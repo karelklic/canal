@@ -1,0 +1,10 @@
+This document describes coding standards that are being used in this
+project. It's based on LLVM Coding Standards[1].
+
+== Commenting
+Comments are one critical part of readability and
+maintainability. Everyone knows they should comment, so should
+you. When writing comments, write them as English prose, which means
+they should use proper capitalization, punctuation, etc.
+
+[1] http://llvm.org/docs/CodingStandards.html

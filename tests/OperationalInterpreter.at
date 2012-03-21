@@ -1,0 +1,7 @@
+
+AT_BANNER([Operational Interpreter])
+
+AT_SETUP([numeric0])
+AT_CHECK([clang -emit-llvm -S -g ../../numeric0.c], 0, [ignore], [ignore])
+AT_CHECK([../../OperationalInterpreterTest numeric0.s], 0, [ignore], [ignore])
+AT_CLEANUP
