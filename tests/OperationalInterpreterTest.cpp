@@ -1,13 +1,14 @@
 #include "../lib/OperationalInterpreter.h"
-#include "../lib/OperationalMachine.h"
 #include "../lib/OperationalState.h"
 #include "../lib/AbstractValue.h"
+#include "../lib/AbstractPointer.h"
 #include <llvm/Value.h>
 #include <llvm/Module.h>
 #include <llvm/Instructions.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Support/IRReader.h>
 #include <llvm/Support/ManagedStatic.h>
+#include <llvm/Support/raw_ostream.h>
 
 // This test creates simple LLVM module and simple abstract
 // machine. Runs the interpreter using the machine on the module and
@@ -228,66 +229,115 @@ public:
         else // aa is zero
             mPositive = mNegative = false;
     }
+
+    // Implementation of AbstractValue::printToStream().
+    virtual void printToStream(llvm::raw_ostream &o) const
+    {
+        o << "SignednessAbstractInteger(";
+        if (mDivisionByZero)
+            o << "division by zero";
+        else
+        {
+            if (mPositive)
+                o << "+";
+            if (mNegative)
+                o << "-";
+            if (!mPositive && !mNegative)
+                o << "0";
+        }
+        o << ")";
+    }
 };
 
 // Abstract machine working on the Sign abstract integer.
-class PlusMinusMachine : public Operational::Machine
+class PlusMinusInterpreter : public Operational::Interpreter
 {
 public:
-    // Implementation of Operational::Machine::alloca().
-    virtual void alloca_(const llvm::AllocaInst &instruction, State &state)
+    PlusMinusInterpreter(llvm::Module &module) : Operational::Interpreter(module)
     {
-        Type *type = instruction.getAllocatedType();
+    }
+
+    // Implementation of Operational::Interpreter::alloca().
+    virtual void alloca_(const llvm::AllocaInst &instruction, Operational::State &state)
+    {
+        llvm::Type *type = instruction.getAllocatedType();
+        AbstractValue *value = NULL;
         if (type->isIntegerTy())
-        {
-            state.mFunctionBlocks.append(new SignednessAbstractInteger());
-        }
+            value = new SignednessAbstractInteger();
+        else if (type->isPointerTy())
+            value = new AbstractPointer();
+        else
+            llvm::errs() << "PlusMinusMachine::alloca: unsupported type: " << instruction << "\n";
+
+        state.mFunctionBlocks.push_back(value);
+        AbstractPointer *pointer = new AbstractPointer();
+        pointer->mTargets.insert(value);
+        llvm::outs() << "Adding " << instruction << ", name: " << instruction.getName() << " " << instruction.hasName() << "\n";
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, AbstractPointer*>(&instruction, pointer));
     }
 
-    // Implementation of Operational::Machine::store().
-    virtual void store(const llvm::StoreInst &instruction, State &state)
+    // Implementation of Operational::Interpreter::store().
+    virtual void store(const llvm::StoreInst &instruction, Operational::State &state)
     {
     }
 
-    // Implementation of Operational::Machine::call().
-    virtual void call(const llvm::CallInst &instruction, State &state)
+    // Implementation of Operational::Interpreter::call().
+    virtual void call(const llvm::CallInst &instruction, Operational::State &state)
     {
     }
 
-    // Implementation of Operational::Machine::load().
-    virtual void load(const llvm::LoadInst &instruction, State &state)
+    // Implementation of Operational::Interpreter::load().
+    virtual void load(const llvm::LoadInst &instruction, Operational::State &state)
     {
     }
 
-    // Implementation of Operational::Machine::add().
-    virtual void add(const llvm::BinaryOperator &I, Operational::State &S)
+    // Implementation of Operational::Interpreter::add().
+    virtual void add(const llvm::BinaryOperator &instruction, Operational::State &state)
     {
-        llvm::Value *a = I.getOperand(0);
-        llvm::Value *b = I.getOperand(1);
+        // TODO
+        llvm::Value *a = instruction.getOperand(0);
+        llvm::Value *b = instruction.getOperand(1);
         if (a->hasName())
         {
             if (b->hasName());
         }
+
+        SignednessAbstractInteger *value = new SignednessAbstractInteger();
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, AbstractValue*>(&instruction, value));
     }
 
-    // Implementation of Operational::Machine::sub().
-    virtual void sub(const llvm::BinaryOperator &I, Operational::State &S)
+    // Implementation of Operational::Interpreter::sub().
+    virtual void sub(const llvm::BinaryOperator &instruction, Operational::State &state)
     {
+        SignednessAbstractInteger *value = new SignednessAbstractInteger();
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, AbstractValue*>(&instruction, value));
     }
 
-    // Implementation of Operational::Machine::mul().
-    virtual void mul(const llvm::BinaryOperator &I, Operational::State &S)
+    // Implementation of Operational::Interpreter::mul().
+    virtual void mul(const llvm::BinaryOperator &instruction, Operational::State &state)
     {
+        SignednessAbstractInteger *value = new SignednessAbstractInteger();
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, AbstractValue*>(&instruction, value));
     }
 
-    // Implementation of Operational::Machine::udiv().
-    virtual void udiv(const llvm::BinaryOperator &I, Operational::State &S)
+    // Implementation of Operational::Interpreter::udiv().
+    virtual void udiv(const llvm::BinaryOperator &instruction, Operational::State &state)
     {
+        SignednessAbstractInteger *value = new SignednessAbstractInteger();
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, AbstractValue*>(&instruction, value));
     }
 
-    // Implementation of Operational::Machine::sdiv().
-    virtual void sdiv(const llvm::BinaryOperator &I, Operational::State &S)
+    // Implementation of Operational::Interpreter::sdiv().
+    virtual void sdiv(const llvm::BinaryOperator &instruction, Operational::State &state)
     {
+        SignednessAbstractInteger *value = new SignednessAbstractInteger();
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, AbstractValue*>(&instruction, value));
+    }
+
+    // Implementation of Operational::Interpreter::ret().
+    virtual void ret(const llvm::ReturnInst &instruction, Operational::State &state)
+    {
+        // Do nothing.
     }
 };
 
@@ -304,12 +354,20 @@ int main(int argc, char **argv)
     if (!module)
         return 1;
 
-    PlusMinusMachine machine;
-    Operational::Interpreter interpreter(machine, *module);
+    PlusMinusInterpreter interpreter(*module);
 
     const llvm::Function *main = module->getFunction("main");
     Operational::State state;
     interpreter.interpretFunction(*main, state);
+    llvm::outs() << "Number of variables: " << state.mFunctionVariables.size() << "\n";
+    for (Operational::VariablesMap::const_iterator it = state.mFunctionVariables.begin();
+         it != state.mFunctionVariables.end(); ++it)
+    {
+        if (it->first->hasName())
+            llvm::outs() << it->first->getName() << " = " << it->second << "\n";
+        else
+            llvm::outs() << it->first << " = " << it->second << "\n";
+    }
 
     return 0;
 }

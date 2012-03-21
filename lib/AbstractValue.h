@@ -3,6 +3,10 @@
 
 #include <cstddef>
 
+namespace llvm {
+    class raw_ostream;
+}
+
 class AbstractValue
 {
 public:
@@ -41,6 +45,13 @@ public:
   virtual void and_(const AbstractValue &a, const AbstractValue &b);
   virtual void or_(const AbstractValue &a, const AbstractValue &b);
   virtual void xor_(const AbstractValue &a, const AbstractValue &b);
+
+  // Write to output stream fro logging purposes.
+  virtual void printToStream(llvm::raw_ostream &o) const = 0;
 };
+
+// Support writing of abstract values to output stream.  Used for
+// logging purposes.
+llvm::raw_ostream& operator<<(llvm::raw_ostream& o, const AbstractValue &v);
 
 #endif

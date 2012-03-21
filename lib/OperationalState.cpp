@@ -17,26 +17,26 @@ State &State::operator=(const State &rhs)
 {
     clear();
 
-    FunctionVariables = rhs.FunctionVariables;
-    VariablesMap::iterator vit = FunctionVariables.begin(),
-        vitend = FunctionVariables.end();
+    mFunctionVariables = rhs.mFunctionVariables;
+    VariablesMap::iterator vit = mFunctionVariables.begin(),
+        vitend = mFunctionVariables.end();
     for (; vit != vitend; ++vit)
         vit->second = vit->second->clone();
 
-    GlobalVariables = rhs.GlobalVariables;
-    vit = GlobalVariables.begin();
-    vitend = GlobalVariables.end();
+    mGlobalVariables = rhs.mGlobalVariables;
+    vit = mGlobalVariables.begin();
+    vitend = mGlobalVariables.end();
     for (; vit != vitend; ++vit)
         vit->second = vit->second->clone();
 
-    GlobalBlocks = rhs.GlobalBlocks;
-    MemoryBlockList::iterator it = GlobalBlocks.begin(), itend = GlobalBlocks.end();
+    mGlobalBlocks = rhs.mGlobalBlocks;
+    MemoryBlockList::iterator it = mGlobalBlocks.begin(), itend = mGlobalBlocks.end();
     for (; it != itend; ++it)
         *it = (*it)->clone();
 
-    FunctionBlocks = rhs.FunctionBlocks;
-    it = FunctionBlocks.begin();
-    itend = FunctionBlocks.end();
+    mFunctionBlocks = rhs.mFunctionBlocks;
+    it = mFunctionBlocks.begin();
+    itend = mFunctionBlocks.end();
     for (; it != itend; ++it)
         *it = (*it)->clone();
 
@@ -56,63 +56,63 @@ bool State::operator!=(const State &rhs) const
 void State::clear()
 {
     // Delete stack variables.
-    VariablesMap::const_iterator vit = FunctionVariables.begin(),
-        vitend = FunctionVariables.end();
+    VariablesMap::const_iterator vit = mFunctionVariables.begin(),
+        vitend = mFunctionVariables.end();
     for (; vit != vitend; ++vit)
         delete vit->second;
-    FunctionVariables.clear();
+    mFunctionVariables.clear();
 
     // Delete global variables.
-    vit = GlobalVariables.begin();
-    vitend = GlobalVariables.end();
+    vit = mGlobalVariables.begin();
+    vitend = mGlobalVariables.end();
     for (; vit != vitend; ++vit)
         delete vit->second;
-    GlobalVariables.clear();
+    mGlobalVariables.clear();
 
     // Delete heap blocks.
-    MemoryBlockList::const_iterator it = GlobalBlocks.begin(),
-        itend = GlobalBlocks.end();
+    MemoryBlockList::const_iterator it = mGlobalBlocks.begin(),
+        itend = mGlobalBlocks.end();
     for (; it != itend; ++it)
         delete *it;
-    GlobalBlocks.clear();
+    mGlobalBlocks.clear();
 
     // Delete stack blocks.
-    it = FunctionBlocks.begin();
-    itend = FunctionBlocks.end();
+    it = mFunctionBlocks.begin();
+    itend = mFunctionBlocks.end();
     for (; it != itend; ++it)
         delete *it;
-    FunctionBlocks.clear();
+    mFunctionBlocks.clear();
 }
 
-void State::merge(const State &State)
+void State::merge(const State &state)
 {
     // Merge stack variables.
-    VariablesMap::const_iterator vit = State.FunctionVariables.begin(),
-        vitend = State.FunctionVariables.end();
+    VariablesMap::const_iterator vit = state.mFunctionVariables.begin(),
+        vitend = state.mFunctionVariables.end();
 
     for (; vit != vitend; ++vit)
     {
-	VariablesMap::iterator it = FunctionVariables.find(vit->first);
-	if (it == FunctionVariables.end())
-            FunctionVariables[vit->first] = vit->second;
+	VariablesMap::iterator it = mFunctionVariables.find(vit->first);
+	if (it == mFunctionVariables.end())
+            mFunctionVariables[vit->first] = vit->second;
 	else
             it->second->merge(*vit->second);
     }
 
     // Merge global variables.
-    vit = State.GlobalVariables.begin();
-    vitend = State.GlobalVariables.end();
+    vit = state.mGlobalVariables.begin();
+    vitend = state.mGlobalVariables.end();
     for (; vit != vitend; ++vit)
     {
-	VariablesMap::iterator it = GlobalVariables.find(vit->first);
-	if (it == GlobalVariables.end())
-            GlobalVariables[vit->first] = vit->second;
+	VariablesMap::iterator it = mGlobalVariables.find(vit->first);
+	if (it == mGlobalVariables.end())
+            mGlobalVariables[vit->first] = vit->second;
 	else
             it->second->merge(*vit->second);
     }
 
-    // GlobalBlocks and FunctionBlocks are merged through pointers in
-    // FunctionVariables and GlobalVariables.
+    // mGlobalBlocks and mFunctionBlocks are merged through pointers in
+    // mFunctionVariables and mGlobalVariables.
 }
 
 } // namespace Operational

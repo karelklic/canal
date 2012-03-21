@@ -2,14 +2,14 @@ lib_LTLIBRARIES = libcanal.la
 libcanal_la_SOURCES = \
 	AbstractArray.h \
 	AbstractInteger.h \
+	AbstractPointer.cpp \
 	AbstractPointer.h \
 	AbstractReal.h \
 	AbstractStructure.h \
+	AbstractValue.cpp \
 	AbstractValue.h \
 	OperationalInterpreter.cpp \
 	OperationalInterpreter.h \
-	OperationalMachine.cpp \
-	OperationalMachine.h \
 	OperationalState.cpp \
 	OperationalState.h \
 	SELinuxModulePass.cpp

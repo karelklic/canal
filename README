@@ -1,0 +1,8 @@
+
+
+
+Ideas
+------
+
+Algorithm (pre-processing pass) to determine importance of a variable
+in abstract interpretation results.  This is similar to slicing.

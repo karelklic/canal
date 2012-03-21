@@ -70,8 +70,9 @@ am__base_list = \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libcanal_la_LIBADD =
-am_libcanal_la_OBJECTS = libcanal_la-OperationalInterpreter.lo \
-	libcanal_la-OperationalMachine.lo \
+am_libcanal_la_OBJECTS = libcanal_la-AbstractPointer.lo \
+	libcanal_la-AbstractValue.lo \
+	libcanal_la-OperationalInterpreter.lo \
 	libcanal_la-OperationalState.lo \
 	libcanal_la-SELinuxModulePass.lo
 libcanal_la_OBJECTS = $(am_libcanal_la_OBJECTS)
@@ -235,14 +236,14 @@ lib_LTLIBRARIES = libcanal.la
 libcanal_la_SOURCES = \
 	AbstractArray.h \
 	AbstractInteger.h \
+	AbstractPointer.cpp \
 	AbstractPointer.h \
 	AbstractReal.h \
 	AbstractStructure.h \
+	AbstractValue.cpp \
 	AbstractValue.h \
 	OperationalInterpreter.cpp \
 	OperationalInterpreter.h \
-	OperationalMachine.cpp \
-	OperationalMachine.h \
 	OperationalState.cpp \
 	OperationalState.h \
 	SELinuxModulePass.cpp
@@ -323,8 +324,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-AbstractPointer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-AbstractValue.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-OperationalInterpreter.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-OperationalMachine.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-OperationalState.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-SELinuxModulePass.Plo@am__quote@
 
@@ -349,19 +351,26 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
+libcanal_la-AbstractPointer.lo: AbstractPointer.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-AbstractPointer.lo -MD -MP -MF $(DEPDIR)/libcanal_la-AbstractPointer.Tpo -c -o libcanal_la-AbstractPointer.lo `test -f 'AbstractPointer.cpp' || echo '$(srcdir)/'`AbstractPointer.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-AbstractPointer.Tpo $(DEPDIR)/libcanal_la-AbstractPointer.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='AbstractPointer.cpp' object='libcanal_la-AbstractPointer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-AbstractPointer.lo `test -f 'AbstractPointer.cpp' || echo '$(srcdir)/'`AbstractPointer.cpp
+
+libcanal_la-AbstractValue.lo: AbstractValue.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-AbstractValue.lo -MD -MP -MF $(DEPDIR)/libcanal_la-AbstractValue.Tpo -c -o libcanal_la-AbstractValue.lo `test -f 'AbstractValue.cpp' || echo '$(srcdir)/'`AbstractValue.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-AbstractValue.Tpo $(DEPDIR)/libcanal_la-AbstractValue.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='AbstractValue.cpp' object='libcanal_la-AbstractValue.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-AbstractValue.lo `test -f 'AbstractValue.cpp' || echo '$(srcdir)/'`AbstractValue.cpp
+
 libcanal_la-OperationalInterpreter.lo: OperationalInterpreter.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-OperationalInterpreter.lo -MD -MP -MF $(DEPDIR)/libcanal_la-OperationalInterpreter.Tpo -c -o libcanal_la-OperationalInterpreter.lo `test -f 'OperationalInterpreter.cpp' || echo '$(srcdir)/'`OperationalInterpreter.cpp
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-OperationalInterpreter.Tpo $(DEPDIR)/libcanal_la-OperationalInterpreter.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='OperationalInterpreter.cpp' object='libcanal_la-OperationalInterpreter.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-OperationalInterpreter.lo `test -f 'OperationalInterpreter.cpp' || echo '$(srcdir)/'`OperationalInterpreter.cpp
-
-libcanal_la-OperationalMachine.lo: OperationalMachine.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-OperationalMachine.lo -MD -MP -MF $(DEPDIR)/libcanal_la-OperationalMachine.Tpo -c -o libcanal_la-OperationalMachine.lo `test -f 'OperationalMachine.cpp' || echo '$(srcdir)/'`OperationalMachine.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-OperationalMachine.Tpo $(DEPDIR)/libcanal_la-OperationalMachine.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='OperationalMachine.cpp' object='libcanal_la-OperationalMachine.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-OperationalMachine.lo `test -f 'OperationalMachine.cpp' || echo '$(srcdir)/'`OperationalMachine.cpp
 
 libcanal_la-OperationalState.lo: OperationalState.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-OperationalState.lo -MD -MP -MF $(DEPDIR)/libcanal_la-OperationalState.Tpo -c -o libcanal_la-OperationalState.lo `test -f 'OperationalState.cpp' || echo '$(srcdir)/'`OperationalState.cpp

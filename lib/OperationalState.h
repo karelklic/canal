@@ -5,11 +5,17 @@
 #include <vector>
 #include <string>
 
+namespace llvm {
+    class Value;
+}
+
 class AbstractValue;
 
 namespace Operational {
 
-typedef std::map<std::string, AbstractValue*> VariablesMap;
+// llvm::Value represents an output from an instruction
+// (llvm::Instruction), or some global value (llvm::Constant).
+typedef std::map<const llvm::Value*, AbstractValue*> VariablesMap;
 typedef std::vector<AbstractValue*> MemoryBlockList;
 
 // Includes global variables and heap.
