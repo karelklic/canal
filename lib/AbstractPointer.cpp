@@ -7,6 +7,17 @@ AbstractPointer* AbstractPointer::clone() const
     return new AbstractPointer(*this);
 }
 
+bool AbstractPointer::operator==(const AbstractValue &rhs) const
+{
+    // Check if rhs has the same type.
+    const AbstractPointer *pointer = dynamic_cast<const AbstractPointer*>(&rhs);
+    if (!pointer)
+        return false;
+
+    // TODO: perform actual comparsion.
+    return true;
+}
+
 void AbstractPointer::merge(const AbstractValue &v)
 {
     const AbstractPointer &vv = dynamic_cast<const AbstractPointer&>(v);
@@ -34,7 +45,7 @@ float AbstractPointer::accuracy() const
     return 1.0;
 }
 
-void AbstractPointer::printToStream(llvm::raw_ostream &o) const
+void AbstractPointer::printToStream(llvm::raw_ostream &ostream) const
 {
-    o << "AbstractPointer(size: " << mTargets.size() << "items)";
+    ostream << "AbstractPointer(size: " << mTargets.size() << "items)";
 }

@@ -1,6 +1,11 @@
 #include "AbstractValue.h"
 #include <llvm/Support/raw_ostream.h>
 
+bool AbstractValue::operator!=(const AbstractValue &rhs) const
+{
+    return !operator==(rhs);
+}
+
 void AbstractValue::add(const AbstractValue &a, const AbstractValue &b)
 {
     llvm::errs() << "AbstractValue: add not implemented!\n";
@@ -51,8 +56,8 @@ void AbstractValue::xor_(const AbstractValue &a, const AbstractValue &b)
     llvm::errs() << "AbstractValue: xor not implemented!\n";
 }
 
-llvm::raw_ostream& operator<<(llvm::raw_ostream& o, const AbstractValue &v)
+llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream, const AbstractValue &value)
 {
-    v.printToStream(o);
-    return o;
+    value.printToStream(ostream);
+    return ostream;
 }

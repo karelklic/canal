@@ -29,7 +29,7 @@ Interpreter::Interpreter(llvm::Module &module) : mModule(module)
 void Interpreter::interpretFunction(const llvm::Function &function,
                                     State &state,
                                     const std::vector<AbstractValue*> &arguments,
-                                    AbstractValue **result)
+                                    AbstractValue *&result)
 {
     std::map<const llvm::BasicBlock*, State> blockInputState, blockOutputState;
     llvm::Function::const_iterator itBlock = function.begin(), itBlockEnd = function.end();
@@ -50,8 +50,9 @@ void Interpreter::interpretFunctionBlocks(llvm::Function::const_iterator blockBe
                                           std::map<const llvm::BasicBlock*, State> &blockInputState,
                                           std::map<const llvm::BasicBlock*, State> &blockOutputState)
 {
-    bool changed = false;
+    bool changed;
     do {
+        changed = false;
         llvm::Function::const_iterator itBlock;
         for (itBlock = blockBegin; itBlock != blockEnd; ++itBlock)
         {
@@ -74,10 +75,12 @@ void Interpreter::interpretFunctionBlocks(llvm::Function::const_iterator blockBe
 
             // Check if the state changed since the last pass of this
             // block.
+	    llvm::outs() << "Comparing " << currentState << blockOutputState[itBlock] << "\n";
             if (currentState != blockOutputState[itBlock])
             {
                 changed = true;
                 blockOutputState[itBlock] = currentState;
+		llvm::outs() << "Assigned " << blockOutputState[itBlock];
             }
         }
     } while (changed);

@@ -13,6 +13,9 @@ public:
   // Create a copy of this value.
   virtual AbstractValue *clone() const = 0;
 
+  virtual bool operator==(const AbstractValue &rhs) const = 0;
+  virtual bool operator!=(const AbstractValue &rhs) const;
+
   // Merge another value into this one.
   virtual void merge(const AbstractValue &v) = 0;
 
@@ -47,11 +50,12 @@ public:
   virtual void xor_(const AbstractValue &a, const AbstractValue &b);
 
   // Write to output stream fro logging purposes.
-  virtual void printToStream(llvm::raw_ostream &o) const = 0;
+  virtual void printToStream(llvm::raw_ostream &ostream) const = 0;
 };
 
 // Support writing of abstract values to output stream.  Used for
 // logging purposes.
-llvm::raw_ostream& operator<<(llvm::raw_ostream& o, const AbstractValue &v);
+llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
+                              const AbstractValue &value);
 
 #endif

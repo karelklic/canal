@@ -7,6 +7,7 @@
 
 namespace llvm {
     class Value;
+    class raw_ostream;
 }
 
 class AbstractValue;
@@ -40,7 +41,7 @@ public:
     // another Block or heap Block.
     MemoryBlockList mFunctionBlocks;
 
-    State() {};
+    State();
 
     State(const State &rhs);
 
@@ -55,6 +56,11 @@ public:
 
     void merge(const State &state);
 };
+
+// Support writing of operational state to output stream.  Used for
+// logging purposes.
+llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
+			      const State &state);
 
 } // namespace Operational
 

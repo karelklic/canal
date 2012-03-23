@@ -66,6 +66,8 @@ class Machine;
 class Interpreter
 {
 public:
+    typedef std::map<const llvm::BasicBlock*, State> BlockStateMap;
+
     // @param module
     //   LLVM module that contains all functions.
     Interpreter(llvm::Module &module);
@@ -97,7 +99,7 @@ public:
     virtual void interpretFunction(const llvm::Function &function,
                                    State &state,
                                    const std::vector<AbstractValue*> &arguments,
-                                   AbstractValue **result);
+                                   AbstractValue *&result);
 
     // Interprets function blocks.  This is called by
     // interpretFunction.
@@ -117,8 +119,8 @@ public:
     //   for every BasicBlock on function call.
     virtual void interpretFunctionBlocks(llvm::Function::const_iterator blockBegin,
                                          llvm::Function::const_iterator blockEnd,
-                                         std::map<const llvm::BasicBlock*, State> &blockInputState,
-                                         std::map<const llvm::BasicBlock*, State> &blockOutputState);
+                                         BlockStateMap &blockInputState,
+                                         BlockStateMap &blockOutputState);
 
     // Interprets single instructions.
     void interpretInstruction(const llvm::Instruction &instruction, State &state);

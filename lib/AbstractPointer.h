@@ -9,9 +9,12 @@ class AbstractPointer : public AbstractValue
 public:
     std::set<AbstractValue*> mTargets;
 
+public:
     // Implementation of AbstractValue::clone().
     // Covariant return type -- it really overrides AbstractValue::clone().
     virtual AbstractPointer* clone() const;
+    // Implementation of AbstractValue::operator==().
+    virtual bool operator==(const AbstractValue &rhs) const;
     // Implementation of AbstractValue::merge().
     virtual void merge(const AbstractValue &v);
     // Implementation of AbstractValue::memoryUsage().
@@ -21,7 +24,7 @@ public:
     // Implementation of AbstractValue::accuracy().
     virtual float accuracy() const;
     // Implementation of AbstractValue::printToStream().
-    virtual void printToStream(llvm::raw_ostream &o) const;
+    virtual void printToStream(llvm::raw_ostream &ostream) const;
 };
 
 #endif

@@ -41,6 +41,19 @@ public:
         return new SignednessAbstractInteger(*this);
     }
 
+    // Implementation of AbstractValue::operator==().
+    virtual bool operator==(const AbstractValue &rhs) const
+    {
+        // Check if rhs has the same type.
+        const SignednessAbstractInteger *integer = dynamic_cast<const SignednessAbstractInteger*>(&rhs);
+	if (!integer)
+	    return false;
+
+	return mPositive == integer->mPositive &&
+	  mNegative == integer->mNegative &&
+	  mDivisionByZero == integer->mDivisionByZero;
+    }
+
     // Implementation of AbstractValue::merge().
     virtual void merge(const AbstractValue &abstractValue)
     {
@@ -257,6 +270,43 @@ public:
     {
     }
 
+    void interpretMain()
+    {
+        // Find main() in the module.
+        const llvm::Function &function = *mModule.getFunction("main");
+
+	// Initialize input and output state of all main's basic blocks.
+	Operational::State state;
+	BlockStateMap blockInputState, blockOutputState;
+	llvm::Function::const_iterator itBlock = function.begin(), itBlockEnd = function.end();
+	for (; itBlock != itBlockEnd; ++itBlock)
+	{
+	    blockInputState[itBlock] = state;
+	    blockOutputState[itBlock] = state;
+	}
+
+	// Interpret the blocks.
+	interpretFunctionBlocks(function.begin(), itBlockEnd, blockInputState, blockOutputState);
+
+	// Merge all blocks.
+	for (BlockStateMap::const_iterator it = blockOutputState.begin(); it != blockOutputState.end(); ++it)
+	{
+	    llvm::outs() << it->second;
+	    state.merge(it->second);
+	}
+	llvm::outs() << state;
+
+	llvm::outs() << "Number of variables: " << state.mFunctionVariables.size() << "\n";
+	for (Operational::VariablesMap::const_iterator it = state.mFunctionVariables.begin();
+	     it != state.mFunctionVariables.end(); ++it)
+	{
+	    if (it->first->hasName())
+	      llvm::outs() << it->first->getName() << " = " << *it->second << "\n";
+	    else
+	      llvm::outs() << it->first << " = " << *it->second << "\n";
+	}
+    }
+
     // Implementation of Operational::Interpreter::alloca().
     virtual void alloca_(const llvm::AllocaInst &instruction, Operational::State &state)
     {
@@ -355,19 +405,7 @@ int main(int argc, char **argv)
         return 1;
 
     PlusMinusInterpreter interpreter(*module);
-
-    const llvm::Function *main = module->getFunction("main");
-    Operational::State state;
-    interpreter.interpretFunction(*main, state);
-    llvm::outs() << "Number of variables: " << state.mFunctionVariables.size() << "\n";
-    for (Operational::VariablesMap::const_iterator it = state.mFunctionVariables.begin();
-         it != state.mFunctionVariables.end(); ++it)
-    {
-        if (it->first->hasName())
-            llvm::outs() << it->first->getName() << " = " << it->second << "\n";
-        else
-            llvm::outs() << it->first << " = " << it->second << "\n";
-    }
+    interpreter.interpretMain();
 
     return 0;
 }

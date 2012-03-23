@@ -1,7 +1,12 @@
 #include "OperationalState.h"
 #include "AbstractValue.h"
+#include <llvm/Support/raw_ostream.h>
 
 namespace Operational {
+
+State::State()
+{
+}
 
 State::State(const State &rhs)
 {
@@ -30,7 +35,8 @@ State &State::operator=(const State &rhs)
         vit->second = vit->second->clone();
 
     mGlobalBlocks = rhs.mGlobalBlocks;
-    MemoryBlockList::iterator it = mGlobalBlocks.begin(), itend = mGlobalBlocks.end();
+    MemoryBlockList::iterator it = mGlobalBlocks.begin(),
+        itend = mGlobalBlocks.end();
     for (; it != itend; ++it)
         *it = (*it)->clone();
 
@@ -45,6 +51,38 @@ State &State::operator=(const State &rhs)
 
 bool State::operator==(const State &rhs) const
 {
+    // Quickly compare sizes.
+    if (mGlobalVariables.size() != rhs.mGlobalVariables.size())
+        return false;
+    if (mFunctionVariables.size() != rhs.mFunctionVariables.size())
+        return false;
+
+    // Compare global variables.
+    VariablesMap::const_iterator vit = rhs.mGlobalVariables.begin(),
+        vitend = rhs.mGlobalVariables.end();
+
+    for (; vit != vitend; ++vit)
+    {
+	VariablesMap::const_iterator it = mGlobalVariables.find(vit->first);
+	if (it == mGlobalVariables.end())
+            return false;
+	else if (*it->second != *vit->second)
+            return false;
+    }
+
+    // Compare stack variables.
+    vit = rhs.mFunctionVariables.begin();
+    vitend = rhs.mFunctionVariables.end();
+
+    for (; vit != vitend; ++vit)
+    {
+	VariablesMap::const_iterator it = mFunctionVariables.find(vit->first);
+	if (it == mFunctionVariables.end())
+            return false;
+	else if (*it->second != *vit->second)
+            return false;
+    }
+
     return true;
 }
 
@@ -94,7 +132,7 @@ void State::merge(const State &state)
     {
 	VariablesMap::iterator it = mFunctionVariables.find(vit->first);
 	if (it == mFunctionVariables.end())
-            mFunctionVariables[vit->first] = vit->second;
+            mFunctionVariables[vit->first] = vit->second->clone();
 	else
             it->second->merge(*vit->second);
     }
@@ -106,7 +144,7 @@ void State::merge(const State &state)
     {
 	VariablesMap::iterator it = mGlobalVariables.find(vit->first);
 	if (it == mGlobalVariables.end())
-            mGlobalVariables[vit->first] = vit->second;
+            mGlobalVariables[vit->first] = vit->second->clone();
 	else
             it->second->merge(*vit->second);
     }
@@ -114,5 +152,16 @@ void State::merge(const State &state)
     // mGlobalBlocks and mFunctionBlocks are merged through pointers in
     // mFunctionVariables and mGlobalVariables.
 }
+
+llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
+			      const State &state)
+{
+    ostream << "OperationalState(function variables: "
+            << state.mFunctionVariables.size()
+            << ", global variables: "
+            << state.mGlobalVariables.size()
+            << ")";
+}
+
 
 } // namespace Operational
