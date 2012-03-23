@@ -1,10 +1,15 @@
 #ifndef CANAL_OPERATIONAL_INTERPRETER_H
 #define CANAL_OPERATIONAL_INTERPRETER_H
 
+#include <map>
+#include <vector>
+#include <llvm/Function.h>
+
 namespace llvm {
     class AllocaInst;
     class AtomicCmpXchgInst;
     class AtomicRMWInst;
+    class BasicBlock;
     class BinaryOperator;
     class BitCastInst;
     class BranchInst;
@@ -46,6 +51,8 @@ namespace llvm {
     class ZExtInst;
 }
 
+class AbstractValue;
+
 namespace Operational {
 
 class State;
@@ -66,10 +73,52 @@ public:
 
     // Interprets a function. Calls to other functions are interpreted
     // too.
-    // @param func
-    //   Function to be interpreted. Its instructions will be applied in
-    //   abstract domain to the provided state.
-    void interpretFunction(const llvm::Function &func, const State &state);
+    // @param function
+    //   Function to be interpreted. Its instructions will be applied
+    //   in abstract domain on the provided input state.
+    // @param state
+    //   State of the program.  It includes memory blocks on stack,
+    //   gloval variables and global memory blocks (=heap).  It cannot
+    //   contain function variables (=heap variables with names).
+    //   This function might modify the state.  It will not introduce
+    //   function variables or function blocks, but it might modify
+    //   memory blocks already present on heap, and it might modify
+    //   global memory blocks.
+    // @param arguments
+    //   Input arguments. This function will not modify this
+    //   parameter.
+    // @param result
+    //   Value returned by the function call. If function return value
+    //   is void, the result pointer is set to NULL. Otherwise, a new
+    //   abstract value of proper type is allocated, and result
+    //   pointer is pointed there.  Caller takes ownership of the
+    //   returned object.  This function does not delete memory
+    //   referenced by result, the pointer is just overwritten.
+    virtual void interpretFunction(const llvm::Function &function,
+                                   State &state,
+                                   const std::vector<AbstractValue*> &arguments,
+                                   AbstractValue **result);
+
+    // Interprets function blocks.  This is called by
+    // interpretFunction.
+    // @param blockBegin
+    // @param blockEnd
+    //   Range of blocks to interpret.
+    // @blockInputState
+    //   Input state for every block -- values of variables that
+    //   represent what might come when this block is being executed.
+    //   This function will modify the states stored in the map.  It
+    //   should contain initial state for every BasicBlock on function
+    //   call.
+    // @blockOutputState
+    //   Output state for every block -- values of variables after the
+    //   block have been interpreted.  This function will modify the
+    //   states stored in this map.  It should contain initial state
+    //   for every BasicBlock on function call.
+    virtual void interpretFunctionBlocks(llvm::Function::const_iterator blockBegin,
+                                         llvm::Function::const_iterator blockEnd,
+                                         std::map<const llvm::BasicBlock*, State> &blockInputState,
+                                         std::map<const llvm::BasicBlock*, State> &blockOutputState);
 
     // Interprets single instructions.
     void interpretInstruction(const llvm::Instruction &instruction, State &state);

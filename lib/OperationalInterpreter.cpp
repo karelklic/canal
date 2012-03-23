@@ -26,21 +26,34 @@ Interpreter::Interpreter(llvm::Module &module) : mModule(module)
 {
 }
 
-void Interpreter::interpretFunction(const llvm::Function &func, const State &state)
+void Interpreter::interpretFunction(const llvm::Function &function,
+                                    State &state,
+                                    const std::vector<AbstractValue*> &arguments,
+                                    AbstractValue **result)
 {
-    std::map<const llvm::BasicBlock*, State> inputState, outputState;
-
-    llvm::Function::const_iterator itBlock = func.begin(),
-        itBlockEnd = func.end();
+    std::map<const llvm::BasicBlock*, State> blockInputState, blockOutputState;
+    llvm::Function::const_iterator itBlock = function.begin(), itBlockEnd = function.end();
     for (; itBlock != itBlockEnd; ++itBlock)
     {
-        inputState[itBlock] = state;
-        outputState[itBlock] = state;
+        blockInputState[itBlock] = state;
+        blockOutputState[itBlock] = state;
     }
 
+    interpretFunctionBlocks(function.begin(), itBlockEnd, blockInputState, blockOutputState);
+
+    // TODO: fint function return blocks, merge return values, store
+    // the result into state.
+}
+
+void Interpreter::interpretFunctionBlocks(llvm::Function::const_iterator blockBegin,
+                                          llvm::Function::const_iterator blockEnd,
+                                          std::map<const llvm::BasicBlock*, State> &blockInputState,
+                                          std::map<const llvm::BasicBlock*, State> &blockOutputState)
+{
     bool changed = false;
     do {
-        for (itBlock = func.begin(); itBlock != itBlockEnd; ++itBlock)
+        llvm::Function::const_iterator itBlock;
+        for (itBlock = blockBegin; itBlock != blockEnd; ++itBlock)
         {
             // Merge out states of predecessors to input state of current
             // block.
@@ -48,12 +61,12 @@ void Interpreter::interpretFunction(const llvm::Function &func, const State &sta
                 itPredEnd = llvm::pred_end(itBlock);
             for (; itPred != itPredEnd; ++itPred)
             {
-                assert(&*itBlock != &func.getEntryBlock() && "Entry block cannot have predecessors!");
-                inputState[itBlock].merge(outputState[*itPred]);
+                assert(&*itBlock != &itBlock->getParent()->getEntryBlock() && "Entry block cannot have predecessors!");
+                blockInputState[itBlock].merge(blockOutputState[*itPred]);
             }
 
             // Interpret all instructions of current block.
-            State currentState(inputState[itBlock]);
+            State currentState(blockInputState[itBlock]);
             llvm::BasicBlock::const_iterator itInst = itBlock->begin(),
                 itInstEnd = itBlock->end();
             for (; itInst != itInstEnd; ++itInst)
@@ -61,10 +74,10 @@ void Interpreter::interpretFunction(const llvm::Function &func, const State &sta
 
             // Check if the state changed since the last pass of this
             // block.
-            if (currentState != outputState[itBlock])
+            if (currentState != blockOutputState[itBlock])
             {
                 changed = true;
-                outputState[itBlock] = currentState;
+                blockOutputState[itBlock] = currentState;
             }
         }
     } while (changed);
