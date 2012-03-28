@@ -1,6 +1,7 @@
 #ifndef CANAL_ABSTRACT_VALUE_H
 #define CANAL_ABSTRACT_VALUE_H
 
+#include <llvm/Constant.h>
 #include <cstddef>
 
 namespace llvm {
@@ -9,7 +10,15 @@ namespace llvm {
 
 class AbstractValue
 {
+protected:
+    const llvm::Constant* m_constant;
 public:
+  //Constructor that sets bottom value
+  AbstractValue() : m_constant(NULL) {}
+
+  //Constructor that sets constant value
+  AbstractValue(const llvm::Constant* constant) : m_constant(constant) {}
+
   // Create a copy of this value.
   virtual AbstractValue *clone() const = 0;
 
@@ -35,6 +44,12 @@ public:
   // Accuracy 1 means that the value represents the most precise and
   // exact value.
   virtual float accuracy() const = 0;
+
+  //Is the lowest value
+  virtual bool isBottom() const = 0;
+
+  //Set top value of lattice
+  virtual void setTop() = 0;
 
   virtual void add(const AbstractValue &a, const AbstractValue &b);
   virtual void sub(const AbstractValue &a, const AbstractValue &b);
