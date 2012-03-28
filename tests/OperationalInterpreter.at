@@ -1,4 +1,3 @@
-
 AT_BANNER([Operational Interpreter])
 
 AT_SETUP([numeric0])

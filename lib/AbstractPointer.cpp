@@ -2,30 +2,42 @@
 #include <llvm/Support/raw_ostream.h>
 #include <algorithm>
 
-AbstractPointer* AbstractPointer::clone() const
+AbstractPointer::~AbstractPointer()
 {
-    return new AbstractPointer(*this);
+    std::set<AbstractValue*>::const_iterator it = mTargets.begin();
+    for (; it != mTargets.end(); ++it)
+        delete *it;
 }
 
-bool AbstractPointer::operator==(const AbstractValue &rhs) const
+AbstractPointer* AbstractPointer::clone() const
+{
+    AbstractPointer *dup = new AbstractPointer();
+    std::set<AbstractValue*>::iterator it = mTargets.begin();
+    for (; it != mTargets.end(); ++it)
+        dup->mTargets.insert((*it)->clone());
+}
+
+bool AbstractPointer::operator==(const AbstractValue &value) const
 {
     // Check if rhs has the same type.
-    const AbstractPointer *pointer = dynamic_cast<const AbstractPointer*>(&rhs);
+    const AbstractPointer *pointer = dynamic_cast<const AbstractPointer*>(&value);
     if (!pointer)
         return false;
 
-    // TODO: perform actual comparsion.
     return true;
 }
 
-void AbstractPointer::merge(const AbstractValue &v)
+void AbstractPointer::merge(const AbstractValue &value)
 {
-    const AbstractPointer &vv = dynamic_cast<const AbstractPointer&>(v);
-    std::set<AbstractValue*> temp;
-    std::set_union(mTargets.begin(), mTargets.end(),
-                   vv.mTargets.begin(), vv.mTargets.end(),
-                   std::inserter(temp, temp.begin()));
-    mTargets.swap(temp);
+    const AbstractPointer &vv = dynamic_cast<const AbstractPointer&>(value);
+    std::set<AbstractValue*>::iterator it = vv.mTargets.begin();
+    for (; it != vv.mTargets.end(); ++it)
+    {
+        if (mTargets.find(*it) != mTargets.end())
+            continue;
+
+        mTargets.insert((*it)->clone());
+    }
 }
 
 size_t AbstractPointer::memoryUsage() const

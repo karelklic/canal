@@ -34,7 +34,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = OperationalInterpreterTest$(EXEEXT)
+noinst_PROGRAMS = OperationalInterpreterTest$(EXEEXT) \
+	AbstractPointerTest$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/atlocal.in
@@ -49,6 +50,14 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES = atlocal
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
+am_AbstractPointerTest_OBJECTS =  \
+	AbstractPointerTest-AbstractPointerTest.$(OBJEXT)
+AbstractPointerTest_OBJECTS = $(am_AbstractPointerTest_OBJECTS)
+AbstractPointerTest_DEPENDENCIES = ../lib/libcanal.la
+AbstractPointerTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(AbstractPointerTest_CXXFLAGS) $(CXXFLAGS) \
+	$(AbstractPointerTest_LDFLAGS) $(LDFLAGS) -o $@
 am_OperationalInterpreterTest_OBJECTS = OperationalInterpreterTest-OperationalInterpreterTest.$(OBJEXT)
 OperationalInterpreterTest_OBJECTS =  \
 	$(am_OperationalInterpreterTest_OBJECTS)
@@ -70,8 +79,10 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(OperationalInterpreterTest_SOURCES)
-DIST_SOURCES = $(OperationalInterpreterTest_SOURCES)
+SOURCES = $(AbstractPointerTest_SOURCES) \
+	$(OperationalInterpreterTest_SOURCES)
+DIST_SOURCES = $(AbstractPointerTest_SOURCES) \
+	$(OperationalInterpreterTest_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -206,11 +217,17 @@ OperationalInterpreterTest_SOURCES = OperationalInterpreterTest.cpp
 OperationalInterpreterTest_LDADD = ../lib/libcanal.la
 OperationalInterpreterTest_LIBS = $(LLVM_LIBS)
 OperationalInterpreterTest_LDFLAGS = $(LLVM_LDFLAGS)
+AbstractPointerTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+AbstractPointerTest_SOURCES = AbstractPointerTest.cpp
+AbstractPointerTest_LDADD = ../lib/libcanal.la
+AbstractPointerTest_LIBS = $(LLVM_LIBS)
+AbstractPointerTest_LDFLAGS = $(LLVM_LDFLAGS)
 EXTRA_DIST = numeric0.c package.m4 $(TESTSUITE_AT) $(TESTSUITE) \
 	atlocal.in
 TESTSUITE_AT = \
   local.at 	\
   testsuite.at	\
+  AbstractValue.at \
   OperationalInterpreter.at
 
 TESTSUITE = $(srcdir)/testsuite
@@ -263,6 +280,9 @@ clean-noinstPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+AbstractPointerTest$(EXEEXT): $(AbstractPointerTest_OBJECTS) $(AbstractPointerTest_DEPENDENCIES) 
+	@rm -f AbstractPointerTest$(EXEEXT)
+	$(AbstractPointerTest_LINK) $(AbstractPointerTest_OBJECTS) $(AbstractPointerTest_LDADD) $(LIBS)
 OperationalInterpreterTest$(EXEEXT): $(OperationalInterpreterTest_OBJECTS) $(OperationalInterpreterTest_DEPENDENCIES) 
 	@rm -f OperationalInterpreterTest$(EXEEXT)
 	$(OperationalInterpreterTest_LINK) $(OperationalInterpreterTest_OBJECTS) $(OperationalInterpreterTest_LDADD) $(LIBS)
@@ -273,6 +293,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AbstractPointerTest-AbstractPointerTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OperationalInterpreterTest-OperationalInterpreterTest.Po@am__quote@
 
 .cpp.o:
@@ -295,6 +316,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+AbstractPointerTest-AbstractPointerTest.o: AbstractPointerTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AbstractPointerTest_CXXFLAGS) $(CXXFLAGS) -MT AbstractPointerTest-AbstractPointerTest.o -MD -MP -MF $(DEPDIR)/AbstractPointerTest-AbstractPointerTest.Tpo -c -o AbstractPointerTest-AbstractPointerTest.o `test -f 'AbstractPointerTest.cpp' || echo '$(srcdir)/'`AbstractPointerTest.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/AbstractPointerTest-AbstractPointerTest.Tpo $(DEPDIR)/AbstractPointerTest-AbstractPointerTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='AbstractPointerTest.cpp' object='AbstractPointerTest-AbstractPointerTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AbstractPointerTest_CXXFLAGS) $(CXXFLAGS) -c -o AbstractPointerTest-AbstractPointerTest.o `test -f 'AbstractPointerTest.cpp' || echo '$(srcdir)/'`AbstractPointerTest.cpp
+
+AbstractPointerTest-AbstractPointerTest.obj: AbstractPointerTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AbstractPointerTest_CXXFLAGS) $(CXXFLAGS) -MT AbstractPointerTest-AbstractPointerTest.obj -MD -MP -MF $(DEPDIR)/AbstractPointerTest-AbstractPointerTest.Tpo -c -o AbstractPointerTest-AbstractPointerTest.obj `if test -f 'AbstractPointerTest.cpp'; then $(CYGPATH_W) 'AbstractPointerTest.cpp'; else $(CYGPATH_W) '$(srcdir)/AbstractPointerTest.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/AbstractPointerTest-AbstractPointerTest.Tpo $(DEPDIR)/AbstractPointerTest-AbstractPointerTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='AbstractPointerTest.cpp' object='AbstractPointerTest-AbstractPointerTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AbstractPointerTest_CXXFLAGS) $(CXXFLAGS) -c -o AbstractPointerTest-AbstractPointerTest.obj `if test -f 'AbstractPointerTest.cpp'; then $(CYGPATH_W) 'AbstractPointerTest.cpp'; else $(CYGPATH_W) '$(srcdir)/AbstractPointerTest.cpp'; fi`
 
 OperationalInterpreterTest-OperationalInterpreterTest.o: OperationalInterpreterTest.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationalInterpreterTest_CXXFLAGS) $(CXXFLAGS) -MT OperationalInterpreterTest-OperationalInterpreterTest.o -MD -MP -MF $(DEPDIR)/OperationalInterpreterTest-OperationalInterpreterTest.Tpo -c -o OperationalInterpreterTest-OperationalInterpreterTest.o `test -f 'OperationalInterpreterTest.cpp' || echo '$(srcdir)/'`OperationalInterpreterTest.cpp

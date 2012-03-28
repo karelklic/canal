@@ -301,9 +301,15 @@ public:
 	     it != state.mFunctionVariables.end(); ++it)
 	{
 	    if (it->first->hasName())
-	      llvm::outs() << it->first->getName() << " = " << *it->second << "\n";
+            {
+                const AbstractPointer *pointer = dynamic_cast<const AbstractPointer*>(it->second);
+                if (pointer && pointer->mTargets.size() == 1)
+                    llvm::outs() << it->first->getName() << " = " << **pointer->mTargets.begin() << "\n";
+                else
+                    llvm::outs() << it->first->getName() << " = " << *it->second << "\n";
+            }
 	    else
-	      llvm::outs() << it->first << " = " << *it->second << "\n";
+                llvm::outs() << it->first << " = " << *it->second << "\n";
 	}
     }
 

@@ -1,12 +1,19 @@
 ## --------- ##
 ## Programs. ##
 ## --------- ##
-noinst_PROGRAMS = OperationalInterpreterTest
+noinst_PROGRAMS = OperationalInterpreterTest AbstractPointerTest
+
 OperationalInterpreterTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
 OperationalInterpreterTest_SOURCES = OperationalInterpreterTest.cpp
 OperationalInterpreterTest_LDADD = ../lib/libcanal.la
 OperationalInterpreterTest_LIBS = $(LLVM_LIBS)
 OperationalInterpreterTest_LDFLAGS = $(LLVM_LDFLAGS)
+
+AbstractPointerTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+AbstractPointerTest_SOURCES = AbstractPointerTest.cpp
+AbstractPointerTest_LDADD = ../lib/libcanal.la
+AbstractPointerTest_LIBS = $(LLVM_LIBS)
+AbstractPointerTest_LDFLAGS = $(LLVM_LDFLAGS)
 
 ## ----------- ##
 ## Test files. ##
@@ -43,6 +50,7 @@ EXTRA_DIST += package.m4
 TESTSUITE_AT =	\
   local.at 	\
   testsuite.at	\
+  AbstractValue.at \
   OperationalInterpreter.at
 
 EXTRA_DIST += $(TESTSUITE_AT)

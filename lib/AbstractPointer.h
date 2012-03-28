@@ -10,13 +10,15 @@ public:
     std::set<AbstractValue*> mTargets;
 
 public:
+    virtual ~AbstractPointer();
+
     // Implementation of AbstractValue::clone().
     // Covariant return type -- it really overrides AbstractValue::clone().
     virtual AbstractPointer* clone() const;
     // Implementation of AbstractValue::operator==().
-    virtual bool operator==(const AbstractValue &rhs) const;
+    virtual bool operator==(const AbstractValue &value) const;
     // Implementation of AbstractValue::merge().
-    virtual void merge(const AbstractValue &v);
+    virtual void merge(const AbstractValue &value);
     // Implementation of AbstractValue::memoryUsage().
     virtual size_t memoryUsage() const;
     // Implementation of AbstractValue::limitmemoryUsage().
