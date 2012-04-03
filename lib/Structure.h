@@ -7,7 +7,7 @@
 class AbstractStructure : public AbstractValue
 {
  public:
-  std::vector<AbstractValue> Members;
+  std::vector<AbstractValue> mMembers;
 };
 
 #endif

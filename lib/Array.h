@@ -1,9 +1,19 @@
-#ifndef CANAL_ABSTRACT_ARRAY_H
-#define CANAL_ABSTRACT_ARRAY_H
+#ifndef CANAL_ARRAY_H
+#define CANAL_ARRAY_H
 
-namespace AbstractArray {
+namespace Canal {
+namespace Array {
 
-class Range : public AbstractValue
+// We treat all array members as a single value.  This means, that all
+// the operations on the array are merged and used to move the single
+// value up in its lattice.
+class SingleItem : public Value
+{
+    // TODO
+};
+
+// TODO: Delete.
+class Range : public Value
 {
 public:
     enum {
@@ -39,6 +49,7 @@ public:
     std::vector<ProductionRule> ProductionRules;
 };
 
-}
+} // namespace Array
+} // namespace Canal
 
-#endif
+#endif // CANAL_ARRAY_H

@@ -1,26 +1,14 @@
-// Temporary includes
-#include <llvm/Constants.h>
-#include <llvm/DerivedTypes.h>
-#include <llvm/Function.h>
-#include <llvm/LLVMContext.h>
-#include <llvm/Module.h>
-#include <llvm/ADT/StringSet.h>
-#include <llvm/Analysis/DebugInfo.h>
-#include <llvm/Bitcode/ReaderWriter.h>
-#include <llvm/Support/CFG.h>
-#include <iostream>
-
-
-#include "OperationalInterpreter.h"
-#include "OperationalState.h"
+#include "Interpreter.h"
+#include "State.h"
+#include "Utils.h"
 #include <llvm/Function.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Instructions.h>
+#include <llvm/Support/raw_ostream.h>
 #include <map>
 #include <cassert>
-#include <llvm/Support/raw_ostream.h>
 
-namespace Operational {
+namespace Canal {
 
 Interpreter::Interpreter(llvm::Module &module) : mModule(module)
 {
@@ -146,291 +134,291 @@ void Interpreter::interpretInstruction(const llvm::Instruction &instruction, Sta
 	case llvm::Instruction::Or:   or_(binaryOp, state);  break;
 	case llvm::Instruction::Xor:  xor_(binaryOp, state); break;
 	default:
-            llvm::errs() << "Operational::Machine: Unknown BinaryOperator instruction: " << binaryOp << "\n";
+            CANAL_FATAL_ERROR(binaryOp);
 	}
     }
     else
-        llvm::errs() << "Operational::Machine: Unknown instruction: " << instruction << "\n";
+        CANAL_FATAL_ERROR(binaryOp);
 }
 
 void Interpreter::ret(const llvm::ReturnInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::br(const llvm::BranchInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::switch_(const llvm::SwitchInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::indirectbr(const llvm::IndirectBrInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::invoke(const llvm::InvokeInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::resume(const llvm::ResumeInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::unreachable(const llvm::UnreachableInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::add(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::fadd(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::sub(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::fsub(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::mul(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::fmul(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::udiv(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::sdiv(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::fdiv(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::urem(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::srem(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::frem(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::shl(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::lshr(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::ashr(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::and_(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::or_(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::xor_(const llvm::BinaryOperator &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::extractelement(const llvm::ExtractElementInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::insertelement(const llvm::InsertElementInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::extractvalue(const llvm::ExtractValueInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::insertvalue(const llvm::InsertValueInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::alloca_(const llvm::AllocaInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::load(const llvm::LoadInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::store(const llvm::StoreInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::fence(const llvm::FenceInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::cmpxchg(const llvm::AtomicCmpXchgInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::atomicrmw(const llvm::AtomicRMWInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::trunc(const llvm::TruncInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::zext(const llvm::ZExtInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::sext(const llvm::SExtInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::fptrunc(const llvm::FPTruncInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::fpext(const llvm::FPExtInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::fptoui(const llvm::FPToUIInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::fptosi(const llvm::FPToSIInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::uitofp(const llvm::UIToFpInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << (const llvm::Instruction&)instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::sitofp(const llvm::SIToFPInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::ptrtoint(const llvm::PtrToIntInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::inttoptr(const llvm::IntToPtrInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::bitcast(const llvm::BitCastInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::icmp(const llvm::ICmpInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::fcmp(const llvm::FCmpInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::phi(const llvm::PHINode &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::select(const llvm::SelectInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::call(const llvm::CallInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::va_arg(const llvm::VAArgInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void Interpreter::landingpad(const llvm::LandingPadInst &instruction, State &state)
 {
-    llvm::errs() << "Operational::Interpreter: " << instruction << " is not implemented! Ignoring.\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
-} // namespace Operational
+} // namespace Canal

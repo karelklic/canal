@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 void swap()
 {
     int x = 0, y = 1, *px = &x, *py = &y;
@@ -13,16 +15,16 @@ void array(int i)
     *k = 218;
 }
 
-void strcpy(char *s, char *t)
+void strcpy_simple(char *s, char *t)
 {
-    while (*s++ = *t++) ;
+    while ((*s++ = *t++)) ;
 }
 
-void strcpy_t(char *s)
+void append(char *s)
 {
-    *s++ = ’a’;
-    *s++ = ’b’;
-    *s++ = ’\0’;
+    *s++ = 'a';
+    *s++ = 'b';
+    *s++ = '\0';
 }
 
 int main(int argc, char **argv)

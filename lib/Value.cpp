@@ -1,6 +1,8 @@
 #include "AbstractValue.h"
 #include <llvm/Support/raw_ostream.h>
 
+namespace Canal {
+
 bool AbstractValue::operator!=(const AbstractValue &rhs) const
 {
     return !operator==(rhs);
@@ -61,3 +63,5 @@ llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream, const AbstractValue &v
     value.printToStream(ostream);
     return ostream;
 }
+
+} // namespace Canal

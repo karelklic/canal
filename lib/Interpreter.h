@@ -1,5 +1,5 @@
-#ifndef CANAL_OPERATIONAL_INTERPRETER_H
-#define CANAL_OPERATIONAL_INTERPRETER_H
+#ifndef CANAL_INTERPRETER_H
+#define CANAL_INTERPRETER_H
 
 #include <map>
 #include <vector>
@@ -53,7 +53,7 @@ namespace llvm {
 
 class AbstractValue;
 
-namespace Operational {
+namespace Canal {
 
 class State;
 class Machine;
@@ -237,6 +237,6 @@ protected:
     virtual void landingpad(const llvm::LandingPadInst &instruction, State &state);
 };
 
-} // namespace Operational
+} // namespace Canal
 
-#endif
+#endif // CANAL_INTERPRETER_H
