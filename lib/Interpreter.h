@@ -51,12 +51,11 @@ namespace llvm {
     class ZExtInst;
 }
 
-class AbstractValue;
-
 namespace Canal {
 
 class State;
 class Machine;
+class Value;
 
 // Context-sensitive operational abstract interpreter.  Interprets
 // instructions in abstract domain.
@@ -98,8 +97,8 @@ public:
     //   referenced by result, the pointer is just overwritten.
     virtual void interpretFunction(const llvm::Function &function,
                                    State &state,
-                                   const std::vector<AbstractValue*> &arguments,
-                                   AbstractValue *&result);
+                                   const std::vector<Value*> &arguments,
+                                   Value *&result);
 
     // Interprets function blocks.  This is called by
     // interpretFunction.

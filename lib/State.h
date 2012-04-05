@@ -12,12 +12,12 @@ namespace llvm {
 
 namespace Canal {
 
-class AbstractValue;
+class Value;
 
 // llvm::Value represents an output from an instruction
 // (llvm::Instruction), or some global value (llvm::Constant).
-typedef std::map<const llvm::Value*, AbstractValue*> VariablesMap;
-typedef std::vector<AbstractValue*> MemoryBlockList;
+typedef std::map<const llvm::Value*, Value*> VariablesMap;
+typedef std::vector<Value*> MemoryBlockList;
 
 // Includes global variables and heap.
 // Includes function-level memory and variables (=stack).
@@ -25,7 +25,7 @@ class State
 {
 public:
     // The key (llvm::Value*) is not owned by this class.  It is not
-    // deleted.  The value (AbstractValue*) memory is owned by this
+    // deleted.  The value (Value*) memory is owned by this
     // class, so it is deleted in state destructor.
     VariablesMap mGlobalVariables;
 
@@ -42,7 +42,7 @@ public:
     // which contains a pointer to a StackBlocks item.
     //
     // The key (llvm::Value*) is not owned by this class.  It is not
-    // deleted.  The value (AbstractValue*) memory is owned by this
+    // deleted.  The value (Value*) memory is owned by this
     // class, so it is deleted in state destructor.
     VariablesMap mFunctionVariables;
 

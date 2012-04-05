@@ -1,26 +1,27 @@
-#ifndef CANAL_INT_ENUMERATION_H
-#define CANAL_INT_ENUMERATION_H
+#ifndef CANAL_INTEGER_ENUMERATION_H
+#define CANAL_INTEGER_ENUMERATION_H
 
-#include "AbstractValue.h"
-#include <llvm/Constants.h>
+#include "Value.h"
+#include <llvm/ADT/APInt.h>
 #include <set>
 
-namespace AbstractInteger {
+namespace Canal {
+namespace Integer {
 
-template <typename T>
-class Enumeration : public AbstractValue
+class Enumeration : public Value
 {
  public:
-  std::set<T> Values;
+    std::set<llvm::APInt> Values;
 
  public:
   // Covariant return type -- overrides AbstractValue::clone().
-  virtual Enumeration<T> *clone() const
+  virtual Enumeration *clone() const
   {
-    return new Enumeration<T>(*this);
+    return new Enumeration(*this);
   }
 };
 
-} // namespace AbstractInteger
+} // namespace Integer
+} // namespace Canal
 
 #endif

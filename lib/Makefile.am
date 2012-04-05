@@ -1,6 +1,8 @@
 lib_LTLIBRARIES = libcanal.la
 libcanal_la_SOURCES = \
 	Array.h \
+	Constant.h \
+	Constant.cpp \
 	IntegerBits.h \
 	Integer.cpp \
 	IntegerEnumeration.h \

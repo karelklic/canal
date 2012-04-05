@@ -1,19 +1,19 @@
 ## --------- ##
 ## Programs. ##
 ## --------- ##
-noinst_PROGRAMS = OperationalInterpreterTest AbstractPointerTest
+noinst_PROGRAMS = InterpreterTest PointerTest
 
-OperationalInterpreterTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
-OperationalInterpreterTest_SOURCES = OperationalInterpreterTest.cpp
-OperationalInterpreterTest_LDADD = ../lib/libcanal.la
-OperationalInterpreterTest_LIBS = $(LLVM_LIBS)
-OperationalInterpreterTest_LDFLAGS = $(LLVM_LDFLAGS)
+InterpreterTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+InterpreterTest_SOURCES = InterpreterTest.cpp
+InterpreterTest_LDADD = ../lib/libcanal.la
+InterpreterTest_LIBS = $(LLVM_LIBS)
+InterpreterTest_LDFLAGS = $(LLVM_LDFLAGS)
 
-AbstractPointerTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
-AbstractPointerTest_SOURCES = AbstractPointerTest.cpp
-AbstractPointerTest_LDADD = ../lib/libcanal.la
-AbstractPointerTest_LIBS = $(LLVM_LIBS)
-AbstractPointerTest_LDFLAGS = $(LLVM_LDFLAGS)
+PointerTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+PointerTest_SOURCES = PointerTest.cpp
+PointerTest_LDADD = ../lib/libcanal.la
+PointerTest_LIBS = $(LLVM_LIBS)
+PointerTest_LDFLAGS = $(LLVM_LDFLAGS)
 
 ## ----------- ##
 ## Test files. ##
@@ -50,8 +50,8 @@ EXTRA_DIST += package.m4
 TESTSUITE_AT =	\
   local.at 	\
   testsuite.at	\
-  AbstractValue.at \
-  OperationalInterpreter.at
+  Value.at \
+  Interpreter.at
 
 EXTRA_DIST += $(TESTSUITE_AT)
 TESTSUITE = $(srcdir)/testsuite

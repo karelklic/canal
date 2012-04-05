@@ -1,10 +1,10 @@
-#include "AbstractPointer.h"
+#include "Pointer.h"
 #include "Utils.h"
 #include <llvm/Support/raw_ostream.h>
 #include <algorithm>
 
 namespace Canal {
-namespace AbstractPointer {
+namespace Pointer {
 
 Target::Target() : mType(Target::Uninitialized), mIsArrayOffset(false)
 {
@@ -104,7 +104,7 @@ InclusionBased* InclusionBased::clone() const
     return new InclusionBased(*this);
 }
 
-bool InclusionBased::operator==(const AbstractValue &value) const
+bool InclusionBased::operator==(const Value &value) const
 {
     // Check if rhs has the same type.
     const InclusionBased *pointer = dynamic_cast<const InclusionBased*>(&value);
@@ -127,18 +127,19 @@ bool InclusionBased::operator==(const AbstractValue &value) const
     return true;
 }
 
-void InclusionBased::merge(const AbstractValue &value)
+void InclusionBased::merge(const Value &value)
 {
     const InclusionBased &vv = dynamic_cast<const InclusionBased&>(value);
     std::map<const llvm::Value*, Target>::const_iterator valueit = vv.mTargets.begin();
-    for (; it != vv.mTargets.end(); ++it)
+    for (; valueit != vv.mTargets.end(); ++valueit)
     {
         std::map<const llvm::Value*, Target>::const_iterator it = mTargets.find(valueit->first);
         if (it == mTargets.end())
             mTargets.insert(*valueit);
         else
         {
-            it->second->merge(valueit->second);
+            // TODOxs
+            //it->second->merge(valueit->second);
         }
 
         mTargets.insert(*it);
@@ -147,7 +148,7 @@ void InclusionBased::merge(const AbstractValue &value)
 
 size_t InclusionBased::memoryUsage() const
 {
-    return mTargets.size() * sizeof(AbstractValue*);
+    return mTargets.size() * sizeof(Value*);
 }
 
 bool InclusionBased::limitMemoryUsage(size_t size)
@@ -169,7 +170,7 @@ bool InclusionBased::isBottom() const
 
 void InclusionBased::setTop()
 {
-    CANAL_FATAL_ERROR("neither implemented nor allowed!";
+    CANAL_FATAL_ERROR("neither implemented nor allowed!");
 }
 
 void InclusionBased::printToStream(llvm::raw_ostream &ostream) const
@@ -177,5 +178,5 @@ void InclusionBased::printToStream(llvm::raw_ostream &ostream) const
     ostream << "InclusionBased(size: " << mTargets.size() << "items)";
 }
 
-} // namespace AbstractPointer
+} // namespace Pointer
 } // namespace Canal

@@ -1,8 +1,8 @@
-#include "OperationalState.h"
-#include "AbstractValue.h"
+#include "State.h"
+#include "Value.h"
 #include <llvm/Support/raw_ostream.h>
 
-namespace Operational {
+namespace Canal {
 
 State::State()
 {
@@ -163,5 +163,4 @@ llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
             << ")";
 }
 
-
-} // namespace Operational
+} // namespace Canal

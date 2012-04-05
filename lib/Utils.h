@@ -55,8 +55,7 @@
     {                                                                   \
         llvm::errs() << __FILE__ << ":"                                 \
                      << __LINE__ << "("                                 \
-                     << __FUNCTION__ << "): dead code location reached" \
-                     << #expr;                                          \
+                     << __FUNCTION__ << "): dead code location reached"; \
             exit(1);                                                    \
     }
 
@@ -67,7 +66,7 @@
     {                                                                   \
         llvm::errs() << __FILE__ << ":"                                 \
                      << __LINE__ << "("                                 \
-                     << __FUNCTION__ << "): not implemented"            \
+                     << __FUNCTION__ << "): not implemented";           \
     }
 
 #endif // CANAL_UTILS_H

@@ -1,14 +1,15 @@
-#ifndef CANAL_INT_RANGE_H
-#define CANAL_INT_RANGE_H
+#ifndef CANAL_INTEGER_RANGE_H
+#define CANAL_INTEGER_RANGE_H
 
-#include "AbstractValue.h"
+#include "Value.h"
 #include <llvm/Constants.h>
 
-namespace AbstractInteger {
+namespace Canal {
+namespace Integer {
 
 // Abstracts integer values as a range min - max.
 template <typename T>
-class Range : public AbstractValue
+class Range : public Value
 {
  public:
   bool Empty;
@@ -30,6 +31,7 @@ class Range : public AbstractValue
   }
 };
 
-} // namespace AbstractInteger
+} // namespace Integer
+} // namespace Canal
 
 #endif

@@ -1,8 +1,10 @@
-#include "AbstractValue.h"
+#include "Value.h"
 #include <llvm/Pass.h>
 #include <llvm/Module.h>
 #include <llvm/Function.h>
 #include <vector>
+
+namespace Canal {
 
 class SELinuxModulePass : public llvm::ModulePass
 {
@@ -21,12 +23,12 @@ public:
 
     const llvm::Function::ArgumentListType &list = main->getArgumentList();
 
-    std::vector<AbstractValue> values;
+    std::vector<Value> values;
     interpretFunction(*main, values);
   }
 
   void interpretFunction(const llvm::Function &F,
-			 const std::vector<AbstractValue> &Arguments)
+			 const std::vector<Value> &Arguments)
   {
     for (llvm::Function::const_iterator i = F.begin(), e = F.end(); i != e; ++i)
       {
@@ -46,3 +48,5 @@ static llvm::RegisterPass<SELinuxModulePass> X("selinux-abstract-interpretation"
 					       "SELinux Abstract Interpretation Pass",
 					       false /* Only looks at CFG */,
 					       false /* Analysis Pass */);
+
+} // namespace Canal

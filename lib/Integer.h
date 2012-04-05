@@ -1,8 +1,20 @@
 #ifndef CANAL_ABSTRACT_INTEGER_H
 #define CANAL_ABSTRACT_INTEGER_H
 
-#include "IntBits.h"
-#include "IntEnumeration.h"
-#include "IntRange.h"
+#include "IntegerBits.h"
+//#include "IntegerEnumeration.h"
+//#include "IntegerRange.h"
+
+namespace Canal {
+namespace Integer {
+
+class Container
+{
+public:
+    Bits
+};
+
+} // namespace Integer
+} // namespace Canal
 
 #endif

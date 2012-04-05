@@ -1,64 +1,80 @@
-#include "AbstractValue.h"
+#include "Value.h"
+#include "Utils.h"
 #include <llvm/Support/raw_ostream.h>
 
 namespace Canal {
 
-bool AbstractValue::operator!=(const AbstractValue &rhs) const
+bool Value::operator!=(const Value &rhs) const
 {
     return !operator==(rhs);
 }
 
-void AbstractValue::add(const AbstractValue &a, const AbstractValue &b)
+bool Value::limitMemoryUsage(size_t size)
 {
-    llvm::errs() << "AbstractValue: add not implemented!\n";
+    return false;
 }
 
-void AbstractValue::sub(const AbstractValue &a, const AbstractValue &b)
+bool Value::isBottom() const
 {
-    llvm::errs() << "AbstractValue: sub not implemented!\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
-void AbstractValue::mul(const AbstractValue &a, const AbstractValue &b)
+void Value::setTop()
 {
-    llvm::errs() << "AbstractValue: mul not implemented!\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
-void AbstractValue::div(const AbstractValue &a, const AbstractValue &b)
+void Value::add(const Value &a, const Value &b)
 {
-    llvm::errs() << "AbstractValue: div not implemented!\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
-void AbstractValue::rem(const AbstractValue &a, const AbstractValue &b)
+void Value::sub(const Value &a, const Value &b)
 {
-    llvm::errs() << "AbstractValue: rem not implemented!\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
-void AbstractValue::shl(const AbstractValue &a, const AbstractValue &b)
+void Value::mul(const Value &a, const Value &b)
 {
-    llvm::errs() << "AbstractValue: shl not implemented!\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
-void AbstractValue::shr(const AbstractValue &a, const AbstractValue &b)
+void Value::div(const Value &a, const Value &b)
 {
-    llvm::errs() << "AbstractValue: shr not implemented!\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
-void AbstractValue::and_(const AbstractValue &a, const AbstractValue &b)
+void Value::rem(const Value &a, const Value &b)
 {
-    llvm::errs() << "AbstractValue: and not implemented!\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
-void AbstractValue::or_(const AbstractValue &a, const AbstractValue &b)
+void Value::shl(const Value &a, const Value &b)
 {
-    llvm::errs() << "AbstractValue: or not implemented!\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
-void AbstractValue::xor_(const AbstractValue &a, const AbstractValue &b)
+void Value::shr(const Value &a, const Value &b)
 {
-    llvm::errs() << "AbstractValue: xor not implemented!\n";
+    CANAL_NOT_IMPLEMENTED();
 }
 
-llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream, const AbstractValue &value)
+void Value::and_(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void Value::or_(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void Value::xor_(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream, const Value &value)
 {
     value.printToStream(ostream);
     return ostream;

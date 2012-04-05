@@ -1,6 +1,8 @@
-#include "AbstractInteger.h"
+#include "Integer.h"
 
-namespace AbstractInteger {
+namespace Canal {
+namespace Integer {
 
 
-} // namespace AbstractInteger
+} // namespace Integer
+} // namespace Canal

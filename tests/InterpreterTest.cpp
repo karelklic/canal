@@ -1,7 +1,8 @@
-#include "../lib/OperationalInterpreter.h"
-#include "../lib/OperationalState.h"
-#include "../lib/AbstractValue.h"
-#include "../lib/AbstractPointer.h"
+#include "../lib/Interpreter.h"
+#include "../lib/State.h"
+#include "../lib/Value.h"
+#include "../lib/Pointer.h"
+#include "../lib/Utils.h"
 #include <llvm/Value.h>
 #include <llvm/Module.h>
 #include <llvm/Instructions.h>
@@ -9,6 +10,8 @@
 #include <llvm/Support/IRReader.h>
 #include <llvm/Support/ManagedStatic.h>
 #include <llvm/Support/raw_ostream.h>
+
+namespace Canal {
 
 // This test creates simple LLVM module and simple abstract
 // machine. Runs the interpreter using the machine on the module and
@@ -19,7 +22,7 @@
 //  The remainder operation is intentionally not implemented, as it
 //  would require extending the variables to handle "zero or positive"
 //  and "zero or negative" states.
-class SignednessAbstractInteger : public AbstractValue
+class SignednessInteger : public Value
 {
 public:
     // Is number larger than zero.
@@ -30,22 +33,22 @@ public:
     bool mDivisionByZero;
 
 public:
-    SignednessAbstractInteger() : mPositive(false), mNegative(false), mDivisionByZero(false)
+    SignednessInteger() : mPositive(false), mNegative(false), mDivisionByZero(false)
     {
     }
 
-    // Implementation of AbstractValue::clone().
-    // Covariant return type -- it really overrides AbstractValue::clone().
-    virtual SignednessAbstractInteger *clone() const
+    // Implementation of Value::clone().
+    // Covariant return type -- it really overrides Value::clone().
+    virtual SignednessInteger *clone() const
     {
-        return new SignednessAbstractInteger(*this);
+        return new SignednessInteger(*this);
     }
 
-    // Implementation of AbstractValue::operator==().
-    virtual bool operator==(const AbstractValue &rhs) const
+    // Implementation of Value::operator==().
+    virtual bool operator==(const Value &rhs) const
     {
         // Check if rhs has the same type.
-        const SignednessAbstractInteger *integer = dynamic_cast<const SignednessAbstractInteger*>(&rhs);
+        const SignednessInteger *integer = dynamic_cast<const SignednessInteger*>(&rhs);
 	if (!integer)
 	    return false;
 
@@ -54,29 +57,29 @@ public:
 	  mDivisionByZero == integer->mDivisionByZero;
     }
 
-    // Implementation of AbstractValue::merge().
-    virtual void merge(const AbstractValue &abstractValue)
+    // Implementation of Value::merge().
+    virtual void merge(const Value &abstractValue)
     {
-        const SignednessAbstractInteger &value = dynamic_cast<const SignednessAbstractInteger&>(abstractValue);
+        const SignednessInteger &value = dynamic_cast<const SignednessInteger&>(abstractValue);
         mPositive = mPositive || value.mPositive;
         mNegative = mNegative || value.mNegative;
         mDivisionByZero = mDivisionByZero || value.mDivisionByZero;
     }
 
-    // Implementation of AbstractValue::memoryUsage().
+    // Implementation of Value::memoryUsage().
     virtual size_t memoryUsage() const
     {
-        return sizeof(SignednessAbstractInteger);
+        return sizeof(SignednessInteger);
     }
 
-    // Implementation of AbstractValue::limitmemoryUsage().
+    // Implementation of Value::limitmemoryUsage().
     virtual bool limitMemoryUsage(size_t size)
     {
         // Memory usage of this value cannot be lowered.
         return false;
     }
 
-    // Implementation of AbstractValue::accuracy().
+    // Implementation of Value::accuracy().
     virtual float accuracy() const
     {
         if (mDivisionByZero)
@@ -87,11 +90,11 @@ public:
             return 1.0;
     }
 
-    // Implementation of AbstractValue::add().
-    virtual void add(const AbstractValue &a, const AbstractValue &b)
+    // Implementation of Value::add().
+    virtual void add(const Value &a, const Value &b)
     {
-        const SignednessAbstractInteger &aa = dynamic_cast<const SignednessAbstractInteger&>(a);
-        const SignednessAbstractInteger &bb = dynamic_cast<const SignednessAbstractInteger&>(b);
+        const SignednessInteger &aa = dynamic_cast<const SignednessInteger&>(a);
+        const SignednessInteger &bb = dynamic_cast<const SignednessInteger&>(b);
 
         // (+)  + (+)   = (+)
         // (+)  + (-)   = (+-)
@@ -126,11 +129,11 @@ public:
         }
     }
 
-    // Implementation of AbstractValue::sub().
-    virtual void sub(const AbstractValue &a, const AbstractValue &b)
+    // Implementation of Value::sub().
+    virtual void sub(const Value &a, const Value &b)
     {
-        const SignednessAbstractInteger &aa = dynamic_cast<const SignednessAbstractInteger&>(a);
-        const SignednessAbstractInteger &bb = dynamic_cast<const SignednessAbstractInteger&>(b);
+        const SignednessInteger &aa = dynamic_cast<const SignednessInteger&>(a);
+        const SignednessInteger &bb = dynamic_cast<const SignednessInteger&>(b);
 
         // (+)  - (+)  = (+-)
         // (+)  - (-)  = (+)
@@ -165,11 +168,11 @@ public:
         }
     }
 
-    // Implementation of AbstractValue::mul().
-    virtual void mul(const AbstractValue &a, const AbstractValue &b)
+    // Implementation of Value::mul().
+    virtual void mul(const Value &a, const Value &b)
     {
-        const SignednessAbstractInteger &aa = dynamic_cast<const SignednessAbstractInteger&>(a);
-        const SignednessAbstractInteger &bb = dynamic_cast<const SignednessAbstractInteger&>(b);
+        const SignednessInteger &aa = dynamic_cast<const SignednessInteger&>(a);
+        const SignednessInteger &bb = dynamic_cast<const SignednessInteger&>(b);
 
         // (+)  * (+)  = (+)
         // (+)  * (-)  = (-)
@@ -206,11 +209,11 @@ public:
             mPositive = mNegative = false;
     }
 
-    // Implementation of AbstractValue::div().
-    virtual void div(const AbstractValue &a, const AbstractValue &b)
+    // Implementation of Value::div().
+    virtual void div(const Value &a, const Value &b)
     {
-        const SignednessAbstractInteger &aa = dynamic_cast<const SignednessAbstractInteger&>(a);
-        const SignednessAbstractInteger &bb = dynamic_cast<const SignednessAbstractInteger&>(b);
+        const SignednessInteger &aa = dynamic_cast<const SignednessInteger&>(a);
+        const SignednessInteger &bb = dynamic_cast<const SignednessInteger&>(b);
 
         // (+)  / (+)  = (+)
         // (+)  / (-)  = (-)
@@ -243,10 +246,10 @@ public:
             mPositive = mNegative = false;
     }
 
-    // Implementation of AbstractValue::printToStream().
+    // Implementation of Value::printToStream().
     virtual void printToStream(llvm::raw_ostream &o) const
     {
-        o << "SignednessAbstractInteger(";
+        o << "SignednessInteger(";
         if (mDivisionByZero)
             o << "division by zero";
         else
@@ -262,11 +265,11 @@ public:
     }
 };
 
-// Abstract machine working on the Sign abstract integer.
-class PlusMinusInterpreter : public Operational::Interpreter
+//  machine working on the Sign abstract integer.
+class PlusMinusInterpreter : public Interpreter
 {
 public:
-    PlusMinusInterpreter(llvm::Module &module) : Operational::Interpreter(module)
+    PlusMinusInterpreter(llvm::Module &module) : Interpreter(module)
     {
     }
 
@@ -276,7 +279,7 @@ public:
         const llvm::Function &function = *mModule.getFunction("main");
 
 	// Initialize input and output state of all main's basic blocks.
-	Operational::State state;
+	State state;
 	BlockStateMap blockInputState, blockOutputState;
 	llvm::Function::const_iterator itBlock = function.begin(), itBlockEnd = function.end();
 	for (; itBlock != itBlockEnd; ++itBlock)
@@ -297,12 +300,12 @@ public:
 	llvm::outs() << state;
 
 	llvm::outs() << "Number of variables: " << state.mFunctionVariables.size() << "\n";
-	for (Operational::VariablesMap::const_iterator it = state.mFunctionVariables.begin();
+	for (VariablesMap::const_iterator it = state.mFunctionVariables.begin();
 	     it != state.mFunctionVariables.end(); ++it)
 	{
 	    if (it->first->hasName())
             {
-                const AbstractPointer *pointer = dynamic_cast<const AbstractPointer*>(it->second);
+                const Pointer::InclusionBased *pointer = dynamic_cast<const Pointer::InclusionBased*>(it->second);
                 if (pointer && pointer->mTargets.size() == 1)
                     llvm::outs() << it->first->getName() << " = " << **pointer->mTargets.begin() << "\n";
                 else
@@ -314,41 +317,41 @@ public:
     }
 
     // Implementation of Operational::Interpreter::alloca().
-    virtual void alloca_(const llvm::AllocaInst &instruction, Operational::State &state)
+    virtual void alloca_(const llvm::AllocaInst &instruction, State &state)
     {
         llvm::Type *type = instruction.getAllocatedType();
-        AbstractValue *value = NULL;
+        Value *value = NULL;
         if (type->isIntegerTy())
-            value = new SignednessAbstractInteger();
+            value = new SignednessInteger();
         else if (type->isPointerTy())
-            value = new AbstractPointer();
+            value = new Pointer::InclusionBased();
         else
-            llvm::errs() << "PlusMinusMachine::alloca: unsupported type: " << instruction << "\n";
+            CANAL_DIE();
 
         state.mFunctionBlocks.push_back(value);
-        AbstractPointer *pointer = new AbstractPointer();
+        Pointer::InclusionBased *pointer = new Pointer::InclusionBased();
         pointer->mTargets.insert(value);
         llvm::outs() << "Adding " << instruction << ", name: " << instruction.getName() << " " << instruction.hasName() << "\n";
-        state.mFunctionVariables.insert(std::pair<const llvm::Value*, AbstractPointer*>(&instruction, pointer));
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, Pointer*>(&instruction, pointer));
     }
 
-    // Implementation of Operational::Interpreter::store().
-    virtual void store(const llvm::StoreInst &instruction, Operational::State &state)
+    // Implementation of Interpreter::store().
+    virtual void store(const llvm::StoreInst &instruction, State &state)
     {
     }
 
-    // Implementation of Operational::Interpreter::call().
-    virtual void call(const llvm::CallInst &instruction, Operational::State &state)
+    // Implementation of Interpreter::call().
+    virtual void call(const llvm::CallInst &instruction, State &state)
     {
     }
 
-    // Implementation of Operational::Interpreter::load().
-    virtual void load(const llvm::LoadInst &instruction, Operational::State &state)
+    // Implementation of Interpreter::load().
+    virtual void load(const llvm::LoadInst &instruction, State &state)
     {
     }
 
-    // Implementation of Operational::Interpreter::add().
-    virtual void add(const llvm::BinaryOperator &instruction, Operational::State &state)
+    // Implementation of Interpreter::add().
+    virtual void add(const llvm::BinaryOperator &instruction, State &state)
     {
         // TODO
         llvm::Value *a = instruction.getOperand(0);
@@ -358,44 +361,46 @@ public:
             if (b->hasName());
         }
 
-        SignednessAbstractInteger *value = new SignednessAbstractInteger();
-        state.mFunctionVariables.insert(std::pair<const llvm::Value*, AbstractValue*>(&instruction, value));
+        SignednessInteger *value = new SignednessInteger();
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, Value*>(&instruction, value));
     }
 
-    // Implementation of Operational::Interpreter::sub().
-    virtual void sub(const llvm::BinaryOperator &instruction, Operational::State &state)
+    // Implementation of Interpreter::sub().
+    virtual void sub(const llvm::BinaryOperator &instruction, State &state)
     {
-        SignednessAbstractInteger *value = new SignednessAbstractInteger();
-        state.mFunctionVariables.insert(std::pair<const llvm::Value*, AbstractValue*>(&instruction, value));
+        SignednessInteger *value = new SignednessInteger();
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, Value*>(&instruction, value));
     }
 
-    // Implementation of Operational::Interpreter::mul().
-    virtual void mul(const llvm::BinaryOperator &instruction, Operational::State &state)
+    // Implementation of Interpreter::mul().
+    virtual void mul(const llvm::BinaryOperator &instruction, State &state)
     {
-        SignednessAbstractInteger *value = new SignednessAbstractInteger();
-        state.mFunctionVariables.insert(std::pair<const llvm::Value*, AbstractValue*>(&instruction, value));
+        SignednessInteger *value = new SignednessInteger();
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, Value*>(&instruction, value));
     }
 
-    // Implementation of Operational::Interpreter::udiv().
-    virtual void udiv(const llvm::BinaryOperator &instruction, Operational::State &state)
+    // Implementation of Interpreter::udiv().
+    virtual void udiv(const llvm::BinaryOperator &instruction, State &state)
     {
-        SignednessAbstractInteger *value = new SignednessAbstractInteger();
-        state.mFunctionVariables.insert(std::pair<const llvm::Value*, AbstractValue*>(&instruction, value));
+        SignednessInteger *value = new SignednessInteger();
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, Value*>(&instruction, value));
     }
 
-    // Implementation of Operational::Interpreter::sdiv().
-    virtual void sdiv(const llvm::BinaryOperator &instruction, Operational::State &state)
+    // Implementation of Interpreter::sdiv().
+    virtual void sdiv(const llvm::BinaryOperator &instruction, State &state)
     {
-        SignednessAbstractInteger *value = new SignednessAbstractInteger();
-        state.mFunctionVariables.insert(std::pair<const llvm::Value*, AbstractValue*>(&instruction, value));
+        SignednessInteger *value = new SignednessInteger();
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, Value*>(&instruction, value));
     }
 
-    // Implementation of Operational::Interpreter::ret().
-    virtual void ret(const llvm::ReturnInst &instruction, Operational::State &state)
+    // Implementation of Interpreter::ret().
+    virtual void ret(const llvm::ReturnInst &instruction, State &state)
     {
         // Do nothing.
     }
 };
+
+} // namespace Canal
 
 int main(int argc, char **argv)
 {
@@ -410,7 +415,7 @@ int main(int argc, char **argv)
     if (!module)
         return 1;
 
-    PlusMinusInterpreter interpreter(*module);
+    Canal::PlusMinusInterpreter interpreter(*module);
     interpreter.interpretMain();
 
     return 0;

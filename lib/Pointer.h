@@ -1,11 +1,11 @@
-#ifndef CANAL_ABSTRACT_POINTER_H
-#define CANAL_ABSTRACT_POINTER_H
+#ifndef CANAL_POINTER_H
+#define CANAL_POINTER_H
 
-#include "AbstractValue.h"
+#include "Value.h"
 #include <map>
 
 namespace Canal {
-namespace AbstractPointer {
+namespace Pointer {
 
 // Pointer target -- where the pointer points to.
 // Pointer can:
@@ -82,8 +82,7 @@ protected:
 };
 
 // Inclusion-based flow-insensitive abstract pointer.
-class InclusionBased : public AbstractValue,
-     public OperationalStateOwner
+class InclusionBased : public Value, public StateOwner
 {
 public:
     // llvm::Value represents a position in the program. It points to
@@ -91,28 +90,28 @@ public:
     std::map<const llvm::Value*, Target> mTargets;
 
 public:
-    // Implementation of AbstractValue::clone().
-    // Covariant return type -- it really overrides AbstractValue::clone().
+    // Implementation of Value::clone().
+    // Covariant return type -- it really overrides Value::clone().
     virtual InclusionBased* clone() const;
-    // Implementation of AbstractValue::operator==().
-    virtual bool operator==(const AbstractValue &value) const;
-    // Implementation of AbstractValue::merge().
-    virtual void merge(const AbstractValue &value);
-    // Implementation of AbstractValue::memoryUsage().
+    // Implementation of Value::operator==().
+    virtual bool operator==(const Value &value) const;
+    // Implementation of Value::merge().
+    virtual void merge(const Value &value);
+    // Implementation of Value::memoryUsage().
     virtual size_t memoryUsage() const;
-    // Implementation of AbstractValue::limitmemoryUsage().
+    // Implementation of Value::limitmemoryUsage().
     virtual bool limitMemoryUsage(size_t size);
-    // Implementation of AbstractValue::accuracy().
+    // Implementation of Value::accuracy().
     virtual float accuracy() const;
-    // Implementation of AbstractValue::isBottom().
+    // Implementation of Value::isBottom().
     virtual bool isBottom() const;
-    // Implementation of AbstractValue::setTop().
+    // Implementation of Value::setTop().
     virtual void setTop();
-    // Implementation of AbstractValue::printToStream().
+    // Implementation of Value::printToStream().
     virtual void printToStream(llvm::raw_ostream &ostream) const;
 };
 
-} // namespace AbstractPointer
+} // namespace Pointer
 } // namespace Canal
 
 #endif

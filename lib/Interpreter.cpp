@@ -1,9 +1,11 @@
 #include "Interpreter.h"
 #include "State.h"
 #include "Utils.h"
+#include "Value.h"
 #include <llvm/Function.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Instructions.h>
+#include <llvm/Support/CFG.h>
 #include <llvm/Support/raw_ostream.h>
 #include <map>
 #include <cassert>
@@ -16,8 +18,8 @@ Interpreter::Interpreter(llvm::Module &module) : mModule(module)
 
 void Interpreter::interpretFunction(const llvm::Function &function,
                                     State &state,
-                                    const std::vector<AbstractValue*> &arguments,
-                                    AbstractValue *&result)
+                                    const std::vector<Value*> &arguments,
+                                    Value *&result)
 {
     std::map<const llvm::BasicBlock*, State> blockInputState, blockOutputState;
     llvm::Function::const_iterator itBlock = function.begin(), itBlockEnd = function.end();
@@ -138,7 +140,7 @@ void Interpreter::interpretInstruction(const llvm::Instruction &instruction, Sta
 	}
     }
     else
-        CANAL_FATAL_ERROR(binaryOp);
+        CANAL_DIE();
 }
 
 void Interpreter::ret(const llvm::ReturnInst &instruction, State &state)
