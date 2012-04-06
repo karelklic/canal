@@ -1,5 +1,6 @@
 #include "Pointer.h"
 #include "Utils.h"
+#include "State.h"
 #include <llvm/Support/raw_ostream.h>
 #include <algorithm>
 
@@ -99,6 +100,46 @@ void Target::setArrayOffset(size_t minOffset, size_t maxOffset)
     mMaxArrayOffset = maxOffset;
 }
 
+Value *Target::dereference(State &state) const
+{
+    switch (mType)
+    {
+    case Uninitialized:
+    case Constant:
+        return NULL;
+    case GlobalVariable:
+        return state.mGlobalVariables.find(mVariable)->second;
+    case GlobalBlock:
+        return state.mGlobalBlocks[mOffset];
+    case FunctionVariable:
+        return state.mFunctionVariables.find(mVariable)->second;
+    case FunctionBlock:
+        return state.mFunctionBlocks[mOffset];
+    default:
+        CANAL_DIE();
+    }
+}
+
+const Value *Target::dereference(const State &state) const
+{
+    switch (mType)
+    {
+    case Uninitialized:
+    case Constant:
+        return NULL;
+    case GlobalVariable:
+        return state.mGlobalVariables.find(mVariable)->second;
+    case GlobalBlock:
+        return state.mGlobalBlocks[mOffset];
+    case FunctionVariable:
+        return state.mFunctionVariables.find(mVariable)->second;
+    case FunctionBlock:
+        return state.mFunctionBlocks[mOffset];
+    default:
+        CANAL_DIE();
+    }
+}
+
 InclusionBased* InclusionBased::clone() const
 {
     return new InclusionBased(*this);
@@ -175,7 +216,7 @@ void InclusionBased::setTop()
 
 void InclusionBased::printToStream(llvm::raw_ostream &ostream) const
 {
-    ostream << "InclusionBased(size: " << mTargets.size() << "items)";
+    ostream << "Pointer::InclusionBased(size: " << mTargets.size() << "items)";
 }
 
 } // namespace Pointer

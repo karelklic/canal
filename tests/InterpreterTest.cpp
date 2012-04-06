@@ -307,7 +307,9 @@ public:
             {
                 const Pointer::InclusionBased *pointer = dynamic_cast<const Pointer::InclusionBased*>(it->second);
                 if (pointer && pointer->mTargets.size() == 1)
-                    llvm::outs() << it->first->getName() << " = " << **pointer->mTargets.begin() << "\n";
+                {
+                    llvm::outs() << it->first->getName() << " = " << *pointer->mTargets.begin()->second.dereference(state) << "\n";
+                }
                 else
                     llvm::outs() << it->first->getName() << " = " << *it->second << "\n";
             }
@@ -316,9 +318,18 @@ public:
 	}
     }
 
-    // Implementation of Operational::Interpreter::alloca().
+    // Implementation of Interpreter::alloca().
     virtual void alloca_(const llvm::AllocaInst &instruction, State &state)
     {
+        // Alloca allocates either a single item, or an array of
+        // items.
+
+        if (state.mFunctionVariables.end() != state.mFunctionVariables.find(&instruction))
+        {
+            // TODO: handle allocation size change
+            return;
+        }
+
         llvm::Type *type = instruction.getAllocatedType();
         Value *value = NULL;
         if (type->isIntegerTy())
@@ -329,9 +340,16 @@ public:
             CANAL_DIE();
 
         state.mFunctionBlocks.push_back(value);
+
+        Pointer::Target target;
+        target.setBlockOffset(state.mFunctionBlocks.size() - 1,
+                              Pointer::Target::FunctionBlock);
+
         Pointer::InclusionBased *pointer = new Pointer::InclusionBased();
-        pointer->mTargets.insert(value);
+        pointer->mTargets[instruction] = target;
+
         llvm::outs() << "Adding " << instruction << ", name: " << instruction.getName() << " " << instruction.hasName() << "\n";
+
         state.mFunctionVariables.insert(std::pair<const llvm::Value*, Pointer*>(&instruction, pointer));
     }
 

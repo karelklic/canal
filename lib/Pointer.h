@@ -4,6 +4,10 @@
 #include "Value.h"
 #include <map>
 
+namespace llvm {
+    class Value;
+}
+
 namespace Canal {
 namespace Pointer {
 
@@ -58,6 +62,13 @@ public:
     size_t minArrayOffset() const { return mMinArrayOffset; }
     size_t maxArrayOffset() const { return mMaxArrayOffset; }
     void setArrayOffset(size_t minOffset, size_t maxOffset);
+
+    // Dereference the pointer on a state.
+    //
+    // If the Target represents a constant or uninitialized pointer,
+    // NULL is returned.
+    Value *dereference(State &state) const;
+    const Value *dereference(const State &state) const;
 
 protected:
     Type mType;

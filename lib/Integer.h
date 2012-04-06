@@ -10,8 +10,6 @@ namespace Integer {
 
 class Container
 {
-public:
-    Bits
 };
 
 } // namespace Integer

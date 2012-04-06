@@ -29,14 +29,15 @@ void append(char *s)
 
 int main(int argc, char **argv)
 {
-    int i = 3, ii = 6, *j;
+    int i = 3, ii = 6, *j, k[i];
     j = &i;
     *j = 4;
     j = &ii;
     *j = 5;
-    int *k;
-    k = j;
+    int *l;
+    l = j;
     j = NULL;
-    *k = 6;
+    *l = 1;
+    k[*l] = 0;
     return 0;
 }

@@ -1,5 +1,6 @@
 #include "Constant.h"
 #include <llvm/Constant.h>
+#include <llvm/Support/raw_ostream.h>
 
 namespace Canal {
 
@@ -19,7 +20,22 @@ bool Constant::operator==(const Value &value) const
     if (!constant)
         return false;
 
-    return mConstant == constant.mConstant;
+    return mConstant == constant->mConstant;
+}
+
+size_t Constant::memoryUsage() const
+{
+    return sizeof(Constant);
+}
+
+float Constant::accuracy() const
+{
+    return 1.0f;
+}
+
+void Constant::printToStream(llvm::raw_ostream &ostream) const
+{
+    ostream << "Constant(" << *mConstant << ")";
 }
 
 } // namespace Canal

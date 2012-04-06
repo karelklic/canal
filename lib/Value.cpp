@@ -9,6 +9,11 @@ bool Value::operator!=(const Value &rhs) const
     return !operator==(rhs);
 }
 
+void Value::merge(const Value &v)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 bool Value::limitMemoryUsage(size_t size)
 {
     return false;

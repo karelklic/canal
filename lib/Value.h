@@ -24,7 +24,7 @@ public:
     virtual bool operator!=(const Value &rhs) const;
 
     // Merge another value into this one.
-    virtual void merge(const Value &v) = 0;
+    virtual void merge(const Value &v);
 
     // Get memory usage (used byte count) of this value.
     virtual size_t memoryUsage() const = 0;
