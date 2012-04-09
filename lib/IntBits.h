@@ -72,7 +72,7 @@ class Bits : public AbstractValue
       return this->Bits0 == 0 && this->Bits1 == 0;
   }
 
-  virtual void setTop() const {
+  virtual void setTop() {
       this->Bits0 = ~0;
       this->Bits1 = ~0;
   }
