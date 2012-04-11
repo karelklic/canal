@@ -9,8 +9,30 @@ namespace Array {
 // value up in its lattice.
 class SingleItem : public Value
 {
-    // TODO
+public:
+    Value *mItemValue;
+
+    // Number of elements in the array.
+    // It is either a Constant or Integer::Container.
+    Value *mSize;
+
+public:
+    SingleItem();
+    virtual ~SingleItem();
+
+    // Implementation of Value::clone().
+    // Covariant return type -- overrides Value::clone().
+    virtual SingleItem *clone() const;
+    // Implementation of Value::operator==().
+    virtual bool operator==(const Value &value) const;
+    // Implementation of Value::merge().
+    virtual void merge(const Value &value);
+    // Implementation of Value::memoryUsage().
+    virtual size_t memoryUsage() const;
+    // Implementation of Value::printToStream().
+    virtual void printToStream(llvm::raw_ostream &ostream) const;
 };
+
 
 // TODO: Delete.
 class Range : public Value

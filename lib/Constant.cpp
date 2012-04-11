@@ -28,11 +28,6 @@ size_t Constant::memoryUsage() const
     return sizeof(Constant);
 }
 
-float Constant::accuracy() const
-{
-    return 1.0f;
-}
-
 void Constant::printToStream(llvm::raw_ostream &ostream) const
 {
     ostream << "Constant(" << *mConstant << ")";

@@ -7,8 +7,24 @@
 namespace Canal {
 namespace Pointer {
 
-Target::Target() : mType(Target::Uninitialized), mIsArrayOffset(false)
+Target::Target() : mType(Target::Uninitialized),
+                   mArrayOffset(NULL),
+                   mParent(NULL)
 {
+}
+
+Target::Target(const Target &target) : mType(target.mType),
+                                       mParent(target.mParent),
+                                       mConstant(target.mConstant),
+                                       mArrayOffset(target.mArrayOffset)
+{
+    if (mArrayOffset)
+        mArrayOffset = mArrayOffset->clone();
+}
+
+Target::~Target()
+{
+    delete mArrayOffset;
 }
 
 bool Target::operator==(const Target &target) const
@@ -22,26 +38,17 @@ bool Target::operator==(const Target &target) const
         return true;
     case Constant:
         return mConstant == target.mConstant;
-    case GlobalVariable:
-    case FunctionVariable:
-        // Check array offset.
-        if (mIsArrayOffset != target.mIsArrayOffset ||
-            (mIsArrayOffset &&
-             (mMinArrayOffset != target.mMinArrayOffset ||
-              mMaxArrayOffset != target.mMaxArrayOffset)))
-            return false;
-
-        return mVariable == target.mVariable;
     case GlobalBlock:
     case FunctionBlock:
         // Check array offset.
-        if (mIsArrayOffset != target.mIsArrayOffset ||
-            (mIsArrayOffset &&
-             (mMinArrayOffset != target.mMinArrayOffset ||
-              mMaxArrayOffset != target.mMaxArrayOffset)))
+        if ((mArrayOffset && !target.mArrayOffset) ||
+            (!mArrayOffset && target.mArrayOffset))
             return false;
 
-        return mOffset == target.mOffset;
+        if (mArrayOffset && *mArrayOffset != *target.mArrayOffset)
+            return false;
+
+        return *dereference() == *target.dereference();
     default:
         CANAL_DIE();
     }
@@ -54,87 +61,47 @@ bool Target::operator!=(const Target &target) const
     return !(*this == target);
 }
 
-void Target::setBlockOffset(size_t offset, Target::Type type)
-{
-    CANAL_ASSERT(type == GlobalBlock || type == FunctionBlock);
-    mOffset = offset;
-    mType = type;
-}
-
-size_t Target::getBlockOffset() const
-{
-    CANAL_ASSERT(mType == GlobalBlock || mType == FunctionBlock);
-    return mOffset;
-}
-
-void Target::setVariable(const llvm::Value *variable, Target::Type type)
-{
-    CANAL_ASSERT(variable && (type == GlobalVariable ||
-                              type == FunctionVariable));
-    mVariable = variable;
-    mType = type;
-}
-
-const llvm::Value *Target::getVariable() const
-{
-    CANAL_ASSERT(mType == GlobalVariable || mType == FunctionVariable);
-    return mVariable;
-}
-
-void Target::setConstant(size_t constant)
-{
-    mConstant = constant;
-    mType = Constant;
-}
-
-size_t Target::getConstant() const
-{
-    CANAL_ASSERT(mType == Constant);
-    return mConstant;
-}
-
-void Target::setArrayOffset(size_t minOffset, size_t maxOffset)
-{
-    mIsArrayOffset = true;
-    mMinArrayOffset = minOffset;
-    mMaxArrayOffset = maxOffset;
-}
-
-Value *Target::dereference(State &state) const
+Value *Target::dereference() const
 {
     switch (mType)
     {
     case Uninitialized:
     case Constant:
         return NULL;
-    case GlobalVariable:
-        return state.mGlobalVariables.find(mVariable)->second;
     case GlobalBlock:
-        return state.mGlobalBlocks[mOffset];
-    case FunctionVariable:
-        return state.mFunctionVariables.find(mVariable)->second;
+        return mParent->getState()->mGlobalBlocks[mOffset];
     case FunctionBlock:
-        return state.mFunctionBlocks[mOffset];
+        return mParent->getState()->mFunctionBlocks[mOffset];
     default:
         CANAL_DIE();
     }
 }
 
-const Value *Target::dereference(const State &state) const
+void Target::merge(const Target &target)
 {
+    CANAL_ASSERT(mType == target.mType);
     switch (mType)
     {
     case Uninitialized:
+        break;
     case Constant:
-        return NULL;
-    case GlobalVariable:
-        return state.mGlobalVariables.find(mVariable)->second;
+        // TODO: mConstant can be abstract value.
+        CANAL_ASSERT(mConstant == target.mConstant);
+        break;
     case GlobalBlock:
-        return state.mGlobalBlocks[mOffset];
-    case FunctionVariable:
-        return state.mFunctionVariables.find(mVariable)->second;
     case FunctionBlock:
-        return state.mFunctionBlocks[mOffset];
+        dereference()->merge(*target.dereference());
+
+        if (mArrayOffset)
+        {
+            if (target.mArrayOffset)
+                mArrayOffset->merge(*target.mArrayOffset);
+            else
+                CANAL_NOT_IMPLEMENTED();
+        }
+        else if (target.mArrayOffset)
+            CANAL_NOT_IMPLEMENTED();
+        break;
     default:
         CANAL_DIE();
     }
@@ -174,44 +141,17 @@ void InclusionBased::merge(const Value &value)
     std::map<const llvm::Value*, Target>::const_iterator valueit = vv.mTargets.begin();
     for (; valueit != vv.mTargets.end(); ++valueit)
     {
-        std::map<const llvm::Value*, Target>::const_iterator it = mTargets.find(valueit->first);
+        std::map<const llvm::Value*, Target>::iterator it = mTargets.find(valueit->first);
         if (it == mTargets.end())
             mTargets.insert(*valueit);
         else
-        {
-            // TODOxs
-            //it->second->merge(valueit->second);
-        }
-
-        mTargets.insert(*it);
+            it->second.merge(valueit->second);
     }
 }
 
 size_t InclusionBased::memoryUsage() const
 {
-    return mTargets.size() * sizeof(Value*);
-}
-
-bool InclusionBased::limitMemoryUsage(size_t size)
-{
-    // Memory usage of this value cannot be lowered.
-    return false;
-}
-
-float InclusionBased::accuracy() const
-{
-    // Not possible to determine.
-    return 1.0;
-}
-
-bool InclusionBased::isBottom() const
-{
-    return mTargets.empty();
-}
-
-void InclusionBased::setTop()
-{
-    CANAL_FATAL_ERROR("neither implemented nor allowed!");
+    return mTargets.size() * sizeof(Target);
 }
 
 void InclusionBased::printToStream(llvm::raw_ostream &ostream) const

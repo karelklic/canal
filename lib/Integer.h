@@ -8,7 +8,7 @@
 namespace Canal {
 namespace Integer {
 
-class Container
+class Container : public Value
 {
 };
 

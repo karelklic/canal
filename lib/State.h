@@ -55,9 +55,7 @@ public:
     MemoryBlockList mFunctionBlocks;
 
     State();
-
     State(const State &rhs);
-
     virtual ~State();
 
     State &operator=(const State &rhs);

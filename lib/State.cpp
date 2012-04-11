@@ -26,25 +26,49 @@ State &State::operator=(const State &rhs)
     VariablesMap::iterator vit = mFunctionVariables.begin(),
         vitend = mFunctionVariables.end();
     for (; vit != vitend; ++vit)
+    {
         vit->second = vit->second->clone();
+
+        StateValue *stateValue = dynamic_cast<StateValue*>(vit->second);
+        if (stateValue)
+            stateValue->setState(this);
+    }
 
     mGlobalVariables = rhs.mGlobalVariables;
     vit = mGlobalVariables.begin();
     vitend = mGlobalVariables.end();
     for (; vit != vitend; ++vit)
+    {
         vit->second = vit->second->clone();
+
+        StateValue *stateValue = dynamic_cast<StateValue*>(vit->second);
+        if (stateValue)
+            stateValue->setState(this);
+    }
 
     mGlobalBlocks = rhs.mGlobalBlocks;
     MemoryBlockList::iterator it = mGlobalBlocks.begin(),
         itend = mGlobalBlocks.end();
     for (; it != itend; ++it)
+    {
         *it = (*it)->clone();
+
+        StateValue *stateValue = dynamic_cast<StateValue*>(*it);
+        if (stateValue)
+            stateValue->setState(this);
+    }
 
     mFunctionBlocks = rhs.mFunctionBlocks;
     it = mFunctionBlocks.begin();
     itend = mFunctionBlocks.end();
     for (; it != itend; ++it)
+    {
         *it = (*it)->clone();
+
+        StateValue *stateValue = dynamic_cast<StateValue*>(*it);
+        if (stateValue)
+            stateValue->setState(this);
+    }
 
     return *this;
 }

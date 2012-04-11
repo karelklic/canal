@@ -346,11 +346,11 @@ public:
                               Pointer::Target::FunctionBlock);
 
         Pointer::InclusionBased *pointer = new Pointer::InclusionBased();
-        pointer->mTargets[instruction] = target;
+        pointer->mTargets[&instruction] = target;
 
         llvm::outs() << "Adding " << instruction << ", name: " << instruction.getName() << " " << instruction.hasName() << "\n";
 
-        state.mFunctionVariables.insert(std::pair<const llvm::Value*, Pointer*>(&instruction, pointer));
+        state.mFunctionVariables.insert(std::pair<const llvm::Value*, Pointer::InclusionBased*>(&instruction, pointer));
     }
 
     // Implementation of Interpreter::store().

@@ -14,21 +14,6 @@ void Value::merge(const Value &v)
     CANAL_NOT_IMPLEMENTED();
 }
 
-bool Value::limitMemoryUsage(size_t size)
-{
-    return false;
-}
-
-bool Value::isBottom() const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void Value::setTop()
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
 void Value::add(const Value &a, const Value &b)
 {
     CANAL_NOT_IMPLEMENTED();
