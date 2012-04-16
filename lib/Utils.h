@@ -1,6 +1,9 @@
 #ifndef CANAL_UTILS_H
 #define CANAL_UTILS_H
 
+#include <llvm/Support/raw_ostream.h>
+#include <cstdlib>
+
 // Fatal error.  Writes a message to stderr and terminates the
 // application.
 //

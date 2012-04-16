@@ -8,14 +8,13 @@ namespace Canal {
 namespace Pointer {
 
 Target::Target() : mType(Target::Uninitialized),
-                   mArrayOffset(NULL),
-                   mParent(NULL)
+                   mArrayOffset(NULL)
 {
 }
 
 Target::Target(const Target &target) : mType(target.mType),
-                                       mParent(target.mParent),
                                        mConstant(target.mConstant),
+                                       mInstruction(target.mInstruction),
                                        mArrayOffset(target.mArrayOffset)
 {
     if (mArrayOffset)
@@ -48,7 +47,7 @@ bool Target::operator==(const Target &target) const
         if (mArrayOffset && *mArrayOffset != *target.mArrayOffset)
             return false;
 
-        return *dereference() == *target.dereference();
+        return mInstruction == target.mInstruction;
     default:
         CANAL_DIE();
     }
@@ -59,22 +58,6 @@ bool Target::operator==(const Target &target) const
 bool Target::operator!=(const Target &target) const
 {
     return !(*this == target);
-}
-
-Value *Target::dereference() const
-{
-    switch (mType)
-    {
-    case Uninitialized:
-    case Constant:
-        return NULL;
-    case GlobalBlock:
-        return mParent->getState()->mGlobalBlocks[mOffset];
-    case FunctionBlock:
-        return mParent->getState()->mFunctionBlocks[mOffset];
-    default:
-        CANAL_DIE();
-    }
 }
 
 void Target::merge(const Target &target)
@@ -90,21 +73,26 @@ void Target::merge(const Target &target)
         break;
     case GlobalBlock:
     case FunctionBlock:
-        dereference()->merge(*target.dereference());
-
         if (mArrayOffset)
         {
             if (target.mArrayOffset)
                 mArrayOffset->merge(*target.mArrayOffset);
             else
-                CANAL_NOT_IMPLEMENTED();
+                CANAL_NOT_IMPLEMENTED(); // only one pointer is array offset
         }
         else if (target.mArrayOffset)
-            CANAL_NOT_IMPLEMENTED();
+            CANAL_NOT_IMPLEMENTED(); // only one pointer is array offset
+
+        CANAL_ASSERT(mInstruction == target.mInstruction);
         break;
     default:
         CANAL_DIE();
     }
+}
+
+size_t Target::memoryUsage() const
+{
+    return sizeof(Target) + (mArrayOffset ? mArrayOffset->memoryUsage() : 0);
 }
 
 InclusionBased* InclusionBased::clone() const
@@ -151,7 +139,11 @@ void InclusionBased::merge(const Value &value)
 
 size_t InclusionBased::memoryUsage() const
 {
-    return mTargets.size() * sizeof(Target);
+    size_t size = sizeof(InclusionBased);
+    std::map<const llvm::Value*, Target>::const_iterator it = mTargets.begin();
+    for (; it != mTargets.end(); ++it)
+        size += it->second.memoryUsage();
+    return size;
 }
 
 void InclusionBased::printToStream(llvm::raw_ostream &ostream) const

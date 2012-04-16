@@ -1,4 +1,5 @@
 #include "Array.h"
+#include "Utils.h"
 
 namespace Canal {
 namespace Array {
@@ -7,18 +8,26 @@ SingleItem::SingleItem() : mItemValue(NULL), mSize(NULL)
 {
 }
 
+SingleItem::SingleItem(const SingleItem &singleItem)
+{
+    mItemValue = singleItem.mItemValue;
+    if (mItemValue)
+        mItemValue = mItemValue->clone();
+
+    mSize = singleItem.mSize;
+    if (mSize)
+        mSize = mSize->clone();
+}
+
 SingleItem::~SingleItem()
 {
     delete mItemValue;
     delete mSize;
 }
 
-Value *SingleItem::clone() const
+SingleItem *SingleItem::clone() const
 {
-    SingleItem *copy = new SingleItem();
-    copy->mItemValue = mItemValue->clone();
-    copy->mSize = mSize->clone();
-    return copy;
+    return new SingleItem(*this);
 }
 
 bool SingleItem::operator==(const Value &value) const
@@ -27,20 +36,34 @@ bool SingleItem::operator==(const Value &value) const
     if (!singleItem)
         return false;
 
-    return *mItemValue == *singleItem->mItemValue
-        && *mSize == *singleItem->mSize;
+    if ((mSize && !singleItem->mSize) || (!mSize && singleItem->mSize))
+        return false;
+    if ((mItemValue && !singleItem->mItemValue) || (!mItemValue && singleItem->mItemValue))
+        return false;
+
+    if (mItemValue && *mItemValue != *singleItem->mItemValue)
+        return false;
+    if (mSize && *mSize != *singleItem->mSize)
+        return false;
+
+    return true;
 }
 
 void SingleItem::merge(const Value &value)
 {
     const SingleItem &singleItem = dynamic_cast<const SingleItem&>(value);
+    CANAL_ASSERT(mItemValue && singleItem.mItemValue); // implement if necessary
+    CANAL_ASSERT(mSize && singleItem.mSize); // implement if necessary
     mItemValue->merge(*singleItem.mItemValue);
     mSize->merge(*singleItem.mSize);
 }
 
 size_t SingleItem::memoryUsage() const
 {
-    return sizeof(SingleItem) + mItemValue->memoryUsage() + mSize->memoryUsage();
+    size_t size = sizeof(SingleItem);
+    size += (mItemValue ? mItemValue->memoryUsage() : 0);
+    size += (mSize ? mSize->memoryUsage() : 0);
+    return size;
 }
 
 void SingleItem::printToStream(llvm::raw_ostream &ostream) const

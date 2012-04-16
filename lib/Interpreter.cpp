@@ -2,11 +2,14 @@
 #include "State.h"
 #include "Utils.h"
 #include "Value.h"
+#include "Integer.h"
+#include "Pointer.h"
+#include "Array.h"
+#include "Constant.h"
 #include <llvm/Function.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Instructions.h>
 #include <llvm/Support/CFG.h>
-#include <llvm/Support/raw_ostream.h>
 #include <map>
 #include <cassert>
 
@@ -31,7 +34,7 @@ void Interpreter::interpretFunction(const llvm::Function &function,
 
     interpretFunctionBlocks(function.begin(), itBlockEnd, blockInputState, blockOutputState);
 
-    // TODO: fint function return blocks, merge return values, store
+    // TODO: find function return blocks, merge return values, store
     // the result into state.
 }
 
@@ -46,8 +49,8 @@ void Interpreter::interpretFunctionBlocks(llvm::Function::const_iterator blockBe
         llvm::Function::const_iterator itBlock;
         for (itBlock = blockBegin; itBlock != blockEnd; ++itBlock)
         {
-            // Merge out states of predecessors to input state of current
-            // block.
+            // Merge out states of predecessors to input state of
+            // current block.
             llvm::const_pred_iterator itPred = llvm::pred_begin(itBlock),
                 itPredEnd = llvm::pred_end(itBlock);
             for (; itPred != itPredEnd; ++itPred)
@@ -295,7 +298,38 @@ void Interpreter::insertvalue(const llvm::InsertValueInst &instruction, State &s
 
 void Interpreter::alloca_(const llvm::AllocaInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    llvm::Type *type = instruction.getAllocatedType();
+    Value *value = NULL;
+    if (type->isIntegerTy())
+        value = new Integer::Container();
+    else if (type->isPointerTy())
+        value = new Pointer::InclusionBased();
+    else
+        CANAL_DIE();
+
+    if (instruction.isArrayAllocation())
+    {
+        Array::SingleItem *array = new Array::SingleItem();
+        array->mItemValue = value;
+        value = array;
+        const llvm::Value *arraySize = instruction.getArraySize();
+        PlaceValueMap::const_iterator it = state.getGlobalVariables().find(arraySize);
+        if (it != state.getGlobalVariables().end())
+            array->mSize = it->second->clone();
+        else
+        {
+            it = state.getFunctionVariables().find(arraySize);
+            if (it != state.getFunctionVariables().end())
+                array->mSize = it->second->clone();
+            else
+                array->mSize = new Constant(llvm::cast<llvm::Constant>(arraySize));
+        }
+    }
+
+    state.addFunctionBlock(&instruction, value);
+    Pointer::InclusionBased *pointer = new Pointer::InclusionBased();
+    pointer->addStackTarget(&instruction, &instruction);
+    state.addFunctionVariable(&instruction, pointer);
 }
 
 void Interpreter::load(const llvm::LoadInst &instruction, State &state)

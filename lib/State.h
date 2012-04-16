@@ -14,58 +14,71 @@ namespace Canal {
 
 class Value;
 
-// llvm::Value represents an output from an instruction
-// (llvm::Instruction), or some global value (llvm::Constant).
-typedef std::map<const llvm::Value*, Value*> VariablesMap;
-typedef std::vector<Value*> MemoryBlockList;
+// llvm::Value represents a place in the program (an instruction,
+// instance of llvm::Instruction).
+typedef std::map<const llvm::Value*, Value*> PlaceValueMap;
 
 // Includes global variables and heap.
 // Includes function-level memory and variables (=stack).
 class State
 {
 public:
+    State();
+    State(const State &state);
+    virtual ~State();
+
+    State &operator=(const State &state);
+
+    bool operator==(const State &state) const;
+    bool operator!=(const State &state) const;
+
+    void clear();
+
+    void merge(const State &state);
+
+    void addGlobalVariable(const llvm::Value *instruction, Value *value);
+    void addFunctionVariable(const llvm::Value *instruction, Value *value);
+
+    void addGlobalBlock(const llvm::Value *instruction, Value *value);
+    void addFunctionBlock(const llvm::Value *instruction, Value *value);
+
+    const PlaceValueMap &getGlobalVariables() const { return mGlobalVariables; }
+    const PlaceValueMap &getGlobalBlocks() const { return mGlobalBlocks; }
+    const PlaceValueMap &getFunctionVariables() const { return mFunctionVariables; }
+    const PlaceValueMap &getFunctionBlocks() const { return mFunctionBlocks; }
+
+protected:
     // The key (llvm::Value*) is not owned by this class.  It is not
     // deleted.  The value (Value*) memory is owned by this
     // class, so it is deleted in state destructor.
-    VariablesMap mGlobalVariables;
+    PlaceValueMap mGlobalVariables;
 
     // Nameless memory/values allocated on the heap.  It's referenced
     // either by a pointer somewhere on a stack, by a global variable,
     // or by another Block or stack Block.
     //
-    // The members of the list are owned by this class, so they are
-    // deleted in the state destructor.
-    MemoryBlockList mGlobalBlocks;
+    // The keys are not owned by this class.  They represent the place
+    // where the block has been allocated.  The values are owned by
+    // this class, so they are deleted in the state destructor.
+    PlaceValueMap mGlobalBlocks;
 
-    // The value pointer does _not_ point to StackBlocks! To connect
-    // with a StackBlocks item, create an AbstractPointer value object
-    // which contains a pointer to a StackBlocks item.
+    // The value pointer does _not_ point to mFunctionBlocks! To connect
+    // with a mFunctionBlocks item, create a Pointer object that
+    // contains a pointer to a StackBlocks item.
     //
     // The key (llvm::Value*) is not owned by this class.  It is not
     // deleted.  The value (Value*) memory is owned by this
     // class, so it is deleted in state destructor.
-    VariablesMap mFunctionVariables;
+    PlaceValueMap mFunctionVariables;
 
-    // Nameless memory/values allocated on the stack.  It's referenced
-    // either by a pointer in StackVariables or GlobalVariables, or by
-    // another Block or heap Block.
+    // Nameless memory/values allocated on the stack.  The values are
+    // referenced either by a pointer in mFunctionVariables or
+    // mGlobalVariables, or by another item in mFunctionBlocks or
+    // mGlobalBlocks.
     //
     // The members of the list are owned by this class, so they are
     // deleted in the state destructor.
-    MemoryBlockList mFunctionBlocks;
-
-    State();
-    State(const State &rhs);
-    virtual ~State();
-
-    State &operator=(const State &rhs);
-
-    bool operator==(const State &rhs) const;
-    bool operator!=(const State &rhs) const;
-
-    void clear();
-
-    void merge(const State &state);
+    PlaceValueMap mFunctionBlocks;
 };
 
 // Support writing of operational state to output stream.  Used for

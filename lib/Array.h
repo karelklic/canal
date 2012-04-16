@@ -1,6 +1,8 @@
 #ifndef CANAL_ARRAY_H
 #define CANAL_ARRAY_H
 
+#include "Value.h"
+
 namespace Canal {
 namespace Array {
 
@@ -18,10 +20,11 @@ public:
 
 public:
     SingleItem();
+    SingleItem(const SingleItem &singleItem);
     virtual ~SingleItem();
 
     // Implementation of Value::clone().
-    // Covariant return type -- overrides Value::clone().
+    // Covariant return type.
     virtual SingleItem *clone() const;
     // Implementation of Value::operator==().
     virtual bool operator==(const Value &value) const;
@@ -31,44 +34,6 @@ public:
     virtual size_t memoryUsage() const;
     // Implementation of Value::printToStream().
     virtual void printToStream(llvm::raw_ostream &ostream) const;
-};
-
-
-// TODO: Delete.
-class Range : public Value
-{
-public:
-    enum {
-        Ranges,
-        ContextFreeGrammar
-    } LimitType;
-
-    // When LimitType is Ranges...
-    struct SizeRange
-    {
-        int From;
-        int To;
-    };
-    std::vector<SizeRange> SizeRanges;
-    std::vector<AbstractVariable> Members;
-
-    // When LimitType is ContextFreeGrammar...
-    struct Symbol
-    {
-        // If Nonterminal is nonnegative, it is valid. Otherwise, Terminal
-        // is valid.
-        int Nonterminal;
-        char Terminal;
-    };
-
-    struct ProductionRule
-    {
-        // Nonterminal.
-        int From;
-        std::vector<Symbol> To;
-    };
-
-    std::vector<ProductionRule> ProductionRules;
 };
 
 } // namespace Array

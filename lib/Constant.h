@@ -15,7 +15,7 @@ public:
     Constant(const llvm::Constant *constant);
 
     // Implementation of Value::clone().
-    // Covariant return type -- it really overrides Value::clone().
+    // Covariant return type.
     virtual Constant* clone() const;
     // Implementation of Value::operator==().
     virtual bool operator==(const Value &value) const;

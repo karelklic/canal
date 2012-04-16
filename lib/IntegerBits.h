@@ -30,18 +30,21 @@ public:
     // Initializes to the lowest value.
     Bits();
 
-    virtual bool operator==(const Value& value) const;
-
+    // Implementation of Value::clone().
     // Covariant return type -- overrides Value::clone().
     virtual Bits *clone() const;
-
+    // Implementation of Value::operator==().
+    virtual bool operator==(const Value& value) const;
+    // Implementation of Value::merge().
     virtual void merge(const Value &value);
+    // Implementation of Value::memoryUsage().
+    virtual size_t memoryUsage() const;
+    // Implementation of Value::printToStream().
+    virtual void printToStream(llvm::raw_ostream &ostream) const;
 
     virtual float accuracy() const;
     virtual bool isBottom() const;
     virtual void setTop();
-
-    virtual void printToStream(llvm::raw_ostream &ostream) const;
 
     void and_(const Value &a, const Value &b);
     void or_(const Value &a, const Value &b);

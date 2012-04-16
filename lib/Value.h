@@ -54,22 +54,6 @@ public:
 llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
                               const Value &value);
 
-
-// Base class for abstract states that require to know not just its
-// own value, but the complete state where they belong to.  This is
-// currently used for pointers, as pointers point to other objects.
-class StateValue
-{
-public:
-    StateValue() : mState(NULL) {}
-
-    State *getState() const { return mState; }
-    void setState(State *state) { mState = state; }
-
-protected:
-    State *mState;
-};
-
 // Base class for abstract states that can inform about accuracy.
 class AccuracyValue
 {

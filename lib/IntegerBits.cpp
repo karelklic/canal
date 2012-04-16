@@ -17,14 +17,14 @@ bool Bits::operator==(const Value& value) const
 
 Bits *Bits::clone() const
 {
-    return new Bits<T>(*this);
+    return new Bits(*this);
 }
 
 void Bits::merge(const Value &value)
 {
-    const Bits &other = dynamic_cast<const Bits&>(value);
-    mBits0 |= other.mBits0;
-    mBits1 |= other.mBits1;
+    const Bits &bits = dynamic_cast<const Bits&>(value);
+    mBits0 |= bits.mBits0;
+    mBits1 |= bits.mBits1;
 }
 
 float Bits::accuracy() const
@@ -45,6 +45,7 @@ void Bits::setTop()
 
 void Bits::printToStream(llvm::raw_ostream &ostream) const
 {
+    ostream << "Integer::Bits("
     for (int pos = 0; pos < sizeof(T) * 8; ++pos)
     {
         if (hasBit(pos))
@@ -52,6 +53,7 @@ void Bits::printToStream(llvm::raw_ostream &ostream) const
         else
             ostream << (this->getBit(pos) ? '_' : '?');
     }
+    ostream << ")";
 }
 
 void Bits::and_(const Value &a, const Value &b)
@@ -79,7 +81,7 @@ void Bits::xor_(const Value &a, const Value &b)
     const Bits &aa = dynamic_cast<const Bits&>(a),
         &bb = dynamic_cast<const Bits&>(b);
 
-    // First digit is mBits1, second is mBits0
+    // First number in a pair is mBits1, second is mBits0
     // 00 xor 00 = 00
     // 00 xor 01 = 00
     // 00 xor 10 = 10
@@ -95,18 +97,18 @@ void Bits::xor_(const Value &a, const Value &b)
 
 bool Bits::hasBit(const unsigned int pos) const
 {
-    return (this->Bits0 & (1 << pos)) xor (this->Bits1 & (1 << pos));
+    return (mBits0 & (1 << pos)) xor (mBits1 & (1 << pos));
 }
 
 bool Bits::getBit(const unsigned int pos) const
 {
-    return (this->Bits0 & (1 << pos) ? 0 : 1);
+    return (mBits0 & (1 << pos) ? 0 : 1);
 }
 
 void Bits::setBit(const unsigned int pos, const bool bit)
 {
-    T &where = (bit ? this->Bits1 : this->Bits0);
-    T &other = (bit ? this->Bits0 : this->Bits1);
+    llvm::APInt &where = (bit ? mBits1 : mBits0);
+    llvm::APInt &other = (bit ? mBits0 : mBits1);
     where |= 1 << pos;
     other &= ~(1 << pos);
 }
@@ -114,7 +116,7 @@ void Bits::setBit(const unsigned int pos, const bool bit)
 unsigned Bits::bitcount() const
 {
     unsigned ret = 0;
-    for (unsigned i = 0; i < sizeof(T) * 8; i ++)
+    for (unsigned i = 0; i < mBits0.getBitWidth(); ++i)
         ret += (unsigned)hasBit(i);
     return ret;
 }
