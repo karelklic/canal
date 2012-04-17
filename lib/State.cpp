@@ -155,6 +155,19 @@ void State::addFunctionBlock(const llvm::Value *instruction, Value *value)
     replaceOrInsertMapItem(mFunctionBlocks, instruction, value);
 }
 
+Value *State::findVariable(const llvm::Value *place) const
+{
+    PlaceValueMap::const_iterator it = mGlobalVariables.find(place);
+    if (it != mGlobalVariables.end())
+        return it->second;
+
+    it = mFunctionVariables.find(place);
+    if (it != mFunctionVariables.end())
+        return it->second;
+
+    return NULL;
+}
+
 llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
 			      const State &state)
 {

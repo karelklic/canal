@@ -331,18 +331,66 @@ void Interpreter::alloca_(const llvm::AllocaInst &instruction, State &state)
 
     state.addFunctionBlock(&instruction, value);
     Pointer::InclusionBased *pointer = new Pointer::InclusionBased();
-    pointer->addStackTarget(&instruction, &instruction);
+    pointer->addMemoryTarget(&instruction, &instruction);
     state.addFunctionVariable(&instruction, pointer);
 }
 
 void Interpreter::load(const llvm::LoadInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    // Find the pointer in the state.  If the pointer is not
+    // available, do nothing.
+    Value *variable = state.findVariable(instruction.getPointerOperand());
+    if (!variable)
+        return;
+    const Pointer::InclusionBased &pointer = dynamic_cast<const Pointer::InclusionBased&>(*variable);
+
+    // Pointer found. Merge all possible values and store the result
+    // into the state.
+    Value *mergedValue = NULL;
+    Pointer::PlaceTargetMap::const_iterator it = pointer.getTargets().begin();
+    for (; it != pointer.getTargets().end(); ++it)
+    {
+        Value *value = it->second.dereference(state);
+        if (!value)
+            continue;
+
+        if (mergedValue)
+            mergedValue->merge(*value);
+        else
+            mergedValue = value->clone();
+    }
+
+    if (!mergedValue)
+        return;
+
+    state.addFunctionVariable(&instruction, mergedValue);
 }
 
 void Interpreter::store(const llvm::StoreInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    // Find the pointer in the state.  If the pointer is not
+    // available, do nothing.
+    Value *variable = state.findVariable(instruction.getPointerOperand());
+    if (!variable)
+        return;
+    const Pointer::InclusionBased &pointer = dynamic_cast<const Pointer::InclusionBased&>(*variable);
+
+    // Find the variable in the state.  Merge the provided value into
+    // all targets.
+    Value *value = state.findVariable(instruction.getValueOperand());
+    // TODO: Handle constants.
+    if (!value)
+        return;
+
+    Pointer::PlaceTargetMap::const_iterator it = pointer.getTargets().begin();
+    for (; it != pointer.getTargets().end(); ++it)
+    {
+        Value *dest = it->second.dereference(state);
+        if (!dest)
+            continue;
+
+        dest->merge(*value);
+    }
 }
 
 void Interpreter::fence(const llvm::FenceInst &instruction, State &state)

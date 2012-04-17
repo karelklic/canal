@@ -27,8 +27,7 @@ public:
     enum Type {
         Uninitialized,
         Constant,
-        GlobalBlock,
-        FunctionBlock
+        MemoryBlock
     };
 
     // Initializes the target to the Uninitialized type.
@@ -39,9 +38,13 @@ public:
     bool operator==(const Target &target) const;
     bool operator!=(const Target &target) const;
 
+    // Merge another target into this one.
     void merge(const Target &target);
 
+    // Get memory usage (used byte count) of this value.
     size_t memoryUsage() const;
+
+    Value *dereference(const State &state) const;
 
 public:
     Type mType;
@@ -56,6 +59,11 @@ public:
     // Pointer to an array if this is not NULL.
     Value *mArrayOffset;
 };
+
+// llvm::Value represents a position in the program.  It points to
+// the instruction where the target was assigned/stored to the
+// pointer.
+typedef std::map<const llvm::Value*, Target> PlaceTargetMap;
 
 // Inclusion-based flow-insensitive abstract pointer.
 class InclusionBased : public Value
@@ -74,13 +82,15 @@ public:
     virtual void printToStream(llvm::raw_ostream &ostream) const;
 
     void addConstantTarget(const llvm::Value *instruction, size_t constant);
-    void addHeapTarget(const llvm::Value *instruction, const llvm::Value *target, Value *arrayOffset = NULL);
-    void addStackTarget(const llvm::Value *instruction, const llvm::Value *target, Value *arrayOffset = NULL);
+    void addMemoryTarget(const llvm::Value *instruction, const llvm::Value *target, Value *arrayOffset = NULL);
+
+    const PlaceTargetMap &getTargets() const { return mTargets; }
 
 protected:
-    // llvm::Value represents a position in the program. It points to
-    // the instruction of origin.
-    std::map<const llvm::Value*, Target> mTargets;
+    // llvm::Value represents a position in the program.  It points to
+    // the instruction where the target was assigned/stored to the
+    // pointer.
+    PlaceTargetMap mTargets;
 };
 
 } // namespace Pointer

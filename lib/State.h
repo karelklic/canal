@@ -47,6 +47,11 @@ public:
     const PlaceValueMap &getFunctionVariables() const { return mFunctionVariables; }
     const PlaceValueMap &getFunctionBlocks() const { return mFunctionBlocks; }
 
+    // Search both global and function variables for a place.  If the
+    // place is found, the variable is returned.  Otherwise NULL is
+    // returned.
+    Value *findVariable(const llvm::Value *place) const;
+
 protected:
     // The key (llvm::Value*) is not owned by this class.  It is not
     // deleted.  The value (Value*) memory is owned by this

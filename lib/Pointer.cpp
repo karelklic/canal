@@ -1,4 +1,5 @@
 #include "Pointer.h"
+#include "Array.h"
 #include "Utils.h"
 #include "State.h"
 #include <llvm/Support/raw_ostream.h>
@@ -37,11 +38,9 @@ bool Target::operator==(const Target &target) const
         return true;
     case Constant:
         return mConstant == target.mConstant;
-    case GlobalBlock:
-    case FunctionBlock:
+    case MemoryBlock:
         // Check array offset.
-        if ((mArrayOffset && !target.mArrayOffset) ||
-            (!mArrayOffset && target.mArrayOffset))
+        if (!mArrayOffset xor !target.mArrayOffset)
             return false;
 
         if (mArrayOffset && *mArrayOffset != *target.mArrayOffset)
@@ -71,8 +70,7 @@ void Target::merge(const Target &target)
         // TODO: mConstant can be abstract value.
         CANAL_ASSERT(mConstant == target.mConstant);
         break;
-    case GlobalBlock:
-    case FunctionBlock:
+    case MemoryBlock:
         if (mArrayOffset)
         {
             if (target.mArrayOffset)
@@ -95,6 +93,29 @@ size_t Target::memoryUsage() const
     return sizeof(Target) + (mArrayOffset ? mArrayOffset->memoryUsage() : 0);
 }
 
+Value *Target::dereference(const State &state) const
+{
+    switch (mType)
+    {
+    case Uninitialized:
+    case Constant:
+        return NULL;
+    case MemoryBlock:
+    {
+        Value *variable = state.findVariable(mInstruction);
+        if (!variable)
+            return NULL;
+        if (!mArrayOffset)
+            return variable;
+        // Do not care about offsets when lacking better array.
+        const Array::SingleItem &array = dynamic_cast<const Array::SingleItem&>(*variable);
+        return array.mItemValue;
+    }
+    default:
+        CANAL_DIE();
+    }
+}
+
 InclusionBased* InclusionBased::clone() const
 {
     return new InclusionBased(*this);
@@ -102,7 +123,7 @@ InclusionBased* InclusionBased::clone() const
 
 bool InclusionBased::operator==(const Value &value) const
 {
-    // Check if rhs has the same type.
+    // Check if the value has the same type.
     const InclusionBased *pointer = dynamic_cast<const InclusionBased*>(&value);
     if (!pointer)
         return false;
@@ -112,7 +133,7 @@ bool InclusionBased::operator==(const Value &value) const
         return false;
 
     // Check the targets.
-    std::map<const llvm::Value*, Target>::const_iterator it1 = pointer->mTargets.begin(),
+    PlaceTargetMap::const_iterator it1 = pointer->mTargets.begin(),
         it2 = mTargets.begin();
     for (; it2 != mTargets.end(); ++it1, ++it2)
     {
@@ -126,10 +147,10 @@ bool InclusionBased::operator==(const Value &value) const
 void InclusionBased::merge(const Value &value)
 {
     const InclusionBased &vv = dynamic_cast<const InclusionBased&>(value);
-    std::map<const llvm::Value*, Target>::const_iterator valueit = vv.mTargets.begin();
+    PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
     for (; valueit != vv.mTargets.end(); ++valueit)
     {
-        std::map<const llvm::Value*, Target>::iterator it = mTargets.find(valueit->first);
+        PlaceTargetMap::iterator it = mTargets.find(valueit->first);
         if (it == mTargets.end())
             mTargets.insert(*valueit);
         else
@@ -140,7 +161,7 @@ void InclusionBased::merge(const Value &value)
 size_t InclusionBased::memoryUsage() const
 {
     size_t size = sizeof(InclusionBased);
-    std::map<const llvm::Value*, Target>::const_iterator it = mTargets.begin();
+    PlaceTargetMap::const_iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
         size += it->second.memoryUsage();
     return size;
@@ -149,6 +170,16 @@ size_t InclusionBased::memoryUsage() const
 void InclusionBased::printToStream(llvm::raw_ostream &ostream) const
 {
     ostream << "Pointer::InclusionBased(size: " << mTargets.size() << "items)";
+}
+
+void InclusionBased::addConstantTarget(const llvm::Value *instruction, size_t constant)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void InclusionBased::addMemoryTarget(const llvm::Value *instruction, const llvm::Value *target, Value *arrayOffset /*= NULL*/)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 } // namespace Pointer
