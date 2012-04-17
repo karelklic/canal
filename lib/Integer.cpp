@@ -4,7 +4,7 @@
 namespace Canal {
 namespace Integer {
 
-Container::Container() : mBits(new Bits())
+Container::Container(unsigned numBits) : mBits(new Bits(numBits))
 {
 }
 

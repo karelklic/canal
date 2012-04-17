@@ -301,7 +301,10 @@ void Interpreter::alloca_(const llvm::AllocaInst &instruction, State &state)
     llvm::Type *type = instruction.getAllocatedType();
     Value *value = NULL;
     if (type->isIntegerTy())
-        value = new Integer::Container();
+    {
+        llvm::IntegerType &integerType = llvm::cast<llvm::IntegerType>(*type);
+        value = new Integer::Container(integerType.getBitWidth());
+    }
     else if (type->isPointerTy())
         value = new Pointer::InclusionBased();
     else

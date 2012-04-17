@@ -11,7 +11,7 @@ namespace Integer {
 class Container : public Value
 {
 public:
-    Container();
+    Container(unsigned numBits);
     Container(const Container &container);
     virtual ~Container();
 

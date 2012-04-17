@@ -28,7 +28,9 @@ public:
 
 public:
     // Initializes to the lowest value.
-    Bits();
+    Bits(unsigned numBits);
+
+    unsigned getBitWidth() const { return mBits0.getBitWidth(); }
 
     // Implementation of Value::clone().
     // Covariant return type -- overrides Value::clone().
@@ -50,7 +52,6 @@ public:
     void or_(const Value &a, const Value &b);
     void xor_(const Value &a, const Value &b);
 
-protected:
     bool hasBit(unsigned pos) const;
 
     // If this bit is set (hasBit(pos) == true), it will return its
@@ -62,6 +63,10 @@ protected:
 
     // Number of definately known bits
     unsigned bitcount() const;
+
+protected:
+    void bitOp(const Bits &a, const Bits &b, void(*fun)(bool,bool,bool&,bool&));
+
 };
 
 } // namespace Integer
