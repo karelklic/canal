@@ -378,9 +378,18 @@ void Interpreter::store(const llvm::StoreInst &instruction, State &state)
     // Find the variable in the state.  Merge the provided value into
     // all targets.
     Value *value = state.findVariable(instruction.getValueOperand());
-    // TODO: Handle constants.
+    bool deleteValue = false;
     if (!value)
-        return;
+    {
+        // Handle constants.
+        if (llvm::isa<llvm::Constant>(instruction.getValueOperand()))
+        {
+            value = new Constant(llvm::cast<llvm::Constant>(instruction.getValueOperand()));
+            deleteValue = true;
+        }
+        else
+            return;
+    }
 
     Pointer::PlaceTargetMap::const_iterator it = pointer.getTargets().begin();
     for (; it != pointer.getTargets().end(); ++it)
@@ -391,6 +400,9 @@ void Interpreter::store(const llvm::StoreInst &instruction, State &state)
 
         dest->merge(*value);
     }
+
+    if (deleteValue)
+        delete value;
 }
 
 void Interpreter::fence(const llvm::FenceInst &instruction, State &state)
