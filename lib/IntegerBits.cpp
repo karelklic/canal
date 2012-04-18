@@ -10,6 +10,10 @@ Bits::Bits(unsigned numBits) : mBits0(numBits, 0), mBits1(numBits, 0)
 {
 }
 
+Bits::Bits(const llvm::APInt &number) : mBits0(~number), mBits1(number)
+{
+}
+
 bool Bits::operator==(const Value& value) const
 {
     const Bits *other = dynamic_cast<const Bits*>(&value);

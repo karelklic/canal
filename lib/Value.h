@@ -36,14 +36,23 @@ public:
     // Implementation of instructions operating on values.
 
     virtual void add(const Value &a, const Value &b);
+    virtual void fadd(const Value &a, const Value &b);
     virtual void sub(const Value &a, const Value &b);
+    virtual void fsub(const Value &a, const Value &b);
     virtual void mul(const Value &a, const Value &b);
+    virtual void fmul(const Value &a, const Value &b);
+    // Unsigned division
+    virtual void udiv(const Value &a, const Value &b);
     // Signed division.
-    virtual void div(const Value &a, const Value &b);
-    // Signed remainder.
-    virtual void rem(const Value &a, const Value &b);
+    virtual void sdiv(const Value &a, const Value &b);
+    // Floating point division.
+    virtual void fdiv(const Value &a, const Value &b);
+    virtual void urem(const Value &a, const Value &b);
+    virtual void srem(const Value &a, const Value &b);
+    virtual void frem(const Value &a, const Value &b);
     virtual void shl(const Value &a, const Value &b);
-    virtual void shr(const Value &a, const Value &b);
+    virtual void lshr(const Value &a, const Value &b);
+    virtual void ashr(const Value &a, const Value &b);
     virtual void and_(const Value &a, const Value &b);
     virtual void or_(const Value &a, const Value &b);
     virtual void xor_(const Value &a, const Value &b);

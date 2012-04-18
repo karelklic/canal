@@ -19,7 +19,17 @@ void Value::add(const Value &a, const Value &b)
     CANAL_NOT_IMPLEMENTED();
 }
 
+void Value::fadd(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 void Value::sub(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void Value::fsub(const Value &a, const Value &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
@@ -29,12 +39,37 @@ void Value::mul(const Value &a, const Value &b)
     CANAL_NOT_IMPLEMENTED();
 }
 
-void Value::div(const Value &a, const Value &b)
+void Value::fmul(const Value &a, const Value &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
-void Value::rem(const Value &a, const Value &b)
+void Value::udiv(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void Value::sdiv(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void Value::fdiv(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void Value::urem(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void Value::srem(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void Value::frem(const Value &a, const Value &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
@@ -44,7 +79,12 @@ void Value::shl(const Value &a, const Value &b)
     CANAL_NOT_IMPLEMENTED();
 }
 
-void Value::shr(const Value &a, const Value &b)
+void Value::lshr(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void Value::ashr(const Value &a, const Value &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }

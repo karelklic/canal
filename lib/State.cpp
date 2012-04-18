@@ -4,7 +4,7 @@
 
 namespace Canal {
 
-State::State()
+State::State() : mReturnedValue(NULL)
 {
 }
 
@@ -34,6 +34,7 @@ State &State::operator=(const State &state)
     copyMap(mFunctionBlocks, state.mFunctionBlocks);
     copyMap(mGlobalVariables, state.mGlobalVariables);
     copyMap(mGlobalBlocks, state.mGlobalBlocks);
+    mReturnedValue = state.mReturnedValue ? state.mReturnedValue->clone() : NULL;
     return *this;
 }
 
@@ -74,6 +75,11 @@ bool State::operator==(const State &state) const
     if (!equalMaps(mFunctionBlocks, state.mFunctionBlocks))
         return false;
 
+    if (!mReturnedValue xor !state.mReturnedValue)
+        return false;
+    if (mReturnedValue && *mReturnedValue != *state.mReturnedValue)
+        return false;
+
     return true;
 }
 
@@ -97,6 +103,8 @@ void State::clear()
     clearMap(mFunctionBlocks);
     clearMap(mGlobalVariables);
     clearMap(mGlobalBlocks);
+    delete mReturnedValue;
+    mReturnedValue = NULL;
 }
 
 // Merges map2 into map1.
@@ -121,6 +129,14 @@ void State::merge(const State &state)
     mergeMaps(mFunctionBlocks, state.mFunctionBlocks);
     mergeMaps(mGlobalVariables, state.mGlobalVariables);
     mergeMaps(mGlobalBlocks, state.mGlobalBlocks);
+
+    if (mReturnedValue)
+    {
+        if (state.mReturnedValue)
+            mReturnedValue->merge(*state.mReturnedValue);
+    }
+    else if (state.mReturnedValue)
+        mReturnedValue = state.mReturnedValue->clone();
 }
 
 static void replaceOrInsertMapItem(PlaceValueMap &map, const llvm::Value *instruction, Value *value)

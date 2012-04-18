@@ -1,4 +1,6 @@
 #include "Constant.h"
+#include "Integer.h"
+#include "Utils.h"
 #include <llvm/Constants.h>
 #include <llvm/Support/raw_ostream.h>
 
@@ -41,6 +43,14 @@ bool Constant::isAPInt() const
 const llvm::APInt &Constant::getAPInt() const
 {
     return llvm::cast<llvm::ConstantInt>(mConstant)->getValue();
+}
+
+Value *Constant::toModifiableValue() const
+{
+    if (isAPInt())
+        return new Integer::Container(getAPInt());
+    else
+        CANAL_DIE();
 }
 
 } // namespace Canal

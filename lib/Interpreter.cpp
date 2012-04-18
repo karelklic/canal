@@ -148,22 +148,51 @@ void Interpreter::interpretInstruction(const llvm::Instruction &instruction, Sta
 
 void Interpreter::ret(const llvm::ReturnInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    llvm::Value *value = instruction.getReturnValue();
+    Value *variable = state.findVariable(value);
+    // It might happen that the variable is not found in state,
+    // because the function has not yet reached fixpoint.
+    if (variable)
+    {
+        if (state.mReturnedValue)
+            state.mReturnedValue->merge(*variable);
+        else
+            state.mReturnedValue = variable->clone();
+    }
+    else if (llvm::isa<llvm::Constant>(value))
+    {
+        if (state.mReturnedValue)
+        {
+            // If the returned value is constant, convert it to
+            // something that can merge other values.
+            Constant *constant = dynamic_cast<Constant*>(state.mReturnedValue);
+            if (constant)
+            {
+                state.mReturnedValue = constant->toModifiableValue();
+                delete constant;
+            }
+
+            Constant c(llvm::cast<llvm::Constant>(value));
+            state.mReturnedValue->merge(c);
+        }
+        else
+            state.mReturnedValue = new Constant(llvm::cast<llvm::Constant>(value));
+    }
 }
 
 void Interpreter::br(const llvm::BranchInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    // Ignore.
 }
 
 void Interpreter::switch_(const llvm::SwitchInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    // Ignore.
 }
 
 void Interpreter::indirectbr(const llvm::IndirectBrInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    // Ignore.
 }
 
 void Interpreter::invoke(const llvm::InvokeInst &instruction, State &state)
@@ -181,9 +210,45 @@ void Interpreter::unreachable(const llvm::UnreachableInst &instruction, State &s
     CANAL_NOT_IMPLEMENTED();
 }
 
+static Value *
+variableOrConstant(const llvm::Value &value, State &state, Constant &constant)
+{
+    if (llvm::isa<llvm::Constant>(value))
+    {
+        constant.mConstant = llvm::cast<llvm::Constant>(&value);
+        return &constant;
+    }
+
+    // Either NULL or existing variable.
+    return state.findVariable(&value);
+}
+
+static void
+integerBinaryOperation(const llvm::BinaryOperator &instruction, State &state, void(Value::*operation)(const Value&, const Value&))
+{
+    // Find operands in state, and encapsulate constant operands (such
+    // as numbers).  If some operand is not known, exit.
+    Constant constants[2];
+    Value *values[2] = {
+        variableOrConstant(*instruction.getOperand(0), state, constants[0]),
+        variableOrConstant(*instruction.getOperand(1), state, constants[1])
+    };
+    if (!values[0] || !values[1])
+        return;
+
+    // Create result value of required type.
+    llvm::Type *type = instruction.getType();
+    if (!type->isIntegerTy())
+        CANAL_NOT_IMPLEMENTED();
+    llvm::IntegerType *integerType = llvm::cast<llvm::IntegerType>(type);
+    Integer::Container *result = new Integer::Container(integerType->getBitWidth());
+    ((result)->*(operation))(*values[0], *values[1]);
+    state.addFunctionVariable(&instruction, result);
+}
+
 void Interpreter::add(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::add);
 }
 
 void Interpreter::fadd(const llvm::BinaryOperator &instruction, State &state)
@@ -193,7 +258,7 @@ void Interpreter::fadd(const llvm::BinaryOperator &instruction, State &state)
 
 void Interpreter::sub(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::sub);
 }
 
 void Interpreter::fsub(const llvm::BinaryOperator &instruction, State &state)
@@ -203,7 +268,7 @@ void Interpreter::fsub(const llvm::BinaryOperator &instruction, State &state)
 
 void Interpreter::mul(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::sub);
 }
 
 void Interpreter::fmul(const llvm::BinaryOperator &instruction, State &state)
@@ -213,12 +278,12 @@ void Interpreter::fmul(const llvm::BinaryOperator &instruction, State &state)
 
 void Interpreter::udiv(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::udiv);
 }
 
 void Interpreter::sdiv(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::sdiv);
 }
 
 void Interpreter::fdiv(const llvm::BinaryOperator &instruction, State &state)
@@ -228,12 +293,12 @@ void Interpreter::fdiv(const llvm::BinaryOperator &instruction, State &state)
 
 void Interpreter::urem(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::urem);
 }
 
 void Interpreter::srem(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::srem);
 }
 
 void Interpreter::frem(const llvm::BinaryOperator &instruction, State &state)
@@ -243,32 +308,32 @@ void Interpreter::frem(const llvm::BinaryOperator &instruction, State &state)
 
 void Interpreter::shl(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::shl);
 }
 
 void Interpreter::lshr(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::lshr);
 }
 
 void Interpreter::ashr(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::ashr);
 }
 
 void Interpreter::and_(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::and_);
 }
 
 void Interpreter::or_(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::or_);
 }
 
 void Interpreter::xor_(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    integerBinaryOperation(instruction, state, &Value::xor_);
 }
 
 void Interpreter::extractelement(const llvm::ExtractElementInst &instruction, State &state)

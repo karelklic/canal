@@ -8,6 +8,10 @@ Container::Container(unsigned numBits) : mBits(new Bits(numBits))
 {
 }
 
+Container::Container(const llvm::APInt &number) : mBits(new Bits(number))
+{
+}
+
 Container::Container(const Container &container)
 {
     mBits = container.mBits;

@@ -29,6 +29,8 @@ public:
 public:
     // Initializes to the lowest value.
     Bits(unsigned numBits);
+    // Initializes to the given value.
+    Bits(const llvm::APInt &number);
 
     unsigned getBitWidth() const { return mBits0.getBitWidth(); }
 

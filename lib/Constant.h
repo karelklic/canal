@@ -10,10 +10,12 @@ namespace llvm {
 
 namespace Canal {
 
+class Value;
+
 class Constant : public Value
 {
 public:
-    Constant(const llvm::Constant *constant);
+    Constant(const llvm::Constant *constant = NULL);
 
     // Implementation of Value::clone().
     // Covariant return type.
@@ -30,7 +32,11 @@ public:
     // Returns number for integer constant.
     const llvm::APInt &getAPInt() const;
 
-protected:
+    // Creates a modifiable value from the constant.  Caller is
+    // responsible for releasing its memory.
+    Value *toModifiableValue() const;
+
+public:
     const llvm::Constant *mConstant;
 };
 

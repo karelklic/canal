@@ -84,6 +84,10 @@ protected:
     // The members of the list are owned by this class, so they are
     // deleted in the state destructor.
     PlaceValueMap mFunctionBlocks;
+
+public:
+    // Value returned from function.
+    Value *mReturnedValue;
 };
 
 // Support writing of operational state to output stream.  Used for
