@@ -56,12 +56,12 @@ public:
 
     // If this bit is set (hasBit(pos) == true), it will return its
     // value.  Otherwise it will return 0 if it can represent both
-    // values, 1 if unset
+    // values, 1 if unset.
     bool getBit(unsigned pos) const;
 
     void setBit(unsigned pos, bool bit);
 
-    // Number of definately known bits
+    // Number of definitely known bits.
     unsigned bitcount() const;
 
 protected:

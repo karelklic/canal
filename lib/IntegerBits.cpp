@@ -1,4 +1,5 @@
 #include "IntegerBits.h"
+#include "Constant.h"
 #include "Utils.h"
 #include <llvm/Support/raw_ostream.h>
 
@@ -24,6 +25,13 @@ Bits *Bits::clone() const
 
 void Bits::merge(const Value &value)
 {
+    const Constant *constant = dynamic_cast<const Constant*>(&value);
+    if (constant)
+    {
+        CANAL_ASSERT(constant->isAPInt());
+        mBits1 |= constant->getAPInt();
+    }
+
     const Bits &bits = dynamic_cast<const Bits&>(value);
     mBits0 |= bits.mBits0;
     mBits1 |= bits.mBits1;

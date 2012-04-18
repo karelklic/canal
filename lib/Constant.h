@@ -5,6 +5,7 @@
 
 namespace llvm {
     class Constant;
+    class APInt;
 }
 
 namespace Canal {
@@ -23,6 +24,11 @@ public:
     virtual size_t memoryUsage() const;
     // Implementation of Value::printToStream().
     virtual void printToStream(llvm::raw_ostream &ostream) const;
+
+    // Checks if this constant is an integer number.
+    bool isAPInt() const;
+    // Returns number for integer constant.
+    const llvm::APInt &getAPInt() const;
 
 protected:
     const llvm::Constant *mConstant;

@@ -1,5 +1,5 @@
 #include "Constant.h"
-#include <llvm/Constant.h>
+#include <llvm/Constants.h>
 #include <llvm/Support/raw_ostream.h>
 
 namespace Canal {
@@ -31,6 +31,16 @@ size_t Constant::memoryUsage() const
 void Constant::printToStream(llvm::raw_ostream &ostream) const
 {
     ostream << "Constant(" << *mConstant << ")";
+}
+
+bool Constant::isAPInt() const
+{
+    return llvm::isa<llvm::ConstantInt>(mConstant);
+}
+
+const llvm::APInt &Constant::getAPInt() const
+{
+    return llvm::cast<llvm::ConstantInt>(mConstant)->getValue();
 }
 
 } // namespace Canal
