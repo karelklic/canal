@@ -4,6 +4,8 @@ libcanal_la_SOURCES = \
 	Array.cpp \
 	Constant.h \
 	Constant.cpp \
+	Float.h \
+	Float.cpp \
 	Integer.h \
 	Integer.cpp \
 	IntegerBits.h \
@@ -14,7 +16,6 @@ libcanal_la_SOURCES = \
 	Interpreter.cpp \
 	Pointer.h \
 	Pointer.cpp \
-	Real.h \
 	SELinuxModulePass.cpp \
 	State.h \
 	State.cpp \

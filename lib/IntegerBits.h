@@ -2,7 +2,7 @@
 #define CANAL_INTEGER_BITS_H
 
 #include "Value.h"
-#include <llvm/Constants.h>
+#include <llvm/ADT/APInt.h>
 
 namespace Canal {
 namespace Integer {
@@ -33,7 +33,7 @@ public:
     unsigned getBitWidth() const { return mBits0.getBitWidth(); }
 
     // Implementation of Value::clone().
-    // Covariant return type -- overrides Value::clone().
+    // Covariant return type.
     virtual Bits *clone() const;
     // Implementation of Value::operator==().
     virtual bool operator==(const Value& value) const;
