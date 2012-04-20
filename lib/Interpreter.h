@@ -96,9 +96,7 @@ public:
     //   returned object.  This function does not delete memory
     //   referenced by result, the pointer is just overwritten.
     virtual void interpretFunction(const llvm::Function &function,
-                                   State &state,
-                                   const std::vector<Value*> &arguments,
-                                   Value *&result);
+                                   State &state);
 
     // Interprets function blocks.  This is called by
     // interpretFunction.
