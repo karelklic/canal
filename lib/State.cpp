@@ -18,7 +18,8 @@ State::~State()
     clear();
 }
 
-static void copyMap(PlaceValueMap &destination, const PlaceValueMap &source)
+static void
+copyMap(PlaceValueMap &destination, const PlaceValueMap &source)
 {
     destination = source;
     PlaceValueMap::iterator it = destination.begin(),
@@ -27,7 +28,8 @@ static void copyMap(PlaceValueMap &destination, const PlaceValueMap &source)
         it->second = it->second->clone();
 }
 
-State &State::operator=(const State &state)
+State &
+State::operator=(const State &state)
 {
     clear();
     copyMap(mFunctionVariables, state.mFunctionVariables);
@@ -38,7 +40,8 @@ State &State::operator=(const State &state)
     return *this;
 }
 
-static bool equalMaps(const PlaceValueMap &map1, const PlaceValueMap &map2)
+static bool
+equalMaps(const PlaceValueMap &map1, const PlaceValueMap &map2)
 {
     PlaceValueMap::const_iterator it2 = map2.begin(),
         it2end = map2.end();
@@ -54,7 +57,8 @@ static bool equalMaps(const PlaceValueMap &map1, const PlaceValueMap &map2)
     return true;
 }
 
-bool State::operator==(const State &state) const
+bool
+State::operator==(const State &state) const
 {
     // Quickly compare sizes.
     if (mGlobalVariables.size() != state.mGlobalVariables.size())
@@ -83,12 +87,14 @@ bool State::operator==(const State &state) const
     return true;
 }
 
-bool State::operator!=(const State &state) const
+bool
+State::operator!=(const State &state) const
 {
     return !operator==(state);
 }
 
-static void clearMap(PlaceValueMap &map)
+static void
+clearMap(PlaceValueMap &map)
 {
     PlaceValueMap::const_iterator it = map.begin(),
         itend = map.end();
@@ -97,18 +103,26 @@ static void clearMap(PlaceValueMap &map)
     map.clear();
 }
 
-void State::clear()
+void
+State::clear()
+{
+    clearFunctionLevel();
+    clearMap(mGlobalVariables);
+    clearMap(mGlobalBlocks);
+}
+
+void
+State::clearFunctionLevel()
 {
     clearMap(mFunctionVariables);
     clearMap(mFunctionBlocks);
-    clearMap(mGlobalVariables);
-    clearMap(mGlobalBlocks);
     delete mReturnedValue;
     mReturnedValue = NULL;
 }
 
 // Merges map2 into map1.
-static void mergeMaps(PlaceValueMap &map1, const PlaceValueMap &map2)
+static void
+mergeMaps(PlaceValueMap &map1, const PlaceValueMap &map2)
 {
     PlaceValueMap::const_iterator it2 = map2.begin(),
         it2end = map2.end();
@@ -123,7 +137,8 @@ static void mergeMaps(PlaceValueMap &map1, const PlaceValueMap &map2)
     }
 }
 
-void State::merge(const State &state)
+void
+State::merge(const State &state)
 {
     mergeMaps(mFunctionVariables, state.mFunctionVariables);
     mergeMaps(mFunctionBlocks, state.mFunctionBlocks);
@@ -139,53 +154,68 @@ void State::merge(const State &state)
         mReturnedValue = state.mReturnedValue->clone();
 }
 
-static void replaceOrInsertMapItem(PlaceValueMap &map, const llvm::Value *instruction, Value *value)
+void
+State::mergeGlobalLevel(const State &state)
 {
-    PlaceValueMap::iterator it = map.find(instruction);
+    mergeMaps(mGlobalVariables, state.mGlobalVariables);
+    mergeMaps(mGlobalBlocks, state.mGlobalBlocks);
+}
+
+static void
+replaceOrInsertMapItem(PlaceValueMap &map,
+                       const llvm::Value &place,
+                       Value *value)
+{
+    PlaceValueMap::iterator it = map.find(&place);
     if (it != map.end())
     {
         delete it->second;
         it->second = value;
     }
     else
-        map.insert(std::pair<const llvm::Value*, Value*>(instruction, value));
+        map.insert(std::pair<const llvm::Value*, Value*>(&place, value));
 }
 
-void State::addGlobalVariable(const llvm::Value *instruction, Value *value)
+void State::addGlobalVariable(const llvm::Value &place, Value *value)
 {
-    replaceOrInsertMapItem(mGlobalVariables, instruction, value);
+    replaceOrInsertMapItem(mGlobalVariables, place, value);
 }
 
-void State::addFunctionVariable(const llvm::Value *instruction, Value *value)
+void
+State::addFunctionVariable(const llvm::Value &place, Value *value)
 {
-    replaceOrInsertMapItem(mFunctionVariables, instruction, value);
+    replaceOrInsertMapItem(mFunctionVariables, place, value);
 }
 
-void State::addGlobalBlock(const llvm::Value *instruction, Value *value)
+void
+State::addGlobalBlock(const llvm::Value &place, Value *value)
 {
-    replaceOrInsertMapItem(mGlobalBlocks, instruction, value);
+    replaceOrInsertMapItem(mGlobalBlocks, place, value);
 }
 
-void State::addFunctionBlock(const llvm::Value *instruction, Value *value)
+void
+State::addFunctionBlock(const llvm::Value &place, Value *value)
 {
-    replaceOrInsertMapItem(mFunctionBlocks, instruction, value);
+    replaceOrInsertMapItem(mFunctionBlocks, place, value);
 }
 
-Value *State::findVariable(const llvm::Value *place) const
+Value *
+State::findVariable(const llvm::Value &place) const
 {
-    PlaceValueMap::const_iterator it = mGlobalVariables.find(place);
+    PlaceValueMap::const_iterator it = mGlobalVariables.find(&place);
     if (it != mGlobalVariables.end())
         return it->second;
 
-    it = mFunctionVariables.find(place);
+    it = mFunctionVariables.find(&place);
     if (it != mFunctionVariables.end())
         return it->second;
 
     return NULL;
 }
 
-llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
-			      const State &state)
+llvm::raw_ostream&
+operator<<(llvm::raw_ostream& ostream,
+           const State &state)
 {
     ostream << "State(function variables: "
             << state.getFunctionVariables().size()

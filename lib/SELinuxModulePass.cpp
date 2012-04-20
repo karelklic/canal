@@ -15,9 +15,9 @@ public:
   {
   }
 
-  virtual bool runOnModule(llvm::Module &M)
+  virtual bool runOnModule(llvm::Module &module)
   {
-    const llvm::Function *main = M.getFunction("main");
+    const llvm::Function *main = module.getFunction("main");
     if (!main)
       return false;
 

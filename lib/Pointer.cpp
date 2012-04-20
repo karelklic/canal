@@ -102,7 +102,7 @@ Value *Target::dereference(const State &state) const
         return NULL;
     case MemoryBlock:
     {
-        Value *variable = state.findVariable(mInstruction);
+        Value *variable = state.findVariable(*mInstruction);
         if (!variable)
             return NULL;
         if (!mArrayOffset)
