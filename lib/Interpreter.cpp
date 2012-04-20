@@ -5,6 +5,7 @@
 #include "Integer.h"
 #include "Pointer.h"
 #include "Array.h"
+#include "Float.h"
 #include "Constant.h"
 #include <llvm/Function.h>
 #include <llvm/BasicBlock.h>
@@ -224,7 +225,7 @@ variableOrConstant(const llvm::Value &value, State &state, Constant &constant)
 }
 
 static void
-integerBinaryOperation(const llvm::BinaryOperator &instruction, State &state, void(Value::*operation)(const Value&, const Value&))
+binaryOperation(const llvm::BinaryOperator &instruction, State &state, void(Value::*operation)(const Value&, const Value&))
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.
@@ -238,102 +239,130 @@ integerBinaryOperation(const llvm::BinaryOperator &instruction, State &state, vo
 
     // Create result value of required type.
     llvm::Type *type = instruction.getType();
-    if (!type->isIntegerTy())
+    Value *result = NULL;
+    if (type->isIntegerTy())
+    {
+        llvm::IntegerType *integerType = llvm::cast<llvm::IntegerType>(type);
+        result = new Integer::Container(integerType->getBitWidth());
+    }
+    else if (type->isFloatingPointTy())
+    {
+        const llvm::fltSemantics *semantics;
+#if LLVM_MAJOR >= 3 && LLVM_MINOR >= 1
+        if (type->isHalfTy())
+            semantics = &llvm::APFloat::IEEEhalf;
+        else
+#endif
+        if (type->isFloatTy())
+            semantics = &llvm::APFloat::IEEEsingle;
+        else if (type->isDoubleTy())
+            semantics = &llvm::APFloat::IEEEdouble;
+        else if (type->isFP128Ty())
+            semantics = &llvm::APFloat::IEEEquad;
+        else if (type->isPPC_FP128Ty())
+            semantics = &llvm::APFloat::PPCDoubleDouble;
+        else if (type->isX86_FP80Ty())
+            semantics = &llvm::APFloat::x87DoubleExtended;
+        else
+            CANAL_DIE();
+
+        result = new Float::Range(*semantics);
+    }
+    else
         CANAL_NOT_IMPLEMENTED();
-    llvm::IntegerType *integerType = llvm::cast<llvm::IntegerType>(type);
-    Integer::Container *result = new Integer::Container(integerType->getBitWidth());
+
     ((result)->*(operation))(*values[0], *values[1]);
     state.addFunctionVariable(&instruction, result);
 }
 
 void Interpreter::add(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::add);
+    binaryOperation(instruction, state, &Value::add);
 }
 
 void Interpreter::fadd(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(instruction, state, &Value::fadd);
 }
 
 void Interpreter::sub(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::sub);
+    binaryOperation(instruction, state, &Value::sub);
 }
 
 void Interpreter::fsub(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(instruction, state, &Value::fsub);
 }
 
 void Interpreter::mul(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::sub);
+    binaryOperation(instruction, state, &Value::mul);
 }
 
 void Interpreter::fmul(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(instruction, state, &Value::fmul);
 }
 
 void Interpreter::udiv(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::udiv);
+    binaryOperation(instruction, state, &Value::udiv);
 }
 
 void Interpreter::sdiv(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::sdiv);
+    binaryOperation(instruction, state, &Value::sdiv);
 }
 
 void Interpreter::fdiv(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(instruction, state, &Value::fdiv);
 }
 
 void Interpreter::urem(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::urem);
+    binaryOperation(instruction, state, &Value::urem);
 }
 
 void Interpreter::srem(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::srem);
+    binaryOperation(instruction, state, &Value::srem);
 }
 
 void Interpreter::frem(const llvm::BinaryOperator &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(instruction, state, &Value::frem);
 }
 
 void Interpreter::shl(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::shl);
+    binaryOperation(instruction, state, &Value::shl);
 }
 
 void Interpreter::lshr(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::lshr);
+    binaryOperation(instruction, state, &Value::lshr);
 }
 
 void Interpreter::ashr(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::ashr);
+    binaryOperation(instruction, state, &Value::ashr);
 }
 
 void Interpreter::and_(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::and_);
+    binaryOperation(instruction, state, &Value::and_);
 }
 
 void Interpreter::or_(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::or_);
+    binaryOperation(instruction, state, &Value::or_);
 }
 
 void Interpreter::xor_(const llvm::BinaryOperator &instruction, State &state)
 {
-    integerBinaryOperation(instruction, state, &Value::xor_);
+    binaryOperation(instruction, state, &Value::xor_);
 }
 
 void Interpreter::extractelement(const llvm::ExtractElementInst &instruction, State &state)
