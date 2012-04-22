@@ -2,6 +2,16 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = lib tests
 
+bin_PROGRAMS = canal
+canal_SOURCES = \
+	Canal.cpp \
+	Commands.h \
+	Commands.cpp
+
+# $(LIBEDIT_LIBS)
+canal_LDADD = lib/libcanal.la -lreadline -lhistory  $(LLVM_LDFLAGS) $(LLVM_LIBS) 
+canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS)
+
 EXTRA_DIST = canal.spec.in
 
 UPLOAD_URI = kklic@fedorahosted.org:canal

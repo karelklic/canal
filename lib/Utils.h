@@ -13,7 +13,7 @@
         llvm::errs() << __FILE__ << ":"                          \
                      << __LINE__ << "("                          \
                      << __FUNCTION__ << ") fatal error: "        \
-                     << msg;                                     \
+                     << msg << "\n";                             \
         exit(1);                                                 \
     }
 
@@ -23,7 +23,7 @@
         llvm::errs() << __FILE__ << ":"                          \
                      << __LINE__ << "("                          \
                      << __FUNCTION__ << ") error: "              \
-                     << msg;                                     \
+                     << msg << "\n";                             \
     }
 
 // Assertion check.  On failure, the expression is written to stderr
@@ -35,8 +35,8 @@
         llvm::errs() << __FILE__ << ":"                                 \
                      << __LINE__ << "("                                 \
                      << __FUNCTION__ << ") assert failed: "             \
-                     << #expr;                                          \
-            exit(1);                                                    \
+                     << #expr << "\n";                                  \
+        exit(1);                                                        \
     }
 
 // Assertion check.  On failuer, a message and the expression is
@@ -48,8 +48,8 @@
         llvm::errs() << __FILE__ << ":"                                 \
                      << __LINE__ << "("                                 \
                      << __FUNCTION__ << ") assert failed: "             \
-                     << msg << " [" << #expr << "]";                    \
-            exit(1);                                                    \
+                     << msg << " [" << #expr << "]\n";                  \
+        exit(1);                                                        \
     }
 
 // Termination.  The location where the program terminated is written
@@ -58,8 +58,8 @@
     {                                                                   \
         llvm::errs() << __FILE__ << ":"                                 \
                      << __LINE__ << "("                                 \
-                     << __FUNCTION__ << "): dead code location reached"; \
-            exit(1);                                                    \
+                     << __FUNCTION__ << "): dead code location reached\n"; \
+        exit(1);                                                        \
     }
 
 // Report a function or a code block that is not implemented but it
@@ -69,7 +69,7 @@
     {                                                                   \
         llvm::errs() << __FILE__ << ":"                                 \
                      << __LINE__ << "("                                 \
-                     << __FUNCTION__ << "): not implemented";           \
+                     << __FUNCTION__ << "): not implemented\n";         \
     }
 
 #endif // CANAL_UTILS_H

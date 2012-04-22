@@ -143,4 +143,41 @@ operator<<(llvm::raw_ostream& ostream, const Value &value)
     return ostream;
 }
 
+
+float
+AccuracyValue::accuracy() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+AccuracyValue::isBottom() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+AccuracyValue::setBottom()
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+AccuracyValue::isTop() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+AccuracyValue::setTop()
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+VariablePrecisionValue::limitMemoryUsage(size_t size)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 } // namespace Canal

@@ -8,27 +8,41 @@ namespace Canal {
 namespace Integer {
 
 // Abstracts integer values as a range min - max.
-template <typename T>
 class Range : public Value
 {
- public:
-  bool Empty;
+public:
+    bool mEmpty;
 
-  bool NegativeInfinity;
-  T From;
+    llvm::APInt mFrom;
+    bool mFromInfinity;
 
-  bool Infinity;
-  T To;
+    llvm::APInt mTo;
+    bool mToInfinity;
 
- public:
-  // Initializes to the lowest value.
-  Range() : Infinity(false), NegativeInfinity(false), Empty(true) {}
+public:
+    // Initializes to the lowest value.
+    Range(unsigned numBits);
 
-  // Covariant return type -- overrides AbstractValue::clone().
-  virtual Range<T> *clone() const
-  {
-    return new Range<T>(*this);
-  }
+public: // Implementation of Value.
+    // Implementation of Value::clone().
+    // Covariant return type.
+    virtual Range *clone() const;
+    // Implementation of Value::operator==().
+    virtual bool operator==(const Value& value) const;
+    // Implementation of Value::merge().
+    virtual void merge(const Value &value);
+    // Implementation of Value::memoryUsage().
+    virtual size_t memoryUsage() const;
+    // Implementation of Value::printToStream().
+    virtual void printToStream(llvm::raw_ostream &ostream) const;
+
+public: // Implementation of AccuracyValue.
+    // Implementation of AccuracyValue::accuracy().
+    virtual float accuracy() const;
+    // Implementation of AccuracyValue::isBottom().
+    virtual bool isBottom() const;
+    // Implementation of AccuracyValue::setTop().
+    virtual void setTop();
 };
 
 } // namespace Integer

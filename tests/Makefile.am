@@ -1,7 +1,7 @@
 ## --------- ##
 ## Programs. ##
 ## --------- ##
-noinst_PROGRAMS = InterpreterTest PointerTest
+#noinst_PROGRAMS = InterpreterTest PointerTest
 
 InterpreterTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
 InterpreterTest_SOURCES = InterpreterTest.cpp

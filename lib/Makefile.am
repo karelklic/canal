@@ -13,6 +13,7 @@ libcanal_la_SOURCES = \
 	IntegerEnumeration.h \
 	IntegerEnumeration.cpp \
 	IntegerRange.h \
+	IntegerRange.cpp \
 	Interpreter.h \
 	Interpreter.cpp \
 	Pointer.h \
