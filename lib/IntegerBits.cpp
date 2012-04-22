@@ -14,7 +14,14 @@ Bits::Bits(const llvm::APInt &number) : mBits0(~number), mBits1(number)
 {
 }
 
-bool Bits::operator==(const Value& value) const
+Bits *
+Bits::clone() const
+{
+    return new Bits(*this);
+}
+
+bool
+Bits::operator==(const Value& value) const
 {
     const Bits *other = dynamic_cast<const Bits*>(&value);
     if (!other)
@@ -22,18 +29,15 @@ bool Bits::operator==(const Value& value) const
     return mBits0 == other->mBits0 && mBits1 == other->mBits1;
 }
 
-Bits *Bits::clone() const
-{
-    return new Bits(*this);
-}
-
-void Bits::merge(const Value &value)
+void
+Bits::merge(const Value &value)
 {
     const Constant *constant = dynamic_cast<const Constant*>(&value);
     if (constant)
     {
         CANAL_ASSERT(constant->isAPInt());
         mBits1 |= constant->getAPInt();
+        return;
     }
 
     const Bits &bits = dynamic_cast<const Bits&>(value);
@@ -41,114 +45,99 @@ void Bits::merge(const Value &value)
     mBits1 |= bits.mBits1;
 }
 
-float Bits::accuracy() const
+size_t
+Bits::memoryUsage() const
 {
-    return 1.0 - (this->bitcount() / (float)mBits0.getBitWidth());
+    return sizeof(Bits);
 }
 
-bool Bits::isBottom() const
-{
-    return mBits0 == 0 && mBits1 == 0;
-}
-
-void Bits::setTop()
-{
-    mBits0 = mBits1 = ~0;
-}
-
-void Bits::printToStream(llvm::raw_ostream &ostream) const
+void
+Bits::printToStream(llvm::raw_ostream &ostream) const
 {
     ostream << "Integer::Bits(";
     for (int pos = 0; pos < mBits0.getBitWidth(); ++pos)
     {
-        if (hasBit(pos))
-            ostream << getBit(pos);
-        else
-            ostream << (this->getBit(pos) ? '_' : '?');
+        switch (getBitValue(pos))
+        {
+        case -1: ostream << "_"; break;
+        case  0: ostream << "0"; break;
+        case  1: ostream << "1"; break;
+        case  2: ostream << "2"; break;
+        default: CANAL_DIE();
+        }
     }
     ostream << ")";
 }
 
-static void bitAnd(bool know1, bool know2, bool &bit0, bool &bit1)
-{
-    switch ((unsigned)know1 + (unsigned)know2)
-    {
-    case 2:
-        if (bit0 && bit1)
-        {
-            bit0 = 1;
-            bit1 = 0;
-        }
-        else
-        {
-            bit0 = 0;
-            bit1 = 1;
-        }
-        break;
-    case 1:
-          if ((know1 && !bit0) || (know2 && !bit1))
-          {
-              // One of the bits is 0, so the result is 0
-              bit0 = 1; bit1 = 0;
-          }
-          else
-              bit0 = bit1 = 1;
-          break;
-    default:
-        // No info
-        bit0 = bit1 = 1;
-        break;
-    }
-}
-
-void Bits::and_(const Value &a, const Value &b)
+static void
+applyBitOperation(Bits &result, const Value &a, const Value &b, int(*operation)(int,int))
 {
     const Bits &aa = dynamic_cast<const Bits&>(a),
         &bb = dynamic_cast<const Bits&>(b);
-
-    bitOp(aa, bb, bitAnd);
-}
-
-static void bitOr(bool know1, bool know2, bool &bit0, bool &bit1)
-{
-    switch ((unsigned)know1 + (unsigned)know2)
+    CANAL_ASSERT(result.getBitWidth() == aa.getBitWidth() &&
+                 aa.getBitWidth() == bb.getBitWidth());
+    for (int pos = 0; pos < aa.getBitWidth(); ++pos)
     {
-    case 2:
-        if (bit0 || bit1)
-        {
-            bit0 = 0;
-            bit1 = 1;
-        }
-        else
-        {
-            bit0 = 1;
-            bit1 = 0;
-        }
-        break;
-    case 1:
-        if ((know1 && bit0) || (know2 && bit1))
-        {
-            // One of the bits is 1, so the result is 1
-            bit0 = 0;
-            bit1 = 1;
-        }
-        else
-            bit0 = bit1 = 1;
-        break;
-    default:
-        // No info
-        bit0 = bit1 = 1;
+        result.setBitValue(pos, operation(aa.getBitValue(pos),
+                                          bb.getBitValue(pos)));
     }
 }
 
-void Bits::or_(const Value &a, const Value &b)
+// First number in a pair is mBits1, second is mBits0
+// 00 and 00 = 00
+// 00 and 01 = 01
+// 00 and 10 = 00
+// 00 and 11 = 11
+// 10 and 01 = 01
+// 10 and 10 = 10
+// 10 and 11 = 11
+// 01 and 01 = 01
+// 01 and 11 = 01
+// 11 and 11 = 11
+static int
+bitAnd(int valueA, int valueB)
 {
-    const Bits &aa = dynamic_cast<const Bits&>(a),
-        &bb = dynamic_cast<const Bits&>(b);
-
-    bitOp(aa, bb, bitOr);
+    if (valueA == 0 || valueB == 0)
+        return 0;
+    else if (valueA == 2 || valueB == 2)
+        return 2;
+    else
+        return (valueA == -1 || valueB == -1) ? -1 : 1;
 }
 
+void
+Bits::and_(const Value &a, const Value &b)
+{
+    applyBitOperation(*this, a, b, bitAnd);
+}
+
+// First number in a pair is mBits1, second is mBits0
+// 00 or 00 = 00
+// 00 or 01 = 00
+// 00 or 10 = 10
+// 00 or 11 = 11
+// 10 or 01 = 10
+// 10 or 10 = 10
+// 10 or 11 = 10
+// 01 or 01 = 01
+// 01 or 11 = 11
+// 11 or 11 = 11
+static int
+bitOr(int valueA, int valueB)
+{
+    if ((valueA == 0 || valueA == 1) && (valueB == 0 || valueB == 1))
+        return (valueA || valueB) ? 1 : 0;
+    else if (valueA == 2 || valueB == 2)
+        return 2;
+    else
+        return (valueA == 1 || valueB == 1) ? 1 : -1;
+}
+
+void
+Bits::or_(const Value &a, const Value &b)
+{
+    applyBitOperation(*this, a, b, bitOr);
+}
 
 // First number in a pair is mBits1, second is mBits0
 // 00 xor 00 = 00
@@ -161,75 +150,82 @@ void Bits::or_(const Value &a, const Value &b)
 // 01 xor 01 = 01
 // 01 xor 11 = 11
 // 11 xor 11 = 11
-static void bitXor(bool know1, bool know2, bool &bit0, bool &bit1)
+static int
+bitXor(int valueA, int valueB)
 {
-    switch ((unsigned)know1 + (unsigned)know2)
+    if ((valueA == 0 || valueA == 1) && (valueB == 0 || valueB == 1))
+        return (valueA xor valueB) ? 1 : 0;
+    else if (valueA == 2 || valueB == 2)
+        return 2;
+    else
+        return (valueA == 1 || valueB == 1) ? 1 : -1;
+}
+
+void
+Bits::xor_(const Value &a, const Value &b)
+{
+    applyBitOperation(*this, a, b, bitXor);
+}
+
+float
+Bits::accuracy() const
+{
+    int variableBits = 0;
+    for (int pos = 0; pos < getBitWidth(); ++pos)
     {
+        if (getBitValue(pos) == 2)
+            ++variableBits;
+    }
+
+    return 1.0 - (variableBits / (float)getBitWidth());
+}
+
+bool
+Bits::isBottom() const
+{
+    return mBits0 == 0 && mBits1 == 0;
+}
+
+void
+Bits::setTop()
+{
+    mBits0 = mBits1 = ~0;
+}
+
+int
+Bits::getBitValue(unsigned pos) const
+{
+    llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
+    if ((mBits1 & bit).getBoolValue())
+        return (mBits0 & bit).getBoolValue() ? 2 : 1;
+    else
+        return (mBits0 & bit).getBoolValue() ? 0 : -1;
+}
+
+void
+Bits::setBitValue(unsigned pos, int value)
+{
+    llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
+    switch (value)
+    {
+    case -1:
+        mBits0 &= ~bit;
+        mBits1 &= ~bit;
+        break;
+    case 0:
+        mBits0 |= bit;
+        mBits1 &= ~bit;
+        break;
+    case 1:
+        mBits0 &= ~bit;
+        mBits1 |= bit;
+        break;
     case 2:
-        if (bit0 xor bit1)
-        {
-            bit0 = 0;
-            bit1 = 1;
-        }
-        else
-        {
-            bit0 = 1;
-            bit1 = 0;
-        }
+        mBits0 |= bit;
+        mBits1 |= bit;
         break;
     default:
-        // No info
-        bit0 = bit1 = 1;
-    }
-}
-
-void Bits::xor_(const Value &a, const Value &b)
-{
-    const Bits &aa = dynamic_cast<const Bits&>(a),
-        &bb = dynamic_cast<const Bits&>(b);
-    bitOp(aa, bb, bitXor);
-}
-
-bool Bits::hasBit(unsigned pos) const
-{
-    llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
-    return ((mBits0 & bit) xor (mBits1 & bit)).getBoolValue();
-}
-
-bool Bits::getBit(unsigned pos) const
-{
-    llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
-    return !(mBits0 & bit).getBoolValue();
-}
-
-void Bits::setBit(unsigned pos, bool bit)
-{
-    llvm::APInt bitpos(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
-    llvm::APInt &where = (bit ? mBits1 : mBits0);
-    llvm::APInt &other = (bit ? mBits0 : mBits1);
-    where |= bitpos;
-    other &= ~bitpos;
-}
-
-unsigned Bits::bitcount() const
-{
-    unsigned ret = 0;
-    for (unsigned i = 0; i < mBits0.getBitWidth(); ++i)
-        ret += (unsigned)hasBit(i);
-    return ret;
-}
-
-void Bits::bitOp(const Bits &a, const Bits &b, void(*fun)(bool,bool,bool&,bool&))
-{
-    CANAL_ASSERT(a.getBitWidth() == b.getBitWidth());
-    for (unsigned pos = 0; pos < a.getBitWidth(); ++pos)
-    {
-        bool b0 = a.getBit(pos), b1 = b.getBit(pos);
-        fun(a.hasBit(pos), b.hasBit(pos), b0, b1);
-        if (b0)
-            setBit(pos, 0);
-        if (b1)
-            setBit(pos, 1);
+        CANAL_DIE();
     }
 }
 

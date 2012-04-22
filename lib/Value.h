@@ -2,6 +2,7 @@
 #define CANAL_VALUE_H
 
 #include <cstddef>
+#include <llvm/Instructions.h>
 
 namespace llvm {
     class raw_ostream;
@@ -56,6 +57,8 @@ public:
     virtual void and_(const Value &a, const Value &b);
     virtual void or_(const Value &a, const Value &b);
     virtual void xor_(const Value &a, const Value &b);
+    virtual void icmp(const Value &a, const Value &b, llvm::CmpInst::Predicate predicate);
+    virtual void fcmp(const Value &a, const Value &b, llvm::CmpInst::Predicate predicate);
 };
 
 // Support writing of abstract values to output stream.  Used for

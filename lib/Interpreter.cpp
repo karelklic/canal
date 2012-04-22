@@ -255,7 +255,7 @@ Interpreter::resume(const llvm::ResumeInst &instruction, State &state)
 void
 Interpreter::unreachable(const llvm::UnreachableInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    // Ignore.
 }
 
 static void
@@ -654,28 +654,98 @@ Interpreter::bitcast(const llvm::BitCastInst &instruction, State &state)
     CANAL_NOT_IMPLEMENTED();
 }
 
+static void
+cmpOperation(const llvm::CmpInst &instruction, State &state, void(Value::*cmpOperation)(const Value&, const Value&, llvm::CmpInst::Predicate predicate))
+{
+    // Find operands in state, and encapsulate constant operands (such
+    // as numbers).  If some operand is not known, exit.
+    Constant constants[2];
+    Value *values[2] = {
+        variableOrConstant(*instruction.getOperand(0), state, constants[0]),
+        variableOrConstant(*instruction.getOperand(1), state, constants[1])
+    };
+    if (!values[0] || !values[1])
+        return;
+
+    // TODO: suppot arrays
+    Value *resultValue = new Integer::Container(1);
+    ((resultValue)->*(cmpOperation))(*values[0], *values[1], instruction.getPredicate());
+    state.addFunctionVariable(instruction, resultValue);
+}
+
 void
 Interpreter::icmp(const llvm::ICmpInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    cmpOperation(instruction, state, &Value::icmp);
 }
 
 void
 Interpreter::fcmp(const llvm::FCmpInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    cmpOperation(instruction, state, &Value::fcmp);
 }
 
 void
 Interpreter::phi(const llvm::PHINode &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    Value *mergedValue = NULL;
+    for (int i = 0; i < instruction.getNumIncomingValues(); ++i)
+    {
+        Constant c;
+        Value *value = variableOrConstant(*instruction.getIncomingValue(i), state, c);
+        if (!value)
+            continue;
+        if (mergedValue)
+            mergedValue->merge(*value);
+        else
+        {
+            Constant *constant = dynamic_cast<Constant*>(value);
+            if (constant)
+                mergedValue = constant->toModifiableValue();
+            else
+                mergedValue = value->clone();
+        }
+    }
+
+    state.addFunctionVariable(instruction, mergedValue);
 }
 
 void
 Interpreter::select(const llvm::SelectInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    Value *condition = state.findVariable(*instruction.getCondition());
+    if (!condition)
+        return;
+
+    Constant trueConstant, falseConstant;
+    Value *trueValue = variableOrConstant(*instruction.getTrueValue(), state, trueConstant);
+    Value *falseValue = variableOrConstant(*instruction.getFalseValue(), state, falseConstant);
+
+    Value *resultValue;
+    const Integer::Container &conditionInt = dynamic_cast<const Integer::Container&>(*condition);
+    CANAL_ASSERT(conditionInt.mBits->getBitWidth() == 1);
+    switch (conditionInt.mBits->getBitValue(0))
+    {
+    case -1:
+        // The condition result is undefined.  Let's wait for
+        // another iteration.
+        return;
+    case 0:
+        resultValue = falseValue->clone();
+        break;
+    case 1:
+        resultValue = trueValue->clone();
+        break;
+    case 2:
+        // Both true and false results are possible.
+        resultValue = trueValue->clone();
+        resultValue->merge(*falseValue);
+        break;
+    default:
+        CANAL_DIE();
+    }
+
+    state.addFunctionVariable(instruction, resultValue);
 }
 
 void

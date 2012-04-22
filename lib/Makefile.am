@@ -11,6 +11,7 @@ libcanal_la_SOURCES = \
 	IntegerBits.h \
 	IntegerBits.cpp \
 	IntegerEnumeration.h \
+	IntegerEnumeration.cpp \
 	IntegerRange.h \
 	Interpreter.h \
 	Interpreter.cpp \

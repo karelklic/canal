@@ -16,7 +16,7 @@ namespace Integer {
 //    1        0    The bit is set to 0
 //    0        1    The bit is set to 1
 //    1        1    The bit can be both 0 and 1 (highest lattice value - top)
-class Bits : public Value
+class Bits : public Value, public AccuracyValue
 {
 public:
     // When a bit in mBits0 is 1, the value is known to contain zero
@@ -32,8 +32,7 @@ public:
     // Initializes to the given value.
     Bits(const llvm::APInt &number);
 
-    unsigned getBitWidth() const { return mBits0.getBitWidth(); }
-
+public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.
     virtual Bits *clone() const;
@@ -46,29 +45,35 @@ public:
     // Implementation of Value::printToStream().
     virtual void printToStream(llvm::raw_ostream &ostream) const;
 
+    // Implementation of Value::and_().
+    virtual void and_(const Value &a, const Value &b);
+    // Implementation of Value::or_().
+    virtual void or_(const Value &a, const Value &b);
+    // Implementation of Value::xor_().
+    virtual void xor_(const Value &a, const Value &b);
+
+public: // Implementation of AccuracyValue.
+    // Implementation of AccuracyValue::accuracy().
     virtual float accuracy() const;
+    // Implementation of AccuracyValue::isBottom().
     virtual bool isBottom() const;
+    // Implementation of AccuracyValue::setTop().
     virtual void setTop();
 
-    void and_(const Value &a, const Value &b);
-    void or_(const Value &a, const Value &b);
-    void xor_(const Value &a, const Value &b);
+public: // Bits
+    // Return the number of bits of the represented number.
+    unsigned getBitWidth() const { return mBits0.getBitWidth(); }
 
-    bool hasBit(unsigned pos) const;
+    // Returns 0 if the bit is known to be 0.  Returns 1 if the bit is
+    // known to be 1.  Returns -1 if the bit value is unknown.
+    // Returns 2 if the bit is either 1 or 0.
+    int getBitValue(unsigned pos) const;
 
-    // If this bit is set (hasBit(pos) == true), it will return its
-    // value.  Otherwise it will return 0 if it can represent both
-    // values, 1 if unset.
-    bool getBit(unsigned pos) const;
-
-    void setBit(unsigned pos, bool bit);
-
-    // Number of definitely known bits.
-    unsigned bitcount() const;
-
-protected:
-    void bitOp(const Bits &a, const Bits &b, void(*fun)(bool,bool,bool&,bool&));
-
+    // Sets the bit.  If value is 0 or 1, the bit is set to represent
+    // exactly 0 or 1.  If value is -1, the bit is set to represent
+    // unknown value.  If value is 2, the bit is set to represent both
+    // 0 and 1.
+    void setBitValue(unsigned pos, int value);
 };
 
 } // namespace Integer

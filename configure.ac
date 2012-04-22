@@ -21,7 +21,8 @@ LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
 LLVM_CFLAGS=`$LLVM_CONFIG --cppflags | sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
 LLVM_LIBS="`$LLVM_CONFIG --libs`"
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
-CPPFLAGS=`$LLVM_CONFIG --version | sed 's/\([0-9]*\).\([0-9]*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
+# Quadrigaphs: @<:@ gives you [ and @>:@ gives you ].
+CPPFLAGS=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@>:@*\).\(@<:@0-9@>:@*\).*/-DLLVM_MAJOR=\\1 -DLLVM_MINOR=\\2/'`
 AC_SUBST([LLVM_CFLAGS])
 AC_SUBST([LLVM_LIBS])
 AC_SUBST([LLVM_LDFLAGS])

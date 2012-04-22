@@ -35,7 +35,7 @@ public:
     // Implementation of Value::printToStream().
     virtual void printToStream(llvm::raw_ostream &ostream) const;
 
-protected:
+public:
     Bits *mBits;
 };
 
