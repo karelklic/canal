@@ -35,15 +35,8 @@ AM_MISSING_PROG([AUTOM4TE], [autom4te])
 # Needed by tests/atlocal.in.
 AC_SUBST([O0CFLAGS], [`echo $CFLAGS   | sed 's/-O[[0-9]] *//'`])
 
-
 # libedit
 PKG_CHECK_MODULES(LIBEDIT, libedit)
-
-# readline
-wi_LIB_READLINE
-if test "$wi_cv_lib_readline" != yes; then
-   AC_MSG_ERROR(Cannot find readline library)
-fi
 
 AC_CONFIG_FILES([
     canal.spec

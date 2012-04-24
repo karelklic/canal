@@ -8,8 +8,7 @@ canal_SOURCES = \
 	Commands.h \
 	Commands.cpp
 
-# $(LIBEDIT_LIBS)
-canal_LDADD = lib/libcanal.la -lreadline -lhistory  $(LLVM_LDFLAGS) $(LLVM_LIBS) 
+canal_LDADD = lib/libcanal.la $(LIBEDIT_LIBS) $(LLVM_LDFLAGS) $(LLVM_LIBS) 
 canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS)
 
 EXTRA_DIST = canal.spec.in

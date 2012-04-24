@@ -612,7 +612,6 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
-LIBREADLINE
 LIBEDIT_LIBS
 LIBEDIT_CFLAGS
 PKG_CONFIG_LIBDIR
@@ -15101,7 +15100,6 @@ AUTOM4TE=${AUTOM4TE-"${am_missing_run}autom4te"}
 O0CFLAGS=`echo $CFLAGS   | sed 's/-O[0-9] *//'`
 
 
-
 # libedit
 
 
@@ -15312,102 +15310,6 @@ else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 
-fi
-
-# readline
-
-
-  ac_fn_c_check_header_mongrel "$LINENO" "readline/readline.h" "ac_cv_header_readline_readline_h" "$ac_includes_default"
-if test "x$ac_cv_header_readline_readline_h" = xyes; then :
-
-fi
-
-
-
-  if test "$ac_cv_header_readline_readline_h" = yes; then
-
-    cat > conftest.$ac_ext <<EOF
-#include <stdio.h>
-#include <readline/readline.h>
-wi_LIB_READLINE_VERSION RL_VERSION_MAJOR RL_VERSION_MINOR
-EOF
-
-    wi_READLINE_VERSION=$($CPP $CPPFLAGS conftest.$ac_ext | sed -n -e "s/^wi_LIB_READLINE_VERSION  *\([0-9\][0-9\]*\)  *\([0-9\][0-9\]*\)$/\1.\2/p")
-    rm -rf conftest*
-
-    if test -n "$wi_READLINE_VERSION"; then
-      wi_MAJOR=$(expr $wi_READLINE_VERSION : '\([0-9][0-9]*\)\.')
-      wi_MINOR=$(expr $wi_READLINE_VERSION : '[0-9][0-9]*\.\([0-9][0-9]*$\)')
-      if test $wi_MINOR -lt 10; then
-        wi_MINOR=$(expr $wi_MINOR \* 10)
-      fi
-      wi_READLINE_VERSION=$(expr $wi_MAJOR \* 100 + $wi_MINOR)
-    else
-      wi_READLINE_VERSION=-1
-    fi
-
-
-    ac_save_LIBS="$LIBS"
-    # Note: $LIBCURSES is permitted to be empty.
-
-    for LIBREADLINE in "-lreadline.dll" "-lreadline" "-lreadline $LIBCURSES" "-lreadline -ltermcap" "-lreadline -lncurses" "-lreadline -lcurses"
-    do
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GNU Readline library $LIBREADLINE" >&5
-$as_echo_n "checking for GNU Readline library $LIBREADLINE... " >&6; }
-
-      LIBS="$ac_save_LIBS $LIBREADLINE"
-
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-        /* includes */
-        #include <stdio.h>
-        #include <readline/readline.h>
-
-int
-main ()
-{
-
-        /* function-body */
-        int dummy = rl_completion_append_character; /* rl_completion_append_character appeared in version 2.1 */
-        readline(NULL);
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-
-        wi_cv_lib_readline=yes
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-else
-
-        wi_cv_lib_readline=no
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-      if test "$wi_cv_lib_readline" = yes; then
-
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBREADLINE $wi_READLINE_VERSION
-_ACEOF
-
-        break
-      fi
-    done
-
-    LIBS="$ac_save_LIBS"
-  fi
-
-if test "$wi_cv_lib_readline" != yes; then
-   as_fn_error $? "Cannot find readline library" "$LINENO" 5
 fi
 
 ac_config_files="$ac_config_files canal.spec Makefile lib/Makefile"
