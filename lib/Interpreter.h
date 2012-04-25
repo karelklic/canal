@@ -72,6 +72,8 @@ public:
     Interpreter(llvm::Module &module);
     virtual ~Interpreter() {};
 
+    llvm::Module &getModule() { return mModule; }
+
     // Interprets a function. Calls to other functions are interpreted
     // too.
     // @param function

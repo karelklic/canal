@@ -2,18 +2,16 @@
 #include <cstring>
 #include <ctype.h>
 #include <stdlib.h>
-
 #include <readline/readline.h>
 #include <readline/history.h>
-//#include <editline/readline.h>
 
 #include "Commands.h"
 
 // When non-zero, this means the user is done using this program.
-int done;
+int gDone;
 
 // List of all commands.
-CommandList commandList;
+Commands gCommands;
 
 // Strip whitespace from the start and end of STRING.  Return a
 // pointer into STRING.
@@ -37,12 +35,17 @@ stripwhite(char *string)
 static char *
 complete_entry(const char *text, int state)
 {
-    static std::vector<const char*> matches;
+    static std::vector<std::string> matches;
     if (state == 0)
-        matches = commandList.getCompletionMatches(text);
+    {
+        std::string buf(rl_line_buffer);
+        if (rl_point >= buf.size())
+            buf += std::string(text);
+        matches = gCommands.getCompletionMatches(buf, rl_point);
+    }
 
     if (state < matches.size())
-        return strdup(matches[state]);
+        return strdup(matches[state].c_str());
     else
         return NULL;
 }
@@ -60,7 +63,7 @@ main(int argc, char **argv)
     stifle_history(256);
 
     // Loop reading and executing lines until the user quits.
-    for (; !done;)
+    for (; !gDone;)
     {
         char *line = readline("(canal) ");
         if (!line)
@@ -80,8 +83,9 @@ main(int argc, char **argv)
             else
             {
                 add_history(expansion);
-                commandList.executeLine(expansion);
+                gCommands.executeLine(expansion);
             }
+
             free(expansion);
         }
 
