@@ -179,7 +179,16 @@ void InclusionBased::addConstantTarget(const llvm::Value *instruction, size_t co
 
 void InclusionBased::addMemoryTarget(const llvm::Value *instruction, const llvm::Value *target, Value *arrayOffset /*= NULL*/)
 {
-    CANAL_NOT_IMPLEMENTED();
+    Target newTarget;
+    newTarget.mType = Target::MemoryBlock;
+    newTarget.mInstruction = target;
+    newTarget.mArrayOffset = arrayOffset;
+
+    PlaceTargetMap::iterator it = mTargets.find(instruction);
+    if (it != mTargets.end())
+        it->second.merge(newTarget);
+    else
+        mTargets.insert(PlaceTargetMap::value_type(instruction, newTarget));
 }
 
 } // namespace Pointer

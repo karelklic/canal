@@ -1,7 +1,9 @@
 #include "CommandFile.h"
 #include "Commands.h"
 #include "State.h"
+#include "Utils.h"
 #include <llvm/LLVMContext.h>
+#include <llvm/Module.h>
 #include <llvm/Support/IRReader.h>
 #include <cstdio>
 #include <sys/types.h>
@@ -72,9 +74,16 @@ CommandFile::run(const std::vector<std::string> &args)
         return;
     }
 
-    if (mCommands.mState)
+    if (mCommands.mState && mCommands.mState->isInterpreting())
     {
-        // TODO: Query user.
+        puts("A program is being interpreted already.");
+        bool agreed = askYesNo("Are you sure you want to change the file?");
+        if (!agreed)
+        {
+            puts("File not changed.");
+            delete module;
+            return;
+        }
         delete mCommands.mState;
     }
 

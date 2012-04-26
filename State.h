@@ -13,11 +13,16 @@ namespace Canal {
     class Stack;
 }
 
+// State of the interpreter.
 class State
 {
 public:
     State(llvm::Module *module);
     ~State();
+
+    // Check if the interpreter is in the middle of interpretation.
+    // This is true if something is on the stack.
+    bool isInterpreting() const;
 
     void run();
     void step();
@@ -25,6 +30,9 @@ public:
     void finish();
 
     void addFunctionBreakpoint(const std::string &functionName);
+
+    // Adds the "main" function to stack.
+    void addMainFrame();
 
 public:
     llvm::Module *mModule;

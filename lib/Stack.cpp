@@ -125,6 +125,7 @@ Stack::nextInstruction()
     {
         // End of program.  TODO: collect final values of global
         // variables and return value of main function.
+        mFrames.pop_back();
         return false;
     }
 
@@ -138,6 +139,7 @@ Stack::nextInstruction()
 
     currentFrame.mergeGlobalVariables(parentFrame.mCurrentState);
     mFrames.pop_back();
+    return false;
 }
 
 const llvm::Instruction &

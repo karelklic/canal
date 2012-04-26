@@ -8,7 +8,7 @@ State::State() : mReturnedValue(NULL)
 {
 }
 
-State::State(const State &state)
+State::State(const State &state) : mReturnedValue(NULL)
 {
     operator=(state);
 }

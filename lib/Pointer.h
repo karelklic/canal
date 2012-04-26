@@ -57,6 +57,7 @@ public:
     size_t mConstant;
 
     // Pointer to an array if this is not NULL.
+    // mArrayOffset memory is owned by this class.
     Value *mArrayOffset;
 };
 
@@ -82,6 +83,14 @@ public:
     virtual void printToStream(llvm::raw_ostream &ostream) const;
 
     void addConstantTarget(const llvm::Value *instruction, size_t constant);
+
+    // @param instruction
+    //  Place where the pointer target is added.
+    // @param target
+    //   Represents an anonymous memory block.  This is a key to either
+    //   State::mGlobalBlocks or State::mFunctionBlocks.
+    // @param arrayOffset
+    //   If the pointer is provided, this class takes ownership of it.
     void addMemoryTarget(const llvm::Value *instruction, const llvm::Value *target, Value *arrayOffset = NULL);
 
     const PlaceTargetMap &getTargets() const { return mTargets; }

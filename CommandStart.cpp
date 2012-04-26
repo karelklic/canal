@@ -1,4 +1,7 @@
 #include "CommandStart.h"
+#include "Commands.h"
+#include "State.h"
+#include <cstdio>
 
 CommandStart::CommandStart(Commands &commands)
     : Command("start",
@@ -11,5 +14,6 @@ CommandStart::CommandStart(Commands &commands)
 void
 CommandStart::run(const std::vector<std::string> &args)
 {
-    
+    mCommands.mState->addMainFrame();
+    printf("Main reached.\n");
 }

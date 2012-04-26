@@ -42,7 +42,9 @@ canal_SOURCES = \
 	Commands.h \
 	Commands.cpp \
 	State.h \
-	State.cpp
+	State.cpp \
+	Utils.h \
+	Utils.cpp
 
 canal_LDADD = lib/libcanal.la -lreadline -lhistory $(LLVM_LDFLAGS) $(LLVM_LIBS)
 canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS)
