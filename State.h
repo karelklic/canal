@@ -19,6 +19,13 @@ public:
     State(llvm::Module *module);
     ~State();
 
+    void run();
+    void step();
+    void next();
+    void finish();
+    void continue_();
+
+public:
     llvm::Module *mModule;
     // Might be NULL if no module is loaded.
     Canal::Interpreter *mInterpreter;

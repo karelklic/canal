@@ -16,3 +16,41 @@ State::~State()
     delete mStack;
     delete mModule;
 }
+
+void
+State::run()
+{
+    bool finished = false;
+    while (!finished)
+    {
+        finished = mInterpreter->step(*mStack);
+        if (mStack->enteredNewFrame())
+        {
+            mStack->getCurrentFunction.getName();
+        }
+    }
+
+void
+State::step()
+{
+    mInterpreter->step(*mStack);
+}
+
+void
+State::next()
+{
+    mInterpreter->step(*mStack);
+}
+
+void
+State::finish()
+{
+    mInterpreter->step(*mStack);
+}
+
+void
+State::continue_()
+{
+    mInterpreter->step(*mStack);
+}
+

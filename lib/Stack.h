@@ -46,9 +46,11 @@ public:
     Stack(llvm::Module &module);
 
     bool nextInstruction();
+    bool enteredNewFrame() const { return mEnteredNewFrame; }
 
     const llvm::Instruction &getCurrentInstruction() const;
     State &getCurrentState();
+    const llvm::Function &getCurrentFunction() const;
     const llvm::Module &getModule() const { return mModule; }
 
     // @param function

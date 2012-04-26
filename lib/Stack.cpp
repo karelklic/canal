@@ -106,9 +106,9 @@ Stack::Stack(llvm::Module &module) : mModule(module)
 bool
 Stack::nextInstruction()
 {
-    if (mJumpToNewFrame)
+    if (mEnteredNewFrame)
     {
-        mJumpToNewFrame = false;
+        mEnteredNewFrame = false;
         return true;
     }
 
@@ -142,9 +142,16 @@ Stack::getCurrentInstruction() const
     return *mFrames.back().mCurrentInstruction;
 }
 
-State &Stack::getCurrentState()
+State &
+Stack::getCurrentState()
 {
     return mFrames.back().mCurrentState;
+}
+
+const llvm::Function &
+Stack::getCurrentFunction() const
+{
+    return *mFrames.back().mFunction;
 }
 
 void
@@ -152,9 +159,9 @@ Stack::addFrame(const llvm::Function &function, const State &initialState)
 {
     // Note that next instruction step is the jump to the first
     // instruction of the newly created frame.
-    CANAL_ASSERT(!mJumpToNewFrame);
+    CANAL_ASSERT(!mEnteredNewFrame);
     if (mFrames.size() > 0)
-        mJumpToNewFrame = true;
+        mEnteredNewFrame = true;
 
     mFrames.push_back(StackFrame(&function, initialState));
 }
