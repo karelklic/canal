@@ -1,5 +1,5 @@
-#ifndef CANAL_INTEGER_BITS_H
-#define CANAL_INTEGER_BITS_H
+#ifndef LIBCANAL_INTEGER_BITS_H
+#define LIBCANAL_INTEGER_BITS_H
 
 #include "Value.h"
 #include <llvm/ADT/APInt.h>
@@ -79,4 +79,4 @@ public: // Bits
 } // namespace Integer
 } // namespace Canal
 
-#endif // CANAL_INTEGER_BITS_H
+#endif // LIBCANAL_INTEGER_BITS_H

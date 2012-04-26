@@ -1,5 +1,5 @@
-#ifndef CANAL_INTEGER_ENUMERATION_H
-#define CANAL_INTEGER_ENUMERATION_H
+#ifndef LIBCANAL_INTEGER_ENUMERATION_H
+#define LIBCANAL_INTEGER_ENUMERATION_H
 
 #include "Value.h"
 #include <llvm/ADT/APInt.h>
@@ -51,4 +51,4 @@ public: // Implementation of AccuracyValue.
 } // namespace Integer
 } // namespace Canal
 
-#endif
+#endif // LIBCANAL_INTEGER_ENUMERATION_H

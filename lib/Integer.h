@@ -1,5 +1,5 @@
-#ifndef CANAL_ABSTRACT_INTEGER_H
-#define CANAL_ABSTRACT_INTEGER_H
+#ifndef LIBCANAL_INTEGER_H
+#define LIBCANAL_INTEGER_H
 
 #include "IntegerBits.h"
 //#include "IntegerEnumeration.h"
@@ -42,4 +42,4 @@ public:
 } // namespace Integer
 } // namespace Canal
 
-#endif
+#endif // LIBCANAL_INTEGER_H

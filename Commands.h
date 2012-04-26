@@ -7,6 +7,7 @@
 
 class Command;
 class CommandFile;
+class State;
 
 class Commands
 {
@@ -28,16 +29,11 @@ public:
     Command *getCommand(const std::string &name);
     const Command *getCommand(const std::string &name) const;
 
-    CommandFile &getFile() { return *mFile; }
-    const CommandFile &getFile() const { return *mFile; }
-
 public:
     std::vector<Command*> mCommandList;
     typedef std::map<std::string, Command*> CommandMap;
     CommandMap mCommandMap;
-
-protected:
-    CommandFile *mFile;
+    State *mState;
 };
 
 #endif

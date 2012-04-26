@@ -1,5 +1,5 @@
-#ifndef CANAL_CONSTANT_H
-#define CANAL_CONSTANT_H
+#ifndef LIBCANAL_CONSTANT_H
+#define LIBCANAL_CONSTANT_H
 
 #include "Value.h"
 
@@ -42,4 +42,4 @@ public:
 
 } // namespace Canal
 
-#endif // CANAL_CONSTANT_H
+#endif // LIBCANAL_CONSTANT_H

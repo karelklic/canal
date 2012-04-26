@@ -1,5 +1,5 @@
-#ifndef CANAL_UTILS_H
-#define CANAL_UTILS_H
+#ifndef LIBCANAL_UTILS_H
+#define LIBCANAL_UTILS_H
 
 #include <llvm/Support/raw_ostream.h>
 #include <cstdlib>
@@ -72,4 +72,4 @@
                      << __FUNCTION__ << "): not implemented\n";         \
     }
 
-#endif // CANAL_UTILS_H
+#endif // LIBCANAL_UTILS_H

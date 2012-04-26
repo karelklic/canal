@@ -1,5 +1,5 @@
-#ifndef CANAL_INTEGER_RANGE_H
-#define CANAL_INTEGER_RANGE_H
+#ifndef LIBCANAL_INTEGER_RANGE_H
+#define LIBCANAL_INTEGER_RANGE_H
 
 #include "Value.h"
 #include <llvm/Constants.h>
@@ -48,4 +48,4 @@ public: // Implementation of AccuracyValue.
 } // namespace Integer
 } // namespace Canal
 
-#endif
+#endif // LIBCANAL_INTEGER_RANGE_H

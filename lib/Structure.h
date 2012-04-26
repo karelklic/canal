@@ -1,5 +1,5 @@
-#ifndef CANAL_ABSTRACT_STRUCTURE_H
-#define CANAL_ABSTRACT_STRUCTURE_H
+#ifndef LIBCANAL_STRUCTURE_H
+#define LIBCANAL_STRUCTURE_H
 
 #include "AbstractValue.h"
 #include <vector>
@@ -10,4 +10,4 @@ class AbstractStructure : public AbstractValue
   std::vector<AbstractValue> mMembers;
 };
 
-#endif
+#endif // LIBCANAL_STRUCTURE_H

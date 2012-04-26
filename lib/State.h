@@ -1,5 +1,5 @@
-#ifndef CANAL_STATE_H
-#define CANAL_STATE_H
+#ifndef LIBCANAL_STATE_H
+#define LIBCANAL_STATE_H
 
 #include <map>
 #include <vector>
@@ -114,4 +114,4 @@ llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
 
 } // namespace Canal
 
-#endif // CANAL_STATE_H
+#endif // LIBCANAL_STATE_H

@@ -1,5 +1,5 @@
-#ifndef CANAL_VALUE_H
-#define CANAL_VALUE_H
+#ifndef LIBCANAL_VALUE_H
+#define LIBCANAL_VALUE_H
 
 #include <cstddef>
 #include <llvm/Instructions.h>
@@ -103,4 +103,4 @@ public:
 
 } // namespace Canal
 
-#endif // CANAL_VALUE_H
+#endif // LIBCANAL_VALUE_H

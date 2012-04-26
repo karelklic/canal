@@ -1,5 +1,5 @@
 #include "CommandInfo.h"
-#include "CommandFile.h"
+#include "State.h"
 #include "Commands.h"
 #include <cstdio>
 #include <llvm/Module.h>
@@ -32,13 +32,13 @@ CommandInfo::run(const std::vector<std::string> &args)
 void
 CommandInfo::infoModule()
 {
-    if (!mCommands.getFile().getInterpreter())
+    if (!mCommands.mState->mModule)
     {
         puts("No module is loaded.");
         return;
     }
 
-    llvm::Module &module = mCommands.getFile().getInterpreter()->getModule();
+    llvm::Module &module = *mCommands.mState->mModule;
     printf("Identifier: %s\n", module.getModuleIdentifier().c_str());
     printf("Data layout: %s\n", module.getDataLayout().c_str());
     printf("Target: %s\n", module.getTargetTriple().c_str());

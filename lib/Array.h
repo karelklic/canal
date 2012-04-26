@@ -1,5 +1,5 @@
-#ifndef CANAL_ARRAY_H
-#define CANAL_ARRAY_H
+#ifndef LIBCANAL_ARRAY_H
+#define LIBCANAL_ARRAY_H
 
 #include "Value.h"
 
@@ -39,4 +39,4 @@ public:
 } // namespace Array
 } // namespace Canal
 
-#endif // CANAL_ARRAY_H
+#endif // LIBCANAL_ARRAY_H

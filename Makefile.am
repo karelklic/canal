@@ -40,7 +40,9 @@ canal_SOURCES = \
 	CommandStep.h \
 	CommandStep.cpp \
 	Commands.h \
-	Commands.cpp
+	Commands.cpp \
+	State.h \
+	State.cpp
 
 canal_LDADD = lib/libcanal.la -lreadline -lhistory $(LLVM_LDFLAGS) $(LLVM_LIBS)
 canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS)

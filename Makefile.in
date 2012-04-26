@@ -63,7 +63,7 @@ am_canal_OBJECTS = canal-Canal.$(OBJEXT) canal-Command.$(OBJEXT) \
 	canal-CommandPwd.$(OBJEXT) canal-CommandQuit.$(OBJEXT) \
 	canal-CommandRun.$(OBJEXT) canal-CommandShow.$(OBJEXT) \
 	canal-CommandStart.$(OBJEXT) canal-CommandStep.$(OBJEXT) \
-	canal-Commands.$(OBJEXT)
+	canal-Commands.$(OBJEXT) canal-State.$(OBJEXT)
 canal_OBJECTS = $(am_canal_OBJECTS)
 am__DEPENDENCIES_1 =
 canal_DEPENDENCIES = lib/libcanal.la $(am__DEPENDENCIES_1) \
@@ -308,7 +308,9 @@ canal_SOURCES = \
 	CommandStep.h \
 	CommandStep.cpp \
 	Commands.h \
-	Commands.cpp
+	Commands.cpp \
+	State.h \
+	State.cpp
 
 canal_LDADD = lib/libcanal.la -lreadline -lhistory $(LLVM_LDFLAGS) $(LLVM_LIBS)
 canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS)
@@ -432,6 +434,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandStart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandStep.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-Commands.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-State.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -719,6 +722,20 @@ canal-Commands.obj: Commands.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Commands.cpp' object='canal-Commands.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-Commands.obj `if test -f 'Commands.cpp'; then $(CYGPATH_W) 'Commands.cpp'; else $(CYGPATH_W) '$(srcdir)/Commands.cpp'; fi`
+
+canal-State.o: State.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-State.o -MD -MP -MF $(DEPDIR)/canal-State.Tpo -c -o canal-State.o `test -f 'State.cpp' || echo '$(srcdir)/'`State.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/canal-State.Tpo $(DEPDIR)/canal-State.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='State.cpp' object='canal-State.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-State.o `test -f 'State.cpp' || echo '$(srcdir)/'`State.cpp
+
+canal-State.obj: State.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-State.obj -MD -MP -MF $(DEPDIR)/canal-State.Tpo -c -o canal-State.obj `if test -f 'State.cpp'; then $(CYGPATH_W) 'State.cpp'; else $(CYGPATH_W) '$(srcdir)/State.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/canal-State.Tpo $(DEPDIR)/canal-State.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='State.cpp' object='canal-State.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-State.obj `if test -f 'State.cpp'; then $(CYGPATH_W) 'State.cpp'; else $(CYGPATH_W) '$(srcdir)/State.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

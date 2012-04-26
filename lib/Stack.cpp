@@ -99,6 +99,10 @@ StackFrame::startBlock(llvm::Function::const_iterator block)
     mCurrentInstruction = block->begin();
 }
 
+Stack::Stack(llvm::Module &module) : mModule(module)
+{
+}
+
 bool
 Stack::nextInstruction()
 {

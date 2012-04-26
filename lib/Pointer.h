@@ -1,5 +1,5 @@
-#ifndef CANAL_POINTER_H
-#define CANAL_POINTER_H
+#ifndef LIBCANAL_POINTER_H
+#define LIBCANAL_POINTER_H
 
 #include "Value.h"
 #include <map>
@@ -96,4 +96,4 @@ protected:
 } // namespace Pointer
 } // namespace Canal
 
-#endif
+#endif // LIBCANAL_POINTER_H

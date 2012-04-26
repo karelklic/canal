@@ -1,5 +1,5 @@
-#ifndef CANAL_FLOAT_H
-#define CANAL_FLOAT_H
+#ifndef LIBCANAL_FLOAT_H
+#define LIBCANAL_FLOAT_H
 
 #include "Value.h"
 #include <llvm/ADT/APFloat.h>
@@ -32,4 +32,4 @@ public:
 } // namespace Float
 } // namespace Canal
 
-#endif // CANAL_FLOAT_H
+#endif // LIBCANAL_FLOAT_H

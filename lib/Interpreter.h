@@ -1,5 +1,5 @@
-#ifndef CANAL_INTERPRETER_H
-#define CANAL_INTERPRETER_H
+#ifndef LIBCANAL_INTERPRETER_H
+#define LIBCANAL_INTERPRETER_H
 
 #include <map>
 #include <vector>
@@ -190,4 +190,4 @@ protected:
 
 } // namespace Canal
 
-#endif // CANAL_INTERPRETER_H
+#endif // LIBCANAL_INTERPRETER_H

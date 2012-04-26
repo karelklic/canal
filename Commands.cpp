@@ -24,7 +24,7 @@ Commands::Commands()
     mCommandList.push_back(new CommandBreak(*this));
     mCommandList.push_back(new CommandCd(*this));
     mCommandList.push_back(new CommandContinue(*this));
-    mCommandList.push_back(mFile = new CommandFile(*this));
+    mCommandList.push_back(new CommandFile(*this));
     mCommandList.push_back(new CommandFinish(*this));
     mCommandList.push_back(new CommandHelp(*this));
     mCommandList.push_back(new CommandInfo(*this));

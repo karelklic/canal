@@ -1,7 +1,8 @@
 #include "CommandFile.h"
+#include "Commands.h"
+#include "State.h"
 #include <llvm/LLVMContext.h>
 #include <llvm/Support/IRReader.h>
-#include "lib/Interpreter.h"
 #include <cstdio>
 #include <sys/types.h>
 #include <dirent.h>
@@ -10,8 +11,7 @@ CommandFile::CommandFile(Commands &commands)
     : Command("file",
               "Use FILE as program to be interpreted",
               "",
-              commands),
-      mInterpreter(NULL)
+              commands)
 {
 }
 
@@ -72,12 +72,12 @@ CommandFile::run(const std::vector<std::string> &args)
         return;
     }
 
-    if (mInterpreter)
+    if (mCommands.mState)
     {
         // TODO: Query user.
-        delete mInterpreter;
+        delete mCommands.mState;
     }
 
-    mInterpreter = new Canal::Interpreter(*module);
+    mCommands.mState = new State(module);
     puts("Module loaded.");
 }

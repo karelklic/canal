@@ -1,5 +1,5 @@
-#ifndef CANAL_STACK_H
-#define CANAL_STACK_H
+#ifndef LIBCANAL_STACK_H
+#define LIBCANAL_STACK_H
 
 #include <map>
 #include <vector>
@@ -68,4 +68,4 @@ protected:
 
 } // namespace Canal
 
-#endif // CANAL_STACK_H
+#endif // LIBCANAL_STACK_H
