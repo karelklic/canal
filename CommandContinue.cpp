@@ -1,4 +1,6 @@
 #include "CommandContinue.h"
+#include "Commands.h"
+#include "State.h"
 
 CommandContinue::CommandContinue(Commands &commands)
     : Command("continue",
@@ -11,4 +13,5 @@ CommandContinue::CommandContinue(Commands &commands)
 void
 CommandContinue::run(const std::vector<std::string> &args)
 {
+    mCommands.mState->run();
 }

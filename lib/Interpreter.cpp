@@ -407,7 +407,7 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction, State &state)
     if (instruction.isArrayAllocation())
     {
         Array::SingleItem *array = new Array::SingleItem();
-        array->mItemValue = value;
+        array->mValue = value;
         value = array;
         const llvm::Value *arraySize = instruction.getArraySize();
         PlaceValueMap::const_iterator it = state.getGlobalVariables().find(arraySize);

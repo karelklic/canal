@@ -1,11 +1,13 @@
-#include <histedit.h>
+#include "Commands.h"
 #include <cstring>
-#include <ctype.h>
-#include <stdlib.h>
+#include <cctype>
+#include <cstdlib>
+#include <cstdio>
+
+extern "C" {
 #include <readline/readline.h>
 #include <readline/history.h>
-
-#include "Commands.h"
+}
 
 // When non-zero, this means the user is done using this program.
 int gDone;

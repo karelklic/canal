@@ -99,16 +99,19 @@ StackFrame::startBlock(llvm::Function::const_iterator block)
     mCurrentInstruction = block->begin();
 }
 
-Stack::Stack(llvm::Module &module) : mModule(module)
+Stack::Stack(llvm::Module &module) : mModule(module), mHasEnteredNewFrame(false), mHasReturnedFromFrame(false)
 {
 }
 
 bool
 Stack::nextInstruction()
 {
-    if (mEnteredNewFrame)
+    if (mHasReturnedFromFrame)
+        mHasReturnedFromFrame = false;
+
+    if (mHasEnteredNewFrame)
     {
-        mEnteredNewFrame = false;
+        mHasEnteredNewFrame = false;
         return true;
     }
 
@@ -117,6 +120,7 @@ Stack::nextInstruction()
         return true;
 
     // End of function.
+    mHasReturnedFromFrame = true;
     if (mFrames.size() == 1)
     {
         // End of program.  TODO: collect final values of global
@@ -159,9 +163,9 @@ Stack::addFrame(const llvm::Function &function, const State &initialState)
 {
     // Note that next instruction step is the jump to the first
     // instruction of the newly created frame.
-    CANAL_ASSERT(!mEnteredNewFrame);
+    CANAL_ASSERT(!mHasEnteredNewFrame);
     if (mFrames.size() > 0)
-        mEnteredNewFrame = true;
+        mHasEnteredNewFrame = true;
 
     mFrames.push_back(StackFrame(&function, initialState));
 }

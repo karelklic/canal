@@ -23,15 +23,18 @@ public:
     void step();
     void next();
     void finish();
-    void continue_();
+
+    void addFunctionBreakpoint(const std::string &functionName);
 
 public:
     llvm::Module *mModule;
     // Might be NULL if no module is loaded.
     Canal::Interpreter *mInterpreter;
     Canal::Stack *mStack;
+    std::set<std::string> mFunctionBreakpoints;
 
-    std::set<std::string> mFunctionNameBreakpoints;
+protected:
+    bool reachedBreakpoint();
 };
 
 #endif // CANAL_STATE_H

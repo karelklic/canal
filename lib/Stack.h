@@ -46,8 +46,10 @@ public:
     Stack(llvm::Module &module);
 
     bool nextInstruction();
-    bool enteredNewFrame() const { return mEnteredNewFrame; }
-
+    bool hasEnteredNewFrame() const { return mHasEnteredNewFrame; }
+    bool hasReturnedFromFrame() const { return mHasReturnedFromFrame; }
+    std::vector<StackFrame> &getFrames() { return mFrames; }
+    const std::vector<StackFrame> &getFrames() const { return mFrames; }
     const llvm::Instruction &getCurrentInstruction() const;
     State &getCurrentState();
     const llvm::Function &getCurrentFunction() const;
@@ -63,8 +65,8 @@ public:
 
 protected:
     std::vector<StackFrame> mFrames;
-    bool mJumpToNewFrame;
-
+    bool mHasEnteredNewFrame;
+    bool mHasReturnedFromFrame;
     llvm::Module &mModule;
 };
 

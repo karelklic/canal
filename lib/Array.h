@@ -12,7 +12,7 @@ namespace Array {
 class SingleItem : public Value
 {
 public:
-    Value *mItemValue;
+    Value *mValue;
 
     // Number of elements in the array.
     // It is either a Constant or Integer::Container.

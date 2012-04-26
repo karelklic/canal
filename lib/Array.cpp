@@ -4,15 +4,15 @@
 namespace Canal {
 namespace Array {
 
-SingleItem::SingleItem() : mItemValue(NULL), mSize(NULL)
+SingleItem::SingleItem() : mValue(NULL), mSize(NULL)
 {
 }
 
 SingleItem::SingleItem(const SingleItem &singleItem)
 {
-    mItemValue = singleItem.mItemValue;
-    if (mItemValue)
-        mItemValue = mItemValue->clone();
+    mValue = singleItem.mValue;
+    if (mValue)
+        mValue = mValue->clone();
 
     mSize = singleItem.mSize;
     if (mSize)
@@ -21,7 +21,7 @@ SingleItem::SingleItem(const SingleItem &singleItem)
 
 SingleItem::~SingleItem()
 {
-    delete mItemValue;
+    delete mValue;
     delete mSize;
 }
 
@@ -38,10 +38,10 @@ bool SingleItem::operator==(const Value &value) const
 
     if ((mSize && !singleItem->mSize) || (!mSize && singleItem->mSize))
         return false;
-    if ((mItemValue && !singleItem->mItemValue) || (!mItemValue && singleItem->mItemValue))
+    if ((mValue && !singleItem->mValue) || (!mValue && singleItem->mValue))
         return false;
 
-    if (mItemValue && *mItemValue != *singleItem->mItemValue)
+    if (mValue && *mValue != *singleItem->mValue)
         return false;
     if (mSize && *mSize != *singleItem->mSize)
         return false;
@@ -52,16 +52,16 @@ bool SingleItem::operator==(const Value &value) const
 void SingleItem::merge(const Value &value)
 {
     const SingleItem &singleItem = dynamic_cast<const SingleItem&>(value);
-    CANAL_ASSERT(mItemValue && singleItem.mItemValue); // implement if necessary
+    CANAL_ASSERT(mValue && singleItem.mValue); // implement if necessary
     CANAL_ASSERT(mSize && singleItem.mSize); // implement if necessary
-    mItemValue->merge(*singleItem.mItemValue);
+    mValue->merge(*singleItem.mValue);
     mSize->merge(*singleItem.mSize);
 }
 
 size_t SingleItem::memoryUsage() const
 {
     size_t size = sizeof(SingleItem);
-    size += (mItemValue ? mItemValue->memoryUsage() : 0);
+    size += (mValue ? mValue->memoryUsage() : 0);
     size += (mSize ? mSize->memoryUsage() : 0);
     return size;
 }

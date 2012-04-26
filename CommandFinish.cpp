@@ -1,4 +1,6 @@
 #include "CommandFinish.h"
+#include "Commands.h"
+#include "State.h"
 
 CommandFinish::CommandFinish(Commands &commands)
     : Command("finish",
@@ -11,4 +13,5 @@ CommandFinish::CommandFinish(Commands &commands)
 void
 CommandFinish::run(const std::vector<std::string> &args)
 {
+    mCommands.mState->finish();
 }

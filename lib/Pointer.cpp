@@ -109,7 +109,7 @@ Value *Target::dereference(const State &state) const
             return variable;
         // Do not care about offsets when lacking better array.
         const Array::SingleItem &array = dynamic_cast<const Array::SingleItem&>(*variable);
-        return array.mItemValue;
+        return array.mValue;
     }
     default:
         CANAL_DIE();
