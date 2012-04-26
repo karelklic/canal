@@ -7,6 +7,7 @@
 #include "Array.h"
 #include "Float.h"
 #include "Constant.h"
+#include "Stack.h"
 #include <llvm/Function.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Instructions.h>
@@ -16,76 +17,25 @@
 
 namespace Canal {
 
-Interpreter::Interpreter(llvm::Module &module) : mModule(module)
+bool
+Interpreter::step(Stack &stack)
 {
+    interpretInstruction(stack);
+    return stack.nextInstruction();
 }
 
 void
-Interpreter::interpretFunction(const llvm::Function &function,
-                               State &state)
+Interpreter::interpretInstruction(Stack &stack)
 {
-    std::map<const llvm::BasicBlock*, State> blockInputState, blockOutputState;
-    llvm::Function::const_iterator itBlock = function.begin(), itBlockEnd = function.end();
-    for (; itBlock != itBlockEnd; ++itBlock)
-    {
-        blockInputState[itBlock] = state;
-        blockOutputState[itBlock] = state;
-    }
+    const llvm::Instruction &instruction = stack.getCurrentInstruction();
+    State &state = stack.getCurrentState();
 
-    interpretFunctionBlocks(function.begin(), itBlockEnd, blockInputState, blockOutputState);
-}
-
-void
-Interpreter::interpretFunctionBlocks(llvm::Function::const_iterator blockBegin,
-                                     llvm::Function::const_iterator blockEnd,
-                                     std::map<const llvm::BasicBlock*, State> &blockInputState,
-                                     std::map<const llvm::BasicBlock*, State> &blockOutputState)
-{
-    bool changed;
-    do {
-        changed = false;
-        llvm::Function::const_iterator itBlock;
-        for (itBlock = blockBegin; itBlock != blockEnd; ++itBlock)
-        {
-            // Merge out states of predecessors to input state of
-            // current block.
-            llvm::const_pred_iterator itPred = llvm::pred_begin(itBlock),
-                itPredEnd = llvm::pred_end(itBlock);
-            for (; itPred != itPredEnd; ++itPred)
-            {
-                assert(&*itBlock != &itBlock->getParent()->getEntryBlock() && "Entry block cannot have predecessors!");
-                blockInputState[itBlock].merge(blockOutputState[*itPred]);
-            }
-
-            // Interpret all instructions of current block.
-            State currentState(blockInputState[itBlock]);
-            llvm::BasicBlock::const_iterator itInst = itBlock->begin(),
-                itInstEnd = itBlock->end();
-            for (; itInst != itInstEnd; ++itInst)
-                interpretInstruction(*itInst, currentState);
-
-            // Check if the state changed since the last pass of this
-            // block.
-	    llvm::outs() << "Comparing " << currentState << blockOutputState[itBlock] << "\n";
-            if (currentState != blockOutputState[itBlock])
-            {
-                changed = true;
-                blockOutputState[itBlock] = currentState;
-		llvm::outs() << "Assigned " << blockOutputState[itBlock];
-            }
-        }
-    } while (changed);
-}
-
-void
-Interpreter::interpretInstruction(const llvm::Instruction &instruction, State &state)
-{
     if (llvm::isa<llvm::AllocaInst>(instruction))
         alloca_((const llvm::AllocaInst&)instruction, state);
     else if (llvm::isa<llvm::StoreInst>(instruction))
         store((const llvm::StoreInst&)instruction, state);
     else if (llvm::isa<llvm::CallInst>(instruction))
-        call((const llvm::CallInst&)instruction, state);
+        call((const llvm::CallInst&)instruction, stack);
     else if (llvm::isa<llvm::LoadInst>(instruction))
         load((const llvm::LoadInst&)instruction, state);
     else if (llvm::isa<llvm::ICmpInst>(instruction))
@@ -105,7 +55,7 @@ Interpreter::interpretInstruction(const llvm::Instruction &instruction, State &s
         else if (llvm::isa<llvm::IndirectBrInst>(instruction))
             indirectbr((const llvm::IndirectBrInst&)instruction, state);
         else if (llvm::isa<llvm::InvokeInst>(instruction))
-            invoke((const llvm::InvokeInst&)instruction, state);
+            invoke((const llvm::InvokeInst&)instruction, stack);
         else if (llvm::isa<llvm::ResumeInst>(instruction))
             resume((const llvm::ResumeInst&)instruction, state);
         else if (llvm::isa<llvm::UnreachableInst>(instruction))
@@ -212,11 +162,13 @@ variableOrConstant(const llvm::Value &place, State &state, Constant &constant)
 }
 
 template<typename T> static void
-interpretCall(Interpreter &interpreter, const T &instruction, State &state)
+interpretCall(const T &instruction, Stack &stack)
 {
     llvm::Function *function = instruction.getCalledFunction();
-    State functionState(state);
-    functionState.clearFunctionLevel();
+    State &state = stack.getCurrentState();
+
+    State initialState(state);
+    initialState.clearFunctionLevel();
     llvm::Function::ArgumentListType::const_iterator it = function->getArgumentList().begin();
     for (int i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
     {
@@ -225,25 +177,16 @@ interpretCall(Interpreter &interpreter, const T &instruction, State &state)
         Value *value = variableOrConstant(*operand, state, c);
         if (!value)
             return;
-        functionState.addFunctionVariable(*it, value->clone());
+        initialState.addFunctionVariable(*it, value->clone());
     }
 
-    interpreter.interpretFunction(*function, functionState);
-    state.mergeGlobalLevel(functionState);
-    if (functionState.mReturnedValue)
-    {
-        // Optimization: instead of cloning the returned value from
-        // function state, we steal it (so it is not deleted in
-        // functionState destructor).
-        state.addFunctionVariable(instruction, functionState.mReturnedValue);
-        functionState.mReturnedValue = NULL;
-    }
+    stack.addFrame(*function, initialState);
 }
 
 void
-Interpreter::invoke(const llvm::InvokeInst &instruction, State &state)
+Interpreter::invoke(const llvm::InvokeInst &instruction, Stack &stack)
 {
-    interpretCall(*this, instruction, state);
+    interpretCall(instruction, stack);
 }
 
 void
@@ -749,9 +692,9 @@ Interpreter::select(const llvm::SelectInst &instruction, State &state)
 }
 
 void
-Interpreter::call(const llvm::CallInst &instruction, State &state)
+Interpreter::call(const llvm::CallInst &instruction, Stack &stack)
 {
-    interpretCall(*this, instruction, state);
+    interpretCall(instruction, stack);
 }
 
 void

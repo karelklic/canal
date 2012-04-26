@@ -1,24 +1,61 @@
 #include "Stack.h"
+#include "Value.h"
+#include "Utils.h"
+#include <llvm/Instructions.h>
+#include <llvm/Support/CFG.h>
 
 namespace Canal {
 
-StackFrame::StackFrame(const llvm::Function &function, State &initialState)
+StackFrame::StackFrame(const llvm::Function *function, const State &initialState) : mFunction(function)
 {
-    llvm::Function::const_iterator it = function.begin(), itend = function.end();
+    llvm::Function::const_iterator it = function->begin(), itend = function->end();
     for (; it != itend; ++it)
-        mBlockInputState[it] = state;
+        mBlockInputState[it] = initialState;
 
-    startBlock(function.begin());
+    startBlock(function->begin());
 }
 
 bool
-Stack::nextInstruction()
+StackFrame::nextInstruction()
 {
     return ++mCurrentInstruction == mCurrentBlock->end() ? nextBlock() : true;
 }
 
+Value *
+StackFrame::getReturnedValue() const
+{
+    Value *mergedValue = NULL;
+    llvm::Function::const_iterator it = mFunction->begin(), itend = mFunction->end();
+    for (; it != itend; ++it)
+    {
+        if (!dynamic_cast<const llvm::ReturnInst*>(it->getTerminator()))
+            continue;
+
+        if (mergedValue)
+            mergedValue->merge(*mBlockOutputState.find(it)->second.mReturnedValue);
+        else
+            mergedValue = mBlockOutputState.find(it)->second.mReturnedValue->clone();
+
+    }
+
+    return mergedValue;
+}
+
+void
+StackFrame::mergeGlobalVariables(State &target) const
+{
+    llvm::Function::const_iterator it = mFunction->begin(), itend = mFunction->end();
+    for (; it != itend; ++it)
+    {
+        if (!dynamic_cast<const llvm::ReturnInst*>(it->getTerminator()))
+            continue;
+
+        target.mergeGlobalLevel(mBlockOutputState.find(&*it)->second);
+    }
+}
+
 bool
-Stack::nextBlock()
+StackFrame::nextBlock()
 {
     if (mCurrentState != mBlockOutputState[mCurrentBlock])
     {
@@ -26,12 +63,12 @@ Stack::nextBlock()
         mBlockOutputState[mCurrentBlock] = mCurrentState;
     }
 
-    if (++mCurrentBlock == mFunction.end())
+    if (++mCurrentBlock == mFunction->end())
     {
         if (mChanged)
         {
             mChanged = false;
-            startBlock(function.begin());
+            startBlock(mFunction->begin());
         }
         else
         {
@@ -54,12 +91,68 @@ StackFrame::startBlock(llvm::Function::const_iterator block)
     llvm::const_pred_iterator it = llvm::pred_begin(block), itend = llvm::pred_end(block);
     for (; it != itend; ++it)
     {
-        CANAL_ASSERT(&*it != &block->getParent()->getEntryBlock() && "Entry block cannot have predecessors!");
+        CANAL_ASSERT(*it != &block->getParent()->getEntryBlock() && "Entry block cannot have predecessors!");
         mBlockInputState[block].merge(mBlockOutputState[*it]);
     }
 
     mCurrentState = mBlockInputState[block];
     mCurrentInstruction = block->begin();
+}
+
+bool
+Stack::nextInstruction()
+{
+    if (mJumpToNewFrame)
+    {
+        mJumpToNewFrame = false;
+        return true;
+    }
+
+    StackFrame &currentFrame = mFrames.back();
+    if (currentFrame.nextInstruction())
+        return true;
+
+    // End of function.
+    if (mFrames.size() == 1)
+    {
+        // End of program.  TODO: collect final values of global
+        // variables and return value of main function.
+        return false;
+    }
+
+    StackFrame &parentFrame = mFrames[mFrames.size() - 2];
+    CANAL_ASSERT(llvm::isa<llvm::CallInst>(parentFrame.mCurrentInstruction) ||
+                 llvm::isa<llvm::InvokeInst>(parentFrame.mCurrentInstruction));
+
+    Value *returnedValue = currentFrame.getReturnedValue();
+    if (returnedValue)
+        parentFrame.mCurrentState.addFunctionVariable(*parentFrame.mCurrentInstruction, returnedValue);
+
+    currentFrame.mergeGlobalVariables(parentFrame.mCurrentState);
+    mFrames.pop_back();
+}
+
+const llvm::Instruction &
+Stack::getCurrentInstruction() const
+{
+    return *mFrames.back().mCurrentInstruction;
+}
+
+State &Stack::getCurrentState()
+{
+    return mFrames.back().mCurrentState;
+}
+
+void
+Stack::addFrame(const llvm::Function &function, const State &initialState)
+{
+    // Note that next instruction step is the jump to the first
+    // instruction of the newly created frame.
+    CANAL_ASSERT(!mJumpToNewFrame);
+    if (mFrames.size() > 0)
+        mJumpToNewFrame = true;
+
+    mFrames.push_back(StackFrame(&function, initialState));
 }
 
 } // namespace Canal

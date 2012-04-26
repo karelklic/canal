@@ -56,6 +56,7 @@ namespace Canal {
 class State;
 class Machine;
 class Value;
+class Stack;
 
 // Context-sensitive operational abstract interpreter.  Interprets
 // instructions in abstract domain.
@@ -65,68 +66,19 @@ class Value;
 class Interpreter
 {
 public:
-    typedef std::map<const llvm::BasicBlock*, State> BlockStateMap;
-
-    // @param module
-    //   LLVM module that contains all functions.
-    Interpreter(llvm::Module &module);
     virtual ~Interpreter() {};
 
-    llvm::Module &getModule() { return mModule; }
+    // One step of the interpreter.  Interprets current instruction
+    // and moves to the next one.
+    // @returns
+    //   True if next step is possible.  False on the end of the
+    //   program.
+    virtual bool step(Stack &stack);
 
-    // Interprets a function. Calls to other functions are interpreted
-    // too.
-    // @param function
-    //   Function to be interpreted. Its instructions will be applied
-    //   in abstract domain on the provided input state.
-    // @param state
-    //   State of the program.  It includes memory blocks on stack,
-    //   gloval variables and global memory blocks (=heap).  It cannot
-    //   contain function variables (=heap variables with names).
-    //   This function might modify the state.  It will not introduce
-    //   function variables or function blocks, but it might modify
-    //   memory blocks already present on heap, and it might modify
-    //   global memory blocks.
-    // @param arguments
-    //   Input arguments. This function will not modify this
-    //   parameter.
-    // @param result
-    //   Value returned by the function call. If function return value
-    //   is void, the result pointer is set to NULL. Otherwise, a new
-    //   abstract value of proper type is allocated, and result
-    //   pointer is pointed there.  Caller takes ownership of the
-    //   returned object.  This function does not delete memory
-    //   referenced by result, the pointer is just overwritten.
-    virtual void interpretFunction(const llvm::Function &function,
-                                   State &state);
-
-    // Interprets function blocks.  This is called by
-    // interpretFunction.
-    // @param blockBegin
-    // @param blockEnd
-    //   Range of blocks to interpret.
-    // @blockInputState
-    //   Input state for every block -- values of variables that
-    //   represent what might come when this block is being executed.
-    //   This function will modify the states stored in the map.  It
-    //   should contain initial state for every BasicBlock on function
-    //   call.
-    // @blockOutputState
-    //   Output state for every block -- values of variables after the
-    //   block have been interpreted.  This function will modify the
-    //   states stored in this map.  It should contain initial state
-    //   for every BasicBlock on function call.
-    virtual void interpretFunctionBlocks(llvm::Function::const_iterator blockBegin,
-                                         llvm::Function::const_iterator blockEnd,
-                                         BlockStateMap &blockInputState,
-                                         BlockStateMap &blockOutputState);
-
-    // Interprets single instructions.
-    void interpretInstruction(const llvm::Instruction &instruction, State &state);
+    // Interprets current instruction.
+    void interpretInstruction(Stack &stack);
 
 protected:
-    llvm::Module &mModule;
-
     // Below are methods implementing abstract machine, one method for
     // every LLVM instruction.  The order is based on "LLVM Language
     // Reference Manual", obtained 2012-03-13 from
@@ -148,7 +100,7 @@ protected:
     // Transfer to a specified function, with the possibility of
     // control flow transfer to either the 'normal' label or the
     // 'exception' label.
-    virtual void invoke(const llvm::InvokeInst &instruction, State &state);
+    virtual void invoke(const llvm::InvokeInst &instruction, Stack &stack);
     // A terminator instruction that has no successors. Resumes
     // propagation of an existing (in-flight) exception whose
     // unwinding was interrupted with a landingpad instruction.
@@ -231,7 +183,7 @@ protected:
     virtual void fcmp(const llvm::FCmpInst &instruction, State &state);
     virtual void phi(const llvm::PHINode &instruction, State &state);
     virtual void select(const llvm::SelectInst &instruction, State &state);
-    virtual void call(const llvm::CallInst &instruction, State &state);
+    virtual void call(const llvm::CallInst &instruction, Stack &stack);
     virtual void va_arg(const llvm::VAArgInst &instruction, State &state);
     virtual void landingpad(const llvm::LandingPadInst &instruction, State &state);
 };
