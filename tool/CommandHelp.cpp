@@ -1,6 +1,6 @@
 #include "CommandHelp.h"
 #include "Commands.h"
-#include "lib/Utils.h"
+#include "../lib/Utils.h"
 #include <cstdio>
 
 CommandHelp::CommandHelp(Commands &commands)

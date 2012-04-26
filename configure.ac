@@ -42,6 +42,7 @@ AC_CONFIG_FILES([
     canal.spec
     Makefile
     lib/Makefile
+    tool/Makefile
 ])
 
 AC_OUTPUT
