@@ -1,4 +1,5 @@
 #include "State.h"
+#include "Utils.h"
 #include "../lib/Interpreter.h"
 #include "../lib/Stack.h"
 #include "../lib/Utils.h"
@@ -51,6 +52,8 @@ State::step()
     bool running = mInterpreter->step(*mStack);
     if (!running)
         puts("Program finished.");
+    else
+        print(mStack->getCurrentInstruction());
 }
 
 void
@@ -72,6 +75,8 @@ State::next()
         if (reachedBreakpoint())
             return;
     }
+
+    print(mStack->getCurrentInstruction());
 }
 
 void
@@ -89,6 +94,7 @@ State::finish()
         if (reachedBreakpoint())
             return;
     }
+    print(mStack->getCurrentInstruction());
 }
 
 void
@@ -169,5 +175,6 @@ State::reachedBreakpoint()
         return false;
 
     printf("Breakpoint reached: %s\n", name.c_str());
+    print(mStack->getCurrentInstruction());
     return true;
 }
