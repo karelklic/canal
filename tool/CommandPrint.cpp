@@ -6,6 +6,8 @@
 #include "../lib/Stack.h"
 #include "../lib/Value.h"
 #include "../lib/Utils.h"
+#include <llvm/ValueSymbolTable.h>
+#include <llvm/Module.h>
 #include <cstdio>
 
 CommandPrint::CommandPrint(Commands &commands)
@@ -45,19 +47,24 @@ CommandPrint::run(const std::vector<std::string> &args)
             continue;
         }
 
-        bool success;
-        unsigned pos = stringToUnsigned(it->substr(1).c_str(), success);
-        if (!success)
-        {
-            printf("Parameter \"%s\": invalid format.\n", it->c_str());
-            continue;
-        }
-
         const llvm::Value *position;
-        if ((*it)[0] == '%')
-            position = mCommands.mState->mSlotTracker->getLocalSlot(pos);
+        bool isNumber;
+        std::string name(it->substr(1));
+        unsigned pos = stringToUnsigned(name.c_str(), isNumber);
+        if (isNumber)
+        {
+            if ((*it)[0] == '%')
+                position = mCommands.mState->mSlotTracker->getLocalSlot(pos);
+            else
+                position = mCommands.mState->mSlotTracker->getGlobalSlot(pos);
+        }
         else
-            position = mCommands.mState->mSlotTracker->getGlobalSlot(pos);
+        {
+            if ((*it)[0] == '%')
+                position = function.getValueSymbolTable().lookup(name);
+            else
+                position = mCommands.mState->mModule->getValueSymbolTable().lookup(name);
+        }
 
         if (!position)
         {
