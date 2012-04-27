@@ -111,6 +111,7 @@ CommandHelp::allCommandsHelp()
     puts("Support facilities");
     printCommand("help", commands);
     printCommand("quit", commands);
+    printCommand("shell", commands);
     puts("");
     puts("Type \"help\" followed by command name for full documentation.");
     puts("Command name abbreviations are allowed if unambiguous.");
