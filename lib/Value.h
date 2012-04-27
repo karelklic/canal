@@ -2,6 +2,7 @@
 #define LIBCANAL_VALUE_H
 
 #include <cstddef>
+#include <string>
 #include <llvm/Instructions.h>
 
 namespace llvm {
@@ -30,8 +31,8 @@ public:
     // Get memory usage (used byte count) of this value.
     virtual size_t memoryUsage() const = 0;
 
-    // Write to output stream for logging purposes.
-    virtual void printToStream(llvm::raw_ostream &ostream) const = 0;
+    // String representation for logging and debugging purposes.
+    virtual std::string toString() const = 0;
 
 public:
     // Implementation of instructions operating on values.

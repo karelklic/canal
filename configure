@@ -15152,7 +15152,7 @@ fi
 done
 
 
-ac_config_files="$ac_config_files canal.spec Makefile lib/Makefile"
+ac_config_files="$ac_config_files canal.spec Makefile lib/Makefile tool/Makefile wrappers/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -16292,6 +16292,8 @@ do
     "canal.spec") CONFIG_FILES="$CONFIG_FILES canal.spec" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
+    "tool/Makefile") CONFIG_FILES="$CONFIG_FILES tool/Makefile" ;;
+    "wrappers/Makefile") CONFIG_FILES="$CONFIG_FILES wrappers/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

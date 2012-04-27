@@ -13,6 +13,8 @@ namespace Canal {
     class Stack;
 }
 
+class SlotTracker;
+
 // State of the interpreter.
 class State
 {
@@ -40,6 +42,7 @@ public:
     Canal::Interpreter *mInterpreter;
     Canal::Stack *mStack;
     std::set<std::string> mFunctionBreakpoints;
+    SlotTracker *mSlotTracker;
 
 protected:
     bool reachedBreakpoint();

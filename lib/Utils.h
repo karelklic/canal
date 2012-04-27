@@ -3,6 +3,7 @@
 
 #include <llvm/Support/raw_ostream.h>
 #include <cstdlib>
+#include <string>
 
 // Fatal error.  Writes a message to stderr and terminates the
 // application.
@@ -71,5 +72,16 @@
                      << __LINE__ << "("                                 \
                      << __FUNCTION__ << "): not implemented\n";         \
     }
+
+namespace llvm {
+    class APInt;
+}
+
+namespace Canal {
+
+std::string toString(const llvm::APInt &num);
+std::string indentExceptFirstLine(const std::string &input, int spaces);
+
+} // namespace Canal
 
 #endif // LIBCANAL_UTILS_H

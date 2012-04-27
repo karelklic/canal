@@ -1,5 +1,6 @@
 #include "State.h"
 #include "Utils.h"
+#include "SlotTracker.h"
 #include "../lib/Interpreter.h"
 #include "../lib/Stack.h"
 #include "../lib/Utils.h"
@@ -17,6 +18,7 @@ State::State(llvm::Module *module)
     mModule = module;
     mInterpreter = new Canal::Interpreter();
     mStack = new Canal::Stack(*module);
+    mSlotTracker = new SlotTracker(module);
 }
 
 State::~State()
@@ -24,6 +26,7 @@ State::~State()
     delete mInterpreter;
     delete mStack;
     delete mModule;
+    delete mSlotTracker;
 }
 
 bool

@@ -1,6 +1,8 @@
 #include "IntegerRange.h"
 #include "Constant.h"
 #include "Utils.h"
+#include <sstream>
+#include <iostream>
 
 namespace Canal {
 namespace Integer {
@@ -35,10 +37,21 @@ Range::memoryUsage() const
     return sizeof(Range);
 }
 
-void
-Range::printToStream(llvm::raw_ostream &ostream) const
+std::string
+Range::toString() const
 {
-    ostream << "Integer:Range()";
+    std::stringstream ss;
+    ss << "Integer::Range: ";
+    if (mEmpty)
+        ss << "empty";
+    else
+    {
+        ss << "{" << std::endl;
+        ss << "    from:" << (mFromInfinity ? "-infinity" : Canal::toString(mFrom)) << std::endl;
+        ss << "    to:" << (mToInfinity ? "infinity" : Canal::toString(mTo)) << std::endl;
+        ss << "}";
+    }
+    return ss.str();
 }
 
 float

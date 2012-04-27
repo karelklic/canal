@@ -32,8 +32,8 @@ public:
     virtual void merge(const Value &value);
     // Implementation of Value::memoryUsage().
     virtual size_t memoryUsage() const;
-    // Implementation of Value::printToStream().
-    virtual void printToStream(llvm::raw_ostream &ostream) const;
+    // Implementation of Value::toString().
+    virtual std::string toString() const;
 
 public:
     Bits *mBits;

@@ -10,12 +10,14 @@ Constant::Constant(const llvm::Constant *constant) : mConstant(constant)
 {
 }
 
-Constant* Constant::clone() const
+Constant *
+Constant::clone() const
 {
     return new Constant(*this);
 }
 
-bool Constant::operator==(const Value &value) const
+bool
+Constant::operator==(const Value &value) const
 {
     // Check if rhs has the same type.
     const Constant *constant = dynamic_cast<const Constant*>(&value);
@@ -25,14 +27,19 @@ bool Constant::operator==(const Value &value) const
     return mConstant == constant->mConstant;
 }
 
-size_t Constant::memoryUsage() const
+size_t
+Constant::memoryUsage() const
 {
     return sizeof(Constant);
 }
 
-void Constant::printToStream(llvm::raw_ostream &ostream) const
+std::string
+Constant::toString() const
 {
-    ostream << "Constant(" << *mConstant << ")";
+    std::string s;
+    llvm::raw_string_ostream os(s);
+    os << "Constant: " << *mConstant;
+    return s;
 }
 
 bool Constant::isAPInt() const
