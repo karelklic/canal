@@ -1,0 +1,5 @@
+#ifndef CANAL_ABSTRACT_CONTAINER_H
+#define CANAL_ABSTRACT_CONTAINER_H
+
+
+#endif
