@@ -43,6 +43,7 @@ AC_CONFIG_FILES([
     Makefile
     lib/Makefile
     tool/Makefile
+    wrappers/Makefile
 ])
 
 AC_OUTPUT

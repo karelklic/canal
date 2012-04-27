@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = lib tool tests
+SUBDIRS = lib tool wrappers tests
 
 EXTRA_DIST = canal.spec.in
 
