@@ -14,6 +14,12 @@ CommandRun::CommandRun(Commands &commands)
 void
 CommandRun::run(const std::vector<std::string> &args)
 {
+    if (!mCommands.mState)
+    {
+        puts("No program specified.  Use the \"file\" command.");
+        return;
+    }
+
     mCommands.mState->addMainFrame();
     mCommands.mState->run();
 }

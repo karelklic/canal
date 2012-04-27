@@ -51,21 +51,6 @@ Commands::~Commands()
     }
 }
 
-static std::vector<std::string>
-tokenize(const std::string &text, const std::string &separators)
-{
-    std::vector<std::string> result;
-    char textString[text.length() + 1];
-    strcpy(textString, text.c_str());
-    char *pos = strtok(textString, separators.c_str());
-    while (pos != NULL)
-    {
-        result.push_back(pos);
-        pos = strtok(NULL, separators.c_str());
-    }
-    return result;
-}
-
 std::vector<std::string>
 Commands::getCompletionMatches(const std::string &text, int point) const
 {

@@ -14,6 +14,21 @@ CommandInfo::CommandInfo(Commands &commands)
 {
 }
 
+std::vector<std::string>
+CommandInfo::getCompletionMatches(const std::vector<std::string> &args, int pointArg, int pointArgOffset) const
+{
+    std::vector<std::string> result;
+    if (pointArg > 1)
+        return result;
+
+    std::string arg = args[pointArg].substr(0, pointArgOffset);
+
+    if (0 == strncmp("module", arg.c_str(), arg.size()))
+        result.push_back("module");
+
+    return result;
+}
+
 void
 CommandInfo::run(const std::vector<std::string> &args)
 {
@@ -32,7 +47,7 @@ CommandInfo::run(const std::vector<std::string> &args)
 void
 CommandInfo::infoModule()
 {
-    if (!mCommands.mState->mModule)
+    if (!mCommands.mState || !mCommands.mState->mModule)
     {
         puts("No module is loaded.");
         return;
