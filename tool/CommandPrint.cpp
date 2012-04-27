@@ -9,6 +9,7 @@
 #include <llvm/ValueSymbolTable.h>
 #include <llvm/Module.h>
 #include <cstdio>
+#include <sstream>
 
 CommandPrint::CommandPrint(Commands &commands)
     : Command("print",
@@ -16,6 +17,57 @@ CommandPrint::CommandPrint(Commands &commands)
               "",
               commands)
 {
+}
+
+std::vector<std::string>
+CommandPrint::getCompletionMatches(const std::vector<std::string> &args, int pointArg, int pointArgOffset) const
+{
+    std::vector<std::string> result;
+    if (!mCommands.mState || !mCommands.mState->isInterpreting())
+        return result;
+
+    std::string arg(args[pointArg].substr(0, pointArgOffset));
+    Canal::State &state = mCommands.mState->mStack->getCurrentState();
+    const llvm::Function &function = mCommands.mState->mStack->getCurrentFunction();
+    mCommands.mState->mSlotTracker->setActiveFunction(&function);
+
+    // Check function arguments.
+    // TODO
+
+    // Check every instruction in the current function.
+    llvm::Function::const_iterator fit = function.begin(), fitend = function.end();
+    for (; fit != fitend; ++fit)
+    {
+        llvm::BasicBlock::const_iterator bit = fit->begin(), bitend = fit->end();
+        for (; bit != bitend; ++bit)
+        {
+            if (bit->hasName())
+            {
+                std::stringstream ss;
+                ss << "%" << bit->getName().data();
+                std::string name = ss.str();
+                if (0 == strncmp(name.c_str(), arg.c_str(), arg.size()))
+                    result.push_back(name);
+            }
+            else
+            {
+                int id = mCommands.mState->mSlotTracker->getLocalSlot(bit);
+                if (id >= 0)
+                {
+                    std::stringstream ss;
+                    ss << "%" << id;
+                    std::string name = ss.str();
+                    if (0 == strncmp(name.c_str(), arg.c_str(), arg.size()))
+                        result.push_back(name);
+                }
+            }
+        }
+    }
+
+    // Check named and unnamed module-level variables.
+    // TODO
+
+    return result;
 }
 
 void
