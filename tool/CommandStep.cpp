@@ -1,6 +1,7 @@
 #include "CommandStep.h"
 #include "Commands.h"
 #include "State.h"
+#include "Utils.h"
 #include <cstdio>
 
 CommandStep::CommandStep(Commands &commands)
@@ -20,5 +21,17 @@ CommandStep::run(const std::vector<std::string> &args)
         return;
     }
 
-    mCommands.mState->step();
+    if (args.size() <= 1)
+        mCommands.mState->step(1);
+    else if (args.size() == 2)
+    {
+        bool success;
+        int count = stringToPositiveInt(args[1].c_str(), success);
+        if (success)
+            mCommands.mState->step(count);
+        else
+            printf("Not a positive number: %s\n", args[1].c_str());
+    }
+    else
+        puts("Invalid syntax.");
 }

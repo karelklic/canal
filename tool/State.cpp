@@ -47,33 +47,44 @@ State::run()
 }
 
 void
-State::step()
+State::step(int count)
 {
-    bool running = mInterpreter->step(*mStack);
-    if (!running)
-        puts("Program finished.");
-    else
-        print(mStack->getCurrentInstruction());
+    for (int i = 0; i < count; ++i)
+    {
+        bool running = mInterpreter->step(*mStack);
+        if (!running)
+        {
+            puts("Program finished.");
+            return;
+        }
+        if (reachedBreakpoint())
+            return;
+    }
+
+    print(mStack->getCurrentInstruction());
 }
 
 void
-State::next()
+State::next(int count)
 {
-    size_t stackSize = mStack->getFrames().size();
-    bool running = mInterpreter->step(*mStack);
-    if (!running)
+    for (int i = 0; i < count; ++i)
     {
-        puts("Program finished.");
-        return;
-    }
-    if (reachedBreakpoint())
-        return;
-
-    while (stackSize < mStack->getFrames().size())
-    {
-        mInterpreter->step(*mStack);
+        size_t stackSize = mStack->getFrames().size();
+        bool running = mInterpreter->step(*mStack);
+        if (!running)
+        {
+            puts("Program finished.");
+            return;
+        }
         if (reachedBreakpoint())
             return;
+
+        while (stackSize < mStack->getFrames().size())
+        {
+            mInterpreter->step(*mStack);
+            if (reachedBreakpoint())
+                return;
+        }
     }
 
     print(mStack->getCurrentInstruction());

@@ -25,8 +25,8 @@ public:
     bool isInterpreting() const;
 
     void run();
-    void step();
-    void next();
+    void step(int count);
+    void next(int count);
     void finish();
 
     void addFunctionBreakpoint(const std::string &functionName);

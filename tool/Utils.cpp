@@ -4,6 +4,9 @@
 #include <string>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Instruction.h>
+#include <errno.h>
+#include <cstdlib>
+#include <climits>
 
 bool
 askYesNo(const char *question)
@@ -29,4 +32,37 @@ print(const llvm::Instruction &instruction)
     llvm::raw_string_ostream os(s);
     os << instruction;
     puts(s.c_str());
+}
+
+unsigned
+stringToUnsigned(const char *str, bool &success)
+{
+    int save_errno = errno;
+    errno = 0;
+    char *e;
+    unsigned long r = strtoul(str, &e, 10);
+    success = !(errno || str == e || *e != '\0' || r > UINT_MAX);
+    errno = save_errno;
+    return r;
+}
+
+int
+stringToPositiveInt(const char *str, bool &success)
+{
+    unsigned r = stringToUnsigned(str, success);
+    if (r > (unsigned)INT_MAX)
+        success = false;
+    return r;
+}
+
+int
+stringToInt(const char *str, bool &success)
+{
+    if (*str != '-')
+        return stringToPositiveInt(str, success);
+
+    unsigned r = stringToUnsigned(str + 1, success);
+    if (r > (unsigned)INT_MAX + 1)
+        success = false;
+    return -(int)r;
 }
