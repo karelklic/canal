@@ -1,8 +1,8 @@
 #include "CommandPrint.h"
 #include "Commands.h"
 #include "State.h"
-#include "SlotTracker.h"
 #include "Utils.h"
+#include "../lib/SlotTracker.h"
 #include "../lib/Stack.h"
 #include "../lib/Value.h"
 #include "../lib/Utils.h"
@@ -122,24 +122,10 @@ CommandPrint::run(const std::vector<std::string> &args)
 void
 CommandPrint::considerCompletionMatch(const llvm::Value &value, std::vector<std::string> &result, const std::string &prefix) const
 {
-    bool isGlobal = llvm::isa<llvm::GlobalValue>(value);
-    std::stringstream ss;
-    ss << (isGlobal ? "@" : "%");
-    if (value.hasName())
-        ss << value.getName().data();
-    else
-    {
-        int id;
-        if (isGlobal)
-            id = mCommands.mState->mSlotTracker->getGlobalSlot(value);
-        else
-            id = mCommands.mState->mSlotTracker->getLocalSlot(value);
-        if (id >= 0)
-            ss << id;
-        else
-            return;
-    }
-    std::string name = ss.str();
+    std::string name(Canal::getName(value, *mCommands.mState->mSlotTracker));
+    if (name.empty())
+        return;
+
     if (0 == strncmp(name.c_str(), prefix.c_str(), prefix.size()))
         result.push_back(name);
 }

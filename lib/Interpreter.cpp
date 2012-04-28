@@ -31,7 +31,7 @@ Interpreter::interpretInstruction(Stack &stack)
     State &state = stack.getCurrentState();
 
     if (llvm::isa<llvm::AllocaInst>(instruction))
-        alloca_((const llvm::AllocaInst&)instruction, state);
+        alloca_((const llvm::AllocaInst&)instruction, stack);
     else if (llvm::isa<llvm::StoreInst>(instruction))
         store((const llvm::StoreInst&)instruction, state);
     else if (llvm::isa<llvm::CallInst>(instruction))
@@ -225,7 +225,7 @@ binaryOperation(const llvm::BinaryOperator &instruction, State &state, void(Valu
     else if (type->isFloatingPointTy())
     {
         const llvm::fltSemantics *semantics;
-#if LLVM_MAJOR >= 3 && LLVM_MINOR >= 1
+#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
         if (type->isHalfTy())
             semantics = &llvm::APFloat::IEEEhalf;
         else
@@ -390,8 +390,9 @@ Interpreter::insertvalue(const llvm::InsertValueInst &instruction, State &state)
 }
 
 void
-Interpreter::alloca_(const llvm::AllocaInst &instruction, State &state)
+Interpreter::alloca_(const llvm::AllocaInst &instruction, Stack &stack)
 {
+    State &state = stack.getCurrentState();
     llvm::Type *type = instruction.getAllocatedType();
     Value *value = NULL;
     if (type->isIntegerTy())
@@ -400,7 +401,7 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction, State &state)
         value = new Integer::Container(integerType.getBitWidth());
     }
     else if (type->isPointerTy())
-        value = new Pointer::InclusionBased();
+        value = new Pointer::InclusionBased(stack.getModule());
     else
         CANAL_DIE();
 
@@ -424,7 +425,7 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction, State &state)
     }
 
     state.addFunctionBlock(instruction, value);
-    Pointer::InclusionBased *pointer = new Pointer::InclusionBased();
+    Pointer::InclusionBased *pointer = new Pointer::InclusionBased(stack.getModule());
     pointer->addMemoryTarget(&instruction, &instruction);
     state.addFunctionVariable(instruction, pointer);
 }

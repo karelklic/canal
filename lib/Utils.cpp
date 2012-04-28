@@ -1,5 +1,7 @@
 #include "Utils.h"
+#include "SlotTracker.h"
 #include <llvm/ADT/APInt.h>
+#include <llvm/Value.h>
 #include <sstream>
 
 namespace Canal {
@@ -34,6 +36,29 @@ indentExceptFirstLine(const std::string &input, int spaces)
         found = result.find_first_of("\n", found + 1 + space.size());
     }
     return result;
+}
+
+std::string
+getName(const llvm::Value &value, SlotTracker &slotTracker)
+{
+    bool isGlobal = llvm::isa<llvm::GlobalValue>(value);
+    std::stringstream ss;
+    ss << (isGlobal ? "@" : "%");
+    if (value.hasName())
+        ss << value.getName().data();
+    else
+    {
+        int id;
+        if (isGlobal)
+            id = slotTracker.getGlobalSlot(value);
+        else
+            id = slotTracker.getLocalSlot(value);
+        if (id >= 0)
+            ss << id;
+        else
+            return "";
+    }
+    return ss.str();
 }
 
 } // namespace Canal

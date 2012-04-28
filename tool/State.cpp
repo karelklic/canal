@@ -1,6 +1,6 @@
 #include "State.h"
 #include "Utils.h"
-#include "SlotTracker.h"
+#include "../lib/SlotTracker.h"
 #include "../lib/Interpreter.h"
 #include "../lib/Stack.h"
 #include "../lib/Utils.h"
@@ -18,7 +18,7 @@ State::State(llvm::Module *module)
     mModule = module;
     mInterpreter = new Canal::Interpreter();
     mStack = new Canal::Stack(*module);
-    mSlotTracker = new SlotTracker(*module);
+    mSlotTracker = new Canal::SlotTracker(*module);
 }
 
 State::~State()
@@ -152,7 +152,7 @@ State::addMainFrame()
         }
         case 1:
         {
-            Canal::Pointer::InclusionBased *argv = new Canal::Pointer::InclusionBased();
+            Canal::Pointer::InclusionBased *argv = new Canal::Pointer::InclusionBased(*mModule);
             initialState.addFunctionVariable(*it, argv);
             // Canal::Array::SingleItem *argumentList = new Canal::Array::SingleItem();
             // argumentList->mSize = new Canal::Integer::Container(signedOne);

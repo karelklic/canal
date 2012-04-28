@@ -31,6 +31,7 @@ print(const llvm::Instruction &instruction)
     std::string s;
     llvm::raw_string_ostream os(s);
     os << instruction;
+    os.flush();
     puts(s.c_str());
 }
 

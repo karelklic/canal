@@ -2,7 +2,9 @@
 #include "Array.h"
 #include "Utils.h"
 #include "State.h"
+#include "SlotTracker.h"
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/BasicBlock.h>
 #include <algorithm>
 #include <sstream>
 #include <iostream>
@@ -100,7 +102,7 @@ Target::memoryUsage() const
 }
 
 std::string
-Target::toString() const
+Target::toString(SlotTracker &slotTracker) const
 {
     std::stringstream ss;
     ss << "Pointer::Target: ";
@@ -120,8 +122,16 @@ Target::toString() const
         ss << mConstant;
         break;
     case MemoryBlock:
-        ss << "TODO"; // mInstruction
+    {
+        const llvm::Instruction &instruction = llvm::cast<llvm::Instruction>(*mInstruction);
+        slotTracker.setActiveFunction(*instruction.getParent()->getParent());
+        std::string name(Canal::getName(instruction, slotTracker));
+        if (name.empty())
+            name = "<failed to name the location>";
+
+        ss << name;
         break;
+    }
     default:
         CANAL_DIE();
     }
@@ -154,6 +164,10 @@ Target::dereference(const State &state) const
     default:
         CANAL_DIE();
     }
+}
+
+InclusionBased::InclusionBased(const llvm::Module &module) : mModule(module)
+{
 }
 
 InclusionBased *
@@ -214,12 +228,19 @@ InclusionBased::memoryUsage() const
 std::string
 InclusionBased::toString() const
 {
+    SlotTracker slotTracker(mModule);
     std::stringstream ss;
     ss << "Pointer::InclusionBased: [" << std::endl;
     for (PlaceTargetMap::const_iterator it = mTargets.begin(); it != mTargets.end(); ++it)
     {
-        ss << "    { assigned: " << "TODO" /*it->first*/ << std::endl;
-        ss << "      target: " << indentExceptFirstLine(it->second.toString(), 14) << " }" << std::endl;
+        const llvm::Instruction &instruction = llvm::cast<llvm::Instruction>(*it->first);
+        slotTracker.setActiveFunction(*instruction.getParent()->getParent());
+        std::string name(Canal::getName(*it->first, slotTracker));
+        if (name.empty())
+            name = "<failed to name the location>";
+
+        ss << "    { assigned: " << name << std::endl;
+        ss << "      target: " << indentExceptFirstLine(it->second.toString(slotTracker), 14) << " }" << std::endl;
     }
     ss << "]";
     return ss.str();

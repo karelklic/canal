@@ -75,12 +75,21 @@
 
 namespace llvm {
     class APInt;
+    class Value;
 }
 
 namespace Canal {
 
+class SlotTracker;
+
 std::string toString(const llvm::APInt &num);
 std::string indentExceptFirstLine(const std::string &input, int spaces);
+
+// @param slotTracker
+//   Slot Tracker with value's function assigned.
+// @returns
+//   Empty string when no name was found.
+std::string getName(const llvm::Value &value, SlotTracker &slotTracker);
 
 } // namespace Canal
 

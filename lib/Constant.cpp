@@ -39,6 +39,7 @@ Constant::toString() const
     std::string s;
     llvm::raw_string_ostream os(s);
     os << "Constant: " << *mConstant;
+    os.flush();
     return s;
 }
 

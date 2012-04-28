@@ -19,6 +19,8 @@ libcanal_la_SOURCES = \
 	Pointer.h \
 	Pointer.cpp \
 	SELinuxModulePass.cpp \
+	SlotTracker.h \
+	SlotTracker.cpp \
 	Stack.h \
 	Stack.cpp \
 	State.h \

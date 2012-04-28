@@ -6,11 +6,29 @@
 #include <llvm/Instructions.h>
 #include <llvm/ADT/SmallVector.h>
 
+namespace Canal {
+
 SlotTracker::SlotTracker(const llvm::Module &module)
     : mModule(module), mModuleProcessed(false),
       mFunction(NULL), mFunctionProcessed(false),
       mModuleNext(0), mFunctionNext(0), mMetadataNext(0)
 {
+}
+
+void
+SlotTracker::setActiveFunction(const llvm::Function &function)
+{
+    if (mFunction == &function)
+        return;
+    else if (mFunction)
+    {
+        // Discard the old function level map and list.
+        mFunctionMap.clear();
+        mFunctionList.clear();
+    }
+
+    mFunction = &function;
+    mFunctionProcessed = false;
 }
 
 int
@@ -64,22 +82,6 @@ SlotTracker::getMetadataSlot(const llvm::MDNode &node)
     // Find the MDNode in the node map.
     mdn_iterator it = mMetadataMap.find(&node);
     return it == mMetadataMap.end() ? -1 : (int)it->second;
-}
-
-void
-SlotTracker::setActiveFunction(const llvm::Function &function)
-{
-    if (mFunction == &function)
-        return;
-    else if (mFunction)
-    {
-        // Discard the old function level map and list.
-        mFunctionMap.clear();
-        mFunctionList.clear();
-    }
-
-    mFunction = &function;
-    mFunctionProcessed = false;
 }
 
 void
@@ -223,3 +225,4 @@ SlotTracker::processFunction()
     mFunctionProcessed = true;
 }
 
+} // namespace Canal

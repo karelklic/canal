@@ -5,6 +5,7 @@
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 #include <llvm/Support/IRReader.h>
+#include <llvm/Support/raw_ostream.h>
 #include <cstdio>
 #include <sys/types.h>
 #include <dirent.h>
@@ -71,6 +72,15 @@ CommandFile::run(const std::vector<std::string> &args)
     if (!module)
     {
         puts("Failed to load the module.");
+        std::string s;
+        llvm::raw_string_ostream os(s);
+#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
+        err.print(NULL, os, false);
+#else
+        err.Print(NULL, os);
+#endif
+        os.flush();
+        puts(s.c_str());
         return;
     }
 

@@ -11,9 +11,8 @@ namespace llvm {
 namespace Canal {
     class Interpreter;
     class Stack;
+    class SlotTracker;
 }
-
-class SlotTracker;
 
 // State of the interpreter.
 class State
@@ -42,7 +41,7 @@ public:
     Canal::Interpreter *mInterpreter;
     Canal::Stack *mStack;
     std::set<std::string> mFunctionBreakpoints;
-    SlotTracker *mSlotTracker;
+    Canal::SlotTracker *mSlotTracker;
 
 protected:
     bool reachedBreakpoint();

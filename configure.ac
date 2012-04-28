@@ -19,10 +19,10 @@ AC_PATH_PROG([LLVM_CONFIG], [llvm-config], [no])
 
 LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
 LLVM_CFLAGS=`$LLVM_CONFIG --cppflags | sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
-LLVM_LIBS="`$LLVM_CONFIG --libs`"
+LLVM_LIBS=`$LLVM_CONFIG --libs`
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
-# Quadrigaphs: @<:@ gives you [ and @>:@ gives you ].
-CPPFLAGS=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@>:@*\).\(@<:@0-9@>:@*\).*/-DLLVM_MAJOR=\\1 -DLLVM_MINOR=\\2/g'`
+# Quadrigraphs: @<:@ gives you [ and @:>@ gives you ].
+CPPFLAGS=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
 AC_SUBST([LLVM_CFLAGS])
 AC_SUBST([LLVM_LIBS])
 AC_SUBST([LLVM_LDFLAGS])
@@ -33,7 +33,7 @@ AC_CONFIG_TESTDIR(tests)
 AC_CONFIG_FILES([tests/Makefile tests/atlocal])
 AM_MISSING_PROG([AUTOM4TE], [autom4te])
 # Needed by tests/atlocal.in.
-AC_SUBST([O0CFLAGS], [`echo $CFLAGS   | sed 's/-O[[0-9]] *//g'`])
+AC_SUBST([O0CFLAGS], [`echo $CFLAGS | sed 's/-O[[0-9]] *//g'`])
 
 AC_CHECK_HEADERS([readline/readline.h], [],
 	[AC_MSG_ERROR([Please install readline development headers])])

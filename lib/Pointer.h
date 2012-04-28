@@ -9,9 +9,10 @@ namespace llvm {
 }
 
 namespace Canal {
-namespace Pointer {
 
-class InclusionBased;
+class SlotTracker;
+
+namespace Pointer {
 
 // Pointer target -- where the pointer points to.
 // Pointer can:
@@ -43,7 +44,7 @@ public:
 
     // Get memory usage (used byte count) of this value.
     size_t memoryUsage() const;
-    std::string toString() const;
+    std::string toString(SlotTracker &slotTracker) const;
 
     Value *dereference(const State &state) const;
 
@@ -71,6 +72,8 @@ typedef std::map<const llvm::Value*, Target> PlaceTargetMap;
 class InclusionBased : public Value
 {
 public:
+    InclusionBased(const llvm::Module &module);
+
     // Implementation of Value::clone().
     // Covariant return type -- it really overrides Value::clone().
     virtual InclusionBased* clone() const;
@@ -97,6 +100,8 @@ public:
     const PlaceTargetMap &getTargets() const { return mTargets; }
 
 protected:
+    const llvm::Module &mModule;
+
     // llvm::Value represents a position in the program.  It points to
     // the instruction where the target was assigned/stored to the
     // pointer.

@@ -39,8 +39,6 @@ canal_SOURCES = \
 	CommandStep.cpp \
 	Commands.h \
 	Commands.cpp \
-	SlotTracker.h \
-	SlotTracker.cpp \
 	State.h \
 	State.cpp \
 	Utils.h \

@@ -156,7 +156,7 @@ protected:
     virtual void insertvalue(const llvm::InsertValueInst &instruction, State &state);
 
     // Memory Access and Adressing Operations
-    virtual void alloca_(const llvm::AllocaInst &instruction, State &state);
+    virtual void alloca_(const llvm::AllocaInst &instruction, Stack &stack);
     virtual void load(const llvm::LoadInst &instruction, State &state);
     virtual void store(const llvm::StoreInst &instruction, State &state);
     virtual void fence(const llvm::FenceInst &instruction, State &state);
