@@ -32,7 +32,30 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args, int poi
     mCommands.mState->mSlotTracker->setActiveFunction(&function);
 
     // Check function arguments.
-    // TODO
+    llvm::Function::ArgumentListType::const_iterator it = function.getArgumentList().begin();
+    for (; it != function.getArgumentList().end(); ++it)
+    {
+        if (it->hasName())
+        {
+            std::stringstream ss;
+            ss << "%" << it->getName().data();
+            std::string name = ss.str();
+            if (0 == strncmp(name.c_str(), arg.c_str(), arg.size()))
+                result.push_back(name);
+        }
+        else
+        {
+            int id = mCommands.mState->mSlotTracker->getLocalSlot(it);
+            if (id >= 0)
+            {
+                std::stringstream ss;
+                ss << "%" << id;
+                std::string name = ss.str();
+                if (0 == strncmp(name.c_str(), arg.c_str(), arg.size()))
+                    result.push_back(name);
+            }
+        }
+    }
 
     // Check every instruction in the current function.
     llvm::Function::const_iterator fit = function.begin(), fitend = function.end();
@@ -93,7 +116,7 @@ CommandPrint::run(const std::vector<std::string> &args)
     {
         if (it->size() == 0)
             continue;
-        if ((*it)[0] != '%' && (*it)[0] != '@')
+        if (((*it)[0] != '%' && (*it)[0] != '@') || it->size() == 1)
         {
             printf("Parameter \"%s\": invalid format.\n", it->c_str());
             continue;
@@ -120,7 +143,7 @@ CommandPrint::run(const std::vector<std::string> &args)
 
         if (!position)
         {
-            printf("Parameter \"%s\": does not exist in current scope.", it->c_str());
+            printf("Parameter \"%s\": does not exist in current scope.\n", it->c_str());
             continue;
         }
 
