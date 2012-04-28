@@ -106,6 +106,9 @@ Stack::Stack(llvm::Module &module) : mModule(module), mHasEnteredNewFrame(false)
 bool
 Stack::nextInstruction()
 {
+    if (mFrames.empty())
+        return false;
+
     if (mHasReturnedFromFrame)
         mHasReturnedFromFrame = false;
 
