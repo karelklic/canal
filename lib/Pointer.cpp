@@ -152,13 +152,13 @@ Target::dereference(const State &state) const
         return NULL;
     case MemoryBlock:
     {
-        Value *variable = state.findVariable(*mInstruction);
-        if (!variable)
+        Value *block = state.findBlock(*mInstruction);
+        if (!block)
             return NULL;
         if (!mArrayOffset)
-            return variable;
+            return block;
         // Do not care about offsets when lacking better array.
-        const Array::SingleItem &array = dynamic_cast<const Array::SingleItem&>(*variable);
+        const Array::SingleItem &array = dynamic_cast<const Array::SingleItem&>(*block);
         return array.mValue;
     }
     default:

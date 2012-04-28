@@ -213,6 +213,20 @@ State::findVariable(const llvm::Value &place) const
     return NULL;
 }
 
+Value *
+State::findBlock(const llvm::Value &place) const
+{
+    PlaceValueMap::const_iterator it = mGlobalBlocks.find(&place);
+    if (it != mGlobalBlocks.end())
+        return it->second;
+
+    it = mFunctionBlocks.find(&place);
+    if (it != mFunctionBlocks.end())
+        return it->second;
+
+    return NULL;
+}
+
 llvm::raw_ostream&
 operator<<(llvm::raw_ostream& ostream,
            const State &state)

@@ -48,6 +48,7 @@ Container::operator==(const Value &value) const
 void
 Container::merge(const Value &value)
 {
+    // TODO: merge with constant!
     const Container &container = dynamic_cast<const Container&>(value);
     if (mBits)
     {

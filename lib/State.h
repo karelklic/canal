@@ -1,3 +1,4 @@
+
 #ifndef LIBCANAL_STATE_H
 #define LIBCANAL_STATE_H
 
@@ -68,6 +69,11 @@ public:
     // place is found, the variable is returned.  Otherwise NULL is
     // returned.
     Value *findVariable(const llvm::Value &place) const;
+
+    // Search both global and function blocks for a place.  If the
+    // place is found, the block is returned.  Otherwise NULL is
+    // returned.
+    Value *findBlock(const llvm::Value &place) const;
 
 protected:
     // The key (llvm::Value*) is not owned by this class.  It is not
