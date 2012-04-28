@@ -7,8 +7,9 @@
 
 CommandPwd::CommandPwd(Commands &commands)
     : Command("pwd",
-              "Print working directory",
               "",
+              "Print working directory",
+              "Print working directory.",
               commands)
 {
 }

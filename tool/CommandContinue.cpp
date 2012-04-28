@@ -5,6 +5,7 @@
 
 CommandContinue::CommandContinue(Commands &commands)
     : Command("continue",
+              "",
               "Continue the program being interpreted",
               "",
               commands)

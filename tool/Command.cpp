@@ -1,10 +1,12 @@
 #include "Command.h"
 
 Command::Command(const std::string &name,
+                 const std::string &shortcut,
                  const std::string &helpLine,
                  const std::string &help,
                  Commands &commands)
-    : mName(name), mHelpLine(helpLine), mHelp(help), mCommands(commands)
+    : mName(name), mShortcut(shortcut),
+      mHelpLine(helpLine), mHelp(help), mCommands(commands)
 {
 }
 

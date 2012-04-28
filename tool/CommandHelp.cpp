@@ -5,8 +5,9 @@
 
 CommandHelp::CommandHelp(Commands &commands)
     : Command("help",
+              "h",
               "Print list of commands",
-              "",
+              "Print list of commands.",
               commands)
 {
 }

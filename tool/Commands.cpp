@@ -143,7 +143,7 @@ Commands::executeLine(const std::string &line)
     // Find the command to be run.  Run the command.
     for (std::vector<Command*>::const_iterator it = mCommandList.begin(); it != mCommandList.end(); ++it)
     {
-        if ((*it)->getName() == args[0])
+        if ((*it)->getName() == args[0] || (*it)->getShortcut() == args[0])
         {
             (*it)->run(args);
             return;

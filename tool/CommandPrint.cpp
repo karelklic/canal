@@ -13,8 +13,9 @@
 
 CommandPrint::CommandPrint(Commands &commands)
     : Command("print",
+              "p",
               "Print value of a variable",
-              "",
+              "Print value of a variable.",
               commands)
 {
 }

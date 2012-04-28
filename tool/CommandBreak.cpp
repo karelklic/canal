@@ -4,8 +4,9 @@
 
 CommandBreak::CommandBreak(Commands &commands)
     : Command("break",
-              "Set breakpoint at specified line or function",
               "",
+              "Set breakpoint at specified function",
+              "Set breakpoint at specified function.",
               commands)
 {
 }

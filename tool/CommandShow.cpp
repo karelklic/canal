@@ -2,8 +2,9 @@
 
 CommandShow::CommandShow(Commands &commands)
     : Command("show",
-              "Generic command for showing things about the interpreter",
               "",
+              "Generic command for showing things about the interpreter",
+              "Generic command for showing things about the interpreter.",
               commands)
 {
 }

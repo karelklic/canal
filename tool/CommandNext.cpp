@@ -6,8 +6,9 @@
 
 CommandNext::CommandNext(Commands &commands)
     : Command("next",
+              "n",
               "Step one instruction on current level",
-              "",
+              "Step one instruction on current level.",
               commands)
 {
 }

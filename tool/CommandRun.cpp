@@ -5,8 +5,9 @@
 
 CommandRun::CommandRun(Commands &commands)
     : Command("run",
-              "Start program interpretation",
               "",
+              "Start program interpretation",
+              "Start program interpretation.",
               commands)
 {
 }

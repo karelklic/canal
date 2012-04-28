@@ -6,6 +6,7 @@
 
 CommandCd::CommandCd(Commands &commands)
     : Command("cd",
+              "",
               "Set working directory to DIR for interpreter",
               "Set working directory to DIR for interpreter.  "
               "Affects module loading.",

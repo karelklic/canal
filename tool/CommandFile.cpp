@@ -12,8 +12,9 @@
 
 CommandFile::CommandFile(Commands &commands)
     : Command("file",
-              "Use FILE as program to be interpreted",
               "",
+              "Use FILE as program to be interpreted",
+              "Use FILE as program to be interpreted.  Both binary and textual LLVM bitcode files can be loaded.",
               commands)
 {
 }

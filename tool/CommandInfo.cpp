@@ -8,8 +8,9 @@
 
 CommandInfo::CommandInfo(Commands &commands)
     : Command("info",
-              "Generic command for showing things about the program being interpreted",
               "",
+              "Generic command for showing things about the program being interpreted",
+              "Generic command for showing things about the program being interpreted.",
               commands)
 {
 }

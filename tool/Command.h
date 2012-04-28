@@ -10,12 +10,15 @@ class Command
 {
 public:
     Command(const std::string &name,
+            const std::string &shortcut,
             const std::string &helpLine,
             const std::string &help,
             Commands &commands);
 
     // User printable name of the function.
     const std::string &getName() const { return mName; }
+    // Command shortcut.  Empty string if command has none.
+    const std::string &getShortcut() const { return mShortcut; }
     // Short explanation of the command.
     const std::string &getHelpLine() const { return mHelpLine; }
     // Long explanation of the command.
@@ -28,6 +31,7 @@ public:
     virtual void run(const std::vector<std::string> &args) = 0;
 protected:
     std::string mName;
+    std::string mShortcut;
     std::string mHelpLine;
     std::string mHelp;
     Commands &mCommands;

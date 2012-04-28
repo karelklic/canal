@@ -6,8 +6,9 @@
 
 CommandBacktrace::CommandBacktrace(Commands &commands)
     : Command("backtrace",
+              "bt",
               "Print backtrace of all stack frames",
-              "",
+              "Print backtrace of all stack frames.",
               commands)
 {
 }

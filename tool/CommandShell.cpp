@@ -10,6 +10,7 @@
 
 CommandShell::CommandShell(Commands &commands)
     : Command("shell",
+              "",
               "Execute the rest of the line as a shell command",
               "Execute the rest of the line as a shell command.\n"
               "With no arguments, run an inferior shell.\n"

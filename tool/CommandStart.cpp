@@ -7,8 +7,9 @@
 
 CommandStart::CommandStart(Commands &commands)
     : Command("start",
-              "Interpret the program until the beginning of the main procedure",
               "",
+              "Interpret the program until the beginning of the main procedure",
+              "Interpret the program until the beginning of the main procedure.",
               commands)
 {
 }

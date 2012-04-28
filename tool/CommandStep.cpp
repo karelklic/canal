@@ -6,8 +6,9 @@
 
 CommandStep::CommandStep(Commands &commands)
     : Command("step",
+              "s",
               "Step one instruction exactly",
-              "",
+              "Step one instruction exactly,",
               commands)
 {
 }

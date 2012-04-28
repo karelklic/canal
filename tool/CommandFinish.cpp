@@ -5,8 +5,9 @@
 
 CommandFinish::CommandFinish(Commands &commands)
     : Command("finish",
+              "fin",
               "Execute until selected stack frame returns",
-              "",
+              "Execute until selected stack frame returns.",
               commands)
 {
 }
