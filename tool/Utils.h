@@ -15,5 +15,4 @@ unsigned stringToUnsigned(const char *str, bool &success);
 int stringToPositiveInt(const char *str, bool &success);
 int stringToInt(const char *str, bool &success);
 
-
 #endif // CANAL_UTILS_H

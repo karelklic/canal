@@ -1,5 +1,7 @@
 #include "Integer.h"
 #include "Utils.h"
+#include <sstream>
+#include <iostream>
 
 namespace Canal {
 namespace Integer {
@@ -24,12 +26,14 @@ Container::~Container()
     delete mBits;
 }
 
-Container *Container::clone() const
+Container *
+Container::clone() const
 {
     return new Container(*this);
 }
 
-bool Container::operator==(const Value &value) const
+bool
+Container::operator==(const Value &value) const
 {
     const Container *container = dynamic_cast<const Container*>(&value);
     if (!container)
@@ -41,7 +45,8 @@ bool Container::operator==(const Value &value) const
     return true;
 }
 
-void Container::merge(const Value &value)
+void
+Container::merge(const Value &value)
 {
     const Container &container = dynamic_cast<const Container&>(value);
     if (mBits)
@@ -58,7 +63,8 @@ void Container::merge(const Value &value)
         CANAL_DIE();
 }
 
-size_t Container::memoryUsage() const
+size_t
+Container::memoryUsage() const
 {
     size_t size = sizeof(Container);
     if (mBits)
@@ -66,9 +72,14 @@ size_t Container::memoryUsage() const
     return size;
 }
 
-void Container::printToStream(llvm::raw_ostream &ostream) const
+std::string
+Container::toString() const
 {
-    ostream << "Integer::Container()";
+    std::stringstream ss;
+    ss << "Integer::Container: {" << std::endl;
+    ss << "    bits: " << indentExceptFirstLine(mBits->toString(), 10) << std::endl;
+    ss << "}";
+    return ss.str();
 }
 
 } // namespace Integer

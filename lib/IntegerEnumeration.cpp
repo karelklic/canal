@@ -1,6 +1,8 @@
 #include "IntegerEnumeration.h"
 #include "Constant.h"
 #include "Utils.h"
+#include <sstream>
+#include <iostream>
 
 namespace Canal {
 namespace Integer {
@@ -50,10 +52,18 @@ Enumeration::memoryUsage() const
     return result;
 }
 
-void
-Enumeration::printToStream(llvm::raw_ostream &ostream) const
+std::string
+Enumeration::toString() const
 {
-    ostream << "Integer:Enumeration()";
+    std::stringstream ss;
+    ss << "Integer::Enumeration: [";
+    for (std::set<llvm::APInt, APIntComp>::const_iterator it = mValues.begin(); it != mValues.end(); ++it)
+    {
+        ss << "    " << Canal::toString(*it) << std::endl;
+    }
+
+    ss << "]";
+    return ss.str();
 }
 
 float

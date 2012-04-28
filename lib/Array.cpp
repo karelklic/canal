@@ -1,5 +1,7 @@
 #include "Array.h"
 #include "Utils.h"
+#include <sstream>
+#include <iostream>
 
 namespace Canal {
 namespace Array {
@@ -25,12 +27,14 @@ SingleItem::~SingleItem()
     delete mSize;
 }
 
-SingleItem *SingleItem::clone() const
+SingleItem *
+SingleItem::clone() const
 {
     return new SingleItem(*this);
 }
 
-bool SingleItem::operator==(const Value &value) const
+bool
+SingleItem::operator==(const Value &value) const
 {
     const SingleItem *singleItem = dynamic_cast<const SingleItem*>(&value);
     if (!singleItem)
@@ -49,7 +53,8 @@ bool SingleItem::operator==(const Value &value) const
     return true;
 }
 
-void SingleItem::merge(const Value &value)
+void
+SingleItem::merge(const Value &value)
 {
     const SingleItem &singleItem = dynamic_cast<const SingleItem&>(value);
     CANAL_ASSERT(mValue && singleItem.mValue); // implement if necessary
@@ -58,7 +63,8 @@ void SingleItem::merge(const Value &value)
     mSize->merge(*singleItem.mSize);
 }
 
-size_t SingleItem::memoryUsage() const
+size_t
+SingleItem::memoryUsage() const
 {
     size_t size = sizeof(SingleItem);
     size += (mValue ? mValue->memoryUsage() : 0);
@@ -66,9 +72,15 @@ size_t SingleItem::memoryUsage() const
     return size;
 }
 
-void SingleItem::printToStream(llvm::raw_ostream &ostream) const
+std::string
+SingleItem::toString() const
 {
-    ostream << "Array::SingleItem(size:" << mSize << ")";
+    std::stringstream ss;
+    ss << "Array::SingleItem: {" << std::endl;
+    ss << "    size:" << indentExceptFirstLine(mSize->toString(), 9) << std::endl;
+    ss << "    value: " << indentExceptFirstLine(mValue->toString(), 11) << std::endl;
+    ss << "}";
+    return ss.str();
 }
 
 } // namespace Array

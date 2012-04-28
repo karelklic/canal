@@ -1,7 +1,7 @@
 #include "IntegerBits.h"
 #include "Constant.h"
 #include "Utils.h"
-#include <llvm/Support/raw_ostream.h>
+#include <sstream>
 
 namespace Canal {
 namespace Integer {
@@ -51,22 +51,23 @@ Bits::memoryUsage() const
     return sizeof(Bits);
 }
 
-void
-Bits::printToStream(llvm::raw_ostream &ostream) const
+std::string
+Bits::toString() const
 {
-    ostream << "Integer::Bits(";
+    std::stringstream ss;
+    ss << "Integer::Bits: ";
     for (int pos = 0; pos < mBits0.getBitWidth(); ++pos)
     {
         switch (getBitValue(pos))
         {
-        case -1: ostream << "_"; break;
-        case  0: ostream << "0"; break;
-        case  1: ostream << "1"; break;
-        case  2: ostream << "2"; break;
+        case -1: ss << "_"; break;
+        case  0: ss << "0"; break;
+        case  1: ss << "1"; break;
+        case  2: ss << "2"; break;
         default: CANAL_DIE();
         }
     }
-    ostream << ")";
+    return ss.str();
 }
 
 static void

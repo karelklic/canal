@@ -25,6 +25,7 @@ libcanal_la_SOURCES = \
 	State.cpp \
 	Structure.h \
 	Utils.h \
+	Utils.cpp \
 	Value.h \
 	Value.cpp
 

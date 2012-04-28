@@ -4,6 +4,8 @@
 #include "State.h"
 #include <llvm/Support/raw_ostream.h>
 #include <algorithm>
+#include <sstream>
+#include <iostream>
 
 namespace Canal {
 namespace Pointer {
@@ -27,7 +29,8 @@ Target::~Target()
     delete mArrayOffset;
 }
 
-bool Target::operator==(const Target &target) const
+bool
+Target::operator==(const Target &target) const
 {
     if (mType != target.mType)
         return false;
@@ -54,12 +57,14 @@ bool Target::operator==(const Target &target) const
     return true;
 }
 
-bool Target::operator!=(const Target &target) const
+bool
+Target::operator!=(const Target &target) const
 {
     return !(*this == target);
 }
 
-void Target::merge(const Target &target)
+void
+Target::merge(const Target &target)
 {
     CANAL_ASSERT(mType == target.mType);
     switch (mType)
@@ -88,12 +93,47 @@ void Target::merge(const Target &target)
     }
 }
 
-size_t Target::memoryUsage() const
+size_t
+Target::memoryUsage() const
 {
     return sizeof(Target) + (mArrayOffset ? mArrayOffset->memoryUsage() : 0);
 }
 
-Value *Target::dereference(const State &state) const
+std::string
+Target::toString() const
+{
+    std::stringstream ss;
+    ss << "Pointer::Target: ";
+    if (mArrayOffset)
+    {
+        ss << "{" << std::endl;
+        ss << "    array offset: " << mArrayOffset->toString() << std::endl;
+        ss << "    target: ";
+    }
+
+    switch (mType)
+    {
+    case Uninitialized:
+        ss << "uninitialized";
+        break;
+    case Constant:
+        ss << mConstant;
+        break;
+    case MemoryBlock:
+        ss << "TODO"; // mInstruction
+        break;
+    default:
+        CANAL_DIE();
+    }
+
+    if (mArrayOffset)
+        ss << std::endl << "}";
+
+    return ss.str();
+}
+
+Value *
+Target::dereference(const State &state) const
 {
     switch (mType)
     {
@@ -116,12 +156,14 @@ Value *Target::dereference(const State &state) const
     }
 }
 
-InclusionBased* InclusionBased::clone() const
+InclusionBased *
+InclusionBased::clone() const
 {
     return new InclusionBased(*this);
 }
 
-bool InclusionBased::operator==(const Value &value) const
+bool
+InclusionBased::operator==(const Value &value) const
 {
     // Check if the value has the same type.
     const InclusionBased *pointer = dynamic_cast<const InclusionBased*>(&value);
@@ -144,7 +186,8 @@ bool InclusionBased::operator==(const Value &value) const
     return true;
 }
 
-void InclusionBased::merge(const Value &value)
+void
+InclusionBased::merge(const Value &value)
 {
     const InclusionBased &vv = dynamic_cast<const InclusionBased&>(value);
     PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
@@ -158,7 +201,8 @@ void InclusionBased::merge(const Value &value)
     }
 }
 
-size_t InclusionBased::memoryUsage() const
+size_t
+InclusionBased::memoryUsage() const
 {
     size_t size = sizeof(InclusionBased);
     PlaceTargetMap::const_iterator it = mTargets.begin();
@@ -167,17 +211,28 @@ size_t InclusionBased::memoryUsage() const
     return size;
 }
 
-void InclusionBased::printToStream(llvm::raw_ostream &ostream) const
+std::string
+InclusionBased::toString() const
 {
-    ostream << "Pointer::InclusionBased(size: " << mTargets.size() << "items)";
+    std::stringstream ss;
+    ss << "Pointer::InclusionBased: [" << std::endl;
+    for (PlaceTargetMap::const_iterator it = mTargets.begin(); it != mTargets.end(); ++it)
+    {
+        ss << "    { assigned: " << "TODO" /*it->first*/ << std::endl;
+        ss << "      target: " << indentExceptFirstLine(it->second.toString(), 14) << " }" << std::endl;
+    }
+    ss << "]";
+    return ss.str();
 }
 
-void InclusionBased::addConstantTarget(const llvm::Value *instruction, size_t constant)
+void
+InclusionBased::addConstantTarget(const llvm::Value *instruction, size_t constant)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
-void InclusionBased::addMemoryTarget(const llvm::Value *instruction, const llvm::Value *target, Value *arrayOffset /*= NULL*/)
+void
+InclusionBased::addMemoryTarget(const llvm::Value *instruction, const llvm::Value *target, Value *arrayOffset /*= NULL*/)
 {
     Target newTarget;
     newTarget.mType = Target::MemoryBlock;

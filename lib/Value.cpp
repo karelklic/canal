@@ -139,7 +139,7 @@ Value::fcmp(const Value &a, const Value &b, llvm::CmpInst::Predicate predicate)
 llvm::raw_ostream&
 operator<<(llvm::raw_ostream& ostream, const Value &value)
 {
-    value.printToStream(ostream);
+    ostream << value.toString();
     return ostream;
 }
 

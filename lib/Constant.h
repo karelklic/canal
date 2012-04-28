@@ -24,8 +24,8 @@ public:
     virtual bool operator==(const Value &value) const;
     // Implementation of Value::memoryUsage().
     virtual size_t memoryUsage() const;
-    // Implementation of Value::printToStream().
-    virtual void printToStream(llvm::raw_ostream &ostream) const;
+    // Implementation of Value::toString().
+    virtual std::string toString() const;
 
     // Checks if this constant is an integer number.
     bool isAPInt() const;

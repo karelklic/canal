@@ -30,7 +30,7 @@ public:
         MemoryBlock
     };
 
-    // Initializes the target to the Uninitialized type.
+    // Initializes the target to the uninitialized type.
     Target();
     Target(const Target &target);
     ~Target();
@@ -43,6 +43,7 @@ public:
 
     // Get memory usage (used byte count) of this value.
     size_t memoryUsage() const;
+    std::string toString() const;
 
     Value *dereference(const State &state) const;
 
@@ -79,8 +80,8 @@ public:
     virtual void merge(const Value &value);
     // Implementation of Value::memoryUsage().
     virtual size_t memoryUsage() const;
-    // Implementation of Value::printToStream().
-    virtual void printToStream(llvm::raw_ostream &ostream) const;
+    // Implementation of Value::toString().
+    virtual std::string toString() const;
 
     void addConstantTarget(const llvm::Value *instruction, size_t constant);
 
