@@ -60,6 +60,7 @@ main(int argc, char **argv)
     // Tell the completer that we want a crack first.
     rl_completion_entry_function = complete_entry;
     rl_terminal_name = getenv("TERM");
+    rl_completer_word_break_characters = (char*)" \t\n";
 
     // Stifle the history list, remembering only the last 7 entries.
     stifle_history(256);

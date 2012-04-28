@@ -18,22 +18,22 @@ class SlotTracker
 {
 public:
     /// Construct from a module.
-    SlotTracker(const llvm::Module *module);
+    SlotTracker(const llvm::Module &module);
 
     /// Get the slot number for a value that is local to a function.
     /// Return the slot number of the specified value in it's type
     /// plane.  If something is not in the SlotTracker, return -1.
-    int getLocalSlot(const llvm::Value *value);
+    int getLocalSlot(const llvm::Value &value);
     const llvm::Value *getLocalSlot(int num);
     /// Get the slot number of a global value.
-    int getGlobalSlot(const llvm::GlobalValue *value);
+    int getGlobalSlot(const llvm::Value &value);
     const llvm::Value *getGlobalSlot(int num);
     /// Get the slot number of a MDNode.
-    int getMetadataSlot(const llvm::MDNode *node);
+    int getMetadataSlot(const llvm::MDNode &node);
 
     /// If you'd like to deal with a function instead of just a module, use
     /// this method to get its data into the SlotTracker.
-    void setActiveFunction(const llvm::Function *function);
+    void setActiveFunction(const llvm::Function &function);
 
     /// MDNode map iterators.
     typedef std::map<const llvm::MDNode*, unsigned>::iterator mdn_iterator;
@@ -51,13 +51,13 @@ protected:
     void initialize();
 
     /// Insert the specified Value* into the slot table.
-    void createFunctionSlot(const llvm::Value *value);
+    void createFunctionSlot(const llvm::Value &value);
 
     /// Insert the specified GlobalValue* into the slot table.
-    void createModuleSlot(const llvm::GlobalValue *value);
+    void createModuleSlot(const llvm::GlobalValue &value);
 
     /// Insert the specified MDNode* into the slot table.
-    void createMetadataSlot(const llvm::MDNode *node);
+    void createMetadataSlot(const llvm::MDNode &node);
 
     /// Add all of the module level global variables (and their
     /// initializers) and function declarations, but not the contents
@@ -68,15 +68,13 @@ protected:
     /// instructions.
     void processFunction();
 
-    SlotTracker(const SlotTracker &);  // DO NOT IMPLEMENT
-    void operator=(const SlotTracker &);  // DO NOT IMPLEMENT
-
 protected:
     /// The module for which we are holding slot numbers.
-    const llvm::Module* mModule;
+    const llvm::Module &mModule;
+    bool mModuleProcessed;
 
     /// The function for which we are holding slot numbers.
-    const llvm::Function* mFunction;
+    const llvm::Function *mFunction;
     bool mFunctionProcessed;
 
     /// The slot map for the module level data.

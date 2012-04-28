@@ -27,35 +27,13 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args, int poi
         return result;
 
     std::string arg(args[pointArg].substr(0, pointArgOffset));
-    Canal::State &state = mCommands.mState->mStack->getCurrentState();
     const llvm::Function &function = mCommands.mState->mStack->getCurrentFunction();
-    mCommands.mState->mSlotTracker->setActiveFunction(&function);
+    mCommands.mState->mSlotTracker->setActiveFunction(function);
 
     // Check function arguments.
     llvm::Function::ArgumentListType::const_iterator it = function.getArgumentList().begin();
     for (; it != function.getArgumentList().end(); ++it)
-    {
-        if (it->hasName())
-        {
-            std::stringstream ss;
-            ss << "%" << it->getName().data();
-            std::string name = ss.str();
-            if (0 == strncmp(name.c_str(), arg.c_str(), arg.size()))
-                result.push_back(name);
-        }
-        else
-        {
-            int id = mCommands.mState->mSlotTracker->getLocalSlot(it);
-            if (id >= 0)
-            {
-                std::stringstream ss;
-                ss << "%" << id;
-                std::string name = ss.str();
-                if (0 == strncmp(name.c_str(), arg.c_str(), arg.size()))
-                    result.push_back(name);
-            }
-        }
-    }
+        considerCompletionMatch(*it, result, arg);
 
     // Check every instruction in the current function.
     llvm::Function::const_iterator fit = function.begin(), fitend = function.end();
@@ -63,32 +41,15 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args, int poi
     {
         llvm::BasicBlock::const_iterator bit = fit->begin(), bitend = fit->end();
         for (; bit != bitend; ++bit)
-        {
-            if (bit->hasName())
-            {
-                std::stringstream ss;
-                ss << "%" << bit->getName().data();
-                std::string name = ss.str();
-                if (0 == strncmp(name.c_str(), arg.c_str(), arg.size()))
-                    result.push_back(name);
-            }
-            else
-            {
-                int id = mCommands.mState->mSlotTracker->getLocalSlot(bit);
-                if (id >= 0)
-                {
-                    std::stringstream ss;
-                    ss << "%" << id;
-                    std::string name = ss.str();
-                    if (0 == strncmp(name.c_str(), arg.c_str(), arg.size()))
-                        result.push_back(name);
-                }
-            }
-        }
+            considerCompletionMatch(*bit, result, arg);
     }
 
     // Check named and unnamed module-level variables.
-    // TODO
+    const llvm::Module &module = *mCommands.mState->mModule;
+    for (llvm::Module::const_global_iterator it = module.global_begin(); it != module.global_end(); ++it)
+    {
+        considerCompletionMatch(*it, result, arg);
+    }
 
     return result;
 }
@@ -110,7 +71,7 @@ CommandPrint::run(const std::vector<std::string> &args)
 
     Canal::State &state = mCommands.mState->mStack->getCurrentState();
     const llvm::Function &function = mCommands.mState->mStack->getCurrentFunction();
-    mCommands.mState->mSlotTracker->setActiveFunction(&function);
+    mCommands.mState->mSlotTracker->setActiveFunction(function);
 
     for (std::vector<std::string>::const_iterator it = args.begin() + 1; it != args.end(); ++it)
     {
@@ -156,4 +117,29 @@ CommandPrint::run(const std::vector<std::string> &args)
 
         printf("%s = %s\n", it->c_str(), Canal::indentExceptFirstLine(value->toString(), it->size() + 3).c_str());
     }
+}
+
+void
+CommandPrint::considerCompletionMatch(const llvm::Value &value, std::vector<std::string> &result, const std::string &prefix) const
+{
+    bool isGlobal = llvm::isa<llvm::GlobalValue>(value);
+    std::stringstream ss;
+    ss << (isGlobal ? "@" : "%");
+    if (value.hasName())
+        ss << value.getName().data();
+    else
+    {
+        int id;
+        if (isGlobal)
+            id = mCommands.mState->mSlotTracker->getGlobalSlot(value);
+        else
+            id = mCommands.mState->mSlotTracker->getLocalSlot(value);
+        if (id >= 0)
+            ss << id;
+        else
+            return;
+    }
+    std::string name = ss.str();
+    if (0 == strncmp(name.c_str(), prefix.c_str(), prefix.size()))
+        result.push_back(name);
 }

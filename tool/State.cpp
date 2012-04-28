@@ -18,7 +18,7 @@ State::State(llvm::Module *module)
     mModule = module;
     mInterpreter = new Canal::Interpreter();
     mStack = new Canal::Stack(*module);
-    mSlotTracker = new SlotTracker(module);
+    mSlotTracker = new SlotTracker(*module);
 }
 
 State::~State()
