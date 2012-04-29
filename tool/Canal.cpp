@@ -9,30 +9,8 @@ extern "C" {
 #include <readline/history.h>
 }
 
-// When non-zero, this means the user is done using this program.
-int gDone;
-
 // List of all commands.
 Commands gCommands;
-
-// Strip whitespace from the start and end of STRING.  Return a
-// pointer into STRING.
-static char *
-stripwhite(char *string)
-{
-   register char *s, *t;
-   for (s = string; isspace(*s); s++);
-
-   if (*s == 0)
-      return (s);
-
-   t = s + strlen (s) - 1;
-   while (t > s && isspace (*t))
-      t--;
-   *++t = '\0';
-
-   return s;
-}
 
 static char *
 complete_entry(const char *text, int state)
@@ -62,36 +40,27 @@ main(int argc, char **argv)
     rl_terminal_name = getenv("TERM");
     rl_completer_word_break_characters = (char*)" \t\n";
 
-    // Stifle the history list, remembering only the last 7 entries.
+    // Stifle the history list, remembering only the last 256 entries.
     stifle_history(256);
 
     // Loop reading and executing lines until the user quits.
-    for (; !gDone;)
+    while (true)
     {
         char *line = readline("(canal) ");
         if (!line)
             break;
 
-        /* Remove leading and trailing whitespace from the line.
-           Then, if there is anything left, add it to the history list
-           and execute it. */
-        char *s = stripwhite(line);
-
-        if (*s)
+        char *expansion;
+        int result = history_expand(line, &expansion);
+        if (result < 0 || result == 2)
+            fprintf(stderr, "%s\n", expansion);
+        else
         {
-            char *expansion;
-            int result = history_expand(s, &expansion);
-            if (result < 0 || result == 2)
-                fprintf(stderr, "%s\n", expansion);
-            else
-            {
-                add_history(expansion);
-                gCommands.executeLine(expansion);
-            }
-
-            free(expansion);
+            add_history(expansion);
+            gCommands.executeLine(expansion);
         }
 
+        free(expansion);
         free(line);
     }
 

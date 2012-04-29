@@ -124,11 +124,13 @@ Commands::getCommandMatches(const std::string &command) const
 void
 Commands::executeLine(const std::string &line)
 {
+    std::string commandLine(line.size() == 0 ? mLastCommand : line);
+    mLastCommand = commandLine;
     std::vector<std::string> args;
 
     // Split the line into tokens (separated by space)
-    char lineString[line.length() + 1];
-    strcpy(lineString, line.c_str());
+    char lineString[commandLine.length() + 1];
+    strcpy(lineString, commandLine.c_str());
     char *pos = strtok(lineString, " ");
     while (pos != NULL)
     {

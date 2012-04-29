@@ -34,6 +34,7 @@ public:
     typedef std::map<std::string, Command*> CommandMap;
     CommandMap mCommandMap;
     State *mState;
+    std::string mLastCommand;
 };
 
 #endif

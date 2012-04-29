@@ -81,7 +81,7 @@ CommandFile::run(const std::vector<std::string> &args)
         err.Print(NULL, os);
 #endif
         os.flush();
-        puts(s.c_str());
+        printf("%s", s.c_str());
         return;
     }
 
