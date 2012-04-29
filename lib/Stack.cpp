@@ -99,7 +99,7 @@ StackFrame::startBlock(llvm::Function::const_iterator block)
     mCurrentInstruction = block->begin();
 }
 
-Stack::Stack(llvm::Module &module) : mModule(module), mHasEnteredNewFrame(false), mHasReturnedFromFrame(false)
+Stack::Stack(const llvm::Module &module) : mModule(module), mHasEnteredNewFrame(false), mHasReturnedFromFrame(false)
 {
 }
 

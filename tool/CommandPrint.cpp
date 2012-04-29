@@ -24,12 +24,13 @@ std::vector<std::string>
 CommandPrint::getCompletionMatches(const std::vector<std::string> &args, int pointArg, int pointArgOffset) const
 {
     std::vector<std::string> result;
-    if (!mCommands.mState || !mCommands.mState->isInterpreting())
+    State *state = mCommands.getState();
+    if (!state || !state->isInterpreting())
         return result;
 
     std::string arg(args[pointArg].substr(0, pointArgOffset));
-    const llvm::Function &function = mCommands.mState->mStack->getCurrentFunction();
-    mCommands.mState->mSlotTracker->setActiveFunction(function);
+    const llvm::Function &function = state->getStack().getCurrentFunction();
+    state->getSlotTracker().setActiveFunction(function);
 
     // Check function arguments.
     llvm::Function::ArgumentListType::const_iterator it = function.getArgumentList().begin();
@@ -46,7 +47,7 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args, int poi
     }
 
     // Check named and unnamed module-level variables.
-    const llvm::Module &module = *mCommands.mState->mModule;
+    const llvm::Module &module = state->getModule();
     for (llvm::Module::const_global_iterator it = module.global_begin(); it != module.global_end(); ++it)
     {
         considerCompletionMatch(*it, result, arg);
@@ -58,7 +59,8 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args, int poi
 void
 CommandPrint::run(const std::vector<std::string> &args)
 {
-    if (!mCommands.mState || !mCommands.mState->isInterpreting())
+    State *state = mCommands.getState();
+    if (!state || !state->isInterpreting())
     {
         puts("No module is being interpreted.");
         return;
@@ -70,9 +72,11 @@ CommandPrint::run(const std::vector<std::string> &args)
         return;
     }
 
-    Canal::State &state = mCommands.mState->mStack->getCurrentState();
-    const llvm::Function &function = mCommands.mState->mStack->getCurrentFunction();
-    mCommands.mState->mSlotTracker->setActiveFunction(function);
+    Canal::Stack &stack = state->getStack();
+    Canal::State &currentState = stack.getCurrentState();
+    const llvm::Function &function = stack.getCurrentFunction();
+    Canal::SlotTracker &slotTracker = state->getSlotTracker();
+    slotTracker.setActiveFunction(function);
 
     for (std::vector<std::string>::const_iterator it = args.begin() + 1; it != args.end(); ++it)
     {
@@ -91,16 +95,16 @@ CommandPrint::run(const std::vector<std::string> &args)
         if (isNumber)
         {
             if ((*it)[0] == '%')
-                position = mCommands.mState->mSlotTracker->getLocalSlot(pos);
+                position = slotTracker.getLocalSlot(pos);
             else
-                position = mCommands.mState->mSlotTracker->getGlobalSlot(pos);
+                position = slotTracker.getGlobalSlot(pos);
         }
         else
         {
             if ((*it)[0] == '%')
                 position = function.getValueSymbolTable().lookup(name);
             else
-                position = mCommands.mState->mModule->getValueSymbolTable().lookup(name);
+                position = state->getModule().getValueSymbolTable().lookup(name);
         }
 
         if (!position)
@@ -109,7 +113,7 @@ CommandPrint::run(const std::vector<std::string> &args)
             continue;
         }
 
-        Canal::Value *value = state.findVariable(*position);
+        Canal::Value *value = currentState.findVariable(*position);
         if (!value)
         {
             printf("%s = uninitialized\n", it->c_str());
@@ -123,7 +127,7 @@ CommandPrint::run(const std::vector<std::string> &args)
 void
 CommandPrint::considerCompletionMatch(const llvm::Value &value, std::vector<std::string> &result, const std::string &prefix) const
 {
-    std::string name(Canal::getName(value, *mCommands.mState->mSlotTracker));
+    std::string name(Canal::getName(value, mCommands.getState()->getSlotTracker()));
     if (name.empty())
         return;
 

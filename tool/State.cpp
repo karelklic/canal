@@ -1,8 +1,5 @@
 #include "State.h"
 #include "Utils.h"
-#include "../lib/SlotTracker.h"
-#include "../lib/Interpreter.h"
-#include "../lib/Stack.h"
 #include "../lib/Utils.h"
 #include "../lib/State.h"
 #include "../lib/Integer.h"
@@ -13,26 +10,19 @@
 #include <llvm/ADT/APInt.h>
 #include <cstdio>
 
-State::State(llvm::Module *module)
+State::State(const llvm::Module *module) : mModule(module), mStack(*module), mSlotTracker(*module)
 {
-    mModule = module;
-    mInterpreter = new Canal::Interpreter();
-    mStack = new Canal::Stack(*module);
-    mSlotTracker = new Canal::SlotTracker(*module);
 }
 
 State::~State()
 {
-    delete mInterpreter;
-    delete mStack;
     delete mModule;
-    delete mSlotTracker;
 }
 
 bool
 State::isInterpreting() const
 {
-    return !mStack->getFrames().empty();
+    return !mStack.getFrames().empty();
 }
 
 void
@@ -41,7 +31,7 @@ State::run()
     bool running = true;
     while (running)
     {
-        running = mInterpreter->step(*mStack);
+        running = mInterpreter.step(mStack);
         if (reachedBreakpoint())
             return;
     }
@@ -54,7 +44,7 @@ State::step(int count)
 {
     for (int i = 0; i < count; ++i)
     {
-        bool running = mInterpreter->step(*mStack);
+        bool running = mInterpreter.step(mStack);
         if (!running)
         {
             puts("Program finished.");
@@ -64,7 +54,7 @@ State::step(int count)
             return;
     }
 
-    print(mStack->getCurrentInstruction());
+    print(mStack.getCurrentInstruction());
 }
 
 void
@@ -72,8 +62,8 @@ State::next(int count)
 {
     for (int i = 0; i < count; ++i)
     {
-        size_t stackSize = mStack->getFrames().size();
-        bool running = mInterpreter->step(*mStack);
+        size_t stackSize = mStack.getFrames().size();
+        bool running = mInterpreter.step(mStack);
         if (!running)
         {
             puts("Program finished.");
@@ -82,24 +72,24 @@ State::next(int count)
         if (reachedBreakpoint())
             return;
 
-        while (stackSize < mStack->getFrames().size())
+        while (stackSize < mStack.getFrames().size())
         {
-            mInterpreter->step(*mStack);
+            mInterpreter.step(mStack);
             if (reachedBreakpoint())
                 return;
         }
     }
 
-    print(mStack->getCurrentInstruction());
+    print(mStack.getCurrentInstruction());
 }
 
 void
 State::finish()
 {
-    size_t stackSize = mStack->getFrames().size();
-    while (stackSize <= mStack->getFrames().size())
+    size_t stackSize = mStack.getFrames().size();
+    while (stackSize <= mStack.getFrames().size())
     {
-        bool running = mInterpreter->step(*mStack);
+        bool running = mInterpreter.step(mStack);
         if (!running)
         {
             puts("Program finished.");
@@ -108,7 +98,7 @@ State::finish()
         if (reachedBreakpoint())
             return;
     }
-    print(mStack->getCurrentInstruction());
+    print(mStack.getCurrentInstruction());
 }
 
 void
@@ -174,21 +164,21 @@ State::addMainFrame()
         }
     }
 
-    mStack->addFrame(*function, initialState);
+    mStack.addFrame(*function, initialState);
 }
 
 bool
 State::reachedBreakpoint()
 {
-    if (!mStack->hasEnteredNewFrame())
+    if (!mStack.hasEnteredNewFrame())
         return false;
 
-    const std::string &name = mStack->getCurrentFunction().getName();
+    const std::string &name = mStack.getCurrentFunction().getName();
     std::set<std::string>::const_iterator it = mFunctionBreakpoints.find(name);
     if (it == mFunctionBreakpoints.end())
         return false;
 
     printf("Breakpoint reached: %s\n", name.c_str());
-    print(mStack->getCurrentInstruction());
+    print(mStack.getCurrentInstruction());
     return true;
 }

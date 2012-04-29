@@ -16,6 +16,8 @@
 #include "CommandShow.h"
 #include "CommandStart.h"
 #include "CommandStep.h"
+#include "State.h"
+#include "../lib/Utils.h"
 #include <cstring>
 #include <cstdio>
 
@@ -168,4 +170,12 @@ Commands::getCommand(const std::string &name) const
 {
     CommandMap::const_iterator it = mCommandMap.find(name);
     return it == mCommandMap.end() ? NULL : it->second;
+}
+
+void
+Commands::createState(const llvm::Module *module)
+{
+    CANAL_ASSERT(module && "Module cannot be NULL.");
+    delete mState;
+    mState = new State(module);
 }

@@ -17,13 +17,13 @@ CommandStart::CommandStart(Commands &commands)
 void
 CommandStart::run(const std::vector<std::string> &args)
 {
-    if (!mCommands.mState)
+    if (!mCommands.getState())
     {
         puts("No program specified.  Use the \"file\" command.");
         return;
     }
 
-    mCommands.mState->addMainFrame();
+    mCommands.getState()->addMainFrame();
     printf("Temporary breakpoint: \"main\".\n");
-    print(mCommands.mState->mStack->getCurrentInstruction());
+    print(mCommands.getState()->getStack().getCurrentInstruction());
 }

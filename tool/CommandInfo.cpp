@@ -48,13 +48,13 @@ CommandInfo::run(const std::vector<std::string> &args)
 void
 CommandInfo::infoModule()
 {
-    if (!mCommands.mState || !mCommands.mState->mModule)
+    if (!mCommands.getState())
     {
         puts("No module is loaded.");
         return;
     }
 
-    llvm::Module &module = *mCommands.mState->mModule;
+    const llvm::Module &module = mCommands.getState()->getModule();
     printf("Identifier: %s\n", module.getModuleIdentifier().c_str());
     printf("Data layout: %s\n", module.getDataLayout().c_str());
     printf("Target: %s\n", module.getTargetTriple().c_str());

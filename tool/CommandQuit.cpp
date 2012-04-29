@@ -17,7 +17,7 @@ CommandQuit::CommandQuit(Commands &commands)
 void
 CommandQuit::run(const std::vector<std::string> &args)
 {
-    if (mCommands.mState && mCommands.mState->isInterpreting())
+    if (mCommands.getState() && mCommands.getState()->isInterpreting())
     {
         puts("A program is being interpreted.");
         bool agreed = askYesNo("Quit anyway?");

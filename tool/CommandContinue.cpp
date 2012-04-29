@@ -15,11 +15,11 @@ CommandContinue::CommandContinue(Commands &commands)
 void
 CommandContinue::run(const std::vector<std::string> &args)
 {
-    if (!mCommands.mState || !mCommands.mState->isInterpreting())
+    if (!mCommands.getState() || !mCommands.getState()->isInterpreting())
     {
         puts("The program is not being interpreted.");
         return;
     }
 
-    mCommands.mState->run();
+    mCommands.getState()->run();
 }

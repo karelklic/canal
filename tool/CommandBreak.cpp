@@ -1,6 +1,7 @@
 #include "CommandBreak.h"
 #include "Commands.h"
 #include "State.h"
+#include <cstdio>
 
 CommandBreak::CommandBreak(Commands &commands)
     : Command("break",
@@ -14,6 +15,12 @@ CommandBreak::CommandBreak(Commands &commands)
 void
 CommandBreak::run(const std::vector<std::string> &args)
 {
+    if (!mCommands.getState())
+    {
+        puts("No program specified.  Use the \"file\" command.");
+        return;
+    }
+
     if (args.size() == 1)
     {
         // TODO: Add breakpoint to current function.
@@ -21,5 +28,5 @@ CommandBreak::run(const std::vector<std::string> &args)
     }
 
     for (std::vector<std::string>::const_iterator it = args.begin() + 1; it != args.end(); ++it)
-        mCommands.mState->addFunctionBreakpoint(*it);
+        mCommands.getState()->addFunctionBreakpoint(*it);
 }

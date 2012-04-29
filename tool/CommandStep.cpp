@@ -16,20 +16,20 @@ CommandStep::CommandStep(Commands &commands)
 void
 CommandStep::run(const std::vector<std::string> &args)
 {
-    if (!mCommands.mState || !mCommands.mState->isInterpreting())
+    if (!mCommands.getState() || !mCommands.getState()->isInterpreting())
     {
         puts("The program is not being interpreted.");
         return;
     }
 
     if (args.size() <= 1)
-        mCommands.mState->step(1);
+        mCommands.getState()->step(1);
     else if (args.size() == 2)
     {
         bool success;
         int count = stringToPositiveInt(args[1].c_str(), success);
         if (success)
-            mCommands.mState->step(count);
+            mCommands.getState()->step(count);
         else
             printf("Not a positive number: %s\n", args[1].c_str());
     }

@@ -43,7 +43,7 @@ class Stack
 public:
     // @param module
     //   LLVM module that contains all functions.
-    Stack(llvm::Module &module);
+    Stack(const llvm::Module &module);
 
     bool nextInstruction();
     bool hasEnteredNewFrame() const { return mHasEnteredNewFrame; }
@@ -67,7 +67,7 @@ protected:
     std::vector<StackFrame> mFrames;
     bool mHasEnteredNewFrame;
     bool mHasReturnedFromFrame;
-    llvm::Module &mModule;
+    const llvm::Module &mModule;
 };
 
 } // namespace Canal

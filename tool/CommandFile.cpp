@@ -85,7 +85,7 @@ CommandFile::run(const std::vector<std::string> &args)
         return;
     }
 
-    if (mCommands.mState && mCommands.mState->isInterpreting())
+    if (mCommands.getState() && mCommands.getState()->isInterpreting())
     {
         puts("A program is being interpreted already.");
         bool agreed = askYesNo("Are you sure you want to change the file?");
@@ -95,9 +95,8 @@ CommandFile::run(const std::vector<std::string> &args)
             delete module;
             return;
         }
-        delete mCommands.mState;
     }
 
-    mCommands.mState = new State(module);
+    mCommands.createState(module);
     puts("Module loaded.");
 }

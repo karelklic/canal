@@ -3,23 +3,25 @@
 
 #include <set>
 #include <string>
+#include "../lib/Interpreter.h"
+#include "../lib/SlotTracker.h"
+#include "../lib/Stack.h"
 
 namespace llvm {
     class Module;
-}
-
-namespace Canal {
-    class Interpreter;
-    class Stack;
-    class SlotTracker;
 }
 
 // State of the interpreter.
 class State
 {
 public:
-    State(llvm::Module *module);
+    State(const llvm::Module *module);
     ~State();
+
+    const llvm::Module &getModule() const { return *mModule; }
+    Canal::Stack &getStack() { return mStack; }
+    const Canal::Stack &getStack() const { return mStack; }
+    Canal::SlotTracker &getSlotTracker() { return mSlotTracker; }
 
     // Check if the interpreter is in the middle of interpretation.
     // This is true if something is on the stack.
@@ -30,21 +32,21 @@ public:
     void next(int count);
     void finish();
 
+    // Add a breakpoint on function start.
     void addFunctionBreakpoint(const std::string &functionName);
 
     // Adds the "main" function to stack.
     void addMainFrame();
 
-public:
-    llvm::Module *mModule;
-    // Might be NULL if no module is loaded.
-    Canal::Interpreter *mInterpreter;
-    Canal::Stack *mStack;
-    std::set<std::string> mFunctionBreakpoints;
-    Canal::SlotTracker *mSlotTracker;
-
 protected:
     bool reachedBreakpoint();
+
+protected:
+    const llvm::Module *mModule;
+    Canal::Stack mStack;
+    Canal::SlotTracker mSlotTracker;
+    Canal::Interpreter mInterpreter;
+    std::set<std::string> mFunctionBreakpoints;
 };
 
 #endif // CANAL_STATE_H
