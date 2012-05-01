@@ -32,7 +32,7 @@ class Range : public AbstractValue
     return new Range(*this);
   }
 
-  Range(const llvm::APInt &constant) : From(constant), To(constant) {// : AbstractValue(constant) {
+  Range(const llvm::APInt &constant) : Empty(false), NegativeInfinity(false), From(constant), Infinity(false), To(constant) {// : AbstractValue(constant) {
 
   }
 
@@ -47,6 +47,7 @@ class Range : public AbstractValue
 
   virtual void merge(const AbstractValue &v) {
       const Range& other = (const Range&) v;
+      this->Empty = other.Empty;
       this->setLower(other);
       this->setHigher(other);
   }
@@ -87,24 +88,49 @@ class Range : public AbstractValue
 
   void add(const AbstractValue &a, const AbstractValue &b) {
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
-      this->From = a1.From + a2.From;
-      this->To = a1.To + a2.To;
+      this->Empty = false;
+
+      //TODO - can be only one infinity set?
+      if (a1.NegativeInfinity || a2.NegativeInfinity) this->NegativeInfinity = true;
+      else this->From = a1.From + a2.From;
+
+      if (a1.Infinity || a2.Infinity) this->Infinity = true;
+      else this->To = a1.To + a2.To;
+
+      if (overflow(a1, a2)) {
+          this->NegativeInfinity = true;
+          this->Infinity = true;
+      }
   }
 
   void sub(const AbstractValue &a, const AbstractValue &b) {
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
-      this->From = a1.From - a2.To;
-      this->To = a1.To - a2.From;
+      this->Empty = false;
+
+      if (a1.NegativeInfinity || a2.Infinity) this->NegativeInfinity = true;
+      else this->From = a1.From - a2.To;
+
+      if (a1.Infinity || a2.NegativeInfinity) this->Infinity = true;
+      else this->To = a1.To - a2.From;
+
+      if (overflow(a1, a2)) {
+          this->NegativeInfinity = true;
+          this->Infinity = true;
+      }
   }
 
   void mul(const AbstractValue &a, const AbstractValue &b) {
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
+      this->Empty = false;
+
       this->From = min(a1.From * a2.From, a1.To * a2.To, a1.From * a2.To, a1.To * a2.From);
       this->To = max(a1.From * a2.From, a1.To * a2.To, a1.From * a2.To, a1.To * a2.From);
   }
 
   void div(const AbstractValue &a, const AbstractValue &b) {
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
+      this->Empty = false;
+
       this->From = min(a1.From. CMP(div) (a2.From), a1.To. CMP(div) (a2.To), a1.From. CMP(div) (a2.To), a1.To. CMP(div) (a2.From));
       this->To = max(a1.From. CMP(div) (a2.From), a1.To. CMP(div) (a2.To), a1.From. CMP(div) (a2.To), a1.To. CMP(div) (a2.From));
   }
@@ -161,6 +187,15 @@ protected:
 
   static const llvm::APInt& max(const llvm::APInt& a, const llvm::APInt& b, const llvm::APInt& c, const llvm::APInt& d) {
       return MAX2 ( (MAX2(a, b)), (MAX2(c, d)) );
+  }
+
+  //Check for overflow in addition and substraction
+  static bool overflow(const Range& a, const Range& b) {
+      llvm::APInt r1 = (a.To - a.From) + 1;
+      llvm::APInt r2 = (b.To - b.From) + 1;
+      bool res;
+      r1. CMP(mul_ov) (r2, res);
+      return res;
   }
 
 /*  llvm::APInt plus(const llvm::APInt& a, const llvm::APInt& b) const {
