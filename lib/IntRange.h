@@ -16,15 +16,13 @@ class Range : public AbstractValue
  public:
   bool Empty;
 
-  bool NegativeInfinity;
+  bool Top;
   llvm::APInt From;
-
-  bool Infinity;
   llvm::APInt To;
 
  public:
   // Initializes to the lowest value.
-  Range() : Infinity(false), NegativeInfinity(false), Empty(true) {}
+  Range() : Top(false), Empty(true) {}
 
   // Covariant return type -- overrides AbstractValue::clone().
   virtual Range *clone() const
@@ -32,15 +30,14 @@ class Range : public AbstractValue
     return new Range(*this);
   }
 
-  Range(const llvm::APInt &constant) : Empty(false), NegativeInfinity(false), From(constant), Infinity(false), To(constant) {// : AbstractValue(constant) {
+  Range(const llvm::APInt &constant) : Empty(false), Top(false), From(constant), To(constant) {// : AbstractValue(constant) {
 
   }
 
   virtual bool operator==(const AbstractValue& rhs) const {
       const Range& other = (const Range&) rhs;
       return this->Empty == other.Empty &&
-             this->NegativeInfinity == other.NegativeInfinity &&
-              this->Infinity == other.Infinity &&
+              this->Top == other.Top &&
               this->From == other.From &&
               this->To == other.To;
   }
@@ -48,8 +45,14 @@ class Range : public AbstractValue
   virtual void merge(const AbstractValue &v) {
       const Range& other = (const Range&) v;
       this->Empty = other.Empty;
-      this->setLower(other);
-      this->setHigher(other);
+      if (this->Empty) return;
+      if (this->Top || other.Top) {
+          this->Top = true;
+      }
+      else {
+        this->setLower(other);
+        this->setHigher(other);
+      }
   }
 
   virtual size_t memoryUsage() const {
@@ -73,8 +76,7 @@ class Range : public AbstractValue
   }
 
   virtual void setTop() {
-      this->Infinity = true;
-      this->NegativeInfinity = true;
+      this->Top = true;
   }
 
   virtual void printToStream(llvm::raw_ostream &ostream) const {
@@ -90,16 +92,16 @@ class Range : public AbstractValue
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
       this->Empty = false;
 
-      //TODO - can be only one infinity set?
-      if (a1.NegativeInfinity || a2.NegativeInfinity) this->NegativeInfinity = true;
-      else this->From = a1.From + a2.From;
+      if (a1.Top || a2.Top) {
+          this->Top = true;
+          return;
+      }
 
-      if (a1.Infinity || a2.Infinity) this->Infinity = true;
-      else this->To = a1.To + a2.To;
+      this->From = a1.From + a2.From;
+      this->To = a1.To + a2.To;
 
       if (overflow(a1, a2)) {
-          this->NegativeInfinity = true;
-          this->Infinity = true;
+          this->Top = true;
       }
   }
 
@@ -107,21 +109,27 @@ class Range : public AbstractValue
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
       this->Empty = false;
 
-      if (a1.NegativeInfinity || a2.Infinity) this->NegativeInfinity = true;
-      else this->From = a1.From - a2.To;
+      if (a1.Top || a2.Top) {
+          this->Top = true;
+          return;
+      }
 
-      if (a1.Infinity || a2.NegativeInfinity) this->Infinity = true;
-      else this->To = a1.To - a2.From;
+      this->From = a1.From - a2.To;
+      this->To = a1.To - a2.From;
 
       if (overflow(a1, a2)) {
-          this->NegativeInfinity = true;
-          this->Infinity = true;
+          this->Top = true;
       }
   }
 
   void mul(const AbstractValue &a, const AbstractValue &b) {
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
       this->Empty = false;
+
+      if (a1.Top || a2.Top) {
+          this->Top = true;
+          return;
+      }
 
       this->From = min(a1.From * a2.From, a1.To * a2.To, a1.From * a2.To, a1.To * a2.From);
       this->To = max(a1.From * a2.From, a1.To * a2.To, a1.From * a2.To, a1.To * a2.From);
@@ -130,6 +138,11 @@ class Range : public AbstractValue
   void div(const AbstractValue &a, const AbstractValue &b) {
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
       this->Empty = false;
+
+      if (a1.Top || a2.Top) {
+          this->Top = true;
+          return;
+      }
 
       this->From = min(a1.From. CMP(div) (a2.From), a1.To. CMP(div) (a2.To), a1.From. CMP(div) (a2.To), a1.To. CMP(div) (a2.From));
       this->To = max(a1.From. CMP(div) (a2.From), a1.To. CMP(div) (a2.To), a1.From. CMP(div) (a2.To), a1.To. CMP(div) (a2.From));
@@ -162,23 +175,13 @@ protected:
 
 //For merging
   void setLower(const Range& other) {
-      if (this->NegativeInfinity || other.NegativeInfinity) {
-          this->NegativeInfinity = true;
-      }
-      else {
-          //TODO - Signed or Unsigned
-          this->From = MIN2(this->From, other.From);
-      }
+      //TODO - Signed or Unsigned
+      this->From = MIN2(this->From, other.From);
   }
 
   void setHigher(const Range& other) {
-      if (this->Infinity || other.Infinity) {
-          this->Infinity = true;
-      }
-      else {
-          //TODO - Signed or Unsigned
-          this->To = MAX2(this->To, other.To);
-      }
+      //TODO - Signed or Unsigned
+      this->To = MAX2(this->To, other.To);
   }
 
   static const llvm::APInt& min(const llvm::APInt& a, const llvm::APInt& b, const llvm::APInt& c, const llvm::APInt& d) {
