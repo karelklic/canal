@@ -1,4 +1,5 @@
 #include "Integer.h"
+#include "Constant.h"
 #include "Utils.h"
 #include <sstream>
 #include <iostream>
@@ -6,24 +7,20 @@
 namespace Canal {
 namespace Integer {
 
-Container::Container(unsigned numBits) : mBits(new Bits(numBits))
+Container::Container(unsigned numBits) : mBits(numBits)
 {
 }
 
-Container::Container(const llvm::APInt &number) : mBits(new Bits(number))
+Container::Container(const llvm::APInt &number) : mBits(number)
 {
 }
 
-Container::Container(const Container &container)
+Container::Container(const Container &container) : mBits(container.mBits)
 {
-    mBits = container.mBits;
-    if (mBits)
-        mBits = mBits->clone();
 }
 
 Container::~Container()
 {
-    delete mBits;
 }
 
 Container *
@@ -38,9 +35,7 @@ Container::operator==(const Value &value) const
     const Container *container = dynamic_cast<const Container*>(&value);
     if (!container)
         return false;
-    if ((mBits && !container->mBits) || (!mBits && container->mBits))
-        return false;
-    if (mBits && *mBits != *container->mBits)
+    if (mBits != container->mBits)
         return false;
     return true;
 }
@@ -48,28 +43,20 @@ Container::operator==(const Value &value) const
 void
 Container::merge(const Value &value)
 {
-    // TODO: merge with constant!
-    const Container &container = dynamic_cast<const Container&>(value);
-    if (mBits)
+    if (const Constant *constant = dynamic_cast<const Constant*>(&value))
     {
-        if (container.mBits)
-            mBits->merge(*container.mBits);
-        else
-        {
-            delete mBits;
-            mBits = NULL;
-        }
+        mBits.merge(*constant);
+        return;
     }
-    else
-        CANAL_DIE();
+
+    const Container &container = dynamic_cast<const Container&>(value);
+    mBits.merge(container.mBits);
 }
 
 size_t
 Container::memoryUsage() const
 {
-    size_t size = sizeof(Container);
-    if (mBits)
-        size += mBits->memoryUsage();
+    size_t size = mBits.memoryUsage();
     return size;
 }
 
@@ -78,7 +65,7 @@ Container::toString() const
 {
     std::stringstream ss;
     ss << "Integer::Container: {" << std::endl;
-    ss << "    bits: " << indentExceptFirstLine(mBits->toString(), 10) << std::endl;
+    ss << "    bits: " << indentExceptFirstLine(mBits.toString(), 10) << std::endl;
     ss << "}";
     return ss.str();
 }

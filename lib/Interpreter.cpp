@@ -14,6 +14,7 @@
 #include <llvm/Support/CFG.h>
 #include <map>
 #include <cassert>
+#include <cstdio>
 
 namespace Canal {
 
@@ -92,7 +93,7 @@ Interpreter::interpretInstruction(Stack &stack)
 	}
     }
     else
-        CANAL_DIE();
+        CANAL_DIE_MSG("unknown instruction: " << instruction.getOpcodeName());
 }
 
 void
@@ -161,11 +162,80 @@ variableOrConstant(const llvm::Value &place, State &state, Constant &constant)
     return state.findVariable(place);
 }
 
+static const llvm::fltSemantics *
+getFloatingPointSemantics(llvm::Type *type)
+{
+    CANAL_ASSERT(type->isFloatingPointTy());
+
+    const llvm::fltSemantics *semantics;
+#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
+    if (type->isHalfTy())
+        semantics = &llvm::APFloat::IEEEhalf;
+    else
+#endif
+    if (type->isFloatTy())
+        semantics = &llvm::APFloat::IEEEsingle;
+    else if (type->isDoubleTy())
+        semantics = &llvm::APFloat::IEEEdouble;
+    else if (type->isFP128Ty())
+        semantics = &llvm::APFloat::IEEEquad;
+    else if (type->isPPC_FP128Ty())
+        semantics = &llvm::APFloat::PPCDoubleDouble;
+    else if (type->isX86_FP80Ty())
+        semantics = &llvm::APFloat::x87DoubleExtended;
+    else
+        CANAL_DIE();
+    return semantics;
+}
+
 template<typename T> static void
 interpretCall(const T &instruction, Stack &stack)
 {
-    llvm::Function *function = instruction.getCalledFunction();
     State &state = stack.getCurrentState();
+    llvm::Function *function = instruction.getCalledFunction();
+    // TODO: Handle some intristic functions.  Some of them can be
+    // safely ignored.
+    if (!function || function->isIntrinsic() || function->isDeclaration())
+    {
+        // Function not found.  Set the resultant value to the Top
+        // value.
+
+        // TODO: Set memory accessed by non-static globals to
+        // the Top value.
+
+        // Create result TOP value of required type.
+        llvm::Type *type = instruction.getType();
+        Value *returnedValue = NULL;
+        if (type->isVoidTy())
+            returnedValue = NULL;
+        else if (type->isIntegerTy())
+        {
+            llvm::IntegerType *integerType = llvm::cast<llvm::IntegerType>(type);
+            returnedValue = new Integer::Container(integerType->getBitWidth());
+        }
+        else if (type->isFloatingPointTy())
+        {
+            const llvm::fltSemantics *semantics = getFloatingPointSemantics(type);
+            returnedValue = new Float::Range(*semantics);
+        }
+        else if (type->isPointerTy())
+        {
+            returnedValue = new Pointer::InclusionBased(stack.getModule());
+        }
+        else
+            CANAL_DIE_MSG("unsupported llvm::Type::TypeID: " << type->getTypeID());
+
+        // If the function returns nothing (void), we are finished.
+        if (!returnedValue)
+            return;
+
+        AccuracyValue *accuracyValue = dynamic_cast<AccuracyValue*>(returnedValue);
+        if (accuracyValue)
+            accuracyValue->setTop();
+
+        state.addFunctionVariable(instruction, returnedValue);
+        return;
+    }
 
     State initialState(state);
     initialState.clearFunctionLevel();
@@ -224,25 +294,7 @@ binaryOperation(const llvm::BinaryOperator &instruction, State &state, void(Valu
     }
     else if (type->isFloatingPointTy())
     {
-        const llvm::fltSemantics *semantics;
-#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
-        if (type->isHalfTy())
-            semantics = &llvm::APFloat::IEEEhalf;
-        else
-#endif
-        if (type->isFloatTy())
-            semantics = &llvm::APFloat::IEEEsingle;
-        else if (type->isDoubleTy())
-            semantics = &llvm::APFloat::IEEEdouble;
-        else if (type->isFP128Ty())
-            semantics = &llvm::APFloat::IEEEquad;
-        else if (type->isPPC_FP128Ty())
-            semantics = &llvm::APFloat::PPCDoubleDouble;
-        else if (type->isX86_FP80Ty())
-            semantics = &llvm::APFloat::x87DoubleExtended;
-        else
-            CANAL_DIE();
-
+        const llvm::fltSemantics *semantics = getFloatingPointSemantics(type);
         result = new Float::Range(*semantics);
     }
     else
@@ -667,8 +719,8 @@ Interpreter::select(const llvm::SelectInst &instruction, State &state)
 
     Value *resultValue;
     const Integer::Container &conditionInt = dynamic_cast<const Integer::Container&>(*condition);
-    CANAL_ASSERT(conditionInt.mBits->getBitWidth() == 1);
-    switch (conditionInt.mBits->getBitValue(0))
+    CANAL_ASSERT(conditionInt.mBits.getBitWidth() == 1);
+    switch (conditionInt.mBits.getBitValue(0))
     {
     case -1:
         // The condition result is undefined.  Let's wait for

@@ -1,5 +1,6 @@
 #include "State.h"
 #include "Value.h"
+#include "Utils.h"
 #include <llvm/Support/raw_ostream.h>
 
 namespace Canal {
@@ -166,6 +167,7 @@ replaceOrInsertMapItem(PlaceValueMap &map,
                        const llvm::Value &place,
                        Value *value)
 {
+    CANAL_ASSERT(value);
     PlaceValueMap::iterator it = map.find(&place);
     if (it != map.end())
     {

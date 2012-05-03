@@ -14,7 +14,8 @@
         llvm::errs() << __FILE__ << ":"                          \
                      << __LINE__ << "("                          \
                      << __FUNCTION__ << ") fatal error: "        \
-                     << msg << "\n";                             \
+                     << msg << "\n"                              \
+                     << Canal::getCurrentBacktrace();            \
         exit(1);                                                 \
     }
 
@@ -36,7 +37,8 @@
         llvm::errs() << __FILE__ << ":"                                 \
                      << __LINE__ << "("                                 \
                      << __FUNCTION__ << ") assert failed: "             \
-                     << #expr << "\n";                                  \
+                     << #expr << "\n"                                   \
+                     << Canal::getCurrentBacktrace();                   \
         exit(1);                                                        \
     }
 
@@ -49,7 +51,8 @@
         llvm::errs() << __FILE__ << ":"                                 \
                      << __LINE__ << "("                                 \
                      << __FUNCTION__ << ") assert failed: "             \
-                     << msg << " [" << #expr << "]\n";                  \
+                     << msg << " [" << #expr << "]\n"                   \
+                     << Canal::getCurrentBacktrace();                   \
         exit(1);                                                        \
     }
 
@@ -59,7 +62,20 @@
     {                                                                   \
         llvm::errs() << __FILE__ << ":"                                 \
                      << __LINE__ << "("                                 \
-                     << __FUNCTION__ << "): dead code location reached\n"; \
+                     << __FUNCTION__ << "): dead code location reached\n" \
+                     << Canal::getCurrentBacktrace();                   \
+        exit(1);                                                        \
+    }
+
+// Termination.  The location where the program terminated is written
+// to stderr and the application is terminated.
+#define CANAL_DIE_MSG(msg)                                              \
+    {                                                                   \
+        llvm::errs() << __FILE__ << ":"                                 \
+                     << __LINE__ << "("                                 \
+                     << __FUNCTION__ << "): dead code location reached" \
+                     << ": " << msg << "\n"                             \
+                     << Canal::getCurrentBacktrace();                   \
         exit(1);                                                        \
     }
 
@@ -90,6 +106,8 @@ std::string indentExceptFirstLine(const std::string &input, int spaces);
 // @returns
 //   Empty string when no name was found.
 std::string getName(const llvm::Value &value, SlotTracker &slotTracker);
+
+std::string getCurrentBacktrace();
 
 } // namespace Canal
 

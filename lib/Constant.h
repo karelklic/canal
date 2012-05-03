@@ -32,6 +32,8 @@ public:
     // Returns number for integer constant.
     const llvm::APInt &getAPInt() const;
 
+    bool isGetElementPtr() const;
+
     // Creates a modifiable value from the constant.  Caller is
     // responsible for releasing its memory.
     Value *toModifiableValue() const;

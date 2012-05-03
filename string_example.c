@@ -10,9 +10,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+char *path1;
+
 int main(int argc, char **argv)
 {
-  char *path1 = "/etc/hosts";
+  char *path0 = "/etc/hosts";
+  path1 = path0;
   FILE *fp = fopen(path1, "r");
 
   /* return value ignored but should be 0 */

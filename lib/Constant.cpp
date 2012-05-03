@@ -43,17 +43,30 @@ Constant::toString() const
     return s;
 }
 
-bool Constant::isAPInt() const
+bool
+Constant::isAPInt() const
 {
     return llvm::isa<llvm::ConstantInt>(mConstant);
 }
 
-const llvm::APInt &Constant::getAPInt() const
+const llvm::APInt &
+Constant::getAPInt() const
 {
     return llvm::cast<llvm::ConstantInt>(mConstant)->getValue();
 }
 
-Value *Constant::toModifiableValue() const
+bool
+Constant::isGetElementPtr() const
+{
+    const llvm::ConstantExpr *constant = llvm::cast_or_null<llvm::ConstantExpr>(mConstant);
+    if (!constant)
+        return false;
+
+    return constant->getOpcode() == llvm::Instruction::GetElementPtr;
+}
+
+Value *
+Constant::toModifiableValue() const
 {
     if (isAPInt())
         return new Integer::Container(getAPInt());

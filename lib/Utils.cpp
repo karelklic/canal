@@ -3,6 +3,8 @@
 #include <llvm/ADT/APInt.h>
 #include <llvm/Value.h>
 #include <sstream>
+#include <execinfo.h>
+#include <cxxabi.h>
 
 namespace Canal {
 
@@ -59,6 +61,71 @@ getName(const llvm::Value &value, SlotTracker &slotTracker)
             return "";
     }
     return ss.str();
+}
+
+std::string
+getCurrentBacktrace()
+{
+    // http://stackoverflow.com/questions/77005/how-to-generate-a-stacktrace-when-my-gcc-c-app-crashes
+    std::stringstream result;
+    void *array[1024];
+    int size = backtrace(array, 1024);
+    char **messages = backtrace_symbols(array, size);
+
+    // Skip the first stack frame (points here).
+    for (int i = 1; i < size && messages; ++i)
+    {
+        char *mangled_name = 0, *offset_begin = 0, *offset_end = 0;
+
+        // Find parantheses and +address offset surrounding mangled
+        // name.
+        for (char *p = messages[i]; *p; ++p)
+        {
+            if (*p == '(')
+                mangled_name = p;
+            else if (*p == '+')
+                offset_begin = p;
+            else if (*p == ')')
+            {
+                offset_end = p;
+                break;
+            }
+        }
+
+        // If the line could be processed, attempt to demangle the
+        // symbol.  Otherwise, print the whole line.
+        if (mangled_name && offset_begin && offset_end &&
+            mangled_name < offset_begin)
+        {
+            *mangled_name++ = '\0';
+            *offset_begin++ = '\0';
+            *offset_end++ = '\0';
+
+            int status;
+            char *real_name = abi::__cxa_demangle(mangled_name, 0, 0, &status);
+            // If demangling is successful, output the demangled
+            // function name.  Otherwise, output the mangled function
+            // name.
+            if (status == 0)
+            {
+                result << "[bt]: (" << i << ") " << messages[i] << " : "
+                       << real_name << "+" << offset_begin << offset_end
+                       << std::endl;
+            }
+            else
+            {
+                result << "[bt]: (" << i << ") " << messages[i] << " : "
+                       << mangled_name << "+" << offset_begin << offset_end
+                       << std::endl;
+            }
+            free(real_name);
+        }
+        else
+            result << "[bt]: (" << i << ") " << messages[i] << std::endl;
+    }
+
+    free(messages);
+    return result.str();
 }
 
 } // namespace Canal

@@ -36,7 +36,7 @@ public:
     virtual std::string toString() const;
 
 public:
-    Bits *mBits;
+    Bits mBits;
 };
 
 } // namespace Integer

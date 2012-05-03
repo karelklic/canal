@@ -1,5 +1,6 @@
 #include "Pointer.h"
 #include "Array.h"
+#include "Constant.h"
 #include "Utils.h"
 #include "State.h"
 #include "SlotTracker.h"
@@ -203,6 +204,13 @@ InclusionBased::operator==(const Value &value) const
 void
 InclusionBased::merge(const Value &value)
 {
+    if (const Constant *constant = dynamic_cast<const Constant*>(&value))
+    {
+        CANAL_ASSERT(constant->isGetElementPtr());
+        // TODO
+        return;
+    }
+
     const InclusionBased &vv = dynamic_cast<const InclusionBased&>(value);
     PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
     for (; valueit != vv.mTargets.end(); ++valueit)
