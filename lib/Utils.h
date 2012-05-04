@@ -25,7 +25,8 @@
         llvm::errs() << __FILE__ << ":"                          \
                      << __LINE__ << "("                          \
                      << __FUNCTION__ << ") error: "              \
-                     << msg << "\n";                             \
+                     << msg << "\n"                              \
+                     << Canal::getCurrentBacktrace();            \
     }
 
 // Assertion check.  On failure, the expression is written to stderr
@@ -86,7 +87,8 @@
     {                                                                   \
         llvm::errs() << __FILE__ << ":"                                 \
                      << __LINE__ << "("                                 \
-                     << __FUNCTION__ << "): not implemented\n";         \
+                     << __FUNCTION__ << "): not implemented\n"          \
+                     << Canal::getCurrentBacktrace();                   \
     }
 
 namespace llvm {
