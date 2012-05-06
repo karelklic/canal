@@ -8,6 +8,7 @@
 
 #define CMP(OP) s ## OP
 
+
 namespace AbstractInteger {
 
 // Abstracts integer values as a range min - max.
@@ -16,13 +17,24 @@ class Range : public AbstractValue
  public:
   bool Empty;
 
-  bool Top;
-  llvm::APInt From;
-  llvm::APInt To;
+  //Unsigned
+  bool UTop;
+  llvm::APInt UFrom;
+  llvm::APInt UTo;
+
+  //Signed
+  bool STop;
+  llvm::APInt SFrom;
+  llvm::APInt STo;
+
+  enum Declared { UNSIGNED, SIGNED, BOTH };
+
+  //Which type is declared
+  Declared declared;
 
  public:
   // Initializes to the lowest value.
-  Range() : Top(false), Empty(true) {}
+  Range() : Empty(true) {}
 
   // Covariant return type -- overrides AbstractValue::clone().
   virtual Range *clone() const
@@ -30,41 +42,89 @@ class Range : public AbstractValue
     return new Range(*this);
   }
 
-  Range(const llvm::APInt &constant) : Empty(false), Top(false), From(constant), To(constant) {// : AbstractValue(constant) {
-
+  Range(const llvm::APInt &constant) : Empty(false), declared(BOTH),
+      UTop(false), UFrom(constant), UTo(constant),
+      STop(false), SFrom(constant), STo(constant) {// : AbstractValue(constant) {
   }
 
   virtual bool operator==(const AbstractValue& rhs) const {
       const Range& other = (const Range&) rhs;
       return this->Empty == other.Empty &&
-              this->Top == other.Top &&
-              this->From == other.From &&
-              this->To == other.To;
+              this->declared == other.declared &&
+              this->UTop == other.UTop &&
+              this->UFrom == other.UFrom &&
+              this->UTo == other.UTo &&
+              this->STop == other.STop &&
+              this->SFrom == other.SFrom &&
+              this->STo == other.STo;
   }
 
   virtual void merge(const AbstractValue &v) {
       const Range& other = (const Range&) v;
       this->Empty = other.Empty;
       if (this->Empty) return;
+      //TODO - what if only one is defined and both in the other?
+
+      /*
       if (this->Top || other.Top) {
           this->Top = true;
       }
       else {
         this->setLower(other);
         this->setHigher(other);
-      }
+      }*/
   }
 
   virtual size_t memoryUsage() const {
-      return 2 * sizeof(llvm::APInt) + 3 * sizeof(bool);
+      return 4 * sizeof(llvm::APInt) + 3 * sizeof(bool) + sizeof(Declared);
   }
 
   virtual bool limitMemoryUsage(size_t size) {
       return false;
   }
 
+  virtual llvm::APInt Srange() const {
+      if (this->SFrom.sgt(this->STo)) { //Inverted
+          //Interval 9-0 (in mod 10, two values (0 and 9))
+          //Max Value -> 9
+          //Min Value -> 0
+          return (llvm::APInt::getSignedMaxValue(this->SFrom.getBitWidth()) - this->STo) +
+                  (llvm::APInt::getSignedMinValue(this->STo.getBitWidth()) - this->SFrom) + 2;
+      }
+      else {
+          //Interval 0-0 -> one value (0)
+          return this->STo - this->SFrom + 1;
+      }
+  }
+
+  virtual llvm::APInt Urange() const {
+      if (this->SFrom.ugt(this->UTo)) { //Inverted
+          //Interval 9-0 (in mod 10, two values (0 and 9))
+          //Max Value -> 9
+          //Min Value -> 0
+          return (llvm::APInt::getMaxValue(this->UFrom.getBitWidth()) - this->UTo) +
+                  (llvm::APInt::getMinValue(this->UTo.getBitWidth()) - this->UFrom) + 2;
+      }
+      else {
+          //Interval 0-0 -> one value (0)
+          return this->UTo - this->UFrom + 1;
+      }
+  }
+
   virtual float accuracy() const {
-      return 1.0;/* - (
+      //TODO - what if only one is set given?
+      /*
+      if (this->Top) return 0;
+      else if(this->From == this->To) {
+          return 1.0;
+      }
+      else {
+          return 0.5; //Will probably need APFloat probably for accuracy
+          //Pseudocode:
+          //return 1.0 - this->range() / (this->getMaximumSignedValue(this->From.getBitWidth()) - this->getMinimumSignedValue(this->From.getBitWidth()));
+      }
+      */
+      /*return 1.0; /* - (
                   (this->Infinity ? std::numeric_limits<llvm::APInt>::max() : this->To) -
                   (this->NegativeInfinity ? std::numeric_limits<llvm::APInt>::min() : this->From)
               ) / (std::numeric_limits<llvm::APInt>::max() - std::numeric_limits<llvm::APInt>::min());*/
@@ -76,7 +136,8 @@ class Range : public AbstractValue
   }
 
   virtual void setTop() {
-      this->Top = true;
+      if (this->declared == SIGNED || this->declared == BOTH) this->STop = true;
+      if (this->declared == UNSIGNED || this->declared == BOTH) this->UTop = true;
   }
 
   virtual void printToStream(llvm::raw_ostream &ostream) const {
@@ -92,16 +153,34 @@ class Range : public AbstractValue
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
       this->Empty = false;
 
-      if (a1.Top || a2.Top) {
-          this->Top = true;
-          return;
+      if (a1.declared == SIGNED || a1.declared == BOTH &&
+              a2.declared == SIGNED || a2.declared == BOTH) {//Signed part
+          if (a1.STop || a2.STop) {
+              this->STop = true;
+              return;
+          }
+
+          this->SFrom = a1.SFrom + a2.SFrom;
+          this->STo = a1.STo + a2.STo;
+
+          if (Soverflow(a1, a2)) {
+              this->STop = true;
+          }
       }
 
-      this->From = a1.From + a2.From;
-      this->To = a1.To + a2.To;
+      if (a1.declared == UNSIGNED || a1.declared == BOTH &&
+              a2.declared == UNSIGNED || a2.declared == BOTH) {//Unsigned part
+          if (a1.UTop || a2.UTop) {
+              this->UTop = true;
+              return;
+          }
 
-      if (overflow(a1, a2)) {
-          this->Top = true;
+          this->UFrom = a1.UFrom + a2.UFrom;
+          this->UTo = a1.UTo + a2.UTo;
+
+          if (Uoverflow(a1, a2)) {
+              this->UTop = true;
+          }
       }
   }
 
@@ -109,43 +188,79 @@ class Range : public AbstractValue
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
       this->Empty = false;
 
-      if (a1.Top || a2.Top) {
-          this->Top = true;
-          return;
+      if (a1.declared == SIGNED || a1.declared == BOTH &&
+              a2.declared == SIGNED || a2.declared == BOTH) {//Signed part
+          if (a1.STop || a2.STop) {
+              this->STop = true;
+              return;
+          }
+
+          this->SFrom = a1.SFrom - a2.STo;
+          this->STo = a1.STo - a2.SFrom;
+
+          if (Soverflow(a1, a2)) {
+              this->STop = true;
+          }
       }
 
-      this->From = a1.From - a2.To;
-      this->To = a1.To - a2.From;
+      if (a1.declared == UNSIGNED || a1.declared == BOTH &&
+              a2.declared == UNSIGNED || a2.declared == BOTH) {//Unsigned part
+          if (a1.UTop || a2.UTop) {
+              this->UTop = true;
+              return;
+          }
 
-      if (overflow(a1, a2)) {
-          this->Top = true;
+          this->UFrom = a1.UFrom - a2.UTo;
+          this->UTo = a1.UTo - a2.UFrom;
+
+          if (Uoverflow(a1, a2)) {
+              this->UTop = true;
+          }
       }
   }
 
-  void mul(const AbstractValue &a, const AbstractValue &b) {
+  void smul(const AbstractValue &a, const AbstractValue &b) {
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
       this->Empty = false;
 
-      if (a1.Top || a2.Top) {
-          this->Top = true;
-          return;
-      }
+      if (a1.declared == SIGNED || a1.declared == BOTH &&
+              a2.declared == SIGNED || a2.declared == BOTH) { //Both must be signed
 
-      this->From = min(a1.From * a2.From, a1.To * a2.To, a1.From * a2.To, a1.To * a2.From);
-      this->To = max(a1.From * a2.From, a1.To * a2.To, a1.From * a2.To, a1.To * a2.From);
+          this->declared = SIGNED;
+
+          if (a1.STop || a2.STop) {
+              this->STop = true;
+              return;
+          }
+
+          //TODO - overflow
+          this->SFrom = Smin(a1.SFrom * a2.SFrom, a1.STo * a2.STo, a1.SFrom * a2.STo, a1.STo * a2.SFrom);
+          this->STo = Smax(a1.SFrom * a2.SFrom, a1.STo * a2.STo, a1.SFrom * a2.STo, a1.STo * a2.SFrom);
+      }
+      else { //If both are not signed
+          this->setTop();
+      }
   }
 
-  void div(const AbstractValue &a, const AbstractValue &b) {
+  void sdiv(const AbstractValue &a, const AbstractValue &b) {
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
       this->Empty = false;
 
-      if (a1.Top || a2.Top) {
-          this->Top = true;
-          return;
-      }
+      if (a1.declared == SIGNED || a1.declared == BOTH &&
+              a2.declared == SIGNED || a2.declared == BOTH) { //Both must be signed
 
-      this->From = min(a1.From. CMP(div) (a2.From), a1.To. CMP(div) (a2.To), a1.From. CMP(div) (a2.To), a1.To. CMP(div) (a2.From));
-      this->To = max(a1.From. CMP(div) (a2.From), a1.To. CMP(div) (a2.To), a1.From. CMP(div) (a2.To), a1.To. CMP(div) (a2.From));
+          this->declared = SIGNED;
+
+          if (a1.STop || a2.STop) {
+              this->STop = true;
+              return;
+          }
+          this->SFrom = Smin(a1.SFrom. CMP(div) (a2.SFrom), a1.STo. CMP(div) (a2.STo), a1.SFrom. CMP(div) (a2.STo), a1.STo. CMP(div) (a2.SFrom));
+          this->STo = Smax(a1.SFrom. CMP(div) (a2.SFrom), a1.STo. CMP(div) (a2.STo), a1.SFrom. CMP(div) (a2.STo), a1.STo. CMP(div) (a2.SFrom));
+      }
+      else { //If both are not signed
+          this->setTop();
+      }
   }
 
   /*void add(const AbstractValue &a, const AbstractValue &b) {
@@ -170,10 +285,13 @@ class Range : public AbstractValue
 
 protected:
 
-#define MIN2(a, b) ( a. CMP(lt) (b) ? a : b )
-#define MAX2(a, b) ( a. CMP(gt) (b) ? a : b )
+#define MIN2U(a, b) ( a.ult(b) ? a : b )
+#define MAX2U(a, b) ( a.ugt(b) ? a : b )
+#define MIN2S(a, b) ( a.slt(b) ? a : b )
+#define MAX2S(a, b) ( a.sgt(b) ? a : b )
 
 //For merging
+/*
   void setLower(const Range& other) {
       //TODO - Signed or Unsigned
       this->From = MIN2(this->From, other.From);
@@ -183,63 +301,40 @@ protected:
       //TODO - Signed or Unsigned
       this->To = MAX2(this->To, other.To);
   }
+*/
 
-  static const llvm::APInt& min(const llvm::APInt& a, const llvm::APInt& b, const llvm::APInt& c, const llvm::APInt& d) {
-      return MIN2 ( (MIN2(a, b)), (MIN2(c, d)) );
+  static const llvm::APInt& Smin(const llvm::APInt& a, const llvm::APInt& b, const llvm::APInt& c, const llvm::APInt& d) {
+      return MIN2S ( (MIN2S(a, b)), (MIN2S(c, d)) );
   }
 
-  static const llvm::APInt& max(const llvm::APInt& a, const llvm::APInt& b, const llvm::APInt& c, const llvm::APInt& d) {
-      return MAX2 ( (MAX2(a, b)), (MAX2(c, d)) );
+  static const llvm::APInt& Umin(const llvm::APInt& a, const llvm::APInt& b, const llvm::APInt& c, const llvm::APInt& d) {
+      return MIN2U ( (MIN2U(a, b)), (MIN2U(c, d)) );
+  }
+
+  static const llvm::APInt& Smax(const llvm::APInt& a, const llvm::APInt& b, const llvm::APInt& c, const llvm::APInt& d) {
+      return MAX2S ( (MAX2S(a, b)), (MAX2S(c, d)) );
+  }
+  static const llvm::APInt& Umax(const llvm::APInt& a, const llvm::APInt& b, const llvm::APInt& c, const llvm::APInt& d) {
+      return MAX2U ( (MAX2U(a, b)), (MAX2U(c, d)) );
   }
 
   //Check for overflow in addition and substraction
-  static bool overflow(const Range& a, const Range& b) {
-      llvm::APInt r1 = (a.To - a.From) + 1;
-      llvm::APInt r2 = (b.To - b.From) + 1;
+  static bool Soverflow(const Range& a, const Range& b) {
+      //llvm::APInt r1 = (a.To - a.From) + 1;
+      //llvm::APInt r2 = (b.To - b.From) + 1;
       bool res;
-      r1. CMP(mul_ov) (r2, res);
+      a.Srange().smul_ov(b.Srange(), res);
       return res;
   }
 
-/*  llvm::APInt plus(const llvm::APInt& a, const llvm::APInt& b) const {
-      return a + b;
+  //Check for overflow in addition and substraction
+  static bool Uoverflow(const Range& a, const Range& b) {
+      //llvm::APInt r1 = (a.To - a.From) + 1;
+      //llvm::APInt r2 = (b.To - b.From) + 1;
+      bool res;
+      a.Urange().umul_ov(b.Urange(), res);
+      return res;
   }
-
-  llvm::APInt minus(const llvm::APInt& a, const llvm::APInt& b) const {
-      return a - b;
-  }
-
-  llvm::APInt multiple(const llvm::APInt& a, const llvm::APInt& b) const {
-      return a * b;
-  }
-
-  llvm::APInt divide(const llvm::APInt& a, const llvm::APInt& b) const {
-      return a * b;
-  }
-
-  template <typename F>
-  void binaryOp2(const Range &a, const Range& b, F f) {
-      if (a.NegativeInfinity || b.NegativeInfinity) this->NegativeInfinity = true;
-      else {
-          this->From = F(a.From, b.From);
-      }
-      if (a.Infinity || b.Infinity) this->Infinity = true;
-      else {
-          this->To = F(a.To, b.To);
-      }
-  }
-
-  template <typename F>
-  void binaryOp2Inverted(const Range &a, const Range& b, F f) {
-      if (a.NegativeInfinity || b.NegativeInfinity) this->NegativeInfinity = true;
-      else {
-          this->From = F(a.From, b.To);
-      }
-      if (a.Infinity || b.Infinity) this->Infinity = true;
-      else {
-          this->To = F(a.To, b.From);
-      }
-  }*/
 };
 
 } // namespace AbstractInteger
