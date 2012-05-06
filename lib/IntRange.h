@@ -5,9 +5,7 @@
 #include <llvm/Constants.h>
 #include <llvm/ADT/APInt.h>
 #include <limits>
-
-#define CMP(OP) s ## OP
-
+#include <algorithm>
 
 namespace AbstractInteger {
 
@@ -63,16 +61,24 @@ class Range : public AbstractValue
       const Range& other = (const Range&) v;
       this->Empty = other.Empty;
       if (this->Empty) return;
-      //TODO - what if only one is defined and both in the other?
 
-      /*
-      if (this->Top || other.Top) {
-          this->Top = true;
+      if (this->declared == BOTH && other.declared == BOTH) {
+          this->Smerge(other);
+          this->Umerge(other);
+      }
+      else if (other.declared == UNSIGNED &&
+               (this->declared == UNSIGNED || this->declared == BOTH)) {
+          this->declared = UNSIGNED;
+          this->Umerge(other);
+      }
+      else if (other.declared == SIGNED &&
+               (this->declared == SIGNED || this->declared == BOTH)) {
+          this->declared = SIGNED;
+          this->Smerge(other);
       }
       else {
-        this->setLower(other);
-        this->setHigher(other);
-      }*/
+          this->setTop(); //Declared mismatch (signed with unsigned)
+      }
   }
 
   virtual size_t memoryUsage() const {
@@ -112,23 +118,15 @@ class Range : public AbstractValue
   }
 
   virtual float accuracy() const {
-      //TODO - what if only one is set given?
-      /*
-      if (this->Top) return 0;
-      else if(this->From == this->To) {
-          return 1.0;
+      switch (this->declared) {
+      case SIGNED:
+          return this->Saccuracy();
+      case UNSIGNED:
+          return this->Uaccuracy();
+      case BOTH:
+          return std::min(this->Saccuracy(), this->Uaccuracy());
+          //TODO - min or max?
       }
-      else {
-          return 0.5; //Will probably need APFloat probably for accuracy
-          //Pseudocode:
-          //return 1.0 - this->range() / (this->getMaximumSignedValue(this->From.getBitWidth()) - this->getMinimumSignedValue(this->From.getBitWidth()));
-      }
-      */
-      /*return 1.0; /* - (
-                  (this->Infinity ? std::numeric_limits<llvm::APInt>::max() : this->To) -
-                  (this->NegativeInfinity ? std::numeric_limits<llvm::APInt>::min() : this->From)
-              ) / (std::numeric_limits<llvm::APInt>::max() - std::numeric_limits<llvm::APInt>::min());*/
-      //TODO
   }
 
   virtual bool isBottom() const {
@@ -255,8 +253,8 @@ class Range : public AbstractValue
               this->STop = true;
               return;
           }
-          this->SFrom = Smin(a1.SFrom. CMP(div) (a2.SFrom), a1.STo. CMP(div) (a2.STo), a1.SFrom. CMP(div) (a2.STo), a1.STo. CMP(div) (a2.SFrom));
-          this->STo = Smax(a1.SFrom. CMP(div) (a2.SFrom), a1.STo. CMP(div) (a2.STo), a1.SFrom. CMP(div) (a2.STo), a1.STo. CMP(div) (a2.SFrom));
+          this->SFrom = Smin(a1.SFrom.sdiv(a2.SFrom), a1.STo.sdiv(a2.STo), a1.SFrom.sdiv(a2.STo), a1.STo.sdiv(a2.SFrom));
+          this->STo = Smax(a1.SFrom.sdiv(a2.SFrom), a1.STo.sdiv(a2.STo), a1.SFrom.sdiv(a2.STo), a1.STo.sdiv(a2.SFrom));
       }
       else { //If both are not signed
           this->setTop();
@@ -285,43 +283,48 @@ class Range : public AbstractValue
 
 protected:
 
-#define MIN2U(a, b) ( a.ult(b) ? a : b )
-#define MAX2U(a, b) ( a.ugt(b) ? a : b )
-#define MIN2S(a, b) ( a.slt(b) ? a : b )
-#define MAX2S(a, b) ( a.sgt(b) ? a : b )
+#define UMIN2(a, b) ( a.ult(b) ? a : b )
+#define UMAX2(a, b) ( a.ugt(b) ? a : b )
+#define SMIN2(a, b) ( a.slt(b) ? a : b )
+#define SMAX2(a, b) ( a.sgt(b) ? a : b )
 
-//For merging
-/*
-  void setLower(const Range& other) {
-      //TODO - Signed or Unsigned
-      this->From = MIN2(this->From, other.From);
+  void Smerge(const Range& other) {
+      if (other.STop || this->STop) {
+          this->STop = true;
+          return;
+      }
+
+      this->SFrom = SMIN2(this->SFrom, other.SFrom);
+      this->STo = SMAX2(this->STo, other.STo);
   }
 
-  void setHigher(const Range& other) {
-      //TODO - Signed or Unsigned
-      this->To = MAX2(this->To, other.To);
+  void Umerge(const Range& other) {
+      if (other.UTop || this->UTop) {
+          this->UTop = true;
+          return;
+      }
+
+      this->UFrom = UMIN2(this->UFrom, other.UFrom);
+      this->UTo = UMAX2(this->UTo, other.UTo);
   }
-*/
 
   static const llvm::APInt& Smin(const llvm::APInt& a, const llvm::APInt& b, const llvm::APInt& c, const llvm::APInt& d) {
-      return MIN2S ( (MIN2S(a, b)), (MIN2S(c, d)) );
+      return SMIN2 ( (SMIN2(a, b)), (SMIN2(c, d)) );
   }
 
   static const llvm::APInt& Umin(const llvm::APInt& a, const llvm::APInt& b, const llvm::APInt& c, const llvm::APInt& d) {
-      return MIN2U ( (MIN2U(a, b)), (MIN2U(c, d)) );
+      return UMIN2 ( (UMIN2(a, b)), (UMIN2(c, d)) );
   }
 
   static const llvm::APInt& Smax(const llvm::APInt& a, const llvm::APInt& b, const llvm::APInt& c, const llvm::APInt& d) {
-      return MAX2S ( (MAX2S(a, b)), (MAX2S(c, d)) );
+      return SMAX2 ( (SMAX2(a, b)), (SMAX2(c, d)) );
   }
   static const llvm::APInt& Umax(const llvm::APInt& a, const llvm::APInt& b, const llvm::APInt& c, const llvm::APInt& d) {
-      return MAX2U ( (MAX2U(a, b)), (MAX2U(c, d)) );
+      return UMAX2 ( (UMAX2(a, b)), (UMAX2(c, d)) );
   }
 
   //Check for overflow in addition and substraction
   static bool Soverflow(const Range& a, const Range& b) {
-      //llvm::APInt r1 = (a.To - a.From) + 1;
-      //llvm::APInt r2 = (b.To - b.From) + 1;
       bool res;
       a.Srange().smul_ov(b.Srange(), res);
       return res;
@@ -329,11 +332,34 @@ protected:
 
   //Check for overflow in addition and substraction
   static bool Uoverflow(const Range& a, const Range& b) {
-      //llvm::APInt r1 = (a.To - a.From) + 1;
-      //llvm::APInt r2 = (b.To - b.From) + 1;
       bool res;
       a.Urange().umul_ov(b.Urange(), res);
       return res;
+  }
+
+  //Accuracy
+  float Saccuracy() const {
+      if (this->STop) return 0;
+      else if(this->SFrom == this->STo) {
+            return 1.0;
+        }
+      else {
+            return 0.5; //Will probably need APFloat probably for accuracy
+        //Pseudocode:
+        //return 1.0 - this->range() / (this->getMaximumSignedValue(this->From.getBitWidth()) - this->getMinimumSignedValue(this->From.getBitWidth()));
+      }
+  }
+
+  float Uaccuracy() const {
+      if (this->UTop) return 0;
+      else if(this->UFrom == this->UTo) {
+            return 1.0;
+        }
+      else {
+            return 0.5; //Will probably need APFloat probably for accuracy
+        //Pseudocode:
+        //return 1.0 - this->range() / (this->getMaximumSignedValue(this->From.getBitWidth()) - this->getMinimumSignedValue(this->From.getBitWidth()));
+      }
   }
 };
 
