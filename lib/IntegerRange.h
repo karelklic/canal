@@ -4,6 +4,10 @@
 #include "Value.h"
 #include <llvm/Constants.h>
 
+namespace llvm {
+    class APInt;
+}
+
 namespace Canal {
 namespace Integer {
 
@@ -12,16 +16,14 @@ class Range : public Value
 {
 public:
     bool mEmpty;
-
+    bool mTop;
     llvm::APInt mFrom;
-    bool mFromInfinity;
-
     llvm::APInt mTo;
-    bool mToInfinity;
 
 public:
     // Initializes to the lowest value.
     Range(unsigned numBits);
+    Range(const llvm::APInt &constant);
 
 public: // Implementation of Value.
     // Implementation of Value::clone().

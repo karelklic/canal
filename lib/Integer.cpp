@@ -70,5 +70,109 @@ Container::toString() const
     return ss.str();
 }
 
+void
+Container::add(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.setTop();
+}
+
+void
+Container::sub(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.setTop();
+}
+
+void
+Container::mul(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.setTop();
+}
+
+void
+Container::udiv(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.setTop();
+}
+
+void
+Container::sdiv(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.setTop();
+}
+
+void
+Container::urem(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.setTop();
+}
+
+void
+Container::srem(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.setTop();
+}
+
+void
+Container::shl(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.setTop();
+}
+
+void
+Container::lshr(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.setTop();
+}
+
+void
+Container::ashr(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.setTop();
+}
+
+void
+Container::and_(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.and_(aa.mBits, bb.mBits);
+}
+
+void
+Container::or_(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.or_(aa.mBits, bb.mBits);
+}
+
+void
+Container::xor_(const Value &a, const Value &b)
+{
+    const Container &aa = dynamic_cast<const Container&>(a);
+    const Container &bb = dynamic_cast<const Container&>(b);
+    mBits.xor_(aa.mBits, bb.mBits);
+}
+
 } // namespace Integer
 } // namespace Canal

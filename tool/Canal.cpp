@@ -1,4 +1,6 @@
 #include "Commands.h"
+#include <sstream>
+#include <string>
 #include <cstring>
 #include <cctype>
 #include <cstdlib>
@@ -95,6 +97,19 @@ main(int argc, char **argv)
     // Parse command arguments.
     Arguments arguments;
     argp_parse(&gArgumentParser, argc, argv, 0, 0, &arguments);
+
+    if (!arguments.mFileName.empty())
+    {
+        std::stringstream ss;
+        ss << "file " << arguments.mFileName;
+        gCommands.executeLine(ss.str());
+    }
+
+    for (std::vector<std::string>::const_iterator it = arguments.mEvalCommands.begin(); it != arguments.mEvalCommands.end(); ++it)
+    {
+        gCommands.executeLine(*it);
+    }
+
 
     // Loop reading and executing lines until the user quits.
     while (true)

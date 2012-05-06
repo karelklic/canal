@@ -7,7 +7,19 @@
 namespace Canal {
 namespace Integer {
 
-Range::Range(unsigned numBits) : mEmpty(true), mFrom(numBits, 0), mFromInfinity(false), mTo(numBits, 0), mToInfinity(false)
+Range::Range(unsigned numBits)
+    : mEmpty(true),
+      mTop(false),
+      mFrom(numBits, 0),
+      mTo(numBits, 0)
+{
+}
+
+Range::Range(const llvm::APInt &constant)
+    : mEmpty(false),
+      mTop(false),
+      mFrom(constant),
+      mTo(constant)
 {
 }
 
@@ -22,13 +34,32 @@ Range::operator==(const Value& value) const
 {
     const Range *range = dynamic_cast<const Range*>(&value);
     if (!range)
-    return *this == *range;
+        return false;
+    if (mEmpty)
+        return range->mEmpty;
+    if (mTop)
+        return range->mTop;
+    return mFrom == range->mFrom && mTo == range->mTo;
 }
 
 void
 Range::merge(const Value &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Range &range = dynamic_cast<const Range&>(value);
+    if (range.mEmpty)
+        return;
+
+    if (range.mTop)
+    {
+        mEmpty = false;
+        mTop = true;
+        return;
+    }
+
+    if (!mFrom.sle(range.mFrom))
+        mFrom = range.mFrom;
+    if (!mTo.sgt(range.mTo))
+        mTo = range.mTo;
 }
 
 size_t
@@ -47,8 +78,8 @@ Range::toString() const
     else
     {
         ss << "{" << std::endl;
-        ss << "    from:" << (mFromInfinity ? "-infinity" : Canal::toString(mFrom)) << std::endl;
-        ss << "    to:" << (mToInfinity ? "infinity" : Canal::toString(mTo)) << std::endl;
+        ss << "    from:" << (mTop ? "-infinity" : Canal::toString(mFrom)) << std::endl;
+        ss << "    to:" << (mTop ? "infinity" : Canal::toString(mTo)) << std::endl;
         ss << "}";
     }
     return ss.str();
@@ -69,7 +100,7 @@ Range::isBottom() const
 void
 Range::setTop()
 {
-    mFromInfinity = mToInfinity = true;
+    mTop = true;
     mEmpty = false;
 }
 
