@@ -129,11 +129,27 @@ class Enumeration : public AbstractValue
         } \
     } \
   }
+#define METHOD_OV(classname, operation) \
+  void classname(const AbstractValue &a, const AbstractValue &b) { \
+    const Enumeration &l = dynamic_cast<const Enumeration&>(a), &r = dynamic_cast<const Enumeration&>(b); \
+    if (l.Top || r.Top) { this->setTop(); return; } \
+    /*TODO - can this be extracted to function?*/ \
+    for (std::set<APIntSetHack>::const_iterator lit = l.Values.begin(); lit != l.Values.end(); lit ++) { \
+        for (std::set<APIntSetHack>::const_iterator rit = r.Values.begin(); rit != r.Values.end(); rit ++) { \
+            bool overflow; \
+            this->Values.insert((*lit).operation(*rit, overflow)); \
+            if (overflow) { this->setTop(); return; } \
+            if (this->limit()) return; \
+        } \
+    } \
+  }
+
+
   METHOD(add, operator+)
   METHOD(sub, operator-)
-  METHOD(smul, operator*)
-  METHOD(umul, operator*)
-  METHOD(sdiv, sdiv)
+  METHOD_OV(smul, smul_ov)
+  METHOD_OV(umul, umul_ov)
+  METHOD_OV(sdiv, sdiv_ov)
   METHOD(udiv, udiv)
   METHOD(urem, urem)
   METHOD(srem, srem)
