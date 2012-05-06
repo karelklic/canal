@@ -86,7 +86,7 @@ class Range : public AbstractValue
   }
 
   virtual bool limitMemoryUsage(size_t size) {
-      return false;
+      return false; //Possibly dynamically allocate llvm::APInt and delete one in case Declared is UNSIGNED or SIGNED
   }
 
   virtual llvm::APInt Srange() const {
@@ -231,9 +231,40 @@ class Range : public AbstractValue
               return;
           }
 
-          //TODO - overflow
-          this->SFrom = Smin(a1.SFrom * a2.SFrom, a1.STo * a2.STo, a1.SFrom * a2.STo, a1.STo * a2.SFrom);
-          this->STo = Smax(a1.SFrom * a2.SFrom, a1.STo * a2.STo, a1.SFrom * a2.STo, a1.STo * a2.SFrom);
+          bool overflow[8] = {false, false, false, false, false, false, false, false};
+          this->SFrom = Smin(a1.SFrom.smul_ov(a2.SFrom, overflow[0]), a1.STo.smul_ov(a2.STo, overflow[1]), a1.SFrom.smul_ov(a2.STo, overflow[2]), a1.STo.smul_ov(a2.SFrom, overflow[3]));
+          this->STo = Smax(a1.SFrom.smul_ov(a2.SFrom, overflow[4]), a1.STo.smul_ov(a2.STo, overflow[5]), a1.SFrom.smul_ov(a2.STo, overflow[6]), a1.STo.smul_ov(a2.SFrom, overflow[7]));
+
+          if (std::find(overflow, overflow + 8, true) != overflow + 8) { //Overflow in any multiplication -> setTop
+              this->setTop();
+          }
+      }
+      else { //If both are not signed
+          this->setTop();
+      }
+  }
+
+  void umul(const AbstractValue &a, const AbstractValue &b) {
+      const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
+      this->Empty = false;
+
+      if (a1.declared == UNSIGNED || a1.declared == BOTH &&
+              a2.declared == UNSIGNED || a2.declared == BOTH) { //Both must be signed
+
+          this->declared = UNSIGNED;
+
+          if (a1.UTop || a2.UTop) {
+              this->UTop = true;
+              return;
+          }
+
+          bool overflow[8] = {false, false, false, false, false, false, false, false};
+          this->UFrom = Umin(a1.UFrom.umul_ov(a2.UFrom, overflow[0]), a1.UTo.umul_ov(a2.UTo, overflow[1]), a1.UFrom.umul_ov(a2.UTo, overflow[2]), a1.UTo.umul_ov(a2.UFrom, overflow[3]));
+          this->UTo = Umax(a1.UFrom.umul_ov(a2.UFrom, overflow[4]), a1.UTo.umul_ov(a2.UTo, overflow[5]), a1.UFrom.umul_ov(a2.UTo, overflow[6]), a1.UTo.umul_ov(a2.UFrom, overflow[7]));
+
+          if (std::find(overflow, overflow + 8, true) != overflow + 8) { //Overflow in any multiplication -> setTop
+              this->setTop();
+          }
       }
       else { //If both are not signed
           this->setTop();
@@ -253,34 +284,42 @@ class Range : public AbstractValue
               this->STop = true;
               return;
           }
-          this->SFrom = Smin(a1.SFrom.sdiv(a2.SFrom), a1.STo.sdiv(a2.STo), a1.SFrom.sdiv(a2.STo), a1.STo.sdiv(a2.SFrom));
-          this->STo = Smax(a1.SFrom.sdiv(a2.SFrom), a1.STo.sdiv(a2.STo), a1.SFrom.sdiv(a2.STo), a1.STo.sdiv(a2.SFrom));
+
+          bool overflow[8] = {false, false, false, false, false, false, false, false};
+          this->SFrom = Smin(a1.SFrom.sdiv_ov(a2.SFrom, overflow[0]), a1.STo.sdiv_ov(a2.STo, overflow[1]), a1.SFrom.sdiv_ov(a2.STo, overflow[2]), a1.STo.sdiv_ov(a2.SFrom, overflow[3]));
+          this->STo = Smax(a1.SFrom.sdiv_ov(a2.SFrom, overflow[4]), a1.STo.sdiv_ov(a2.STo, overflow[5]), a1.SFrom.sdiv_ov(a2.STo, overflow[6]), a1.STo.sdiv_ov(a2.SFrom, overflow[7]));
+
+          if (std::find(overflow, overflow + 8, true) != overflow + 8) { //Overflow in any division -> setTop
+              this->setTop();
+          }
       }
       else { //If both are not signed
           this->setTop();
       }
   }
 
-  /*void add(const AbstractValue &a, const AbstractValue &b) {
+  void udiv(const AbstractValue &a, const AbstractValue &b) {
       const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
-      this->binaryOp(a, b, Range::plus);
+      this->Empty = false;
+
+      if (a1.declared == UNSIGNED || a1.declared == BOTH &&
+              a2.declared == UNSIGNED || a2.declared == BOTH) { //Both must be signed
+
+          this->declared = UNSIGNED;
+
+          if (a1.UTop || a2.UTop) {
+              this->UTop = true;
+              return;
+          }
+
+          //No overflow can happen in unsigned division
+          this->UFrom = Umin(a1.UFrom.udiv(a2.UFrom), a1.UTo.udiv(a2.UTo), a1.UFrom.udiv(a2.UTo), a1.UTo.udiv(a2.UFrom));
+          this->UTo = Umax(a1.UFrom.udiv(a2.UFrom), a1.UTo.udiv(a2.UTo), a1.UFrom.udiv(a2.UTo), a1.UTo.udiv(a2.UFrom));
+      }
+      else { //If both are not signed
+          this->setTop();
+      }
   }
-
-  void sub(const AbstractValue &a, const AbstractValue &b) {
-      const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
-      this->binaryOpInverted(a, b, Range::minus);
-  }
-
-  void mul(const AbstractValue &a, const AbstractValue &b) {
-      const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
-      this->binaryOp(a, b, Range::multiple);
-  }
-
-  void div(const AbstractValue &a, const AbstractValue &b) {
-      const Range &a1 = dynamic_cast<const Range &> (a), &a2 = dynamic_cast<const Range &> (b);
-      this->binaryOp(a, b, Range::divide);
-  }*/
-
 protected:
 
 #define UMIN2(a, b) ( a.ult(b) ? a : b )
@@ -346,7 +385,7 @@ protected:
       else {
             return 0.5; //Will probably need APFloat probably for accuracy
         //Pseudocode:
-        //return 1.0 - this->range() / (this->getMaximumSignedValue(this->From.getBitWidth()) - this->getMinimumSignedValue(this->From.getBitWidth()));
+        //return 1.0 - this->Srange() / (this->getMaximumSignedValue(this->SFrom.getBitWidth()) - this->getMinimumSignedValue(this->SFrom.getBitWidth()));
       }
   }
 
@@ -358,7 +397,7 @@ protected:
       else {
             return 0.5; //Will probably need APFloat probably for accuracy
         //Pseudocode:
-        //return 1.0 - this->range() / (this->getMaximumSignedValue(this->From.getBitWidth()) - this->getMinimumSignedValue(this->From.getBitWidth()));
+        //return 1.0 - this->Urange() / (this->getMaximumValue(this->UFrom.getBitWidth()) - this->getMinimumValue(this->UFrom.getBitWidth()));
       }
   }
 };
