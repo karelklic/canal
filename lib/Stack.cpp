@@ -63,10 +63,15 @@ StackFrame::nextBlock()
         mBlockOutputState[mCurrentBlock] = mCurrentState;
     }
 
-    if (++mCurrentBlock == mFunction->end())
+    llvm::Function::const_iterator nextBlock(mCurrentBlock);
+    ++nextBlock;
+
+    if (nextBlock == mFunction->end())
     {
         if (mChanged)
         {
+            // We finished an iteration over all basic blocks in the
+            // function, but another iteration is required.
             mChanged = false;
             startBlock(mFunction->begin());
         }
@@ -76,6 +81,13 @@ StackFrame::nextBlock()
             return false;
         }
     }
+    else
+    {
+        // We finished a basic block, and there is another basic block
+        // that should be interpreted to finish an iteration.
+        startBlock(nextBlock);
+    }
+
     // Interpreting next block is necessary to find a fixpoint for
     // this function.
     return true;
@@ -91,7 +103,7 @@ StackFrame::startBlock(llvm::Function::const_iterator block)
     llvm::const_pred_iterator it = llvm::pred_begin(block), itend = llvm::pred_end(block);
     for (; it != itend; ++it)
     {
-        CANAL_ASSERT(*it != &block->getParent()->getEntryBlock() && "Entry block cannot have predecessors!");
+        CANAL_ASSERT(block != block->getParent()->getEntryBlock() && "Entry block cannot have predecessors!");
         mBlockInputState[block].merge(mBlockOutputState[*it]);
     }
 
