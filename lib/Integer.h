@@ -12,7 +12,7 @@ namespace llvm {
 namespace Canal {
 namespace Integer {
 
-class Container : public Value
+class Container : public AccuracyValue
 {
 public:
     Container(unsigned numBits);
@@ -62,8 +62,24 @@ public:
     // Implementation of Value::xor_().
     virtual void xor_(const Value &a, const Value &b);
 
+public: // Implementation of AccuracyValue.
+    // Implementation of AccuracyValue::accuracy().
+    virtual float accuracy() const;
+    // Implementation of AccuracyValue::isBottom().
+    virtual bool isBottom() const;
+    // Implementation of AccuracyValue::setBottom().
+    virtual void setBottom();
+    // Implementation of AccuracyValue::isTop().
+    virtual bool isTop() const;
+    // Implementation of AccuracyValue::setTop().
+    virtual void setTop();
+
+public: // Integer
+    Bits &getBits();
+    const Bits &getBits() const;
+
 public:
-    Bits mBits;
+    std::vector<AccuracyValue*> mValues;
 };
 
 } // namespace Integer

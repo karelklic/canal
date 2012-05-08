@@ -719,8 +719,8 @@ Interpreter::select(const llvm::SelectInst &instruction, State &state)
 
     Value *resultValue;
     const Integer::Container &conditionInt = dynamic_cast<const Integer::Container&>(*condition);
-    CANAL_ASSERT(conditionInt.mBits.getBitWidth() == 1);
-    switch (conditionInt.mBits.getBitValue(0))
+    CANAL_ASSERT(conditionInt.getBits().getBitWidth() == 1);
+    switch (conditionInt.getBits().getBitValue(0))
     {
     case -1:
         // The condition result is undefined.  Let's wait for

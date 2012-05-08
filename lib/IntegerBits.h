@@ -16,7 +16,7 @@ namespace Integer {
 //    1        0    The bit is set to 0
 //    0        1    The bit is set to 1
 //    1        1    The bit can be both 0 and 1 (highest lattice value - top)
-class Bits : public Value, public AccuracyValue
+class Bits : public AccuracyValue
 {
 public:
     // When a bit in mBits0 is 1, the value is known to contain zero

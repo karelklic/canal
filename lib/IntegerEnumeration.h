@@ -16,7 +16,7 @@ struct APIntComp
   }
 };
 
-class Enumeration : public Value, public AccuracyValue
+class Enumeration : public AccuracyValue
 {
 public:
     std::set<llvm::APInt, APIntComp> mValues;

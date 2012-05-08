@@ -63,7 +63,7 @@ Bits::toString() const
         case -1: ss << "_"; break;
         case  0: ss << "0"; break;
         case  1: ss << "1"; break;
-        case  2: ss << "2"; break;
+        case  2: ss << "T"; break;
         default: CANAL_DIE();
         }
     }
