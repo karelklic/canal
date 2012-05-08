@@ -45,4 +45,4 @@ canal_SOURCES = \
 	Utils.cpp
 
 canal_LDADD = ../lib/libcanal.la -lreadline -lhistory $(LLVM_LDFLAGS) $(LLVM_LIBS)
-canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS)
+canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS) -DDATADIR='"$(datadir)"'

@@ -7,6 +7,7 @@ AC_DISABLE_STATIC
 AC_PROG_CXX
 AC_GNU_SOURCE
 AC_PROG_LIBTOOL
+AC_CONFIG_HEADERS([lib/Config.h])
 
 # LLVM
 AC_PATH_PROG([LLVM_CONFIG], [llvm-config], [no])
@@ -22,7 +23,7 @@ LLVM_CFLAGS=`$LLVM_CONFIG --cppflags | sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic/
 LLVM_LIBS=`$LLVM_CONFIG --libs`
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 # Quadrigraphs: @<:@ gives you [ and @:>@ gives you ].
-CPPFLAGS=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
+CPPFLAGS+=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
 AC_SUBST([LLVM_CFLAGS])
 AC_SUBST([LLVM_LIBS])
 AC_SUBST([LLVM_LDFLAGS])

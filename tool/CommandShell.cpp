@@ -63,18 +63,27 @@ CommandShell::run(const std::vector<std::string> &args)
         argv[3] = NULL;
     }
 
-    int save_errno = errno;
-    pid_t pid = vfork();
+    pid_t pid = fork();
     if (pid < 0)
     {
-        printf("Failed to vfork: %s\n", strerror(errno));
-        errno = save_errno;
+        printf("Failed to fork: %s\n", strerror(errno));
         free(argv);
         return;
     }
 
     if (pid == 0)
     {
+        std::stringstream newPath;
+        newPath << DATADIR << "/canal/wrappers";
+
+        char *oldPath = getenv("PATH");
+        if (oldPath)
+            newPath << ":" << oldPath;
+
+        int result = setenv("PATH", newPath.str().c_str(), /*overwrite=*/1);
+        if (result != 0)
+            printf("Failed to set PATH: %s\n", strerror(errno));
+
         execvp(argv[0], argv);
         _exit(127);
     }

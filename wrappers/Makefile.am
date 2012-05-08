@@ -1,3 +1,3 @@
-wrapper_DATA = gcc g++ ld
+wrapper_SCRIPTS = gcc g++ ld
 wrapperdir = $(datadir)/canal/wrappers
-EXTRA_DIST = $(wrapper_DATA)
+EXTRA_DIST = $(wrapper_SCRIPTS)
