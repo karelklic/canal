@@ -14,20 +14,43 @@ AC_PATH_PROG([LLVM_CONFIG], [llvm-config], [no])
 [if test "$LLVM_CONFIG" = "no"; then]
     [echo "The llvm-config program was not found in the search path. Please ensure"]
     [echo "that it is installed and its directory is included in the search path."]
-    [echo "Then run configure again before attempting to build faf."]
+    [echo "Then run configure again before attempting to build Canal."]
     [exit 1]
 [fi]
 
+AC_PATH_PROG([LLVM_LINK], [llvm-link], [no])
+[if test "$LLVM_LINK" = "no"; then]
+    [echo "The llvm-link program was not found in the search path. Please ensure"]
+    [echo "that it is installed and its directory is included in the search path."]
+    [echo "Then run configure again before attempting to build Canal."]
+    [exit 1]
+[fi]
+AC_SUBST([LLVM_LINK])
+
 LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
+AC_SUBST([LLVM_VERSION])
+
 LLVM_CFLAGS=`$LLVM_CONFIG --cppflags | sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
+AC_SUBST([LLVM_CFLAGS])
+
 LLVM_LIBS=`$LLVM_CONFIG --libs`
+AC_SUBST([LLVM_LIBS])
+
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
+AC_SUBST([LLVM_LDFLAGS])
+
 # Quadrigraphs: @<:@ gives you [ and @:>@ gives you ].
 CPPFLAGS+=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
-AC_SUBST([LLVM_CFLAGS])
-AC_SUBST([LLVM_LIBS])
-AC_SUBST([LLVM_LDFLAGS])
-AC_SUBST([LLVM_VERSION])
+
+# CLANG
+AC_PATH_PROG([CLANG], [clang], [no])
+[if test "$CLANG" = "no"; then]
+    [echo "The clang program was not found in the search path. Please ensure"]
+    [echo "that it is installed and its directory is included in the search path."]
+    [echo "Then run configure again before attempting to build Canal."]
+    [exit 1]
+[fi]
+AC_SUBST([CLANG])
 
 # Initialize the test suite.
 AC_CONFIG_TESTDIR(tests)
@@ -44,6 +67,7 @@ AC_CONFIG_FILES([
     Makefile
     lib/Makefile
     tool/Makefile
+    wrappers/config.py
     wrappers/Makefile
 ])
 
