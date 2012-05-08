@@ -32,7 +32,10 @@ public:
     virtual size_t memoryUsage() const = 0;
 
     // String representation for logging and debugging purposes.
-    virtual std::string toString() const = 0;
+    // @param state
+    //   Optional.  If provided, state is used to display more
+    //   information about pointers,
+    virtual std::string toString(const State *state) const = 0;
 
 public:
     // Implementation of instructions operating on values.

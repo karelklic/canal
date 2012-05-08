@@ -44,7 +44,7 @@ public:
 
     // Get memory usage (used byte count) of this value.
     size_t memoryUsage() const;
-    std::string toString(SlotTracker &slotTracker) const;
+    std::string toString(const State *state, SlotTracker &slotTracker) const;
 
     Value *dereference(const State &state) const;
 
@@ -84,7 +84,7 @@ public:
     // Implementation of Value::memoryUsage().
     virtual size_t memoryUsage() const;
     // Implementation of Value::toString().
-    virtual std::string toString() const;
+    virtual std::string toString(const State *state) const;
 
     void addConstantTarget(const llvm::Value *instruction, size_t constant);
 

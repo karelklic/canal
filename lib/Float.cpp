@@ -36,7 +36,7 @@ Range::memoryUsage() const
 }
 
 std::string
-Range::toString() const
+Range::toString(const State *state) const
 {
     std::stringstream ss;
     ss << "Float::Range: {" << std::endl;

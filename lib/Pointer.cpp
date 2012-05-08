@@ -103,14 +103,14 @@ Target::memoryUsage() const
 }
 
 std::string
-Target::toString(SlotTracker &slotTracker) const
+Target::toString(const State *state, SlotTracker &slotTracker) const
 {
     std::stringstream ss;
     ss << "Pointer::Target: ";
     if (mArrayOffset)
     {
         ss << "{" << std::endl;
-        ss << "    array offset: " << mArrayOffset->toString() << std::endl;
+        ss << "    array offset: " << indentExceptFirstLine(mArrayOffset->toString(state), 18) << std::endl;
         ss << "    target: ";
     }
 
@@ -131,6 +131,13 @@ Target::toString(SlotTracker &slotTracker) const
             name = "<failed to name the location>";
 
         ss << name;
+        if (state)
+        {
+            Value *block = state->findBlock(*mInstruction);
+            ss << " ";
+            int indentation = (mArrayOffset ? 12 : 17) + 1 + name.length();
+            ss << (block ? indentExceptFirstLine(block->toString(state), indentation) : "<error: block missing in current state!>");
+        }
         break;
     }
     default:
@@ -234,7 +241,7 @@ InclusionBased::memoryUsage() const
 }
 
 std::string
-InclusionBased::toString() const
+InclusionBased::toString(const State *state) const
 {
     SlotTracker slotTracker(mModule);
     std::stringstream ss;
@@ -248,7 +255,7 @@ InclusionBased::toString() const
             name = "<failed to name the location>";
 
         ss << "    { assigned: " << name << std::endl;
-        ss << "      target: " << indentExceptFirstLine(it->second.toString(slotTracker), 14) << " }" << std::endl;
+        ss << "      target: " << indentExceptFirstLine(it->second.toString(state, slotTracker), 14) << " }" << std::endl;
     }
     ss << "]";
     return ss.str();

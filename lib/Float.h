@@ -26,7 +26,7 @@ public:
     // Implementation of Value::memoryUsage().
     virtual size_t memoryUsage() const;
     // Implementation of Value::toString().
-    virtual std::string toString() const;
+    virtual std::string toString(const State *state) const;
 };
 
 } // namespace Float

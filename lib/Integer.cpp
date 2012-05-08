@@ -86,14 +86,14 @@ Container::memoryUsage() const
 }
 
 std::string
-Container::toString() const
+Container::toString(const State *state) const
 {
     std::stringstream ss;
-    ss << "Integer::Container: {" << std::endl;
+    ss << "Integer::Container: [" << std::endl;
     std::vector<AccuracyValue*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
-        ss << "    - " << indentExceptFirstLine((*it)->toString(), 10) << std::endl;
-    ss << "}";
+        ss << "    " << indentExceptFirstLine((*it)->toString(state), 4) << std::endl;
+    ss << "]";
     return ss.str();
 }
 

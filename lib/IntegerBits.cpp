@@ -36,6 +36,7 @@ Bits::merge(const Value &value)
     if (constant)
     {
         CANAL_ASSERT(constant->isAPInt());
+        mBits0 |= ~constant->getAPInt();
         mBits1 |= constant->getAPInt();
         return;
     }
@@ -52,7 +53,7 @@ Bits::memoryUsage() const
 }
 
 std::string
-Bits::toString() const
+Bits::toString(const State *state) const
 {
     std::stringstream ss;
     ss << "Integer::Bits: ";

@@ -120,7 +120,7 @@ CommandPrint::run(const std::vector<std::string> &args)
             continue;
         }
 
-        printf("%s = %s\n", it->c_str(), Canal::indentExceptFirstLine(value->toString(), it->size() + 3).c_str());
+        printf("%s = %s\n", it->c_str(), Canal::indentExceptFirstLine(value->toString(&currentState), it->size() + 3).c_str());
     }
 }
 

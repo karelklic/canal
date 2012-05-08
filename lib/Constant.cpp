@@ -34,7 +34,7 @@ Constant::memoryUsage() const
 }
 
 std::string
-Constant::toString() const
+Constant::toString(const State *state) const
 {
     std::string s;
     llvm::raw_string_ostream os(s);
