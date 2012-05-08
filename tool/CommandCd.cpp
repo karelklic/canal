@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <cstdio>
 #include <cstring>
+#include <wordexp.h>
 
 CommandCd::CommandCd(Commands &commands)
     : Command("cd",
@@ -28,10 +29,15 @@ CommandCd::run(const std::vector<std::string> &args)
         return;
     }
 
+    wordexp_t exp_result;
+    wordexp(args[1].c_str(), &exp_result, 0);
+
     int save_errno = errno;
-    if (-1 == chdir(args[1].c_str()))
+    if (-1 == chdir(exp_result.we_wordv[0]))
     {
         printf("Failed to change directory: %s\n", strerror(errno));
         errno = save_errno;
     }
+
+    wordfree(&exp_result);
 }
