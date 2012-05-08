@@ -101,15 +101,25 @@ Container::toString() const
 static void
 applyBinaryOperation(Container &result, const Value &a, const Value &b, void(Value::*operation)(const Value&, const Value&))
 {
-    const Container &aa = dynamic_cast<const Container&>(a);
-    const Container &bb = dynamic_cast<const Container&>(b);
-    CANAL_ASSERT(result.mValues.size() == aa.mValues.size() &&
-                 aa.mValues.size() == bb.mValues.size());
+    const Canal::Constant *aconstant = dynamic_cast<const Canal::Constant*>(&a);
+    const Container *acontainer = dynamic_cast<const Container*>(&a);
+    CANAL_ASSERT(aconstant || acontainer);
+    CANAL_ASSERT(!acontainer || result.mValues.size() == acontainer->mValues.size());
+
+    const Canal::Constant *bconstant = dynamic_cast<const Canal::Constant*>(&b);
+    const Container *bcontainer = dynamic_cast<const Container*>(&b);
+    CANAL_ASSERT(bconstant || bcontainer);
+    CANAL_ASSERT(!bcontainer || result.mValues.size() == bcontainer->mValues.size());
+
     std::vector<AccuracyValue*>::iterator it(result.mValues.begin());
-    std::vector<AccuracyValue*>::const_iterator ita(aa.mValues.begin());
-    std::vector<AccuracyValue*>::const_iterator itb(bb.mValues.begin());
+    std::vector<AccuracyValue*>::const_iterator ita(acontainer ? acontainer->mValues.begin() : it);
+    std::vector<AccuracyValue*>::const_iterator itb(bcontainer ? bcontainer->mValues.begin() : it);
     for (; it != result.mValues.end(); ++it, ++ita, ++itb)
-        ((**it).*(operation))(**ita, **itb);
+    {
+        const Value &avalue = acontainer ? static_cast<const Value&>(**ita) : *aconstant;
+        const Value &bvalue = bcontainer ? static_cast<const Value&>(**itb) : *bconstant;
+        ((**it).*(operation))(avalue, bvalue);
+    }
 }
 
 void

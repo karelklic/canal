@@ -70,6 +70,66 @@ Bits::toString() const
     return ss.str();
 }
 
+void
+Bits::add(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Bits::sub(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Bits::mul(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Bits::udiv(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Bits::sdiv(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Bits::urem(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Bits::srem(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Bits::shl(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Bits::lshr(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Bits::ashr(const Value &a, const Value &b)
+{
+    setTop();
+}
+
 static void
 applyBitOperation(Bits &result, const Value &a, const Value &b, int(*operation)(int,int))
 {

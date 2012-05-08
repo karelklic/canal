@@ -68,7 +68,7 @@ llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
                               const Value &value);
 
 // Base class for abstract states that can inform about accuracy.
-class AccuracyValue
+class AccuracyValue : public Value
 {
 public:
     // Get accuracy of the abstract value (0 - 1). In finite-height
