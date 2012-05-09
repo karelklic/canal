@@ -53,8 +53,10 @@ def get_compile_commands(args, remainder):
     for cfile in cfiles:
         subresult = [config.CLANG]
 
+        subresult.append(cfile)
         subresult.append("-c")
         subresult.append("-emit-llvm")
+        subresult.append("-o")
         subresult.append("{0}.o.llvm".format(cfile[:-2]))
 
         if args.I:
