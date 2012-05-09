@@ -214,7 +214,8 @@ InclusionBased::merge(const Value &value)
     if (const Constant *constant = dynamic_cast<const Constant*>(&value))
     {
         CANAL_ASSERT(constant->isGetElementPtr());
-        // TODO
+        // TODO: get the pointer from the constant.
+        CANAL_NOT_IMPLEMENTED();
         return;
     }
 

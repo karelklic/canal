@@ -162,7 +162,7 @@ protected:
     virtual void fence(const llvm::FenceInst &instruction, State &state);
     virtual void cmpxchg(const llvm::AtomicCmpXchgInst &instruction, State &state);
     virtual void atomicrmw(const llvm::AtomicRMWInst &instruction, State &state);
-    virtual void getelementptr(const llvm::GetElementPtrInst &instruction, State &state);
+    virtual void getelementptr(const llvm::GetElementPtrInst &instruction, Stack &stack);
 
     // Conversion Operations
     virtual void trunc(const llvm::TruncInst &instruction, State &state);

@@ -5,6 +5,7 @@
 #include "../lib/Integer.h"
 #include "../lib/Pointer.h"
 #include "../lib/Array.h"
+#include "../lib/Constant.h"
 #include <llvm/Function.h>
 #include <llvm/Module.h>
 #include <llvm/ADT/APInt.h>
@@ -128,6 +129,8 @@ State::addMainFrame()
     }
 
     Canal::State initialState;
+
+    // Add initial argc and argv.
     llvm::Function::ArgumentListType::const_iterator it = function->getArgumentList().begin();
     for (int i = 0; it != function->getArgumentList().end(); ++it, ++i)
     {
@@ -164,6 +167,16 @@ State::addMainFrame()
         }
     }
 
+    // Add global constants.
+    llvm::Module::const_global_iterator git = mModule->global_begin();
+    llvm::Module::const_global_iterator gitend = mModule->global_end();
+    for (; git != gitend; ++git)
+    {
+        if (git->isConstant())
+            initialState.addGlobalVariable(*git, new Canal::Constant(git));
+    }
+
+    // Add the first frame to the stack.
     mStack.addFrame(*function, initialState);
 }
 

@@ -44,7 +44,7 @@ Interpreter::interpretInstruction(Stack &stack)
     else if (llvm::isa<llvm::FCmpInst>(instruction))
         fcmp((const llvm::FCmpInst&)instruction, state);
     else if (llvm::isa<llvm::GetElementPtrInst>(instruction))
-        getelementptr((const llvm::GetElementPtrInst&)instruction, state);
+        getelementptr((const llvm::GetElementPtrInst&)instruction, stack);
     else if (llvm::isa<llvm::TerminatorInst>(instruction))
     {
         if (llvm::isa<llvm::ReturnInst>(instruction))
@@ -530,7 +530,7 @@ Interpreter::store(const llvm::StoreInst &instruction, State &state)
     bool deleteValue = false;
     if (!value)
     {
-        // Handle constants.
+        // Handle storing of constant values.
         if (llvm::isa<llvm::Constant>(instruction.getValueOperand()))
         {
             value = new Constant(llvm::cast<llvm::Constant>(instruction.getValueOperand()));
@@ -540,6 +540,8 @@ Interpreter::store(const llvm::StoreInst &instruction, State &state)
             return;
     }
 
+    // Go through all target memory blocks for the pointer and merge
+    // them with the value being stored.
     Pointer::PlaceTargetMap::const_iterator it = pointer.getTargets().begin();
     for (; it != pointer.getTargets().end(); ++it)
     {
@@ -573,9 +575,20 @@ Interpreter::atomicrmw(const llvm::AtomicRMWInst &instruction, State &state)
 }
 
 void
-Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction, State &state)
+Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction, Stack &stack)
 {
+    CANAL_ASSERT(instruction.getNumOperands() > 1);
+    State &state = stack.getCurrentState();
+
+    // Find the base pointer.
+    Value *pointer = state.findVariable(*instruction.getOperand(0));
+    if (!pointer)
+        return;
+
+    // TODO: add proper target
     CANAL_NOT_IMPLEMENTED();
+    Pointer::InclusionBased *result = new Pointer::InclusionBased(stack.getModule());
+    state.addFunctionVariable(instruction, result);
 }
 
 void
