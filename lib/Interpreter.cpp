@@ -92,6 +92,35 @@ Interpreter::interpretInstruction(Stack &stack)
             CANAL_FATAL_ERROR(binaryOp);
 	}
     }
+    else if (llvm::isa<llvm::CastInst>(instruction))
+    {
+        if (llvm::isa<llvm::BitCastInst>(instruction))
+            bitcast((const llvm::BitCastInst&)instruction, state);
+        else if (llvm::isa<llvm::FPExtInst>(instruction))
+            fpext((const llvm::FPExtInst&)instruction, state);
+        else if (llvm::isa<llvm::FPToSIInst>(instruction))
+            fptosi((const llvm::FPToSIInst&)instruction, state);
+        else if (llvm::isa<llvm::FPToUIInst>(instruction))
+            fptoui((const llvm::FPToUIInst&)instruction, state);
+        else if (llvm::isa<llvm::FPTruncInst>(instruction))
+            fptrunc((const llvm::FPTruncInst&)instruction, state);
+        else if (llvm::isa<llvm::IntToPtrInst>(instruction))
+            inttoptr((const llvm::IntToPtrInst&)instruction, state);
+        else if (llvm::isa<llvm::PtrToIntInst>(instruction))
+            ptrtoint((const llvm::PtrToIntInst&)instruction, state);
+        else if (llvm::isa<llvm::SExtInst>(instruction))
+            sext((const llvm::SExtInst&)instruction, state);
+        else if (llvm::isa<llvm::SIToFPInst>(instruction))
+            sitofp((const llvm::SIToFPInst&)instruction, state);
+        else if (llvm::isa<llvm::TruncInst>(instruction))
+            trunc((const llvm::TruncInst&)instruction, state);
+        else if (llvm::isa<llvm::UIToFPInst>(instruction))
+            uitofp((const llvm::UIToFPInst&)instruction, state);
+        else if (llvm::isa<llvm::ZExtInst>(instruction))
+            zext((const llvm::ZExtInst&)instruction, state);
+        else
+            llvm::errs() << "Operational::Machine: Unknown cast instruction: " << instruction << "\n";
+    }
     else
         CANAL_DIE_MSG("unknown instruction: " << instruction.getOpcodeName());
 }
@@ -199,6 +228,7 @@ interpretCall(const T &instruction, Stack &stack)
     {
         // Function not found.  Set the resultant value to the Top
         // value.
+        printf("Function \"%s\" not available.\n", function->getName().data());
 
         // TODO: Set memory accessed by non-static globals to
         // the Top value.
@@ -454,6 +484,11 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction, Stack &stack)
     }
     else if (type->isPointerTy())
         value = new Pointer::InclusionBased(stack.getModule());
+    else if (type->isArrayTy() || type->isVectorTy())
+    {
+        CANAL_NOT_IMPLEMENTED();
+        return;
+    }
     else
         CANAL_DIE();
 
@@ -634,7 +669,7 @@ Interpreter::fptosi(const llvm::FPToSIInst &instruction, State &state)
 }
 
 void
-Interpreter::uitofp(const llvm::UIToFpInst &instruction, State &state)
+Interpreter::uitofp(const llvm::UIToFPInst &instruction, State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }

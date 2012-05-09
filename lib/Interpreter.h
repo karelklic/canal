@@ -45,7 +45,7 @@ namespace llvm {
     class StoreInst;
     class SwitchInst;
     class TruncInst;
-    class UIToFpInst;
+    class UIToFPInst;
     class UnreachableInst;
     class VAArgInst;
     class ZExtInst;
@@ -172,7 +172,7 @@ protected:
     virtual void fpext(const llvm::FPExtInst &instruction, State &state);
     virtual void fptoui(const llvm::FPToUIInst &instruction, State &state);
     virtual void fptosi(const llvm::FPToSIInst &instruction, State &state);
-    virtual void uitofp(const llvm::UIToFpInst &instruction, State &state);
+    virtual void uitofp(const llvm::UIToFPInst &instruction, State &state);
     virtual void sitofp(const llvm::SIToFPInst &instruction, State &state);
     virtual void ptrtoint(const llvm::PtrToIntInst &instruction, State &state);
     virtual void inttoptr(const llvm::IntToPtrInst &instruction, State &state);
