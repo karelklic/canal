@@ -31,11 +31,14 @@ StackFrame::getReturnedValue() const
         if (!dynamic_cast<const llvm::ReturnInst*>(it->getTerminator()))
             continue;
 
-        if (mergedValue)
-            mergedValue->merge(*mBlockOutputState.find(it)->second.mReturnedValue);
-        else
-            mergedValue = mBlockOutputState.find(it)->second.mReturnedValue->clone();
+        Value *returnedValue = mBlockOutputState.find(it)->second.mReturnedValue;
+        if (!returnedValue)
+            continue;
 
+        if (mergedValue)
+            mergedValue->merge(*returnedValue);
+        else
+            mergedValue = returnedValue->clone();
     }
 
     return mergedValue;

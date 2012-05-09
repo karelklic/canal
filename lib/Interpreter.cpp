@@ -129,6 +129,10 @@ void
 Interpreter::ret(const llvm::ReturnInst &instruction, State &state)
 {
     llvm::Value *value = instruction.getReturnValue();
+    // Return value is optional, some functions return nothing.
+    if (!value)
+        return;
+
     Value *variable = state.findVariable(*value);
     // It might happen that the variable is not found in state,
     // because the function has not yet reached fixpoint.
