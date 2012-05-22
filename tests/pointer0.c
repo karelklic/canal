@@ -29,6 +29,11 @@ void append(char *s)
 
 int main(int argc, char **argv)
 {
+    char s[20];
+    append(s);
+    array(0);
+    swap();
+
     int i = 3, ii = 6, *j, k[i];
     j = &i;
     *j = 4;
@@ -39,5 +44,6 @@ int main(int argc, char **argv)
     j = NULL;
     *l = 1;
     k[*l] = 0;
+
     return 0;
 }
