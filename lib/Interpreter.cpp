@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include "Value.h"
 #include "Integer.h"
+#include "IntegerBits.h"
 #include "Pointer.h"
 #include "Array.h"
 #include "Float.h"

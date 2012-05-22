@@ -1,4 +1,7 @@
 #include "Integer.h"
+#include "IntegerBits.h"
+#include "IntegerEnumeration.h"
+#include "IntegerRange.h"
 #include "Constant.h"
 #include "Utils.h"
 #include <sstream>
@@ -10,11 +13,15 @@ namespace Integer {
 Container::Container(unsigned numBits)
 {
     mValues.push_back(new Bits(numBits));
+    mValues.push_back(new Enumeration());
+    mValues.push_back(new Range(numBits));
 }
 
 Container::Container(const llvm::APInt &number)
 {
     mValues.push_back(new Bits(number));
+    mValues.push_back(new Enumeration(number));
+    mValues.push_back(new Range(number));
 }
 
 Container::Container(const Container &container)
@@ -99,7 +106,10 @@ Container::toString(const State *state) const
 
 
 static void
-applyBinaryOperation(Container &result, const Value &a, const Value &b, void(Value::*operation)(const Value&, const Value&))
+applyBinaryOperation(Container &result,
+                     const Value &a,
+                     const Value &b,
+                     void(Value::*operation)(const Value&, const Value&))
 {
     const Canal::Constant *aconstant = dynamic_cast<const Canal::Constant*>(&a);
     const Container *acontainer = dynamic_cast<const Container*>(&a);
@@ -249,7 +259,6 @@ void Container::setTop()
         (*it)->setTop();
 }
 
-
 Bits &Container::getBits()
 {
     return dynamic_cast<Bits&>(*mValues[0]);
@@ -258,6 +267,26 @@ Bits &Container::getBits()
 const Bits &Container::getBits() const
 {
     return dynamic_cast<Bits&>(*mValues[0]);
+}
+
+Enumeration &Container::getEnumeration()
+{
+    return dynamic_cast<Enumeration&>(*mValues[1]);
+}
+
+const Enumeration &Container::getEnumeration() const
+{
+    return dynamic_cast<Enumeration&>(*mValues[1]);
+}
+
+Range &Container::getRange()
+{
+    return dynamic_cast<Range&>(*mValues[2]);
+}
+
+const Range &Container::getRange() const
+{
+    return dynamic_cast<Range&>(*mValues[2]);
 }
 
 } // namespace Integer

@@ -1,9 +1,7 @@
 #ifndef LIBCANAL_INTEGER_H
 #define LIBCANAL_INTEGER_H
 
-#include "IntegerBits.h"
-//#include "IntegerEnumeration.h"
-//#include "IntegerRange.h"
+#include "Value.h"
 
 namespace llvm {
     class APInt;
@@ -11,6 +9,10 @@ namespace llvm {
 
 namespace Canal {
 namespace Integer {
+
+class Bits;
+class Enumeration;
+class Range;
 
 class Container : public AccuracyValue
 {
@@ -77,6 +79,12 @@ public: // Implementation of AccuracyValue.
 public: // Integer
     Bits &getBits();
     const Bits &getBits() const;
+
+    Enumeration &getEnumeration();
+    const Enumeration &getEnumeration() const;
+
+    Range &getRange();
+    const Range &getRange() const;
 
 public:
     std::vector<AccuracyValue*> mValues;

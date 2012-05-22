@@ -85,6 +85,84 @@ Range::toString(const State *state) const
     return ss.str();
 }
 
+void
+Range::add(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Range::sub(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Range::mul(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Range::udiv(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Range::sdiv(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Range::urem(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Range::srem(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Range::shl(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Range::lshr(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Range::ashr(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Range::and_(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Range::or_(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Range::xor_(const Value &a, const Value &b)
+{
+    setTop();
+}
+
 float
 Range::accuracy() const
 {

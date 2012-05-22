@@ -11,6 +11,11 @@ Enumeration::Enumeration() : mTop(false)
 {
 }
 
+Enumeration::Enumeration(const llvm::APInt &number) : mTop(false)
+{
+    mValues.insert(number);
+}
+
 Enumeration *
 Enumeration::clone() const
 {
@@ -66,6 +71,85 @@ Enumeration::toString(const State *state) const
     return ss.str();
 }
 
+void
+Enumeration::add(const Value &a, const Value &b)
+{
+    applyOperation(a, b, &llvm::APInt::operator+);
+}
+
+void
+Enumeration::sub(const Value &a, const Value &b)
+{
+    applyOperation(a, b, &llvm::APInt::operator-);
+}
+
+void
+Enumeration::mul(const Value &a, const Value &b)
+{
+    setTop();
+    //applyOperation(a, b, &llvm::APInt::smul);
+}
+
+void
+Enumeration::udiv(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Enumeration::sdiv(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Enumeration::urem(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Enumeration::srem(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Enumeration::shl(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Enumeration::lshr(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Enumeration::ashr(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Enumeration::and_(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Enumeration::or_(const Value &a, const Value &b)
+{
+    setTop();
+}
+
+void
+Enumeration::xor_(const Value &a, const Value &b)
+{
+    setTop();
+}
+
 float
 Enumeration::accuracy() const
 {
@@ -87,6 +171,35 @@ Enumeration::setTop()
 {
     mValues.clear();
     mTop = true;
+}
+
+void Enumeration::applyOperation(const Value &a, const Value &b,
+                                 llvm::APInt(llvm::APInt::*operation)(const llvm::APInt&) const)
+{
+    const Enumeration &aa = dynamic_cast<const Enumeration&>(a),
+        &bb = dynamic_cast<const Enumeration&>(b);
+
+    if (aa.isTop() || bb.isTop())
+    {
+        setTop();
+        return;
+    }
+
+    APIntSet::const_iterator aaIt = aa.mValues.begin();
+    for (; aaIt != aa.mValues.end(); ++aaIt)
+    {
+        APIntSet::const_iterator bbIt = bb.mValues.begin();
+        for (; bbIt != bb.mValues.end(); ++bbIt)
+        {
+            mValues.insert(((*aaIt).*(operation))(*bbIt));
+
+            if (mValues.size() > 40)
+            {
+                setTop();
+                return;
+            }
+        }
+    }
 }
 
 } // namespace Integer

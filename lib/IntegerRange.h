@@ -12,7 +12,7 @@ namespace Canal {
 namespace Integer {
 
 // Abstracts integer values as a range min - max.
-class Range : public Value
+class Range : public AccuracyValue
 {
 public:
     bool mEmpty;
@@ -37,6 +37,33 @@ public: // Implementation of Value.
     virtual size_t memoryUsage() const;
     // Implementation of Value::toString().
     virtual std::string toString(const State *state) const;
+
+    // Implementation of Value::add().
+    virtual void add(const Value &a, const Value &b);
+    // Implementation of Value::sub().
+    virtual void sub(const Value &a, const Value &b);
+    // Implementation of Value::mul().
+    virtual void mul(const Value &a, const Value &b);
+    // Implementation of Value::udiv().
+    virtual void udiv(const Value &a, const Value &b);
+    // Implementation of Value::sdiv().
+    virtual void sdiv(const Value &a, const Value &b);
+    // Implementation of Value::urem().
+    virtual void urem(const Value &a, const Value &b);
+    // Implementation of Value::srem().
+    virtual void srem(const Value &a, const Value &b);
+    // Implementation of Value::shl().
+    virtual void shl(const Value &a, const Value &b);
+    // Implementation of Value::lshr().
+    virtual void lshr(const Value &a, const Value &b);
+    // Implementation of Value::ashr().
+    virtual void ashr(const Value &a, const Value &b);
+    // Implementation of Value::and_().
+    virtual void and_(const Value &a, const Value &b);
+    // Implementation of Value::or_().
+    virtual void or_(const Value &a, const Value &b);
+    // Implementation of Value::xor_().
+    virtual void xor_(const Value &a, const Value &b);
 
 public: // Implementation of AccuracyValue.
     // Implementation of AccuracyValue::accuracy().
