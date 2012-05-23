@@ -83,8 +83,13 @@ public: // Implementation of AccuracyValue.
     virtual void setTop();
 
 protected:
-    void applyOperation(const Value &a, const Value &b,
-                        llvm::APInt(llvm::APInt::*operation)(const llvm::APInt&) const);
+    typedef llvm::APInt(llvm::APInt::*APIntOperation)(const llvm::APInt&) const;
+    typedef llvm::APInt(llvm::APInt::*APIntOperationWithOverflow)(const llvm::APInt&, bool&) const;
+
+    void applyOperation(const Value &a,
+                        const Value &b,
+                        APIntOperation operation1,
+                        APIntOperationWithOverflow operation2);
 };
 
 } // namespace Integer

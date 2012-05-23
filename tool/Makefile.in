@@ -45,6 +45,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
+CONFIG_HEADER = $(top_builddir)/lib/Config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
@@ -59,13 +60,12 @@ am_canal_OBJECTS = canal-Canal.$(OBJEXT) canal-Command.$(OBJEXT) \
 	canal-CommandRun.$(OBJEXT) canal-CommandShell.$(OBJEXT) \
 	canal-CommandShow.$(OBJEXT) canal-CommandStart.$(OBJEXT) \
 	canal-CommandStep.$(OBJEXT) canal-Commands.$(OBJEXT) \
-	canal-SlotTracker.$(OBJEXT) canal-State.$(OBJEXT) \
-	canal-Utils.$(OBJEXT)
+	canal-State.$(OBJEXT) canal-Utils.$(OBJEXT)
 canal_OBJECTS = $(am_canal_OBJECTS)
 am__DEPENDENCIES_1 =
 canal_DEPENDENCIES = ../lib/libcanal.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
-DEFAULT_INCLUDES = -I.@am__isrc@
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/lib
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -103,6 +103,7 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CLANG = @CLANG@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -137,6 +138,7 @@ LLVM_CFLAGS = @LLVM_CFLAGS@
 LLVM_CONFIG = @LLVM_CONFIG@
 LLVM_LDFLAGS = @LLVM_LDFLAGS@
 LLVM_LIBS = @LLVM_LIBS@
+LLVM_LINK = @LLVM_LINK@
 LLVM_VERSION = @LLVM_VERSION@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -258,15 +260,13 @@ canal_SOURCES = \
 	CommandStep.cpp \
 	Commands.h \
 	Commands.cpp \
-	SlotTracker.h \
-	SlotTracker.cpp \
 	State.h \
 	State.cpp \
 	Utils.h \
 	Utils.cpp
 
 canal_LDADD = ../lib/libcanal.la -lreadline -lhistory $(LLVM_LDFLAGS) $(LLVM_LIBS)
-canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS)
+canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS) -DDATADIR='"$(datadir)"'
 all: all-am
 
 .SUFFIXES:
@@ -374,7 +374,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandStart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandStep.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-Commands.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-SlotTracker.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-State.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-Utils.Po@am__quote@
 
@@ -678,20 +677,6 @@ canal-Commands.obj: Commands.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Commands.cpp' object='canal-Commands.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-Commands.obj `if test -f 'Commands.cpp'; then $(CYGPATH_W) 'Commands.cpp'; else $(CYGPATH_W) '$(srcdir)/Commands.cpp'; fi`
-
-canal-SlotTracker.o: SlotTracker.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-SlotTracker.o -MD -MP -MF $(DEPDIR)/canal-SlotTracker.Tpo -c -o canal-SlotTracker.o `test -f 'SlotTracker.cpp' || echo '$(srcdir)/'`SlotTracker.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/canal-SlotTracker.Tpo $(DEPDIR)/canal-SlotTracker.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='SlotTracker.cpp' object='canal-SlotTracker.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-SlotTracker.o `test -f 'SlotTracker.cpp' || echo '$(srcdir)/'`SlotTracker.cpp
-
-canal-SlotTracker.obj: SlotTracker.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-SlotTracker.obj -MD -MP -MF $(DEPDIR)/canal-SlotTracker.Tpo -c -o canal-SlotTracker.obj `if test -f 'SlotTracker.cpp'; then $(CYGPATH_W) 'SlotTracker.cpp'; else $(CYGPATH_W) '$(srcdir)/SlotTracker.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/canal-SlotTracker.Tpo $(DEPDIR)/canal-SlotTracker.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='SlotTracker.cpp' object='canal-SlotTracker.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-SlotTracker.obj `if test -f 'SlotTracker.cpp'; then $(CYGPATH_W) 'SlotTracker.cpp'; else $(CYGPATH_W) '$(srcdir)/SlotTracker.cpp'; fi`
 
 canal-State.o: State.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-State.o -MD -MP -MF $(DEPDIR)/canal-State.Tpo -c -o canal-State.o `test -f 'State.cpp' || echo '$(srcdir)/'`State.cpp

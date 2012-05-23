@@ -16,6 +16,18 @@
 @SET_MAKE@
 
 #noinst_PROGRAMS = InterpreterTest PointerTest
+
+#InterpreterTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+#InterpreterTest_SOURCES = InterpreterTest.cpp
+#InterpreterTest_LDADD = ../lib/libcanal.la
+#InterpreterTest_LIBS = $(LLVM_LIBS)
+#InterpreterTest_LDFLAGS = $(LLVM_LDFLAGS)
+
+#PointerTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+#PointerTest_SOURCES = PointerTest.cpp
+#PointerTest_LDADD = ../lib/libcanal.la
+#PointerTest_LIBS = $(LLVM_LIBS)
+#PointerTest_LDFLAGS = $(LLVM_LDFLAGS)
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -46,6 +58,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
+CONFIG_HEADER = $(top_builddir)/lib/Config.h
 CONFIG_CLEAN_FILES = atlocal
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
@@ -62,6 +75,7 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CLANG = @CLANG@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -96,6 +110,7 @@ LLVM_CFLAGS = @LLVM_CFLAGS@
 LLVM_CONFIG = @LLVM_CONFIG@
 LLVM_LDFLAGS = @LLVM_LDFLAGS@
 LLVM_LIBS = @LLVM_LIBS@
+LLVM_LINK = @LLVM_LINK@
 LLVM_VERSION = @LLVM_VERSION@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -177,16 +192,6 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-InterpreterTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
-InterpreterTest_SOURCES = InterpreterTest.cpp
-InterpreterTest_LDADD = ../lib/libcanal.la
-InterpreterTest_LIBS = $(LLVM_LIBS)
-InterpreterTest_LDFLAGS = $(LLVM_LDFLAGS)
-PointerTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
-PointerTest_SOURCES = PointerTest.cpp
-PointerTest_LDADD = ../lib/libcanal.la
-PointerTest_LIBS = $(LLVM_LIBS)
-PointerTest_LDFLAGS = $(LLVM_LDFLAGS)
 EXTRA_DIST = numeric0.c package.m4 $(TESTSUITE_AT) $(TESTSUITE) \
 	atlocal.in
 TESTSUITE_AT = \

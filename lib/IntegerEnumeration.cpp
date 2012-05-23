@@ -74,80 +74,79 @@ Enumeration::toString(const State *state) const
 void
 Enumeration::add(const Value &a, const Value &b)
 {
-    applyOperation(a, b, &llvm::APInt::operator+);
+    applyOperation(a, b, &llvm::APInt::operator+, NULL);
 }
 
 void
 Enumeration::sub(const Value &a, const Value &b)
 {
-    applyOperation(a, b, &llvm::APInt::operator-);
+    applyOperation(a, b, &llvm::APInt::operator-, NULL);
 }
 
 void
 Enumeration::mul(const Value &a, const Value &b)
 {
-    setTop();
-    //applyOperation(a, b, &llvm::APInt::smul);
+    applyOperation(a, b, NULL, &llvm::APInt::smul_ov);
 }
 
 void
 Enumeration::udiv(const Value &a, const Value &b)
 {
-    setTop();
+    applyOperation(a, b, &llvm::APInt::udiv, NULL);
 }
 
 void
 Enumeration::sdiv(const Value &a, const Value &b)
 {
-    setTop();
+    applyOperation(a, b, &llvm::APInt::sdiv, NULL);
 }
 
 void
 Enumeration::urem(const Value &a, const Value &b)
 {
-    setTop();
+    applyOperation(a, b, &llvm::APInt::urem, NULL);
 }
 
 void
 Enumeration::srem(const Value &a, const Value &b)
 {
-    setTop();
+    applyOperation(a, b, &llvm::APInt::srem, NULL);
 }
 
 void
 Enumeration::shl(const Value &a, const Value &b)
 {
-    setTop();
+    applyOperation(a, b, &llvm::APInt::shl, NULL);
 }
 
 void
 Enumeration::lshr(const Value &a, const Value &b)
 {
-    setTop();
+    applyOperation(a, b, &llvm::APInt::lshr, NULL);
 }
 
 void
 Enumeration::ashr(const Value &a, const Value &b)
 {
-    setTop();
+    applyOperation(a, b, &llvm::APInt::ashr, NULL);
 }
 
 void
 Enumeration::and_(const Value &a, const Value &b)
 {
-    setTop();
+    applyOperation(a, b, &llvm::APInt::operator&, NULL);
 }
 
 void
 Enumeration::or_(const Value &a, const Value &b)
 {
-    setTop();
+    applyOperation(a, b, &llvm::APInt::operator|, NULL);
 }
 
 void
 Enumeration::xor_(const Value &a, const Value &b)
 {
-    setTop();
+    applyOperation(a, b, &llvm::APInt::operator^, NULL);
 }
 
 float
@@ -156,7 +155,8 @@ Enumeration::accuracy() const
     if (mTop)
         return 0;
     // Perfectly accurate.
-    // TODO: consider lowering the accuracy depending on the number of elements.
+    // TODO: consider lowering the accuracy depending on the number of
+    // elements.
     return 1;
 }
 
@@ -167,14 +167,31 @@ Enumeration::isBottom() const
 }
 
 void
+Enumeration::setBottom()
+{
+    mValues.clear();
+    mTop = false;
+}
+
+
+bool
+Enumeration::isTop() const
+{
+    return mTop;
+}
+
+void
 Enumeration::setTop()
 {
     mValues.clear();
     mTop = true;
 }
 
-void Enumeration::applyOperation(const Value &a, const Value &b,
-                                 llvm::APInt(llvm::APInt::*operation)(const llvm::APInt&) const)
+void
+Enumeration::applyOperation(const Value &a,
+                            const Value &b,
+                            APIntOperation operation1,
+                            APIntOperationWithOverflow operation2)
 {
     const Enumeration &aa = dynamic_cast<const Enumeration&>(a),
         &bb = dynamic_cast<const Enumeration&>(b);
@@ -191,7 +208,18 @@ void Enumeration::applyOperation(const Value &a, const Value &b,
         APIntSet::const_iterator bbIt = bb.mValues.begin();
         for (; bbIt != bb.mValues.end(); ++bbIt)
         {
-            mValues.insert(((*aaIt).*(operation))(*bbIt));
+            if (operation1)
+                mValues.insert(((*aaIt).*(operation1))(*bbIt));
+            else
+            {
+                bool overflow;
+                mValues.insert(((*aaIt).*(operation2))(*bbIt, overflow));
+                if (overflow)
+                {
+                    setTop();
+                    return;
+                }
+            }
 
             if (mValues.size() > 40)
             {

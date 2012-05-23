@@ -9,17 +9,23 @@ namespace Integer {
 
 Range::Range(unsigned numBits)
     : mEmpty(true),
-      mTop(false),
-      mFrom(numBits, 0),
-      mTo(numBits, 0)
+      mSignedTop(false),
+      mSignedFrom(numBits, 0),
+      mSignedTo(numBits, 0),
+      mUnsignedTop(false),
+      mUnsignedFrom(numBits, 0),
+      mUnsignedTo(numBits, 0)
 {
 }
 
 Range::Range(const llvm::APInt &constant)
     : mEmpty(false),
-      mTop(false),
-      mFrom(constant),
-      mTo(constant)
+      mSignedTop(false),
+      mSignedFrom(constant),
+      mSignedTo(constant),
+      mUnsignedTop(false),
+      mUnsignedFrom(constant),
+      mUnsignedTo(constant)
 {
 }
 
@@ -37,9 +43,22 @@ Range::operator==(const Value& value) const
         return false;
     if (mEmpty)
         return range->mEmpty;
-    if (mTop)
-        return range->mTop;
-    return mFrom == range->mFrom && mTo == range->mTo;
+    if (mSignedTop ^ range->mSignedTop || mUnsignedTop ^ range->mUnsignedTop)
+        return false;
+
+    if (!mSignedTop && (mSignedFrom != range->mSignedFrom ||
+                        mSignedTo != range->mSignedTo))
+    {
+        return false;
+    }
+
+    if (!mUnsignedTop && (mUnsignedFrom != range->mUnsignedFrom ||
+                          mUnsignedTo != range->mUnsignedTo))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 void
@@ -49,17 +68,33 @@ Range::merge(const Value &value)
     if (range.mEmpty)
         return;
 
-    if (range.mTop)
+    mEmpty = false;
+
+    if (!mSignedTop)
     {
-        mEmpty = false;
-        mTop = true;
-        return;
+        if (range.mSignedTop)
+            mSignedTop = true;
+        else
+        {
+            if (!mSignedFrom.sle(range.mSignedFrom))
+                mSignedFrom = range.mSignedFrom;
+            if (!mSignedTo.sge(range.mSignedTo))
+                mSignedTo = range.mSignedTo;
+        }
     }
 
-    if (!mFrom.sle(range.mFrom))
-        mFrom = range.mFrom;
-    if (!mTo.sgt(range.mTo))
-        mTo = range.mTo;
+    if (!mUnsignedTop)
+    {
+        if (range.mUnsignedTop)
+            mUnsignedTop = true;
+        else
+        {
+            if (!mUnsignedFrom.ule(range.mUnsignedFrom))
+                mUnsignedFrom = range.mUnsignedFrom;
+            if (!mUnsignedTo.uge(range.mUnsignedTo))
+                mUnsignedTo = range.mUnsignedTo;
+        }
+    }
 }
 
 size_t
@@ -78,8 +113,26 @@ Range::toString(const State *state) const
     else
     {
         ss << "{" << std::endl;
-        ss << "    from:" << (mTop ? "-infinity" : Canal::toString(mFrom)) << std::endl;
-        ss << "    to:" << (mTop ? "infinity" : Canal::toString(mTo)) << std::endl;
+        ss << "  signed: ";
+        if (mSignedTop)
+            ss << "-infinity to infinity";
+        else
+        {
+            ss << mSignedFrom.toString(10, true) << " to "
+               << mSignedTo.toString(10, true);
+        }
+        ss << std::endl;
+
+        ss << "  unsigned: ";
+        if (mUnsignedTop)
+            ss << "0 to infinity";
+        else
+        {
+            ss << mUnsignedFrom.toString(10, false) << " to "
+               << mUnsignedTo.toString(10, false);
+        }
+        ss << std::endl;
+
         ss << "}";
     }
     return ss.str();
@@ -88,31 +141,321 @@ Range::toString(const State *state) const
 void
 Range::add(const Value &a, const Value &b)
 {
-    setTop();
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    mSignedTop = aa.mSignedTop || bb.mSignedTop;
+    if (!mSignedTop)
+    {
+        mSignedFrom = aa.mSignedFrom.sadd_ov(bb.mSignedFrom, mSignedTop);
+        if (!mSignedTop)
+            mSignedTo = aa.mSignedTo.sadd_ov(bb.mSignedTo, mSignedTop);
+    }
+
+    mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
+    if (!mUnsignedTop)
+    {
+        mUnsignedFrom = aa.mUnsignedFrom.uadd_ov(bb.mUnsignedFrom, mUnsignedTop);
+        if (!mUnsignedTop)
+            mUnsignedTo = aa.mUnsignedTo.uadd_ov(bb.mUnsignedTo, mUnsignedTop);
+    }
 }
 
 void
 Range::sub(const Value &a, const Value &b)
 {
-    setTop();
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    mSignedTop = aa.mSignedTop || bb.mSignedTop;
+    if (!mSignedTop)
+    {
+        mSignedFrom = aa.mSignedFrom.ssub_ov(bb.mSignedTo, mSignedTop);
+        if (!mSignedTop)
+            mSignedTo = aa.mSignedTo.ssub_ov(bb.mSignedFrom, mSignedTop);
+    }
+
+    mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
+    if (!mUnsignedTop)
+    {
+        mUnsignedFrom = aa.mUnsignedFrom.usub_ov(bb.mUnsignedTo, mUnsignedTop);
+        if (!mUnsignedTop)
+            mUnsignedTo = aa.mUnsignedTo.usub_ov(bb.mUnsignedFrom, mUnsignedTop);
+    }
+}
+
+static void
+minMax(bool isSigned,
+       llvm::APInt &min,
+       llvm::APInt &max,
+       const llvm::APInt &toTo,
+       const llvm::APInt &toFrom,
+       const llvm::APInt &fromTo,
+       const llvm::APInt &fromFrom)
+{
+    typedef bool(llvm::APInt::*LessThan)(const llvm::APInt&) const;
+    LessThan lt(isSigned ? (LessThan)&llvm::APInt::slt : (LessThan)&llvm::APInt::ult);
+    if ((toTo.*(lt))(toFrom))
+    { // toTo < toFrom
+        if ((toTo.*(lt))(fromTo))
+        { // toTo < (toFrom, fromTo)
+            if ((toTo.*(lt))(fromFrom))
+            { // toTo < (toFrom, fromTo, fromFrom)
+                min = toTo;
+                if ((toFrom.*(lt))(fromTo))
+                { // toTo < (fromFrom, toFrom < fromTo)
+                    if ((fromFrom.*(lt))(fromTo))
+                        max = fromTo; // toTo < (fromFrom, toFrom) < fromTo
+                    else
+                        max = fromFrom; // toTo < toFrom < fromTo <= fromFrom
+                }
+            }
+            else
+            { // fromFrom <= toTo < (toFrom, fromTo)
+                min = fromFrom;
+                if ((toFrom.*(lt))(fromTo))
+                    max = fromTo; // fromFrom <= toTo < toFrom < fromTo;
+                else
+                    max = toFrom; // fromFrom <= toTo < fromTo <= toFrom;
+            }
+        }
+        else
+        { // fromTo <= toTo < toFrom
+            if ((fromTo.*(lt))(fromFrom))
+            { // fromTo <= (fromFrom, toTo < toFrom)
+                min = fromTo;
+                if ((fromFrom.*(lt))(toFrom))
+                    max = toFrom; // fromTo <= (fromFrom, toTo) < toFrom
+                else
+                    max = fromFrom; // fromTo <= toTo < toFrom <= fromFrom;
+            }
+            else
+            { // fromFrom <= fromTo <= toTo < toFrom
+                min = fromFrom;
+                max = toFrom;
+            }
+        }
+    }
+    else
+    { // toFrom <= toTo
+        if ((toFrom.*(lt))(fromTo))
+        { // toFrom <= (toTo, fromTo)
+            if ((toFrom.*(lt))(fromFrom))
+            { // toFrom <= (toTo, fromTo, fromFrom)
+                min = toFrom;
+                if ((toTo.*(lt))(fromTo))
+                { // toFrom <= (fromFrom, toTo < fromTo)
+                    if ((fromFrom.*(lt))(fromTo))
+                        max = fromTo; // toFrom <= (fromFrom, toTo) < fromTo
+                    else
+                        max = fromFrom; // toFrom <= toTo < fromTo <= fromFrom
+                }
+                else
+                { // toFrom <= (fromFrom, fromTo <= toTo)
+                    if ((fromFrom.*(lt))(toTo))
+                        max = toTo; // toFrom <= (fromTo, fromFrom) <= toTo
+                    else
+                        max = fromFrom; // toFrom <= fromTo <= toTo <= fromFrom
+                }
+            }
+            else
+            { // fromFrom <= toFrom <= (toTo, fromTo)
+                min = fromFrom;
+                if ((toTo.*(lt))(fromTo))
+                    max = fromTo; // fromFrom <= toFrom <= toTo < fromTo
+                else
+                    max = toTo; // fromFrom <= toFrom <= fromTo <= toTo
+            }
+        }
+        else
+        { // fromTo <= toFrom <= toTo
+            if ((fromTo.*(lt))(fromFrom))
+            { // fromTo <= (fromFrom, toFrom <= toTo)
+                min = fromTo;
+                if ((fromFrom.*(lt))(toTo))
+                    max = toTo; // fromTo <= (fromFrom, toFrom) <= toTo
+                else
+                    max = fromFrom; // fromTo <= toFrom <= toTo <= fromFrom
+            }
+            else
+            { // fromFrom <= fromTo <= toFrom <= toTo
+                min = fromFrom;
+                max = toTo;
+            }
+        }
+    }
 }
 
 void
 Range::mul(const Value &a, const Value &b)
 {
-    setTop();
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    if (aa.mEmpty)
+    {
+        *this = bb;
+        return;
+    }
+    else if (bb.mEmpty)
+    {
+        *this = aa;
+        return;
+    }
+
+    mEmpty = false;
+    mSignedTop = aa.mSignedTop || bb.mSignedTop;
+    if (!mSignedTop)
+    {
+        llvm::APInt toTo = aa.mSignedTo.smul_ov(bb.mSignedTo,
+                                                mSignedTop);
+        if (!mSignedTop)
+        {
+            llvm::APInt toFrom = aa.mSignedTo.smul_ov(bb.mSignedFrom,
+                                                      mSignedTop);
+            if (!mSignedTop)
+            {
+                llvm::APInt fromTo = aa.mSignedFrom.smul_ov(bb.mSignedTo,
+                                                            mSignedTop);
+                if (!mSignedTop)
+                {
+                    llvm::APInt fromFrom = aa.mSignedFrom.smul_ov(bb.mSignedFrom,
+                                                                  mSignedTop);
+                    if (!mSignedTop)
+                    {
+                        minMax(/*signed=*/true,
+                               mSignedFrom,
+                               mSignedTo,
+                               toTo,
+                               toFrom,
+                               fromTo,
+                               fromFrom);
+                    }
+                }
+            }
+        }
+    }
+
+    mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
+    if (!mUnsignedTop)
+    {
+        llvm::APInt toTo = aa.mUnsignedTo.umul_ov(bb.mUnsignedTo,
+                                                  mUnsignedTop);
+        if (!mUnsignedTop)
+        {
+            llvm::APInt toFrom = aa.mUnsignedTo.umul_ov(bb.mUnsignedFrom,
+                                                        mUnsignedTop);
+            if (!mUnsignedTop)
+            {
+                llvm::APInt fromTo = aa.mUnsignedFrom.umul_ov(bb.mUnsignedTo,
+                                                              mUnsignedTop);
+                if (!mUnsignedTop)
+                {
+                    llvm::APInt fromFrom = aa.mUnsignedFrom.umul_ov(bb.mUnsignedFrom,
+                                                                    mUnsignedTop);
+                    if (!mUnsignedTop)
+                    {
+                        minMax(/*signed=*/false,
+                               mUnsignedFrom,
+                               mUnsignedTo,
+                               toTo,
+                               toFrom,
+                               fromTo,
+                               fromFrom);
+                    }
+                }
+            }
+        }
+    }
 }
 
 void
 Range::udiv(const Value &a, const Value &b)
 {
-    setTop();
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    if (aa.mEmpty)
+    {
+        *this = bb;
+        return;
+    }
+    else if (bb.mEmpty)
+    {
+        *this = aa;
+        return;
+    }
+
+    mEmpty = false;
+    mSignedTop = true;
+    mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
+    if (!mUnsignedTop)
+    {
+        llvm::APInt toTo = aa.mUnsignedTo.udiv(bb.mUnsignedTo);
+        llvm::APInt toFrom = aa.mUnsignedTo.udiv(bb.mUnsignedFrom);
+        llvm::APInt fromTo = aa.mUnsignedFrom.udiv(bb.mUnsignedTo);
+        llvm::APInt fromFrom = aa.mUnsignedFrom.udiv(bb.mUnsignedFrom);
+        minMax(/*signed=*/false,
+               mUnsignedFrom,
+               mUnsignedTo,
+               toTo,
+               toFrom,
+               fromTo,
+               fromFrom);
+    }
 }
 
 void
 Range::sdiv(const Value &a, const Value &b)
 {
-    setTop();
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    if (aa.mEmpty)
+    {
+        *this = bb;
+        return;
+    }
+    else if (bb.mEmpty)
+    {
+        *this = aa;
+        return;
+    }
+
+    mEmpty = false;
+    mUnsignedTop = true;
+
+    mSignedTop = aa.mSignedTop || bb.mSignedTop;
+    if (!mSignedTop)
+    {
+        llvm::APInt toTo = aa.mSignedTo.sdiv_ov(bb.mSignedTo,
+                                                mSignedTop);
+        if (!mSignedTop)
+        {
+            llvm::APInt toFrom = aa.mSignedTo.sdiv_ov(bb.mSignedFrom,
+                                                      mSignedTop);
+            if (!mSignedTop)
+            {
+                llvm::APInt fromTo = aa.mSignedFrom.sdiv_ov(bb.mSignedTo,
+                                                            mSignedTop);
+                if (!mSignedTop)
+                {
+                    llvm::APInt fromFrom = aa.mSignedFrom.sdiv_ov(bb.mSignedFrom,
+                                                                  mSignedTop);
+                    if (!mSignedTop)
+                    {
+                        minMax(/*signed=*/true,
+                               mSignedFrom,
+                               mSignedTo,
+                               toTo,
+                               toFrom,
+                               fromTo,
+                               fromFrom);
+                    }
+                }
+            }
+        }
+    }
 }
 
 void
@@ -178,7 +521,7 @@ Range::isBottom() const
 void
 Range::setTop()
 {
-    mTop = true;
+    mSignedTop = mUnsignedTop = true;
     mEmpty = false;
 }
 

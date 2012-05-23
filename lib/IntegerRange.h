@@ -16,9 +16,14 @@ class Range : public AccuracyValue
 {
 public:
     bool mEmpty;
-    bool mTop;
-    llvm::APInt mFrom;
-    llvm::APInt mTo;
+
+    bool mSignedTop;
+    llvm::APInt mSignedFrom;
+    llvm::APInt mSignedTo;
+
+    bool mUnsignedTop;
+    llvm::APInt mUnsignedFrom;
+    llvm::APInt mUnsignedTo;
 
 public:
     // Initializes to the lowest value.
