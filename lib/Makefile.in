@@ -84,7 +84,8 @@ am_libcanal_la_OBJECTS = libcanal_la-Array.lo libcanal_la-Constant.lo \
 	libcanal_la-IntegerRange.lo libcanal_la-Interpreter.lo \
 	libcanal_la-Pointer.lo libcanal_la-SELinuxModulePass.lo \
 	libcanal_la-SlotTracker.lo libcanal_la-Stack.lo \
-	libcanal_la-State.lo libcanal_la-Utils.lo libcanal_la-Value.lo
+	libcanal_la-State.lo libcanal_la-Structure.lo \
+	libcanal_la-Utils.lo libcanal_la-Value.lo
 libcanal_la_OBJECTS = $(am_libcanal_la_OBJECTS)
 libcanal_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(libcanal_la_CXXFLAGS) \
@@ -272,6 +273,7 @@ libcanal_la_SOURCES = \
 	State.h \
 	State.cpp \
 	Structure.h \
+	Structure.cpp \
 	Utils.h \
 	Utils.cpp \
 	Value.h \
@@ -382,6 +384,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-SlotTracker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Stack.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-State.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Structure.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Value.Plo@am__quote@
 
@@ -496,6 +499,13 @@ libcanal_la-State.lo: State.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='State.cpp' object='libcanal_la-State.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-State.lo `test -f 'State.cpp' || echo '$(srcdir)/'`State.cpp
+
+libcanal_la-Structure.lo: Structure.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Structure.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Structure.Tpo -c -o libcanal_la-Structure.lo `test -f 'Structure.cpp' || echo '$(srcdir)/'`Structure.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-Structure.Tpo $(DEPDIR)/libcanal_la-Structure.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Structure.cpp' object='libcanal_la-Structure.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Structure.lo `test -f 'Structure.cpp' || echo '$(srcdir)/'`Structure.cpp
 
 libcanal_la-Utils.lo: Utils.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Utils.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Utils.Tpo -c -o libcanal_la-Utils.lo `test -f 'Utils.cpp' || echo '$(srcdir)/'`Utils.cpp
