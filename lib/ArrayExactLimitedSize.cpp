@@ -1,4 +1,4 @@
-#include "Array.h"
+#include "ArrayExactLimitedSize.h"
 
 namespace Canal {
 namespace Array {

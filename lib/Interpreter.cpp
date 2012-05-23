@@ -621,9 +621,38 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction, Stack &st
     State &state = stack.getCurrentState();
 
     // Find the base pointer.
-    Value *pointer = state.findVariable(*instruction.getOperand(0));
+    Value *base = state.findVariable(*instruction.getPointerOperand());
     if (!pointer)
         return;
+
+    Pointer::InclusionBased *pointer = dynamic_cast<Pointer::InclusionBased>(base);
+    CANAL_ASSERT(pointer);
+
+    // We get offsets. Either constants or Integer::Container.
+    // Pointer points either to an array (or array offset), or to a
+    // struct (or struct member).  Pointer might have multiple
+    // targets.
+
+    // When we get an index, we find the corresponding items
+    // (=dereference the pointer targets) and use the index to create
+    // a new pointer.
+
+    llvm::Value::op_iterator it = instruction.idx_begin(),
+        itend = instruction.idx_end();
+    for (; it != itend; ++it)
+    {
+        std::vector<Value*> targets;
+        Pointer::PlaceTargetMap::const_iterator it = pointer->getTargets().begin(),
+            itend = pointer->getTargets().end();
+        for (; it != itend; ++it)
+        {
+            Value *derefValue = it->second->dereference(state);
+            CANAL_ASSERT(derefValue);
+
+            // TODO: struct support
+            // TODO: array support
+        }
+    }
 
     // TODO: add proper target
     CANAL_NOT_IMPLEMENTED();
