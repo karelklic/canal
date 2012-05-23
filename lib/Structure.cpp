@@ -1,4 +1,5 @@
 #include "Structure.h"
+#include "Utils.h"
 #include <sstream>
 
 namespace Canal {
@@ -6,8 +7,8 @@ namespace Canal {
 Structure::Structure(const Structure &structure)
 {
     mMembers = structure.mMembers;
-
-    for (std::vector<Value*>::iterator it = mMembers.begin(); it != mMembers.end(); ++it)
+    std::vector<Value*>::iterator it = mMembers.begin();
+    for (; it != mMembers.end(); ++it)
         *it = (*it)->clone();
 }
 
@@ -33,7 +34,8 @@ Structure::operator==(const Value &value) const
     if (mMembers.size() != structure->mMembers.size())
         return false;
 
-    std::vector<Value*>::const_iterator itA = mMembers.begin(), itAend = mMembers.end(),
+    std::vector<Value*>::const_iterator itA = mMembers.begin(),
+        itAend = mMembers.end(),
         itB = structure->mMembers.begin();
     for (; itA != itAend; ++itA, ++itB)
     {
@@ -48,9 +50,8 @@ void
 Structure::merge(const Value &value)
 {
     const Structure &structure = dynamic_cast<const Structure&>(value);
-
+    CANAL_ASSERT(mMembers.size() == structure.mMembers.size());
     std::vector<Value*>::iterator itA = mMembers.begin();
-
     std::vector<Value*>::const_iterator itAend = mMembers.end(),
         itB = structure.mMembers.begin();
     for (; itA != itAend; ++itA, ++itB)
@@ -62,7 +63,8 @@ Structure::memoryUsage() const
 {
     size_t size = sizeof(Structure);
     size += mMembers.capacity() * sizeof(Value*);
-    for (std::vector<Value*>::const_iterator it = mMembers.begin(); it != mMembers.end(); ++it)
+    std::vector<Value*>::const_iterator it = mMembers.begin();
+    for (; it != mMembers.end(); ++it)
         size += (*it)->memoryUsage();
 
     return size;
@@ -73,8 +75,6 @@ Structure::toString(const State *state) const
 {
     std::stringstream ss;
     ss << "Structure: {" << std::endl;
-    //ss << "    size:" << indentExceptFirstLine(mSize->toString(state), 9) << std::endl;
-    //ss << "    value: " << indentExceptFirstLine(mValue->toString(state), 11) << std::endl;
     ss << "}";
     return ss.str();
 }

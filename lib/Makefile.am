@@ -2,6 +2,10 @@ lib_LTLIBRARIES = libcanal.la
 libcanal_la_SOURCES = \
 	Array.h \
 	Array.cpp \
+	ArrayExactLimitedSize.h \
+	ArrayExactLimitedSize.cpp \
+	ArraySingleItem.h \
+	ArraySingleItem.cpp \
 	Constant.h \
 	Constant.cpp \
 	Float.h \

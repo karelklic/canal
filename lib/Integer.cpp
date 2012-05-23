@@ -27,16 +27,46 @@ Container::Container(const llvm::APInt &number)
 Container::Container(const Container &container)
 {
     mValues = container.mValues;
-    std::vector<AccuracyValue*>::iterator it = mValues.begin();
+    std::vector<Value*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
-        *it = static_cast<AccuracyValue*>((*it)->clone());
+        *it = static_cast<Value*>((*it)->clone());
 }
 
 Container::~Container()
 {
-    std::vector<AccuracyValue*>::const_iterator it = mValues.begin();
+    std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         delete *it;
+}
+
+Bits &Container::getBits()
+{
+    return dynamic_cast<Bits&>(*mValues[0]);
+}
+
+const Bits &Container::getBits() const
+{
+    return dynamic_cast<Bits&>(*mValues[0]);
+}
+
+Enumeration &Container::getEnumeration()
+{
+    return dynamic_cast<Enumeration&>(*mValues[1]);
+}
+
+const Enumeration &Container::getEnumeration() const
+{
+    return dynamic_cast<Enumeration&>(*mValues[1]);
+}
+
+Range &Container::getRange()
+{
+    return dynamic_cast<Range&>(*mValues[2]);
+}
+
+const Range &Container::getRange() const
+{
+    return dynamic_cast<Range&>(*mValues[2]);
 }
 
 Container *
@@ -53,7 +83,7 @@ Container::operator==(const Value &value) const
         return false;
 
     CANAL_ASSERT(mValues.size() == container->mValues.size());
-    std::vector<AccuracyValue*>::const_iterator ita(mValues.begin()),
+    std::vector<Value*>::const_iterator ita(mValues.begin()),
         itb(container->mValues.begin());
     for (; ita != mValues.end(); ++ita, ++itb)
     {
@@ -67,7 +97,7 @@ Container::operator==(const Value &value) const
 void
 Container::merge(const Value &value)
 {
-    std::vector<AccuracyValue*>::iterator it = mValues.begin();
+    std::vector<Value*>::iterator it = mValues.begin();
     if (const Constant *constant = dynamic_cast<const Constant*>(&value))
     {
         for (; it != mValues.end(); ++it)
@@ -77,7 +107,7 @@ Container::merge(const Value &value)
 
     const Container &container = dynamic_cast<const Container&>(value);
     CANAL_ASSERT(mValues.size() == container.mValues.size());
-    std::vector<AccuracyValue*>::const_iterator it2 = container.mValues.begin();
+    std::vector<Value*>::const_iterator it2 = container.mValues.begin();
     for (; it != mValues.end(); ++it, ++it2)
         (*it)->merge(**it2);
 }
@@ -86,7 +116,7 @@ size_t
 Container::memoryUsage() const
 {
     size_t size(0);
-    std::vector<AccuracyValue*>::const_iterator it = mValues.begin();
+    std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         size += (*it)->memoryUsage();
     return size;
@@ -97,7 +127,7 @@ Container::toString(const State *state) const
 {
     std::stringstream ss;
     ss << "Integer::Container: [" << std::endl;
-    std::vector<AccuracyValue*>::const_iterator it = mValues.begin();
+    std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         ss << "    " << indentExceptFirstLine((*it)->toString(state), 4) << std::endl;
     ss << "]";
@@ -121,9 +151,9 @@ applyBinaryOperation(Container &result,
     CANAL_ASSERT(bconstant || bcontainer);
     CANAL_ASSERT(!bcontainer || result.mValues.size() == bcontainer->mValues.size());
 
-    std::vector<AccuracyValue*>::iterator it(result.mValues.begin());
-    std::vector<AccuracyValue*>::const_iterator ita(acontainer ? acontainer->mValues.begin() : it);
-    std::vector<AccuracyValue*>::const_iterator itb(bcontainer ? bcontainer->mValues.begin() : it);
+    std::vector<Value*>::iterator it(result.mValues.begin());
+    std::vector<Value*>::const_iterator ita(acontainer ? acontainer->mValues.begin() : it);
+    std::vector<Value*>::const_iterator itb(bcontainer ? bcontainer->mValues.begin() : it);
     for (; it != result.mValues.end(); ++it, ++ita, ++itb)
     {
         const Value &avalue = acontainer ? static_cast<const Value&>(**ita) : *aconstant;
@@ -213,10 +243,14 @@ Container::xor_(const Value &a, const Value &b)
 float Container::accuracy() const
 {
     float accuracy = 0;
-    std::vector<AccuracyValue*>::const_iterator it = mValues.begin();
+    std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        float localAccuracy = (*it)->accuracy();
+        const AccuracyValue *accuracyValue = dynamic_cast<const AccuracyValue*>(*it);
+        if (!accuracyValue)
+            continue;
+
+        float localAccuracy = accuracyValue->accuracy();
         if (localAccuracy > accuracy)
             accuracy = localAccuracy;
     }
@@ -225,10 +259,14 @@ float Container::accuracy() const
 
 bool Container::isBottom() const
 {
-    std::vector<AccuracyValue*>::const_iterator it = mValues.begin();
+    std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        if (!(*it)->isBottom())
+        const AccuracyValue *accuracyValue = dynamic_cast<const AccuracyValue*>(*it);
+        if (!accuracyValue)
+            continue;
+
+        if (!accuracyValue->isBottom())
             return false;
     }
     return true;
@@ -236,17 +274,27 @@ bool Container::isBottom() const
 
 void Container::setBottom()
 {
-    std::vector<AccuracyValue*>::iterator it = mValues.begin();
+    std::vector<Value*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
-        (*it)->setBottom();
+    {
+        AccuracyValue *accuracyValue = dynamic_cast<AccuracyValue*>(*it);
+        if (!accuracyValue)
+            continue;
+
+        accuracyValue->setBottom();
+    }
 }
 
 bool Container::isTop() const
 {
-    std::vector<AccuracyValue*>::const_iterator it = mValues.begin();
+    std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        if (!(*it)->isTop())
+        const AccuracyValue *accuracyValue = dynamic_cast<const AccuracyValue*>(*it);
+        if (!accuracyValue)
+            continue;
+
+        if (!accuracyValue->isTop())
             return false;
     }
     return true;
@@ -254,39 +302,15 @@ bool Container::isTop() const
 
 void Container::setTop()
 {
-    std::vector<AccuracyValue*>::iterator it = mValues.begin();
+    std::vector<Value*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
-        (*it)->setTop();
-}
+    {
+        AccuracyValue *accuracyValue = dynamic_cast<AccuracyValue*>(*it);
+        if (!accuracyValue)
+            continue;
 
-Bits &Container::getBits()
-{
-    return dynamic_cast<Bits&>(*mValues[0]);
-}
-
-const Bits &Container::getBits() const
-{
-    return dynamic_cast<Bits&>(*mValues[0]);
-}
-
-Enumeration &Container::getEnumeration()
-{
-    return dynamic_cast<Enumeration&>(*mValues[1]);
-}
-
-const Enumeration &Container::getEnumeration() const
-{
-    return dynamic_cast<Enumeration&>(*mValues[1]);
-}
-
-Range &Container::getRange()
-{
-    return dynamic_cast<Range&>(*mValues[2]);
-}
-
-const Range &Container::getRange() const
-{
-    return dynamic_cast<Range&>(*mValues[2]);
+        accuracyValue->setTop();
+    }
 }
 
 } // namespace Integer

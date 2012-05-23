@@ -12,7 +12,7 @@ namespace Canal {
 namespace Integer {
 
 // Abstracts integer values as a range min - max.
-class Range : public AccuracyValue
+class Range : public Value, public AccuracyValue
 {
 public:
     bool mEmpty;

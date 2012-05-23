@@ -1,6 +1,7 @@
 #ifndef LIBCANAL_ARRAY_SINGLE_ITEM_H
 #define LIBCANAL_ARRAY_SINGLE_ITEM_H
 
+#include "Value.h"
 #include "Array.h"
 
 namespace Canal {
@@ -11,7 +12,7 @@ namespace Array {
 // merged and used to move the single value up in its lattice.
 //
 // This array type is very imprecise.
-class SingleItem : public Array
+class SingleItem : public Value, public Array
 {
 public:
     Value *mValue;
@@ -25,6 +26,7 @@ public:
     SingleItem(const SingleItem &singleItem);
     virtual ~SingleItem();
 
+public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.
     virtual SingleItem *clone() const;
@@ -36,6 +38,12 @@ public:
     virtual size_t memoryUsage() const;
     // Implementation of Value::toString().
     virtual std::string toString(const State *state) const;
+
+public: // Implementation of Array.
+    // Implementation of Array::get().
+    virtual Value *get(Value *offset) const;
+    // Implementation of Array::set().
+    virtual void set(Value *offset, Value *value);
 };
 
 } // namespace Array

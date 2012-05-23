@@ -14,8 +14,11 @@ class Bits;
 class Enumeration;
 class Range;
 
-class Container : public AccuracyValue
+class Container : public Value, public AccuracyValue
 {
+public:
+    std::vector<Value*> mValues;
+
 public:
     Container(unsigned numBits);
     // Creates a new container with an initial value.  Signedness,
@@ -23,8 +26,19 @@ public:
     Container(const llvm::APInt &number);
     // Copy constructor.  Creates independent copy of the container.
     Container(const Container &container);
+    // Destructor.  Deletes the contents of the container.
     virtual ~Container();
 
+    Bits &getBits();
+    const Bits &getBits() const;
+
+    Enumeration &getEnumeration();
+    const Enumeration &getEnumeration() const;
+
+    Range &getRange();
+    const Range &getRange() const;
+
+public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.
     virtual Container *clone() const;
@@ -75,19 +89,6 @@ public: // Implementation of AccuracyValue.
     virtual bool isTop() const;
     // Implementation of AccuracyValue::setTop().
     virtual void setTop();
-
-public: // Integer
-    Bits &getBits();
-    const Bits &getBits() const;
-
-    Enumeration &getEnumeration();
-    const Enumeration &getEnumeration() const;
-
-    Range &getRange();
-    const Range &getRange() const;
-
-public:
-    std::vector<AccuracyValue*> mValues;
 };
 
 } // namespace Integer

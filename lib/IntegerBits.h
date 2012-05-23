@@ -16,7 +16,7 @@ namespace Integer {
 //    1        0    The bit is set to 0
 //    0        1    The bit is set to 1
 //    1        1    The bit can be both 0 and 1 (highest lattice value - top)
-class Bits : public AccuracyValue
+class Bits : public Value, public AccuracyValue
 {
 public:
     // When a bit in mBits0 is 1, the value is known to contain zero
@@ -31,6 +31,20 @@ public:
     Bits(unsigned numBits);
     // Initializes to the given value.
     Bits(const llvm::APInt &number);
+
+    // Return the number of bits of the represented number.
+    unsigned getBitWidth() const { return mBits0.getBitWidth(); }
+
+    // Returns 0 if the bit is known to be 0.  Returns 1 if the bit is
+    // known to be 1.  Returns -1 if the bit value is unknown.
+    // Returns 2 if the bit is either 1 or 0.
+    int getBitValue(unsigned pos) const;
+
+    // Sets the bit.  If value is 0 or 1, the bit is set to represent
+    // exactly 0 or 1.  If value is -1, the bit is set to represent
+    // unknown value.  If value is 2, the bit is set to represent both
+    // 0 and 1.
+    void setBitValue(unsigned pos, int value);
 
 public: // Implementation of Value.
     // Implementation of Value::clone().
@@ -79,21 +93,6 @@ public: // Implementation of AccuracyValue.
     virtual bool isBottom() const;
     // Implementation of AccuracyValue::setTop().
     virtual void setTop();
-
-public: // Bits
-    // Return the number of bits of the represented number.
-    unsigned getBitWidth() const { return mBits0.getBitWidth(); }
-
-    // Returns 0 if the bit is known to be 0.  Returns 1 if the bit is
-    // known to be 1.  Returns -1 if the bit value is unknown.
-    // Returns 2 if the bit is either 1 or 0.
-    int getBitValue(unsigned pos) const;
-
-    // Sets the bit.  If value is 0 or 1, the bit is set to represent
-    // exactly 0 or 1.  If value is -1, the bit is set to represent
-    // unknown value.  If value is 2, the bit is set to represent both
-    // 0 and 1.
-    void setBitValue(unsigned pos, int value);
 };
 
 } // namespace Integer

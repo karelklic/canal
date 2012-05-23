@@ -82,3 +82,18 @@ SingleItem::toString(const State *state) const
     ss << "}";
     return ss.str();
 }
+
+Value *SingleItem::get(Value *offset) const
+{
+    // TODO: check if the offset fits into mSize.
+    return mValue;
+}
+
+void SingleItem::set(Value *offset, Value *value)
+{
+    // TODO: check if the offset fits into mSize.
+    mValue->merge(*value);
+}
+
+} // namespace Array
+} // namespace Canal

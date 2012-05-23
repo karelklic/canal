@@ -18,7 +18,7 @@ struct APIntComp
 
 typedef std::set<llvm::APInt, APIntComp> APIntSet;
 
-class Enumeration : public AccuracyValue
+class Enumeration : public Value, public AccuracyValue
 {
 public:
     APIntSet mValues;

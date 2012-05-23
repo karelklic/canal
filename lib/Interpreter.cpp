@@ -5,7 +5,7 @@
 #include "Integer.h"
 #include "IntegerBits.h"
 #include "Pointer.h"
-#include "Array.h"
+#include "ArraySingleItem.h"
 #include "Float.h"
 #include "Constant.h"
 #include "Stack.h"
@@ -622,10 +622,10 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction, Stack &st
 
     // Find the base pointer.
     Value *base = state.findVariable(*instruction.getPointerOperand());
-    if (!pointer)
+    if (!base)
         return;
 
-    Pointer::InclusionBased *pointer = dynamic_cast<Pointer::InclusionBased>(base);
+    Pointer::InclusionBased *pointer = dynamic_cast<Pointer::InclusionBased*>(base);
     CANAL_ASSERT(pointer);
 
     // We get offsets. Either constants or Integer::Container.
@@ -637,7 +637,7 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction, Stack &st
     // (=dereference the pointer targets) and use the index to create
     // a new pointer.
 
-    llvm::Value::op_iterator it = instruction.idx_begin(),
+    llvm::GetElementPtrInst::const_op_iterator it = instruction.idx_begin(),
         itend = instruction.idx_end();
     for (; it != itend; ++it)
     {
@@ -646,7 +646,7 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction, Stack &st
             itend = pointer->getTargets().end();
         for (; it != itend; ++it)
         {
-            Value *derefValue = it->second->dereference(state);
+            Value *derefValue = it->second.dereference(state);
             CANAL_ASSERT(derefValue);
 
             // TODO: struct support

@@ -1,16 +1,19 @@
 #ifndef LIBCANAL_ARRAY_H
 #define LIBCANAL_ARRAY_H
 
-#include "Value.h"
-
 namespace Canal {
+
+class Value;
+
 namespace Array {
 
-class Array : public Value
+class Array
 {
 public:
-    Value *get(Value *offset) = 0;
-    void set(Value *offset, Value *value) = 0;
+    virtual ~Array() {};
+
+    virtual Value *get(Value *offset) const = 0;
+    virtual void set(Value *offset, Value *value) = 0;
 };
 
 } // namespace Array
