@@ -9,6 +9,7 @@
 #include "Float.h"
 #include "Constant.h"
 #include "Stack.h"
+#include "Structure.h"
 #include <llvm/Function.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Instructions.h>
@@ -480,7 +481,7 @@ void
 Interpreter::alloca_(const llvm::AllocaInst &instruction, Stack &stack)
 {
     State &state = stack.getCurrentState();
-    llvm::Type *type = instruction.getAllocatedType();
+    const llvm::Type *type = instruction.getAllocatedType();
     Value *value = NULL;
     if (type->isIntegerTy())
     {
@@ -493,6 +494,11 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction, Stack &stack)
     {
         CANAL_NOT_IMPLEMENTED();
         return;
+    }
+    else if (type->isStructTy())
+    {
+        const llvm::StructType &structType = llvm::cast<llvm::StructType>(*type);
+        CANAL_NOT_IMPLEMENTED();
     }
     else
         CANAL_DIE();
