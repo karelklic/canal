@@ -16,6 +16,7 @@ Makefile
 /lib/libcanal.la
 /lib/libcanal*.lo
 /lib/Config.h
+/lib/stamp-h1
 
 /tool/canal
 
