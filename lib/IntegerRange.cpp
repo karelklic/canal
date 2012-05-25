@@ -144,6 +144,11 @@ Range::add(const Value &a, const Value &b)
     const Range &aa = dynamic_cast<const Range&>(a),
         &bb = dynamic_cast<const Range&>(b);
 
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
+        return;
+
     mSignedTop = aa.mSignedTop || bb.mSignedTop;
     if (!mSignedTop)
     {
@@ -166,6 +171,11 @@ Range::sub(const Value &a, const Value &b)
 {
     const Range &aa = dynamic_cast<const Range&>(a),
         &bb = dynamic_cast<const Range&>(b);
+
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
+        return;
 
     mSignedTop = aa.mSignedTop || bb.mSignedTop;
     if (!mSignedTop)
@@ -292,18 +302,11 @@ Range::mul(const Value &a, const Value &b)
     const Range &aa = dynamic_cast<const Range&>(a),
         &bb = dynamic_cast<const Range&>(b);
 
-    if (aa.mEmpty)
-    {
-        *this = bb;
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
         return;
-    }
-    else if (bb.mEmpty)
-    {
-        *this = aa;
-        return;
-    }
 
-    mEmpty = false;
     mSignedTop = aa.mSignedTop || bb.mSignedTop;
     if (!mSignedTop)
     {
@@ -375,18 +378,11 @@ Range::udiv(const Value &a, const Value &b)
     const Range &aa = dynamic_cast<const Range&>(a),
         &bb = dynamic_cast<const Range&>(b);
 
-    if (aa.mEmpty)
-    {
-        *this = bb;
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
         return;
-    }
-    else if (bb.mEmpty)
-    {
-        *this = aa;
-        return;
-    }
 
-    mEmpty = false;
     mSignedTop = true;
     mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
     if (!mUnsignedTop)
@@ -411,20 +407,12 @@ Range::sdiv(const Value &a, const Value &b)
     const Range &aa = dynamic_cast<const Range&>(a),
         &bb = dynamic_cast<const Range&>(b);
 
-    if (aa.mEmpty)
-    {
-        *this = bb;
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
         return;
-    }
-    else if (bb.mEmpty)
-    {
-        *this = aa;
-        return;
-    }
 
-    mEmpty = false;
     mUnsignedTop = true;
-
     mSignedTop = aa.mSignedTop || bb.mSignedTop;
     if (!mSignedTop)
     {
@@ -461,55 +449,184 @@ Range::sdiv(const Value &a, const Value &b)
 void
 Range::urem(const Value &a, const Value &b)
 {
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
+        return;
+
     setTop();
 }
 
 void
 Range::srem(const Value &a, const Value &b)
 {
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
+        return;
+
     setTop();
 }
 
 void
 Range::shl(const Value &a, const Value &b)
 {
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
+        return;
+
     setTop();
 }
 
 void
 Range::lshr(const Value &a, const Value &b)
 {
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
+        return;
+
     setTop();
 }
 
 void
 Range::ashr(const Value &a, const Value &b)
 {
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
+        return;
+
     setTop();
 }
 
 void
 Range::and_(const Value &a, const Value &b)
 {
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
+        return;
+
     setTop();
 }
 
 void
 Range::or_(const Value &a, const Value &b)
 {
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
+        return;
+
     setTop();
 }
 
 void
 Range::xor_(const Value &a, const Value &b)
 {
+    const Range &aa = dynamic_cast<const Range&>(a),
+        &bb = dynamic_cast<const Range&>(b);
+
+    // Handle empty values.
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty)
+        return;
+
     setTop();
 }
 
 float
 Range::accuracy() const
 {
-    CANAL_NOT_IMPLEMENTED();
+    if (mEmpty)
+        return 1.0f;
+
+    float coverage = 0;
+    if (mUnsignedTop)
+        coverage += 1.0f;
+    else
+    {
+        llvm::APInt dividendInt(mUnsignedTo.getBitWidth() + 1, 0);
+        dividendInt = mUnsignedTo;
+        dividendInt -= mUnsignedFrom;
+        dividendInt = dividendInt + 1;
+
+        llvm::APFloat dividendFloat(llvm::APFloat::IEEEdouble);
+        llvm::APFloat::opStatus status = dividendFloat.convertFromAPInt(
+            dividendInt,
+            /*isSigned=*/false,
+            llvm::APFloat::rmNearestTiesToEven);
+        CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+        llvm::APFloat divisorFloat(llvm::APFloat::IEEEdouble);
+        status = dividendFloat.convertFromAPInt(
+            llvm::APInt::getMaxValue(mUnsignedTo.getBitWidth() + 1),
+            /*isSigned=*/false,
+            llvm::APFloat::rmNearestTiesToEven);
+        CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+        status = dividendFloat.divide(divisorFloat,
+                                      llvm::APFloat::rmNearestTiesToEven);
+        CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+        coverage += dividendFloat.convertToFloat();
+    }
+
+    if (mSignedTop)
+        coverage += 1.0f;
+    else
+    {
+        llvm::APInt dividendInt(mSignedTo.getBitWidth() + 1, 0, /*isSigned=*/true);
+        dividendInt = mSignedTo;
+        dividendInt -= mSignedFrom;
+        dividendInt = dividendInt + 1;
+
+        llvm::APFloat dividendFloat(llvm::APFloat::IEEEdouble);
+        llvm::APFloat::opStatus status = dividendFloat.convertFromAPInt(
+            dividendInt,
+            /*isSigned=*/true,
+            llvm::APFloat::rmNearestTiesToEven);
+        CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+        llvm::APFloat divisorFloat(llvm::APFloat::IEEEdouble);
+        status = dividendFloat.convertFromAPInt(
+            llvm::APInt::getMaxValue(mSignedTo.getBitWidth() + 1),
+            /*isSigned=*/false,
+            llvm::APFloat::rmNearestTiesToEven);
+        CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+        status = dividendFloat.divide(divisorFloat,
+                                      llvm::APFloat::rmNearestTiesToEven);
+        CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+        coverage += dividendFloat.convertToFloat();
+    }
+
+    coverage /= 2.0f;
+    return coverage > 1.0f ? 1.0f : (coverage < 0.0f ? 0.0f : coverage);
 }
 
 bool
@@ -519,10 +636,22 @@ Range::isBottom() const
 }
 
 void
+Range::setBottom()
+{
+    mEmpty = true;
+}
+
+bool
+Range::isTop() const
+{
+    return !mEmpty && mSignedTop && mUnsignedTop;
+}
+
+void
 Range::setTop()
 {
-    mSignedTop = mUnsignedTop = true;
     mEmpty = false;
+    mSignedTop = mUnsignedTop = true;
 }
 
 } // namespace Integer

@@ -245,13 +245,28 @@ Bits::accuracy() const
 bool
 Bits::isBottom() const
 {
-    return mBits0 == 0 && mBits1 == 0;
+    return mBits0.countPopulation() == 0 &&
+        mBits1.countPopulation() == 0;
+}
+
+void
+Bits::setBottom()
+{
+    mBits0 = mBits1 = 0;
+}
+
+bool
+Bits::isTop() const
+{
+    return mBits0.countPopulation() == mBits0.getBitWidth() &&
+        mBits1.countPopulation() == mBits1.getBitWidth();
 }
 
 void
 Bits::setTop()
 {
-    mBits0 = mBits1 = ~0;
+    mBits0.setAllBits();
+    mBits1.setAllBits();
 }
 
 int

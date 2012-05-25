@@ -91,6 +91,10 @@ public: // Implementation of AccuracyValue.
     virtual float accuracy() const;
     // Implementation of AccuracyValue::isBottom().
     virtual bool isBottom() const;
+    // Implementation of AccuracyValue::setBottom().
+    virtual void setBottom();
+    // Implementation of AccuracyValue::isTop().
+    virtual bool isTop() const;
     // Implementation of AccuracyValue::setTop().
     virtual void setTop();
 };
