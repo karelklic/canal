@@ -9,6 +9,7 @@
 #include "Float.h"
 #include "Constant.h"
 #include "Stack.h"
+#include "Structure.h"
 #include <llvm/Function.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Instructions.h>
@@ -476,26 +477,45 @@ Interpreter::insertvalue(const llvm::InsertValueInst &instruction, State &state)
     CANAL_NOT_IMPLEMENTED();
 }
 
+static Value *
+typeToEmptyValue(const llvm::Type &type, const llvm::Module &module)
+{
+    if (type.isIntegerTy())
+    {
+        llvm::IntegerType &integerType = llvm::cast<llvm::IntegerType>(type);
+        return new Integer::Container(integerType.getBitWidth());
+    }
+
+    if (type.isPointerTy())
+        return new Pointer::InclusionBased(module);
+
+    if (type.isArrayTy() || type.isVectorTy())
+    {
+        CANAL_NOT_IMPLEMENTED();
+    }
+
+    if (type.isStructTy())
+    {
+        const llvm::StructType &structType = llvm::cast<llvm::StructType>(type);
+        Structure *structure = new Structure();
+
+        llvm::StructType::element_iterator it = structType.element_begin(),
+            itend = structType.element_end();
+        for (; it != itend; ++it)
+            structure->mMembers.push_back(typeToEmptyValue(**it, module));
+
+        return structure;
+    }
+
+    CANAL_DIE();
+}
+
 void
 Interpreter::alloca_(const llvm::AllocaInst &instruction, Stack &stack)
 {
     State &state = stack.getCurrentState();
-    llvm::Type *type = instruction.getAllocatedType();
-    Value *value = NULL;
-    if (type->isIntegerTy())
-    {
-        llvm::IntegerType &integerType = llvm::cast<llvm::IntegerType>(*type);
-        value = new Integer::Container(integerType.getBitWidth());
-    }
-    else if (type->isPointerTy())
-        value = new Pointer::InclusionBased(stack.getModule());
-    else if (type->isArrayTy() || type->isVectorTy())
-    {
-        CANAL_NOT_IMPLEMENTED();
-        return;
-    }
-    else
-        CANAL_DIE();
+    const llvm::Type *type = instruction.getAllocatedType();
+    Value *value = typeToEmptyValue(*type, stack.getModule());
 
     if (instruction.isArrayAllocation())
     {
