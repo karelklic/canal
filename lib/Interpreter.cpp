@@ -72,24 +72,24 @@ Interpreter::interpretInstruction(Stack &stack)
         assert(binaryOp.getNumOperands() == 2);
         switch (binaryOp.getOpcode())
 	{
-	case llvm::Instruction::Add:  add(binaryOp, state);  break;
-	case llvm::Instruction::FAdd: fadd(binaryOp, state); break;
-	case llvm::Instruction::Sub:  sub(binaryOp, state);  break;
-	case llvm::Instruction::FSub: fsub(binaryOp, state); break;
-	case llvm::Instruction::Mul:  mul(binaryOp, state);  break;
-	case llvm::Instruction::FMul: fmul(binaryOp, state); break;
-	case llvm::Instruction::UDiv: udiv(binaryOp, state); break;
-	case llvm::Instruction::SDiv: sdiv(binaryOp, state); break;
-	case llvm::Instruction::FDiv: fdiv(binaryOp, state); break;
-	case llvm::Instruction::URem: urem(binaryOp, state); break;
-	case llvm::Instruction::SRem: srem(binaryOp, state); break;
-	case llvm::Instruction::FRem: frem(binaryOp, state); break;
-	case llvm::Instruction::Shl:  shl(binaryOp, state);  break;
-	case llvm::Instruction::LShr: lshr(binaryOp, state); break;
-	case llvm::Instruction::AShr: ashr(binaryOp, state); break;
-	case llvm::Instruction::And:  and_(binaryOp, state); break;
-	case llvm::Instruction::Or:   or_(binaryOp, state);  break;
-	case llvm::Instruction::Xor:  xor_(binaryOp, state); break;
+	case llvm::Instruction::Add:  add(binaryOp, stack);  break;
+	case llvm::Instruction::FAdd: fadd(binaryOp, stack); break;
+	case llvm::Instruction::Sub:  sub(binaryOp, stack);  break;
+	case llvm::Instruction::FSub: fsub(binaryOp, stack); break;
+	case llvm::Instruction::Mul:  mul(binaryOp, stack);  break;
+	case llvm::Instruction::FMul: fmul(binaryOp, stack); break;
+	case llvm::Instruction::UDiv: udiv(binaryOp, stack); break;
+	case llvm::Instruction::SDiv: sdiv(binaryOp, stack); break;
+	case llvm::Instruction::FDiv: fdiv(binaryOp, stack); break;
+	case llvm::Instruction::URem: urem(binaryOp, stack); break;
+	case llvm::Instruction::SRem: srem(binaryOp, stack); break;
+	case llvm::Instruction::FRem: frem(binaryOp, stack); break;
+	case llvm::Instruction::Shl:  shl(binaryOp, stack);  break;
+	case llvm::Instruction::LShr: lshr(binaryOp, stack); break;
+	case llvm::Instruction::AShr: ashr(binaryOp, stack); break;
+	case llvm::Instruction::And:  and_(binaryOp, stack); break;
+	case llvm::Instruction::Or:   or_(binaryOp, stack);  break;
+	case llvm::Instruction::Xor:  xor_(binaryOp, stack); break;
 	default:
             CANAL_FATAL_ERROR(binaryOp);
 	}
@@ -198,29 +198,72 @@ variableOrConstant(const llvm::Value &place, State &state, Constant &constant)
 }
 
 static const llvm::fltSemantics *
-getFloatingPointSemantics(llvm::Type *type)
+getFloatingPointSemantics(const llvm::Type &type)
 {
-    CANAL_ASSERT(type->isFloatingPointTy());
+    CANAL_ASSERT(type.isFloatingPointTy());
 
     const llvm::fltSemantics *semantics;
 #if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
-    if (type->isHalfTy())
+    if (type.isHalfTy())
         semantics = &llvm::APFloat::IEEEhalf;
     else
 #endif
-    if (type->isFloatTy())
+    if (type.isFloatTy())
         semantics = &llvm::APFloat::IEEEsingle;
-    else if (type->isDoubleTy())
+    else if (type.isDoubleTy())
         semantics = &llvm::APFloat::IEEEdouble;
-    else if (type->isFP128Ty())
+    else if (type.isFP128Ty())
         semantics = &llvm::APFloat::IEEEquad;
-    else if (type->isPPC_FP128Ty())
+    else if (type.isPPC_FP128Ty())
         semantics = &llvm::APFloat::PPCDoubleDouble;
-    else if (type->isX86_FP80Ty())
+    else if (type.isX86_FP80Ty())
         semantics = &llvm::APFloat::x87DoubleExtended;
     else
         CANAL_DIE();
     return semantics;
+}
+
+
+static Value *
+typeToEmptyValue(const llvm::Type &type, const llvm::Module &module)
+{
+    if (type.isVoidTy())
+        return NULL;
+
+    if (type.isIntegerTy())
+    {
+        llvm::IntegerType &integerType = llvm::cast<llvm::IntegerType>(type);
+        return new Integer::Container(integerType.getBitWidth());
+    }
+
+    if (type.isFloatingPointTy())
+    {
+        const llvm::fltSemantics *semantics = getFloatingPointSemantics(type);
+        return new Float::Range(*semantics);
+    }
+
+    if (type.isPointerTy())
+        return new Pointer::InclusionBased(module);
+
+    if (type.isArrayTy() || type.isVectorTy())
+    {
+        CANAL_NOT_IMPLEMENTED();
+    }
+
+    if (type.isStructTy())
+    {
+        const llvm::StructType &structType = llvm::cast<llvm::StructType>(type);
+        Structure *structure = new Structure();
+
+        llvm::StructType::element_iterator it = structType.element_begin(),
+            itend = structType.element_end();
+        for (; it != itend; ++it)
+            structure->mMembers.push_back(typeToEmptyValue(**it, module));
+
+        return structure;
+    }
+
+    CANAL_DIE_MSG("unsupported llvm::Type::TypeID: " << type.getTypeID());
 }
 
 template<typename T> static void
@@ -241,25 +284,7 @@ interpretCall(const T &instruction, Stack &stack)
 
         // Create result TOP value of required type.
         llvm::Type *type = instruction.getType();
-        Value *returnedValue = NULL;
-        if (type->isVoidTy())
-            returnedValue = NULL;
-        else if (type->isIntegerTy())
-        {
-            llvm::IntegerType *integerType = llvm::cast<llvm::IntegerType>(type);
-            returnedValue = new Integer::Container(integerType->getBitWidth());
-        }
-        else if (type->isFloatingPointTy())
-        {
-            const llvm::fltSemantics *semantics = getFloatingPointSemantics(type);
-            returnedValue = new Float::Range(*semantics);
-        }
-        else if (type->isPointerTy())
-        {
-            returnedValue = new Pointer::InclusionBased(stack.getModule());
-        }
-        else
-            CANAL_DIE_MSG("unsupported llvm::Type::TypeID: " << type->getTypeID());
+        Value *returnedValue = typeToEmptyValue(*instruction.getType(), stack.getModule());
 
         // If the function returns nothing (void), we are finished.
         if (!returnedValue)
@@ -308,8 +333,12 @@ Interpreter::unreachable(const llvm::UnreachableInst &instruction, State &state)
 }
 
 static void
-binaryOperation(const llvm::BinaryOperator &instruction, State &state, void(Value::*operation)(const Value&, const Value&))
+binaryOperation(const llvm::BinaryOperator &instruction,
+                Stack &stack,
+                void(Value::*operation)(const Value&, const Value&))
 {
+    State &state = stack.getCurrentState();
+
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.
     Constant constants[2];
@@ -320,131 +349,120 @@ binaryOperation(const llvm::BinaryOperator &instruction, State &state, void(Valu
     if (!values[0] || !values[1])
         return;
 
-    // Create result value of required type.
-    llvm::Type *type = instruction.getType();
-    Value *result = NULL;
-    if (type->isIntegerTy())
-    {
-        llvm::IntegerType *integerType = llvm::cast<llvm::IntegerType>(type);
-        result = new Integer::Container(integerType->getBitWidth());
-    }
-    else if (type->isFloatingPointTy())
-    {
-        const llvm::fltSemantics *semantics = getFloatingPointSemantics(type);
-        result = new Float::Range(*semantics);
-    }
-    else
-        CANAL_NOT_IMPLEMENTED();
-
+    // Create result value of required type and then run the desired
+    // operation.
+    Value *result = typeToEmptyValue(*instruction.getType(), stack.getModule());
     ((result)->*(operation))(*values[0], *values[1]);
+
+    // Store the result value to the state.
     state.addFunctionVariable(instruction, result);
 }
 
-void Interpreter::add(const llvm::BinaryOperator &instruction, State &state)
+void Interpreter::add(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::add);
+    binaryOperation(instruction, stack, &Value::add);
 }
 
 void
-Interpreter::fadd(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::fadd(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::fadd);
+    binaryOperation(instruction, stack, &Value::fadd);
 }
 
 void
-Interpreter::sub(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::sub(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::sub);
+    binaryOperation(instruction, stack, &Value::sub);
 }
 
 void
-Interpreter::fsub(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::fsub(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::fsub);
+    binaryOperation(instruction, stack, &Value::fsub);
 }
 
 void
-Interpreter::mul(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::mul(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::mul);
+    binaryOperation(instruction, stack, &Value::mul);
 }
 
 void
-Interpreter::fmul(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::fmul(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::fmul);
+    binaryOperation(instruction, stack, &Value::fmul);
 }
 
 void
-Interpreter::udiv(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::udiv(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::udiv);
+    binaryOperation(instruction, stack, &Value::udiv);
 }
 
 void
-Interpreter::sdiv(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::sdiv(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::sdiv);
+    binaryOperation(instruction, stack, &Value::sdiv);
 }
 
 void
-Interpreter::fdiv(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::fdiv(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::fdiv);
+    binaryOperation(instruction, stack, &Value::fdiv);
 }
 
 void
-Interpreter::urem(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::urem(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::urem);
+    binaryOperation(instruction, stack, &Value::urem);
 }
 
 void
-Interpreter::srem(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::srem(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::srem);
+    binaryOperation(instruction, stack, &Value::srem);
 }
 
 void
-Interpreter::frem(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::frem(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::frem);
+    binaryOperation(instruction, stack, &Value::frem);
 }
 
 void
-Interpreter::shl(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::shl(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::shl);
+    binaryOperation(instruction, stack, &Value::shl);
 }
 
 void
-Interpreter::lshr(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::lshr(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::lshr);
+    binaryOperation(instruction, stack, &Value::lshr);
 }
 
 void
-Interpreter::ashr(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::ashr(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::ashr);
+    binaryOperation(instruction, stack, &Value::ashr);
 }
 
 void
-Interpreter::and_(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::and_(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::and_);
+    binaryOperation(instruction, stack, &Value::and_);
 }
 
 void
-Interpreter::or_(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::or_(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::or_);
+    binaryOperation(instruction, stack, &Value::or_);
 }
 
 void
-Interpreter::xor_(const llvm::BinaryOperator &instruction, State &state)
+Interpreter::xor_(const llvm::BinaryOperator &instruction, Stack &stack)
 {
-    binaryOperation(instruction, state, &Value::xor_);
+    binaryOperation(instruction, stack, &Value::xor_);
 }
 
 void
@@ -475,39 +493,6 @@ void
 Interpreter::insertvalue(const llvm::InsertValueInst &instruction, State &state)
 {
     CANAL_NOT_IMPLEMENTED();
-}
-
-static Value *
-typeToEmptyValue(const llvm::Type &type, const llvm::Module &module)
-{
-    if (type.isIntegerTy())
-    {
-        llvm::IntegerType &integerType = llvm::cast<llvm::IntegerType>(type);
-        return new Integer::Container(integerType.getBitWidth());
-    }
-
-    if (type.isPointerTy())
-        return new Pointer::InclusionBased(module);
-
-    if (type.isArrayTy() || type.isVectorTy())
-    {
-        CANAL_NOT_IMPLEMENTED();
-    }
-
-    if (type.isStructTy())
-    {
-        const llvm::StructType &structType = llvm::cast<llvm::StructType>(type);
-        Structure *structure = new Structure();
-
-        llvm::StructType::element_iterator it = structType.element_begin(),
-            itend = structType.element_end();
-        for (; it != itend; ++it)
-            structure->mMembers.push_back(typeToEmptyValue(**it, module));
-
-        return structure;
-    }
-
-    CANAL_DIE();
 }
 
 void

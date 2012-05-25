@@ -112,39 +112,39 @@ protected:
 
     // Binary operators
     // Sum of two operands.
-    virtual void add(const llvm::BinaryOperator &instruction, State &state);
+    virtual void add(const llvm::BinaryOperator &instruction, Stack &stack);
     // Sum of two operands. The operands are floating point or vector of
     // floating point values.
-    virtual void fadd(const llvm::BinaryOperator &instruction, State &state);
+    virtual void fadd(const llvm::BinaryOperator &instruction, Stack &stack);
     // Difference of two operands.
-    virtual void sub(const llvm::BinaryOperator &instruction, State &state);
+    virtual void sub(const llvm::BinaryOperator &instruction, Stack &stack);
     // Difference of two operands.  The operands are floating point or
     // vector of floating point values.
-    virtual void fsub(const llvm::BinaryOperator &instruction, State &state);
+    virtual void fsub(const llvm::BinaryOperator &instruction, Stack &stack);
     // Product of two operands.
-    virtual void mul(const llvm::BinaryOperator &instruction, State &state);
+    virtual void mul(const llvm::BinaryOperator &instruction, Stack &stack);
     // Product of two operands.
-    virtual void fmul(const llvm::BinaryOperator &instruction, State &state);
+    virtual void fmul(const llvm::BinaryOperator &instruction, Stack &stack);
     // Quotient of two operands. The operands are integer or vector of
     // integer values.
-    virtual void udiv(const llvm::BinaryOperator &instruction, State &state);
+    virtual void udiv(const llvm::BinaryOperator &instruction, Stack &stack);
     // Quotient of two operands. The operands are integer or vector of
     // integer values.
-    virtual void sdiv(const llvm::BinaryOperator &instruction, State &state);
+    virtual void sdiv(const llvm::BinaryOperator &instruction, Stack &stack);
     // Quotient of two operands. The operands are floating point or
     // vector of floating point values.
-    virtual void fdiv(const llvm::BinaryOperator &instruction, State &state);
-    virtual void urem(const llvm::BinaryOperator &instruction, State &state);
-    virtual void srem(const llvm::BinaryOperator &instruction, State &state);
-    virtual void frem(const llvm::BinaryOperator &instruction, State &state);
+    virtual void fdiv(const llvm::BinaryOperator &instruction, Stack &stack);
+    virtual void urem(const llvm::BinaryOperator &instruction, Stack &stack);
+    virtual void srem(const llvm::BinaryOperator &instruction, Stack &stack);
+    virtual void frem(const llvm::BinaryOperator &instruction, Stack &stack);
 
     // Bitwise binary operators
-    virtual void shl(const llvm::BinaryOperator &instruction, State &state);
-    virtual void lshr(const llvm::BinaryOperator &instruction, State &state);
-    virtual void ashr(const llvm::BinaryOperator &instruction, State &state);
-    virtual void and_(const llvm::BinaryOperator &instruction, State &state);
-    virtual void or_(const llvm::BinaryOperator &instruction, State &state);
-    virtual void xor_(const llvm::BinaryOperator &instruction, State &state);
+    virtual void shl(const llvm::BinaryOperator &instruction, Stack &stack);
+    virtual void lshr(const llvm::BinaryOperator &instruction, Stack &stack);
+    virtual void ashr(const llvm::BinaryOperator &instruction, Stack &stack);
+    virtual void and_(const llvm::BinaryOperator &instruction, Stack &stack);
+    virtual void or_(const llvm::BinaryOperator &instruction, Stack &stack);
+    virtual void xor_(const llvm::BinaryOperator &instruction, Stack &stack);
 
     // Vector Operations
     virtual void extractelement(const llvm::ExtractElementInst &instruction, State &state);
