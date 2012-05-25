@@ -41,9 +41,9 @@ public: // Implementation of Value.
 
 public: // Implementation of Array.
     // Implementation of Array::get().
-    virtual Value *get(const Value *offset) const;
+    virtual Value *get(const Value &offset) const;
     // Implementation of Array::set().
-    virtual void set(const Value *offset, const Value *value);
+    virtual void set(const Value &offset, const Value &value);
 };
 
 } // namespace Array

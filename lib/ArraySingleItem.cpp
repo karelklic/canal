@@ -83,18 +83,18 @@ SingleItem::toString(const State *state) const
     return ss.str();
 }
 
-Value *SingleItem::get(const Value *offset) const
+Value *SingleItem::get(const Value &offset) const
 {
     // TODO: check if the offset fits into mSize.
     CANAL_NOT_IMPLEMENTED();
     return mValue;
 }
 
-void SingleItem::set(const Value *offset, const Value *value)
+void SingleItem::set(const Value &offset, const Value &value)
 {
     // TODO: check if the offset fits into mSize.
     CANAL_NOT_IMPLEMENTED();
-    mValue->merge(*value);
+    mValue->merge(value);
 }
 
 } // namespace Array
