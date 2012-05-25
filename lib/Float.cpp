@@ -7,7 +7,11 @@
 namespace Canal {
 namespace Float {
 
-Range::Range(const llvm::fltSemantics &semantics) : mFrom(semantics), mTo(semantics)
+Range::Range(const llvm::fltSemantics &semantics)
+    : mFrom(semantics),
+      mTo(semantics),
+      mEmpty(true),
+      mTop(false)
 {
 }
 
@@ -20,13 +24,38 @@ Range::clone() const
 bool
 Range::operator==(const Value& value) const
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Range *range = dynamic_cast<const Range*>(&value);
+    if (!range)
+        return false;
+    if (mEmpty)
+        return range->mEmpty;
+    if (isTop())
+        return range->isTop();
+
+    return mFrom.compare(range->mFrom) == llvm::APFloat::cmpEqual &&
+        mTo.compare(range->mTo) == llvm::APFloat::cmpEqual;
 }
 
 void
 Range::merge(const Value &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Range &range = dynamic_cast<const Range&>(value);
+    if (range.mEmpty)
+        return;
+
+    mEmpty = false;
+
+    if (range.isTop())
+    {
+        mTop = true;
+        return;
+    }
+
+    if (mFrom.compare(range.mFrom) == llvm::APFloat::cmpGreaterThan)
+        mFrom = range.mFrom;
+
+    if (mTo.compare(range.mTo) == llvm::APFloat::cmpLessThan)
+        mTo = range.mTo;
 }
 
 size_t
@@ -45,6 +74,57 @@ Range::toString(const State *state) const
     ss << "}";
     return ss.str();
 }
+
+float
+Range::accuracy() const
+{
+    if (mEmpty)
+        return 1.0f;
+
+    if (mTop)
+        return 0.0f;
+
+    llvm::APFloat divisor = llvm::APFloat::getLargest(mFrom.getSemantics(), /*negative=*/false);
+    llvm::APFloat::opStatus status = divisor.subtract(llvm::APFloat::getLargest(mFrom.getSemantics(), /*negative=*/true), llvm::APFloat::rmNearestTiesToEven);
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+    llvm::APFloat dividend = mTo;
+    status = dividend.subtract(mFrom, llvm::APFloat::rmNearestTiesToEven);
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+    llvm::APFloat coverage = dividend;
+    status = coverage.divide(divisor, llvm::APFloat::rmNearestTiesToEven);
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+    float result = 1.0f - coverage.convertToFloat();
+    return result > 1.0f ? 1.0f : (result < 0.0f ? 0.0f : result);
+}
+
+bool
+Range::isBottom() const
+{
+    return mEmpty;
+}
+
+void
+Range::setBottom()
+{
+    mEmpty = true;
+}
+
+bool
+Range::isTop() const
+{
+    return !mEmpty && mTop;
+}
+
+void
+Range::setTop()
+{
+    mEmpty = false;
+    mTop = true;
+}
+
 
 } // namespace Float
 } // namespace Canal

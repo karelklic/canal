@@ -626,6 +626,7 @@ Range::accuracy() const
     }
 
     coverage /= 2.0f;
+    coverage = 1.0f - coverage;
     return coverage > 1.0f ? 1.0f : (coverage < 0.0f ? 0.0f : coverage);
 }
 
