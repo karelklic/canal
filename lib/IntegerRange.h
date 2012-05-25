@@ -4,10 +4,6 @@
 #include "Value.h"
 #include <llvm/Constants.h>
 
-namespace llvm {
-    class APInt;
-}
-
 namespace Canal {
 namespace Integer {
 
@@ -18,11 +14,15 @@ public:
     bool mEmpty;
 
     bool mSignedTop;
+    // The number is included in the interval.
     llvm::APInt mSignedFrom;
+    // The number is included in the interval.
     llvm::APInt mSignedTo;
 
     bool mUnsignedTop;
+    // The number is included in the interval.
     llvm::APInt mUnsignedFrom;
+    // The number is included in the interval.
     llvm::APInt mUnsignedTo;
 
 public:

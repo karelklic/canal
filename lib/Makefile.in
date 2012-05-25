@@ -78,7 +78,9 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libcanal_la_LIBADD =
-am_libcanal_la_OBJECTS = libcanal_la-Array.lo libcanal_la-Constant.lo \
+am_libcanal_la_OBJECTS = libcanal_la-Array.lo \
+	libcanal_la-ArrayExactLimitedSize.lo \
+	libcanal_la-ArraySingleItem.lo libcanal_la-Constant.lo \
 	libcanal_la-Float.lo libcanal_la-Integer.lo \
 	libcanal_la-IntegerBits.lo libcanal_la-IntegerEnumeration.lo \
 	libcanal_la-IntegerRange.lo libcanal_la-Interpreter.lo \
@@ -249,6 +251,10 @@ lib_LTLIBRARIES = libcanal.la
 libcanal_la_SOURCES = \
 	Array.h \
 	Array.cpp \
+	ArrayExactLimitedSize.h \
+	ArrayExactLimitedSize.cpp \
+	ArraySingleItem.h \
+	ArraySingleItem.cpp \
 	Constant.h \
 	Constant.cpp \
 	Float.h \
@@ -372,6 +378,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Array.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-ArrayExactLimitedSize.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-ArraySingleItem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Constant.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Float.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Integer.Plo@am__quote@
@@ -415,6 +423,20 @@ libcanal_la-Array.lo: Array.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Array.cpp' object='libcanal_la-Array.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Array.lo `test -f 'Array.cpp' || echo '$(srcdir)/'`Array.cpp
+
+libcanal_la-ArrayExactLimitedSize.lo: ArrayExactLimitedSize.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-ArrayExactLimitedSize.lo -MD -MP -MF $(DEPDIR)/libcanal_la-ArrayExactLimitedSize.Tpo -c -o libcanal_la-ArrayExactLimitedSize.lo `test -f 'ArrayExactLimitedSize.cpp' || echo '$(srcdir)/'`ArrayExactLimitedSize.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-ArrayExactLimitedSize.Tpo $(DEPDIR)/libcanal_la-ArrayExactLimitedSize.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ArrayExactLimitedSize.cpp' object='libcanal_la-ArrayExactLimitedSize.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-ArrayExactLimitedSize.lo `test -f 'ArrayExactLimitedSize.cpp' || echo '$(srcdir)/'`ArrayExactLimitedSize.cpp
+
+libcanal_la-ArraySingleItem.lo: ArraySingleItem.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-ArraySingleItem.lo -MD -MP -MF $(DEPDIR)/libcanal_la-ArraySingleItem.Tpo -c -o libcanal_la-ArraySingleItem.lo `test -f 'ArraySingleItem.cpp' || echo '$(srcdir)/'`ArraySingleItem.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-ArraySingleItem.Tpo $(DEPDIR)/libcanal_la-ArraySingleItem.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ArraySingleItem.cpp' object='libcanal_la-ArraySingleItem.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-ArraySingleItem.lo `test -f 'ArraySingleItem.cpp' || echo '$(srcdir)/'`ArraySingleItem.cpp
 
 libcanal_la-Constant.lo: Constant.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Constant.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Constant.Tpo -c -o libcanal_la-Constant.lo `test -f 'Constant.cpp' || echo '$(srcdir)/'`Constant.cpp
