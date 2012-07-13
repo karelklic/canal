@@ -21,15 +21,21 @@ Target::Target() : mType(Target::Uninitialized),
 Target::Target(const Target &target) : mType(target.mType),
                                        mConstant(target.mConstant),
                                        mInstruction(target.mInstruction),
-                                       mArrayOffset(target.mArrayOffset)
+                                       mOffsets(target.mOffsets)
 {
-    if (mArrayOffset)
-        mArrayOffset = mArrayOffset->clone();
+    std::vector<Value*>::iterator it = mOffsets.begin(),
+        itend = mOffsets.end();
+
+    for (; it != itend; ++it)
+        *it = (*it)->clone();
 }
 
 Target::~Target()
 {
-    delete mArrayOffset;
+    std::vector<Value*>::iterator it = mOffsets.begin(),
+        itend = mOffsets.end();
+    for (; it != itend; ++it)
+        delete *it;
 }
 
 bool
@@ -150,24 +156,19 @@ Target::toString(const State *state, SlotTracker &slotTracker) const
     return ss.str();
 }
 
-Value *
+Value &
 Target::dereference(const State &state) const
 {
     switch (mType)
     {
     case Uninitialized:
     case Constant:
-        return NULL;
+        CANAL_DIE();
     case MemoryBlock:
     {
         Value *block = state.findBlock(*mInstruction);
-        if (!block)
-            return NULL;
-        if (!mArrayOffset)
-            return block;
-        // Do not care about offsets when lacking better array.
-        const Array::SingleItem &array = dynamic_cast<const Array::SingleItem&>(*block);
-        return array.mValue;
+        CANAL_ASSERT(block);
+        return *block;
     }
     default:
         CANAL_DIE();

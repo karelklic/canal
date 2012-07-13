@@ -46,7 +46,7 @@ public:
     size_t memoryUsage() const;
     std::string toString(const State *state, SlotTracker &slotTracker) const;
 
-    Value *dereference(const State &state) const;
+    Value &dereference(const State &state) const;
 
 public:
     Type mType;
@@ -58,9 +58,8 @@ public:
     // A specific constant.
     size_t mConstant;
 
-    // Pointer to an array if this is not NULL.
-    // mArrayOffset memory is owned by this class.
-    Value *mArrayOffset;
+    // Array or struct offsets in the GetElementPtr style.
+    std::vector<Value*> mOffsets;
 };
 
 // llvm::Value represents a position in the program.  It points to

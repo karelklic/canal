@@ -507,6 +507,9 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction, Stack &stack)
         Array::SingleItem *array = new Array::SingleItem();
         array->mValue = value;
         value = array;
+
+        // Here is a bug, maybe. Array size might be unavailable
+        // because of fixpoint calculation.
         const llvm::Value *arraySize = instruction.getArraySize();
         PlaceValueMap::const_iterator it = state.getGlobalVariables().find(arraySize);
         if (it != state.getGlobalVariables().end())
@@ -543,14 +546,12 @@ Interpreter::load(const llvm::LoadInst &instruction, State &state)
     Pointer::PlaceTargetMap::const_iterator it = pointer.getTargets().begin();
     for (; it != pointer.getTargets().end(); ++it)
     {
-        Value *value = it->second.dereference(state);
-        if (!value)
-            continue;
+        Value &value = it->second.dereference(state);
 
         if (mergedValue)
-            mergedValue->merge(*value);
+            mergedValue->merge(value);
         else
-            mergedValue = value->clone();
+            mergedValue = value.clone();
     }
 
     if (!mergedValue)
@@ -590,11 +591,8 @@ Interpreter::store(const llvm::StoreInst &instruction, State &state)
     Pointer::PlaceTargetMap::const_iterator it = pointer.getTargets().begin();
     for (; it != pointer.getTargets().end(); ++it)
     {
-        Value *dest = it->second.dereference(state);
-        if (!dest)
-            continue;
-
-        dest->merge(*value);
+        Value &dest = it->second.dereference(state);
+        dest.merge(*value);
     }
 
     if (deleteValue)
@@ -619,8 +617,40 @@ Interpreter::atomicrmw(const llvm::AtomicRMWInst &instruction, State &state)
     CANAL_NOT_IMPLEMENTED();
 }
 
+static Pointer::Target
+singleElementPtr(const Pointer::Target &source,
+                 llvm::APInt offset,
+                 const State &state)
+{
+    CANAL_ASSERT(!source.mArrayOffset);
+    CANAL_ASSERT(source.mType == Pointer::Target::MemoryBlock);
+
+    Value &object = source.dereference(state);
+    Array::Array *array = dynamic_cast<Array::Array*>(&derefValue);
+    if (array)
+    {
+        if (pit->second.mArrayOffset)
+        {
+            CANAL_ASSERT(it == instruction.idx_begin());
+            CANAL_NOT_IMPLEMENTED();
+        }
+    }
+
+            CANAL_ASSERT(it != instruction.idx_begin() || (constant && constant->equalsInt(0)));
+
+            Structure *structure = dynamic_cast<Structure*>(&derefValue);
+            if (structure)
+            {
+                CANAL_NOT_IMPLEMENTED();
+                continue;
+            }
+
+}
+
+
 void
-Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction, Stack &stack)
+Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
+                           Stack &stack)
 {
     CANAL_ASSERT(instruction.getNumOperands() > 1);
     State &state = stack.getCurrentState();
@@ -630,7 +660,9 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction, Stack &st
     if (!base)
         return;
 
-    Pointer::InclusionBased *pointer = dynamic_cast<Pointer::InclusionBased*>(base);
+    Pointer::InclusionBased *pointer =
+        dynamic_cast<Pointer::InclusionBased*>(base);
+
     CANAL_ASSERT(pointer);
 
     // We get offsets. Either constants or Integer::Container.
@@ -646,16 +678,51 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction, Stack &st
         itend = instruction.idx_end();
     for (; it != itend; ++it)
     {
-        std::vector<Value*> targets;
-        Pointer::PlaceTargetMap::const_iterator it = pointer->getTargets().begin(),
-            itend = pointer->getTargets().end();
-        for (; it != itend; ++it)
-        {
-            Value *derefValue = it->second.dereference(state);
-            CANAL_ASSERT(derefValue);
+        llvm::ConstantInt *constant = NULL;
+        Integer::Container *offset = NULL;
 
-            // TODO: struct support
-            // TODO: array support
+        if (llvm::isa<llvm::ConstantInt>(it))
+            constant = llvm::cast<llvm::ConstantInt>(it);
+        else
+        {
+            Value *offset = state.findVariable(it);
+            if (!offset)
+                continue;
+        }
+
+        Pointer::InclusionBased *newPointer =
+            new Pointer::InclusionBased(stack.getModule());
+
+        Pointer::PlaceTargetMap::const_iterator
+            pit = pointer->getTargets().begin(),
+            pitend = pointer->getTargets().end();
+
+        for (; pit != pitend; ++pit)
+        {
+            CANAL_ASSERT(pit->second.mType == Pointer::Target::MemoryBlock);
+
+            Value &derefValue = pit->second.dereference(state);
+
+            Array::Array *array = dynamic_cast<Array::Array*>(&derefValue);
+            if (array)
+            {
+                if (pit->second.mArrayOffset)
+                {
+                    CANAL_ASSERT(it == instruction.idx_begin());
+                    CANAL_NOT_IMPLEMENTED();
+                }
+
+                continue;
+            }
+
+            CANAL_ASSERT(it != instruction.idx_begin() || (constant && constant->equalsInt(0)));
+
+            Structure *structure = dynamic_cast<Structure*>(&derefValue);
+            if (structure)
+            {
+                CANAL_NOT_IMPLEMENTED();
+                continue;
+            }
         }
     }
 

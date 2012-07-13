@@ -12,10 +12,16 @@ class Array
 public:
     virtual ~Array() {};
 
-    // Gets the value representing the array item(s) represented by
+    // Gets the value representing the array item(s) pointed by
     // the provided offset.  Caller is responsible for deleting the
     // returned value.
     virtual Value *get(const Value &offset) const = 0;
+
+    // Gets all internal values representing the array item(s) pointed
+    // by the provided offset.  Caller must not delete the returned
+    // values.
+    //virtual std::vector<Value*> getInternal(const Value &offset) const = 0;
+
     // @param value
     //  The method does not take the ownership of this memory.
     virtual void set(const Value &offset, const Value &value) = 0;
