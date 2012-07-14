@@ -36,7 +36,10 @@ namespace llvm {
     class Module;
     class PHINode;
     class PtrToIntInst;
+#if LLVM_MAJOR >= 3
+    // Resume instruction is available since LLVM 3.0
     class ResumeInst;
+#endif
     class ReturnInst;
     class SExtInst;
     class SIToFPInst;
@@ -101,10 +104,15 @@ protected:
     // control flow transfer to either the 'normal' label or the
     // 'exception' label.
     virtual void invoke(const llvm::InvokeInst &instruction, Stack &stack);
+
+#if LLVM_MAJOR >= 3
+    // Resume instruction is available since LLVM 3.0
     // A terminator instruction that has no successors. Resumes
     // propagation of an existing (in-flight) exception whose
     // unwinding was interrupted with a landingpad instruction.
     virtual void resume(const llvm::ResumeInst &instruction, State &state);
+#endif
+
     // No defined semantics. This instruction is used to inform the
     // optimizer that a particular portion of the code is not
     // reachable.

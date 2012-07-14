@@ -59,6 +59,7 @@ public:
     size_t mConstant;
 
     // Array or struct offsets in the GetElementPtr style.
+    // This class owns the values.
     std::vector<Value*> mOffsets;
 };
 

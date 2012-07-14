@@ -1,5 +1,7 @@
 lib_LTLIBRARIES = libcanal.la
 libcanal_la_SOURCES = \
+	APIntUtils.h \
+	APIntUtils.cpp \
 	Array.h \
 	Array.cpp \
 	ArrayExactLimitedSize.h \

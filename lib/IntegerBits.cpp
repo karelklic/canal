@@ -265,14 +265,25 @@ Bits::isTop() const
 void
 Bits::setTop()
 {
+#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
+    // Old interface replaced in LLVM 2.9.
+    mBits0.set();
+    mBits1.set();
+#else
     mBits0.setAllBits();
     mBits1.setAllBits();
+#endif
 }
 
 int
 Bits::getBitValue(unsigned pos) const
 {
+#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
+    // Old interface replaced in LLVM 2.9.
+    llvm::APInt bit(llvm::APInt::getBitsSet(mBits0.getBitWidth(), pos, pos + 1));
+#else
     llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
+#endif
     if ((mBits1 & bit).getBoolValue())
         return (mBits0 & bit).getBoolValue() ? 2 : 1;
     else
@@ -282,7 +293,12 @@ Bits::getBitValue(unsigned pos) const
 void
 Bits::setBitValue(unsigned pos, int value)
 {
+#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
+    // Old interface replaced in LLVM 2.9.
+    llvm::APInt bit(llvm::APInt::getBitsSet(mBits0.getBitWidth(), pos, pos + 1));
+#else
     llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
+#endif
     switch (value)
     {
     case -1:

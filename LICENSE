@@ -1,6 +1,6 @@
 The Canal project is licensed under the terms of University of
-Illinois/NCSA Open Source License.  This is the license used by the
-LLVM project.
+Illinois Open Source License.  This is the license used by the LLVM
+project.
 
 The canal command-line tool is also licensed under the terms of the
 GNU General Public License as published by the Free Software
@@ -9,7 +9,7 @@ later version.  This license allows linking the tool to the readline
 library.
 
 
-== University of Illinois/NCSA Open Source License
+== University of Illinois Open Source License
 
 Copyright (c) 2012 Red Hat, Inc.
 All rights reserved.

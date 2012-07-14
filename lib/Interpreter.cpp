@@ -59,8 +59,11 @@ Interpreter::interpretInstruction(Stack &stack)
             indirectbr((const llvm::IndirectBrInst&)instruction, state);
         else if (llvm::isa<llvm::InvokeInst>(instruction))
             invoke((const llvm::InvokeInst&)instruction, stack);
+#if LLVM_MAJOR >= 3
+        // Resume instruction is available since LLVM 3.0
         else if (llvm::isa<llvm::ResumeInst>(instruction))
             resume((const llvm::ResumeInst&)instruction, state);
+#endif
         else if (llvm::isa<llvm::UnreachableInst>(instruction))
             unreachable((const llvm::UnreachableInst&)instruction, state);
         else
@@ -283,7 +286,7 @@ interpretCall(const T &instruction, Stack &stack)
         // the Top value.
 
         // Create result TOP value of required type.
-        llvm::Type *type = instruction.getType();
+        const llvm::Type *type = instruction.getType();
         Value *returnedValue = typeToEmptyValue(*instruction.getType(), stack.getModule());
 
         // If the function returns nothing (void), we are finished.
@@ -320,11 +323,14 @@ Interpreter::invoke(const llvm::InvokeInst &instruction, Stack &stack)
     interpretCall(instruction, stack);
 }
 
+#if LLVM_MAJOR >= 3
+// Resume instruction is available since LLVM 3.0
 void
 Interpreter::resume(const llvm::ResumeInst &instruction, State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
+#endif
 
 void
 Interpreter::unreachable(const llvm::UnreachableInst &instruction, State &state)
@@ -616,7 +622,7 @@ Interpreter::atomicrmw(const llvm::AtomicRMWInst &instruction, State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
-
+/*
 static Pointer::Target
 singleElementPtr(const Pointer::Target &source,
                  llvm::APInt offset,
@@ -636,17 +642,16 @@ singleElementPtr(const Pointer::Target &source,
         }
     }
 
-            CANAL_ASSERT(it != instruction.idx_begin() || (constant && constant->equalsInt(0)));
+    CANAL_ASSERT(it != instruction.idx_begin() || (constant && constant->equalsInt(0)));
 
-            Structure *structure = dynamic_cast<Structure*>(&derefValue);
-            if (structure)
-            {
-                CANAL_NOT_IMPLEMENTED();
-                continue;
-            }
-
+    Structure *structure = dynamic_cast<Structure*>(&derefValue);
+    if (structure)
+    {
+        CANAL_NOT_IMPLEMENTED();
+        continue;
+    }
 }
-
+*/
 
 void
 Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
@@ -685,7 +690,7 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
             constant = llvm::cast<llvm::ConstantInt>(it);
         else
         {
-            Value *offset = state.findVariable(it);
+            Value *offset = state.findVariable(*it->get());
             if (!offset)
                 continue;
         }
@@ -706,12 +711,13 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
             Array::Array *array = dynamic_cast<Array::Array*>(&derefValue);
             if (array)
             {
-                if (pit->second.mArrayOffset)
+                // TODOx
+/*                if (pit->second.mArrayOffset)
                 {
                     CANAL_ASSERT(it == instruction.idx_begin());
                     CANAL_NOT_IMPLEMENTED();
                 }
-
+*/
                 continue;
             }
 

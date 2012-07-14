@@ -1,3 +1,7 @@
+//
+// This file is distributed under the University of Illinois Open
+// Source License. See the LICENSE file for details.
+//
 #include "Pointer.h"
 #include "ArraySingleItem.h"
 #include "Constant.h"
@@ -13,8 +17,7 @@
 namespace Canal {
 namespace Pointer {
 
-Target::Target() : mType(Target::Uninitialized),
-                   mArrayOffset(NULL)
+Target::Target() : mType(Target::Uninitialized)
 {
 }
 
@@ -51,14 +54,21 @@ Target::operator==(const Target &target) const
     case Constant:
         return mConstant == target.mConstant;
     case MemoryBlock:
-        // Check array offset.
-        if (!mArrayOffset xor !target.mArrayOffset)
+    {
+        if (mOffsets.size() != target.mOffsets.size())
             return false;
 
-        if (mArrayOffset && *mArrayOffset != *target.mArrayOffset)
-            return false;
+        // Check the targets.
+        std::vector<Value*>::const_iterator it1 = mOffsets.begin(),
+            it2 = target.mOffsets.begin();
+        for (; it1 != mOffsets.end(); ++it1, ++it2)
+        {
+            if (*it1 != *it2)
+                return false;
+        }
 
         return mInstruction == target.mInstruction;
+    }
     default:
         CANAL_DIE();
     }
@@ -85,18 +95,16 @@ Target::merge(const Target &target)
         CANAL_ASSERT(mConstant == target.mConstant);
         break;
     case MemoryBlock:
-        if (mArrayOffset)
-        {
-            if (target.mArrayOffset)
-                mArrayOffset->merge(*target.mArrayOffset);
-            else
-                CANAL_NOT_IMPLEMENTED(); // only one pointer is array offset
-        }
-        else if (target.mArrayOffset)
-            CANAL_NOT_IMPLEMENTED(); // only one pointer is array offset
-
+    {
         CANAL_ASSERT(mInstruction == target.mInstruction);
+        CANAL_ASSERT(mOffsets.size() == target.mOffsets.size());
+
+        std::vector<Value*>::iterator it1 = mOffsets.begin();
+        std::vector<Value*>::const_iterator it2 = target.mOffsets.begin();
+        for (; it1 != mOffsets.end(); ++it1, ++it2)
+            (*it1)->merge(**it2);
         break;
+    }
     default:
         CANAL_DIE();
     }
@@ -105,7 +113,12 @@ Target::merge(const Target &target)
 size_t
 Target::memoryUsage() const
 {
-    return sizeof(Target) + (mArrayOffset ? mArrayOffset->memoryUsage() : 0);
+    size_t offsetSize = 0;
+    std::vector<Value*>::const_iterator it = mOffsets.begin();
+    for (; it != mOffsets.end(); ++it)
+        offsetSize += (*it)->memoryUsage();
+
+    return sizeof(Target) + offsetSize;
 }
 
 std::string

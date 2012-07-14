@@ -1,6 +1,7 @@
 #include "IntegerRange.h"
 #include "Constant.h"
 #include "Utils.h"
+#include "APIntUtils.h"
 #include <sstream>
 #include <iostream>
 
@@ -152,17 +153,17 @@ Range::add(const Value &a, const Value &b)
     mSignedTop = aa.mSignedTop || bb.mSignedTop;
     if (!mSignedTop)
     {
-        mSignedFrom = aa.mSignedFrom.sadd_ov(bb.mSignedFrom, mSignedTop);
+        mSignedFrom = APIntUtils::sadd_ov(aa.mSignedFrom, bb.mSignedFrom, mSignedTop);
         if (!mSignedTop)
-            mSignedTo = aa.mSignedTo.sadd_ov(bb.mSignedTo, mSignedTop);
+            mSignedTo = APIntUtils::sadd_ov(aa.mSignedTo, bb.mSignedTo, mSignedTop);
     }
 
     mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
     if (!mUnsignedTop)
     {
-        mUnsignedFrom = aa.mUnsignedFrom.uadd_ov(bb.mUnsignedFrom, mUnsignedTop);
+        mUnsignedFrom = APIntUtils::uadd_ov(aa.mUnsignedFrom, bb.mUnsignedFrom, mUnsignedTop);
         if (!mUnsignedTop)
-            mUnsignedTo = aa.mUnsignedTo.uadd_ov(bb.mUnsignedTo, mUnsignedTop);
+            mUnsignedTo = APIntUtils::uadd_ov(aa.mUnsignedTo, bb.mUnsignedTo, mUnsignedTop);
     }
 }
 
@@ -180,17 +181,17 @@ Range::sub(const Value &a, const Value &b)
     mSignedTop = aa.mSignedTop || bb.mSignedTop;
     if (!mSignedTop)
     {
-        mSignedFrom = aa.mSignedFrom.ssub_ov(bb.mSignedTo, mSignedTop);
+        mSignedFrom = APIntUtils::ssub_ov(aa.mSignedFrom, bb.mSignedTo, mSignedTop);
         if (!mSignedTop)
-            mSignedTo = aa.mSignedTo.ssub_ov(bb.mSignedFrom, mSignedTop);
+            mSignedTo = APIntUtils::ssub_ov(aa.mSignedTo, bb.mSignedFrom, mSignedTop);
     }
 
     mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
     if (!mUnsignedTop)
     {
-        mUnsignedFrom = aa.mUnsignedFrom.usub_ov(bb.mUnsignedTo, mUnsignedTop);
+        mUnsignedFrom = APIntUtils::usub_ov(aa.mUnsignedFrom, bb.mUnsignedTo, mUnsignedTop);
         if (!mUnsignedTop)
-            mUnsignedTo = aa.mUnsignedTo.usub_ov(bb.mUnsignedFrom, mUnsignedTop);
+            mUnsignedTo = APIntUtils::usub_ov(aa.mUnsignedTo, bb.mUnsignedFrom, mUnsignedTop);
     }
 }
 
@@ -310,20 +311,24 @@ Range::mul(const Value &a, const Value &b)
     mSignedTop = aa.mSignedTop || bb.mSignedTop;
     if (!mSignedTop)
     {
-        llvm::APInt toTo = aa.mSignedTo.smul_ov(bb.mSignedTo,
-                                                mSignedTop);
+        llvm::APInt toTo = APIntUtils::smul_ov(aa.mSignedTo,
+                                               bb.mSignedTo,
+                                               mSignedTop);
         if (!mSignedTop)
         {
-            llvm::APInt toFrom = aa.mSignedTo.smul_ov(bb.mSignedFrom,
-                                                      mSignedTop);
+            llvm::APInt toFrom = APIntUtils::smul_ov(aa.mSignedTo,
+                                                     bb.mSignedFrom,
+                                                     mSignedTop);
             if (!mSignedTop)
             {
-                llvm::APInt fromTo = aa.mSignedFrom.smul_ov(bb.mSignedTo,
-                                                            mSignedTop);
+                llvm::APInt fromTo = APIntUtils::smul_ov(aa.mSignedFrom,
+                                                         bb.mSignedTo,
+                                                         mSignedTop);
                 if (!mSignedTop)
                 {
-                    llvm::APInt fromFrom = aa.mSignedFrom.smul_ov(bb.mSignedFrom,
-                                                                  mSignedTop);
+                    llvm::APInt fromFrom = APIntUtils::smul_ov(aa.mSignedFrom,
+                                                               bb.mSignedFrom,
+                                                               mSignedTop);
                     if (!mSignedTop)
                     {
                         minMax(/*signed=*/true,
@@ -342,20 +347,24 @@ Range::mul(const Value &a, const Value &b)
     mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
     if (!mUnsignedTop)
     {
-        llvm::APInt toTo = aa.mUnsignedTo.umul_ov(bb.mUnsignedTo,
-                                                  mUnsignedTop);
+        llvm::APInt toTo = APIntUtils::umul_ov(aa.mUnsignedTo,
+                                               bb.mUnsignedTo,
+                                               mUnsignedTop);
         if (!mUnsignedTop)
         {
-            llvm::APInt toFrom = aa.mUnsignedTo.umul_ov(bb.mUnsignedFrom,
-                                                        mUnsignedTop);
+            llvm::APInt toFrom = APIntUtils::umul_ov(aa.mUnsignedTo,
+                                                     bb.mUnsignedFrom,
+                                                     mUnsignedTop);
             if (!mUnsignedTop)
             {
-                llvm::APInt fromTo = aa.mUnsignedFrom.umul_ov(bb.mUnsignedTo,
-                                                              mUnsignedTop);
+                llvm::APInt fromTo = APIntUtils::umul_ov(aa.mUnsignedFrom,
+                                                         bb.mUnsignedTo,
+                                                         mUnsignedTop);
                 if (!mUnsignedTop)
                 {
-                    llvm::APInt fromFrom = aa.mUnsignedFrom.umul_ov(bb.mUnsignedFrom,
-                                                                    mUnsignedTop);
+                    llvm::APInt fromFrom = APIntUtils::umul_ov(aa.mUnsignedFrom,
+                                                               bb.mUnsignedFrom,
+                                                               mUnsignedTop);
                     if (!mUnsignedTop)
                     {
                         minMax(/*signed=*/false,
@@ -416,20 +425,24 @@ Range::sdiv(const Value &a, const Value &b)
     mSignedTop = aa.mSignedTop || bb.mSignedTop;
     if (!mSignedTop)
     {
-        llvm::APInt toTo = aa.mSignedTo.sdiv_ov(bb.mSignedTo,
-                                                mSignedTop);
+        llvm::APInt toTo = APIntUtils::sdiv_ov(aa.mSignedTo,
+                                               bb.mSignedTo,
+                                               mSignedTop);
         if (!mSignedTop)
         {
-            llvm::APInt toFrom = aa.mSignedTo.sdiv_ov(bb.mSignedFrom,
-                                                      mSignedTop);
+            llvm::APInt toFrom = APIntUtils::sdiv_ov(aa.mSignedTo,
+                                                     bb.mSignedFrom,
+                                                     mSignedTop);
             if (!mSignedTop)
             {
-                llvm::APInt fromTo = aa.mSignedFrom.sdiv_ov(bb.mSignedTo,
-                                                            mSignedTop);
+                llvm::APInt fromTo = APIntUtils::sdiv_ov(aa.mSignedFrom,
+                                                         bb.mSignedTo,
+                                                         mSignedTop);
                 if (!mSignedTop)
                 {
-                    llvm::APInt fromFrom = aa.mSignedFrom.sdiv_ov(bb.mSignedFrom,
-                                                                  mSignedTop);
+                    llvm::APInt fromFrom = APIntUtils::sdiv_ov(aa.mSignedFrom,
+                                                               bb.mSignedFrom,
+                                                               mSignedTop);
                     if (!mSignedTop)
                     {
                         minMax(/*signed=*/true,

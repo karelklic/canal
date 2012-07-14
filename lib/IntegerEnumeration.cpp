@@ -86,7 +86,11 @@ Enumeration::sub(const Value &a, const Value &b)
 void
 Enumeration::mul(const Value &a, const Value &b)
 {
+#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
+    applyOperation(a, b, &llvm::APInt::operator*, NULL);
+#else
     applyOperation(a, b, NULL, &llvm::APInt::smul_ov);
+#endif
 }
 
 void
