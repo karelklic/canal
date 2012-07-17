@@ -12,7 +12,7 @@ std::string
 toString(const llvm::APInt &num)
 {
     std::stringstream ss;
-    ss << num.toString(16, /*signed=*/false);
+    ss << "0x" << num.toString(16, /*signed=*/false);
     std::string unsignedNum = num.toString(10, false);
     std::string signedNum = num.toString(10, true);
     if (unsignedNum == signedNum)

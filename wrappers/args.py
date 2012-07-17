@@ -21,21 +21,26 @@ def is_linking(args, remainder):
 
     return hasObject or hasSource
 
-def get_linking_command(args, remainder):
-    result = [config.LLVM_LINK]
+def get_linking_commands(args, remainder):
+    subresult = [config.LLVM_LINK]
 
     # Output
-    if args.o:
-        result.append("-o={0}.llvm".format(args.o))
-    else:
-        result.append("-o=a.out.llvm")
+    linker_output = args.o if args.o else "a.out"
+    llvm_output = "{0}.llvm".format(linker_output)
+    subresult.append("-o={0}".format(llvm_output))
 
     # Input
     for r in remainder:
         if r.endswith(".c"):
-            result.append("{0}.o.llvm".format(r[:-2]))
+            subresult.append("{0}.o.llvm".format(r[:-2]))
         if r.endswith(".o"):
-            result.append("{0}.llvm".format(r))
+            subresult.append("{0}.llvm".format(r))
+
+    result = [subresult]
+    result.append(["objcopy",
+                   "--add-section",
+                   ".note.llvm={0}".format(llvm_output),
+                   linker_output])
 
     return result
 

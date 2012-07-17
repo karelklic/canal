@@ -65,6 +65,39 @@ Range::operator==(const Value& value) const
 void
 Range::merge(const Value &value)
 {
+    // Handle values represeting a constant.
+    if (const Constant *constant = dynamic_cast<const Constant *>(&value))
+    {
+        CANAL_ASSERT(constant->isAPInt());
+        const llvm::APInt &constInt = constant->getAPInt();
+
+        if (mEmpty)
+        {
+            mEmpty = false;
+            mSignedFrom = mSignedTo = constInt;
+            mUnsignedFrom = mUnsignedTo = constInt;
+            return;
+        }
+
+        if (!mSignedTop)
+        {
+            if (!mSignedFrom.sle(constInt))
+                mSignedFrom = constInt;
+            if (!mSignedTo.sge(constInt))
+                mSignedTo = constInt;
+        }
+
+        if (!mUnsignedTop)
+        {
+            if (!mUnsignedFrom.sle(constInt))
+                mUnsignedFrom = constInt;
+            if (!mUnsignedTo.sge(constInt))
+                mUnsignedTo = constInt;
+        }
+
+        return;
+    }
+
     const Range &range = dynamic_cast<const Range&>(value);
     if (range.mEmpty)
         return;

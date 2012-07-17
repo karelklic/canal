@@ -6,9 +6,19 @@
 #include <llvm/Module.h>
 #include <llvm/Support/IRReader.h>
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/MemoryBuffer.h>
 #include <cstdio>
 #include <sys/types.h>
 #include <dirent.h>
+#include <libelf.h>
+#include <gelf.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <error.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
 
 CommandFile::CommandFile(Commands &commands)
     : Command("file",
@@ -69,20 +79,89 @@ CommandFile::run(const std::vector<std::string> &args)
 
     llvm::LLVMContext &context = llvm::getGlobalContext();
     llvm::SMDiagnostic err;
-    llvm::Module *module = llvm::ParseIRFile(args[1], err, context);
-    if (!module)
+    llvm::Module *module = NULL;
+
+    // Open the ELF file.
+    int fd = open(args[1].c_str(), O_RDONLY, 0);
+    if (fd == -1)
+        printf("Cannot open `%s': %s\n", args[1].c_str(), strerror(errno));
+
+    // Get Elf object for the file.
+    elf_version(EV_CURRENT);
+    Elf *elf = elf_begin(fd, ELF_C_READ, NULL);
+
+    if (!elf)
     {
-        puts("Failed to load the module.");
-        std::string s;
-        llvm::raw_string_ostream os(s);
-#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
-        err.print(NULL, os, false);
-#else
-        err.Print(NULL, os);
-#endif
-        os.flush();
-        printf("%s", s.c_str());
+        printf("Cannot create ELF descriptor: %s\n", elf_errmsg(-1));
         return;
+    }
+
+    if (elf_kind(elf) == ELF_K_ELF)
+    {
+        // Get Elf header.
+        GElf_Ehdr ehdr_mem, *ehdr = gelf_getehdr (elf, &ehdr_mem);
+        if (!ehdr)
+        {
+            printf("Cannot get ELF header: %s\n", elf_errmsg (-1));
+            elf_end(elf);
+            close(fd);
+            return;
+        }
+
+        Elf_Scn *section = NULL;
+        while ((section = elf_nextscn(elf, section)) != NULL)
+        {
+            GElf_Shdr shdr_mem, *shdr;
+
+            /* Get the section header data.  */
+            shdr = gelf_getshdr(section, &shdr_mem);
+            if (shdr->sh_type == SHT_NOBITS)
+                continue;
+
+            if ((shdr->sh_flags & SHF_GROUP) != 0)
+                /* Ignore the section.  */
+                continue;
+
+            const char *section_name = elf_strptr(elf, ehdr->e_shstrndx, shdr->sh_name);
+            if (!section_name)
+                continue;
+
+            if (0 != strcmp(section_name, ".note.llvm"))
+                continue;
+
+            Elf_Data *data = elf_getdata(section, NULL);
+            llvm::StringRef data_ref((const char*)data->d_buf, data->d_size);
+            llvm::MemoryBuffer *data_buffer = llvm::MemoryBuffer::getMemBufferCopy(data_ref);
+            module = llvm::ParseIR(data_buffer, err, context);
+            break;
+        }
+
+        if (!module)
+        {
+            puts("Failed to find .llvm section in the ELF file.");
+            return;
+        }
+
+        elf_end(elf);
+        close(fd);
+    }
+    else
+    {
+        module = llvm::ParseIRFile(args[1], err, context);
+        if (!module)
+        {
+            puts("Failed to load the module.");
+            std::string s;
+            llvm::raw_string_ostream os(s);
+#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
+            err.print(NULL, os, false);
+#else
+            err.Print(NULL, os);
+#endif
+            os.flush();
+            printf("%s", s.c_str());
+            return;
+        }
     }
 
     if (mCommands.getState() && mCommands.getState()->isInterpreting())

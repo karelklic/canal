@@ -126,10 +126,12 @@ Target::toString(const State *state, SlotTracker &slotTracker) const
 {
     std::stringstream ss;
     ss << "Pointer::Target: ";
-    if (mArrayOffset)
+    if (!mOffsets.empty())
     {
         ss << "{" << std::endl;
-        ss << "    array offset: " << indentExceptFirstLine(mArrayOffset->toString(state), 18) << std::endl;
+        std::vector<Value*>::const_iterator it = mOffsets.begin();
+        for (; it != mOffsets.end(); ++it)
+            ss << "    offset: " << indentExceptFirstLine((*it)->toString(state), 18) << std::endl;
         ss << "    target: ";
     }
 
@@ -154,7 +156,7 @@ Target::toString(const State *state, SlotTracker &slotTracker) const
         {
             Value *block = state->findBlock(*mInstruction);
             ss << " ";
-            int indentation = (mArrayOffset ? 12 : 17) + 1 + name.length();
+            int indentation = (mOffsets.empty() ? 17 : 12) + 1 + name.length();
             ss << (block ? indentExceptFirstLine(block->toString(state), indentation) : "<error: block missing in current state!>");
         }
         break;
@@ -163,7 +165,7 @@ Target::toString(const State *state, SlotTracker &slotTracker) const
         CANAL_DIE();
     }
 
-    if (mArrayOffset)
+    if (!mOffsets.empty())
         ss << std::endl << "}";
 
     return ss.str();
@@ -288,7 +290,7 @@ InclusionBased::addMemoryTarget(const llvm::Value *instruction, const llvm::Valu
     Target newTarget;
     newTarget.mType = Target::MemoryBlock;
     newTarget.mInstruction = target;
-    newTarget.mArrayOffset = arrayOffset;
+    //newTarget.mArrayOffset = arrayOffset;
 
     PlaceTargetMap::iterator it = mTargets.find(instruction);
     if (it != mTargets.end())

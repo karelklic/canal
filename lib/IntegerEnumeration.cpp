@@ -61,7 +61,7 @@ std::string
 Enumeration::toString(const State *state) const
 {
     std::stringstream ss;
-    ss << "Integer::Enumeration: [";
+    ss << "Integer::Enumeration: [" << std::endl;
     for (std::set<llvm::APInt, APIntComp>::const_iterator it = mValues.begin(); it != mValues.end(); ++it)
     {
         ss << "    " << Canal::toString(*it) << std::endl;

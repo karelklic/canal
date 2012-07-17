@@ -35,7 +35,8 @@ if args.is_compile(gcc_args, remainder):
         run(command)
 
 if args.is_linking(gcc_args, remainder):
-    run(args.get_linking_command(gcc_args, remainder))
+    for command in args.get_linking_commands(gcc_args, remainder):
+        run(command)
 
 if args.is_other(gcc_args, remainder):
     run(args.get_other_command(gcc_args, remainder))
