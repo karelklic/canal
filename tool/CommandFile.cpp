@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <sstream>
 
 CommandFile::CommandFile(Commands &commands)
     : Command("file",
@@ -33,30 +34,66 @@ std::vector<std::string>
 CommandFile::getCompletionMatches(const std::vector<std::string> &args, int pointArg, int pointArgOffset) const
 {
     std::vector<std::string> result;
-    if (pointArgOffset == 0)
+    std::string arg = args[pointArg].substr(0, pointArgOffset);
+    std::string dirPath(".");
+    bool defaultDirPath = true;
+    size_t dirPos = arg.rfind("/");
+    if (dirPos != std::string::npos)
     {
-	DIR *dir = opendir(".");
-	struct dirent *dirent;
-	for (dirent = readdir(dir); dirent != NULL; dirent = readdir(dir))
-        {
-            if (!dirent || !dirent->d_name)
-                continue;
-            result.push_back(dirent->d_name);
-        }
-        closedir(dir);
+        dirPath = arg.substr(0, dirPos);
+        defaultDirPath = false;
+        if (arg.length() > dirPos + 1)
+            arg = arg.substr(dirPos + 1);
+        else
+            arg = "";
     }
-    else
+
+    DIR *dir = opendir(dirPath.c_str());
+    struct dirent *dirent;
+    bool lastIsDir = false;
+    for (dirent = readdir(dir); dirent != NULL; dirent = readdir(dir))
     {
-        std::string arg = args[pointArg].substr(0, pointArgOffset);
-	DIR *dir = opendir(".");
-	struct dirent *dirent;
-	for (dirent = readdir(dir); dirent != NULL; dirent = readdir(dir))
+        if (!dirent || !dirent->d_name)
+            continue;
+
+        if (0 == strncmp(dirent->d_name, arg.c_str(), arg.length()))
+        {
+            std::stringstream ss;
+            if (!defaultDirPath)
+                ss << dirPath << "/";
+            ss << dirent->d_name;
+            if (dirent->d_type == DT_DIR)
+            {
+                lastIsDir = true;
+                ss << "/";
+            }
+
+            result.push_back(ss.str());
+        }
+    }
+
+    if (result.size() == 1 && lastIsDir)
+    {
+        std::string dirPath(result[0].substr(0, result[0].length() - 1));
+        //printf("dirPath %s\n", dirPath.c_str());
+        //result.clear();
+        DIR *dir = opendir(dirPath.c_str());
+        struct dirent *dirent;
+        result.clear();
+        for (dirent = readdir(dir);
+             dirent != NULL;
+             dirent = readdir(dir))
         {
             if (!dirent || !dirent->d_name)
                 continue;
 
-            if (0 == strncmp(dirent->d_name, arg.c_str(), arg.length()))
-                result.push_back(dirent->d_name);
+            if (0 == strcmp(dirent->d_name, ".") ||
+                0 == strcmp(dirent->d_name, ".."))
+                continue;
+
+            std::stringstream ss;
+            ss << dirPath << "/" << dirent->d_name;
+            result.push_back(ss.str());
         }
     }
 
@@ -84,7 +121,10 @@ CommandFile::run(const std::vector<std::string> &args)
     // Open the ELF file.
     int fd = open(args[1].c_str(), O_RDONLY, 0);
     if (fd == -1)
+    {
         printf("Cannot open `%s': %s\n", args[1].c_str(), strerror(errno));
+        return;
+    }
 
     // Get Elf object for the file.
     elf_version(EV_CURRENT);
@@ -93,6 +133,7 @@ CommandFile::run(const std::vector<std::string> &args)
     if (!elf)
     {
         printf("Cannot create ELF descriptor: %s\n", elf_errmsg(-1));
+        close(fd);
         return;
     }
 
