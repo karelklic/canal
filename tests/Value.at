@@ -1,5 +1,5 @@
-AT_BANNER([Abstract Value])
+AT_BANNER([Value])
 
-AT_SETUP([AbstractPointer])
-AT_CHECK([../../AbstractPointerTest], 0)
+AT_SETUP([Pointer])
+AT_CHECK([../../PointerTest], 0)
 AT_CLEANUP

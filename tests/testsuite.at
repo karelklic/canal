@@ -1,5 +1,5 @@
 # Test suite for canal.
 # See http://www.gnu.org/software/hello/manual/autoconf/Writing-Testsuites.html
 
-m4_include([AbstractValue.at])
-m4_include([OperationalInterpreter.at])
+m4_include([Value.at])
+m4_include([Interpreter.at])
