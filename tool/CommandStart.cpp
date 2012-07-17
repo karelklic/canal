@@ -23,6 +23,12 @@ CommandStart::run(const std::vector<std::string> &args)
         return;
     }
 
+    if (mCommands.getState()->isInterpreting())
+    {
+        puts("The program being interpreted has been started already.");
+        return;
+    }
+
     mCommands.getState()->addMainFrame();
     printf("Temporary breakpoint: \"main\".\n");
     print(mCommands.getState()->getStack().getCurrentInstruction());
