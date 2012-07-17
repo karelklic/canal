@@ -90,17 +90,18 @@ ExactLimitedSize::toString(const State *state) const
     return ss.str();
 }
 
-Value *
-ExactLimitedSize::get(const Value &offset) const
+std::vector<Value*>
+ExactLimitedSize::getItems(const Value &offset) const
 {
-    const Constant *constant = dynamic_cast<const Constant*>(&offset);
-    if (constant)
+    std::vector<Value*> result;
+    if (const Constant *constant = dynamic_cast<const Constant*>(&offset))
     {
         CANAL_ASSERT(constant->isAPInt());
         CANAL_ASSERT(constant->getAPInt().getBitWidth() <= 64);
         uint64_t numOffset = constant->getAPInt().getZExtValue();
         CANAL_ASSERT(numOffset < mValues.size());
-        return mValues[numOffset];
+        result.push_back(mValues[numOffset]);
+        return result;
     }
 
     const Integer::Container &integer = dynamic_cast<const Integer::Container&>(offset);
@@ -109,7 +110,6 @@ ExactLimitedSize::get(const Value &offset) const
     const Integer::Enumeration &enumeration = integer.getEnumeration();
     if (!enumeration.isTop())
     {
-        Value *result = NULL;
         Integer::APIntSet::const_iterator it = enumeration.mValues.begin(),
             itend = enumeration.mValues.end();
         for (; it != itend; ++it)
@@ -118,22 +118,19 @@ ExactLimitedSize::get(const Value &offset) const
             uint64_t numOffset = it->getZExtValue();
 
             // If some offset from the enumeration points out of the
-            // array bounds, we ignore it.  It might be caused either
-            // by a bug in the code, or by imprecision of the
+            // array bounds, we ignore it FOR NOW.  It might be caused
+            // either by a bug in the code, or by imprecision of the
             // interpreter.
             if (numOffset >= mValues.size())
                 continue;
 
-            if (!result)
-                result = mValues[numOffset]->clone();
-            else
-                result->merge(*mValues[numOffset]);
+            result.push_back(mValues[numOffset]);
         }
 
         // At least one of the offsets in the enumeration should point
         // to the array.  Otherwise it might be a bug in the
         // interpreter that requires investigation.
-        CANAL_ASSERT(result);
+        CANAL_ASSERT(!result.empty());
         return result;
     }
 
@@ -149,33 +146,18 @@ ExactLimitedSize::get(const Value &offset) const
         // Otherwise it might be a bug in the interpreter that
         // requires investigation.
         CANAL_ASSERT(from < mValues.size());
-        Value *result = NULL;
-        for (size_t loop = from; loop < mValues.size() && loop <= to; ++loop)
-        {
-            if (!result)
-                result = mValues[loop]->clone();
-            else
-                result->merge(*mValues[loop]);
-        }
-
+        if (to >= mValues.size())
+            to = mValues.size();
+        result.insert(result.end(), mValues.begin() + from, mValues.begin() + to);
         return result;
     }
 
-    // Both enumeration and range are set to the top value, so merge
-    // all members and return such a combined value.
-    Value *result = NULL;
-    std::vector<Value*>::const_iterator it = mValues.begin(),
-        itend = mValues.end();
-    for (; it != itend; ++it)
-    {
-        if (!result)
-            result = (*it)->clone();
-        else
-            result->merge(**it);
-    }
+    // Both enumeration and range are set to the top value, so return
+    // all members.
+    result.insert(result.end(), mValues.begin(), mValues.end());
 
     // Zero length arrays are not supported.
-    CANAL_ASSERT(result);
+    CANAL_ASSERT(!result.empty());
     return result;
 }
 

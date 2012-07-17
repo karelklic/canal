@@ -549,15 +549,18 @@ Interpreter::load(const llvm::LoadInst &instruction, State &state)
     // Pointer found. Merge all possible values and store the result
     // into the state.
     Value *mergedValue = NULL;
-    Pointer::PlaceTargetMap::const_iterator it = pointer.getTargets().begin();
-    for (; it != pointer.getTargets().end(); ++it)
+    Pointer::PlaceTargetMap::const_iterator it = pointer.mTargets.begin();
+    for (; it != pointer.mTargets.end(); ++it)
     {
-        Value &value = it->second.dereference(state);
-
-        if (mergedValue)
-            mergedValue->merge(value);
-        else
-            mergedValue = value.clone();
+        std::vector<Value*> values = it->second.dereference(state);
+        std::vector<Value*>::const_iterator it = values.begin();
+        for (; it != values.end(); ++it)
+        {
+            if (mergedValue)
+                mergedValue->merge(**it);
+            else
+                mergedValue = (*it)->clone();
+        }
     }
 
     if (!mergedValue)
@@ -594,11 +597,13 @@ Interpreter::store(const llvm::StoreInst &instruction, State &state)
 
     // Go through all target memory blocks for the pointer and merge
     // them with the value being stored.
-    Pointer::PlaceTargetMap::const_iterator it = pointer.getTargets().begin();
-    for (; it != pointer.getTargets().end(); ++it)
+    Pointer::PlaceTargetMap::const_iterator it = pointer.mTargets.begin();
+    for (; it != pointer.mTargets.end(); ++it)
     {
-        Value &dest = it->second.dereference(state);
-        dest.merge(*value);
+        std::vector<Value*> destinations = it->second.dereference(state);
+        std::vector<Value*>::iterator it = destinations.begin();
+        for (; it != destinations.end(); ++it)
+            (*it)->merge(*value);
     }
 
     if (deleteValue)
@@ -622,36 +627,6 @@ Interpreter::atomicrmw(const llvm::AtomicRMWInst &instruction, State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
-/*
-static Pointer::Target
-singleElementPtr(const Pointer::Target &source,
-                 llvm::APInt offset,
-                 const State &state)
-{
-    CANAL_ASSERT(!source.mArrayOffset);
-    CANAL_ASSERT(source.mType == Pointer::Target::MemoryBlock);
-
-    Value &object = source.dereference(state);
-    Array::Array *array = dynamic_cast<Array::Array*>(&derefValue);
-    if (array)
-    {
-        if (pit->second.mArrayOffset)
-        {
-            CANAL_ASSERT(it == instruction.idx_begin());
-            CANAL_NOT_IMPLEMENTED();
-        }
-    }
-
-    CANAL_ASSERT(it != instruction.idx_begin() || (constant && constant->equalsInt(0)));
-
-    Structure *structure = dynamic_cast<Structure*>(&derefValue);
-    if (structure)
-    {
-        CANAL_NOT_IMPLEMENTED();
-        continue;
-    }
-}
-*/
 
 void
 Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
@@ -665,76 +640,50 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
     if (!base)
         return;
 
-    Pointer::InclusionBased *pointer =
+    Pointer::InclusionBased *source =
         dynamic_cast<Pointer::InclusionBased*>(base);
+    CANAL_ASSERT(source);
 
-    CANAL_ASSERT(pointer);
+    Pointer::InclusionBased *result = source->clone();
 
     // We get offsets. Either constants or Integer::Container.
     // Pointer points either to an array (or array offset), or to a
     // struct (or struct member).  Pointer might have multiple
     // targets.
 
-    // When we get an index, we find the corresponding items
-    // (=dereference the pointer targets) and use the index to create
-    // a new pointer.
-
     llvm::GetElementPtrInst::const_op_iterator it = instruction.idx_begin(),
         itend = instruction.idx_end();
     for (; it != itend; ++it)
     {
-        llvm::ConstantInt *constant = NULL;
-        Integer::Container *offset = NULL;
-
         if (llvm::isa<llvm::ConstantInt>(it))
-            constant = llvm::cast<llvm::ConstantInt>(it);
+        {
+            llvm::ConstantInt *constant = llvm::cast<llvm::ConstantInt>(it);
+            Pointer::PlaceTargetMap::iterator it = result->mTargets.begin();
+            for (; it != result->mTargets.end(); ++it)
+                it->second.mOffsets.push_back(new Constant(constant));
+        }
         else
         {
             Value *offset = state.findVariable(*it->get());
             if (!offset)
-                continue;
-        }
-
-        Pointer::InclusionBased *newPointer =
-            new Pointer::InclusionBased(stack.getModule());
-
-        Pointer::PlaceTargetMap::const_iterator
-            pit = pointer->getTargets().begin(),
-            pitend = pointer->getTargets().end();
-
-        for (; pit != pitend; ++pit)
-        {
-            CANAL_ASSERT(pit->second.mType == Pointer::Target::MemoryBlock);
-
-            Value &derefValue = pit->second.dereference(state);
-
-            Array::Array *array = dynamic_cast<Array::Array*>(&derefValue);
-            if (array)
             {
-                // TODOx
-/*                if (pit->second.mArrayOffset)
-                {
-                    CANAL_ASSERT(it == instruction.idx_begin());
-                    CANAL_NOT_IMPLEMENTED();
-                }
-*/
-                continue;
+                // There should be a return as not all offsets are
+                // necesarily known at each pass before reaching a
+                // fixpoint, but we need to implement a check ensuring
+                // that all instructions are evaluated before reaching
+                // fixpoint.
+                CANAL_DIE();
+                return;
             }
 
-            CANAL_ASSERT(it != instruction.idx_begin() || (constant && constant->equalsInt(0)));
-
-            Structure *structure = dynamic_cast<Structure*>(&derefValue);
-            if (structure)
-            {
-                CANAL_NOT_IMPLEMENTED();
-                continue;
-            }
+            Integer::Container &integer = dynamic_cast<Integer::Container&>(*offset);
+            Pointer::PlaceTargetMap::iterator it = result->mTargets.begin();
+            for (; it != result->mTargets.end(); ++it)
+                it->second.mOffsets.push_back(integer.clone());
         }
+
     }
 
-    // TODO: add proper target
-    CANAL_NOT_IMPLEMENTED();
-    Pointer::InclusionBased *result = new Pointer::InclusionBased(stack.getModule());
     state.addFunctionVariable(instruction, result);
 }
 

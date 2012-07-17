@@ -1,6 +1,8 @@
 #ifndef LIBCANAL_ARRAY_H
 #define LIBCANAL_ARRAY_H
 
+#include <vector>
+
 namespace Canal {
 
 class Value;
@@ -15,12 +17,12 @@ public:
     // Gets the value representing the array item(s) pointed by
     // the provided offset.  Caller is responsible for deleting the
     // returned value.
-    virtual Value *get(const Value &offset) const = 0;
+    Value *getValue(const Value &offset) const;
 
-    // Gets all internal values representing the array item(s) pointed
-    // by the provided offset.  Caller must not delete the returned
-    // values.
-    //virtual std::vector<Value*> getInternal(const Value &offset) const = 0;
+    // Get the array items pointed by the provided offset.  Returns
+    // internal array items owned by the array.  Caller must not
+    // delete the items.
+    virtual std::vector<Value*> getItems(const Value &offset) const = 0;
 
     // @param value
     //  The method does not take the ownership of this memory.

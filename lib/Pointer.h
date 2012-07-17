@@ -44,22 +44,32 @@ public:
 
     // Get memory usage (used byte count) of this value.
     size_t memoryUsage() const;
+
+    // Get a string representation of the target.
     std::string toString(const State *state, SlotTracker &slotTracker) const;
 
-    Value &dereference(const State &state) const;
+    // Dereference the target in a certain state.  Dereferencing might
+    // result in multiple Values being returned due to the nature of
+    // mOffsets (offsets might include integer ranges).  The returned
+    // pointers point to the memory owned by State and its abstract
+    // domains -- caller must not release the memory.
+    std::vector<Value*> dereference(const State &state) const;
 
 public:
+    // Type of the target.
     Type mType;
 
     // Valid when the target represents an anonymous memory block.
     // This is a key to either State::mGlobalBlocks or
-    // State::mFunctionBlocks.
+    // State::mFunctionBlocks.  The memory is owned by LLVM and not by
+    // this class.
     const llvm::Value *mInstruction;
+
     // A specific constant.
     size_t mConstant;
 
     // Array or struct offsets in the GetElementPtr style.
-    // This class owns the values.
+    // This class owns the memory.
     std::vector<Value*> mOffsets;
 };
 
@@ -93,13 +103,10 @@ public:
     // @param target
     //   Represents an anonymous memory block.  This is a key to either
     //   State::mGlobalBlocks or State::mFunctionBlocks.
-    // @param arrayOffset
-    //   If the pointer is provided, this class takes ownership of it.
-    void addMemoryTarget(const llvm::Value *instruction, const llvm::Value *target, Value *arrayOffset = NULL);
+    void addMemoryTarget(const llvm::Value *instruction,
+                         const llvm::Value *target);
 
-    const PlaceTargetMap &getTargets() const { return mTargets; }
-
-protected:
+public:
     const llvm::Module &mModule;
 
     // llvm::Value represents a position in the program.  It points to

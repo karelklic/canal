@@ -16,6 +16,12 @@ public:
     Structure(const Structure &structure);
     virtual ~Structure();
 
+    // Gets the strcture members pointed by the provided offset.
+    // Returns internal structure items owned by the structure.
+    // Caller must not delete the items.
+    // @see Array::Array::getItems
+    std::vector<Value*> getItems(const Value &offset) const;
+
     // Implementation of Value::clone().
     // Covariant return type.
     virtual Structure *clone() const;

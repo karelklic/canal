@@ -8,6 +8,7 @@
 #include "Utils.h"
 #include "State.h"
 #include "SlotTracker.h"
+#include "Structure.h"
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/BasicBlock.h>
 #include <algorithm>
@@ -171,9 +172,11 @@ Target::toString(const State *state, SlotTracker &slotTracker) const
     return ss.str();
 }
 
-Value &
+std::vector<Value*>
 Target::dereference(const State &state) const
 {
+    std::vector<Value*> result;
+
     switch (mType)
     {
     case Uninitialized:
@@ -181,9 +184,33 @@ Target::dereference(const State &state) const
         CANAL_DIE();
     case MemoryBlock:
     {
-        Value *block = state.findBlock(*mInstruction);
-        CANAL_ASSERT(block);
-        return *block;
+        result.push_back(state.findBlock(*mInstruction));
+        CANAL_ASSERT(result[0]);
+
+        std::vector<Value*>::const_iterator itOffsets = mOffsets.begin();
+        for (; itOffsets != mOffsets.end(); ++itOffsets)
+        {
+            std::vector<Value*> nextLevelResult;
+            std::vector<Value*>::const_iterator itItems = result.begin();
+            for (; itItems != result.end(); ++itItems)
+            {
+                std::vector<Value*> items;
+                if (Array::Array *array = dynamic_cast<Array::Array*>(*itItems))
+                    items = array->getItems(**itOffsets);
+                else if (Structure *structure = dynamic_cast<Structure*>(structure))
+                    items = structure->getItems(**itOffsets);
+                else
+                    CANAL_DIE();
+
+                nextLevelResult.insert(nextLevelResult.end(),
+                                       items.begin(),
+                                       items.end());
+            }
+
+            result.swap(nextLevelResult);
+        }
+
+        return result;
     }
     default:
         CANAL_DIE();
@@ -281,16 +308,17 @@ InclusionBased::toString(const State *state) const
 void
 InclusionBased::addConstantTarget(const llvm::Value *instruction, size_t constant)
 {
+    Target newTarget;
+    newTarget.mType = Target::Constant;
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-InclusionBased::addMemoryTarget(const llvm::Value *instruction, const llvm::Value *target, Value *arrayOffset /*= NULL*/)
+InclusionBased::addMemoryTarget(const llvm::Value *instruction, const llvm::Value *target)
 {
     Target newTarget;
     newTarget.mType = Target::MemoryBlock;
     newTarget.mInstruction = target;
-    //newTarget.mArrayOffset = arrayOffset;
 
     PlaceTargetMap::iterator it = mTargets.find(instruction);
     if (it != mTargets.end())

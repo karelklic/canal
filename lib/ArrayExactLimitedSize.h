@@ -33,8 +33,8 @@ public: // Implementation of Value.
     virtual std::string toString(const State *state) const;
 
 public: // Implementation of Array.
-    // Implementation of Array::get().
-    virtual Value *get(const Value &offset) const;
+    // Implementation of Array::getItems().
+    virtual std::vector<Value*> getItems(const Value &offset) const;
     // Implementation of Array::set().
     virtual void set(const Value &offset, const Value &value);
 };

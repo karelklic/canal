@@ -83,14 +83,16 @@ SingleItem::toString(const State *state) const
     return ss.str();
 }
 
-Value *SingleItem::get(const Value &offset) const
+std::vector<Value*>
+SingleItem::getItems(const Value &offset) const
 {
     // TODO: check if the offset fits into mSize.
     CANAL_NOT_IMPLEMENTED();
-    return mValue;
+    return std::vector<Value*>();
 }
 
-void SingleItem::set(const Value &offset, const Value &value)
+void
+SingleItem::set(const Value &offset, const Value &value)
 {
     // TODO: check if the offset fits into mSize.
     CANAL_NOT_IMPLEMENTED();
