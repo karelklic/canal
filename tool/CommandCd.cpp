@@ -4,6 +4,11 @@
 #include <cstdio>
 #include <cstring>
 #include <wordexp.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <sstream>
 
 CommandCd::CommandCd(Commands &commands)
     : Command("cd",
@@ -13,6 +18,70 @@ CommandCd::CommandCd(Commands &commands)
               "Affects module loading.",
               commands)
 {
+}
+
+std::vector<std::string>
+CommandCd::getCompletionMatches(const std::vector<std::string> &args,
+                                int pointArg,
+                                int pointArgOffset) const
+{
+    std::vector<std::string> result;
+    std::string arg = args[pointArg].substr(0, pointArgOffset);
+    std::string dirPath(".");
+    bool defaultDirPath = true;
+    size_t dirPos = arg.rfind("/");
+    if (dirPos != std::string::npos)
+    {
+        dirPath = arg.substr(0, dirPos);
+        defaultDirPath = false;
+        if (arg.length() > dirPos + 1)
+            arg = arg.substr(dirPos + 1);
+        else
+            arg = "";
+    }
+
+    DIR *dir = opendir(dirPath.c_str());
+    struct dirent *dirent;
+    for (dirent = readdir(dir); dirent != NULL; dirent = readdir(dir))
+    {
+        if (!dirent || !dirent->d_name)
+            continue;
+
+        if (dirent->d_type != DT_DIR)
+            continue;
+
+        if (0 == strncmp(dirent->d_name, arg.c_str(), arg.length()))
+        {
+            std::stringstream ss;
+            if (!defaultDirPath)
+                ss << dirPath << "/";
+            ss << dirent->d_name;
+            result.push_back(ss.str());
+        }
+    }
+
+    if (result.size() == 1)
+    {
+        std::string dirPath(result[0]);
+        DIR *dir = opendir(dirPath.c_str());
+        struct dirent *dirent;
+        for (dirent = readdir(dir);
+             dirent != NULL;
+             dirent = readdir(dir))
+        {
+            if (!dirent || !dirent->d_name)
+                continue;
+
+            if (dirent->d_type != DT_DIR)
+                continue;
+
+            std::stringstream ss;
+            ss << dirPath << "/" << dirent->d_name;
+            result.push_back(ss.str());
+        }
+    }
+
+    return result;
 }
 
 void

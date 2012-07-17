@@ -12,7 +12,6 @@
 #include <dirent.h>
 #include <libelf.h>
 #include <gelf.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <error.h>
@@ -75,8 +74,6 @@ CommandFile::getCompletionMatches(const std::vector<std::string> &args, int poin
     if (result.size() == 1 && lastIsDir)
     {
         std::string dirPath(result[0].substr(0, result[0].length() - 1));
-        //printf("dirPath %s\n", dirPath.c_str());
-        //result.clear();
         DIR *dir = opendir(dirPath.c_str());
         struct dirent *dirent;
         result.clear();
@@ -85,10 +82,6 @@ CommandFile::getCompletionMatches(const std::vector<std::string> &args, int poin
              dirent = readdir(dir))
         {
             if (!dirent || !dirent->d_name)
-                continue;
-
-            if (0 == strcmp(dirent->d_name, ".") ||
-                0 == strcmp(dirent->d_name, ".."))
                 continue;
 
             std::stringstream ss;
