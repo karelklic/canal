@@ -86,6 +86,19 @@ SingleItem::toString(const State *state) const
 std::vector<Value*>
 SingleItem::getItems(const Value &offset) const
 {
+    // Check if the offset might point to the array.
+    if (const Constant *constant = dynamic_cast<const Constant*>(&offset))
+    {
+        CANAL_ASSERT(constant->isAPInt());
+        CANAL_ASSERT(constant->getAPInt().getBitWidth() <= 64);
+        uint64_t numOffset = constant->getAPInt().getZExtValue();
+        CANAL_ASSERT(numOffset < mValues.size());
+    }
+
+
+    std::vector<Value*> result;
+    result.push_back(mValue)
+
     // TODO: check if the offset fits into mSize.
     CANAL_NOT_IMPLEMENTED();
     return std::vector<Value*>();

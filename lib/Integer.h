@@ -38,6 +38,19 @@ public:
     Range &getRange();
     const Range &getRange() const;
 
+    // Lowest signed number represented by this container.  Uses the
+    // abstract domain (enum, range, bits) with highest precision.
+    llvm::APInt signedMin() const;
+    // Highest signed number represented by this container.  Uses the
+    // abstract domain (enum, range, bits) with highest precision.
+    llvm::APInt signedMax() const;
+    // Lowest unsigned number represented by this container.  Uses the
+    // abstract domain (enum, range, bits) with highest precision.
+    llvm::APInt unsignedMin() const;
+    // Highest unsigned number represented by this container.  Uses
+    // the abstract domain (enum, range, bits) with highest precision.
+    llvm::APInt unsignedMax() const;
+
 public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.

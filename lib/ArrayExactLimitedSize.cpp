@@ -175,7 +175,8 @@ ExactLimitedSize::set(const Value &offset, const Value &value)
         return;
     }
 
-    const Integer::Container &integer = dynamic_cast<const Integer::Container&>(offset);
+    const Integer::Container &integer =
+        dynamic_cast<const Integer::Container&>(offset);
 
     // First try an enumeration, then range.
     const Integer::Enumeration &enumeration = integer.getEnumeration();

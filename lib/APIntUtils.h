@@ -8,6 +8,23 @@ namespace llvm {
 namespace Canal {
 namespace APIntUtils {
 
+// Minimum and maximum.
+llvm::APInt signedMin(const llvm::APInt &a,
+                      const llvm::APInt &b,
+                      const llvm::APInt &c);
+
+llvm::APInt signedMax(const llvm::APInt &a,
+                      const llvm::APInt &b,
+                      const llvm::APInt &c);
+
+llvm::APInt unsignedMin(const llvm::APInt &a,
+                        const llvm::APInt &b,
+                        const llvm::APInt &c);
+
+llvm::APInt unsignedMax(const llvm::APInt &a,
+                        const llvm::APInt &b,
+                        const llvm::APInt &c);
+
 // APInt compatibility for LLVM 2.8 and older.
 // Operations that return overflow indicators.
 llvm::APInt sadd_ov(const llvm::APInt &a,

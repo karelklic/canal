@@ -39,34 +39,72 @@ Container::~Container()
         delete *it;
 }
 
-Bits &Container::getBits()
+Bits &
+Container::getBits()
 {
     return dynamic_cast<Bits&>(*mValues[0]);
 }
 
-const Bits &Container::getBits() const
+const Bits &
+Container::getBits() const
 {
     return dynamic_cast<Bits&>(*mValues[0]);
 }
 
-Enumeration &Container::getEnumeration()
+Enumeration &
+Container::getEnumeration()
 {
     return dynamic_cast<Enumeration&>(*mValues[1]);
 }
 
-const Enumeration &Container::getEnumeration() const
+const Enumeration &
+Container::getEnumeration() const
 {
     return dynamic_cast<Enumeration&>(*mValues[1]);
 }
 
-Range &Container::getRange()
+Range &
+Container::getRange()
 {
     return dynamic_cast<Range&>(*mValues[2]);
 }
 
-const Range &Container::getRange() const
+const Range &
+Container::getRange() const
 {
     return dynamic_cast<Range&>(*mValues[2]);
+}
+
+llvm::APInt
+Container::signedMin() const
+{
+    return APIntUtils::signedMax(getEnumeration().signedMin(),
+                                 getRange().signedMin(),
+                                 getBits().signedMin());
+}
+
+llvm::APInt
+Container::signedMax() const
+{
+    return APIntUtils::signedMin(getEnumeration().signedMax(),
+                                 getRange().signedMax(),
+                                 getBits().signedMax());
+}
+
+llvm::APInt
+Container::unsignedMin() const
+{
+    return APIntUtils::unsignedMax(getEnumeration().unsignedMin(),
+                                   getRange().unsignedMin(),
+                                   getBits().unsignedMin());
+}
+
+llvm::APInt
+Container::unsignedMax() const
+{
+    return APIntUtils::unsignedMin(getEnumeration().unsignedMax(),
+                                   getRange().unsignedMax(),
+                                   getBits().unsignedMax());
 }
 
 Container *

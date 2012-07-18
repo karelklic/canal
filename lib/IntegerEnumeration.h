@@ -10,10 +10,10 @@ namespace Integer {
 
 struct APIntComp
 {
-  bool operator()(const llvm::APInt &a, const llvm::APInt &b) const
-  {
-      return a.ult(b);
-  }
+    bool operator()(const llvm::APInt &a, const llvm::APInt &b) const
+    {
+        return a.ult(b);
+    }
 };
 
 typedef std::set<llvm::APInt, APIntComp> APIntSet;
@@ -29,6 +29,19 @@ public:
     Enumeration();
     // Initializes to the given value.
     Enumeration(const llvm::APInt &number);
+
+    // Lowest signed number represented by this container.  Uses the
+    // abstract domain (enum, range, bits) with highest precision.
+    llvm::APInt signedMin() const;
+    // Highest signed number represented by this container.  Uses the
+    // abstract domain (enum, range, bits) with highest precision.
+    llvm::APInt signedMax() const;
+    // Lowest unsigned number represented by this container.  Uses the
+    // abstract domain (enum, range, bits) with highest precision.
+    llvm::APInt unsignedMin() const;
+    // Highest unsigned number represented by this container.  Uses
+    // the abstract domain (enum, range, bits) with highest precision.
+    llvm::APInt unsignedMax() const;
 
 public: // Implementation of Value.
     // Implementation of Value::clone().

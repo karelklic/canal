@@ -16,6 +16,62 @@ Enumeration::Enumeration(const llvm::APInt &number) : mTop(false)
     mValues.insert(number);
 }
 
+llvm::APInt
+Enumeration::signedMin() const
+{
+    if (mTop)
+        return llvm::APInt::getSignedMinValue();
+
+    // We assume the set is sorted by unsigned comparison.
+    APIntSet::const_iterator it = mValues.begin();
+    llvm::APInt lowest = *it++;
+    for (; it != mValues.end(); ++it)
+    {
+        if (it->slt(lowest))
+            lowest = *it;
+    }
+
+    return lowest;
+}
+
+llvm::APInt
+Enumeration::signedMax() const
+{
+    if (mTop)
+        return llvm::APInt::getSignedMaxValue();
+
+    // We assume the set is sorted by unsigned comparison.
+    APIntSet::const_iterator it = mValues.begin();
+    llvm::APInt highest = *it++;
+    for (; it != mValues.end(); ++it)
+    {
+        if (it->sgt(highest))
+            highest = *it;
+    }
+
+    return highest;
+}
+
+llvm::APInt
+Enumeration::unsignedMin() const
+{
+    if (mTop)
+        return llvm::APInt::getMinValue();
+
+    // We assume the set is sorted by unsigned comparison.
+    return mValues.begin();
+}
+
+llvm::APInt
+Enumeration::unsignedMax() const
+{
+    if (mTop)
+        return llvm::APInt::getMaxValue();
+
+    // We assume the set is sorted by unsigned comparison.
+    return mValues.rbegin();
+}
+
 Enumeration *
 Enumeration::clone() const
 {
@@ -28,7 +84,13 @@ Enumeration::operator==(const Value& value) const
     const Enumeration *enumeration = dynamic_cast<const Enumeration*>(&value);
     if (!enumeration)
         return false;
-    return mTop == enumeration->mTop && mValues == enumeration->mValues;
+    if (mTop != enumeration->mTop)
+        return false;
+    if (mTop)
+        return true;
+    // Compare values only if the top is not set, otherwise we would
+    // get false inequality.
+    return mValues == enumeration->mValues;
 }
 
 void
