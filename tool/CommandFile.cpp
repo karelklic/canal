@@ -34,12 +34,12 @@ CommandFile::getCompletionMatches(const std::vector<std::string> &args, int poin
 {
     std::vector<std::string> result;
     std::string arg = args[pointArg].substr(0, pointArgOffset);
-    std::string dirPath(".");
+    std::string dirPath("./");
     bool defaultDirPath = true;
     size_t dirPos = arg.rfind("/");
     if (dirPos != std::string::npos)
     {
-        dirPath = arg.substr(0, dirPos);
+        dirPath = arg.substr(0, dirPos + 1);
         defaultDirPath = false;
         if (arg.length() > dirPos + 1)
             arg = arg.substr(dirPos + 1);
@@ -48,6 +48,9 @@ CommandFile::getCompletionMatches(const std::vector<std::string> &args, int poin
     }
 
     DIR *dir = opendir(dirPath.c_str());
+    if (!dir)
+        return result;
+
     struct dirent *dirent;
     bool lastIsDir = false;
     for (dirent = readdir(dir); dirent != NULL; dirent = readdir(dir))
@@ -59,7 +62,7 @@ CommandFile::getCompletionMatches(const std::vector<std::string> &args, int poin
         {
             std::stringstream ss;
             if (!defaultDirPath)
-                ss << dirPath << "/";
+                ss << dirPath;
             ss << dirent->d_name;
             if (dirent->d_type == DT_DIR)
             {
@@ -73,7 +76,7 @@ CommandFile::getCompletionMatches(const std::vector<std::string> &args, int poin
 
     if (result.size() == 1 && lastIsDir)
     {
-        std::string dirPath(result[0].substr(0, result[0].length() - 1));
+        dirPath = result[0].substr(0, result[0].length());
         DIR *dir = opendir(dirPath.c_str());
         struct dirent *dirent;
         result.clear();
@@ -85,7 +88,7 @@ CommandFile::getCompletionMatches(const std::vector<std::string> &args, int poin
                 continue;
 
             std::stringstream ss;
-            ss << dirPath << "/" << dirent->d_name;
+            ss << dirPath << dirent->d_name;
             result.push_back(ss.str());
         }
     }
