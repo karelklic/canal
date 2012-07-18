@@ -14,6 +14,181 @@ Bits::Bits(const llvm::APInt &number) : mBits0(~number), mBits1(number)
 {
 }
 
+int
+Bits::getBitValue(unsigned pos) const
+{
+#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
+    // Old interface replaced in LLVM 2.9.
+    llvm::APInt bit(llvm::APInt::getBitsSet(mBits0.getBitWidth(), pos, pos + 1));
+#else
+    llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
+#endif
+    if ((mBits1 & bit).getBoolValue())
+        return (mBits0 & bit).getBoolValue() ? 2 : 1;
+    else
+        return (mBits0 & bit).getBoolValue() ? 0 : -1;
+}
+
+void
+Bits::setBitValue(unsigned pos, int value)
+{
+#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
+    // Old interface replaced in LLVM 2.9.
+    llvm::APInt bit(llvm::APInt::getBitsSet(mBits0.getBitWidth(), pos, pos + 1));
+#else
+    llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
+#endif
+    switch (value)
+    {
+    case -1:
+        mBits0 &= ~bit;
+        mBits1 &= ~bit;
+        break;
+    case 0:
+        mBits0 |= bit;
+        mBits1 &= ~bit;
+        break;
+    case 1:
+        mBits0 &= ~bit;
+        mBits1 |= bit;
+        break;
+    case 2:
+        mBits0 |= bit;
+        mBits1 |= bit;
+        break;
+    default:
+        CANAL_DIE();
+    }
+}
+
+bool
+Bits::signedMin(llvm::APInt &result) const
+{
+    CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
+                     "The bit width must be the same.");
+
+    // Not available on LLVM 2.8:
+    //result.clearAllBits();
+    result.clear(result.getBitWidth());
+
+    for (int i = 0; i < getBitWidth(); ++i)
+    {
+        switch (getBitValue(i))
+        {
+        case -1:
+            // A bit has unknown (undefined) value.
+            return false;
+        case 0:
+            break;
+        case 1:
+            // Not available on LLVM 2.8:
+            //result.setBit(i);
+            result.set(i);
+            break;
+        case 2:
+            // If not sign bit...
+            if (i != getBitWidth() - 1)
+                result.set(i);
+            break;
+        default:
+            CANAL_DIE();
+        }
+    }
+
+    return true;
+}
+
+bool
+Bits::signedMax(llvm::APInt &result) const
+{
+    CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
+                     "The bit width must be the same.");
+
+    result.clear(result.getBitWidth());
+
+    for (int i = 0; i < getBitWidth(); ++i)
+    {
+        switch (getBitValue(i))
+        {
+        case -1:
+            // A bit has unknown (undefined) value.
+            return false;
+        case 0:
+            break;
+        case 1:
+            result.set(i);
+            break;
+        case 2:
+            // If sign bit...
+            if (i == getBitWidth() - 1)
+                result.set(i);
+            break;
+        default:
+            CANAL_DIE();
+        }
+    }
+
+    return true;
+}
+
+bool
+Bits::unsignedMin(llvm::APInt &result) const
+{
+    CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
+                     "The bit width must be the same.");
+
+    result.clear(result.getBitWidth());
+
+    for (int i = 0; i < getBitWidth(); ++i)
+    {
+        switch (getBitValue(i))
+        {
+        case -1:
+            // A bit has unknown (undefined) value.
+            return false;
+        case 0:
+        case 2: // We choose 0 when both 0 and 1 are available...
+            break;
+        case 1:
+            result.set(i);
+            break;
+        default:
+            CANAL_DIE();
+        }
+    }
+
+    return true;
+}
+
+bool
+Bits::unsignedMax(llvm::APInt &result) const
+{
+    CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
+                     "The bit width must be the same.");
+
+    result.clear(result.getBitWidth());
+
+    for (int i = 0; i < getBitWidth(); ++i)
+    {
+        switch (getBitValue(i))
+        {
+        case -1:
+            // A bit has unknown (undefined) value.
+            return false;
+        case 0:
+            break;
+        case 1:
+        case 2: // We choose 1 when both 0 and 1 are available...
+            result.set(i);
+            break;
+        default:
+            CANAL_DIE();
+        }
+    }
+
+    return true;
+}
+
 Bits *
 Bits::clone() const
 {
@@ -273,53 +448,6 @@ Bits::setTop()
     mBits0.setAllBits();
     mBits1.setAllBits();
 #endif
-}
-
-int
-Bits::getBitValue(unsigned pos) const
-{
-#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
-    // Old interface replaced in LLVM 2.9.
-    llvm::APInt bit(llvm::APInt::getBitsSet(mBits0.getBitWidth(), pos, pos + 1));
-#else
-    llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
-#endif
-    if ((mBits1 & bit).getBoolValue())
-        return (mBits0 & bit).getBoolValue() ? 2 : 1;
-    else
-        return (mBits0 & bit).getBoolValue() ? 0 : -1;
-}
-
-void
-Bits::setBitValue(unsigned pos, int value)
-{
-#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
-    // Old interface replaced in LLVM 2.9.
-    llvm::APInt bit(llvm::APInt::getBitsSet(mBits0.getBitWidth(), pos, pos + 1));
-#else
-    llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
-#endif
-    switch (value)
-    {
-    case -1:
-        mBits0 &= ~bit;
-        mBits1 &= ~bit;
-        break;
-    case 0:
-        mBits0 |= bit;
-        mBits1 &= ~bit;
-        break;
-    case 1:
-        mBits0 &= ~bit;
-        mBits1 |= bit;
-        break;
-    case 2:
-        mBits0 |= bit;
-        mBits1 |= bit;
-        break;
-    default:
-        CANAL_DIE();
-    }
 }
 
 } // namespace Integer

@@ -23,25 +23,49 @@ class Enumeration : public Value, public AccuracyValue
 public:
     APIntSet mValues;
     bool mTop;
+    unsigned mNumBits;
 
 public:
     // Initializes to the lowest value.
-    Enumeration();
+    Enumeration(unsigned numBits);
     // Initializes to the given value.
     Enumeration(const llvm::APInt &number);
 
-    // Lowest signed number represented by this container.  Uses the
-    // abstract domain (enum, range, bits) with highest precision.
-    llvm::APInt signedMin() const;
-    // Highest signed number represented by this container.  Uses the
-    // abstract domain (enum, range, bits) with highest precision.
-    llvm::APInt signedMax() const;
-    // Lowest unsigned number represented by this container.  Uses the
-    // abstract domain (enum, range, bits) with highest precision.
-    llvm::APInt unsignedMin() const;
-    // Highest unsigned number represented by this container.  Uses
-    // the abstract domain (enum, range, bits) with highest precision.
-    llvm::APInt unsignedMax() const;
+    // Lowest signed number represented by this abstract domain.
+    // @param result
+    //   Filled by the minimum value if it is known.  Otherwise, the
+    //   value is undefined.
+    // @return
+    //   True if the result is known and the parameter was set to
+    //   correct value.
+    bool signedMin(llvm::APInt &result) const;
+
+    // Highest signed number represented by this abstract domain.
+    // @param result
+    //   Filled by the maximum value if it is known.  Otherwise, the
+    //   value is undefined.
+    // @return
+    //   True if the result is known and the parameter was set to
+    //   correct value.
+    bool signedMax(llvm::APInt &result) const;
+
+    // Lowest unsigned number represented by this abstract domain.
+    // @param result
+    //   Filled by the minimum value if it is known.  Otherwise, the
+    //   value is undefined.
+    // @return
+    //   True if the result is known and the parameter was set to
+    //   correct value.
+    bool unsignedMin(llvm::APInt &result) const;
+
+    // Highest unsigned number represented by this abstract domain.
+    // @param result
+    //   Filled by the maximum value if it is known.  Otherwise, the
+    //   value is undefined.
+    // @return
+    //   True if the result is known and the parameter was set to
+    //   correct value.
+    bool unsignedMax(llvm::APInt &result) const;
 
 public: // Implementation of Value.
     // Implementation of Value::clone().

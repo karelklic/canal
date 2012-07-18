@@ -7,7 +7,8 @@
 namespace Canal {
 namespace Integer {
 
-Enumeration::Enumeration() : mTop(false)
+Enumeration::Enumeration(unsigned numBits) : mTop(false),
+                                             mNumBits(numBits)
 {
 }
 
@@ -16,60 +17,80 @@ Enumeration::Enumeration(const llvm::APInt &number) : mTop(false)
     mValues.insert(number);
 }
 
-llvm::APInt
-Enumeration::signedMin() const
+bool
+Enumeration::signedMin(llvm::APInt &result) const
 {
-    if (mTop)
-        return llvm::APInt::getSignedMinValue();
+    if (mValues.empty())
+        return false;
 
-    // We assume the set is sorted by unsigned comparison.
-    APIntSet::const_iterator it = mValues.begin();
-    llvm::APInt lowest = *it++;
-    for (; it != mValues.end(); ++it)
+    if (mTop)
+        result = llvm::APInt::getSignedMinValue(mNumBits);
+    else
     {
-        if (it->slt(lowest))
-            lowest = *it;
+        // We assume the set is sorted by unsigned comparison.
+        APIntSet::const_iterator it = mValues.begin();
+        result = *it++;
+        for (; it != mValues.end(); ++it)
+        {
+            if (it->slt(result))
+                result = *it;
+        }
     }
 
-    return lowest;
+    return true;
 }
 
-llvm::APInt
-Enumeration::signedMax() const
+bool
+Enumeration::signedMax(llvm::APInt &result) const
 {
-    if (mTop)
-        return llvm::APInt::getSignedMaxValue();
+    if (mValues.empty())
+        return false;
 
-    // We assume the set is sorted by unsigned comparison.
-    APIntSet::const_iterator it = mValues.begin();
-    llvm::APInt highest = *it++;
-    for (; it != mValues.end(); ++it)
+    if (mTop)
+        result = llvm::APInt::getSignedMaxValue(mNumBits);
+    else
     {
-        if (it->sgt(highest))
-            highest = *it;
+        // We assume the set is sorted by unsigned comparison.
+        APIntSet::const_iterator it = mValues.begin();
+        result = *it++;
+        for (; it != mValues.end(); ++it)
+        {
+            if (it->sgt(result))
+                result = *it;
+        }
     }
 
-    return highest;
+    return true;
 }
 
-llvm::APInt
-Enumeration::unsignedMin() const
+bool
+Enumeration::unsignedMin(llvm::APInt &result) const
 {
-    if (mTop)
-        return llvm::APInt::getMinValue();
+    if (mValues.empty())
+        return false;
 
-    // We assume the set is sorted by unsigned comparison.
-    return mValues.begin();
+    if (mTop)
+        result = llvm::APInt::getMinValue(mNumBits);
+    else
+        // We assume the set is sorted by unsigned comparison.
+        result = *mValues.begin();
+
+    return true;
 }
 
-llvm::APInt
-Enumeration::unsignedMax() const
+bool
+Enumeration::unsignedMax(llvm::APInt &result) const
 {
-    if (mTop)
-        return llvm::APInt::getMaxValue();
+    if (mValues.empty())
+        return false;
 
-    // We assume the set is sorted by unsigned comparison.
-    return mValues.rbegin();
+    if (mTop)
+        result = llvm::APInt::getMaxValue(mNumBits);
+    else
+        // We assume the set is sorted by unsigned comparison.
+        result = *mValues.rbegin();
+
+    return true;
 }
 
 Enumeration *

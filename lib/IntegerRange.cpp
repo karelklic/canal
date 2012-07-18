@@ -30,6 +30,62 @@ Range::Range(const llvm::APInt &constant)
 {
 }
 
+bool
+Range::signedMin(llvm::APInt &result) const
+{
+    if (mEmpty)
+        return false;
+
+    if (mSignedTop)
+        result = llvm::APInt::getSignedMinValue(mSignedFrom.getBitWidth());
+    else
+        result = mSignedFrom;
+
+    return true;
+}
+
+bool
+Range::signedMax(llvm::APInt &result) const
+{
+    if (mEmpty)
+        return false;
+
+    if (mSignedTop)
+        result = llvm::APInt::getSignedMaxValue(mSignedTo.getBitWidth());
+    else
+        result = mSignedTo;
+
+    return true;
+}
+
+bool
+Range::unsignedMin(llvm::APInt &result) const
+{
+    if (mEmpty)
+        return false;
+
+    if (mUnsignedTop)
+        result = llvm::APInt::getMinValue(mUnsignedFrom.getBitWidth());
+    else
+        result = mUnsignedFrom;
+
+    return true;
+}
+
+bool
+Range::unsignedMax(llvm::APInt &result) const
+{
+    if (mEmpty)
+        return false;
+
+    if (mUnsignedTop)
+        result = llvm::APInt::getMaxValue(mUnsignedTo.getBitWidth());
+    else
+        result = mUnsignedTo;
+
+    return true;
+}
+
 Range *
 Range::clone() const
 {

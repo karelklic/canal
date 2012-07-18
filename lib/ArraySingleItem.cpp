@@ -1,5 +1,7 @@
 #include "ArraySingleItem.h"
 #include "Utils.h"
+#include "Integer.h"
+#include "Constant.h"
 #include <sstream>
 #include <iostream>
 
@@ -57,8 +59,10 @@ void
 SingleItem::merge(const Value &value)
 {
     const SingleItem &singleItem = dynamic_cast<const SingleItem&>(value);
-    CANAL_ASSERT(mValue && singleItem.mValue); // implement if necessary
-    CANAL_ASSERT(mSize && singleItem.mSize); // implement if necessary
+    CANAL_ASSERT_MSG(mValue && singleItem.mValue,
+                     "Array value must be intialized for merging");
+    CANAL_ASSERT_MSG(mSize && singleItem.mSize,
+                     "Array size must be initialized for merging");
     mValue->merge(*singleItem.mValue);
     mSize->merge(*singleItem.mSize);
 }
@@ -83,32 +87,50 @@ SingleItem::toString(const State *state) const
     return ss.str();
 }
 
-std::vector<Value*>
-SingleItem::getItems(const Value &offset) const
+static void
+assertOffsetFitsToArray(const Value &offset, const Value &size)
 {
+    // Get maximum size of the array.
+    const Integer::Container &integerSize =
+        dynamic_cast<const Integer::Container&>(size);
+    llvm::APInt unsignedMaxSize(integerSize.getBitWidth(), 0);
+    bool sizeIsKnown = integerSize.unsignedMax(unsignedMaxSize);
+    // The following requirement can be changed if necessary.
+    CANAL_ASSERT_MSG(sizeIsKnown, "Size must be a known value.");
+
     // Check if the offset might point to the array.
     if (const Constant *constant = dynamic_cast<const Constant*>(&offset))
     {
         CANAL_ASSERT(constant->isAPInt());
-        CANAL_ASSERT(constant->getAPInt().getBitWidth() <= 64);
-        uint64_t numOffset = constant->getAPInt().getZExtValue();
-        CANAL_ASSERT(numOffset < mValues.size());
+        CANAL_ASSERT_MSG(constant->getAPInt().ult(unsignedMaxSize),
+                         "Offset out of bounds.");
     }
 
+    const Integer::Container &integerOffset =
+        dynamic_cast<const Integer::Container&>(offset);
+    llvm::APInt unsignedMinOffset(integerOffset.getBitWidth(), 0);
+    bool offsetIsKnown = integerOffset.unsignedMin(unsignedMinOffset);
+    // The following requirement can be changed if necessary.
+    CANAL_ASSERT_MSG(offsetIsKnown, "Offset must be a known value.");
+    CANAL_ASSERT_MSG(unsignedMinOffset.ult(unsignedMaxSize),
+                     "Offset out of bounds.");
+}
+
+std::vector<Value*>
+SingleItem::getItems(const Value &offset) const
+{
+    assertOffsetFitsToArray(offset, *mSize);
 
     std::vector<Value*> result;
-    result.push_back(mValue)
-
-    // TODO: check if the offset fits into mSize.
-    CANAL_NOT_IMPLEMENTED();
-    return std::vector<Value*>();
+    result.push_back(mValue);
+    return result;
 }
 
 void
 SingleItem::set(const Value &offset, const Value &value)
 {
-    // TODO: check if the offset fits into mSize.
-    CANAL_NOT_IMPLEMENTED();
+    assertOffsetFitsToArray(offset, *mSize);
+
     mValue->merge(value);
 }
 

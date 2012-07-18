@@ -29,6 +29,8 @@ public:
     // Destructor.  Deletes the contents of the container.
     virtual ~Container();
 
+    int getBitWidth() const;
+
     Bits &getBits();
     const Bits &getBits() const;
 
@@ -40,16 +42,43 @@ public:
 
     // Lowest signed number represented by this container.  Uses the
     // abstract domain (enum, range, bits) with highest precision.
-    llvm::APInt signedMin() const;
+    // @param result
+    //   Filled by the minimum value if it is known.  Otherwise, the
+    //   value is undefined.
+    // @return
+    //   True if the result is known and the parameter was set to
+    //   correct value.
+    bool signedMin(llvm::APInt &result) const;
+
     // Highest signed number represented by this container.  Uses the
     // abstract domain (enum, range, bits) with highest precision.
-    llvm::APInt signedMax() const;
+    // @param result
+    //   Filled by the maximum value if it is known.  Otherwise, the
+    //   value is undefined.
+    // @return
+    //   True if the result is known and the parameter was set to
+    //   correct value.
+    bool signedMax(llvm::APInt &result) const;
+
     // Lowest unsigned number represented by this container.  Uses the
     // abstract domain (enum, range, bits) with highest precision.
-    llvm::APInt unsignedMin() const;
+    // @param result
+    //   Filled by the minimum value if it is known.  Otherwise, the
+    //   value is undefined.
+    // @return
+    //   True if the result is known and the parameter was set to
+    //   correct value.
+    bool unsignedMin(llvm::APInt &result) const;
+
     // Highest unsigned number represented by this container.  Uses
     // the abstract domain (enum, range, bits) with highest precision.
-    llvm::APInt unsignedMax() const;
+    // @param result
+    //   Filled by the maximum value if it is known.  Otherwise, the
+    //   value is undefined.
+    // @return
+    //   True if the result is known and the parameter was set to
+    //   correct value.
+    bool unsignedMax(llvm::APInt &result) const;
 
 public: // Implementation of Value.
     // Implementation of Value::clone().

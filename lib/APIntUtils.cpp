@@ -4,9 +4,10 @@
 namespace Canal {
 namespace APIntUtils {
 
-llvm::APInt sadd_ov(const llvm::APInt &a,
-                    const llvm::APInt &b,
-                    bool &overflow)
+llvm::APInt
+sadd_ov(const llvm::APInt &a,
+        const llvm::APInt &b,
+        bool &overflow)
 {
 #if LLVM_MAJOR == 2 && LLVM_MINOR < 9
     llvm::APInt result = a+b;
@@ -18,9 +19,10 @@ llvm::APInt sadd_ov(const llvm::APInt &a,
 #endif
 }
 
-llvm::APInt uadd_ov(const llvm::APInt &a,
-                    const llvm::APInt &b,
-                    bool &overflow)
+llvm::APInt
+uadd_ov(const llvm::APInt &a,
+        const llvm::APInt &b,
+        bool &overflow)
 {
 #if LLVM_MAJOR == 2 && LLVM_MINOR < 9
     llvm::APInt result = a+b;
@@ -31,9 +33,10 @@ llvm::APInt uadd_ov(const llvm::APInt &a,
 #endif
 }
 
-llvm::APInt ssub_ov(const llvm::APInt &a,
-                    const llvm::APInt &b,
-                    bool &overflow)
+llvm::APInt
+ssub_ov(const llvm::APInt &a,
+        const llvm::APInt &b,
+        bool &overflow)
 {
 #if LLVM_MAJOR == 2 && LLVM_MINOR < 9
     llvm::APInt result = a - b;
@@ -45,9 +48,10 @@ llvm::APInt ssub_ov(const llvm::APInt &a,
 #endif
 }
 
-llvm::APInt usub_ov(const llvm::APInt &a,
-                    const llvm::APInt &b,
-                    bool &overflow)
+llvm::APInt
+usub_ov(const llvm::APInt &a,
+        const llvm::APInt &b,
+        bool &overflow)
 {
 #if LLVM_MAJOR == 2 && LLVM_MINOR < 9
     llvm::APInt result = a-b;
@@ -58,9 +62,10 @@ llvm::APInt usub_ov(const llvm::APInt &a,
 #endif
 }
 
-llvm::APInt sdiv_ov(const llvm::APInt &a,
-                    const llvm::APInt &b,
-                    bool &overflow)
+llvm::APInt
+sdiv_ov(const llvm::APInt &a,
+        const llvm::APInt &b,
+        bool &overflow)
 {
 #if LLVM_MAJOR == 2 && LLVM_MINOR < 9
     // MININT/-1  -->  overflow.
@@ -71,9 +76,10 @@ llvm::APInt sdiv_ov(const llvm::APInt &a,
 #endif
 }
 
-llvm::APInt smul_ov(const llvm::APInt &a,
-                    const llvm::APInt &b,
-                    bool &overflow)
+llvm::APInt
+smul_ov(const llvm::APInt &a,
+        const llvm::APInt &b,
+        bool &overflow)
 {
 #if LLVM_MAJOR == 2 && LLVM_MINOR < 9
     llvm::APInt result = a * b;
@@ -87,9 +93,10 @@ llvm::APInt smul_ov(const llvm::APInt &a,
 #endif
 }
 
-llvm::APInt umul_ov(const llvm::APInt &a,
-                    const llvm::APInt &b,
-                    bool &overflow)
+llvm::APInt
+umul_ov(const llvm::APInt &a,
+        const llvm::APInt &b,
+        bool &overflow)
 {
 #if LLVM_MAJOR == 2 && LLVM_MINOR < 9
     llvm::APInt result = a * b;
@@ -102,7 +109,6 @@ llvm::APInt umul_ov(const llvm::APInt &a,
     return a.umul_ov(b, overflow);
 #endif
 }
-
 
 } // namespace APIntUtils
 } // namespace Canal

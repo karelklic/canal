@@ -46,6 +46,42 @@ public:
     // 0 and 1.
     void setBitValue(unsigned pos, int value);
 
+    // Lowest signed number represented by this abstract domain.
+    // @param result
+    //   Filled by the minimum value if it is known.  Otherwise, the
+    //   value is undefined.
+    // @return
+    //   True if the result is known and the parameter was set to
+    //   correct value.
+    bool signedMin(llvm::APInt &result) const;
+
+    // Highest signed number represented by this abstract domain.
+    // @param result
+    //   Filled by the maximum value if it is known.  Otherwise, the
+    //   value is undefined.
+    // @return
+    //   True if the result is known and the parameter was set to
+    //   correct value.
+    bool signedMax(llvm::APInt &result) const;
+
+    // Lowest unsigned number represented by this abstract domain.
+    // @param result
+    //   Filled by the minimum value if it is known.  Otherwise, the
+    //   value is undefined.
+    // @return
+    //   True if the result is known and the parameter was set to
+    //   correct value.
+    bool unsignedMin(llvm::APInt &result) const;
+
+    // Highest unsigned number represented by this abstract domain.
+    // @param result
+    //   Filled by the maximum value if it is known.  Otherwise, the
+    //   value is undefined.
+    // @return
+    //   True if the result is known and the parameter was set to
+    //   correct value.
+    bool unsignedMax(llvm::APInt &result) const;
+
 public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.

@@ -4,6 +4,7 @@
 #include "IntegerRange.h"
 #include "Constant.h"
 #include "Utils.h"
+#include "APIntUtils.h"
 #include <sstream>
 #include <iostream>
 
@@ -13,7 +14,7 @@ namespace Integer {
 Container::Container(unsigned numBits)
 {
     mValues.push_back(new Bits(numBits));
-    mValues.push_back(new Enumeration());
+    mValues.push_back(new Enumeration(numBits));
     mValues.push_back(new Range(numBits));
 }
 
@@ -37,6 +38,12 @@ Container::~Container()
     std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         delete *it;
+}
+
+int
+Container::getBitWidth() const
+{
+    return getEnumeration().mNumBits;
 }
 
 Bits &
@@ -75,36 +82,92 @@ Container::getRange() const
     return dynamic_cast<Range&>(*mValues[2]);
 }
 
-llvm::APInt
-Container::signedMin() const
+bool
+Container::signedMin(llvm::APInt &result) const
 {
-    return APIntUtils::signedMax(getEnumeration().signedMin(),
-                                 getRange().signedMin(),
-                                 getBits().signedMin());
+    if (!getEnumeration().signedMin(result))
+        return false;
+
+    llvm::APInt temp(getBitWidth(), 0);
+    if (!getRange().signedMin(temp))
+        return false;
+
+    if (result.sgt(temp))
+        result = temp;
+
+    if (!getBits().signedMin(temp))
+        return false;
+
+    if (result.sgt(temp))
+        result = temp;
+
+    return true;
 }
 
-llvm::APInt
-Container::signedMax() const
+bool
+Container::signedMax(llvm::APInt &result) const
 {
-    return APIntUtils::signedMin(getEnumeration().signedMax(),
-                                 getRange().signedMax(),
-                                 getBits().signedMax());
+    if (!getEnumeration().signedMax(result))
+        return false;
+
+    llvm::APInt temp(getBitWidth(), 0);
+    if (!getRange().signedMax(temp))
+        return false;
+
+    if (result.slt(temp))
+        result = temp;
+
+    if (!getBits().signedMax(temp))
+        return false;
+
+    if (result.slt(temp))
+        result = temp;
+
+    return true;
 }
 
-llvm::APInt
-Container::unsignedMin() const
+bool
+Container::unsignedMin(llvm::APInt &result) const
 {
-    return APIntUtils::unsignedMax(getEnumeration().unsignedMin(),
-                                   getRange().unsignedMin(),
-                                   getBits().unsignedMin());
+    if (!getEnumeration().unsignedMin(result))
+        return false;
+
+    llvm::APInt temp(getBitWidth(), 0);
+    if (!getRange().unsignedMin(temp))
+        return false;
+
+    if (result.ugt(temp))
+        result = temp;
+
+    if (!getBits().unsignedMin(temp))
+        return false;
+
+    if (result.ugt(temp))
+        result = temp;
+
+    return true;
 }
 
-llvm::APInt
-Container::unsignedMax() const
+bool
+Container::unsignedMax(llvm::APInt &result) const
 {
-    return APIntUtils::unsignedMin(getEnumeration().unsignedMax(),
-                                   getRange().unsignedMax(),
-                                   getBits().unsignedMax());
+    if (!getEnumeration().unsignedMax(result))
+        return false;
+
+    llvm::APInt temp(getBitWidth(), 0);
+    if (!getRange().unsignedMax(temp))
+        return false;
+
+    if (result.ult(temp))
+        result = temp;
+
+    if (!getBits().unsignedMax(temp))
+        return false;
+
+    if (result.ult(temp))
+        result = temp;
+
+    return true;
 }
 
 Container *
