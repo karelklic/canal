@@ -187,6 +187,13 @@ Interpreter::indirectbr(const llvm::IndirectBrInst &instruction, State &state)
     // Ignore.
 }
 
+// Given a place in source code, return the corresponding variable
+// from the abstract interpreter state. If the place contains a
+// constant, fill the provided constant variable with it.
+// @return
+//  Returns a pointer to the variable if it is found in the state.
+//  Returns a pointer to the provided constant if the place contains a
+//  constant.  Otherwise, it returns NULL.
 static Value *
 variableOrConstant(const llvm::Value &place, State &state, Constant &constant)
 {
@@ -531,7 +538,9 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction, Stack &stack)
     }
 
     state.addFunctionBlock(instruction, value);
-    Pointer::InclusionBased *pointer = new Pointer::InclusionBased(stack.getModule());
+    Pointer::InclusionBased *pointer =
+        new Pointer::InclusionBased(stack.getModule());
+
     pointer->addMemoryTarget(&instruction, &instruction);
     state.addFunctionVariable(instruction, pointer);
 }
@@ -544,7 +553,9 @@ Interpreter::load(const llvm::LoadInst &instruction, State &state)
     Value *variable = state.findVariable(*instruction.getPointerOperand());
     if (!variable)
         return;
-    const Pointer::InclusionBased &pointer = dynamic_cast<const Pointer::InclusionBased&>(*variable);
+
+    const Pointer::InclusionBased &pointer =
+        dynamic_cast<const Pointer::InclusionBased&>(*variable);
 
     // Pointer found. Merge all possible values and store the result
     // into the state.
@@ -577,7 +588,9 @@ Interpreter::store(const llvm::StoreInst &instruction, State &state)
     Value *variable = state.findVariable(*instruction.getPointerOperand());
     if (!variable)
         return;
-    const Pointer::InclusionBased &pointer = dynamic_cast<const Pointer::InclusionBased&>(*variable);
+
+    const Pointer::InclusionBased &pointer =
+        dynamic_cast<const Pointer::InclusionBased&>(*variable);
 
     // Find the variable in the state.  Merge the provided value into
     // all targets.
@@ -756,11 +769,35 @@ Interpreter::inttoptr(const llvm::IntToPtrInst &instruction, State &state)
 void
 Interpreter::bitcast(const llvm::BitCastInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const llvm::Type *source = instruction.getSrcTy();
+    const llvm::Type *destination = instruction.getDestTy();
+
+    CANAL_ASSERT_MSG(source->isPointerTy() && destination->isPointerTy(),
+                     "Bitcast for non-pointers is not implemented.");
+
+    Value *operand = state.findVariable(*instruction.getOperand(0));
+    if (!operand)
+        return;
+
+    Value *resultValue = operand->clone();
+
+     Pointer::InclusionBased &pointer =
+        dynamic_cast<Pointer::InclusionBased&>(*resultValue);
+
+    pointer.mBitcastFrom = instruction.getSrcTy();
+    pointer.mBitcastTo = instruction.getDestTy();
+
+    state.addFunctionVariable(instruction, resultValue);
 }
 
+typedef void(Value::*CmpOperation)(const Value&,
+                                   const Value&,
+                                   llvm::CmpInst::Predicate predicate);
+
 static void
-cmpOperation(const llvm::CmpInst &instruction, State &state, void(Value::*cmpOperation)(const Value&, const Value&, llvm::CmpInst::Predicate predicate))
+cmpOperation(const llvm::CmpInst &instruction,
+             State &state,
+             CmpOperation cmpOperation)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.
@@ -774,7 +811,10 @@ cmpOperation(const llvm::CmpInst &instruction, State &state, void(Value::*cmpOpe
 
     // TODO: suppot arrays
     Value *resultValue = new Integer::Container(1);
-    ((resultValue)->*(cmpOperation))(*values[0], *values[1], instruction.getPredicate());
+    ((resultValue)->*(cmpOperation))(*values[0],
+                                     *values[1],
+                                     instruction.getPredicate());
+
     state.addFunctionVariable(instruction, resultValue);
 }
 

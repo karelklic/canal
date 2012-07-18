@@ -217,7 +217,8 @@ Target::dereference(const State &state) const
     }
 }
 
-InclusionBased::InclusionBased(const llvm::Module &module) : mModule(module)
+InclusionBased::InclusionBased(const llvm::Module &module)
+    : mModule(module), mBitcastFrom(NULL), mBitcastTo(NULL)
 {
 }
 
@@ -233,6 +234,10 @@ InclusionBased::operator==(const Value &value) const
     // Check if the value has the same type.
     const InclusionBased *pointer = dynamic_cast<const InclusionBased*>(&value);
     if (!pointer)
+        return false;
+
+    if (pointer->mBitcastFrom != mBitcastFrom ||
+        pointer->mBitcastTo != mBitcastTo)
         return false;
 
     // Check if it has the same number of targets.
@@ -263,6 +268,10 @@ InclusionBased::merge(const Value &value)
     }
 
     const InclusionBased &vv = dynamic_cast<const InclusionBased&>(value);
+    CANAL_ASSERT_MSG(vv.mBitcastFrom == mBitcastFrom &&
+                     vv.mBitcastTo == mBitcastTo,
+                     "Unexpected different bitcasts in a pointer merge");
+
     PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
     for (; valueit != vv.mTargets.end(); ++valueit)
     {
@@ -301,20 +310,47 @@ InclusionBased::toString(const State *state) const
         ss << "    { assigned: " << name << std::endl;
         ss << "      target: " << indentExceptFirstLine(it->second.toString(state, slotTracker), 14) << " }" << std::endl;
     }
+
+    if (mBitcastFrom)
+    {
+        std::string s;
+        llvm::raw_string_ostream os(s);
+        os << "    bitcast from: " << *mBitcastFrom;
+        os.flush();
+        ss << s << std::endl;
+    }
+
+    if (mBitcastTo)
+    {
+        std::string s;
+        llvm::raw_string_ostream os(s);
+        os << "    bitcast to: " << *mBitcastTo;
+        os.flush();
+        ss << s << std::endl;
+    }
+
     ss << "]";
     return ss.str();
 }
 
 void
-InclusionBased::addConstantTarget(const llvm::Value *instruction, size_t constant)
+InclusionBased::addConstantTarget(const llvm::Value *instruction,
+                                  size_t constant)
 {
     Target newTarget;
     newTarget.mType = Target::Constant;
-    CANAL_NOT_IMPLEMENTED();
+    newTarget.mConstant = constant;
+
+    PlaceTargetMap::iterator it = mTargets.find(instruction);
+    if (it != mTargets.end())
+        it->second.merge(newTarget);
+    else
+        mTargets.insert(PlaceTargetMap::value_type(instruction, newTarget));
 }
 
 void
-InclusionBased::addMemoryTarget(const llvm::Value *instruction, const llvm::Value *target)
+InclusionBased::addMemoryTarget(const llvm::Value *instruction,
+                                const llvm::Value *target)
 {
     Target newTarget;
     newTarget.mType = Target::MemoryBlock;
