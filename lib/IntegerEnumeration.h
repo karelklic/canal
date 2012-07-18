@@ -8,7 +8,7 @@
 namespace Canal {
 namespace Integer {
 
-struct APIntComp
+struct APIntCompare
 {
     bool operator()(const llvm::APInt &a, const llvm::APInt &b) const
     {
@@ -16,7 +16,7 @@ struct APIntComp
     }
 };
 
-typedef std::set<llvm::APInt, APIntComp> APIntSet;
+typedef std::set<llvm::APInt, APIntCompare> APIntSet;
 
 class Enumeration : public Value, public AccuracyValue
 {

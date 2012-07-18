@@ -12,10 +12,10 @@ libcanal_la_SOURCES = \
 	Constant.cpp \
 	Float.h \
 	Float.cpp \
-	Integer.h \
-	Integer.cpp \
 	IntegerBits.h \
 	IntegerBits.cpp \
+	IntegerContainer.h \
+	IntegerContainer.cpp \
 	IntegerEnumeration.h \
 	IntegerEnumeration.cpp \
 	IntegerRange.h \

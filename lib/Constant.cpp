@@ -1,5 +1,5 @@
 #include "Constant.h"
-#include "Integer.h"
+#include "IntegerContainer.h"
 #include "Utils.h"
 #include <llvm/Constants.h>
 #include <llvm/Support/raw_ostream.h>

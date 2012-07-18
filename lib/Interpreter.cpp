@@ -2,7 +2,7 @@
 #include "State.h"
 #include "Utils.h"
 #include "Value.h"
-#include "Integer.h"
+#include "IntegerContainer.h"
 #include "IntegerBits.h"
 #include "Pointer.h"
 #include "ArraySingleItem.h"

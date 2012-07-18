@@ -1,4 +1,4 @@
-#include "Integer.h"
+#include "IntegerContainer.h"
 #include "IntegerBits.h"
 #include "IntegerEnumeration.h"
 #include "IntegerRange.h"

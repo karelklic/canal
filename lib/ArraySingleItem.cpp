@@ -1,6 +1,6 @@
 #include "ArraySingleItem.h"
 #include "Utils.h"
-#include "Integer.h"
+#include "IntegerContainer.h"
 #include "Constant.h"
 #include <sstream>
 #include <iostream>

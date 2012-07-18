@@ -1,6 +1,6 @@
 #include "ArrayExactLimitedSize.h"
 #include "Constant.h"
-#include "Integer.h"
+#include "IntegerContainer.h"
 #include "IntegerEnumeration.h"
 #include "IntegerRange.h"
 #include "Utils.h"

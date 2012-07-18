@@ -2,7 +2,7 @@
 #include "Utils.h"
 #include "../lib/Utils.h"
 #include "../lib/State.h"
-#include "../lib/Integer.h"
+#include "../lib/IntegerContainer.h"
 #include "../lib/Pointer.h"
 #include "../lib/Array.h"
 #include "../lib/Constant.h"

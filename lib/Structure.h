@@ -22,6 +22,7 @@ public:
     // @see Array::Array::getItems
     std::vector<Value*> getItems(const Value &offset) const;
 
+public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.
     virtual Structure *clone() const;

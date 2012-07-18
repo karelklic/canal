@@ -1,7 +1,7 @@
 #include "Structure.h"
 #include "Utils.h"
 #include "Constant.h"
-#include "Integer.h"
+#include "IntegerContainer.h"
 #include "IntegerEnumeration.h"
 #include "IntegerRange.h"
 #include <sstream>
