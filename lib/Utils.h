@@ -89,6 +89,7 @@
                      << __LINE__ << "("                                 \
                      << __FUNCTION__ << "): not implemented\n"          \
                      << Canal::getCurrentBacktrace();                   \
+        exit(1);                                                        \
     }
 
 namespace llvm {

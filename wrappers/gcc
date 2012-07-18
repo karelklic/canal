@@ -23,6 +23,7 @@ def run(argv):
     log.write("".join(["stdout: {0}".format(line) for line in stdout.splitlines(True)]))
     log.write("".join(["stderr: {0}".format(line) for line in stderr.splitlines(True)]))
     log.write("exit: {0}\n".format(proc.returncode))
+    log.write("reason: {0}\n".format(sys.argv))
     log.close()
 
 #

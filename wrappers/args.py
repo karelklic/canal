@@ -1,5 +1,7 @@
 import argparse
 import config
+import subprocess
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", action="store_true")
@@ -22,6 +24,7 @@ def is_linking(args, remainder):
     return hasObject or hasSource
 
 def get_linking_commands(args, remainder):
+    result = []
     subresult = [config.LLVM_LINK]
 
     # Output
@@ -34,9 +37,10 @@ def get_linking_commands(args, remainder):
         if r.endswith(".c"):
             subresult.append("{0}.o.llvm".format(r[:-2]))
         if r.endswith(".o"):
+            result.append(["extract-llvm", r])
             subresult.append("{0}.llvm".format(r))
 
-    result = [subresult]
+    result.append(subresult)
     result.append(["objcopy",
                    "--add-section",
                    ".note.llvm={0}".format(llvm_output),
@@ -58,11 +62,14 @@ def get_compile_commands(args, remainder):
     for cfile in cfiles:
         subresult = [config.CLANG]
 
+        compiler_output = "{0}.o".format(cfile[:-2])
+        llvm_output = "{0}.llvm".format(compiler_output)
+
         subresult.append(cfile)
         subresult.append("-c")
         subresult.append("-emit-llvm")
         subresult.append("-o")
-        subresult.append("{0}.o.llvm".format(cfile[:-2]))
+        subresult.append(llvm_output)
 
         if args.I:
             for i in args.I:
@@ -78,6 +85,10 @@ def get_compile_commands(args, remainder):
                 subresult.append(r)
 
         result.append(subresult)
+        result.append(["objcopy",
+                       "--add-section",
+                       ".note.llvm={0}".format(llvm_output),
+                       compiler_output])
 
     return result
 
