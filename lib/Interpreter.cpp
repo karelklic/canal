@@ -6,7 +6,7 @@
 #include "IntegerBits.h"
 #include "Pointer.h"
 #include "ArraySingleItem.h"
-#include "Float.h"
+#include "FloatRange.h"
 #include "Constant.h"
 #include "Stack.h"
 #include "Structure.h"
@@ -67,7 +67,7 @@ Interpreter::interpretInstruction(Stack &stack)
         else if (llvm::isa<llvm::UnreachableInst>(instruction))
             unreachable((const llvm::UnreachableInst&)instruction, state);
         else
-            llvm::errs() << "Operational::Machine: Unknown terminator instruction: " << instruction << "\n";
+            CANAL_FATAL_ERROR("Unknown terminator instruction: " << instruction);
     }
     else if (llvm::isa<llvm::BinaryOperator>(instruction))
     {
@@ -124,10 +124,10 @@ Interpreter::interpretInstruction(Stack &stack)
         else if (llvm::isa<llvm::ZExtInst>(instruction))
             zext((const llvm::ZExtInst&)instruction, state);
         else
-            llvm::errs() << "Operational::Machine: Unknown cast instruction: " << instruction << "\n";
+            CANAL_FATAL_ERROR("Unknown cast instruction: " << instruction);
     }
     else
-        CANAL_DIE_MSG("unknown instruction: " << instruction.getOpcodeName());
+        CANAL_FATAL_ERROR("unknown instruction: " << instruction.getOpcodeName());
 }
 
 void

@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_FLOAT_H
-#define LIBCANAL_FLOAT_H
+#ifndef LIBCANAL_FLOAT_RANGE_H
+#define LIBCANAL_FLOAT_RANGE_H
 
 #include "Value.h"
 #include <llvm/ADT/APFloat.h>

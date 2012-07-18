@@ -75,7 +75,7 @@ libcanal_la_LIBADD =
 am_libcanal_la_OBJECTS = libcanal_la-APIntUtils.lo \
 	libcanal_la-Array.lo libcanal_la-ArrayExactLimitedSize.lo \
 	libcanal_la-ArraySingleItem.lo libcanal_la-Constant.lo \
-	libcanal_la-Float.lo libcanal_la-IntegerBits.lo \
+	libcanal_la-FloatRange.lo libcanal_la-IntegerBits.lo \
 	libcanal_la-IntegerContainer.lo \
 	libcanal_la-IntegerEnumeration.lo libcanal_la-IntegerRange.lo \
 	libcanal_la-Interpreter.lo libcanal_la-Pointer.lo \
@@ -251,8 +251,8 @@ libcanal_la_SOURCES = \
 	ArraySingleItem.cpp \
 	Constant.h \
 	Constant.cpp \
-	Float.h \
-	Float.cpp \
+	FloatRange.h \
+	FloatRange.cpp \
 	IntegerBits.h \
 	IntegerBits.cpp \
 	IntegerContainer.h \
@@ -378,7 +378,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-ArrayExactLimitedSize.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-ArraySingleItem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Constant.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Float.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-FloatRange.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerBits.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerContainer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerEnumeration.Plo@am__quote@
@@ -449,12 +449,12 @@ libcanal_la-Constant.lo: Constant.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Constant.lo `test -f 'Constant.cpp' || echo '$(srcdir)/'`Constant.cpp
 
-libcanal_la-Float.lo: Float.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Float.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Float.Tpo -c -o libcanal_la-Float.lo `test -f 'Float.cpp' || echo '$(srcdir)/'`Float.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-Float.Tpo $(DEPDIR)/libcanal_la-Float.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Float.cpp' object='libcanal_la-Float.lo' libtool=yes @AMDEPBACKSLASH@
+libcanal_la-FloatRange.lo: FloatRange.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-FloatRange.lo -MD -MP -MF $(DEPDIR)/libcanal_la-FloatRange.Tpo -c -o libcanal_la-FloatRange.lo `test -f 'FloatRange.cpp' || echo '$(srcdir)/'`FloatRange.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-FloatRange.Tpo $(DEPDIR)/libcanal_la-FloatRange.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FloatRange.cpp' object='libcanal_la-FloatRange.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Float.lo `test -f 'Float.cpp' || echo '$(srcdir)/'`Float.cpp
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-FloatRange.lo `test -f 'FloatRange.cpp' || echo '$(srcdir)/'`FloatRange.cpp
 
 libcanal_la-IntegerBits.lo: IntegerBits.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-IntegerBits.lo -MD -MP -MF $(DEPDIR)/libcanal_la-IntegerBits.Tpo -c -o libcanal_la-IntegerBits.lo `test -f 'IntegerBits.cpp' || echo '$(srcdir)/'`IntegerBits.cpp
