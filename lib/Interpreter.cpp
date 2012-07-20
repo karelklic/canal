@@ -6,6 +6,7 @@
 #include "IntegerBits.h"
 #include "Pointer.h"
 #include "ArraySingleItem.h"
+#include "ArrayExactLimitedSize.h"
 #include "FloatRange.h"
 #include "Constant.h"
 #include "Stack.h"
@@ -481,13 +482,65 @@ Interpreter::xor_(const llvm::BinaryOperator &instruction, Stack &stack)
 void
 Interpreter::extractelement(const llvm::ExtractElementInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    // Find operands in state, and encapsulate constant operands (such
+    // as numbers).  If some operand is not known, exit.  Fixpoint
+    // calculation is probably not far enough.
+    Constant constants[2];
+    Value *values[2] = {
+        variableOrConstant(*instruction.getOperand(0), state, constants[0]),
+        variableOrConstant(*instruction.getOperand(1), state, constants[1])
+    };
+    if (!values[0] || !values[1])
+        return;
+
+    const Array::ExactLimitedSize *array =
+        dynamic_cast<const Array::ExactLimitedSize*>(values[0]);
+
+    if (const Constant *constant = dynamic_cast<const Constant*>(values[0]))
+    {
+        Value *modifiable = constant->toModifiableValue();
+        array = dynamic_cast<const Array::ExactLimitedSize*>(modifiable);
+    }
+
+    CANAL_ASSERT_MSG(array, "Invalid type of array.");
+    Value *result = array->getValue(*values[1]);
+
+    // Store the result value to the state.
+    state.addFunctionVariable(instruction, result);
 }
 
 void
 Interpreter::insertelement(const llvm::InsertElementInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    // Find operands in state, and encapsulate constant operands (such
+    // as numbers).  If some operand is not known, exit.  Fixpoint
+    // calculation is probably not far enough.
+    Constant constants[3];
+    Value *values[3] = {
+        variableOrConstant(*instruction.getOperand(0), state, constants[0]),
+        variableOrConstant(*instruction.getOperand(1), state, constants[1]),
+        variableOrConstant(*instruction.getOperand(2), state, constants[2])
+    };
+    if (!values[0] || !values[1] || !values[2])
+        return;
+
+    Value *result = values[0]->clone();
+
+    Array::ExactLimitedSize *resultAsArray =
+        dynamic_cast<Array::ExactLimitedSize*>(result);
+
+    if (Constant *constant = dynamic_cast<Constant*>(result))
+    {
+        Value *modifiable = constant->toModifiableValue();
+        result = resultAsArray =
+            dynamic_cast<Array::ExactLimitedSize*>(modifiable);
+    }
+
+    CANAL_ASSERT_MSG(result, "Invalid type of array.");
+    resultAsArray->set(*values[2], *values[1]);
+
+    // Store the result value to the state.
+    state.addFunctionVariable(instruction, result);
 }
 
 void
