@@ -1,16 +1,16 @@
 #include "Interpreter.h"
+#include "ArrayExactSize.h"
+#include "ArraySingleItem.h"
+#include "Constant.h"
+#include "FloatRange.h"
+#include "IntegerBits.h"
+#include "IntegerContainer.h"
+#include "Pointer.h"
+#include "Stack.h"
 #include "State.h"
+#include "Structure.h"
 #include "Utils.h"
 #include "Value.h"
-#include "IntegerContainer.h"
-#include "IntegerBits.h"
-#include "Pointer.h"
-#include "ArraySingleItem.h"
-#include "ArrayExactLimitedSize.h"
-#include "FloatRange.h"
-#include "Constant.h"
-#include "Stack.h"
-#include "Structure.h"
 #include <llvm/Function.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Instructions.h>
@@ -128,7 +128,7 @@ Interpreter::interpretInstruction(Stack &stack)
             CANAL_FATAL_ERROR("Unknown cast instruction: " << instruction);
     }
     else
-        CANAL_FATAL_ERROR("unknown instruction: " << instruction.getOpcodeName());
+        CANAL_FATAL_ERROR("Unknown instruction: " << instruction.getOpcodeName());
 }
 
 void
@@ -493,13 +493,13 @@ Interpreter::extractelement(const llvm::ExtractElementInst &instruction, State &
     if (!values[0] || !values[1])
         return;
 
-    const Array::ExactLimitedSize *array =
-        dynamic_cast<const Array::ExactLimitedSize*>(values[0]);
+    const Array::ExactSize *array =
+        dynamic_cast<const Array::ExactSize*>(values[0]);
 
     if (const Constant *constant = dynamic_cast<const Constant*>(values[0]))
     {
         Value *modifiable = constant->toModifiableValue();
-        array = dynamic_cast<const Array::ExactLimitedSize*>(modifiable);
+        array = dynamic_cast<const Array::ExactSize*>(modifiable);
     }
 
     CANAL_ASSERT_MSG(array, "Invalid type of array.");
@@ -526,39 +526,98 @@ Interpreter::insertelement(const llvm::InsertElementInst &instruction, State &st
 
     Value *result = values[0]->clone();
 
-    Array::ExactLimitedSize *resultAsArray =
-        dynamic_cast<Array::ExactLimitedSize*>(result);
+    Array::ExactSize *resultAsArray =
+        dynamic_cast<Array::ExactSize*>(result);
 
     if (Constant *constant = dynamic_cast<Constant*>(result))
     {
         Value *modifiable = constant->toModifiableValue();
         result = resultAsArray =
-            dynamic_cast<Array::ExactLimitedSize*>(modifiable);
+            dynamic_cast<Array::ExactSize*>(modifiable);
     }
 
     CANAL_ASSERT_MSG(result, "Invalid type of array.");
-    resultAsArray->set(*values[2], *values[1]);
+    resultAsArray->setItem(*values[2], *values[1]);
 
     // Store the result value to the state.
     state.addFunctionVariable(instruction, result);
 }
 
 void
-Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction, State &state)
+Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction,
+                           State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
-void
-Interpreter::extractvalue(const llvm::ExtractValueInst &instruction, State &state)
+template <typename T>
+Value *getValueLocation(Value *aggregate,
+                        const T &instruction)
 {
-    CANAL_NOT_IMPLEMENTED();
+    Value *item = aggregate;
+    typename T::idx_iterator it = instruction.idx_begin(),
+        itend = instruction.idx_end();
+    for (; it != itend; ++it)
+    {
+        if (const Constant *constant = dynamic_cast<const Constant *>(item))
+        {
+            // It would make sense to implement getValue() for
+            // Constant.  Converting constant via getModifableValue()
+            // leads to precision loss.
+            CANAL_NOT_IMPLEMENTED();
+        }
+
+        const Array::Interface *array = dynamic_cast<const Array::Interface*>(item);
+        CANAL_ASSERT_MSG(array, "ExtractValue reached an unsupported type.");
+        item = array->getItem(*it);
+    }
+
+    return item;
 }
 
 void
-Interpreter::insertvalue(const llvm::InsertValueInst &instruction, State &state)
+Interpreter::extractvalue(const llvm::ExtractValueInst &instruction,
+                          State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    Constant constant;
+    Value *aggregate = variableOrConstant(
+        *instruction.getAggregateOperand(),
+        state,
+        constant);
+
+    if (!aggregate)
+        return;
+
+    Value *item = getValueLocation(aggregate, instruction);
+    state.addFunctionVariable(instruction, item->clone());
+}
+
+void
+Interpreter::insertvalue(const llvm::InsertValueInst &instruction,
+                         State &state)
+{
+    Constant aggregateConstant;
+    Value *aggregate = variableOrConstant(
+        *instruction.getAggregateOperand(),
+        state,
+        aggregateConstant);
+
+    if (!aggregate)
+        return;
+
+    Constant insertedConstant;
+    Value *insertedValue = variableOrConstant(
+        *instruction.getInsertedValueOperand(),
+        state,
+        insertedConstant);
+
+    if (!insertedValue)
+        return;
+
+    Value *result = aggregate->clone();
+    Value *item = getValueLocation(result, instruction);
+    item->merge(*insertedValue);
+    state.addFunctionVariable(instruction, result);
 }
 
 void
@@ -586,7 +645,11 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction, Stack &stack)
             if (it != state.getFunctionVariables().end())
                 array->mSize = it->second->clone();
             else
-                array->mSize = new Constant(llvm::cast<llvm::Constant>(arraySize));
+            {
+                const llvm::Constant *constant =
+                    llvm::cast<llvm::Constant>(arraySize);
+                array->mSize = new Constant(constant);
+            }
         }
     }
 

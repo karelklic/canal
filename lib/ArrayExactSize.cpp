@@ -1,4 +1,4 @@
-#include "ArrayExactLimitedSize.h"
+#include "ArrayExactSize.h"
 #include "Constant.h"
 #include "IntegerContainer.h"
 #include "IntegerEnumeration.h"
@@ -10,35 +10,35 @@
 namespace Canal {
 namespace Array {
 
-ExactLimitedSize::ExactLimitedSize()
+ExactSize::ExactSize()
 {
 }
 
-ExactLimitedSize::ExactLimitedSize(const ExactLimitedSize &exactLimitedSize)
+ExactSize::ExactSize(const ExactSize &exactSize)
 {
-    mValues = exactLimitedSize.mValues;
+    mValues = exactSize.mValues;
     std::vector<Value*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         *it = (*it)->clone();
 }
 
-ExactLimitedSize::~ExactLimitedSize()
+ExactSize::~ExactSize()
 {
     std::vector<Value*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         delete (*it);
 }
 
-ExactLimitedSize *
-ExactLimitedSize::clone() const
+ExactSize *
+ExactSize::clone() const
 {
-    return new ExactLimitedSize(*this);
+    return new ExactSize(*this);
 }
 
 bool
-ExactLimitedSize::operator==(const Value &value) const
+ExactSize::operator==(const Value &value) const
 {
-    const ExactLimitedSize *array = dynamic_cast<const ExactLimitedSize*>(&value);
+    const ExactSize *array = dynamic_cast<const ExactSize*>(&value);
     if (!array)
         return false;
 
@@ -58,9 +58,9 @@ ExactLimitedSize::operator==(const Value &value) const
 }
 
 void
-ExactLimitedSize::merge(const Value &value)
+ExactSize::merge(const Value &value)
 {
-    const ExactLimitedSize &array = dynamic_cast<const ExactLimitedSize&>(value);
+    const ExactSize &array = dynamic_cast<const ExactSize&>(value);
     CANAL_ASSERT(mValues.size() == array.mValues.size());
     std::vector<Value*>::iterator itA = mValues.begin();
     std::vector<Value*>::const_iterator itAend = mValues.end(),
@@ -70,9 +70,9 @@ ExactLimitedSize::merge(const Value &value)
 }
 
 size_t
-ExactLimitedSize::memoryUsage() const
+ExactSize::memoryUsage() const
 {
-    size_t size = sizeof(ExactLimitedSize);
+    size_t size = sizeof(ExactSize);
     size += mValues.capacity() * sizeof(Value*);
     std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
@@ -82,16 +82,16 @@ ExactLimitedSize::memoryUsage() const
 }
 
 std::string
-ExactLimitedSize::toString(const State *state) const
+ExactSize::toString(const State *state) const
 {
     std::stringstream ss;
-    ss << "Array::ExactLimitedSize: {" << std::endl;
+    ss << "Array::ExactSize: {" << std::endl;
     ss << "}";
     return ss.str();
 }
 
 std::vector<Value*>
-ExactLimitedSize::getItems(const Value &offset) const
+ExactSize::getItem(const Value &offset) const
 {
     std::vector<Value*> result;
     if (const Constant *constant = dynamic_cast<const Constant*>(&offset))
@@ -162,8 +162,16 @@ ExactLimitedSize::getItems(const Value &offset) const
     return result;
 }
 
+Value *
+ExactSize::getItem(uint64_t offset) const
+{
+    CANAL_ASSERT_MSG(offset < mValues.size(),
+                     "Offset out of bounds.");
+    return mValues[offset];
+}
+
 void
-ExactLimitedSize::set(const Value &offset, const Value &value)
+ExactSize::setItem(const Value &offset, const Value &value)
 {
     const Constant *constant = dynamic_cast<const Constant*>(&offset);
     if (constant)
@@ -227,6 +235,13 @@ ExactLimitedSize::set(const Value &offset, const Value &value)
         (*it)->merge(value);
 }
 
+void
+ExactSize::setItem(uint64_t offset, const Value &value)
+{
+    CANAL_ASSERT_MSG(offset < mValues.size(),
+                     "Offset out of bounds.");
+    mValues[offset]->merge(value);
+}
 
 } // namespace Array
 } // namespace Canal

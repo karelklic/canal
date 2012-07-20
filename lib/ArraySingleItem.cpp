@@ -88,7 +88,7 @@ SingleItem::toString(const State *state) const
 }
 
 static void
-assertOffsetFitsToArray(const Value &offset, const Value &size)
+assertOffsetFitsToArray(uint64_t offset, const Value &size)
 {
     // Get maximum size of the array.
     const Integer::Container &integerSize =
@@ -97,40 +97,59 @@ assertOffsetFitsToArray(const Value &offset, const Value &size)
     bool sizeIsKnown = integerSize.unsignedMax(unsignedMaxSize);
     // The following requirement can be changed if necessary.
     CANAL_ASSERT_MSG(sizeIsKnown, "Size must be a known value.");
+    CANAL_ASSERT_MSG(offset < unsignedMaxSize.getZExtValue(),
+                     "Offset out of bounds.");
+}
 
+static void
+assertOffsetFitsToArray(const Value &offset, const Value &size)
+{
     // Check if the offset might point to the array.
     if (const Constant *constant = dynamic_cast<const Constant*>(&offset))
     {
         CANAL_ASSERT(constant->isAPInt());
-        CANAL_ASSERT_MSG(constant->getAPInt().ult(unsignedMaxSize),
-                         "Offset out of bounds.");
+        assertOffsetFitsToArray(constant->getAPInt().getZExtValue(), size);
+        return;
     }
-
-    const Integer::Container &integerOffset =
-        dynamic_cast<const Integer::Container&>(offset);
-    llvm::APInt unsignedMinOffset(integerOffset.getBitWidth(), 0);
-    bool offsetIsKnown = integerOffset.unsignedMin(unsignedMinOffset);
-    // The following requirement can be changed if necessary.
-    CANAL_ASSERT_MSG(offsetIsKnown, "Offset must be a known value.");
-    CANAL_ASSERT_MSG(unsignedMinOffset.ult(unsignedMaxSize),
-                     "Offset out of bounds.");
+    else
+    {
+        const Integer::Container &integerOffset =
+            dynamic_cast<const Integer::Container&>(offset);
+        llvm::APInt unsignedMinOffset(integerOffset.getBitWidth(), 0);
+        bool offsetIsKnown = integerOffset.unsignedMin(unsignedMinOffset);
+        // The following requirement can be changed if necessary.
+        CANAL_ASSERT_MSG(offsetIsKnown, "Offset must be a known value.");
+        assertOffsetFitsToArray(unsignedMinOffset.getZExtValue(), size);
+    }
 }
 
 std::vector<Value*>
-SingleItem::getItems(const Value &offset) const
+SingleItem::getItem(const Value &offset) const
 {
     assertOffsetFitsToArray(offset, *mSize);
-
     std::vector<Value*> result;
     result.push_back(mValue);
     return result;
 }
 
-void
-SingleItem::set(const Value &offset, const Value &value)
+Value *
+SingleItem::getItem(uint64_t offset) const
 {
     assertOffsetFitsToArray(offset, *mSize);
+    return mValue;
+}
 
+void
+SingleItem::setItem(const Value &offset, const Value &value)
+{
+    assertOffsetFitsToArray(offset, *mSize);
+    mValue->merge(value);
+}
+
+void
+SingleItem::setItem(uint64_t offset, const Value &value)
+{
+    assertOffsetFitsToArray(offset, *mSize);
     mValue->merge(value);
 }
 

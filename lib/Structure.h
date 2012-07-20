@@ -2,11 +2,12 @@
 #define LIBCANAL_STRUCTURE_H
 
 #include "Value.h"
+#include "ArrayInterface.h"
 #include <vector>
 
 namespace Canal {
 
-class Structure : public Value
+class Structure : public Value, public Array::Interface
 {
 public:
     std::vector<Value*> mMembers;
@@ -15,12 +16,6 @@ public:
     Structure() {};
     Structure(const Structure &structure);
     virtual ~Structure();
-
-    // Gets the strcture members pointed by the provided offset.
-    // Returns internal structure items owned by the structure.
-    // Caller must not delete the items.
-    // @see Array::Array::getItems
-    std::vector<Value*> getItems(const Value &offset) const;
 
 public: // Implementation of Value.
     // Implementation of Value::clone().
@@ -34,6 +29,16 @@ public: // Implementation of Value.
     virtual size_t memoryUsage() const;
     // Implementation of Value::toString().
     virtual std::string toString(const State *state) const;
+
+public: // Implementation of Array::Interface.
+    // Implementation of Array::Interface::getItem().
+    virtual std::vector<Value*> getItem(const Value &offset) const;
+    // Implementation of Array::Interface::getItem().
+    virtual Value *getItem(uint64_t offset) const;
+    // Implementation of Array::Interface::set().
+    virtual void setItem(const Value &offset, const Value &value);
+    // Implementation of Array::Interface::set().
+    virtual void setItem(uint64_t offset, const Value &value);
 };
 
 } // namespace Canal

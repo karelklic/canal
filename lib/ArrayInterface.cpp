@@ -1,13 +1,13 @@
-#include "Array.h"
+#include "ArrayInterface.h"
 #include "Value.h"
 
 namespace Canal {
 namespace Array {
 
-Value *Array::getValue(const Value &offset) const
+Value *Interface::getValue(const Value &offset) const
 {
     Value *result = NULL;
-    std::vector<Value*> items(getItems(offset));
+    std::vector<Value*> items(getItem(offset));
     std::vector<Value*>::const_iterator it = items.begin();
     for (; it != items.end(); ++it)
     {

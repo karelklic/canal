@@ -195,10 +195,10 @@ Target::dereference(const State &state) const
             for (; itItems != result.end(); ++itItems)
             {
                 std::vector<Value*> items;
-                if (Array::Array *array = dynamic_cast<Array::Array*>(*itItems))
-                    items = array->getItems(**itOffsets);
+                if (Array::Interface *array = dynamic_cast<Array::Interface*>(*itItems))
+                    items = array->getItem(**itOffsets);
                 else if (Structure *structure = dynamic_cast<Structure*>(structure))
-                    items = structure->getItems(**itOffsets);
+                    items = structure->getItem(**itOffsets);
                 else
                     CANAL_DIE();
 
