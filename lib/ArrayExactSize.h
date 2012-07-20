@@ -19,6 +19,8 @@ public:
     ExactSize(const ExactSize &exactSize);
     virtual ~ExactSize();
 
+    size_t size() const { return mValues.size(); }
+
 public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.

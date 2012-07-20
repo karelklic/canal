@@ -31,7 +31,10 @@ namespace llvm {
     class Instruction;
     class IntToPtrInst;
     class InvokeInst;
+#if LLVM_MAJOR >= 3
+    // LandingPad instruction is available since LLVM 3.0
     class LandingPadInst;
+#endif
     class LoadInst;
     class Module;
     class PHINode;
@@ -157,7 +160,7 @@ protected:
     // Vector Operations
     virtual void extractelement(const llvm::ExtractElementInst &instruction, State &state);
     virtual void insertelement(const llvm::InsertElementInst &instruction, State &state);
-    virtual void shufflevector(const llvm::ShuffleVectorInst &instruction, State &state);
+    virtual void shufflevector(const llvm::ShuffleVectorInst &instruction, Stack &stack);
 
     // Aggregate Operations
     virtual void extractvalue(const llvm::ExtractValueInst &instruction, State &state);
@@ -193,7 +196,11 @@ protected:
     virtual void select(const llvm::SelectInst &instruction, State &state);
     virtual void call(const llvm::CallInst &instruction, Stack &stack);
     virtual void va_arg(const llvm::VAArgInst &instruction, State &state);
+
+#if LLVM_MAJOR >= 3
+    // LandingPad instruction is available since LLVM 3.0
     virtual void landingpad(const llvm::LandingPadInst &instruction, State &state);
+#endif
 };
 
 } // namespace Canal
