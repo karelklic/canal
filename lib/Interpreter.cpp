@@ -1,15 +1,16 @@
 #include "Interpreter.h"
+#include "ArrayExactSize.h"
+#include "ArraySingleItem.h"
+#include "Constant.h"
+#include "FloatRange.h"
+#include "IntegerBits.h"
+#include "IntegerContainer.h"
+#include "Pointer.h"
+#include "Stack.h"
 #include "State.h"
+#include "Structure.h"
 #include "Utils.h"
 #include "Value.h"
-#include "IntegerContainer.h"
-#include "IntegerBits.h"
-#include "Pointer.h"
-#include "ArraySingleItem.h"
-#include "FloatRange.h"
-#include "Constant.h"
-#include "Stack.h"
-#include "Structure.h"
 #include <llvm/Function.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Instructions.h>
@@ -33,28 +34,85 @@ Interpreter::interpretInstruction(Stack &stack)
     const llvm::Instruction &instruction = stack.getCurrentInstruction();
     State &state = stack.getCurrentState();
 
-    if (llvm::isa<llvm::AllocaInst>(instruction))
-        alloca_((const llvm::AllocaInst&)instruction, stack);
-    else if (llvm::isa<llvm::StoreInst>(instruction))
-        store((const llvm::StoreInst&)instruction, state);
+    if (llvm::isa<llvm::AtomicCmpXchgInst>(instruction))
+        cmpxchg((const llvm::AtomicCmpXchgInst&)instruction, state);
+    else if (llvm::isa<llvm::AtomicRMWInst>(instruction))
+        atomicrmw((const llvm::AtomicRMWInst&)instruction, state);
     else if (llvm::isa<llvm::CallInst>(instruction))
         call((const llvm::CallInst&)instruction, stack);
-    else if (llvm::isa<llvm::LoadInst>(instruction))
-        load((const llvm::LoadInst&)instruction, state);
     else if (llvm::isa<llvm::ICmpInst>(instruction))
         icmp((const llvm::ICmpInst&)instruction, state);
     else if (llvm::isa<llvm::FCmpInst>(instruction))
         fcmp((const llvm::FCmpInst&)instruction, state);
+    else if (llvm::isa<llvm::ExtractElementInst>(instruction))
+        extractelement((const llvm::ExtractElementInst&)instruction, state);
+    else if (llvm::isa<llvm::FenceInst>(instruction))
+        fence((const llvm::FenceInst&)instruction, state);
     else if (llvm::isa<llvm::GetElementPtrInst>(instruction))
         getelementptr((const llvm::GetElementPtrInst&)instruction, stack);
+    else if (llvm::isa<llvm::InsertElementInst>(instruction))
+        insertelement((const llvm::InsertElementInst&)instruction, state);
+    else if (llvm::isa<llvm::InsertValueInst>(instruction))
+        insertvalue((const llvm::InsertValueInst&)instruction, state);
+#if LLVM_MAJOR >= 3
+    // LandingPad instruction is available since LLVM 3.0
+    else if (llvm::isa<llvm::LandingPadInst>(instruction))
+        landingpad((const llvm::LandingPadInst&)instruction, state);
+#endif
+    else if (llvm::isa<llvm::PHINode>(instruction))
+        phi((const llvm::PHINode&)instruction, state);
+    else if (llvm::isa<llvm::SelectInst>(instruction))
+        select((const llvm::SelectInst&)instruction, state);
+    else if (llvm::isa<llvm::ShuffleVectorInst>(instruction))
+        shufflevector((const llvm::ShuffleVectorInst&)instruction, stack);
+    else if (llvm::isa<llvm::StoreInst>(instruction))
+        store((const llvm::StoreInst&)instruction, state);
+    else if (llvm::isa<llvm::UnaryInstruction>(instruction))
+    {
+        if (llvm::isa<llvm::AllocaInst>(instruction))
+            alloca_((const llvm::AllocaInst&)instruction, stack);
+        else if (llvm::isa<llvm::CastInst>(instruction))
+        {
+            if (llvm::isa<llvm::BitCastInst>(instruction))
+                bitcast((const llvm::BitCastInst&)instruction, state);
+            else if (llvm::isa<llvm::FPExtInst>(instruction))
+                fpext((const llvm::FPExtInst&)instruction, state);
+            else if (llvm::isa<llvm::FPToSIInst>(instruction))
+                fptosi((const llvm::FPToSIInst&)instruction, state);
+            else if (llvm::isa<llvm::FPToUIInst>(instruction))
+                fptoui((const llvm::FPToUIInst&)instruction, state);
+            else if (llvm::isa<llvm::FPTruncInst>(instruction))
+                fptrunc((const llvm::FPTruncInst&)instruction, state);
+            else if (llvm::isa<llvm::IntToPtrInst>(instruction))
+                inttoptr((const llvm::IntToPtrInst&)instruction, state);
+            else if (llvm::isa<llvm::PtrToIntInst>(instruction))
+                ptrtoint((const llvm::PtrToIntInst&)instruction, state);
+            else if (llvm::isa<llvm::SExtInst>(instruction))
+                sext((const llvm::SExtInst&)instruction, state);
+            else if (llvm::isa<llvm::SIToFPInst>(instruction))
+                sitofp((const llvm::SIToFPInst&)instruction, state);
+            else if (llvm::isa<llvm::TruncInst>(instruction))
+                trunc((const llvm::TruncInst&)instruction, state);
+            else if (llvm::isa<llvm::UIToFPInst>(instruction))
+                uitofp((const llvm::UIToFPInst&)instruction, state);
+            else if (llvm::isa<llvm::ZExtInst>(instruction))
+                zext((const llvm::ZExtInst&)instruction, state);
+            else
+                CANAL_FATAL_ERROR("Unknown cast instruction: " << instruction);
+        }
+        else if (llvm::isa<llvm::ExtractValueInst>(instruction))
+            extractvalue((const llvm::ExtractValueInst&)instruction, state);
+        else if (llvm::isa<llvm::LoadInst>(instruction))
+            load((const llvm::LoadInst&)instruction, state);
+        else if (llvm::isa<llvm::VAArgInst>(instruction))
+            va_arg((const llvm::VAArgInst&)instruction, state);
+        else
+            CANAL_FATAL_ERROR("Unknown unary instruction: " << instruction);
+    }
     else if (llvm::isa<llvm::TerminatorInst>(instruction))
     {
-        if (llvm::isa<llvm::ReturnInst>(instruction))
-            ret((const llvm::ReturnInst&)instruction, state);
-        else if (llvm::isa<llvm::BranchInst>(instruction))
+        if (llvm::isa<llvm::BranchInst>(instruction))
             br((const llvm::BranchInst&)instruction, state);
-        else if (llvm::isa<llvm::SwitchInst>(instruction))
-            switch_((const llvm::SwitchInst&)instruction, state);
         else if (llvm::isa<llvm::IndirectBrInst>(instruction))
             indirectbr((const llvm::IndirectBrInst&)instruction, state);
         else if (llvm::isa<llvm::InvokeInst>(instruction))
@@ -64,6 +122,10 @@ Interpreter::interpretInstruction(Stack &stack)
         else if (llvm::isa<llvm::ResumeInst>(instruction))
             resume((const llvm::ResumeInst&)instruction, state);
 #endif
+        else if (llvm::isa<llvm::ReturnInst>(instruction))
+            ret((const llvm::ReturnInst&)instruction, state);
+        else if (llvm::isa<llvm::SwitchInst>(instruction))
+            switch_((const llvm::SwitchInst&)instruction, state);
         else if (llvm::isa<llvm::UnreachableInst>(instruction))
             unreachable((const llvm::UnreachableInst&)instruction, state);
         else
@@ -97,37 +159,8 @@ Interpreter::interpretInstruction(Stack &stack)
             CANAL_FATAL_ERROR(binaryOp);
 	}
     }
-    else if (llvm::isa<llvm::CastInst>(instruction))
-    {
-        if (llvm::isa<llvm::BitCastInst>(instruction))
-            bitcast((const llvm::BitCastInst&)instruction, state);
-        else if (llvm::isa<llvm::FPExtInst>(instruction))
-            fpext((const llvm::FPExtInst&)instruction, state);
-        else if (llvm::isa<llvm::FPToSIInst>(instruction))
-            fptosi((const llvm::FPToSIInst&)instruction, state);
-        else if (llvm::isa<llvm::FPToUIInst>(instruction))
-            fptoui((const llvm::FPToUIInst&)instruction, state);
-        else if (llvm::isa<llvm::FPTruncInst>(instruction))
-            fptrunc((const llvm::FPTruncInst&)instruction, state);
-        else if (llvm::isa<llvm::IntToPtrInst>(instruction))
-            inttoptr((const llvm::IntToPtrInst&)instruction, state);
-        else if (llvm::isa<llvm::PtrToIntInst>(instruction))
-            ptrtoint((const llvm::PtrToIntInst&)instruction, state);
-        else if (llvm::isa<llvm::SExtInst>(instruction))
-            sext((const llvm::SExtInst&)instruction, state);
-        else if (llvm::isa<llvm::SIToFPInst>(instruction))
-            sitofp((const llvm::SIToFPInst&)instruction, state);
-        else if (llvm::isa<llvm::TruncInst>(instruction))
-            trunc((const llvm::TruncInst&)instruction, state);
-        else if (llvm::isa<llvm::UIToFPInst>(instruction))
-            uitofp((const llvm::UIToFPInst&)instruction, state);
-        else if (llvm::isa<llvm::ZExtInst>(instruction))
-            zext((const llvm::ZExtInst&)instruction, state);
-        else
-            CANAL_FATAL_ERROR("Unknown cast instruction: " << instruction);
-    }
     else
-        CANAL_FATAL_ERROR("unknown instruction: " << instruction.getOpcodeName());
+        CANAL_FATAL_ERROR("Unknown instruction: " << instruction.getOpcodeName());
 }
 
 void
@@ -481,31 +514,204 @@ Interpreter::xor_(const llvm::BinaryOperator &instruction, Stack &stack)
 void
 Interpreter::extractelement(const llvm::ExtractElementInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    // Find operands in state, and encapsulate constant operands (such
+    // as numbers).  If some operand is not known, exit.  Fixpoint
+    // calculation is probably not far enough.
+    Constant constants[2];
+    Value *values[2] = {
+        variableOrConstant(*instruction.getOperand(0), state, constants[0]),
+        variableOrConstant(*instruction.getOperand(1), state, constants[1])
+    };
+    if (!values[0] || !values[1])
+        return;
+
+    const Array::ExactSize *array =
+        dynamic_cast<const Array::ExactSize*>(values[0]);
+
+    if (const Constant *constant = dynamic_cast<const Constant*>(values[0]))
+    {
+        Value *modifiable = constant->toModifiableValue();
+        array = dynamic_cast<const Array::ExactSize*>(modifiable);
+    }
+
+    CANAL_ASSERT_MSG(array, "Invalid type of array.");
+    Value *result = array->getValue(*values[1]);
+
+    // Store the result value to the state.
+    state.addFunctionVariable(instruction, result);
 }
 
 void
 Interpreter::insertelement(const llvm::InsertElementInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    // Find operands in state, and encapsulate constant operands (such
+    // as numbers).  If some operand is not known, exit.  Fixpoint
+    // calculation is probably not far enough.
+    Constant constants[3];
+    Value *values[3] = {
+        variableOrConstant(*instruction.getOperand(0), state, constants[0]),
+        variableOrConstant(*instruction.getOperand(1), state, constants[1]),
+        variableOrConstant(*instruction.getOperand(2), state, constants[2])
+    };
+    if (!values[0] || !values[1] || !values[2])
+        return;
+
+    Value *result = values[0]->clone();
+
+    Array::ExactSize *resultAsArray =
+        dynamic_cast<Array::ExactSize*>(result);
+
+    if (Constant *constant = dynamic_cast<Constant*>(result))
+    {
+        Value *modifiable = constant->toModifiableValue();
+        result = resultAsArray =
+            dynamic_cast<Array::ExactSize*>(modifiable);
+    }
+
+    CANAL_ASSERT_MSG(result, "Invalid type of array.");
+    resultAsArray->setItem(*values[2], *values[1]);
+
+    // Store the result value to the state.
+    state.addFunctionVariable(instruction, result);
 }
 
 void
-Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction, State &state)
+Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction,
+                           Stack &stack)
 {
-    CANAL_NOT_IMPLEMENTED();
+    State &state = stack.getCurrentState();
+
+    Constant constants[2];
+    Value *values[2] = {
+        variableOrConstant(*instruction.getOperand(0), state, constants[0]),
+        variableOrConstant(*instruction.getOperand(1), state, constants[1])
+    };
+    if (!values[0] || !values[1])
+        return;
+
+    Array::ExactSize *array0 = dynamic_cast<Array::ExactSize*>(values[0]);
+    CANAL_ASSERT_MSG(array0, "Invalid type in shufflevector.");
+    Array::ExactSize *array1 = dynamic_cast<Array::ExactSize*>(values[1]);
+    CANAL_ASSERT_MSG(array1, "Invalid type in shufflevector.");
+
+    Array::ExactSize *result = new Array::ExactSize();
+
+#if LLVM_MAJOR >= 3
+    llvm::SmallVector<int, 16> shuffleMask = instruction.getShuffleMask();
+#else
+    llvm::SmallVector<int, 16> shuffleMask;
+    { // Reimplementation of missing getShuffleMask.
+        const llvm::Value *inputMask = instruction.getOperand(2);
+        CANAL_ASSERT_MSG(inputMask, "Failed to get shufflevector mask.");
+        const llvm::VectorType *inputMaskType =
+            llvm::cast<llvm::VectorType>(inputMask->getType());
+
+        unsigned count = inputMaskType->getNumElements();
+        const llvm::ConstantVector *inputMaskConstant =
+            llvm::cast<llvm::ConstantVector>(inputMask);
+
+        for (unsigned i = 0; i != count; ++i)
+        {
+            llvm::Constant *constant = inputMaskConstant->getOperand(i);
+            shuffleMask.push_back(llvm::isa<llvm::UndefValue>(constant) ? -1 :
+                                  llvm::cast<llvm::ConstantInt>(constant)->getZExtValue());
+        }
+    }
+#endif
+
+    llvm::SmallVector<int, 16>::iterator it = shuffleMask.begin(),
+        itend = shuffleMask.end();
+    for (; it != itend; ++it)
+    {
+        int offset = *it;
+        if (offset == -1)
+        {
+            Value *value = typeToEmptyValue(*instruction.getType()->getElementType(),
+                                            stack.getModule());
+
+            result->mValues.push_back(value);
+        }
+        else if (offset < array0->size())
+            result->mValues.push_back(array0->mValues[offset]->clone());
+        else
+        {
+            CANAL_ASSERT_MSG(offset < array0->size() + array1->size(),
+                             "Offset out of bounds.");
+            offset -= array0->size();
+            result->mValues.push_back(array1->mValues[offset]->clone());
+        }
+    }
+
+    state.addFunctionVariable(instruction, result);
+}
+
+template <typename T> static Value *
+getValueLocation(Value *aggregate, const T &instruction)
+{
+    Value *item = aggregate;
+    typename T::idx_iterator it = instruction.idx_begin(),
+        itend = instruction.idx_end();
+    for (; it != itend; ++it)
+    {
+        if (const Constant *constant = dynamic_cast<const Constant *>(item))
+        {
+            // It would make sense to implement getValue() for
+            // Constant.  Converting constant via getModifableValue()
+            // leads to precision loss.
+            CANAL_NOT_IMPLEMENTED();
+        }
+
+        const Array::Interface *array = dynamic_cast<const Array::Interface*>(item);
+        CANAL_ASSERT_MSG(array, "ExtractValue reached an unsupported type.");
+        item = array->getItem(*it);
+    }
+
+    return item;
 }
 
 void
-Interpreter::extractvalue(const llvm::ExtractValueInst &instruction, State &state)
+Interpreter::extractvalue(const llvm::ExtractValueInst &instruction,
+                          State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    Constant constant;
+    Value *aggregate = variableOrConstant(
+        *instruction.getAggregateOperand(),
+        state,
+        constant);
+
+    if (!aggregate)
+        return;
+
+    Value *item = getValueLocation(aggregate, instruction);
+    state.addFunctionVariable(instruction, item->clone());
 }
 
 void
-Interpreter::insertvalue(const llvm::InsertValueInst &instruction, State &state)
+Interpreter::insertvalue(const llvm::InsertValueInst &instruction,
+                         State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    Constant aggregateConstant;
+    Value *aggregate = variableOrConstant(
+        *instruction.getAggregateOperand(),
+        state,
+        aggregateConstant);
+
+    if (!aggregate)
+        return;
+
+    Constant insertedConstant;
+    Value *insertedValue = variableOrConstant(
+        *instruction.getInsertedValueOperand(),
+        state,
+        insertedConstant);
+
+    if (!insertedValue)
+        return;
+
+    Value *result = aggregate->clone();
+    Value *item = getValueLocation(result, instruction);
+    item->merge(*insertedValue);
+    state.addFunctionVariable(instruction, result);
 }
 
 void
@@ -533,7 +739,11 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction, Stack &stack)
             if (it != state.getFunctionVariables().end())
                 array->mSize = it->second->clone();
             else
-                array->mSize = new Constant(llvm::cast<llvm::Constant>(arraySize));
+            {
+                const llvm::Constant *constant =
+                    llvm::cast<llvm::Constant>(arraySize);
+                array->mSize = new Constant(constant);
+            }
         }
     }
 
@@ -906,10 +1116,13 @@ Interpreter::va_arg(const llvm::VAArgInst &instruction, State &state)
     CANAL_NOT_IMPLEMENTED();
 }
 
+#if LLVM_MAJOR >= 3
+// LandingPad instruction is available since LLVM 3.0
 void
 Interpreter::landingpad(const llvm::LandingPadInst &instruction, State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
+#endif
 
 } // namespace Canal

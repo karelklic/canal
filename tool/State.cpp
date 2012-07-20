@@ -4,14 +4,15 @@
 #include "../lib/State.h"
 #include "../lib/IntegerContainer.h"
 #include "../lib/Pointer.h"
-#include "../lib/Array.h"
 #include "../lib/Constant.h"
 #include <llvm/Function.h>
 #include <llvm/Module.h>
 #include <llvm/ADT/APInt.h>
 #include <cstdio>
 
-State::State(const llvm::Module *module) : mModule(module), mStack(*module), mSlotTracker(*module)
+State::State(const llvm::Module *module) : mModule(module),
+                                           mStack(*module),
+                                           mSlotTracker(*module)
 {
 }
 

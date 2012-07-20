@@ -1,42 +1,42 @@
 lib_LTLIBRARIES = libcanal.la
 libcanal_la_SOURCES = \
-	APIntUtils.h \
 	APIntUtils.cpp \
-	Array.h \
-	Array.cpp \
-	ArrayExactLimitedSize.h \
-	ArrayExactLimitedSize.cpp \
-	ArraySingleItem.h \
+	APIntUtils.h \
+	ArrayExactSize.cpp \
+	ArrayExactSize.h \
+	ArrayInterface.cpp \
+	ArrayInterface.h \
 	ArraySingleItem.cpp \
-	Constant.h \
+	ArraySingleItem.h \
 	Constant.cpp \
-	FloatRange.h \
+	Constant.h \
 	FloatRange.cpp \
-	IntegerBits.h \
+	FloatRange.h \
 	IntegerBits.cpp \
-	IntegerContainer.h \
+	IntegerBits.h \
 	IntegerContainer.cpp \
-	IntegerEnumeration.h \
+	IntegerContainer.h \
 	IntegerEnumeration.cpp \
-	IntegerRange.h \
+	IntegerEnumeration.h \
 	IntegerRange.cpp \
-	Interpreter.h \
+	IntegerRange.h \
 	Interpreter.cpp \
-	Pointer.h \
+	Interpreter.h \
 	Pointer.cpp \
+	Pointer.h \
 	SELinuxModulePass.cpp \
-	SlotTracker.h \
 	SlotTracker.cpp \
-	Stack.h \
+	SlotTracker.h \
 	Stack.cpp \
-	State.h \
+	Stack.h \
 	State.cpp \
-	Structure.h \
+	State.h \
 	Structure.cpp \
-	Utils.h \
+	Structure.h \
 	Utils.cpp \
-	Value.h \
-	Value.cpp
+	Utils.h \
+	Value.cpp \
+	Value.h
 
 libcanal_la_CXXFLAGS = $(LLVM_CFLAGS)
 libcanal_la_LDFLAGS = $(LLVM_LDFLAGS) $(LLVM_LIBS) -version-info 0:0:0

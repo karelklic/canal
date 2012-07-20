@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_ARRAY_SINGLE_ITEM_H
-#define LIBCANAL_ARRAY_SINGLE_ITEM_H
+#ifndef LIBCANAL_ARRAY_EXACT_SIZE_H
+#define LIBCANAL_ARRAY_EXACT_SIZE_H
 
 #include "Value.h"
 #include "ArrayInterface.h"
@@ -7,29 +7,24 @@
 namespace Canal {
 namespace Array {
 
-// The most trivial array type.  It treats all array members as a
-// single value.  This means all the operations on the array are
-// merged and used to move the single value up in its lattice.
-//
-// This array type is very imprecise.
-class SingleItem : public Value, public Interface
+// Array with exact size and limited length.  It keeps all array
+// members separately, not losing precision at all.
+class ExactSize : public Value, public Interface
 {
 public:
-    Value *mValue;
-
-    // Number of elements in the array.
-    // It is either a Constant or Integer::Container.
-    Value *mSize;
+    std::vector<Value*> mValues;
 
 public:
-    SingleItem();
-    SingleItem(const SingleItem &singleItem);
-    virtual ~SingleItem();
+    ExactSize();
+    ExactSize(const ExactSize &exactSize);
+    virtual ~ExactSize();
+
+    size_t size() const { return mValues.size(); }
 
 public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.
-    virtual SingleItem *clone() const;
+    virtual ExactSize *clone() const;
     // Implementation of Value::operator==().
     virtual bool operator==(const Value &value) const;
     // Implementation of Value::merge().
@@ -53,4 +48,4 @@ public: // Implementation of Array::Interface.
 } // namespace Array
 } // namespace Canal
 
-#endif // LIBCANAL_ARRAY_SINGLE_ITEM_H
+#endif // LIBCANAL_ARRAY_EXACT_SIZE_H
