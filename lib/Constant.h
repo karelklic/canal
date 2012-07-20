@@ -15,17 +15,10 @@ class Value;
 class Constant : public Value
 {
 public:
-    Constant(const llvm::Constant *constant = NULL);
+    const llvm::Constant *mConstant;
 
-    // Implementation of Value::clone().
-    // Covariant return type.
-    virtual Constant* clone() const;
-    // Implementation of Value::operator==().
-    virtual bool operator==(const Value &value) const;
-    // Implementation of Value::memoryUsage().
-    virtual size_t memoryUsage() const;
-    // Implementation of Value::toString().
-    virtual std::string toString(const State *state) const;
+public:
+    Constant(const llvm::Constant *constant = NULL);
 
     // Checks if this constant is an integer number.
     bool isAPInt() const;
@@ -38,8 +31,16 @@ public:
     // responsible for releasing its memory.
     Value *toModifiableValue() const;
 
-public:
-    const llvm::Constant *mConstant;
+public: // Implementation of Value.
+    // Implementation of Value::clone().
+    // Covariant return type.
+    virtual Constant* clone() const;
+    // Implementation of Value::operator==().
+    virtual bool operator==(const Value &value) const;
+    // Implementation of Value::memoryUsage().
+    virtual size_t memoryUsage() const;
+    // Implementation of Value::toString().
+    virtual std::string toString(const State *state) const;
 };
 
 } // namespace Canal

@@ -39,7 +39,6 @@ public:
 
 public:
     // Implementation of instructions operating on values.
-
     virtual void add(const Value &a, const Value &b);
     virtual void fadd(const Value &a, const Value &b);
     virtual void sub(const Value &a, const Value &b);
@@ -103,6 +102,16 @@ public:
     // bytes.  Returns true if the memory usage was limited, false when
     // it was not possible.
     virtual bool limitMemoryUsage(size_t size);
+};
+
+// Base class for abstract values that can provide access to their
+// memory.
+class MemoryValue
+{
+public:
+    virtual size_t memorySize() const;
+    virtual Array::ExaclimitedSize *castToArray(const llvm::Type *itemType) const;
+    virtual void castFromArray(Array::ExaclimitedSize *array);
 };
 
 } // namespace Canal

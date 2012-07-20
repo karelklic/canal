@@ -658,6 +658,7 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
     CANAL_ASSERT(source);
 
     Pointer::InclusionBased *result = source->clone();
+    result->mBitcastFrom = result->mBitcastTo = NULL;
 
     // We get offsets. Either constants or Integer::Container.
     // Pointer points either to an array (or array offset), or to a

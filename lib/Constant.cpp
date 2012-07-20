@@ -10,6 +10,37 @@ Constant::Constant(const llvm::Constant *constant) : mConstant(constant)
 {
 }
 
+bool
+Constant::isAPInt() const
+{
+    return llvm::isa<llvm::ConstantInt>(mConstant);
+}
+
+const llvm::APInt &
+Constant::getAPInt() const
+{
+    return llvm::cast<llvm::ConstantInt>(mConstant)->getValue();
+}
+
+bool
+Constant::isGetElementPtr() const
+{
+    const llvm::ConstantExpr *constant = llvm::cast_or_null<llvm::ConstantExpr>(mConstant);
+    if (!constant)
+        return false;
+
+    return constant->getOpcode() == llvm::Instruction::GetElementPtr;
+}
+
+Value *
+Constant::toModifiableValue() const
+{
+    if (isAPInt())
+        return new Integer::Container(getAPInt());
+    else
+        CANAL_DIE();
+}
+
 Constant *
 Constant::clone() const
 {
@@ -41,37 +72,6 @@ Constant::toString(const State *state) const
     os << "Constant: " << *mConstant;
     os.flush();
     return s;
-}
-
-bool
-Constant::isAPInt() const
-{
-    return llvm::isa<llvm::ConstantInt>(mConstant);
-}
-
-const llvm::APInt &
-Constant::getAPInt() const
-{
-    return llvm::cast<llvm::ConstantInt>(mConstant)->getValue();
-}
-
-bool
-Constant::isGetElementPtr() const
-{
-    const llvm::ConstantExpr *constant = llvm::cast_or_null<llvm::ConstantExpr>(mConstant);
-    if (!constant)
-        return false;
-
-    return constant->getOpcode() == llvm::Instruction::GetElementPtr;
-}
-
-Value *
-Constant::toModifiableValue() const
-{
-    if (isAPInt())
-        return new Integer::Container(getAPInt());
-    else
-        CANAL_DIE();
 }
 
 } // namespace Canal
