@@ -7,8 +7,6 @@
 
 namespace llvm {
     class AllocaInst;
-    class AtomicCmpXchgInst;
-    class AtomicRMWInst;
     class BasicBlock;
     class BinaryOperator;
     class BitCastInst;
@@ -21,7 +19,6 @@ namespace llvm {
     class FPToSIInst;
     class FPToUIInst;
     class FPTruncInst;
-    class FenceInst;
     class Function;
     class GetElementPtrInst;
     class ICmpInst;
@@ -31,18 +28,10 @@ namespace llvm {
     class Instruction;
     class IntToPtrInst;
     class InvokeInst;
-#if LLVM_MAJOR >= 3
-    // LandingPad instruction is available since LLVM 3.0
-    class LandingPadInst;
-#endif
     class LoadInst;
     class Module;
     class PHINode;
     class PtrToIntInst;
-#if LLVM_MAJOR >= 3
-    // Resume instruction is available since LLVM 3.0
-    class ResumeInst;
-#endif
     class ReturnInst;
     class SExtInst;
     class SIToFPInst;
@@ -55,6 +44,14 @@ namespace llvm {
     class UnreachableInst;
     class VAArgInst;
     class ZExtInst;
+#if LLVM_MAJOR >= 3
+    // Instructions available since LLVM 3.0
+    class AtomicCmpXchgInst;
+    class AtomicRMWInst;
+    class FenceInst;
+    class LandingPadInst;
+    class ResumeInst;
+#endif
 }
 
 namespace Canal {
@@ -107,14 +104,6 @@ protected:
     // control flow transfer to either the 'normal' label or the
     // 'exception' label.
     virtual void invoke(const llvm::InvokeInst &instruction, Stack &stack);
-
-#if LLVM_MAJOR >= 3
-    // Resume instruction is available since LLVM 3.0
-    // A terminator instruction that has no successors. Resumes
-    // propagation of an existing (in-flight) exception whose
-    // unwinding was interrupted with a landingpad instruction.
-    virtual void resume(const llvm::ResumeInst &instruction, State &state);
-#endif
 
     // No defined semantics. This instruction is used to inform the
     // optimizer that a particular portion of the code is not
@@ -170,9 +159,6 @@ protected:
     virtual void alloca_(const llvm::AllocaInst &instruction, Stack &stack);
     virtual void load(const llvm::LoadInst &instruction, State &state);
     virtual void store(const llvm::StoreInst &instruction, State &state);
-    virtual void fence(const llvm::FenceInst &instruction, State &state);
-    virtual void cmpxchg(const llvm::AtomicCmpXchgInst &instruction, State &state);
-    virtual void atomicrmw(const llvm::AtomicRMWInst &instruction, State &state);
     virtual void getelementptr(const llvm::GetElementPtrInst &instruction, Stack &stack);
 
     // Conversion Operations
@@ -198,8 +184,18 @@ protected:
     virtual void va_arg(const llvm::VAArgInst &instruction, State &state);
 
 #if LLVM_MAJOR >= 3
-    // LandingPad instruction is available since LLVM 3.0
+    // Instructions available since LLVM 3.0
     virtual void landingpad(const llvm::LandingPadInst &instruction, State &state);
+
+    // Resume instruction is available since LLVM 3.0
+    // A terminator instruction that has no successors. Resumes
+    // propagation of an existing (in-flight) exception whose
+    // unwinding was interrupted with a landingpad instruction.
+    virtual void resume(const llvm::ResumeInst &instruction, State &state);
+
+    virtual void fence(const llvm::FenceInst &instruction, State &state);
+    virtual void cmpxchg(const llvm::AtomicCmpXchgInst &instruction, State &state);
+    virtual void atomicrmw(const llvm::AtomicRMWInst &instruction, State &state);
 #endif
 };
 

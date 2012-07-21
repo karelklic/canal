@@ -34,11 +34,7 @@ Interpreter::interpretInstruction(Stack &stack)
     const llvm::Instruction &instruction = stack.getCurrentInstruction();
     State &state = stack.getCurrentState();
 
-    if (llvm::isa<llvm::AtomicCmpXchgInst>(instruction))
-        cmpxchg((const llvm::AtomicCmpXchgInst&)instruction, state);
-    else if (llvm::isa<llvm::AtomicRMWInst>(instruction))
-        atomicrmw((const llvm::AtomicRMWInst&)instruction, state);
-    else if (llvm::isa<llvm::CallInst>(instruction))
+    if (llvm::isa<llvm::CallInst>(instruction))
         call((const llvm::CallInst&)instruction, stack);
     else if (llvm::isa<llvm::ICmpInst>(instruction))
         icmp((const llvm::ICmpInst&)instruction, state);
@@ -46,8 +42,6 @@ Interpreter::interpretInstruction(Stack &stack)
         fcmp((const llvm::FCmpInst&)instruction, state);
     else if (llvm::isa<llvm::ExtractElementInst>(instruction))
         extractelement((const llvm::ExtractElementInst&)instruction, state);
-    else if (llvm::isa<llvm::FenceInst>(instruction))
-        fence((const llvm::FenceInst&)instruction, state);
     else if (llvm::isa<llvm::GetElementPtrInst>(instruction))
         getelementptr((const llvm::GetElementPtrInst&)instruction, stack);
     else if (llvm::isa<llvm::InsertElementInst>(instruction))
@@ -55,9 +49,15 @@ Interpreter::interpretInstruction(Stack &stack)
     else if (llvm::isa<llvm::InsertValueInst>(instruction))
         insertvalue((const llvm::InsertValueInst&)instruction, state);
 #if LLVM_MAJOR >= 3
-    // LandingPad instruction is available since LLVM 3.0
+    // Instructions available since LLVM 3.0
     else if (llvm::isa<llvm::LandingPadInst>(instruction))
         landingpad((const llvm::LandingPadInst&)instruction, state);
+    else if (llvm::isa<llvm::AtomicCmpXchgInst>(instruction))
+        cmpxchg((const llvm::AtomicCmpXchgInst&)instruction, state);
+    else if (llvm::isa<llvm::AtomicRMWInst>(instruction))
+        atomicrmw((const llvm::AtomicRMWInst&)instruction, state);
+    else if (llvm::isa<llvm::FenceInst>(instruction))
+        fence((const llvm::FenceInst&)instruction, state);
 #endif
     else if (llvm::isa<llvm::PHINode>(instruction))
         phi((const llvm::PHINode&)instruction, state);
@@ -362,15 +362,6 @@ Interpreter::invoke(const llvm::InvokeInst &instruction, Stack &stack)
 {
     interpretCall(instruction, stack);
 }
-
-#if LLVM_MAJOR >= 3
-// Resume instruction is available since LLVM 3.0
-void
-Interpreter::resume(const llvm::ResumeInst &instruction, State &state)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-#endif
 
 void
 Interpreter::unreachable(const llvm::UnreachableInst &instruction, State &state)
@@ -834,24 +825,6 @@ Interpreter::store(const llvm::StoreInst &instruction, State &state)
 }
 
 void
-Interpreter::fence(const llvm::FenceInst &instruction, State &state)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-Interpreter::cmpxchg(const llvm::AtomicCmpXchgInst &instruction, State &state)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-Interpreter::atomicrmw(const llvm::AtomicRMWInst &instruction, State &state)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
 Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
                            Stack &stack)
 {
@@ -1117,12 +1090,38 @@ Interpreter::va_arg(const llvm::VAArgInst &instruction, State &state)
 }
 
 #if LLVM_MAJOR >= 3
-// LandingPad instruction is available since LLVM 3.0
+// Instructions available since LLVM 3.0
+
+void
+Interpreter::resume(const llvm::ResumeInst &instruction, State &state)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Interpreter::fence(const llvm::FenceInst &instruction, State &state)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Interpreter::cmpxchg(const llvm::AtomicCmpXchgInst &instruction, State &state)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Interpreter::atomicrmw(const llvm::AtomicRMWInst &instruction, State &state)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 void
 Interpreter::landingpad(const llvm::LandingPadInst &instruction, State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
+
 #endif
 
 } // namespace Canal

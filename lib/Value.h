@@ -112,8 +112,8 @@ class MemoryValue
 {
 public:
     virtual size_t memorySize() const;
-    virtual Array::ExaclimitedSize *castToArray(const llvm::Type *itemType) const;
-    virtual void castFromArray(Array::ExaclimitedSize *array);
+    //virtual Array::ExactLimitedSize *castToArray(const llvm::Type *itemType) const;
+    //virtual void castFromArray(Array::ExaclimitedSize *array);
 };
 
 } // namespace Canal
