@@ -24,6 +24,8 @@ libcanal_la_SOURCES = \
 	Interpreter.h \
 	Pointer.cpp \
 	Pointer.h \
+	PointerTarget.cpp \
+	PointerTarget.h \
 	SELinuxModulePass.cpp \
 	SlotTracker.cpp \
 	SlotTracker.h \
