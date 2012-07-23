@@ -972,7 +972,7 @@ Interpreter::bitcast(const llvm::BitCastInst &instruction, State &state)
 
     // Set bitcast source only for the first bitcast of a pointer.
     // All subsequent bitcasts are also done from the original source.
-    if (!pointer->mBitcastFrom)
+    if (!pointer.mBitcastFrom)
         pointer.mBitcastFrom = instruction.getSrcTy();
 
     pointer.mBitcastTo = instruction.getDestTy();

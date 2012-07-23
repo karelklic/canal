@@ -111,7 +111,10 @@ public:
 class MemoryValue
 {
 public:
-    virtual size_t memorySize() const;
+    // Number of bits of memory actually used a value in the concrete
+    // domain.
+    virtual size_t memoryBitSize() const = 0;
+
     //virtual Array::ExactLimitedSize *castToArray(const llvm::Type *itemType) const;
     //virtual void castFromArray(Array::ExaclimitedSize *array);
 };

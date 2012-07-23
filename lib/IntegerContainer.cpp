@@ -341,7 +341,8 @@ Container::xor_(const Value &a, const Value &b)
     applyBinaryOperation(*this, a, b, &Value::xor_);
 }
 
-float Container::accuracy() const
+float
+Container::accuracy() const
 {
     float accuracy = 0;
     std::vector<Value*>::const_iterator it = mValues.begin();
@@ -358,7 +359,8 @@ float Container::accuracy() const
     return accuracy;
 }
 
-bool Container::isBottom() const
+bool
+Container::isBottom() const
 {
     std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
@@ -373,7 +375,8 @@ bool Container::isBottom() const
     return true;
 }
 
-void Container::setBottom()
+void
+Container::setBottom()
 {
     std::vector<Value*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
@@ -386,7 +389,8 @@ void Container::setBottom()
     }
 }
 
-bool Container::isTop() const
+bool
+Container::isTop() const
 {
     std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
@@ -401,7 +405,8 @@ bool Container::isTop() const
     return true;
 }
 
-void Container::setTop()
+void
+Container::setTop()
 {
     std::vector<Value*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
@@ -412,6 +417,12 @@ void Container::setTop()
 
         accuracyValue->setTop();
     }
+}
+
+size_t
+Container::memoryBitSize() const
+{
+    return getBitWidth();
 }
 
 } // namespace Integer
