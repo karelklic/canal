@@ -841,6 +841,8 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
     CANAL_ASSERT(source);
 
     Pointer::InclusionBased *result = source->clone();
+    // TODO: Use the bitcasts here, they must be used to properly
+    // access the elements!
     result->mBitcastFrom = result->mBitcastTo = NULL;
 
     // We get offsets. Either constants or Integer::Container.
@@ -965,10 +967,14 @@ Interpreter::bitcast(const llvm::BitCastInst &instruction, State &state)
 
     Value *resultValue = operand->clone();
 
-     Pointer::InclusionBased &pointer =
+    Pointer::InclusionBased &pointer =
         dynamic_cast<Pointer::InclusionBased&>(*resultValue);
 
-    pointer.mBitcastFrom = instruction.getSrcTy();
+    // Set bitcast source only for the first bitcast of a pointer.
+    // All subsequent bitcasts are also done from the original source.
+    if (!pointer->mBitcastFrom)
+        pointer.mBitcastFrom = instruction.getSrcTy();
+
     pointer.mBitcastTo = instruction.getDestTy();
 
     state.addFunctionVariable(instruction, resultValue);
