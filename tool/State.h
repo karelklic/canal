@@ -20,7 +20,7 @@ public:
     ~State();
 
     const llvm::Module &getModule() const { return *mModule; }
-    const Canal::Environment &getEnvironment() const { return mStack; }
+    const Canal::Environment &getEnvironment() const { return mEnvironment; }
     Canal::Stack &getStack() { return mStack; }
     const Canal::Stack &getStack() const { return mStack; }
     Canal::SlotTracker &getSlotTracker() { return mEnvironment.mSlotTracker; }
