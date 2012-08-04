@@ -133,97 +133,97 @@ protected:
 
     // Sum of two operands.  It's a binary operator.
     virtual void add(const llvm::BinaryOperator &instruction,
-                     Stack &stack,
+                     State &state,
                      const Environment &environment);
 
     // Sum of two operands.  It's a binary operator.  The operands are
     // floating point or vector of floating point values.
     virtual void fadd(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // Difference of two operands.    It's a binary operator.
     virtual void sub(const llvm::BinaryOperator &instruction,
-                     Stack &stack,
+                     State &state,
                      const Environment &environment);
 
     // Difference of two operands.  It's a binary operator.  The
     // operands are floating point or vector of floating point values.
     virtual void fsub(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // Product of two operands.  It's a binary operator.
     virtual void mul(const llvm::BinaryOperator &instruction,
-                     Stack &stack,
+                     State &state,
                      const Environment &environment);
 
     // Product of two operands.  It's a binary operator.
     virtual void fmul(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // Quotient of two operands.  It's a binary operator.  The
     // operands are integer or vector of integer values.
     virtual void udiv(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // Quotient of two operands.  It's a binary operator.  The
     // operands are integer or vector of integer values.
     virtual void sdiv(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // Quotient of two operands.  It's a binary operator.  The
     // operands are floating point or vector of floating point values.
     virtual void fdiv(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // Unsigned division remainder.  It's a binary operator.
     virtual void urem(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // Signed division remainder.  It's a binary operator.
     virtual void srem(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // Floating point remainder.  It's a binary operator.
     virtual void frem(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // It's a bitwise binary operator.
     virtual void shl(const llvm::BinaryOperator &instruction,
-                     Stack &stack,
+                     State &state,
                      const Environment &environment);
 
     // It's a bitwise binary operator.
     virtual void lshr(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // It's a bitwise binary operator.
     virtual void ashr(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // It's a bitwise binary operator.
     virtual void and_(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // It's a bitwise binary operator.
     virtual void or_(const llvm::BinaryOperator &instruction,
-                     Stack &stack,
+                     State &state,
                      const Environment &environment);
 
     // It's a bitwise binary operator.
     virtual void xor_(const llvm::BinaryOperator &instruction,
-                      Stack &stack,
+                      State &state,
                       const Environment &environment);
 
     // It's a vector operation.
