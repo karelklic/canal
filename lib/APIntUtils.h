@@ -1,12 +1,32 @@
 #ifndef LIBCANAL_APINT_UTILS_H
 #define LIBCANAL_APINT_UTILS_H
 
-namespace llvm {
-    class APInt;
-}
+#include <set>
+#include <llvm/ADT/APInt.h>
 
 namespace Canal {
 namespace APIntUtils {
+
+struct UCompare
+{
+    bool operator()(const llvm::APInt &a,
+                    const llvm::APInt &b) const
+    {
+        return a.ult(b);
+    }
+};
+
+struct SCompare
+{
+    bool operator()(const llvm::APInt &a,
+                    const llvm::APInt &b) const
+    {
+        return a.slt(b);
+    }
+};
+
+typedef std::set<llvm::APInt, UCompare> USet;
+
 
 // APInt compatibility for LLVM 2.8 and older.
 // Operations that return overflow indicators.
