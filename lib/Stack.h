@@ -13,7 +13,8 @@ class Value;
 class StackFrame
 {
 public:
-    StackFrame(const llvm::Function *function, const State &initialState);
+    StackFrame(const llvm::Function *function,
+               const State &initialState);
 
     // Returns true if next instruction should be interpreted for this
     // frame, and false when fixpoint has been reached.
@@ -41,9 +42,7 @@ private:
 class Stack
 {
 public:
-    // @param module
-    //   LLVM module that contains all functions.
-    Stack(const llvm::Module &module);
+    Stack();
 
     bool nextInstruction();
     bool hasEnteredNewFrame() const { return mHasEnteredNewFrame; }
@@ -53,7 +52,6 @@ public:
     const llvm::Instruction &getCurrentInstruction() const;
     State &getCurrentState();
     const llvm::Function &getCurrentFunction() const;
-    const llvm::Module &getModule() const { return mModule; }
 
     // @param function
     //   Function to be interpreted. Its instructions will be applied
@@ -61,13 +59,13 @@ public:
     // @param initialState
     //   Initial state when entering the function.  It includes global
     //   variables and function arguments.
-    void addFrame(const llvm::Function &function, const State &initialState);
+    void addFrame(const llvm::Function &function,
+                  const State &initialState);
 
 protected:
     std::vector<StackFrame> mFrames;
     bool mHasEnteredNewFrame;
     bool mHasReturnedFromFrame;
-    const llvm::Module &mModule;
 };
 
 } // namespace Canal
