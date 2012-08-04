@@ -28,7 +28,7 @@ Enumeration::signedMin(llvm::APInt &result) const
     else
     {
         // We assume the set is sorted by unsigned comparison.
-        APIntSet::const_iterator it = mValues.begin();
+        APIntUtils::USet::const_iterator it = mValues.begin();
         result = *it++;
         for (; it != mValues.end(); ++it)
         {
@@ -51,7 +51,7 @@ Enumeration::signedMax(llvm::APInt &result) const
     else
     {
         // We assume the set is sorted by unsigned comparison.
-        APIntSet::const_iterator it = mValues.begin();
+        APIntUtils::USet::const_iterator it = mValues.begin();
         result = *it++;
         for (; it != mValues.end(); ++it)
         {
@@ -145,7 +145,7 @@ Enumeration::toString(const State *state) const
 {
     std::stringstream ss;
     ss << "Integer::Enumeration: [" << std::endl;
-    for (std::set<llvm::APInt, APIntCompare>::const_iterator it = mValues.begin(); it != mValues.end(); ++it)
+    for (APIntUtils::USet::const_iterator it = mValues.begin(); it != mValues.end(); ++it)
     {
         ss << "    " << Canal::toString(*it) << std::endl;
     }
@@ -289,10 +289,10 @@ Enumeration::applyOperation(const Value &a,
         return;
     }
 
-    APIntSet::const_iterator aaIt = aa.mValues.begin();
+    APIntUtils::USet::const_iterator aaIt = aa.mValues.begin();
     for (; aaIt != aa.mValues.end(); ++aaIt)
     {
-        APIntSet::const_iterator bbIt = bb.mValues.begin();
+        APIntUtils::USet::const_iterator bbIt = bb.mValues.begin();
         for (; bbIt != bb.mValues.end(); ++bbIt)
         {
             if (operation1)
