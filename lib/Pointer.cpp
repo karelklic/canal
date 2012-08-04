@@ -11,7 +11,7 @@ namespace Canal {
 namespace Pointer {
 
 InclusionBased::InclusionBased(const llvm::Module &module)
-    : mModule(module), mBitcastFrom(NULL), mBitcastTo(NULL)
+    : mModule(module), mBitcastTo(NULL)
 {
 }
 
@@ -29,8 +29,7 @@ InclusionBased::operator==(const Value &value) const
     if (!pointer)
         return false;
 
-    if (pointer->mBitcastFrom != mBitcastFrom ||
-        pointer->mBitcastTo != mBitcastTo)
+    if (pointer->mBitcastTo != mBitcastTo)
         return false;
 
     // Check if it has the same number of targets.
@@ -61,8 +60,7 @@ InclusionBased::merge(const Value &value)
     }
 
     const InclusionBased &vv = dynamic_cast<const InclusionBased&>(value);
-    CANAL_ASSERT_MSG(vv.mBitcastFrom == mBitcastFrom &&
-                     vv.mBitcastTo == mBitcastTo,
+    CANAL_ASSERT_MSG(vv.mBitcastTo == mBitcastTo,
                      "Unexpected different bitcasts in a pointer merge");
 
     PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
@@ -102,15 +100,6 @@ InclusionBased::toString(const State *state) const
 
         ss << "    { assigned: " << name << std::endl;
         ss << "      target: " << indentExceptFirstLine(it->second.toString(state, slotTracker), 14) << " }" << std::endl;
-    }
-
-    if (mBitcastFrom)
-    {
-        std::string s;
-        llvm::raw_string_ostream os(s);
-        os << "    bitcast from: " << *mBitcastFrom;
-        os.flush();
-        ss << s << std::endl;
     }
 
     if (mBitcastTo)

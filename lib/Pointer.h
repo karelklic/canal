@@ -29,7 +29,6 @@ public:
     // pointer.
     PlaceTargetMap mTargets;
 
-    const llvm::Type *mBitcastFrom;
     const llvm::Type *mBitcastTo;
 
 public:
