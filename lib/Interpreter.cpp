@@ -164,7 +164,9 @@ Interpreter::interpretInstruction(Stack &stack)
 }
 
 void
-Interpreter::ret(const llvm::ReturnInst &instruction, State &state)
+Interpreter::ret(const llvm::ReturnInst &instruction,
+                 State &state,
+                 const Environment &environment)
 {
     llvm::Value *value = instruction.getReturnValue();
     // Return value is optional, some functions return nothing.
@@ -203,19 +205,25 @@ Interpreter::ret(const llvm::ReturnInst &instruction, State &state)
 }
 
 void
-Interpreter::br(const llvm::BranchInst &instruction, State &state)
+Interpreter::br(const llvm::BranchInst &instruction,
+                State &state,
+                const Environment &environment)
 {
     // Ignore.
 }
 
 void
-Interpreter::switch_(const llvm::SwitchInst &instruction, State &state)
+Interpreter::switch_(const llvm::SwitchInst &instruction,
+                     State &state,
+                     const Environment &environment)
 {
     // Ignore.
 }
 
 void
-Interpreter::indirectbr(const llvm::IndirectBrInst &instruction, State &state)
+Interpreter::indirectbr(const llvm::IndirectBrInst &instruction,
+                        State &state,
+                        const Environment &environment)
 {
     // Ignore.
 }
@@ -358,13 +366,17 @@ interpretCall(const T &instruction, Stack &stack)
 }
 
 void
-Interpreter::invoke(const llvm::InvokeInst &instruction, Stack &stack)
+Interpreter::invoke(const llvm::InvokeInst &instruction,
+                    Stack &stack,
+                    const Environment &environment)
 {
     interpretCall(instruction, stack);
 }
 
 void
-Interpreter::unreachable(const llvm::UnreachableInst &instruction, State &state)
+Interpreter::unreachable(const llvm::UnreachableInst &instruction,
+                         State &state,
+                         const Environment &environment)
 {
     // Ignore.
 }
@@ -395,115 +407,153 @@ binaryOperation(const llvm::BinaryOperator &instruction,
     state.addFunctionVariable(instruction, result);
 }
 
-void Interpreter::add(const llvm::BinaryOperator &instruction, Stack &stack)
+void Interpreter::add(const llvm::BinaryOperator &instruction,
+                      Stack &stack,
+                      const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::add);
 }
 
 void
-Interpreter::fadd(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::fadd(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::fadd);
 }
 
 void
-Interpreter::sub(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::sub(const llvm::BinaryOperator &instruction,
+                 Stack &stack,
+                 const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::sub);
 }
 
 void
-Interpreter::fsub(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::fsub(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::fsub);
 }
 
 void
-Interpreter::mul(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::mul(const llvm::BinaryOperator &instruction,
+                 Stack &stack,
+                 const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::mul);
 }
 
 void
-Interpreter::fmul(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::fmul(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::fmul);
 }
 
 void
-Interpreter::udiv(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::udiv(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::udiv);
 }
 
 void
-Interpreter::sdiv(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::sdiv(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::sdiv);
 }
 
 void
-Interpreter::fdiv(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::fdiv(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::fdiv);
 }
 
 void
-Interpreter::urem(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::urem(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::urem);
 }
 
 void
-Interpreter::srem(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::srem(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::srem);
 }
 
 void
-Interpreter::frem(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::frem(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::frem);
 }
 
 void
-Interpreter::shl(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::shl(const llvm::BinaryOperator &instruction,
+                 Stack &stack,
+                 const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::shl);
 }
 
 void
-Interpreter::lshr(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::lshr(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::lshr);
 }
 
 void
-Interpreter::ashr(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::ashr(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::ashr);
 }
 
 void
-Interpreter::and_(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::and_(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::and_);
 }
 
 void
-Interpreter::or_(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::or_(const llvm::BinaryOperator &instruction,
+                 Stack &stack,
+                 const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::or_);
 }
 
 void
-Interpreter::xor_(const llvm::BinaryOperator &instruction, Stack &stack)
+Interpreter::xor_(const llvm::BinaryOperator &instruction,
+                  Stack &stack,
+                  const Environment &environment)
 {
     binaryOperation(instruction, stack, &Value::xor_);
 }
 
 void
-Interpreter::extractelement(const llvm::ExtractElementInst &instruction, State &state)
+Interpreter::extractelement(const llvm::ExtractElementInst &instruction,
+                            State &state,
+                            const Environment &environment)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.  Fixpoint
@@ -533,7 +583,9 @@ Interpreter::extractelement(const llvm::ExtractElementInst &instruction, State &
 }
 
 void
-Interpreter::insertelement(const llvm::InsertElementInst &instruction, State &state)
+Interpreter::insertelement(const llvm::InsertElementInst &instruction,
+                           State &state,
+                           const Environment &environment)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.  Fixpoint
@@ -568,7 +620,8 @@ Interpreter::insertelement(const llvm::InsertElementInst &instruction, State &st
 
 void
 Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction,
-                           Stack &stack)
+                           Stack &stack,
+                           const Environment &environment)
 {
     State &state = stack.getCurrentState();
 
@@ -591,7 +644,8 @@ Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction,
     llvm::SmallVector<int, 16> shuffleMask = instruction.getShuffleMask();
 #else
     llvm::SmallVector<int, 16> shuffleMask;
-    { // Reimplementation of missing getShuffleMask.
+    {
+        // Reimplementation of the missing getShuffleMask method.
         const llvm::Value *inputMask = instruction.getOperand(2);
         CANAL_ASSERT_MSG(inputMask, "Failed to get shufflevector mask.");
         const llvm::VectorType *inputMaskType =
@@ -604,8 +658,9 @@ Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction,
         for (unsigned i = 0; i != count; ++i)
         {
             llvm::Constant *constant = inputMaskConstant->getOperand(i);
-            shuffleMask.push_back(llvm::isa<llvm::UndefValue>(constant) ? -1 :
-                                  llvm::cast<llvm::ConstantInt>(constant)->getZExtValue());
+            int constantInt = llvm::isa<llvm::UndefValue>(constant) ? -1 :
+                llvm::cast<llvm::ConstantInt>(constant)->getZExtValue();
+            shuffleMask.push_back(constantInt);
         }
     }
 #endif
@@ -662,7 +717,8 @@ getValueLocation(Value *aggregate, const T &instruction)
 
 void
 Interpreter::extractvalue(const llvm::ExtractValueInst &instruction,
-                          State &state)
+                          State &state,
+                          const Environment &environment)
 {
     Constant constant;
     Value *aggregate = variableOrConstant(
@@ -679,7 +735,8 @@ Interpreter::extractvalue(const llvm::ExtractValueInst &instruction,
 
 void
 Interpreter::insertvalue(const llvm::InsertValueInst &instruction,
-                         State &state)
+                         State &state,
+                         const Environment &environment)
 {
     Constant aggregateConstant;
     Value *aggregate = variableOrConstant(
@@ -706,7 +763,9 @@ Interpreter::insertvalue(const llvm::InsertValueInst &instruction,
 }
 
 void
-Interpreter::alloca_(const llvm::AllocaInst &instruction, Stack &stack)
+Interpreter::alloca_(const llvm::AllocaInst &instruction,
+                     Stack &stack,
+                     const Environment &environment)
 {
     State &state = stack.getCurrentState();
     const llvm::Type *type = instruction.getAllocatedType();
@@ -747,7 +806,9 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction, Stack &stack)
 }
 
 void
-Interpreter::load(const llvm::LoadInst &instruction, State &state)
+Interpreter::load(const llvm::LoadInst &instruction,
+                  State &state,
+                  const Environment &environment)
 {
     // Find the pointer in the state.  If the pointer is not
     // available, do nothing.
@@ -782,7 +843,9 @@ Interpreter::load(const llvm::LoadInst &instruction, State &state)
 }
 
 void
-Interpreter::store(const llvm::StoreInst &instruction, State &state)
+Interpreter::store(const llvm::StoreInst &instruction,
+                   State &state,
+                   const Environment &environment)
 {
     // Find the pointer in the state.  If the pointer is not
     // available, do nothing.
@@ -836,12 +899,11 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
     if (!base)
         return;
 
-    Pointer::InclusionBased *source =
-        dynamic_cast<Pointer::InclusionBased*>(base);
-    CANAL_ASSERT(source);
+    Pointer::InclusionBased &source =
+        dynamic_cast<Pointer::InclusionBased&>(*base);
 
-    Pointer::InclusionBased *result = source->clone();
-    result->mBitcastFrom = result->mBitcastTo = NULL;
+    Pointer::InclusionBased *result = source.clone();
+    result->mBitcastTo = NULL;
 
     // We get offsets. Either constants or Integer::Container.
     // Pointer points either to an array (or array offset), or to a
@@ -941,13 +1003,55 @@ Interpreter::sitofp(const llvm::SIToFPInst &instruction, State &state)
 void
 Interpreter::ptrtoint(const llvm::PtrToIntInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    Value *operand = state.findVariable(*instruction.getOperand(0));
+    if (!operand)
+        return;
+
+    Pointer::InclusionBased &source =
+        dynamic_cast<Pointer::InclusionBased&>(*operand);
+
+    Pointer::InclusionBased *result = source.clone();
+
+    Pointer::PlaceTargetMap::const_iterator it = result->mTargets.begin();
+    for (; it != result->mTargets.end(); ++it)
+    {
+        // If the numeric offset exists, verify that the width
+        // matches.  Otherwise, create an empty offset.
+        if (it->second.mNumericOffset)
+        {
+            llvm::IntegerType &integerType =
+                llvm::cast<llvm::IntegerType>(*instruction.getDestTy());
+
+            int existingWidth = it->second.mNumericOffset->getBitWidth();
+            CANAL_ASSERT_MSG(existingWidth == integerType.getBitWidth(),
+                             "Offset integer width adjustment is not "
+                             "implemented.  Perhaps now is the right "
+                             "time to implement it, as you have an example.");
+        }
+        else
+        {
+            it->second.mNumericOffset =
+                typeToEmptyValue(*instruction.getDestTy(), module);
+        }
+    }
+
+    state.addFunctionVariable(instruction, result);
 }
 
 void
 Interpreter::inttoptr(const llvm::IntToPtrInst &instruction, State &state)
 {
-    CANAL_NOT_IMPLEMENTED();
+    Value *operand = state.findVariable(*instruction.getOperand(0));
+    if (!operand)
+        return;
+
+    Pointer::InclusionBased &source =
+        dynamic_cast<Pointer::InclusionBased&>(*operand);
+
+    Pointer::InclusionBased *result = source.clone();
+    result->mBitcastTo = instruction.getDestTy();
+
+    state.addFunctionVariable(instruction, result);
 }
 
 void
@@ -968,7 +1072,6 @@ Interpreter::bitcast(const llvm::BitCastInst &instruction, State &state)
      Pointer::InclusionBased &pointer =
         dynamic_cast<Pointer::InclusionBased&>(*resultValue);
 
-    pointer.mBitcastFrom = instruction.getSrcTy();
     pointer.mBitcastTo = instruction.getDestTy();
 
     state.addFunctionVariable(instruction, resultValue);
@@ -1047,11 +1150,15 @@ Interpreter::select(const llvm::SelectInst &instruction, State &state)
         return;
 
     Constant trueConstant, falseConstant;
-    Value *trueValue = variableOrConstant(*instruction.getTrueValue(), state, trueConstant);
-    Value *falseValue = variableOrConstant(*instruction.getFalseValue(), state, falseConstant);
+    Value *trueValue = variableOrConstant(*instruction.getTrueValue(),
+                                          state, trueConstant);
+    Value *falseValue = variableOrConstant(*instruction.getFalseValue(),
+                                           state, falseConstant);
 
     Value *resultValue;
-    const Integer::Container &conditionInt = dynamic_cast<const Integer::Container&>(*condition);
+    const Integer::Container &conditionInt =
+        dynamic_cast<const Integer::Container&>(*condition);
+
     CANAL_ASSERT(conditionInt.getBits().getBitWidth() == 1);
     switch (conditionInt.getBits().getBitValue(0))
     {
