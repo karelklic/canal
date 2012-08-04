@@ -10,20 +10,25 @@
 namespace Canal {
 namespace Pointer {
 
-Target::Target() : mType(Target::Uninitialized)
+Target::Target() : mType(Target::Uninitialized),
+                   mNumericOffset(NULL)
 {
 }
 
 Target::Target(const Target &target) : mType(target.mType),
                                        mConstant(target.mConstant),
                                        mInstruction(target.mInstruction),
-                                       mOffsets(target.mOffsets)
+                                       mOffsets(target.mOffsets),
+                                       mNumericOffset(target.mNumericOffset)
 {
     std::vector<Value*>::iterator it = mOffsets.begin(),
         itend = mOffsets.end();
 
     for (; it != itend; ++it)
         *it = (*it)->clone();
+
+    if (mNumericOffset)
+        mNumericOffset = mNumericOffset->clone();
 }
 
 Target::~Target()
@@ -32,6 +37,8 @@ Target::~Target()
         itend = mOffsets.end();
     for (; it != itend; ++it)
         delete *it;
+
+    delete mNumericOffset;
 }
 
 bool
@@ -39,6 +46,13 @@ Target::operator==(const Target &target) const
 {
     if (mType != target.mType)
         return false;
+
+    if ((!mNumericOffset && target.mNumericOffset) ||
+        (mNumericOffset && !target.mNumericOffset) ||
+        (mNumericOffset && *mNumericOffset != *target.mNumericOffset))
+    {
+        return false;
+    }
 
     switch (mType)
     {
@@ -92,6 +106,17 @@ Target::merge(const Target &target)
         CANAL_ASSERT(mInstruction == target.mInstruction);
         CANAL_ASSERT(mOffsets.size() == target.mOffsets.size());
 
+        // Merge numeric offsets.
+        if (!mNumericOffset && target.mNumericOffset)
+            mNumericOffset = target.mNumericOffset->clone();
+        else if (mNumericOffset && !target.mNumericOffset)
+        {
+            llvm::APInt zero = llvm::APInt::getNullValue(mNumericOffset->getBitWidth());
+            mNumericOffset->merge(Integer::Container(zero));
+        }
+        else if (mNumericOffset)
+            mNumericOffset->merge(*target.mNumericOffset);
+
         std::vector<Value*>::iterator it1 = mOffsets.begin();
         std::vector<Value*>::const_iterator it2 = target.mOffsets.begin();
         for (; it1 != mOffsets.end(); ++it1, ++it2)
@@ -138,7 +163,9 @@ Target::toString(const State *state, SlotTracker &slotTracker) const
         break;
     case MemoryBlock:
     {
-        const llvm::Instruction &instruction = llvm::cast<llvm::Instruction>(*mInstruction);
+        const llvm::Instruction &instruction =
+            llvm::cast<llvm::Instruction>(*mInstruction);
+
         slotTracker.setActiveFunction(*instruction.getParent()->getParent());
         std::string name(Canal::getName(instruction, slotTracker));
         if (name.empty())

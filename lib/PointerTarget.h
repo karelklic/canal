@@ -6,14 +6,18 @@
 #include <vector>
 
 namespace llvm {
-    class Value;
-}
+class Value;
+} // namespace llvm
 
 namespace Canal {
 
 class State;
 class SlotTracker;
 class Value;
+
+namespace Integer {
+class Container;
+} // namespace Integer
 
 namespace Pointer {
 
@@ -64,8 +68,8 @@ public:
 
     // Valid when the target represents an anonymous memory block.
     // This is a key to either State::mGlobalBlocks or
-    // State::mFunctionBlocks.  The memory is owned by LLVM and not by
-    // this class.
+    // State::mFunctionBlocks.  The referenced llvm::Value instance is
+    // owned by the LLVM framework and not by this class.
     const llvm::Value *mInstruction;
 
     // A specific constant.
@@ -74,6 +78,10 @@ public:
     // Array or struct offsets in the GetElementPtr style.
     // This class owns the memory.
     std::vector<Value*> mOffsets;
+
+    // An additional, numeric offset on the top of mOffsets.  This
+    // class owns the memory.  It might be NULL instead of 0.
+    Integer::Container *mNumericOffset;
 };
 
 } // namespace Pointer
