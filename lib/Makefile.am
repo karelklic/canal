@@ -10,6 +10,8 @@ libcanal_la_SOURCES = \
 	ArraySingleItem.h \
 	Constant.cpp \
 	Constant.h \
+	Environment.cpp \
+	Environment.h \
 	FloatRange.cpp \
 	FloatRange.h \
 	IntegerBits.cpp \
