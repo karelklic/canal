@@ -12,7 +12,7 @@
 
 State::State(const llvm::Module *module) : mModule(module),
                                            mStack(*module),
-                                           mSlotTracker(*module)
+                                           mEnvironment(*module)
 {
 }
 

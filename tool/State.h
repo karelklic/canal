@@ -3,6 +3,7 @@
 
 #include <set>
 #include <string>
+#include "../lib/Environment.h"
 #include "../lib/Interpreter.h"
 #include "../lib/SlotTracker.h"
 #include "../lib/Stack.h"
@@ -19,9 +20,10 @@ public:
     ~State();
 
     const llvm::Module &getModule() const { return *mModule; }
+    const Canal::Environment &getEnvironment() const { return mStack; }
     Canal::Stack &getStack() { return mStack; }
     const Canal::Stack &getStack() const { return mStack; }
-    Canal::SlotTracker &getSlotTracker() { return mSlotTracker; }
+    Canal::SlotTracker &getSlotTracker() { return mEnvironment.mSlotTracker; }
 
     // Check if the interpreter is in the middle of interpretation.
     // This is true if something is on the stack.
@@ -43,8 +45,8 @@ protected:
 
 protected:
     const llvm::Module *mModule;
+    Canal::Environment mEnvironment;
     Canal::Stack mStack;
-    Canal::SlotTracker mSlotTracker;
     Canal::Interpreter mInterpreter;
     std::set<std::string> mFunctionBreakpoints;
 };
