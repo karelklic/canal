@@ -2,26 +2,15 @@
 #define LIBCANAL_INTEGER_ENUMERATION_H
 
 #include "Value.h"
-#include <llvm/ADT/APInt.h>
-#include <set>
+#include "APIntUtils.h"
 
 namespace Canal {
 namespace Integer {
 
-struct APIntCompare
-{
-    bool operator()(const llvm::APInt &a, const llvm::APInt &b) const
-    {
-        return a.ult(b);
-    }
-};
-
-typedef std::set<llvm::APInt, APIntCompare> APIntSet;
-
 class Enumeration : public Value, public AccuracyValue
 {
 public:
-    APIntSet mValues;
+    APIntUtils::USet mValues;
     bool mTop;
     unsigned mNumBits;
 
