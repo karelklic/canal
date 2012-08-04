@@ -7,9 +7,9 @@
 #include <string>
 
 namespace llvm {
-    class Value;
-    class raw_ostream;
-}
+class Value;
+class raw_ostream;
+} // namespace llvm
 
 namespace Canal {
 
@@ -35,11 +35,11 @@ public:
 
     // Clears everything.  Releases all memory.
     void clear();
-    // Clears function variables and blocks.  Also clears
-    // mReturnedValue.
+    // Clears function variables, blocks and returned value.
     void clearFunctionLevel();
 
     void merge(const State &state);
+
     // Merge only global variables and global memory blocks of the
     // provided state.  This is used after a function call, where the
     // modifications of the global state need to be merged to the
@@ -51,12 +51,14 @@ public:
     // Represents a place in the program where the global variable is
     // assigned.
     void addGlobalVariable(const llvm::Value &place, Value *value);
+
     // @param place
     // Represents a place in the program where the function variable
     // is assigned.  Usually it is an instance of llvm::Instruction
     // for a result of the instruction.  It might also be an instance
     // of llvm::Argument, which represents a function call parameter.
     void addFunctionVariable(const llvm::Value &place, Value *value);
+
     void addGlobalBlock(const llvm::Value &place, Value *value);
     void addFunctionBlock(const llvm::Value &place, Value *value);
 
