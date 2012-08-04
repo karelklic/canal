@@ -1,5 +1,6 @@
 #include "PointerTarget.h"
 #include "ArrayInterface.h"
+#include "IntegerContainer.h"
 #include "SlotTracker.h"
 #include "State.h"
 #include "Utils.h"
@@ -111,7 +112,10 @@ Target::merge(const Target &target)
             mNumericOffset = target.mNumericOffset->clone();
         else if (mNumericOffset && !target.mNumericOffset)
         {
-            llvm::APInt zero = llvm::APInt::getNullValue(mNumericOffset->getBitWidth());
+            const Integer::Container &numericOffsetInt =
+                dynamic_cast<const Integer::Container&>(*mNumericOffset);
+
+            llvm::APInt zero = llvm::APInt::getNullValue(numericOffsetInt.getBitWidth());
             mNumericOffset->merge(Integer::Container(zero));
         }
         else if (mNumericOffset)

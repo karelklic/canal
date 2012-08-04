@@ -81,7 +81,7 @@ public:
 
     // An additional, numeric offset on the top of mOffsets.  This
     // class owns the memory.  It might be NULL instead of 0.
-    Integer::Container *mNumericOffset;
+    Value *mNumericOffset;
 };
 
 } // namespace Pointer
