@@ -1,0 +1,65 @@
+% pdflatex canal.tex
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{hyperref}
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{fancybox}
+
+\title{Canal}
+\author{Karel Klíč}
+
+\begin{document}
+\maketitle
+
+Canal is a tool for increasing the understandability, traceability,
+precision, and correctness of C and C++ programs.
+
+It achieves its goals through the use of static code analysis,
+abstract interpretation, and abstractions.
+
+\cleardoublepage
+\tableofcontents
+
+\cleardoublepage
+\section{Overview}
+
+\section{Use cases}
+\subsection{Analyze program behaviour}
+\subsection{Check if program matches a specification}
+
+\section{Artifacts}
+\subsection{Source code}
+\subsection{Specification}
+\subsection{Models}
+
+\section{Techniques}
+\subsection{Abstract Interpretation}
+
+\subsection{Symbolic Execution}
+
+\section{Abstractions}
+\subsection{Arrays}
+
+\subsection{Structures}
+
+\subsection{Integers}
+
+\subsection{Floating-point Numbers}
+
+\subsection{Pointers}
+
+Pointer can be casted to a number via the ptrtoint instruction.
+Usually, the resulting memory offset is used to achieve pointer
+arithmetics that are not available via getelementptr semantics.
+
+
+
+\cleardoublepage
+\begin{thebibliography}{9}
+
+\end{thebibliography}
+
+\end{document}
