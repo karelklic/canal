@@ -104,7 +104,7 @@ Structure::getItem(const Value &offset) const
     const Integer::Enumeration &enumeration = integer.getEnumeration();
     if (!enumeration.isTop())
     {
-        Integer::APIntSet::const_iterator it = enumeration.mValues.begin(),
+        APIntUtils::USet::const_iterator it = enumeration.mValues.begin(),
             itend = enumeration.mValues.end();
         for (; it != itend; ++it)
         {
