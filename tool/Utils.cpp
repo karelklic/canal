@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <cstdlib>
 #include <climits>
+#include <sys/wait.h>
 
 bool
 askYesNo(const char *question)
@@ -66,4 +67,14 @@ stringToInt(const char *str, bool &success)
     if (r > (unsigned)INT_MAX + 1)
         success = false;
     return -(int)r;
+}
+
+pid_t
+safeWaitPid(pid_t pid, int *wstat, int options)
+{
+    pid_t r;
+    do {
+        r = waitpid(pid, wstat, options);
+    } while (r == -1 && errno == EINTR);
+    return r;
 }

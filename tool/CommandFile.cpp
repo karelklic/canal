@@ -24,7 +24,10 @@ CommandFile::CommandFile(Commands &commands)
     : Command("file",
               "",
               "Use FILE as program to be interpreted",
-              "Use FILE as program to be interpreted.  Both binary and textual LLVM bitcode files can be loaded.",
+              "Use FILE as program to be interpreted.  FILE can be a LLVM "
+              "bitcode file (both binary and textual form is allowed), an ELF "
+              "binary with .note.llvm section containing the LLVM bitcode, "
+              "or a standalone source file with .c or .cpp extension.",
               commands)
 {
 }
@@ -96,30 +99,32 @@ CommandFile::getCompletionMatches(const std::vector<std::string> &args, int poin
     return result;
 }
 
-void
-CommandFile::run(const std::vector<std::string> &args)
+static void
+printError(const llvm::SMDiagnostic &err)
 {
-    if (args.size() > 2)
-    {
-        puts("Too many parameters.");
-        return;
-    }
-    else if (args.size() < 2)
-    {
-        puts("Argument required (module file).");
-        return;
-    }
+    std::string s;
+    llvm::raw_string_ostream os(s);
+#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
+    err.print(NULL, os, false);
+#else
+    err.Print(NULL, os);
+#endif
+    os.flush();
+    printf("%s", s.c_str());
+}
 
-    llvm::LLVMContext &context = llvm::getGlobalContext();
-    llvm::SMDiagnostic err;
-    llvm::Module *module = NULL;
+static llvm::Module *
+loadAsElfFile(const std::string &path, bool &error)
+{
+    error = false;
 
     // Open the ELF file.
-    int fd = open(args[1].c_str(), O_RDONLY, 0);
+    int fd = open(path.c_str(), O_RDONLY, 0);
     if (fd == -1)
     {
-        printf("Cannot open `%s': %s\n", args[1].c_str(), strerror(errno));
-        return;
+        printf("Cannot open `%s': %s\n", path.c_str(), strerror(errno));
+        error = true;
+        return NULL;
     }
 
     // Get Elf object for the file.
@@ -130,74 +135,188 @@ CommandFile::run(const std::vector<std::string> &args)
     {
         printf("Cannot create ELF descriptor: %s\n", elf_errmsg(-1));
         close(fd);
-        return;
+        error = true;
+        return NULL;
     }
 
+    llvm::Module *module = NULL;
     if (elf_kind(elf) == ELF_K_ELF)
     {
         // Get Elf header.
         GElf_Ehdr ehdr_mem, *ehdr = gelf_getehdr (elf, &ehdr_mem);
-        if (!ehdr)
+        if (ehdr)
+        {
+            Elf_Scn *section = NULL;
+            while ((section = elf_nextscn(elf, section)) != NULL)
+            {
+                GElf_Shdr shdr_mem, *shdr;
+
+                /* Get the section header data.  */
+                shdr = gelf_getshdr(section, &shdr_mem);
+                if (shdr->sh_type == SHT_NOBITS)
+                    continue;
+
+                if ((shdr->sh_flags & SHF_GROUP) != 0)
+                    /* Ignore the section.  */
+                    continue;
+
+                const char *section_name = elf_strptr(elf, ehdr->e_shstrndx, shdr->sh_name);
+                if (!section_name)
+                    continue;
+
+                if (0 != strcmp(section_name, ".note.llvm"))
+                    continue;
+
+                Elf_Data *data = elf_getdata(section, NULL);
+                llvm::StringRef data_ref((const char*)data->d_buf, data->d_size);
+                llvm::MemoryBuffer *data_buffer = llvm::MemoryBuffer::getMemBufferCopy(data_ref);
+                llvm::LLVMContext &context = llvm::getGlobalContext();
+                llvm::SMDiagnostic err;
+                module = llvm::ParseIR(data_buffer, err, context);
+                if (!module)
+                {
+                    puts("Failed to load the module.");
+                    printError(err);
+                    error = true;
+                }
+                break;
+            }
+
+            if (!module)
+            {
+                puts("Failed to find .note.llvm section in the ELF file.");
+                error = true;
+            }
+        }
+        else
         {
             printf("Cannot get ELF header: %s\n", elf_errmsg (-1));
-            elf_end(elf);
-            close(fd);
-            return;
+            error = true;
         }
+    }
 
-        Elf_Scn *section = NULL;
-        while ((section = elf_nextscn(elf, section)) != NULL)
+    elf_end(elf);
+    close(fd);
+    return module;
+}
+
+static llvm::Module *
+loadAsBitcodeFile(const std::string &path, bool &error)
+{
+    error = false;
+    llvm::LLVMContext &context = llvm::getGlobalContext();
+    llvm::SMDiagnostic err;
+    llvm::Module *module = llvm::ParseIRFile(path, err, context);
+    if (!module)
+    {
+        error = true;
+        puts("Failed to load the module.");
+        printError(err);
+    }
+
+    return module;
+}
+
+static llvm::Module *
+loadAsSourceFile(const std::string &path, bool &error)
+{
+    const char *extensions[] = { ".c", ".cpp", ".C", ".cxx", NULL };
+    error = false;
+
+    enum {
+        PlainC,
+        CPlusPlus,
+        Unknown
+    } type = Unknown;
+    std::string bitcodePath;
+
+    for (const char *extension = extensions[0]; extension != NULL; ++extension)
+    {
+        if (path.length() <= strlen(extension))
+            continue;
+
+        if (path.substr(path.length() - strlen(extension)) == extension)
         {
-            GElf_Shdr shdr_mem, *shdr;
-
-            /* Get the section header data.  */
-            shdr = gelf_getshdr(section, &shdr_mem);
-            if (shdr->sh_type == SHT_NOBITS)
-                continue;
-
-            if ((shdr->sh_flags & SHF_GROUP) != 0)
-                /* Ignore the section.  */
-                continue;
-
-            const char *section_name = elf_strptr(elf, ehdr->e_shstrndx, shdr->sh_name);
-            if (!section_name)
-                continue;
-
-            if (0 != strcmp(section_name, ".note.llvm"))
-                continue;
-
-            Elf_Data *data = elf_getdata(section, NULL);
-            llvm::StringRef data_ref((const char*)data->d_buf, data->d_size);
-            llvm::MemoryBuffer *data_buffer = llvm::MemoryBuffer::getMemBufferCopy(data_ref);
-            module = llvm::ParseIR(data_buffer, err, context);
+            type = (extension == extensions[0]) ? PlainC : CPlusPlus;
+            bitcodePath = path.substr(0, path.length() - strlen(extension)) + ".s";
             break;
         }
-
-        if (!module)
-        {
-            puts("Failed to find .llvm section in the ELF file.");
-            return;
-        }
-
-        elf_end(elf);
-        close(fd);
     }
-    else
+
+    if (type == Unknown)
+        return NULL;
+
+    // Compile via clang and obtain bitcode.
+    char **argv;
+    argv = (char**)malloc(7 * sizeof(char*));
+    argv[0] = (char*)"clang";
+    argv[1] = (char*)"-emit-llvm";
+    argv[2] = (char*)"-S";
+    argv[3] = (char*)path.c_str();
+    argv[4] = (char*)"-o";
+    argv[5] = (char*)bitcodePath.c_str();
+    argv[6] = NULL;
+
+    // Print the command.
+    for (int i = 0; argv[i]; ++i)
     {
-        module = llvm::ParseIRFile(args[1], err, context);
+        if (i > 0)
+            printf(" ");
+        printf("%s", argv[i]);
+    }
+    puts("");
+
+    pid_t pid = fork();
+    if (pid < 0)
+    {
+        printf("Failed to fork: %s\n", strerror(errno));
+        free(argv);
+        error = true;
+        return NULL;
+    }
+
+    if (pid == 0)
+    {
+        execvp(argv[0], argv);
+        _exit(127);
+    }
+
+    safeWaitPid(pid, NULL, 0);
+    free(argv);
+
+    return loadAsBitcodeFile(bitcodePath, error);
+}
+
+void
+CommandFile::run(const std::vector<std::string> &args)
+{
+    if (args.size() > 2)
+    {
+        puts("Too many parameters.");
+        return;
+    }
+    else if (args.size() < 2)
+    {
+        puts("Argument required (a file).");
+        return;
+    }
+
+    bool error;
+    llvm::Module *module = loadAsElfFile(args[1], error);
+    if (error)
+        return;
+
+    if (!module)
+    {
+        module = loadAsSourceFile(args[1], error);
+        if (error)
+            return;
+
         if (!module)
         {
-            puts("Failed to load the module.");
-            std::string s;
-            llvm::raw_string_ostream os(s);
-#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
-            err.print(NULL, os, false);
-#else
-            err.Print(NULL, os);
-#endif
-            os.flush();
-            printf("%s", s.c_str());
-            return;
+            module = loadAsBitcodeFile(args[1], error);
+            if (error || !module)
+                return;
         }
     }
 

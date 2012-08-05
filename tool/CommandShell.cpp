@@ -1,6 +1,5 @@
 #include "CommandShell.h"
-#include <sys/types.h>
-#include <sys/wait.h>
+#include "Utils.h"
 #include <unistd.h>
 #include <errno.h>
 #include <cstdlib>
@@ -17,16 +16,6 @@ CommandShell::CommandShell(Commands &commands)
               "$PATH is modified to include gcc/ld build wrappers.",
               commands)
 {
-}
-
-static pid_t
-safe_waitpid(pid_t pid, int *wstat, int options)
-{
-	pid_t r;
-	do {
-            r = waitpid(pid, wstat, options);
-	} while (r == -1 && errno == EINTR);
-	return r;
 }
 
 void
@@ -48,7 +37,8 @@ CommandShell::run(const std::vector<std::string> &args)
     else
     {
         std::stringstream ss;
-        for (std::vector<std::string>::const_iterator it = args.begin() + 1; it != args.end(); ++it)
+        std::vector<std::string>::const_iterator it = args.begin() + 1;
+        for (; it != args.end(); ++it)
         {
             if (it != args.begin() + 1)
                 ss << " ";
@@ -88,6 +78,6 @@ CommandShell::run(const std::vector<std::string> &args)
         _exit(127);
     }
 
-    safe_waitpid(pid, NULL, 0);
+    safeWaitPid(pid, NULL, 0);
     free(argv);
 }
