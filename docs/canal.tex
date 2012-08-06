@@ -15,10 +15,8 @@
 \maketitle
 
 Canal is a tool for increasing the understandability, traceability,
-precision, and correctness of C and C++ programs.
-
-It achieves its goals through the use of static code analysis,
-abstract interpretation, and abstractions.
+precision, and correctness of C and C++ programs via the use of static
+code analysis, abstract interpretation, and abstractions.
 
 \cleardoublepage
 \tableofcontents
@@ -27,35 +25,157 @@ abstract interpretation, and abstractions.
 \section{Overview}
 
 \section{Use cases}
-\subsection{Analyze program behaviour}
-\subsection{Check if program matches a specification}
+\subsection{Analysis of program behaviour}
+You can hook on the fixpoint of function calls to inspect the
+calculated abstract values.  You can get abstract values of function
+call parameters.
+
+\subsection{Comparison with a specification}
+A set of pre- and post-conditions for functions, and variable-based or
+module-based automata.  This can be defined for certain function or
+library, and library/function users are watched to conform to the
+specification.
+
+\subsection{Conformance to environment constraints}
+Double free, memory leaks, buffer overflow and underflow, division by
+zero, invalid access to memory, locking and concurrency errors,
+uncaught exceptions.
 
 \section{Artifacts}
 \subsection{Source code}
 \subsection{Specification}
 \subsection{Models}
 
-\section{Techniques}
-\subsection{Abstract Interpretation}
+\section{Abstract Interpretation}
+Our abstract interpreter comes in four flavours:
+\begin{description}
+\item[Context-insensitive flow-insensitive] For every function in a
+  program, the fixpoint is calculated with a single set of abstract
+  values that encompasses all function calls.
+\item[Context-insensitive flow-sensitive] For every function in a
+  program, the fixpoint is calculated with a single set of abstract
+  values that encompasses all function calls, but every possible path
+  through the function is calculated separately.
+\item[Context-sensitive flow-insensitive] The fixpoint is calculated
+  with a set of abstract values specifically created for every
+  function call.
+\item[Context-sensitive flow-sensitive] The fixpoint is calculated
+  with a set of abstract values specifically created for every
+  possible path in a function call.  Path conditions are taken into
+  account.
+\end{description}
 
-\subsection{Symbolic Execution}
+Abstract interpreter can be either operational or equation-based.  Our
+interpreter is operational.
+
+\subsection{Tuning}
+The precision of abstract interpreter is greately tunable. Here are
+the aspects to consider:
+\begin{description}
+\item[Interpreter flavour] Context-sensitivity and flow-sensitivity
+  increase both precision and complexity.
+\item[Widening and narrowing] Selection and parameters of widening and
+  narrowing operators affect both precision and complexity.
+\item[Relations in abstract domains] Type and number of relations in
+  abstract domains affect both precision and complexity.
+\item[Memory for abstract domains] Parameters of some abstract domains
+  allow to trade memory for better precision.
+\end{description}
+
+Maximal precision of abstract interpreter is same as for symbolic
+executor, but abstract interpreter is more tunable.
+
+\subsection{Context sensitivity}
+Context sensitivity is achieved by keeping a function call stack.
+Every stack frame keeps the complete state of a function fixpoint
+calculation (all local and global variables).  When a function call is
+reached during the fixpoint computation and function call parameters
+are already initialized, a new frame is placed on the top of stack and
+the called function is interpreted with the provided parameters.
+
+\subsection{Flow sensitivity}
+
 
 \section{Abstractions}
+
+\subsection{Memory}
+Our memory abstraction for abstract interpretation recognizes four
+kinds of memory:
+\begin{description}
+\item[Register-like stack memory] This is function-level memory that
+  is released automatically when function returns.  We denote such a
+  memory by LLVM-style names starting with the percent sign
+  \texttt{\%}.  Memory either has a name (e.g. \texttt{\%result}) or a
+  number is generated to serve as a name (e.g. \texttt{\%32} denotes
+  thirty-second unnamed instruction call in a function).
+\item[Stack memory allocated by \texttt{alloca}] This is also a
+  function-level memory that is released automatically when function
+  returns.  The difference to register-like stack memory is that this
+  memory is accessed by LLVM exclusively via pointers.  We denote such
+  a memory by names starting with \texttt{\%\^}.  Every piece of
+  memory has a name corresponding to the place where the memory has
+  been allocated (\texttt{alloca} has been called).  So if the memory
+  has been allocated by an instruction call \texttt{\%ptr = alloca
+    i32, align 4}, it can be denoted by \texttt{\%\^{}ptr}.
+\item[Global variables] Global variables are module-wise and are valid
+  for the whole program run.  We denote such a memory by LLVM-style
+  names starting with \texttt{@}.
+\item[Heap memory] Heap memory is also valid for the whole program
+  run.  We denote such a memory by names starting by \texttt{@\^}.
+  Every piece of memory has a name corresponding to the place where
+  the memory has been allocated (\texttt{malloc} or similar function
+  has been called).  Name of the function is also included in the
+  place name, so if a function \texttt{createString} contains an
+  instruction call \texttt{\%result = call i8* @malloc(i32 1)}, we can
+  denote the memory allocated on this place by
+  \texttt{@\^{}createString:result}.
+\end{description}
+
+As it can be seen from the style of memory denotation, every piece of
+memory is associated with a place in the program.  This means all
+operations affecting a memory block allocated at certain place forms a
+single abstract value.  Context-sensite abstract interpretation helps
+to increase the precision of this memory abstraction.
+
 \subsection{Arrays}
 
 \subsection{Structures}
 
 \subsection{Integers}
 
-\subsection{Floating-point Numbers}
+\subsection{Floating-point numbers}
 
 \subsection{Pointers}
+Pointer can be casted to a number via the \texttt{ptrtoint}
+instruction.  Usually, the resulting memory offset is used to achieve
+pointer arithmetics that are not available via \texttt{getelementptr}
+semantics.
 
-Pointer can be casted to a number via the ptrtoint instruction.
-Usually, the resulting memory offset is used to achieve pointer
-arithmetics that are not available via getelementptr semantics.
-
-
+\section{Wishlist}
+\begin{description}
+\item[Lazy model-checking abstract value] Allow to investigate just a
+  single function, taking into account all possible parameter values
+  and shapes (perhaps limited by a pre-condition).  Parameter values
+  and shapes must be smartly provided depending on the boundary
+  requirements of the checked code.  This allows a kind of model
+  checking, and use of model checking algorithms and ideas.
+\item[Widening operators] Implement widening operators for integers
+  and other abstract domains as required.
+\item[Narrowing operators] Implement narrowing operators for integers
+  and other abstract domains as required.
+\item[String abstractions] Implement abstract domains specific for C
+  strings.
+\item[Weakly relational numeric abstractions] Implement weakly
+  relational integer and floating-point abstract domains.
+\item[Basic block abstraction] Implement basic block summaries that
+  speed-up the static analysis.
+\item[Function abstraction] Implement function summaries that speed-up
+  the static analysis.
+\item[Parallelization] Make abstract interpreter to use multiple
+  threads for fixpoint calculation on the right level.
+\item[Concurrency check] Add support for checking of multi-threaded
+  programs.
+\end{description}
 
 \cleardoublepage
 \begin{thebibliography}{9}
