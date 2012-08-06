@@ -177,7 +177,36 @@ CommandPrint::run(const std::vector<std::string> &args)
         return;
     }
 
-    std::vector<std::string>::const_iterator it = args.begin() + 1;
-    for (; it != args.end(); ++it)
-        printVariable(*it, *state);
+    if (args[1] == "%" || args[1] == "@" || args[1] == "@^" || args[1] == "%^")
+    {
+        std::vector<std::string> variables;
+        Canal::State &curState = state->getStack().getCurrentState();
+
+        bool addFunctionName = (args[1] == "@^");
+        const Canal::PlaceValueMap *map = NULL;
+        if (args[1] == "%")
+            map = &curState.getFunctionVariables();
+        else if (args[1] == "@")
+            map = &curState.getGlobalVariables();
+        else if (args[1] == "@^")
+            map = &curState.getGlobalBlocks();
+        else if (args[1] == "%^")
+            map = &curState.getFunctionBlocks();
+        else
+            CANAL_DIE();
+
+        filterPlaceValueMap(*map, state->getSlotTracker(),
+                            args[1].c_str(), args[1],
+                            addFunctionName, variables);
+
+        std::vector<std::string>::const_iterator it = variables.begin();
+        for (; it != variables.end(); ++it)
+            printVariable(*it, *state);
+    }
+    else
+    {
+        std::vector<std::string>::const_iterator it = args.begin() + 1;
+        for (; it != args.end(); ++it)
+            printVariable(*it, *state);
+    }
 }
