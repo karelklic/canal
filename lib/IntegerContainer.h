@@ -91,7 +91,7 @@ public: // Implementation of Value.
     // Implementation of Value::memoryUsage().
     virtual size_t memoryUsage() const;
     // Implementation of Value::toString().
-    virtual std::string toString(const State *state) const;
+    virtual std::string toString() const;
 
     // Implementation of Value::add().
     virtual void add(const Value &a, const Value &b);

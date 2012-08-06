@@ -2,6 +2,8 @@
 #include "SlotTracker.h"
 #include <llvm/ADT/APInt.h>
 #include <llvm/Value.h>
+#include <llvm/Instruction.h>
+#include <llvm/BasicBlock.h>
 #include <sstream>
 #include <execinfo.h>
 #include <cxxabi.h>
@@ -45,7 +47,6 @@ getName(const llvm::Value &value, SlotTracker &slotTracker)
 {
     bool isGlobal = llvm::isa<llvm::GlobalValue>(value);
     std::stringstream ss;
-    ss << (isGlobal ? "@" : "%");
     if (value.hasName())
         ss << value.getName().data();
     else
@@ -54,7 +55,13 @@ getName(const llvm::Value &value, SlotTracker &slotTracker)
         if (isGlobal)
             id = slotTracker.getGlobalSlot(value);
         else
+        {
+            const llvm::Instruction &inst =
+                llvm::cast<const llvm::Instruction>(value);
+
+            slotTracker.setActiveFunction(*inst.getParent()->getParent());
             id = slotTracker.getLocalSlot(value);
+        }
         if (id >= 0)
             ss << id;
         else

@@ -1,4 +1,3 @@
-
 #ifndef LIBCANAL_STATE_H
 #define LIBCANAL_STATE_H
 
@@ -48,18 +47,25 @@ public:
     void mergeGlobalLevel(const State &state);
 
     // @param place
-    // Represents a place in the program where the global variable is
-    // assigned.
+    //   Represents a place in the program where the global variable
+    //   is defined and assigned.
     void addGlobalVariable(const llvm::Value &place, Value *value);
 
+    // Adds a register-type value to the stack.
     // @param place
-    // Represents a place in the program where the function variable
-    // is assigned.  Usually it is an instance of llvm::Instruction
-    // for a result of the instruction.  It might also be an instance
-    // of llvm::Argument, which represents a function call parameter.
+    //   Represents a place in the program where the function variable
+    //   is assigned.  Usually it is an instance of llvm::Instruction
+    //   for a result of the instruction.  It might also be an
+    //   instance of llvm::Argument, which represents a function call
+    //   parameter.
+    // @see
+    //   To add a value created by alloca to the stack, use the method
+    //   addFunctionBlock.
     void addFunctionVariable(const llvm::Value &place, Value *value);
 
     void addGlobalBlock(const llvm::Value &place, Value *value);
+
+    // Adds a value created by alloca to the stack.
     void addFunctionBlock(const llvm::Value &place, Value *value);
 
     const PlaceValueMap &getGlobalVariables() const { return mGlobalVariables; }

@@ -28,7 +28,7 @@ public: // Implementation of Value.
     // Implementation of Value::memoryUsage().
     virtual size_t memoryUsage() const;
     // Implementation of Value::toString().
-    virtual std::string toString(const State *state) const;
+    virtual std::string toString() const;
 
 public: // Implementation of Array::Interface.
     // Implementation of Array::Interface::getItem().

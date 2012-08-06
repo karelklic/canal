@@ -17,14 +17,13 @@ Target::Target() : mType(Target::Uninitialized),
 }
 
 Target::Target(const Target &target) : mType(target.mType),
-                                       mConstant(target.mConstant),
                                        mInstruction(target.mInstruction),
+                                       mConstant(target.mConstant),
                                        mOffsets(target.mOffsets),
                                        mNumericOffset(target.mNumericOffset)
 {
     std::vector<Value*>::iterator it = mOffsets.begin(),
         itend = mOffsets.end();
-
     for (; it != itend; ++it)
         *it = (*it)->clone();
 
@@ -61,7 +60,8 @@ Target::operator==(const Target &target) const
         return true;
     case Constant:
         return mConstant == target.mConstant;
-    case MemoryBlock:
+    case FunctionBlock:
+    case GlobalBlock:
     {
         if (mOffsets.size() != target.mOffsets.size())
             return false;
@@ -102,7 +102,8 @@ Target::merge(const Target &target)
         // TODO: mConstant can be abstract value.
         CANAL_ASSERT(mConstant == target.mConstant);
         break;
-    case MemoryBlock:
+    case FunctionBlock:
+    case GlobalBlock:
     {
         CANAL_ASSERT(mInstruction == target.mInstruction);
         CANAL_ASSERT(mOffsets.size() == target.mOffsets.size());
@@ -135,16 +136,22 @@ Target::merge(const Target &target)
 size_t
 Target::memoryUsage() const
 {
-    size_t offsetSize = 0;
+    size_t size = sizeof(Target);
+
+    // Add the size of the offsets.
     std::vector<Value*>::const_iterator it = mOffsets.begin();
     for (; it != mOffsets.end(); ++it)
-        offsetSize += (*it)->memoryUsage();
+        size += (*it)->memoryUsage();
 
-    return sizeof(Target) + offsetSize;
+    // Add the size of the numeric offset.
+    if (mNumericOffset)
+        size += mNumericOffset->memoryUsage();
+
+    return size;
 }
 
 std::string
-Target::toString(const State *state, SlotTracker &slotTracker) const
+Target::toString(SlotTracker &slotTracker) const
 {
     std::stringstream ss;
     ss << "Pointer::Target: ";
@@ -153,7 +160,7 @@ Target::toString(const State *state, SlotTracker &slotTracker) const
         ss << "{" << std::endl;
         std::vector<Value*>::const_iterator it = mOffsets.begin();
         for (; it != mOffsets.end(); ++it)
-            ss << "    offset: " << indentExceptFirstLine((*it)->toString(state), 18) << std::endl;
+            ss << "    offset: " << indentExceptFirstLine((*it)->toString(), 18) << std::endl;
         ss << "    target: ";
     }
 
@@ -165,7 +172,8 @@ Target::toString(const State *state, SlotTracker &slotTracker) const
     case Constant:
         ss << mConstant;
         break;
-    case MemoryBlock:
+    case FunctionBlock:
+    case GlobalBlock:
     {
         const llvm::Instruction &instruction =
             llvm::cast<llvm::Instruction>(*mInstruction);
@@ -175,14 +183,8 @@ Target::toString(const State *state, SlotTracker &slotTracker) const
         if (name.empty())
             name = "<failed to name the location>";
 
+        ss << (mType == FunctionBlock ? "%^" : "@^");
         ss << name;
-        if (state)
-        {
-            Value *block = state->findBlock(*mInstruction);
-            ss << " ";
-            int indentation = (mOffsets.empty() ? 17 : 12) + 1 + name.length();
-            ss << (block ? indentExceptFirstLine(block->toString(state), indentation) : "<error: block missing in current state!>");
-        }
         break;
     }
     default:
@@ -205,7 +207,8 @@ Target::dereference(const State &state) const
     case Uninitialized:
     case Constant:
         CANAL_DIE();
-    case MemoryBlock:
+    case GlobalBlock:
+    case FunctionBlock:
     {
         result.push_back(state.findBlock(*mInstruction));
         CANAL_ASSERT(result[0]);

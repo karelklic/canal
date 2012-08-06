@@ -224,13 +224,13 @@ Container::memoryUsage() const
 }
 
 std::string
-Container::toString(const State *state) const
+Container::toString() const
 {
     std::stringstream ss;
     ss << "Integer::Container: [" << std::endl;
     std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
-        ss << "    " << indentExceptFirstLine((*it)->toString(state), 4) << std::endl;
+        ss << "    " << indentExceptFirstLine((*it)->toString(), 4) << std::endl;
     ss << "]";
     return ss.str();
 }

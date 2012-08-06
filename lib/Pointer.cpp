@@ -25,7 +25,9 @@ bool
 InclusionBased::operator==(const Value &value) const
 {
     // Check if the value has the same type.
-    const InclusionBased *pointer = dynamic_cast<const InclusionBased*>(&value);
+    const InclusionBased *pointer =
+        dynamic_cast<const InclusionBased*>(&value);
+
     if (!pointer)
         return false;
 
@@ -85,21 +87,23 @@ InclusionBased::memoryUsage() const
 }
 
 std::string
-InclusionBased::toString(const State *state) const
+InclusionBased::toString() const
 {
     SlotTracker slotTracker(mModule);
     std::stringstream ss;
     ss << "Pointer::InclusionBased: [" << std::endl;
-    for (PlaceTargetMap::const_iterator it = mTargets.begin(); it != mTargets.end(); ++it)
+    PlaceTargetMap::const_iterator it = mTargets.begin();
+    for (; it != mTargets.end(); ++it)
     {
-        const llvm::Instruction &instruction = llvm::cast<llvm::Instruction>(*it->first);
+        const llvm::Instruction &instruction =
+            llvm::cast<llvm::Instruction>(*it->first);
         slotTracker.setActiveFunction(*instruction.getParent()->getParent());
         std::string name(Canal::getName(*it->first, slotTracker));
         if (name.empty())
             name = "<failed to name the location>";
 
         ss << "    { assigned: " << name << std::endl;
-        ss << "      target: " << indentExceptFirstLine(it->second.toString(state, slotTracker), 14) << " }" << std::endl;
+        ss << "      target: " << indentExceptFirstLine(it->second.toString(slotTracker), 14) << " }" << std::endl;
     }
 
     if (mBitcastTo)
@@ -131,11 +135,11 @@ InclusionBased::addConstantTarget(const llvm::Value *instruction,
 }
 
 void
-InclusionBased::addMemoryTarget(const llvm::Value *instruction,
-                                const llvm::Value *target)
+InclusionBased::addFunctionBlockTarget(const llvm::Value *instruction,
+                                       const llvm::Value *target)
 {
     Target newTarget;
-    newTarget.mType = Target::MemoryBlock;
+    newTarget.mType = Target::FunctionBlock;
     newTarget.mInstruction = target;
 
     PlaceTargetMap::iterator it = mTargets.find(instruction);

@@ -76,7 +76,7 @@ Structure::memoryUsage() const
 }
 
 std::string
-Structure::toString(const State *state) const
+Structure::toString() const
 {
     std::stringstream ss;
     ss << "Structure: {" << std::endl;

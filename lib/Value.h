@@ -6,8 +6,8 @@
 #include <llvm/Instructions.h>
 
 namespace llvm {
-    class raw_ostream;
-}
+class raw_ostream;
+} // namespace llvm
 
 namespace Canal {
 
@@ -28,14 +28,23 @@ public:
     // Merge another value into this one.
     virtual void merge(const Value &value);
 
-    // Get memory usage (used byte count) of this value.
+    // Get memory usage (used byte count) of this abstract value.
     virtual size_t memoryUsage() const = 0;
 
-    // String representation for logging and debugging purposes.
-    // @param state
-    //   Optional.  If provided, state is used to display more
-    //   information about pointers,
-    virtual std::string toString(const State *state) const = 0;
+    // An idea for different memory interpretation.
+    // virtual Value *castTo(const llvm::Type *itemType, int offset) const = 0;
+
+    // Create a string representation of the abstract value.
+    virtual std::string toString() const = 0;
+
+    // Load the abstract value state from a string representation.
+    // @param text
+    //   The textual representation.  It must not contain any text
+    //   that does not belong to this abstract value state.
+    // @returns
+    //   True if the text has been successfully parsed and the state
+    //   has been set from the text.  False otherwise.
+    //virtual bool fromString(const std::string &text) = 0;
 
 public:
     // Implementation of instructions operating on values.
@@ -104,15 +113,6 @@ public:
     // bytes.  Returns true if the memory usage was limited, false when
     // it was not possible.
     virtual bool limitMemoryUsage(size_t size);
-};
-
-// Base class for abstract values that can provide access to their
-// memory.
-class MemoryValue
-{
-public:
-    virtual size_t memorySize() const = 0;
-    virtual Value *castTo(const llvm::Type *itemType, int offset) const = 0;
 };
 
 } // namespace Canal

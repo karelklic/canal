@@ -82,7 +82,7 @@ ExactSize::memoryUsage() const
 }
 
 std::string
-ExactSize::toString(const State *state) const
+ExactSize::toString() const
 {
     std::stringstream ss;
     ss << "Array::ExactSize: {" << std::endl;

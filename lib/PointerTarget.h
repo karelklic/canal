@@ -35,7 +35,8 @@ public:
     enum Type {
         Uninitialized,
         Constant,
-        MemoryBlock
+        FunctionBlock,
+        GlobalBlock
     };
 
     // Initializes the target to the uninitialized type.
@@ -53,7 +54,7 @@ public:
     size_t memoryUsage() const;
 
     // Get a string representation of the target.
-    std::string toString(const State *state, SlotTracker &slotTracker) const;
+    std::string toString(SlotTracker &slotTracker) const;
 
     // Dereference the target in a certain state.  Dereferencing might
     // result in multiple Values being returned due to the nature of

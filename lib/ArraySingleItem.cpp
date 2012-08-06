@@ -77,12 +77,12 @@ SingleItem::memoryUsage() const
 }
 
 std::string
-SingleItem::toString(const State *state) const
+SingleItem::toString() const
 {
     std::stringstream ss;
     ss << "Array::SingleItem: {" << std::endl;
-    ss << "    size:" << indentExceptFirstLine(mSize->toString(state), 9) << std::endl;
-    ss << "    value: " << indentExceptFirstLine(mValue->toString(state), 11) << std::endl;
+    ss << "    size:" << indentExceptFirstLine(mSize->toString(), 9) << std::endl;
+    ss << "    value: " << indentExceptFirstLine(mValue->toString(), 11) << std::endl;
     ss << "}";
     return ss.str();
 }

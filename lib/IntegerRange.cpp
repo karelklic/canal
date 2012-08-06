@@ -194,7 +194,7 @@ Range::memoryUsage() const
 }
 
 std::string
-Range::toString(const State *state) const
+Range::toString() const
 {
     std::stringstream ss;
     ss << "Integer::Range: ";

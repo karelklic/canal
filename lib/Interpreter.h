@@ -62,8 +62,8 @@ class Value;
 class Stack;
 class Environment;
 
-// Context-sensitive operational abstract interpreter.  Interprets
-// instructions in abstract domain.
+// Context-sensitive flow-insensitive operational abstract
+// interpreter.  Interprets instructions in abstract domain.
 //
 /// This is an abstract class, which is used as a base class for
 /// actual abstract interpretation implementations.

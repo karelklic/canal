@@ -807,7 +807,7 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction,
     Pointer::InclusionBased *pointer =
         new Pointer::InclusionBased(environment.mModule);
 
-    pointer->addMemoryTarget(&instruction, &instruction);
+    pointer->addFunctionBlockTarget(&instruction, &instruction);
     state.addFunctionVariable(instruction, pointer);
 }
 

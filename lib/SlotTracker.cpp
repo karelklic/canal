@@ -34,7 +34,8 @@ SlotTracker::setActiveFunction(const llvm::Function &function)
 int
 SlotTracker::getLocalSlot(const llvm::Value &value)
 {
-    CANAL_ASSERT(!llvm::isa<llvm::Constant>(value) && "Can't get a constant or global slot with this!");
+    CANAL_ASSERT_MSG(!llvm::isa<llvm::Constant>(value),
+                     "Can't get a constant or global slot with this!");
 
     // Check for uninitialized state and do lazy initialization.
     initialize();
@@ -101,7 +102,9 @@ SlotTracker::initialize()
 void
 SlotTracker::createFunctionSlot(const llvm::Value &value)
 {
-    CANAL_ASSERT(!value.getType()->isVoidTy() && !value.hasName() && "Doesn't need a slot!");
+    CANAL_ASSERT_MSG(!value.getType()->isVoidTy() && !value.hasName(),
+                     "Doesn't need a slot!");
+
     CANAL_ASSERT(mFunctionNext == mFunctionList.size());
     mFunctionList.push_back(&value);
     mFunctionMap[&value] = mFunctionNext++;
@@ -110,8 +113,12 @@ SlotTracker::createFunctionSlot(const llvm::Value &value)
 void
 SlotTracker::createModuleSlot(const llvm::GlobalValue &value)
 {
-    CANAL_ASSERT(!value.getType()->isVoidTy() && "Doesn't need a slot!");
-    CANAL_ASSERT(!value.hasName() && "Doesn't need a slot!");
+    CANAL_ASSERT_MSG(!value.getType()->isVoidTy(),
+                     "Doesn't need a slot!");
+
+    CANAL_ASSERT_MSG(!value.hasName(),
+                     "Doesn't need a slot!");
+
     CANAL_ASSERT(mModuleNext == mModuleList.size());
     mModuleList.push_back(&value);
     mModuleMap[&value] = mModuleNext++;

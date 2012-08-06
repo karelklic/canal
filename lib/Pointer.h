@@ -34,15 +34,16 @@ public:
 public:
     InclusionBased(const llvm::Module &module);
 
-    void addConstantTarget(const llvm::Value *instruction, size_t constant);
+    void addConstantTarget(const llvm::Value *instruction,
+                           size_t constant);
 
     // @param instruction
     //  Place where the pointer target is added.
     // @param target
-    //   Represents an anonymous memory block.  This is a key to either
-    //   State::mGlobalBlocks or State::mFunctionBlocks.
-    void addMemoryTarget(const llvm::Value *instruction,
-                         const llvm::Value *target);
+    //   Represents an anonymous memory block.  This is a key to
+    //   State::mFunctionBlocks.
+    void addFunctionBlockTarget(const llvm::Value *instruction,
+                                const llvm::Value *target);
 
 public: // Implementation of Value.
     // Implementation of Value::clone().
@@ -55,7 +56,7 @@ public: // Implementation of Value.
     // Implementation of Value::memoryUsage().
     virtual size_t memoryUsage() const;
     // Implementation of Value::toString().
-    virtual std::string toString(const State *state) const;
+    virtual std::string toString() const;
 };
 
 } // namespace Pointer

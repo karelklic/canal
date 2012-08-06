@@ -141,7 +141,7 @@ Enumeration::memoryUsage() const
 }
 
 std::string
-Enumeration::toString(const State *state) const
+Enumeration::toString() const
 {
     std::stringstream ss;
     ss << "Integer::Enumeration: [" << std::endl;

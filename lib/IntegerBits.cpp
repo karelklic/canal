@@ -228,10 +228,10 @@ Bits::memoryUsage() const
 }
 
 std::string
-Bits::toString(const State *state) const
+Bits::toString() const
 {
     std::stringstream ss;
-    ss << "Integer::Bits: ";
+    ss << "bits ";
     for (int pos = 0; pos < mBits0.getBitWidth(); ++pos)
     {
         switch (getBitValue(pos))
