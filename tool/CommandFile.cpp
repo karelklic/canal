@@ -230,15 +230,15 @@ loadAsSourceFile(const std::string &path, bool &error)
     } type = Unknown;
     std::string bitcodePath;
 
-    for (const char *extension = extensions[0]; extension != NULL; ++extension)
+    for (int i = 0; extensions[i]; ++i)
     {
-        if (path.length() <= strlen(extension))
+        if (path.length() <= strlen(extensions[i]))
             continue;
 
-        if (path.substr(path.length() - strlen(extension)) == extension)
+        if (path.substr(path.length() - strlen(extensions[i])) == extensions[i])
         {
-            type = (extension == extensions[0]) ? PlainC : CPlusPlus;
-            bitcodePath = path.substr(0, path.length() - strlen(extension)) + ".s";
+            type = (i == 0) ? PlainC : CPlusPlus;
+            bitcodePath = path.substr(0, path.length() - strlen(extensions[i])) + ".s";
             break;
         }
     }
