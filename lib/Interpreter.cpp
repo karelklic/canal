@@ -298,7 +298,10 @@ typeToEmptyValue(const llvm::Type &type, const llvm::Module &module)
     }
 
     if (type.isPointerTy())
-        return new Pointer::InclusionBased(module);
+    {
+        const llvm::PointerType &pointerType = llvm::cast<const llvm::PointerType>(type);
+        return new Pointer::InclusionBased(module, pointerType.getElementType());
+    }
 
     if (type.isArrayTy() || type.isVectorTy())
     {
@@ -779,35 +782,44 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction,
 
     if (instruction.isArrayAllocation())
     {
-        Array::SingleItem *array = new Array::SingleItem();
-        array->mValue = value;
-        value = array;
-
-        // Here is a bug, maybe. Array size might be unavailable
-        // because of fixpoint calculation.
         const llvm::Value *arraySize = instruction.getArraySize();
-        PlaceValueMap::const_iterator it = state.getGlobalVariables().find(arraySize);
-        if (it != state.getGlobalVariables().end())
-            array->mSize = it->second->clone();
+        Value *abstractSize = NULL;
+
+        if (llvm::isa<llvm::ConstantInt>(arraySize))
+        {
+            const llvm::ConstantInt *constant = llvm::cast<llvm::ConstantInt>(arraySize);
+            abstractSize = new Constant(constant);
+        }
         else
         {
-            it = state.getFunctionVariables().find(arraySize);
-            if (it != state.getFunctionVariables().end())
-                array->mSize = it->second->clone();
-            else
+            abstractSize = state.findVariable(*arraySize);
+            // Size is not necesarily known at each pass before
+            // reaching a fixpoint.
+            if (!abstractSize)
             {
-                const llvm::Constant *constant =
-                    llvm::cast<llvm::Constant>(arraySize);
-                array->mSize = new Constant(constant);
+                delete value;
+                return;
             }
+
+            abstractSize = abstractSize->clone();
         }
+
+        Array::SingleItem *array = new Array::SingleItem();
+        array->mValue = value;
+        array->mSize = abstractSize;
+        value = array;
     }
 
     state.addFunctionBlock(instruction, value);
     Pointer::InclusionBased *pointer =
-        new Pointer::InclusionBased(environment.mModule);
+        new Pointer::InclusionBased(environment.mModule, type);
 
-    pointer->addFunctionBlockTarget(&instruction, &instruction);
+    pointer->addTarget(Pointer::Target::FunctionBlock,
+                       &instruction,
+                       &instruction,
+                       std::vector<Value*>(),
+                       NULL);
+
     state.addFunctionVariable(instruction, pointer);
 }
 
@@ -827,25 +839,57 @@ Interpreter::load(const llvm::LoadInst &instruction,
 
     // Pointer found. Merge all possible values and store the result
     // into the state.
-    Value *mergedValue = NULL;
-    Pointer::PlaceTargetMap::const_iterator it = pointer.mTargets.begin();
-    for (; it != pointer.mTargets.end(); ++it)
-    {
-        std::vector<Value*> values = it->second.dereference(state);
-        std::vector<Value*>::const_iterator it = values.begin();
-        for (; it != values.end(); ++it)
-        {
-            if (mergedValue)
-                mergedValue->merge(**it);
-            else
-                mergedValue = (*it)->clone();
-        }
-    }
-
+    Value *mergedValue = pointer.dereferenceAndMerge(state);
     if (!mergedValue)
         return;
 
     state.addFunctionVariable(instruction, mergedValue);
+}
+
+// Went through the getelementptr offsets and assembly a list of
+// abstract values representing these offsets.
+// @returns
+//   True if the the operation has been successful.  This means that
+//   state contained all abstract values used as an offset.  False
+//   otherwise.  If false is returned, the result vector is empty.
+// @param result
+//   Vector where all offsets are going to be stored as abstract
+//   values.  Caller takes ownership of the values.
+template<typename T> static bool
+getElementPtrOffsets(std::vector<Value*> &result,
+                     T iteratorStart,
+                     T iteratorEnd,
+                     const State &state)
+{
+    // Check that all variables exist before building the offset list.
+    for (T it = iteratorStart; it != iteratorEnd; ++it)
+    {
+        if (llvm::isa<llvm::ConstantInt>(it))
+            continue;
+
+        Value *offset = state.findVariable(*it->get());
+        // Not all offsets are necesarily known at each pass before
+        // reaching a fixpoint.
+        if (!offset)
+            return false;
+    }
+
+    // Build the offset list.
+    for (T it = iteratorStart; it != iteratorEnd; ++it)
+    {
+        if (llvm::isa<llvm::ConstantInt>(it))
+        {
+            llvm::ConstantInt *constant = llvm::cast<llvm::ConstantInt>(it);
+            result.push_back(new Constant(constant));
+        }
+        else
+        {
+            Value *offset = state.findVariable(*it->get());
+            result.push_back(offset->clone());
+        }
+    }
+
+    return true;
 }
 
 void
@@ -859,8 +903,8 @@ Interpreter::store(const llvm::StoreInst &instruction,
     if (!variable)
         return;
 
-    const Pointer::InclusionBased &pointer =
-        dynamic_cast<const Pointer::InclusionBased&>(*variable);
+    Pointer::InclusionBased &pointer =
+        dynamic_cast<Pointer::InclusionBased&>(*variable);
 
     // Find the variable in the state.  Merge the provided value into
     // all targets.
@@ -869,25 +913,52 @@ Interpreter::store(const llvm::StoreInst &instruction,
     if (!value)
     {
         // Handle storing of constant values.
-        if (llvm::isa<llvm::Constant>(instruction.getValueOperand()))
+        const llvm::Constant *constant =
+            llvm::cast<llvm::Constant>(instruction.getValueOperand());
+
+        if (!constant)
         {
-            value = new Constant(llvm::cast<llvm::Constant>(instruction.getValueOperand()));
-            deleteValue = true;
+            // Give up.  Fixpoint calculation has not yet provided us
+            // the variable.
+            return;
+        }
+
+        deleteValue = true;
+
+        const llvm::ConstantExpr *constantExpr =
+            llvm::cast_or_null<llvm::ConstantExpr>(constant);
+
+        // Handle storing of getelementptr constant.  Our abstract
+        // pointer value does not handle that.
+        if (constantExpr &&
+            constantExpr->getOpcode() == llvm::Instruction::GetElementPtr)
+        {
+            std::vector<Value*> offsets;
+            bool allOffsetsPresent = getElementPtrOffsets(
+                offsets,
+                constantExpr->op_begin() + 1,
+                constantExpr->op_end(),
+                state);
+
+            CANAL_ASSERT_MSG(allOffsetsPresent,
+                             "All offsets are expected to be present in "
+                             "a constant expression of getelementptr.");
+
+            Pointer::InclusionBased *pointer = new Pointer::InclusionBased(
+                environment.mModule);
+            pointer->addTarget(Pointer::Target::GlobalVariable,
+                               &instruction,
+                               *constantExpr->op_begin(),
+                               offsets,
+                               NULL);
+
+            value = pointer;
         }
         else
-            return;
+            value = new Constant(constant);
     }
 
-    // Go through all target memory blocks for the pointer and merge
-    // them with the value being stored.
-    Pointer::PlaceTargetMap::const_iterator it = pointer.mTargets.begin();
-    for (; it != pointer.mTargets.end(); ++it)
-    {
-        std::vector<Value*> destinations = it->second.dereference(state);
-        std::vector<Value*>::iterator it = destinations.begin();
-        for (; it != destinations.end(); ++it)
-            (*it)->merge(*value);
-    }
+    pointer.store(*value, state);
 
     if (deleteValue)
         delete value;
@@ -909,46 +980,22 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
     Pointer::InclusionBased &source =
         dynamic_cast<Pointer::InclusionBased&>(*base);
 
-    Pointer::InclusionBased *result = source.clone();
-    result->mBitcastTo = NULL;
-
     // We get offsets. Either constants or Integer::Container.
     // Pointer points either to an array (or array offset), or to a
     // struct (or struct member).  Pointer might have multiple
     // targets.
+    std::vector<Value*> offsets;
+    bool allOffsetsPresent = getElementPtrOffsets(offsets,
+                                                  instruction.idx_begin(),
+                                                  instruction.idx_end(),
+                                                  state);
 
-    llvm::GetElementPtrInst::const_op_iterator it = instruction.idx_begin(),
-        itend = instruction.idx_end();
-    for (; it != itend; ++it)
-    {
-        if (llvm::isa<llvm::ConstantInt>(it))
-        {
-            llvm::ConstantInt *constant = llvm::cast<llvm::ConstantInt>(it);
-            Pointer::PlaceTargetMap::iterator it = result->mTargets.begin();
-            for (; it != result->mTargets.end(); ++it)
-                it->second.mOffsets.push_back(new Constant(constant));
-        }
-        else
-        {
-            Value *offset = state.findVariable(*it->get());
-            if (!offset)
-            {
-                // There should be a return as not all offsets are
-                // necesarily known at each pass before reaching a
-                // fixpoint, but we need to implement a check ensuring
-                // that all instructions are evaluated before reaching
-                // fixpoint.
-                CANAL_DIE();
-                return;
-            }
+    if (!allOffsetsPresent)
+        return;
 
-            Integer::Container &integer = dynamic_cast<Integer::Container&>(*offset);
-            Pointer::PlaceTargetMap::iterator it = result->mTargets.begin();
-            for (; it != result->mTargets.end(); ++it)
-                it->second.mOffsets.push_back(integer.clone());
-        }
-
-    }
+    const llvm::PointerType *pointerType = instruction.getType();
+    Pointer::InclusionBased *result = source.getElementPtr(
+        offsets, pointerType->getElementType());
 
     state.addFunctionVariable(instruction, result);
 }
@@ -1038,7 +1085,7 @@ Interpreter::ptrtoint(const llvm::PtrToIntInst &instruction,
         dynamic_cast<Pointer::InclusionBased&>(*operand);
 
     Pointer::InclusionBased *result = source.clone();
-
+/*  This should really be handled in integer operations.
     Pointer::PlaceTargetMap::iterator it = result->mTargets.begin();
     for (; it != result->mTargets.end(); ++it)
     {
@@ -1063,7 +1110,7 @@ Interpreter::ptrtoint(const llvm::PtrToIntInst &instruction,
                 typeToEmptyValue(*instruction.getDestTy(), environment.mModule);
         }
     }
-
+*/
     state.addFunctionVariable(instruction, result);
 }
 
@@ -1079,8 +1126,11 @@ Interpreter::inttoptr(const llvm::IntToPtrInst &instruction,
     Pointer::InclusionBased &source =
         dynamic_cast<Pointer::InclusionBased&>(*operand);
 
-    Pointer::InclusionBased *result = source.clone();
-    result->mBitcastTo = instruction.getDestTy();
+    const llvm::PointerType &pointerType =
+        llvm::cast<const llvm::PointerType>(*instruction.getDestTy());
+
+    Pointer::InclusionBased *result =
+        source.bitcast(pointerType.getElementType());
 
     state.addFunctionVariable(instruction, result);
 }
@@ -1090,24 +1140,21 @@ Interpreter::bitcast(const llvm::BitCastInst &instruction,
                      State &state,
                      const Environment &environment)
 {
-    const llvm::Type *source = instruction.getSrcTy();
-    const llvm::Type *destination = instruction.getDestTy();
+    const llvm::Type *sourceType = instruction.getSrcTy();
+    const llvm::Type *destinationType = instruction.getDestTy();
 
-    CANAL_ASSERT_MSG(source->isPointerTy() && destination->isPointerTy(),
-                     "Bitcast for non-pointers is not implemented.");
+    CANAL_ASSERT_MSG(sourceType->isPointerTy() && destinationType->isPointerTy(),
+                     "Bitcast for non-pointers is not implemented yet.");
 
-    Value *operand = state.findVariable(*instruction.getOperand(0));
-    if (!operand)
+    Value *source = state.findVariable(*instruction.getOperand(0));
+    if (!source)
         return;
 
-    Value *resultValue = operand->clone();
+    Pointer::InclusionBased &sourcePointer =
+        dynamic_cast<Pointer::InclusionBased&>(*source);
 
-     Pointer::InclusionBased &pointer =
-        dynamic_cast<Pointer::InclusionBased&>(*resultValue);
-
-    pointer.mBitcastTo = instruction.getDestTy();
-
-    state.addFunctionVariable(instruction, resultValue);
+    Value *resultPointer = sourcePointer.bitcast(destinationType);
+    state.addFunctionVariable(instruction, resultPointer);
 }
 
 typedef void(Value::*CmpOperation)(const Value&,
@@ -1163,7 +1210,8 @@ Interpreter::phi(const llvm::PHINode &instruction,
     for (int i = 0; i < instruction.getNumIncomingValues(); ++i)
     {
         Constant c;
-        Value *value = variableOrConstant(*instruction.getIncomingValue(i), state, c);
+        Value *value = variableOrConstant(*instruction.getIncomingValue(i),
+                                          state, c);
         if (!value)
             continue;
         if (mergedValue)

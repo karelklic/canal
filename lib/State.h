@@ -34,6 +34,7 @@ public:
 
     // Clears everything.  Releases all memory.
     void clear();
+
     // Clears function variables, blocks and returned value.
     void clearFunctionLevel();
 

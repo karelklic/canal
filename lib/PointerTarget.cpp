@@ -11,9 +11,33 @@
 namespace Canal {
 namespace Pointer {
 
-Target::Target() : mType(Target::Uninitialized),
-                   mNumericOffset(NULL)
+Target::Target(Type type,
+               const llvm::Value *target,
+               const std::vector<Value*> &offsets,
+               Value *numericOffset)
+    : mType(type),
+      mInstruction(target),
+      mOffsets(offsets),
+      mNumericOffset(numericOffset)
 {
+    CANAL_ASSERT_MSG(type == FunctionBlock ||
+                     type == FunctionVariable ||
+                     type == GlobalBlock ||
+                     type == GlobalVariable ||
+                     type == Constant,
+                     "Invalid type.");
+
+    CANAL_ASSERT_MSG((type == Constant && !target) ||
+                     (type != Constant && target),
+                     "Invalid value of target.");
+
+    CANAL_ASSERT_MSG(type != Constant || offsets.empty(),
+                     "Offsets cannot be present for constant pointers "
+                     "as the semantics is not defined.");
+
+    CANAL_ASSERT_MSG(type != Constant || numericOffset,
+                     "Numeric offset must be present for constant "
+                     "pointers, because it contains the constant.");
 }
 
 Target::Target(const Target &target) : mType(target.mType),
@@ -22,9 +46,8 @@ Target::Target(const Target &target) : mType(target.mType),
                                        mOffsets(target.mOffsets),
                                        mNumericOffset(target.mNumericOffset)
 {
-    std::vector<Value*>::iterator it = mOffsets.begin(),
-        itend = mOffsets.end();
-    for (; it != itend; ++it)
+    std::vector<Value*>::iterator it = mOffsets.begin();
+    for (; it != mOffsets.end(); ++it)
         *it = (*it)->clone();
 
     if (mNumericOffset)
@@ -56,12 +79,12 @@ Target::operator==(const Target &target) const
 
     switch (mType)
     {
-    case Uninitialized:
-        return true;
     case Constant:
         return mConstant == target.mConstant;
     case FunctionBlock:
+    case FunctionVariable:
     case GlobalBlock:
+    case GlobalVariable:
     {
         if (mOffsets.size() != target.mOffsets.size())
             return false;
@@ -96,14 +119,14 @@ Target::merge(const Target &target)
     CANAL_ASSERT(mType == target.mType);
     switch (mType)
     {
-    case Uninitialized:
-        break;
     case Constant:
         // TODO: mConstant can be abstract value.
         CANAL_ASSERT(mConstant == target.mConstant);
         break;
     case FunctionBlock:
+    case FunctionVariable:
     case GlobalBlock:
+    case GlobalVariable:
     {
         CANAL_ASSERT(mInstruction == target.mInstruction);
         CANAL_ASSERT(mOffsets.size() == target.mOffsets.size());
@@ -116,7 +139,8 @@ Target::merge(const Target &target)
             const Integer::Container &numericOffsetInt =
                 dynamic_cast<const Integer::Container&>(*mNumericOffset);
 
-            llvm::APInt zero = llvm::APInt::getNullValue(numericOffsetInt.getBitWidth());
+            llvm::APInt zero = llvm::APInt::getNullValue(
+                numericOffsetInt.getBitWidth());
             mNumericOffset->merge(Integer::Container(zero));
         }
         else if (mNumericOffset)
@@ -166,14 +190,13 @@ Target::toString(SlotTracker &slotTracker) const
 
     switch (mType)
     {
-    case Uninitialized:
-        ss << "uninitialized";
-        break;
     case Constant:
         ss << mConstant;
         break;
     case FunctionBlock:
+    case FunctionVariable:
     case GlobalBlock:
+    case GlobalVariable:
     {
         const llvm::Instruction &instruction =
             llvm::cast<llvm::Instruction>(*mInstruction);
@@ -183,7 +206,15 @@ Target::toString(SlotTracker &slotTracker) const
         if (name.empty())
             name = "<failed to name the location>";
 
-        ss << (mType == FunctionBlock ? "%^" : "@^");
+        switch (mType)
+        {
+        case FunctionBlock:    ss << "%^"; break;
+        case FunctionVariable: ss << "%";  break;
+        case GlobalBlock:      ss << "@^"; break;
+        case GlobalVariable:   ss << "@";  break;
+        default:               CANAL_DIE();
+        }
+
         ss << name;
         break;
     }
@@ -204,11 +235,12 @@ Target::dereference(const State &state) const
 
     switch (mType)
     {
-    case Uninitialized:
     case Constant:
         CANAL_DIE();
-    case GlobalBlock:
     case FunctionBlock:
+    case FunctionVariable:
+    case GlobalBlock:
+    case GlobalVariable:
     {
         result.push_back(state.findBlock(*mInstruction));
         CANAL_ASSERT(result[0]);

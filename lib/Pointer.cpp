@@ -10,9 +10,124 @@
 namespace Canal {
 namespace Pointer {
 
-InclusionBased::InclusionBased(const llvm::Module &module)
-    : mModule(module), mBitcastTo(NULL)
+InclusionBased::InclusionBased(const llvm::Module &module,
+                               const llvm::Type *type)
+    : mModule(module), mType(type)
 {
+}
+
+InclusionBased::InclusionBased(const InclusionBased &second)
+    : mModule(second.mModule),
+      mType(second.mType),
+      mTargets(second.mTargets)
+{
+    PlaceTargetMap::iterator it = mTargets.begin();
+    for (; it != mTargets.end(); ++it)
+        it->second = new Target(*it->second);
+}
+
+
+InclusionBased::~InclusionBased()
+{
+    PlaceTargetMap::const_iterator it = mTargets.begin();
+    for (; it != mTargets.end(); ++it)
+        delete it->second;
+}
+
+void
+InclusionBased::addTarget(Target::Type type,
+                          const llvm::Value *instruction,
+                          const llvm::Value *target,
+                          const std::vector<Value*> &offsets,
+                          Value *numericOffset)
+{
+    CANAL_ASSERT_MSG(instruction,
+                     "Instruction is mandatory.");
+
+    Target *pointerTarget = new Target(type, target, offsets, numericOffset);
+
+    PlaceTargetMap::iterator it = mTargets.find(instruction);
+    if (it != mTargets.end())
+    {
+        it->second->merge(*pointerTarget);
+        delete pointerTarget;
+    }
+    else
+        mTargets.insert(PlaceTargetMap::value_type(instruction, pointerTarget));
+}
+
+Value *
+InclusionBased::dereferenceAndMerge(const State &state) const
+{
+    Value *mergedValue = NULL;
+    PlaceTargetMap::const_iterator it = mTargets.begin();
+    for (; it != mTargets.end(); ++it)
+    {
+        std::vector<Value*> values = it->second->dereference(state);
+        std::vector<Value*>::const_iterator it = values.begin();
+        for (; it != values.end(); ++it)
+        {
+            if (mergedValue)
+                mergedValue->merge(**it);
+            else
+                mergedValue = (*it)->clone();
+        }
+    }
+
+    return mergedValue;
+}
+
+InclusionBased *
+InclusionBased::bitcast(const llvm::Type *type) const
+{
+    InclusionBased *result = clone();
+    result->mType = type;
+    return result;
+}
+
+InclusionBased *
+InclusionBased::getElementPtr(const std::vector<Value*> &offsets,
+                              const llvm::Type *type) const
+{
+    InclusionBased *result = clone();
+    result->mType = type;
+
+    PlaceTargetMap::iterator targetIt = result->mTargets.begin();
+    for (; targetIt != result->mTargets.end(); ++targetIt)
+    {
+        std::vector<Value*>::const_iterator offsetIt = offsets.begin();
+        for (; offsetIt != offsets.end(); ++offsetIt)
+        {
+            if (targetIt == result->mTargets.begin())
+                targetIt->second->mOffsets.push_back(*offsetIt);
+            else
+                targetIt->second->mOffsets.push_back((*offsetIt)->clone());
+        }
+    }
+
+    if (result->mTargets.empty())
+    {
+        std::vector<Value*>::const_iterator offsetIt = offsets.begin();
+        for (; offsetIt != offsets.end(); ++offsetIt)
+            delete *offsetIt;
+    }
+
+    return result;
+}
+
+void
+InclusionBased::store(const Value &value, State &state)
+{
+    // Go through all target memory blocks for the pointer and merge
+    // them with the value being stored.
+    PlaceTargetMap::const_iterator it = mTargets.begin();
+    for (; it != mTargets.end(); ++it)
+    {
+        std::vector<Value*> destinations = it->second->dereference(state);
+        std::vector<Value*>::iterator it = destinations.begin();
+        for (; it != destinations.end(); ++it)
+            (*it)->merge(value);
+    }
 }
 
 InclusionBased *
@@ -31,7 +146,7 @@ InclusionBased::operator==(const Value &value) const
     if (!pointer)
         return false;
 
-    if (pointer->mBitcastTo != mBitcastTo)
+    if (pointer->mType != mType)
         return false;
 
     // Check if it has the same number of targets.
@@ -43,7 +158,7 @@ InclusionBased::operator==(const Value &value) const
         it2 = mTargets.begin();
     for (; it2 != mTargets.end(); ++it1, ++it2)
     {
-        if (it1->first != it2->first || it1->second != it2->second)
+        if (it1->first != it2->first || *it1->second != *it2->second)
             return false;
     }
 
@@ -53,26 +168,24 @@ InclusionBased::operator==(const Value &value) const
 void
 InclusionBased::merge(const Value &value)
 {
-    if (const Constant *constant = dynamic_cast<const Constant*>(&value))
-    {
-        CANAL_ASSERT(constant->isGetElementPtr());
-        // TODO: get the pointer from the constant.
-        CANAL_NOT_IMPLEMENTED();
-        return;
-    }
+    CANAL_ASSERT_MSG(!dynamic_cast<const Constant*>(&value),
+                     "Constant values are not supported for pointers."
+                     "Getelementptr should be evaluated in the interpreter.");
 
     const InclusionBased &vv = dynamic_cast<const InclusionBased&>(value);
-    CANAL_ASSERT_MSG(vv.mBitcastTo == mBitcastTo,
-                     "Unexpected different bitcasts in a pointer merge");
+
+    CANAL_ASSERT_MSG(vv.mType == mType,
+                     "Unexpected different types in a pointer merge");
 
     PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
     for (; valueit != vv.mTargets.end(); ++valueit)
     {
         PlaceTargetMap::iterator it = mTargets.find(valueit->first);
         if (it == mTargets.end())
-            mTargets.insert(*valueit);
+            mTargets.insert(PlaceTargetMap::value_type(
+                                it->first, new Target(*it->second)));
         else
-            it->second.merge(valueit->second);
+            it->second->merge(*valueit->second);
     }
 }
 
@@ -80,9 +193,11 @@ size_t
 InclusionBased::memoryUsage() const
 {
     size_t size = sizeof(InclusionBased);
+
     PlaceTargetMap::const_iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
-        size += it->second.memoryUsage();
+        size += it->second->memoryUsage();
+
     return size;
 }
 
@@ -103,50 +218,16 @@ InclusionBased::toString() const
             name = "<failed to name the location>";
 
         ss << "    { assigned: " << name << std::endl;
-        ss << "      target: " << indentExceptFirstLine(it->second.toString(slotTracker), 14) << " }" << std::endl;
+        ss << "      target: " << indentExceptFirstLine(it->second->toString(slotTracker), 14) << " }" << std::endl;
     }
 
-    if (mBitcastTo)
-    {
-        std::string s;
-        llvm::raw_string_ostream os(s);
-        os << "    bitcast to: " << *mBitcastTo;
-        os.flush();
-        ss << s << std::endl;
-    }
-
+    std::string s;
+    llvm::raw_string_ostream os(s);
+    os << "    type: " << *mType;
+    os.flush();
+    ss << s << std::endl;
     ss << "]";
     return ss.str();
-}
-
-void
-InclusionBased::addConstantTarget(const llvm::Value *instruction,
-                                  size_t constant)
-{
-    Target newTarget;
-    newTarget.mType = Target::Constant;
-    newTarget.mConstant = constant;
-
-    PlaceTargetMap::iterator it = mTargets.find(instruction);
-    if (it != mTargets.end())
-        it->second.merge(newTarget);
-    else
-        mTargets.insert(PlaceTargetMap::value_type(instruction, newTarget));
-}
-
-void
-InclusionBased::addFunctionBlockTarget(const llvm::Value *instruction,
-                                       const llvm::Value *target)
-{
-    Target newTarget;
-    newTarget.mType = Target::FunctionBlock;
-    newTarget.mInstruction = target;
-
-    PlaceTargetMap::iterator it = mTargets.find(instruction);
-    if (it != mTargets.end())
-        it->second.merge(newTarget);
-    else
-        mTargets.insert(PlaceTargetMap::value_type(instruction, newTarget));
 }
 
 } // namespace Pointer

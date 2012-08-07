@@ -33,15 +33,42 @@ class Target
 {
 public:
     enum Type {
-        Uninitialized,
         Constant,
         FunctionBlock,
-        GlobalBlock
+        FunctionVariable,
+        GlobalBlock,
+        GlobalVariable,
     };
 
-    // Initializes the target to the uninitialized type.
-    Target();
+    // Standard constructor.
+    // @param type
+    //   Type of the referenced memory.
+    // @param target
+    //   Represents the target memory block.  If type is Constant, it
+    //   must be NULL.  Otherwise, it must be a valid pointer to an
+    //   instruction.  This is a key to State::mFunctionBlocks,
+    //   State::mFunctionVariables, State::mGlobalBlocks, or
+    //   State::mGlobalVariables, depending on the type.
+    // @param offsets
+    //   Offsets in the getelementptr style.  The provided vector
+    //   might be empty.  The newly created pointer target becomes the
+    //   owner of the objects in the vector.
+    // @param numericOffset
+    //   Numerical offset that is used in addition to the
+    //   getelementptr style offset and after they have been applied.
+    //   It might be NULL, which indicates the offset 0.  The target
+    //   becomes the owner of the numerical offset when it's provided.
+    //
+    //   This parameter is mandatory for pointers of Constant type,
+    //   because it contains the constant.
+    Target(Type type,
+           const llvm::Value *target,
+           const std::vector<Value*> &offsets,
+           Value *numericOffset);
+
+    // Copy constructor.
     Target(const Target &target);
+
     ~Target();
 
     bool operator==(const Target &target) const;
