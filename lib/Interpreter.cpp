@@ -944,8 +944,11 @@ Interpreter::store(const llvm::StoreInst &instruction,
                              "All offsets are expected to be present in "
                              "a constant expression of getelementptr.");
 
+            const llvm::PointerType &pointerType =
+                llvm::cast<const llvm::PointerType>(*constantExpr->getType());
+
             Pointer::InclusionBased *pointer = new Pointer::InclusionBased(
-                environment.mModule);
+                environment.mModule, pointerType.getElementType());
             pointer->addTarget(Pointer::Target::GlobalVariable,
                                &instruction,
                                *constantExpr->op_begin(),
