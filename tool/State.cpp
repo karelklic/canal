@@ -145,7 +145,12 @@ State::addMainFrame()
         }
         case 1:
         {
-            Canal::Pointer::InclusionBased *argv = new Canal::Pointer::InclusionBased(*mModule);
+            const llvm::PointerType &pointerType =
+                llvm::cast<const llvm::PointerType>(*it->getType());
+
+            Canal::Pointer::InclusionBased *argv =
+                new Canal::Pointer::InclusionBased(*mModule,
+                                                   pointerType.getElementType());
             initialState.addFunctionVariable(*it, argv);
             // Canal::Array::SingleItem *argumentList = new Canal::Array::SingleItem();
             // argumentList->mSize = new Canal::Integer::Container(signedOne);

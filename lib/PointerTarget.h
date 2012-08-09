@@ -100,9 +100,6 @@ public:
     // owned by the LLVM framework and not by this class.
     const llvm::Value *mInstruction;
 
-    // A specific constant.
-    size_t mConstant;
-
     // Array or struct offsets in the GetElementPtr style.
     // This class owns the memory.
     std::vector<Value*> mOffsets;

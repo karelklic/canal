@@ -42,7 +42,6 @@ Target::Target(Type type,
 
 Target::Target(const Target &target) : mType(target.mType),
                                        mInstruction(target.mInstruction),
-                                       mConstant(target.mConstant),
                                        mOffsets(target.mOffsets),
                                        mNumericOffset(target.mNumericOffset)
 {
@@ -80,7 +79,8 @@ Target::operator==(const Target &target) const
     switch (mType)
     {
     case Constant:
-        return mConstant == target.mConstant;
+        // We already compared numeric offsets.
+        break;
     case FunctionBlock:
     case FunctionVariable:
     case GlobalBlock:
@@ -116,12 +116,26 @@ Target::operator!=(const Target &target) const
 void
 Target::merge(const Target &target)
 {
+    // Merge numeric offsets.
+    if (!mNumericOffset && target.mNumericOffset)
+        mNumericOffset = target.mNumericOffset->clone();
+    else if (mNumericOffset && !target.mNumericOffset)
+    {
+        const Integer::Container &numericOffsetInt =
+            dynamic_cast<const Integer::Container&>(*mNumericOffset);
+
+        llvm::APInt zero = llvm::APInt::getNullValue(
+            numericOffsetInt.getBitWidth());
+        mNumericOffset->merge(Integer::Container(zero));
+    }
+    else if (mNumericOffset)
+        mNumericOffset->merge(*target.mNumericOffset);
+
     CANAL_ASSERT(mType == target.mType);
     switch (mType)
     {
     case Constant:
-        // TODO: mConstant can be abstract value.
-        CANAL_ASSERT(mConstant == target.mConstant);
+        // We already merged numeric offsets.
         break;
     case FunctionBlock:
     case FunctionVariable:
@@ -130,22 +144,6 @@ Target::merge(const Target &target)
     {
         CANAL_ASSERT(mInstruction == target.mInstruction);
         CANAL_ASSERT(mOffsets.size() == target.mOffsets.size());
-
-        // Merge numeric offsets.
-        if (!mNumericOffset && target.mNumericOffset)
-            mNumericOffset = target.mNumericOffset->clone();
-        else if (mNumericOffset && !target.mNumericOffset)
-        {
-            const Integer::Container &numericOffsetInt =
-                dynamic_cast<const Integer::Container&>(*mNumericOffset);
-
-            llvm::APInt zero = llvm::APInt::getNullValue(
-                numericOffsetInt.getBitWidth());
-            mNumericOffset->merge(Integer::Container(zero));
-        }
-        else if (mNumericOffset)
-            mNumericOffset->merge(*target.mNumericOffset);
-
         std::vector<Value*>::iterator it1 = mOffsets.begin();
         std::vector<Value*>::const_iterator it2 = target.mOffsets.begin();
         for (; it1 != mOffsets.end(); ++it1, ++it2)
@@ -178,20 +176,11 @@ std::string
 Target::toString(SlotTracker &slotTracker) const
 {
     std::stringstream ss;
-    ss << "Pointer::Target: ";
-    if (!mOffsets.empty())
-    {
-        ss << "{" << std::endl;
-        std::vector<Value*>::const_iterator it = mOffsets.begin();
-        for (; it != mOffsets.end(); ++it)
-            ss << "    offset: " << indentExceptFirstLine((*it)->toString(), 18) << std::endl;
-        ss << "    target: ";
-    }
+    ss << "target";
 
     switch (mType)
     {
     case Constant:
-        ss << mConstant;
         break;
     case FunctionBlock:
     case FunctionVariable:
@@ -208,10 +197,10 @@ Target::toString(SlotTracker &slotTracker) const
 
         switch (mType)
         {
-        case FunctionBlock:    ss << "%^"; break;
-        case FunctionVariable: ss << "%";  break;
-        case GlobalBlock:      ss << "@^"; break;
-        case GlobalVariable:   ss << "@";  break;
+        case FunctionBlock:    ss << " %^"; break;
+        case FunctionVariable: ss << " %";  break;
+        case GlobalBlock:      ss << " @^"; break;
+        case GlobalVariable:   ss << " @";  break;
         default:               CANAL_DIE();
         }
 
@@ -222,8 +211,21 @@ Target::toString(SlotTracker &slotTracker) const
         CANAL_DIE();
     }
 
+    ss << std::endl;
+
     if (!mOffsets.empty())
-        ss << std::endl << "}";
+    {
+        ss << "    offsets" << std::endl;
+        std::vector<Value*>::const_iterator it = mOffsets.begin();
+        for (; it != mOffsets.end(); ++it)
+            ss << indent((*it)->toString(), 8);
+    }
+
+    if (mNumericOffset)
+    {
+        ss << "    numericOffset" << std::endl;
+        ss << indent(mNumericOffset->toString(), 8);
+    }
 
     return ss.str();
 }
