@@ -156,7 +156,7 @@ printVariable(const std::string &fullName, State &state)
         return;
     }
 
-    printf("%s = %s\n", fullName.c_str(),
+    printf("%s = %s", fullName.c_str(),
            Canal::indentExceptFirstLine(value->toString(),
                                         fullName.size() + 3).c_str());
 }
