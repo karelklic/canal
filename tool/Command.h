@@ -25,10 +25,14 @@ public:
     const std::string &getHelp() const { return mHelp; }
 
     // Finds completion options for given arguments.
-    virtual std::vector<std::string> getCompletionMatches(const std::vector<std::string> &args, int pointArg, int pointArgOffset) const;
+    virtual std::vector<std::string> getCompletionMatches(
+        const std::vector<std::string> &args,
+        int pointArg,
+        int pointArgOffset) const;
 
     // Function to call to do the job
     virtual void run(const std::vector<std::string> &args) = 0;
+
 protected:
     std::string mName;
     std::string mShortcut;

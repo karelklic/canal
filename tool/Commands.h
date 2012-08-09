@@ -21,8 +21,11 @@ public:
 
     // Finds completion options for given text that represents an
     // incomplete command line.
-    std::vector<std::string> getCompletionMatches(const std::string &text, int point) const;
-    std::vector<std::string> getCommandMatches(const std::string &command) const;
+    std::vector<std::string> getCompletionMatches(
+        const std::string &text, int point) const;
+
+    std::vector<std::string> getCommandMatches(
+        const std::string &command) const;
 
     // Runs a command line that should contain a command name and
     // command arguments.  Does nothing on empty line.

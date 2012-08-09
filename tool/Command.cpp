@@ -11,7 +11,9 @@ Command::Command(const std::string &name,
 }
 
 std::vector<std::string>
-Command::getCompletionMatches(const std::vector<std::string> &args, int pointArg, int pointArgOffset) const
+Command::getCompletionMatches(const std::vector<std::string> &args,
+                              int pointArg,
+                              int pointArgOffset) const
 {
     // No completion by default.
     return std::vector<std::string>();

@@ -41,15 +41,20 @@ Commands::Commands()
     mCommandList.push_back(new CommandStart(*this));
     mCommandList.push_back(new CommandStep(*this));
 
-    for (std::vector<Command*>::const_iterator it = mCommandList.begin(); it != mCommandList.end(); ++it)
+    std::vector<Command*>::const_iterator it = mCommandList.begin();
+    for (; it != mCommandList.end(); ++it)
     {
         mCommandMap.insert(CommandMap::value_type((*it)->getName(), *it));
+
+        if (!(*it)->getShortcut().empty())
+            mCommandMap.insert(CommandMap::value_type((*it)->getShortcut(), *it));
     }
 }
 
 Commands::~Commands()
 {
-    for (std::vector<Command*>::const_iterator it = mCommandList.begin(); it != mCommandList.end(); ++it)
+    std::vector<Command*>::const_iterator it = mCommandList.begin();
+    for (; it != mCommandList.end(); ++it)
     {
         delete *it;
     }
