@@ -38,7 +38,9 @@ SingleItem::clone() const
 bool
 SingleItem::operator==(const Value &value) const
 {
-    const SingleItem *singleItem = dynamic_cast<const SingleItem*>(&value);
+    const SingleItem *singleItem =
+        dynamic_cast<const SingleItem*>(&value);
+
     if (!singleItem)
         return false;
 
@@ -80,10 +82,11 @@ std::string
 SingleItem::toString() const
 {
     std::stringstream ss;
-    ss << "Array::SingleItem: {" << std::endl;
-    ss << "    size:" << indentExceptFirstLine(mSize->toString(), 9) << std::endl;
-    ss << "    value: " << indentExceptFirstLine(mValue->toString(), 11) << std::endl;
-    ss << "}";
+    ss << "arraySingleItem" << std::endl;
+    ss << "    size" << std::endl;
+    ss << indent(mSize->toString(), 8);
+    ss << "    value" << std::endl;
+    ss << indent(mValue->toString(), 8);
     return ss.str();
 }
 

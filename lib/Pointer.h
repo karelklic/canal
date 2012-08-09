@@ -12,10 +12,11 @@ namespace llvm {
 namespace Canal {
 namespace Pointer {
 
-// llvm::Value represents a position in the program.  It points to
-// the instruction where the target was assigned/stored to the
-// pointer.  The idea is that the targets created on the same
-// place of the code are merged together.
+// llvm::Value represents a position in the program.  It points to the
+// instruction where the target was assigned/stored to the pointer.
+// The idea is that the targets created on the same place of the code
+// are merged together.  It is a way how targets can be ordered
+// easily.
 typedef std::map<const llvm::Value*, Target*> PlaceTargetMap;
 
 // Inclusion-based flow-insensitive abstract pointer.

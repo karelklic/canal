@@ -144,13 +144,15 @@ std::string
 Enumeration::toString() const
 {
     std::stringstream ss;
-    ss << "Integer::Enumeration: [" << std::endl;
-    for (APIntUtils::USet::const_iterator it = mValues.begin(); it != mValues.end(); ++it)
-    {
-        ss << "    " << Canal::toString(*it) << std::endl;
-    }
+    ss << "enumeration";
+    if (mValues.empty())
+        ss << " empty";
+    ss << std::endl;
 
-    ss << "]";
+    APIntUtils::USet::const_iterator it = mValues.begin();
+    for (; it != mValues.end(); ++it)
+        ss << "    " << Canal::toString(*it) << std::endl;
+
     return ss.str();
 }
 

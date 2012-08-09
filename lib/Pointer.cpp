@@ -175,7 +175,7 @@ InclusionBased::merge(const Value &value)
     const InclusionBased &vv = dynamic_cast<const InclusionBased&>(value);
 
     CANAL_ASSERT_MSG(vv.mType == mType,
-                     "Unexpected different types in a pointer merge");
+                     "Unexpected different types in a pointer merge (" << *vv.mType << " != " << *mType << ")");
 
     PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
     for (; valueit != vv.mTargets.end(); ++valueit)
@@ -206,27 +206,12 @@ InclusionBased::toString() const
 {
     SlotTracker slotTracker(mModule);
     std::stringstream ss;
-    ss << "Pointer::InclusionBased: [" << std::endl;
+    ss << "pointer" << std::endl;
+    ss << "    type " << Canal::toString(*mType) << std::endl;
     PlaceTargetMap::const_iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
-    {
-        const llvm::Instruction &instruction =
-            llvm::cast<llvm::Instruction>(*it->first);
-        slotTracker.setActiveFunction(*instruction.getParent()->getParent());
-        std::string name(Canal::getName(*it->first, slotTracker));
-        if (name.empty())
-            name = "<failed to name the location>";
+        ss << indent(it->second->toString(slotTracker), 4);
 
-        ss << "    { assigned: " << name << std::endl;
-        ss << "      target: " << indentExceptFirstLine(it->second->toString(slotTracker), 14) << " }" << std::endl;
-    }
-
-    std::string s;
-    llvm::raw_string_ostream os(s);
-    os << "    type: " << *mType;
-    os.flush();
-    ss << s << std::endl;
-    ss << "]";
     return ss.str();
 }
 

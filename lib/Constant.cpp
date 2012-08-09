@@ -1,6 +1,7 @@
 #include "Constant.h"
 #include "IntegerContainer.h"
 #include "Utils.h"
+#include <sstream>
 #include <llvm/Constants.h>
 #include <llvm/Support/raw_ostream.h>
 
@@ -25,7 +26,9 @@ Constant::getAPInt() const
 bool
 Constant::isGetElementPtr() const
 {
-    const llvm::ConstantExpr *constant = llvm::cast_or_null<llvm::ConstantExpr>(mConstant);
+    const llvm::ConstantExpr *constant =
+        llvm::dyn_cast<llvm::ConstantExpr>(mConstant);
+
     if (!constant)
         return false;
 
@@ -67,11 +70,9 @@ Constant::memoryUsage() const
 std::string
 Constant::toString() const
 {
-    std::string s;
-    llvm::raw_string_ostream os(s);
-    os << "Constant: " << *mConstant;
-    os.flush();
-    return s;
+    std::stringstream ss;
+    ss << "constant " << Canal::toString(*mConstant) << std::endl;
+    return ss.str();
 }
 
 } // namespace Canal

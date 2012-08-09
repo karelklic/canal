@@ -197,34 +197,33 @@ std::string
 Range::toString() const
 {
     std::stringstream ss;
-    ss << "Integer::Range: ";
+    ss << "range";
     if (mEmpty)
-        ss << "empty";
+        ss << " empty" << std::endl;
     else
     {
-        ss << "{" << std::endl;
-        ss << "  signed: ";
-        if (mSignedTop)
-            ss << "-infinity to infinity";
-        else
-        {
-            ss << mSignedFrom.toString(10, true) << " to "
-               << mSignedTo.toString(10, true);
-        }
-        ss << std::endl;
-
-        ss << "  unsigned: ";
-        if (mUnsignedTop)
-            ss << "0 to infinity";
-        else
-        {
-            ss << mUnsignedFrom.toString(10, false) << " to "
+        std::stringstream sign;
+        sign << mSignedFrom.toString(10, true) << " to "
+             << mSignedTo.toString(10, true);
+        std::stringstream unsign;
+        unsign << mUnsignedFrom.toString(10, false) << " to "
                << mUnsignedTo.toString(10, false);
-        }
-        ss << std::endl;
 
-        ss << "}";
+        if (mSignedTop || mUnsignedTop || sign.str() != unsign.str())
+        {
+            ss << std::endl;
+            ss << "    signed ";
+            ss << (mSignedTop ? "-infinity to infinity" : sign.str());
+            ss << std::endl;
+
+            ss << "    unsigned ";
+            ss << (mUnsignedTop ? "0 to infinity" : unsign.str());
+            ss << std::endl;
+        }
+        else
+            ss << " " << sign.str() << std::endl;
     }
+
     return ss.str();
 }
 

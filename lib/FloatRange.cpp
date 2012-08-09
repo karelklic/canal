@@ -68,10 +68,18 @@ std::string
 Range::toString() const
 {
     std::stringstream ss;
-    ss << "Float::Range: {" << std::endl;
-    ss << "    from: " << mFrom.convertToDouble() << std::endl;
-    ss << "    to: " << mTo.convertToDouble() << std::endl;
-    ss << "}";
+    ss << "floatRange ";
+    if (mEmpty)
+        ss << "empty";
+    else if (mTop)
+        ss << "-infinity to infinity";
+    else
+    {
+        ss << mFrom.convertToDouble() << " to " <<
+            mTo.convertToDouble();
+    }
+
+    ss << std::endl;
     return ss.str();
 }
 

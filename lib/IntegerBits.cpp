@@ -243,6 +243,7 @@ Bits::toString() const
         default: CANAL_DIE();
         }
     }
+    ss << std::endl;
     return ss.str();
 }
 

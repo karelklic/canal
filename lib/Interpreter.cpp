@@ -914,7 +914,7 @@ Interpreter::store(const llvm::StoreInst &instruction,
     {
         // Handle storing of constant values.
         const llvm::Constant *constant =
-            llvm::cast<llvm::Constant>(instruction.getValueOperand());
+            llvm::dyn_cast<llvm::Constant>(instruction.getValueOperand());
 
         if (!constant)
         {
@@ -926,7 +926,7 @@ Interpreter::store(const llvm::StoreInst &instruction,
         deleteValue = true;
 
         const llvm::ConstantExpr *constantExpr =
-            llvm::cast_or_null<llvm::ConstantExpr>(constant);
+            llvm::dyn_cast<llvm::ConstantExpr>(constant);
 
         // Handle storing of getelementptr constant.  Our abstract
         // pointer value does not handle that.

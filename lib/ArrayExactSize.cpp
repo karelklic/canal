@@ -85,8 +85,10 @@ std::string
 ExactSize::toString() const
 {
     std::stringstream ss;
-    ss << "Array::ExactSize: {" << std::endl;
-    ss << "}";
+    ss << "arrayExactSize" << std::endl;
+    std::vector<Value*>::const_iterator it = mValues.begin();
+    for (; it != mValues.end(); ++it)
+        ss << indent((*it)->toString(), 4);
     return ss.str();
 }
 

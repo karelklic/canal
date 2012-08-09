@@ -227,11 +227,10 @@ std::string
 Container::toString() const
 {
     std::stringstream ss;
-    ss << "Integer::Container: [" << std::endl;
+    ss << "integerContainer" << std::endl;
     std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
-        ss << "    " << indentExceptFirstLine((*it)->toString(), 4) << std::endl;
-    ss << "]";
+        ss << indent((*it)->toString(), 4);
     return ss.str();
 }
 
