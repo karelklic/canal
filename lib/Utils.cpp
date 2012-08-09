@@ -4,6 +4,8 @@
 #include <llvm/Value.h>
 #include <llvm/Instruction.h>
 #include <llvm/BasicBlock.h>
+#include <llvm/Type.h>
+#include <llvm/Constant.h>
 #include <sstream>
 #include <execinfo.h>
 #include <cxxabi.h>
@@ -26,6 +28,32 @@ toString(const llvm::APInt &num)
         ss << ")";
     }
     return ss.str();
+}
+
+std::string
+toString(const llvm::Type &type)
+{
+    std::string s;
+    llvm::raw_string_ostream os(s);
+    os << type;
+    os.flush();
+    return s;
+}
+
+std::string
+toString(const llvm::Constant &constant)
+{
+    std::string s;
+    llvm::raw_string_ostream os(s);
+    os << constant;
+    os.flush();
+    return s;
+}
+
+std::string
+indent(const std::string &input, int spaces)
+{
+    return std::string(spaces, ' ') + indentExceptFirstLine(input, spaces);
 }
 
 std::string

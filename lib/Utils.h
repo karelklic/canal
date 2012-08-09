@@ -93,15 +93,21 @@
     }
 
 namespace llvm {
-    class APInt;
-    class Value;
-}
+class APInt;
+class Constant;
+class Type;
+class Value;
+} // namespace llvm
 
 namespace Canal {
 
 class SlotTracker;
 
 std::string toString(const llvm::APInt &num);
+std::string toString(const llvm::Type &type);
+std::string toString(const llvm::Constant &constant);
+
+std::string indent(const std::string &input, int spaces);
 std::string indentExceptFirstLine(const std::string &input, int spaces);
 
 // @param slotTracker

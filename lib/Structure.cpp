@@ -79,8 +79,11 @@ std::string
 Structure::toString() const
 {
     std::stringstream ss;
-    ss << "Structure: {" << std::endl;
-    ss << "}";
+    ss << "structure" << std::endl;
+    std::vector<Value*>::const_iterator it = mMembers.begin();
+    for (; it != mMembers.end(); ++it)
+        ss << indent((*it)->toString(), 4);
+
     return ss.str();
 }
 
