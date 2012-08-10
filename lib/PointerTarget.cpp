@@ -185,10 +185,9 @@ Target::toString(SlotTracker &slotTracker) const
     case FunctionBlock:
     case FunctionVariable:
     case GlobalBlock:
-    case GlobalVariable:
     {
         const llvm::Instruction &instruction =
-            llvm::cast<llvm::Instruction>(*mInstruction);
+            llvmCast<llvm::Instruction>(*mInstruction);
 
         slotTracker.setActiveFunction(*instruction.getParent()->getParent());
         std::string name(Canal::getName(instruction, slotTracker));
@@ -200,11 +199,18 @@ Target::toString(SlotTracker &slotTracker) const
         case FunctionBlock:    ss << " %^"; break;
         case FunctionVariable: ss << " %";  break;
         case GlobalBlock:      ss << " @^"; break;
-        case GlobalVariable:   ss << " @";  break;
         default:               CANAL_DIE();
         }
 
         ss << name;
+        break;
+    }
+    case GlobalVariable:
+    {
+        std::string name(Canal::getName(*mInstruction, slotTracker));
+        if (name.empty())
+            name = "<failed to name the location>";
+        ss << " @" << name;
         break;
     }
     default:

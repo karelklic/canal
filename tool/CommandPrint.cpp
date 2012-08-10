@@ -36,7 +36,7 @@ filterPlaceValueMap(const Canal::PlaceValueMap &map,
         if (addFunctionName)
         {
             const llvm::Instruction &instruction =
-                llvm::cast<llvm::Instruction>(*it->first);
+                Canal::llvmCast<llvm::Instruction>(*it->first);
             const llvm::Function &f = *instruction.getParent()->getParent();
             name << f.getName().str() << ":";
         }
@@ -58,8 +58,19 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args,
         return result;
 
     std::string arg(args[pointArg].substr(0, pointArgOffset));
-
     Canal::State &curState = state->getStack().getCurrentState();
+
+    if (arg.empty() || arg == "%")
+    {
+        result.push_back("%");
+        result.push_back("%^");
+    }
+
+    if (arg.empty() || arg == "@")
+    {
+        result.push_back("@");
+        result.push_back("@^");
+    }
 
     filterPlaceValueMap(curState.getGlobalVariables(),
                         state->getSlotTracker(),

@@ -20,7 +20,7 @@ Constant::isAPInt() const
 const llvm::APInt &
 Constant::getAPInt() const
 {
-    return llvm::cast<llvm::ConstantInt>(mConstant)->getValue();
+    return llvmCast<llvm::ConstantInt>(mConstant)->getValue();
 }
 
 bool

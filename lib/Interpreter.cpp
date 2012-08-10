@@ -200,11 +200,11 @@ Interpreter::ret(const llvm::ReturnInst &instruction,
                 delete constant;
             }
 
-            Constant c(llvm::cast<llvm::Constant>(value));
+            Constant c(llvmCast<llvm::Constant>(value));
             state.mReturnedValue->merge(c);
         }
         else
-            state.mReturnedValue = new Constant(llvm::cast<llvm::Constant>(value));
+            state.mReturnedValue = new Constant(llvmCast<llvm::Constant>(value));
     }
 }
 
@@ -244,7 +244,7 @@ variableOrConstant(const llvm::Value &place, State &state, Constant &constant)
 {
     if (llvm::isa<llvm::Constant>(place))
     {
-        constant.mConstant = llvm::cast<llvm::Constant>(&place);
+        constant.mConstant = llvmCast<llvm::Constant>(&place);
         return &constant;
     }
 
@@ -287,7 +287,7 @@ typeToEmptyValue(const llvm::Type &type, const llvm::Module &module)
 
     if (type.isIntegerTy())
     {
-        llvm::IntegerType &integerType = llvm::cast<llvm::IntegerType>(type);
+        llvm::IntegerType &integerType = llvmCast<llvm::IntegerType>(type);
         return new Integer::Container(integerType.getBitWidth());
     }
 
@@ -299,7 +299,7 @@ typeToEmptyValue(const llvm::Type &type, const llvm::Module &module)
 
     if (type.isPointerTy())
     {
-        const llvm::PointerType &pointerType = llvm::cast<const llvm::PointerType>(type);
+        const llvm::PointerType &pointerType = llvmCast<const llvm::PointerType>(type);
         return new Pointer::InclusionBased(module, pointerType.getElementType());
     }
 
@@ -310,7 +310,7 @@ typeToEmptyValue(const llvm::Type &type, const llvm::Module &module)
 
     if (type.isStructTy())
     {
-        const llvm::StructType &structType = llvm::cast<llvm::StructType>(type);
+        const llvm::StructType &structType = llvmCast<llvm::StructType>(type);
         Structure *structure = new Structure();
 
         llvm::StructType::element_iterator it = structType.element_begin(),
@@ -658,17 +658,17 @@ Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction,
         const llvm::Value *inputMask = instruction.getOperand(2);
         CANAL_ASSERT_MSG(inputMask, "Failed to get shufflevector mask.");
         const llvm::VectorType *inputMaskType =
-            llvm::cast<llvm::VectorType>(inputMask->getType());
+            llvmCast<llvm::VectorType>(inputMask->getType());
 
         unsigned count = inputMaskType->getNumElements();
         const llvm::ConstantVector *inputMaskConstant =
-            llvm::cast<llvm::ConstantVector>(inputMask);
+            llvmCast<llvm::ConstantVector>(inputMask);
 
         for (unsigned i = 0; i != count; ++i)
         {
             llvm::Constant *constant = inputMaskConstant->getOperand(i);
             int constantInt = llvm::isa<llvm::UndefValue>(constant) ? -1 :
-                llvm::cast<llvm::ConstantInt>(constant)->getZExtValue();
+                llvmCast<llvm::ConstantInt>(constant)->getZExtValue();
             shuffleMask.push_back(constantInt);
         }
     }
@@ -787,7 +787,9 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction,
 
         if (llvm::isa<llvm::ConstantInt>(arraySize))
         {
-            const llvm::ConstantInt *constant = llvm::cast<llvm::ConstantInt>(arraySize);
+            const llvm::ConstantInt *constant =
+                llvmCast<llvm::ConstantInt>(arraySize);
+
             abstractSize = new Constant(constant);
         }
         else
@@ -879,7 +881,9 @@ getElementPtrOffsets(std::vector<Value*> &result,
     {
         if (llvm::isa<llvm::ConstantInt>(it))
         {
-            llvm::ConstantInt *constant = llvm::cast<llvm::ConstantInt>(it);
+            llvm::ConstantInt *constant =
+                llvmCast<llvm::ConstantInt>(it);
+
             result.push_back(new Constant(constant));
         }
         else
@@ -945,17 +949,18 @@ Interpreter::store(const llvm::StoreInst &instruction,
                              "a constant expression of getelementptr.");
 
             const llvm::PointerType &pointerType =
-                llvm::cast<const llvm::PointerType>(*constantExpr->getType());
+                llvmCast<const llvm::PointerType>(*constantExpr->getType());
 
-            Pointer::InclusionBased *pointer = new Pointer::InclusionBased(
+            Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
                 environment.mModule, pointerType.getElementType());
-            pointer->addTarget(Pointer::Target::GlobalVariable,
-                               &instruction,
-                               *constantExpr->op_begin(),
-                               offsets,
-                               NULL);
+            constPointer->addTarget(Pointer::Target::GlobalVariable,
+                                    &instruction,
+                                    *constantExpr->op_begin(),
+                                    offsets,
+                                    NULL);
 
-            value = pointer;
+            puts(constPointer->toString().c_str());
+            value = constPointer;
         }
         else
             value = new Constant(constant);
@@ -1097,7 +1102,7 @@ Interpreter::ptrtoint(const llvm::PtrToIntInst &instruction,
         if (it->second.mNumericOffset)
         {
             llvm::IntegerType &integerType =
-                llvm::cast<llvm::IntegerType>(*instruction.getDestTy());
+                llvmCast<llvm::IntegerType>(*instruction.getDestTy());
 
             const Integer::Container &existingInt =
                 dynamic_cast<const Integer::Container&>(*it->second.mNumericOffset);
@@ -1130,7 +1135,7 @@ Interpreter::inttoptr(const llvm::IntToPtrInst &instruction,
         dynamic_cast<Pointer::InclusionBased&>(*operand);
 
     const llvm::PointerType &pointerType =
-        llvm::cast<const llvm::PointerType>(*instruction.getDestTy());
+        llvmCast<const llvm::PointerType>(*instruction.getDestTy());
 
     Pointer::InclusionBased *result =
         source.bitcast(pointerType.getElementType());

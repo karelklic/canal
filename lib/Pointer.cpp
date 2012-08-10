@@ -36,7 +36,7 @@ InclusionBased::~InclusionBased()
 
 void
 InclusionBased::addTarget(Target::Type type,
-                          const llvm::Value *instruction,
+                          const llvm::Instruction *instruction,
                           const llvm::Value *target,
                           const std::vector<Value*> &offsets,
                           Value *numericOffset)

@@ -2,6 +2,7 @@
 #define LIBCANAL_UTILS_H
 
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/Casting.h>
 #include <cstdlib>
 #include <string>
 
@@ -118,6 +119,16 @@ std::string getName(const llvm::Value &value,
                     SlotTracker &slotTracker);
 
 std::string getCurrentBacktrace();
+
+template <class X, class Y> inline typename llvm::cast_retty<X, Y>::ret_type
+llvmCast(const Y &Val)
+{
+    CANAL_ASSERT_MSG(llvm::isa<X>(Val),
+                     "cast<Ty>() argument of incompatible type!");
+    return llvm::cast_convert_val<X, Y,
+        typename llvm::simplify_type<Y>::SimpleType>::doit(Val);
+}
+
 
 } // namespace Canal
 

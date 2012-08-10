@@ -76,7 +76,7 @@ public:
     //   This parameter is mandatory for pointers of Constant type,
     //   because it contains the constant.
     void addTarget(Target::Type type,
-                   const llvm::Value *instruction,
+                   const llvm::Instruction *instruction,
                    const llvm::Value *target,
                    const std::vector<Value*> &offsets,
                    Value *numericOffset);

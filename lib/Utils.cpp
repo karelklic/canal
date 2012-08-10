@@ -85,7 +85,7 @@ getName(const llvm::Value &value, SlotTracker &slotTracker)
         else
         {
             const llvm::Instruction &inst =
-                llvm::cast<const llvm::Instruction>(value);
+                llvmCast<const llvm::Instruction>(value);
 
             slotTracker.setActiveFunction(*inst.getParent()->getParent());
             id = slotTracker.getLocalSlot(value);

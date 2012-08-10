@@ -146,7 +146,7 @@ State::addMainFrame()
         case 1:
         {
             const llvm::PointerType &pointerType =
-                llvm::cast<const llvm::PointerType>(*it->getType());
+                Canal::llvmCast<const llvm::PointerType>(*it->getType());
 
             Canal::Pointer::InclusionBased *argv =
                 new Canal::Pointer::InclusionBased(*mModule,
