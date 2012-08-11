@@ -234,45 +234,46 @@ Container::toString() const
     return ss.str();
 }
 
+// Converts value to container.  If the value is a constant, it is
+// converted to container and deleteAfter is set to true.
+static const Container *
+asContainer(const Value &value, bool &deleteAfter)
+{
+    deleteAfter = false;
+    const Container *container = dynCast<const Container*>(&value);
+    if (!container)
+    {
+        const Constant *constant = dynCast<const Constant*>(&value);
+        CANAL_ASSERT_MSG(constant,
+                         "Unsupported type cannot be converted to integer container.");
+        container = new Container(constant->getAPInt());
+        deleteAfter = true;
+    }
+
+    return container;
+}
+
 static void
 applyBinaryOperation(Container &result,
                      const Value &a,
                      const Value &b,
                      void(Value::*operation)(const Value&, const Value&))
 {
-    const Container *acontainer = dynCast<const Container*>(&a);
-    bool deleteAContainer = false;
-    if (!acontainer)
-    {
-        const Constant *constant = dynCast<const Constant*>(&a);
-        CANAL_ASSERT_MSG(constant,
-                         "Unsupported type provided to an Integer Container operation.");
-        acontainer = new Container(constant->getAPInt());
-        deleteAContainer = true;
-    }
-
-    const Container *bcontainer = dynCast<const Container*>(&b);
-    bool deleteBContainer = false;
-    if (!bcontainer)
-    {
-        const Constant *constant = dynCast<const Constant*>(&b);
-        CANAL_ASSERT_MSG(constant,
-                         "Unsupported type provided to an Integer Container operation.");
-        bcontainer = new Container(constant->getAPInt());
-        deleteBContainer = true;
-    }
+    bool deleteAA, deleteBB;
+    const Container *aa = asContainer(a, deleteAA),
+        *bb = asContainer(b, deleteBB);
 
     std::vector<Value*>::iterator it(result.mValues.begin());
-    std::vector<Value*>::const_iterator ita = acontainer->mValues.begin(),
-        itb = bcontainer->mValues.begin();
+    std::vector<Value*>::const_iterator ita = aa->mValues.begin(),
+        itb = bb->mValues.begin();
 
     for (; it != result.mValues.end(); ++it, ++ita, ++itb)
         ((**it).*(operation))(**ita, **itb);
 
-    if (deleteAContainer)
-        delete acontainer;
-    if (deleteBContainer)
-        delete bcontainer;
+    if (deleteAA)
+        delete aa;
+    if (deleteBB)
+        delete bb;
 }
 
 void
@@ -351,6 +352,27 @@ void
 Container::xor_(const Value &a, const Value &b)
 {
     applyBinaryOperation(*this, a, b, &Value::xor_);
+}
+
+void
+Container::icmp(const Value &a, const Value &b,
+                llvm::CmpInst::Predicate predicate)
+{
+    bool deleteAA, deleteBB;
+    const Container *aa = asContainer(a, deleteAA),
+        *bb = asContainer(b, deleteBB);
+
+    std::vector<Value*>::iterator it(mValues.begin());
+    std::vector<Value*>::const_iterator ita = aa->mValues.begin(),
+        itb = bb->mValues.begin();
+
+    for (; it != mValues.end(); ++it, ++ita, ++itb)
+        (**it).icmp(**ita, **itb, predicate);
+
+    if (deleteAA)
+        delete aa;
+    if (deleteBB)
+        delete bb;
 }
 
 float Container::accuracy() const

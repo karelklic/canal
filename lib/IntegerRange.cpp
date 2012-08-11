@@ -659,6 +659,13 @@ Range::xor_(const Value &a, const Value &b)
     setTop();
 }
 
+void
+Range::icmp(const Value &a, const Value &b,
+            llvm::CmpInst::Predicate predicate)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 float
 Range::accuracy() const
 {

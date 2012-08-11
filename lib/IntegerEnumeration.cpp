@@ -242,6 +242,13 @@ Enumeration::xor_(const Value &a, const Value &b)
     applyOperation(a, b, &llvm::APInt::operator^, NULL);
 }
 
+void
+Enumeration::icmp(const Value &a, const Value &b,
+                  llvm::CmpInst::Predicate predicate)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 float
 Enumeration::accuracy() const
 {

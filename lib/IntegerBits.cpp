@@ -408,6 +408,13 @@ Bits::xor_(const Value &a, const Value &b)
     applyBitOperation(*this, a, b, bitXor);
 }
 
+void
+Bits::icmp(const Value &a, const Value &b,
+           llvm::CmpInst::Predicate predicate)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 float
 Bits::accuracy() const
 {

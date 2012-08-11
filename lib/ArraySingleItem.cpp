@@ -90,6 +90,128 @@ SingleItem::toString() const
     return ss.str();
 }
 
+void
+SingleItem::add(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::fadd(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::sub(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::fsub(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::mul(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::fmul(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::udiv(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::sdiv(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::fdiv(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::urem(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::srem(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::frem(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::shl(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::lshr(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::ashr(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::and_(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::or_(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::xor_(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::icmp(const Value &a, const Value &b,
+                llvm::CmpInst::Predicate predicate)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+SingleItem::fcmp(const Value &a, const Value &b,
+                llvm::CmpInst::Predicate predicate)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 static void
 assertOffsetFitsToArray(uint64_t offset, const Value &size)
 {

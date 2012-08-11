@@ -92,6 +92,128 @@ ExactSize::toString() const
     return ss.str();
 }
 
+void
+ExactSize::add(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::fadd(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::sub(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::fsub(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::mul(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::fmul(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::udiv(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::sdiv(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::fdiv(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::urem(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::srem(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::frem(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::shl(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::lshr(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::ashr(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::and_(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::or_(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::xor_(const Value &a, const Value &b)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::icmp(const Value &a, const Value &b,
+                llvm::CmpInst::Predicate predicate)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+ExactSize::fcmp(const Value &a, const Value &b,
+                llvm::CmpInst::Predicate predicate)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 std::vector<Value*>
 ExactSize::getItem(const Value &offset) const
 {

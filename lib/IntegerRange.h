@@ -105,6 +105,9 @@ public: // Implementation of Value.
     virtual void or_(const Value &a, const Value &b);
     // Implementation of Value::xor_().
     virtual void xor_(const Value &a, const Value &b);
+    // Implementation of Value::icmp().
+    virtual void icmp(const Value &a, const Value &b,
+                      llvm::CmpInst::Predicate predicate);
 
 public: // Implementation of AccuracyValue.
     // Implementation of AccuracyValue::accuracy().
