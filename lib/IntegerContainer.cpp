@@ -49,37 +49,37 @@ Container::getBitWidth() const
 Bits &
 Container::getBits()
 {
-    return dynamic_cast<Bits&>(*mValues[0]);
+    return dynCast<Bits&>(*mValues[0]);
 }
 
 const Bits &
 Container::getBits() const
 {
-    return dynamic_cast<Bits&>(*mValues[0]);
+    return dynCast<const Bits&>(*mValues[0]);
 }
 
 Enumeration &
 Container::getEnumeration()
 {
-    return dynamic_cast<Enumeration&>(*mValues[1]);
+    return dynCast<Enumeration&>(*mValues[1]);
 }
 
 const Enumeration &
 Container::getEnumeration() const
 {
-    return dynamic_cast<Enumeration&>(*mValues[1]);
+    return dynCast<const Enumeration&>(*mValues[1]);
 }
 
 Range &
 Container::getRange()
 {
-    return dynamic_cast<Range&>(*mValues[2]);
+    return dynCast<Range&>(*mValues[2]);
 }
 
 const Range &
 Container::getRange() const
 {
-    return dynamic_cast<Range&>(*mValues[2]);
+    return dynCast<const Range&>(*mValues[2]);
 }
 
 bool
@@ -179,7 +179,7 @@ Container::clone() const
 bool
 Container::operator==(const Value &value) const
 {
-    const Container *container = dynamic_cast<const Container*>(&value);
+    const Container *container = dynCast<const Container*>(&value);
     if (!container)
         return false;
 
@@ -199,14 +199,14 @@ void
 Container::merge(const Value &value)
 {
     std::vector<Value*>::iterator it = mValues.begin();
-    if (const Constant *constant = dynamic_cast<const Constant*>(&value))
+    if (const Constant *constant = dynCast<const Constant*>(&value))
     {
         for (; it != mValues.end(); ++it)
             (*it)->merge(*constant);
         return;
     }
 
-    const Container &container = dynamic_cast<const Container&>(value);
+    const Container &container = dynCast<const Container&>(value);
     CANAL_ASSERT(mValues.size() == container.mValues.size());
     std::vector<Value*>::const_iterator it2 = container.mValues.begin();
     for (; it != mValues.end(); ++it, ++it2)
@@ -241,13 +241,13 @@ applyBinaryOperation(Container &result,
                      const Value &b,
                      void(Value::*operation)(const Value&, const Value&))
 {
-    const Canal::Constant *aconstant = dynamic_cast<const Canal::Constant*>(&a);
-    const Container *acontainer = dynamic_cast<const Container*>(&a);
+    const Constant *aconstant = dynCast<const Constant*>(&a);
+    const Container *acontainer = dynCast<const Container*>(&a);
     CANAL_ASSERT(aconstant || acontainer);
     CANAL_ASSERT(!acontainer || result.mValues.size() == acontainer->mValues.size());
 
-    const Canal::Constant *bconstant = dynamic_cast<const Canal::Constant*>(&b);
-    const Container *bcontainer = dynamic_cast<const Container*>(&b);
+    const Constant *bconstant = dynCast<const Constant*>(&b);
+    const Container *bcontainer = dynCast<const Container*>(&b);
     CANAL_ASSERT(bconstant || bcontainer);
     CANAL_ASSERT(!bcontainer || result.mValues.size() == bcontainer->mValues.size());
 
@@ -346,7 +346,9 @@ float Container::accuracy() const
     std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        const AccuracyValue *accuracyValue = dynamic_cast<const AccuracyValue*>(*it);
+        const AccuracyValue *accuracyValue =
+            dynCast<const AccuracyValue*>(*it);
+
         if (!accuracyValue)
             continue;
 
@@ -362,7 +364,9 @@ bool Container::isBottom() const
     std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        const AccuracyValue *accuracyValue = dynamic_cast<const AccuracyValue*>(*it);
+        const AccuracyValue *accuracyValue =
+            dynCast<const AccuracyValue*>(*it);
+
         if (!accuracyValue)
             continue;
 
@@ -377,7 +381,9 @@ void Container::setBottom()
     std::vector<Value*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        AccuracyValue *accuracyValue = dynamic_cast<AccuracyValue*>(*it);
+        AccuracyValue *accuracyValue =
+            dynCast<AccuracyValue*>(*it);
+
         if (!accuracyValue)
             continue;
 
@@ -390,7 +396,9 @@ bool Container::isTop() const
     std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        const AccuracyValue *accuracyValue = dynamic_cast<const AccuracyValue*>(*it);
+        const AccuracyValue *accuracyValue =
+            dynCast<const AccuracyValue*>(*it);
+
         if (!accuracyValue)
             continue;
 
@@ -405,7 +413,7 @@ void Container::setTop()
     std::vector<Value*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        AccuracyValue *accuracyValue = dynamic_cast<AccuracyValue*>(*it);
+        AccuracyValue *accuracyValue = dynCast<AccuracyValue*>(*it);
         if (!accuracyValue)
             continue;
 

@@ -72,6 +72,11 @@ class Interpreter
 public:
     virtual ~Interpreter() {};
 
+    // Adds all global variables and constants from a module to the
+    // state.
+    void addGlobalVariables(State &state,
+                            const Environment &environment);
+
     // One step of the interpreter.  Interprets current instruction
     // and moves to the next one.
     // @returns

@@ -5,6 +5,7 @@
 #include <llvm/Support/Casting.h>
 #include <cstdlib>
 #include <string>
+#include <typeinfo>
 
 // Fatal error.  Writes a message to stderr and terminates the
 // application.
@@ -121,14 +122,35 @@ std::string getName(const llvm::Value &value,
 std::string getCurrentBacktrace();
 
 template <class X, class Y> inline typename llvm::cast_retty<X, Y>::ret_type
-llvmCast(const Y &Val)
+llvmCast(const Y &val)
 {
-    CANAL_ASSERT_MSG(llvm::isa<X>(Val),
+    CANAL_ASSERT_MSG(llvm::isa<X>(val),
                      "cast<Ty>() argument of incompatible type!");
     return llvm::cast_convert_val<X, Y,
-        typename llvm::simplify_type<Y>::SimpleType>::doit(Val);
+        typename llvm::simplify_type<Y>::SimpleType>::doit(val);
 }
 
+template <typename X, typename Y> inline X
+dynCast(Y &val)
+{
+    try
+    {
+        return dynamic_cast<X>(val);
+    }
+    catch (std::bad_cast exception)
+        CANAL_FATAL_ERROR(exception.what());
+}
+
+template <typename X, typename Y> inline X
+dynCast(const Y &val)
+{
+    try
+    {
+        return dynamic_cast<X>(val);
+    }
+    catch (std::bad_cast exception)
+        CANAL_FATAL_ERROR(exception.what());
+}
 
 } // namespace Canal
 

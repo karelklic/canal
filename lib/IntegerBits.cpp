@@ -198,7 +198,7 @@ Bits::clone() const
 bool
 Bits::operator==(const Value& value) const
 {
-    const Bits *other = dynamic_cast<const Bits*>(&value);
+    const Bits *other = dynCast<const Bits*>(&value);
     if (!other)
         return false;
     return mBits0 == other->mBits0 && mBits1 == other->mBits1;
@@ -207,7 +207,7 @@ Bits::operator==(const Value& value) const
 void
 Bits::merge(const Value &value)
 {
-    const Constant *constant = dynamic_cast<const Constant*>(&value);
+    const Constant *constant = dynCast<const Constant*>(&value);
     if (constant)
     {
         CANAL_ASSERT(constant->isAPInt());
@@ -216,7 +216,7 @@ Bits::merge(const Value &value)
         return;
     }
 
-    const Bits &bits = dynamic_cast<const Bits&>(value);
+    const Bits &bits = dynCast<const Bits&>(value);
     mBits0 |= bits.mBits0;
     mBits1 |= bits.mBits1;
 }
@@ -308,10 +308,14 @@ Bits::ashr(const Value &a, const Value &b)
 }
 
 static void
-applyBitOperation(Bits &result, const Value &a, const Value &b, int(*operation)(int,int))
+applyBitOperation(Bits &result,
+                  const Value &a,
+                  const Value &b,
+                  int(*operation)(int,int))
 {
-    const Bits &aa = dynamic_cast<const Bits&>(a),
-        &bb = dynamic_cast<const Bits&>(b);
+    // TODO: support constants.
+    const Bits &aa = dynCast<const Bits&>(a),
+        &bb = dynCast<const Bits&>(b);
     CANAL_ASSERT(result.getBitWidth() == aa.getBitWidth() &&
                  aa.getBitWidth() == bb.getBitWidth());
     for (int pos = 0; pos < aa.getBitWidth(); ++pos)

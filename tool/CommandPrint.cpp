@@ -35,10 +35,18 @@ filterPlaceValueMap(const Canal::PlaceValueMap &map,
         name << prefix;
         if (addFunctionName)
         {
-            const llvm::Instruction &instruction =
-                Canal::llvmCast<llvm::Instruction>(*it->first);
-            const llvm::Function &f = *instruction.getParent()->getParent();
-            name << f.getName().str() << ":";
+            const llvm::Instruction *instruction =
+                llvm::dyn_cast<llvm::Instruction>(it->first);
+
+            if (instruction)
+            {
+                const llvm::Function &function =
+                    *instruction->getParent()->getParent();
+                name << function.getName().str() << ":";
+            }
+            else
+                CANAL_ASSERT_MSG(llvm::isa<llvm::GlobalVariable>(it->first),
+                                 "Unexpected entity in a place-variable map.");
         }
 
         name << Canal::getName(*it->first, slotTracker);
@@ -105,7 +113,6 @@ printVariable(const std::string &fullName, State &state)
     bool isBlock = (fullName.size() > 1 && fullName[1] == '^');
 
     const llvm::Value *position;
-    bool isNumber;
     std::string name(fullName.substr(isBlock ? 2 : 1));
 
     std::string functionName;
@@ -119,6 +126,7 @@ printVariable(const std::string &fullName, State &state)
         }
     }
 
+    bool isNumber;
     unsigned pos = stringToUnsigned(name.c_str(), isNumber);
 
     Canal::Stack &stack = state.getStack();
@@ -135,14 +143,14 @@ printVariable(const std::string &fullName, State &state)
 
     if (isNumber)
     {
-        if (fullName[0] == '%' || isBlock)
+        if (fullName[0] == '%' || (isBlock && !functionName.empty()))
             position = slotTracker.getLocalSlot(pos);
         else
             position = slotTracker.getGlobalSlot(pos);
     }
     else
     {
-        if (fullName[0] == '%' || isBlock)
+        if (fullName[0] == '%' || (isBlock && !functionName.empty()))
             position = function->getValueSymbolTable().lookup(name);
         else
             position = state.getModule().getValueSymbolTable().lookup(name);

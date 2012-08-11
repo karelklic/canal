@@ -36,7 +36,7 @@ InclusionBased::~InclusionBased()
 
 void
 InclusionBased::addTarget(Target::Type type,
-                          const llvm::Instruction *instruction,
+                          const llvm::Value *instruction,
                           const llvm::Value *target,
                           const std::vector<Value*> &offsets,
                           Value *numericOffset)
@@ -141,7 +141,7 @@ InclusionBased::operator==(const Value &value) const
 {
     // Check if the value has the same type.
     const InclusionBased *pointer =
-        dynamic_cast<const InclusionBased*>(&value);
+        dynCast<const InclusionBased*>(&value);
 
     if (!pointer)
         return false;
@@ -168,14 +168,15 @@ InclusionBased::operator==(const Value &value) const
 void
 InclusionBased::merge(const Value &value)
 {
-    CANAL_ASSERT_MSG(!dynamic_cast<const Constant*>(&value),
+    CANAL_ASSERT_MSG(!dynCast<const Constant*>(&value),
                      "Constant values are not supported for pointers."
                      "Getelementptr should be evaluated in the interpreter.");
 
-    const InclusionBased &vv = dynamic_cast<const InclusionBased&>(value);
+    const InclusionBased &vv = dynCast<const InclusionBased&>(value);
 
     CANAL_ASSERT_MSG(vv.mType == mType,
-                     "Unexpected different types in a pointer merge (" << *vv.mType << " != " << *mType << ")");
+                     "Unexpected different types in a pointer merge ("
+                     << *vv.mType << " != " << *mType << ")");
 
     PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
     for (; valueit != vv.mTargets.end(); ++valueit)
@@ -183,7 +184,7 @@ InclusionBased::merge(const Value &value)
         PlaceTargetMap::iterator it = mTargets.find(valueit->first);
         if (it == mTargets.end())
             mTargets.insert(PlaceTargetMap::value_type(
-                                it->first, new Target(*it->second)));
+                                valueit->first, new Target(*valueit->second)));
         else
             it->second->merge(*valueit->second);
     }

@@ -39,7 +39,7 @@ bool
 SingleItem::operator==(const Value &value) const
 {
     const SingleItem *singleItem =
-        dynamic_cast<const SingleItem*>(&value);
+        dynCast<const SingleItem*>(&value);
 
     if (!singleItem)
         return false;
@@ -60,7 +60,7 @@ SingleItem::operator==(const Value &value) const
 void
 SingleItem::merge(const Value &value)
 {
-    const SingleItem &singleItem = dynamic_cast<const SingleItem&>(value);
+    const SingleItem &singleItem = dynCast<const SingleItem&>(value);
     CANAL_ASSERT_MSG(mValue && singleItem.mValue,
                      "Array value must be intialized for merging");
     CANAL_ASSERT_MSG(mSize && singleItem.mSize,
@@ -95,7 +95,7 @@ assertOffsetFitsToArray(uint64_t offset, const Value &size)
 {
     // Get maximum size of the array.
     const Integer::Container &integerSize =
-        dynamic_cast<const Integer::Container&>(size);
+        dynCast<const Integer::Container&>(size);
     llvm::APInt unsignedMaxSize(integerSize.getBitWidth(), 0);
     bool sizeIsKnown = integerSize.unsignedMax(unsignedMaxSize);
     // The following requirement can be changed if necessary.
@@ -108,7 +108,7 @@ static void
 assertOffsetFitsToArray(const Value &offset, const Value &size)
 {
     // Check if the offset might point to the array.
-    if (const Constant *constant = dynamic_cast<const Constant*>(&offset))
+    if (const Constant *constant = dynCast<const Constant*>(&offset))
     {
         CANAL_ASSERT(constant->isAPInt());
         assertOffsetFitsToArray(constant->getAPInt().getZExtValue(), size);
@@ -117,7 +117,7 @@ assertOffsetFitsToArray(const Value &offset, const Value &size)
     else
     {
         const Integer::Container &integerOffset =
-            dynamic_cast<const Integer::Container&>(offset);
+            dynCast<const Integer::Container&>(offset);
         llvm::APInt unsignedMinOffset(integerOffset.getBitWidth(), 0);
         bool offsetIsKnown = integerOffset.unsignedMin(unsignedMinOffset);
         // The following requirement can be changed if necessary.

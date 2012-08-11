@@ -24,7 +24,7 @@ Range::clone() const
 bool
 Range::operator==(const Value& value) const
 {
-    const Range *range = dynamic_cast<const Range*>(&value);
+    const Range *range = dynCast<const Range*>(&value);
     if (!range)
         return false;
     if (mEmpty)
@@ -39,7 +39,7 @@ Range::operator==(const Value& value) const
 void
 Range::merge(const Value &value)
 {
-    const Range &range = dynamic_cast<const Range&>(value);
+    const Range &range = dynCast<const Range&>(value);
     if (range.mEmpty)
         return;
 

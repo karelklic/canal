@@ -28,7 +28,7 @@ StackFrame::getReturnedValue() const
     llvm::Function::const_iterator it = mFunction->begin(), itend = mFunction->end();
     for (; it != itend; ++it)
     {
-        if (!dynamic_cast<const llvm::ReturnInst*>(it->getTerminator()))
+        if (!dynCast<const llvm::ReturnInst*>(it->getTerminator()))
             continue;
 
         Value *returnedValue = mBlockOutputState.find(it)->second.mReturnedValue;
@@ -50,7 +50,7 @@ StackFrame::mergeGlobalVariables(State &target) const
     llvm::Function::const_iterator it = mFunction->begin(), itend = mFunction->end();
     for (; it != itend; ++it)
     {
-        if (!dynamic_cast<const llvm::ReturnInst*>(it->getTerminator()))
+        if (!dynCast<const llvm::ReturnInst*>(it->getTerminator()))
             continue;
 
         target.mergeGlobalLevel(mBlockOutputState.find(&*it)->second);

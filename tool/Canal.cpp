@@ -105,11 +105,9 @@ main(int argc, char **argv)
         gCommands.executeLine(ss.str());
     }
 
-    for (std::vector<std::string>::const_iterator it = arguments.mEvalCommands.begin(); it != arguments.mEvalCommands.end(); ++it)
-    {
+    std::vector<std::string>::const_iterator it = arguments.mEvalCommands.begin();
+    for (; it != arguments.mEvalCommands.end(); ++it)
         gCommands.executeLine(*it);
-    }
-
 
     // Loop reading and executing lines until the user quits.
     while (true)

@@ -102,7 +102,9 @@ Enumeration::clone() const
 bool
 Enumeration::operator==(const Value& value) const
 {
-    const Enumeration *enumeration = dynamic_cast<const Enumeration*>(&value);
+    const Enumeration *enumeration =
+        dynCast<const Enumeration*>(&value);
+
     if (!enumeration)
         return false;
     if (mTop != enumeration->mTop)
@@ -120,7 +122,7 @@ Enumeration::merge(const Value &value)
     if (mTop)
         return;
 
-    const Constant *constant = dynamic_cast<const Constant*>(&value);
+    const Constant *constant = dynCast<const Constant*>(&value);
     if (constant)
     {
         CANAL_ASSERT(constant->isAPInt());
@@ -128,7 +130,7 @@ Enumeration::merge(const Value &value)
         return;
     }
 
-    const Enumeration &enumeration = dynamic_cast<const Enumeration&>(value);
+    const Enumeration &enumeration = dynCast<const Enumeration&>(value);
     mValues.insert(enumeration.mValues.begin(), enumeration.mValues.end());
 }
 
@@ -145,7 +147,9 @@ Enumeration::toString() const
 {
     std::stringstream ss;
     ss << "enumeration";
-    if (mValues.empty())
+    if (mTop)
+        ss << " top";
+    else if (mValues.empty())
         ss << " empty";
     ss << std::endl;
 
@@ -282,41 +286,62 @@ Enumeration::applyOperation(const Value &a,
                             APIntOperation operation1,
                             APIntOperationWithOverflow operation2)
 {
-    const Enumeration &aa = dynamic_cast<const Enumeration&>(a),
-        &bb = dynamic_cast<const Enumeration&>(b);
+    const Enumeration *aa = dynCast<const Enumeration*>(&a),
+        *bb = dynCast<const Enumeration*>(&b);
 
-    if (aa.isTop() || bb.isTop())
+    bool deleteAA = false;
+    if (const Constant *aConst = dynCast<const Constant*>(&a))
     {
-        setTop();
-        return;
+        aa = new Enumeration(aConst->getAPInt());
+        deleteAA = true;
     }
 
-    APIntUtils::USet::const_iterator aaIt = aa.mValues.begin();
-    for (; aaIt != aa.mValues.end(); ++aaIt)
+    bool deleteBB = false;
+    if (const Constant *bConst = dynCast<const Constant*>(&b))
     {
-        APIntUtils::USet::const_iterator bbIt = bb.mValues.begin();
-        for (; bbIt != bb.mValues.end(); ++bbIt)
+        bb = new Enumeration(bConst->getAPInt());
+        deleteBB = true;
+    }
+
+    if (aa->isTop() || bb->isTop())
+        setTop();
+    else
+    {
+        APIntUtils::USet::const_iterator aaIt = aa->mValues.begin();
+        for (; aaIt != aa->mValues.end(); ++aaIt)
         {
-            if (operation1)
-                mValues.insert(((*aaIt).*(operation1))(*bbIt));
-            else
+            APIntUtils::USet::const_iterator bbIt = bb->mValues.begin();
+            for (; bbIt != bb->mValues.end(); ++bbIt)
             {
-                bool overflow;
-                mValues.insert(((*aaIt).*(operation2))(*bbIt, overflow));
-                if (overflow)
+                if (operation1)
+                    mValues.insert(((*aaIt).*(operation1))(*bbIt));
+                else
+                {
+                    bool overflow;
+                    mValues.insert(((*aaIt).*(operation2))(*bbIt, overflow));
+                    if (overflow)
+                    {
+                        setTop();
+                        break;
+                    }
+                }
+
+                if (mValues.size() > 40)
                 {
                     setTop();
-                    return;
+                    break;
                 }
             }
 
-            if (mValues.size() > 40)
-            {
-                setTop();
-                return;
-            }
+            if (isTop())
+                break;
         }
     }
+
+    if (deleteAA)
+        delete aa;
+    if (deleteBB)
+        delete bb;
 }
 
 } // namespace Integer

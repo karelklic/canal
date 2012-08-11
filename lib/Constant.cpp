@@ -54,7 +54,7 @@ bool
 Constant::operator==(const Value &value) const
 {
     // Check if rhs has the same type.
-    const Constant *constant = dynamic_cast<const Constant*>(&value);
+    const Constant *constant = dynCast<const Constant*>(&value);
     if (!constant)
         return false;
 

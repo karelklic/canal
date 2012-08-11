@@ -38,7 +38,7 @@ ExactSize::clone() const
 bool
 ExactSize::operator==(const Value &value) const
 {
-    const ExactSize *array = dynamic_cast<const ExactSize*>(&value);
+    const ExactSize *array = dynCast<const ExactSize*>(&value);
     if (!array)
         return false;
 
@@ -60,7 +60,7 @@ ExactSize::operator==(const Value &value) const
 void
 ExactSize::merge(const Value &value)
 {
-    const ExactSize &array = dynamic_cast<const ExactSize&>(value);
+    const ExactSize &array = dynCast<const ExactSize&>(value);
     CANAL_ASSERT(mValues.size() == array.mValues.size());
     std::vector<Value*>::iterator itA = mValues.begin();
     std::vector<Value*>::const_iterator itAend = mValues.end(),
@@ -96,7 +96,7 @@ std::vector<Value*>
 ExactSize::getItem(const Value &offset) const
 {
     std::vector<Value*> result;
-    if (const Constant *constant = dynamic_cast<const Constant*>(&offset))
+    if (const Constant *constant = dynCast<const Constant*>(&offset))
     {
         CANAL_ASSERT(constant->isAPInt());
         CANAL_ASSERT(constant->getAPInt().getBitWidth() <= 64);
@@ -107,7 +107,7 @@ ExactSize::getItem(const Value &offset) const
     }
 
     const Integer::Container &integer =
-        dynamic_cast<const Integer::Container&>(offset);
+        dynCast<const Integer::Container&>(offset);
 
     // First try an enumeration, then range.
     const Integer::Enumeration &enumeration = integer.getEnumeration();
@@ -175,7 +175,7 @@ ExactSize::getItem(uint64_t offset) const
 void
 ExactSize::setItem(const Value &offset, const Value &value)
 {
-    const Constant *constant = dynamic_cast<const Constant*>(&offset);
+    const Constant *constant = dynCast<const Constant*>(&offset);
     if (constant)
     {
         CANAL_ASSERT(constant->isAPInt());
@@ -187,7 +187,7 @@ ExactSize::setItem(const Value &offset, const Value &value)
     }
 
     const Integer::Container &integer =
-        dynamic_cast<const Integer::Container&>(offset);
+        dynCast<const Integer::Container&>(offset);
 
     // First try an enumeration, then range.
     const Integer::Enumeration &enumeration = integer.getEnumeration();

@@ -122,7 +122,7 @@ Target::merge(const Target &target)
     else if (mNumericOffset && !target.mNumericOffset)
     {
         const Integer::Container &numericOffsetInt =
-            dynamic_cast<const Integer::Container&>(*mNumericOffset);
+            dynCast<const Integer::Container&>(*mNumericOffset);
 
         llvm::APInt zero = llvm::APInt::getNullValue(
             numericOffsetInt.getBitWidth());
@@ -184,7 +184,6 @@ Target::toString(SlotTracker &slotTracker) const
         break;
     case FunctionBlock:
     case FunctionVariable:
-    case GlobalBlock:
     {
         const llvm::Instruction &instruction =
             llvmCast<llvm::Instruction>(*mInstruction);
@@ -203,6 +202,24 @@ Target::toString(SlotTracker &slotTracker) const
         }
 
         ss << name;
+        break;
+    }
+    case GlobalBlock:
+    {
+        const llvm::Instruction *instruction =
+            llvm::dyn_cast<llvm::Instruction>(mInstruction);
+
+        if (instruction)
+            slotTracker.setActiveFunction(*instruction->getParent()->getParent());
+        else
+            CANAL_ASSERT_MSG(llvm::isa<llvm::GlobalVariable>(mInstruction),
+                             "Unexpected type of pointer assignment source");
+
+        std::string name(Canal::getName(*mInstruction, slotTracker));
+        if (name.empty())
+            name = "<failed to name the location>";
+
+        ss << " @^" << name;
         break;
     }
     case GlobalVariable:
@@ -261,7 +278,7 @@ Target::dereference(const State &state) const
             for (; itItems != result.end(); ++itItems)
             {
                 std::vector<Value*> items;
-                Array::Interface &array = dynamic_cast<Array::Interface&>(**itItems);
+                Array::Interface &array = dynCast<Array::Interface&>(**itItems);
                 items = array.getItem(**itOffsets);
                 nextLevelResult.insert(nextLevelResult.end(),
                                        items.begin(),

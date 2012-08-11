@@ -95,7 +95,7 @@ Range::clone() const
 bool
 Range::operator==(const Value& value) const
 {
-    const Range *range = dynamic_cast<const Range*>(&value);
+    const Range *range = dynCast<const Range*>(&value);
     if (!range)
         return false;
     if (mEmpty)
@@ -122,7 +122,7 @@ void
 Range::merge(const Value &value)
 {
     // Handle values represeting a constant.
-    if (const Constant *constant = dynamic_cast<const Constant *>(&value))
+    if (const Constant *constant = dynCast<const Constant*>(&value))
     {
         CANAL_ASSERT(constant->isAPInt());
         const llvm::APInt &constInt = constant->getAPInt();
@@ -154,7 +154,7 @@ Range::merge(const Value &value)
         return;
     }
 
-    const Range &range = dynamic_cast<const Range&>(value);
+    const Range &range = dynCast<const Range&>(value);
     if (range.mEmpty)
         return;
 
@@ -230,8 +230,8 @@ Range::toString() const
 void
 Range::add(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -258,8 +258,8 @@ Range::add(const Value &a, const Value &b)
 void
 Range::sub(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -388,8 +388,8 @@ minMax(bool isSigned,
 void
 Range::mul(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -472,8 +472,8 @@ Range::mul(const Value &a, const Value &b)
 void
 Range::udiv(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -501,8 +501,8 @@ Range::udiv(const Value &a, const Value &b)
 void
 Range::sdiv(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -550,8 +550,8 @@ Range::sdiv(const Value &a, const Value &b)
 void
 Range::urem(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -564,8 +564,8 @@ Range::urem(const Value &a, const Value &b)
 void
 Range::srem(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -578,8 +578,8 @@ Range::srem(const Value &a, const Value &b)
 void
 Range::shl(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -592,8 +592,8 @@ Range::shl(const Value &a, const Value &b)
 void
 Range::lshr(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -606,8 +606,8 @@ Range::lshr(const Value &a, const Value &b)
 void
 Range::ashr(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -620,8 +620,8 @@ Range::ashr(const Value &a, const Value &b)
 void
 Range::and_(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -634,8 +634,8 @@ Range::and_(const Value &a, const Value &b)
 void
 Range::or_(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -648,8 +648,8 @@ Range::or_(const Value &a, const Value &b)
 void
 Range::xor_(const Value &a, const Value &b)
 {
-    const Range &aa = dynamic_cast<const Range&>(a),
-        &bb = dynamic_cast<const Range&>(b);
+    const Range &aa = dynCast<const Range&>(a),
+        &bb = dynCast<const Range&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);

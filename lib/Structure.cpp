@@ -32,7 +32,7 @@ Structure::clone() const
 bool
 Structure::operator==(const Value &value) const
 {
-    const Structure *structure = dynamic_cast<const Structure*>(&value);
+    const Structure *structure = dynCast<const Structure*>(&value);
     if (!structure)
         return false;
 
@@ -54,7 +54,7 @@ Structure::operator==(const Value &value) const
 void
 Structure::merge(const Value &value)
 {
-    const Structure &structure = dynamic_cast<const Structure&>(value);
+    const Structure &structure = dynCast<const Structure&>(value);
     CANAL_ASSERT(mMembers.size() == structure.mMembers.size());
     std::vector<Value*>::iterator itA = mMembers.begin();
     std::vector<Value*>::const_iterator itAend = mMembers.end(),
@@ -91,7 +91,7 @@ std::vector<Value*>
 Structure::getItem(const Value &offset) const
 {
     std::vector<Value*> result;
-    if (const Constant *constant = dynamic_cast<const Constant*>(&offset))
+    if (const Constant *constant = dynCast<const Constant*>(&offset))
     {
         CANAL_ASSERT(constant->isAPInt());
         CANAL_ASSERT(constant->getAPInt().getBitWidth() <= 64);
@@ -101,7 +101,8 @@ Structure::getItem(const Value &offset) const
         return result;
     }
 
-    const Integer::Container &integer = dynamic_cast<const Integer::Container&>(offset);
+    const Integer::Container &integer =
+        dynCast<const Integer::Container&>(offset);
 
     // First try an enumeration, then range.
     const Integer::Enumeration &enumeration = integer.getEnumeration();

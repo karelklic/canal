@@ -13,6 +13,7 @@
 #include "Utils.h"
 #include "Value.h"
 #include <llvm/Function.h>
+#include <llvm/Module.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Instructions.h>
 #include <llvm/Support/CFG.h>
@@ -21,6 +22,110 @@
 #include <cstdio>
 
 namespace Canal {
+
+static const llvm::fltSemantics *
+getFloatingPointSemantics(const llvm::Type &type)
+{
+    CANAL_ASSERT(type.isFloatingPointTy());
+
+    const llvm::fltSemantics *semantics;
+#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
+    if (type.isHalfTy())
+        semantics = &llvm::APFloat::IEEEhalf;
+    else
+#endif
+    if (type.isFloatTy())
+        semantics = &llvm::APFloat::IEEEsingle;
+    else if (type.isDoubleTy())
+        semantics = &llvm::APFloat::IEEEdouble;
+    else if (type.isFP128Ty())
+        semantics = &llvm::APFloat::IEEEquad;
+    else if (type.isPPC_FP128Ty())
+        semantics = &llvm::APFloat::PPCDoubleDouble;
+    else if (type.isX86_FP80Ty())
+        semantics = &llvm::APFloat::x87DoubleExtended;
+    else
+        CANAL_DIE();
+    return semantics;
+}
+
+static Value *
+typeToEmptyValue(const llvm::Type &type, const llvm::Module &module)
+{
+    if (type.isVoidTy())
+        return NULL;
+
+    if (type.isIntegerTy())
+    {
+        llvm::IntegerType &integerType = llvmCast<llvm::IntegerType>(type);
+        return new Integer::Container(integerType.getBitWidth());
+    }
+
+    if (type.isFloatingPointTy())
+    {
+        const llvm::fltSemantics *semantics = getFloatingPointSemantics(type);
+        return new Float::Range(*semantics);
+    }
+
+    if (type.isPointerTy())
+    {
+        const llvm::PointerType &pointerType = llvmCast<const llvm::PointerType>(type);
+        return new Pointer::InclusionBased(module, pointerType.getElementType());
+    }
+
+    if (type.isArrayTy() || type.isVectorTy())
+    {
+        CANAL_NOT_IMPLEMENTED();
+    }
+
+    if (type.isStructTy())
+    {
+        const llvm::StructType &structType = llvmCast<llvm::StructType>(type);
+        Structure *structure = new Structure();
+
+        llvm::StructType::element_iterator it = structType.element_begin(),
+            itend = structType.element_end();
+        for (; it != itend; ++it)
+            structure->mMembers.push_back(typeToEmptyValue(**it, module));
+
+        return structure;
+    }
+
+    CANAL_DIE_MSG("unsupported llvm::Type::TypeID: " << type.getTypeID());
+}
+
+void
+Interpreter::addGlobalVariables(State &state,
+                                const Environment &environment)
+{
+    // Add global constants.
+    llvm::Module::const_global_iterator git = environment.mModule.global_begin();
+    llvm::Module::const_global_iterator gitend = environment.mModule.global_end();
+    for (; git != gitend; ++git)
+    {
+        if (git->isConstant())
+            state.addGlobalVariable(*git, new Canal::Constant(git));
+        else
+        {
+            // When it is not a constant, then it is a pointer to a
+            // global block.
+            state.addGlobalBlock(*git, typeToEmptyValue(*git->getType()->getElementType(),
+                                                        environment.mModule));
+
+            Value *value = typeToEmptyValue(*git->getType(),
+                                            environment.mModule);
+
+            Pointer::InclusionBased &pointer = dynCast<Pointer::InclusionBased&>(*value);
+            pointer.addTarget(Pointer::Target::GlobalBlock,
+                              git,
+                              git,
+                              std::vector<Value*>(),
+                              NULL);
+
+            state.addGlobalVariable(*git, value);
+        }
+    }
+}
 
 bool
 Interpreter::step(Stack &stack,
@@ -193,7 +298,7 @@ Interpreter::ret(const llvm::ReturnInst &instruction,
         {
             // If the returned value is constant, convert it to
             // something that can merge other values.
-            Constant *constant = dynamic_cast<Constant*>(state.mReturnedValue);
+            Constant *constant = dynCast<Constant*>(state.mReturnedValue);
             if (constant)
             {
                 state.mReturnedValue = constant->toModifiableValue();
@@ -252,78 +357,6 @@ variableOrConstant(const llvm::Value &place, State &state, Constant &constant)
     return state.findVariable(place);
 }
 
-static const llvm::fltSemantics *
-getFloatingPointSemantics(const llvm::Type &type)
-{
-    CANAL_ASSERT(type.isFloatingPointTy());
-
-    const llvm::fltSemantics *semantics;
-#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
-    if (type.isHalfTy())
-        semantics = &llvm::APFloat::IEEEhalf;
-    else
-#endif
-    if (type.isFloatTy())
-        semantics = &llvm::APFloat::IEEEsingle;
-    else if (type.isDoubleTy())
-        semantics = &llvm::APFloat::IEEEdouble;
-    else if (type.isFP128Ty())
-        semantics = &llvm::APFloat::IEEEquad;
-    else if (type.isPPC_FP128Ty())
-        semantics = &llvm::APFloat::PPCDoubleDouble;
-    else if (type.isX86_FP80Ty())
-        semantics = &llvm::APFloat::x87DoubleExtended;
-    else
-        CANAL_DIE();
-    return semantics;
-}
-
-
-static Value *
-typeToEmptyValue(const llvm::Type &type, const llvm::Module &module)
-{
-    if (type.isVoidTy())
-        return NULL;
-
-    if (type.isIntegerTy())
-    {
-        llvm::IntegerType &integerType = llvmCast<llvm::IntegerType>(type);
-        return new Integer::Container(integerType.getBitWidth());
-    }
-
-    if (type.isFloatingPointTy())
-    {
-        const llvm::fltSemantics *semantics = getFloatingPointSemantics(type);
-        return new Float::Range(*semantics);
-    }
-
-    if (type.isPointerTy())
-    {
-        const llvm::PointerType &pointerType = llvmCast<const llvm::PointerType>(type);
-        return new Pointer::InclusionBased(module, pointerType.getElementType());
-    }
-
-    if (type.isArrayTy() || type.isVectorTy())
-    {
-        CANAL_NOT_IMPLEMENTED();
-    }
-
-    if (type.isStructTy())
-    {
-        const llvm::StructType &structType = llvmCast<llvm::StructType>(type);
-        Structure *structure = new Structure();
-
-        llvm::StructType::element_iterator it = structType.element_begin(),
-            itend = structType.element_end();
-        for (; it != itend; ++it)
-            structure->mMembers.push_back(typeToEmptyValue(**it, module));
-
-        return structure;
-    }
-
-    CANAL_DIE_MSG("unsupported llvm::Type::TypeID: " << type.getTypeID());
-}
-
 template<typename T> static void
 interpretCall(const T &instruction,
               Stack &stack,
@@ -351,7 +384,7 @@ interpretCall(const T &instruction,
         if (!returnedValue)
             return;
 
-        AccuracyValue *accuracyValue = dynamic_cast<AccuracyValue*>(returnedValue);
+        AccuracyValue *accuracyValue = dynCast<AccuracyValue*>(returnedValue);
         if (accuracyValue)
             accuracyValue->setTop();
 
@@ -361,7 +394,9 @@ interpretCall(const T &instruction,
 
     State initialState(state);
     initialState.clearFunctionLevel();
-    llvm::Function::ArgumentListType::const_iterator it = function->getArgumentList().begin();
+    llvm::Function::ArgumentListType::const_iterator it =
+        function->getArgumentList().begin();
+
     for (int i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
     {
         llvm::Value *operand = instruction.getArgOperand(i);
@@ -576,16 +611,21 @@ Interpreter::extractelement(const llvm::ExtractElementInst &instruction,
         return;
 
     const Array::ExactSize *array =
-        dynamic_cast<const Array::ExactSize*>(values[0]);
+        dynCast<const Array::ExactSize*>(values[0]);
 
-    if (const Constant *constant = dynamic_cast<const Constant*>(values[0]))
+    bool deleteArray = false;
+    if (const Constant *constant = dynCast<const Constant*>(values[0]))
     {
         Value *modifiable = constant->toModifiableValue();
-        array = dynamic_cast<const Array::ExactSize*>(modifiable);
+        array = dynCast<const Array::ExactSize*>(modifiable);
+        deleteArray = true;
     }
 
     CANAL_ASSERT_MSG(array, "Invalid type of array.");
     Value *result = array->getValue(*values[1]);
+
+    if (deleteArray)
+        delete array;
 
     // Store the result value to the state.
     state.addFunctionVariable(instruction, result);
@@ -610,14 +650,12 @@ Interpreter::insertelement(const llvm::InsertElementInst &instruction,
 
     Value *result = values[0]->clone();
 
-    Array::ExactSize *resultAsArray =
-        dynamic_cast<Array::ExactSize*>(result);
+    Array::ExactSize *resultAsArray = dynCast<Array::ExactSize*>(result);
 
-    if (Constant *constant = dynamic_cast<Constant*>(result))
+    if (Constant *constant = dynCast<Constant*>(result))
     {
         Value *modifiable = constant->toModifiableValue();
-        result = resultAsArray =
-            dynamic_cast<Array::ExactSize*>(modifiable);
+        result = resultAsArray = dynCast<Array::ExactSize*>(modifiable);
     }
 
     CANAL_ASSERT_MSG(result, "Invalid type of array.");
@@ -642,9 +680,9 @@ Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction,
     if (!values[0] || !values[1])
         return;
 
-    Array::ExactSize *array0 = dynamic_cast<Array::ExactSize*>(values[0]);
+    Array::ExactSize *array0 = dynCast<Array::ExactSize*>(values[0]);
     CANAL_ASSERT_MSG(array0, "Invalid type in shufflevector.");
-    Array::ExactSize *array1 = dynamic_cast<Array::ExactSize*>(values[1]);
+    Array::ExactSize *array1 = dynCast<Array::ExactSize*>(values[1]);
     CANAL_ASSERT_MSG(array1, "Invalid type in shufflevector.");
 
     Array::ExactSize *result = new Array::ExactSize();
@@ -708,7 +746,7 @@ getValueLocation(Value *aggregate, const T &instruction)
         itend = instruction.idx_end();
     for (; it != itend; ++it)
     {
-        if (const Constant *constant = dynamic_cast<const Constant *>(item))
+        if (const Constant *constant = dynCast<const Constant*>(item))
         {
             // It would make sense to implement getValue() for
             // Constant.  Converting constant via getModifableValue()
@@ -716,7 +754,9 @@ getValueLocation(Value *aggregate, const T &instruction)
             CANAL_NOT_IMPLEMENTED();
         }
 
-        const Array::Interface *array = dynamic_cast<const Array::Interface*>(item);
+        const Array::Interface *array =
+            dynCast<const Array::Interface*>(item);
+
         CANAL_ASSERT_MSG(array, "ExtractValue reached an unsupported type.");
         item = array->getItem(*it);
     }
@@ -837,7 +877,7 @@ Interpreter::load(const llvm::LoadInst &instruction,
         return;
 
     const Pointer::InclusionBased &pointer =
-        dynamic_cast<const Pointer::InclusionBased&>(*variable);
+        dynCast<const Pointer::InclusionBased&>(*variable);
 
     // Pointer found. Merge all possible values and store the result
     // into the state.
@@ -907,8 +947,7 @@ Interpreter::store(const llvm::StoreInst &instruction,
     if (!variable)
         return;
 
-    Pointer::InclusionBased &pointer =
-        dynamic_cast<Pointer::InclusionBased&>(*variable);
+    Pointer::InclusionBased &pointer = dynCast<Pointer::InclusionBased&>(*variable);
 
     // Find the variable in the state.  Merge the provided value into
     // all targets.
@@ -959,7 +998,6 @@ Interpreter::store(const llvm::StoreInst &instruction,
                                     offsets,
                                     NULL);
 
-            puts(constPointer->toString().c_str());
             value = constPointer;
         }
         else
@@ -985,8 +1023,7 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
     if (!base)
         return;
 
-    Pointer::InclusionBased &source =
-        dynamic_cast<Pointer::InclusionBased&>(*base);
+    Pointer::InclusionBased &source = dynCast<Pointer::InclusionBased&>(*base);
 
     // We get offsets. Either constants or Integer::Container.
     // Pointer points either to an array (or array offset), or to a
@@ -1089,8 +1126,7 @@ Interpreter::ptrtoint(const llvm::PtrToIntInst &instruction,
     if (!operand)
         return;
 
-    Pointer::InclusionBased &source =
-        dynamic_cast<Pointer::InclusionBased&>(*operand);
+    Pointer::InclusionBased &source = dynCast<Pointer::InclusionBased&>(*operand);
 
     Pointer::InclusionBased *result = source.clone();
 /*  This should really be handled in integer operations.
@@ -1105,7 +1141,7 @@ Interpreter::ptrtoint(const llvm::PtrToIntInst &instruction,
                 llvmCast<llvm::IntegerType>(*instruction.getDestTy());
 
             const Integer::Container &existingInt =
-                dynamic_cast<const Integer::Container&>(*it->second.mNumericOffset);
+                dynCast<const Integer::Container&>(*it->second.mNumericOffset);
             int existingWidth = existingInt.getBitWidth();
             CANAL_ASSERT_MSG(existingWidth == integerType.getBitWidth(),
                              "Offset integer width adjustment is not "
@@ -1132,7 +1168,7 @@ Interpreter::inttoptr(const llvm::IntToPtrInst &instruction,
         return;
 
     Pointer::InclusionBased &source =
-        dynamic_cast<Pointer::InclusionBased&>(*operand);
+        dynCast<Pointer::InclusionBased&>(*operand);
 
     const llvm::PointerType &pointerType =
         llvmCast<const llvm::PointerType>(*instruction.getDestTy());
@@ -1159,7 +1195,7 @@ Interpreter::bitcast(const llvm::BitCastInst &instruction,
         return;
 
     Pointer::InclusionBased &sourcePointer =
-        dynamic_cast<Pointer::InclusionBased&>(*source);
+        dynCast<Pointer::InclusionBased&>(*source);
 
     Value *resultPointer = sourcePointer.bitcast(destinationType);
     state.addFunctionVariable(instruction, resultPointer);
@@ -1226,7 +1262,7 @@ Interpreter::phi(const llvm::PHINode &instruction,
             mergedValue->merge(*value);
         else
         {
-            Constant *constant = dynamic_cast<Constant*>(value);
+            Constant *constant = dynCast<Constant*>(value);
             if (constant)
                 mergedValue = constant->toModifiableValue();
             else
@@ -1254,7 +1290,7 @@ Interpreter::select(const llvm::SelectInst &instruction,
 
     Value *resultValue;
     const Integer::Container &conditionInt =
-        dynamic_cast<const Integer::Container&>(*condition);
+        dynCast<const Integer::Container&>(*condition);
 
     CANAL_ASSERT(conditionInt.getBits().getBitWidth() == 1);
     switch (conditionInt.getBits().getBitValue(0))

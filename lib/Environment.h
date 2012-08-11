@@ -21,7 +21,6 @@ public:
     // @param module
     //   LLVM module that contains all functions.
     Environment(const llvm::Module &module);
-
 };
 
 } // namespace Canal
