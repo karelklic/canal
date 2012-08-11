@@ -234,32 +234,45 @@ Container::toString() const
     return ss.str();
 }
 
-
 static void
 applyBinaryOperation(Container &result,
                      const Value &a,
                      const Value &b,
                      void(Value::*operation)(const Value&, const Value&))
 {
-    const Constant *aconstant = dynCast<const Constant*>(&a);
     const Container *acontainer = dynCast<const Container*>(&a);
-    CANAL_ASSERT(aconstant || acontainer);
-    CANAL_ASSERT(!acontainer || result.mValues.size() == acontainer->mValues.size());
+    bool deleteAContainer = false;
+    if (!acontainer)
+    {
+        const Constant *constant = dynCast<const Constant*>(&a);
+        CANAL_ASSERT_MSG(constant,
+                         "Unsupported type provided to an Integer Container operation.");
+        acontainer = new Container(constant->getAPInt());
+        deleteAContainer = true;
+    }
 
-    const Constant *bconstant = dynCast<const Constant*>(&b);
     const Container *bcontainer = dynCast<const Container*>(&b);
-    CANAL_ASSERT(bconstant || bcontainer);
-    CANAL_ASSERT(!bcontainer || result.mValues.size() == bcontainer->mValues.size());
+    bool deleteBContainer = false;
+    if (!bcontainer)
+    {
+        const Constant *constant = dynCast<const Constant*>(&b);
+        CANAL_ASSERT_MSG(constant,
+                         "Unsupported type provided to an Integer Container operation.");
+        bcontainer = new Container(constant->getAPInt());
+        deleteBContainer = true;
+    }
 
     std::vector<Value*>::iterator it(result.mValues.begin());
-    std::vector<Value*>::const_iterator ita(acontainer ? acontainer->mValues.begin() : it);
-    std::vector<Value*>::const_iterator itb(bcontainer ? bcontainer->mValues.begin() : it);
+    std::vector<Value*>::const_iterator ita = acontainer->mValues.begin(),
+        itb = bcontainer->mValues.begin();
+
     for (; it != result.mValues.end(); ++it, ++ita, ++itb)
-    {
-        const Value &avalue = acontainer ? static_cast<const Value&>(**ita) : *aconstant;
-        const Value &bvalue = bcontainer ? static_cast<const Value&>(**itb) : *bconstant;
-        ((**it).*(operation))(avalue, bvalue);
-    }
+        ((**it).*(operation))(**ita, **itb);
+
+    if (deleteAContainer)
+        delete acontainer;
+    if (deleteBContainer)
+        delete bcontainer;
 }
 
 void

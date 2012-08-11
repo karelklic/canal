@@ -313,7 +313,6 @@ applyBitOperation(Bits &result,
                   const Value &b,
                   int(*operation)(int,int))
 {
-    // TODO: support constants.
     const Bits &aa = dynCast<const Bits&>(a),
         &bb = dynCast<const Bits&>(b);
     CANAL_ASSERT(result.getBitWidth() == aa.getBitWidth() &&
