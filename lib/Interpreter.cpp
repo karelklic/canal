@@ -1023,7 +1023,8 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
     if (!base)
         return;
 
-    Pointer::InclusionBased &source = dynCast<Pointer::InclusionBased&>(*base);
+    Pointer::InclusionBased &source =
+        dynCast<Pointer::InclusionBased&>(*base);
 
     // We get offsets. Either constants or Integer::Container.
     // Pointer points either to an array (or array offset), or to a
@@ -1045,12 +1046,41 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
     state.addFunctionVariable(instruction, result);
 }
 
+static void
+castOperation(const llvm::CastInst &instruction,
+              State &state,
+              const llvm::Module &module,
+              void(Value::*operation)(const Value&))
+{
+    Constant constant;
+    Value *source = variableOrConstant(
+        *instruction.getOperand(0),
+        state,
+        constant);
+
+    if (!source)
+        return;
+
+    // Create result value of required type and then run the desired
+    // operation.
+    Value *result = typeToEmptyValue(*instruction.getDestTy(),
+                                     module);
+    ((result)->*(operation))(*source);
+
+    // Store the result value to the state.
+    state.addFunctionVariable(instruction, result);
+}
+
+
 void
 Interpreter::trunc(const llvm::TruncInst &instruction,
                    State &state,
                    const Environment &environment)
 {
-    CANAL_NOT_IMPLEMENTED();
+    castOperation(instruction,
+                  state,
+                  environment.mModule,
+                  &Value::trunc);
 }
 
 void
@@ -1058,7 +1088,10 @@ Interpreter::zext(const llvm::ZExtInst &instruction,
                   State &state,
                   const Environment &environment)
 {
-    CANAL_NOT_IMPLEMENTED();
+    castOperation(instruction,
+                  state,
+                  environment.mModule,
+                  &Value::zext);
 }
 
 void
@@ -1066,7 +1099,10 @@ Interpreter::sext(const llvm::SExtInst &instruction,
                   State &state,
                   const Environment &environment)
 {
-    CANAL_NOT_IMPLEMENTED();
+    castOperation(instruction,
+                  state,
+                  environment.mModule,
+                  &Value::sext);
 }
 
 void
@@ -1074,7 +1110,10 @@ Interpreter::fptrunc(const llvm::FPTruncInst &instruction,
                      State &state,
                      const Environment &environment)
 {
-    CANAL_NOT_IMPLEMENTED();
+    castOperation(instruction,
+                  state,
+                  environment.mModule,
+                  &Value::fptrunc);
 }
 
 void
@@ -1082,7 +1121,10 @@ Interpreter::fpext(const llvm::FPExtInst &instruction,
                    State &state,
                    const Environment &environment)
 {
-    CANAL_NOT_IMPLEMENTED();
+    castOperation(instruction,
+                  state,
+                  environment.mModule,
+                  &Value::fpext);
 }
 
 void
@@ -1090,7 +1132,10 @@ Interpreter::fptoui(const llvm::FPToUIInst &instruction,
                     State &state,
                     const Environment &environment)
 {
-    CANAL_NOT_IMPLEMENTED();
+    castOperation(instruction,
+                  state,
+                  environment.mModule,
+                  &Value::fptoui);
 }
 
 void
@@ -1098,7 +1143,10 @@ Interpreter::fptosi(const llvm::FPToSIInst &instruction,
                     State &state,
                     const Environment &environment)
 {
-    CANAL_NOT_IMPLEMENTED();
+    castOperation(instruction,
+                  state,
+                  environment.mModule,
+                  &Value::fptosi);
 }
 
 void
@@ -1106,7 +1154,10 @@ Interpreter::uitofp(const llvm::UIToFPInst &instruction,
                     State &state,
                     const Environment &environment)
 {
-    CANAL_NOT_IMPLEMENTED();
+    castOperation(instruction,
+                  state,
+                  environment.mModule,
+                  &Value::uitofp);
 }
 
 void
@@ -1114,7 +1165,10 @@ Interpreter::sitofp(const llvm::SIToFPInst &instruction,
                     State &state,
                     const Environment &environment)
 {
-    CANAL_NOT_IMPLEMENTED();
+    castOperation(instruction,
+                  state,
+                  environment.mModule,
+                  &Value::sitofp);
 }
 
 void
