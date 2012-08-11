@@ -286,32 +286,18 @@ Enumeration::applyOperation(const Value &a,
                             APIntOperation operation1,
                             APIntOperationWithOverflow operation2)
 {
-    const Enumeration *aa = dynCast<const Enumeration*>(&a),
-        *bb = dynCast<const Enumeration*>(&b);
+    const Enumeration &aa = dynCast<const Enumeration&>(a),
+        &bb = dynCast<const Enumeration&>(b);
 
-    bool deleteAA = false;
-    if (const Constant *aConst = dynCast<const Constant*>(&a))
-    {
-        aa = new Enumeration(aConst->getAPInt());
-        deleteAA = true;
-    }
-
-    bool deleteBB = false;
-    if (const Constant *bConst = dynCast<const Constant*>(&b))
-    {
-        bb = new Enumeration(bConst->getAPInt());
-        deleteBB = true;
-    }
-
-    if (aa->isTop() || bb->isTop())
+    if (aa.isTop() || bb.isTop())
         setTop();
     else
     {
-        APIntUtils::USet::const_iterator aaIt = aa->mValues.begin();
-        for (; aaIt != aa->mValues.end(); ++aaIt)
+        APIntUtils::USet::const_iterator aaIt = aa.mValues.begin();
+        for (; aaIt != aa.mValues.end(); ++aaIt)
         {
-            APIntUtils::USet::const_iterator bbIt = bb->mValues.begin();
-            for (; bbIt != bb->mValues.end(); ++bbIt)
+            APIntUtils::USet::const_iterator bbIt = bb.mValues.begin();
+            for (; bbIt != bb.mValues.end(); ++bbIt)
             {
                 if (operation1)
                     mValues.insert(((*aaIt).*(operation1))(*bbIt));
@@ -322,26 +308,18 @@ Enumeration::applyOperation(const Value &a,
                     if (overflow)
                     {
                         setTop();
-                        break;
+                        return;
                     }
                 }
 
                 if (mValues.size() > 40)
                 {
                     setTop();
-                    break;
+                    return;
                 }
             }
-
-            if (isTop())
-                break;
         }
     }
-
-    if (deleteAA)
-        delete aa;
-    if (deleteBB)
-        delete bb;
 }
 
 } // namespace Integer
