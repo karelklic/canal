@@ -18,6 +18,15 @@ public:
 public:
     Range(const llvm::fltSemantics &semantics);
 
+    // Compares a range with another range.
+    // @returns
+    //  -1 - one of the ranges is empty
+    //   0 - false (predicate not satisfied)
+    //   1 - true  (predicate satisfied)
+    //   2 - both true and false are possible (top value)
+    int compare(const Range &value,
+                llvm::CmpInst::Predicate predicate) const;
+
 public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.

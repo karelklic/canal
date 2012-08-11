@@ -130,8 +130,11 @@ Enumeration::merge(const Value &value)
         return;
     }
 
-    const Enumeration &enumeration = dynCast<const Enumeration&>(value);
-    mValues.insert(enumeration.mValues.begin(), enumeration.mValues.end());
+    const Enumeration &enumeration =
+        dynCast<const Enumeration&>(value);
+
+    mValues.insert(enumeration.mValues.begin(),
+                   enumeration.mValues.end());
 }
 
 size_t
@@ -246,7 +249,89 @@ void
 Enumeration::icmp(const Value &a, const Value &b,
                   llvm::CmpInst::Predicate predicate)
 {
+    const Enumeration &aa = dynCast<const Enumeration&>(a),
+        &bb = dynCast<const Enumeration&>(b);
+
+    if (aa.isTop() || bb.isTop())
+    {
+        setTop();
+        return;
+    }
+
+    if (aa.isBottom() || bb.isBottom())
+    {
+        setBottom();
+        return;
+    }
+
+    switch (predicate)
+    {
+    case ICMP_EQ:  // equal
+        // If both enumerations are equal, the result is 1.  If
+        // enumeration intersection is empty, the result is 0.
+        // Otherwise the result is the top value (both 0 and 1).
+        if (aa.mValues == bb.mValues)
+            mValues.push_back(1);
+        break;
+    case ICMP_NE:  // not equal
+        // If both enumerations are equal, the result is 0.  If
+        // enumeration intersection is empty, the result is 1.
+        // Otherwise the result is the top value (both 0 and 1).
+        break;
+    case ICMP_UGT: // unsigned greater than
+        // If the lowest element from the first enumeration is
+        // unsigned greater than the largest element from the second
+        // enumeration, the result is 1.  If the largest element from
+        // the first enumeration is unsigned lower than the lowest
+        // element from the second enumeration, the result is 0.
+        // Otherwise the result is the top value (both 0 and 1).
+        break;
+    case ICMP_UGE: // unsigned greater or equal
+        break;
+    case ICMP_ULT: // unsigned less than
+        break;
+    case ICMP_ULE: // unsigned less or equal
+        break;
+    case ICMP_SGT: // signed greater than
+        break;
+    case ICMP_SGE: // signed greater or equal
+        break;
+    case ICMP_SLT: // signed less than
+        break;
+    case ICMP_SLE: // signed less or equal
+        break;
+    default:
+        CANAL_DIE();
+    }
+
     CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Enumeration::fcmp(const Value &a, const Value &b,
+                  llvm::CmpInst::Predicate predicate)
+{
+    const Float::Range &aa = dynCast<const Float::Range&>(a),
+        &bb = dynCast<const Float::Range&>(b);
+
+    int result = aa.compare(bb, predicate);
+    switch (result)
+    {
+    case -1:
+        setBottom();
+        break;
+    case 0:
+        mValues.push_back(0);
+        break;
+    case 1:
+        mValues.push_back(1);
+        break;
+    case 2:
+        setTop();
+        break;
+    default:
+        CANAL_DIE();
+    }
 }
 
 float
@@ -254,9 +339,8 @@ Enumeration::accuracy() const
 {
     if (mTop)
         return 0;
-    // Perfectly accurate.
-    // TODO: consider lowering the accuracy depending on the number of
-    // elements.
+    // Perfectly accurate.  TODO: consider lowering the accuracy
+    // depending on the number of elements.
     return 1;
 }
 
@@ -297,33 +381,34 @@ Enumeration::applyOperation(const Value &a,
         &bb = dynCast<const Enumeration&>(b);
 
     if (aa.isTop() || bb.isTop())
-        setTop();
-    else
     {
-        APIntUtils::USet::const_iterator aaIt = aa.mValues.begin();
-        for (; aaIt != aa.mValues.end(); ++aaIt)
-        {
-            APIntUtils::USet::const_iterator bbIt = bb.mValues.begin();
-            for (; bbIt != bb.mValues.end(); ++bbIt)
-            {
-                if (operation1)
-                    mValues.insert(((*aaIt).*(operation1))(*bbIt));
-                else
-                {
-                    bool overflow;
-                    mValues.insert(((*aaIt).*(operation2))(*bbIt, overflow));
-                    if (overflow)
-                    {
-                        setTop();
-                        return;
-                    }
-                }
+        setTop();
+        return;
+    }
 
-                if (mValues.size() > 40)
+    APIntUtils::USet::const_iterator aaIt = aa.mValues.begin();
+    for (; aaIt != aa.mValues.end(); ++aaIt)
+    {
+        APIntUtils::USet::const_iterator bbIt = bb.mValues.begin();
+        for (; bbIt != bb.mValues.end(); ++bbIt)
+        {
+            if (operation1)
+                mValues.insert(((*aaIt).*(operation1))(*bbIt));
+            else
+            {
+                bool overflow;
+                mValues.insert(((*aaIt).*(operation2))(*bbIt, overflow));
+                if (overflow)
                 {
                     setTop();
                     return;
                 }
+            }
+
+            if (mValues.size() > 40)
+            {
+                setTop();
+                return;
             }
         }
     }

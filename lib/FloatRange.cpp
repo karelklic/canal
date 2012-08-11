@@ -15,6 +15,61 @@ Range::Range(const llvm::fltSemantics &semantics)
 {
 }
 
+int
+Range::compare(const Range &value,
+               llvm::CmpInst::Predicate predicate) const
+{
+    if (isTop() || value.isTop())
+        return 2;
+
+    if (isBottom() || value.isBottom())
+        return -1;
+
+    switch (predicate)
+    {
+    // Ordered means that neither operand is a QNAN while
+    // unordered means that either operand may be a QNAN.
+    //
+    //   Opcode         U L G E  Intuitive operation
+    case FCMP_FALSE: // 0 0 0 0  always false (always folded)
+        break;
+    case FCMP_OEQ:   // 0 0 0 1  ordered and equal
+        break;
+    case FCMP_OGT:   // 0 0 1 0  ordered and greater than
+        break;
+    case FCMP_OGE:   // 0 0 1 1  ordered and greater than or equal
+        break;
+    case FCMP_OLT:   // 0 1 0 0  ordered and less than
+        break;
+    case FCMP_OLE:   // 0 1 0 1  ordered and less than or equal
+        break;
+    case FCMP_ONE:   // 0 1 1 0  ordered and operands are unequal
+        break;
+    case FCMP_ORD:   // 0 1 1 1  ordered (no nans)
+        break;
+    case FCMP_UNO:   // 1 0 0 0  unordered: isnan(X) | isnan(Y)
+        break;
+    case FCMP_UEQ:   // 1 0 0 1  unordered or equal
+        break;
+    case FCMP_UGT:   // 1 0 1 0  unordered or greater than
+        break;
+    case FCMP_UGE:   // 1 0 1 1  unordered, greater than, or equal
+        break;
+    case FCMP_ULT:   // 1 1 0 0  unordered or less than
+        break;
+    case FCMP_ULE:   // 1 1 0 1  unordered, less than, or equal
+        break;
+    case FCMP_UNE:   // 1 1 1 0  unordered or not equal
+        break;
+    case FCMP_TRUE:  // 1 1 1 1  always true (always folded)
+        break;
+    default:
+        CANAL_DIE();
+    }
+
+    CANAL_NOT_IMPLEMENTED();
+}
+
 Range *
 Range::clone() const
 {
