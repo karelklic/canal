@@ -122,6 +122,9 @@ public: // Implementation of Value.
     // Implementation of Value::icmp().
     virtual void icmp(const Value &a, const Value &b,
                       llvm::CmpInst::Predicate predicate);
+    // Implementation of Value::fcmp().
+    virtual void fcmp(const Value &a, const Value &b,
+                      llvm::CmpInst::Predicate predicate);
 
 public: // Implementation of AccuracyValue.
     // Implementation of AccuracyValue::accuracy().

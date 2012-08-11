@@ -73,6 +73,15 @@ public:
                       llvm::CmpInst::Predicate predicate);
     virtual void fcmp(const Value &a, const Value &b,
                       llvm::CmpInst::Predicate predicate);
+    virtual void trunc(const Value &value);
+    virtual void zext(const Value &value);
+    virtual void sext(const Value &value);
+    virtual void fptrunc(const Value &value);
+    virtual void fpext(const Value &value);
+    virtual void fptoui(const Value &value);
+    virtual void fptosi(const Value &value);
+    virtual void uitofp(const Value &value);
+    virtual void sitofp(const Value &value);
 };
 
 // Support writing of abstract values to output stream.  Used for

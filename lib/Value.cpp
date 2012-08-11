@@ -125,13 +125,69 @@ Value::xor_(const Value &a, const Value &b)
 }
 
 void
-Value::icmp(const Value &a, const Value &b, llvm::CmpInst::Predicate predicate)
+Value::icmp(const Value &a, const Value &b,
+            llvm::CmpInst::Predicate predicate)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::fcmp(const Value &a, const Value &b, llvm::CmpInst::Predicate predicate)
+Value::fcmp(const Value &a, const Value &b,
+            llvm::CmpInst::Predicate predicate)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Value::trunc(const Value &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Value::zext(const Value &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Value::sext(const Value &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Value::fptrunc(const Value &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Value::Value::fpext(const Value &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Value::fptoui(const Value &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Value::fptosi(const Value &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Value::uitofp(const Value &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Value::Value::sitofp(const Value &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }

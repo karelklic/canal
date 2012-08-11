@@ -354,25 +354,44 @@ Container::xor_(const Value &a, const Value &b)
     applyBinaryOperation(*this, a, b, &Value::xor_);
 }
 
-void
-Container::icmp(const Value &a, const Value &b,
-                llvm::CmpInst::Predicate predicate)
+static void
+applyCmpOperation(Container &result,
+                  const Value &a,
+                  const Value &b,
+                  llvm::CmpInst::Predicate predicate,
+                  void(Value::*operation)(const Value&, const Value&,
+                                          llvm::CmpInst::Predicate))
 {
     bool deleteAA, deleteBB;
     const Container *aa = asContainer(a, deleteAA),
         *bb = asContainer(b, deleteBB);
 
-    std::vector<Value*>::iterator it(mValues.begin());
+    std::vector<Value*>::iterator it(result.mValues.begin());
     std::vector<Value*>::const_iterator ita = aa->mValues.begin(),
         itb = bb->mValues.begin();
 
-    for (; it != mValues.end(); ++it, ++ita, ++itb)
-        (**it).icmp(**ita, **itb, predicate);
+    for (; it != result.mValues.end(); ++it, ++ita, ++itb)
+        ((**it).*(operation))(**ita, **itb, predicate);
 
     if (deleteAA)
         delete aa;
     if (deleteBB)
         delete bb;
+}
+
+
+void
+Container::icmp(const Value &a, const Value &b,
+                llvm::CmpInst::Predicate predicate)
+{
+    applyCmpOperation(*this, a, b, predicate, &Value::icmp);
+}
+
+void
+Container::fcmp(const Value &a, const Value &b,
+                llvm::CmpInst::Predicate predicate)
+{
+    applyCmpOperation(*this, a, b, predicate, &Value::fcmp);
 }
 
 float Container::accuracy() const
