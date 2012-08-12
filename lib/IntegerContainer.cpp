@@ -40,10 +40,10 @@ Container::~Container()
         delete *it;
 }
 
-int
+unsigned
 Container::getBitWidth() const
 {
-    return getEnumeration().mNumBits;
+    return getEnumeration().getBitWidth();
 }
 
 Bits &
@@ -176,6 +176,12 @@ Container::clone() const
     return new Container(*this);
 }
 
+Container *
+Container::cloneCleaned() const
+{
+    return new Container(getBitWidth());
+}
+
 bool
 Container::operator==(const Value &value) const
 {
@@ -254,10 +260,10 @@ asContainer(const Value &value, bool &deleteAfter)
 }
 
 static void
-applyBinaryOperation(Container &result,
-                     const Value &a,
-                     const Value &b,
-                     void(Value::*operation)(const Value&, const Value&))
+binaryOperation(Container &result,
+                const Value &a,
+                const Value &b,
+                Value::BinaryOperation operation)
 {
     bool deleteAA, deleteBB;
     const Container *aa = asContainer(a, deleteAA),
@@ -279,88 +285,87 @@ applyBinaryOperation(Container &result,
 void
 Container::add(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::add);
+    binaryOperation(*this, a, b, &Value::add);
 }
 
 void
 Container::sub(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::sub);
+    binaryOperation(*this, a, b, &Value::sub);
 }
 
 void
 Container::mul(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::mul);
+    binaryOperation(*this, a, b, &Value::mul);
 }
 
 void
 Container::udiv(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::udiv);
+    binaryOperation(*this, a, b, &Value::udiv);
 }
 
 void
 Container::sdiv(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::sdiv);
+    binaryOperation(*this, a, b, &Value::sdiv);
 }
 
 void
 Container::urem(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::urem);
+    binaryOperation(*this, a, b, &Value::urem);
 }
 
 void
 Container::srem(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::srem);
+    binaryOperation(*this, a, b, &Value::srem);
 }
 
 void
 Container::shl(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::shl);
+    binaryOperation(*this, a, b, &Value::shl);
 }
 
 void
 Container::lshr(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::lshr);
+    binaryOperation(*this, a, b, &Value::lshr);
 }
 
 void
 Container::ashr(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::ashr);
+    binaryOperation(*this, a, b, &Value::ashr);
 }
 
 void
 Container::and_(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::and_);
+    binaryOperation(*this, a, b, &Value::and_);
 }
 
 void
 Container::or_(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::or_);
+    binaryOperation(*this, a, b, &Value::or_);
 }
 
 void
 Container::xor_(const Value &a, const Value &b)
 {
-    applyBinaryOperation(*this, a, b, &Value::xor_);
+    binaryOperation(*this, a, b, &Value::xor_);
 }
 
 static void
-applyCmpOperation(Container &result,
-                  const Value &a,
-                  const Value &b,
-                  llvm::CmpInst::Predicate predicate,
-                  void(Value::*operation)(const Value&, const Value&,
-                                          llvm::CmpInst::Predicate))
+cmpOperation(Container &result,
+             const Value &a,
+             const Value &b,
+             llvm::CmpInst::Predicate predicate,
+             Value::CmpOperation operation)
 {
     bool deleteAA, deleteBB;
     const Container *aa = asContainer(a, deleteAA),
@@ -384,17 +389,18 @@ void
 Container::icmp(const Value &a, const Value &b,
                 llvm::CmpInst::Predicate predicate)
 {
-    applyCmpOperation(*this, a, b, predicate, &Value::icmp);
+    cmpOperation(*this, a, b, predicate, &Value::icmp);
 }
 
 void
 Container::fcmp(const Value &a, const Value &b,
                 llvm::CmpInst::Predicate predicate)
 {
-    applyCmpOperation(*this, a, b, predicate, &Value::fcmp);
+    cmpOperation(*this, a, b, predicate, &Value::fcmp);
 }
 
-float Container::accuracy() const
+float
+Container::accuracy() const
 {
     float accuracy = 0;
     std::vector<Value*>::const_iterator it = mValues.begin();
@@ -430,7 +436,8 @@ bool Container::isBottom() const
     return true;
 }
 
-void Container::setBottom()
+void
+Container::setBottom()
 {
     std::vector<Value*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
@@ -445,7 +452,8 @@ void Container::setBottom()
     }
 }
 
-bool Container::isTop() const
+bool
+Container::isTop() const
 {
     std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
@@ -462,7 +470,8 @@ bool Container::isTop() const
     return true;
 }
 
-void Container::setTop()
+void
+Container::setTop()
 {
     std::vector<Value*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)

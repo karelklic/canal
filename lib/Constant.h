@@ -34,7 +34,10 @@ public:
 public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.
-    virtual Constant* clone() const;
+    virtual Constant *clone() const;
+    // Implementation of Value::cloneCleaned().
+    // Covariant return type.
+    virtual Constant *cloneCleaned() const;
     // Implementation of Value::operator==().
     virtual bool operator==(const Value &value) const;
     // Implementation of Value::memoryUsage().

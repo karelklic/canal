@@ -430,7 +430,7 @@ static void
 binaryOperation(const llvm::BinaryOperator &instruction,
                 State &state,
                 const llvm::Module &module,
-                void(Value::*operation)(const Value&, const Value&))
+                Value::BinaryOperation operation)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.
@@ -947,7 +947,8 @@ Interpreter::store(const llvm::StoreInst &instruction,
     if (!variable)
         return;
 
-    Pointer::InclusionBased &pointer = dynCast<Pointer::InclusionBased&>(*variable);
+    Pointer::InclusionBased &pointer =
+        dynCast<Pointer::InclusionBased&>(*variable);
 
     // Find the variable in the state.  Merge the provided value into
     // all targets.
@@ -1050,7 +1051,7 @@ static void
 castOperation(const llvm::CastInst &instruction,
               State &state,
               const llvm::Module &module,
-              void(Value::*operation)(const Value&))
+              Value::CastOperation operation)
 {
     Constant constant;
     Value *source = variableOrConstant(
@@ -1255,14 +1256,10 @@ Interpreter::bitcast(const llvm::BitCastInst &instruction,
     state.addFunctionVariable(instruction, resultPointer);
 }
 
-typedef void(Value::*CmpOperation)(const Value&,
-                                   const Value&,
-                                   llvm::CmpInst::Predicate predicate);
-
 static void
 cmpOperation(const llvm::CmpInst &instruction,
              State &state,
-             CmpOperation cmpOperation)
+             Value::CmpOperation operation)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.
@@ -1276,9 +1273,9 @@ cmpOperation(const llvm::CmpInst &instruction,
 
     // TODO: suppot arrays
     Value *resultValue = new Integer::Container(1);
-    ((resultValue)->*(cmpOperation))(*values[0],
-                                     *values[1],
-                                     instruction.getPredicate());
+    ((resultValue)->*(operation))(*values[0],
+                                  *values[1],
+                                  instruction.getPredicate());
 
     state.addFunctionVariable(instruction, resultValue);
 }
@@ -1312,6 +1309,7 @@ Interpreter::phi(const llvm::PHINode &instruction,
                                           state, c);
         if (!value)
             continue;
+
         if (mergedValue)
             mergedValue->merge(*value);
         else
@@ -1323,6 +1321,9 @@ Interpreter::phi(const llvm::PHINode &instruction,
                 mergedValue = value->clone();
         }
     }
+
+    if (!mergedValue)
+        return;
 
     state.addFunctionVariable(instruction, mergedValue);
 }

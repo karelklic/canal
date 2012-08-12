@@ -35,6 +35,12 @@ ExactSize::clone() const
     return new ExactSize(*this);
 }
 
+ExactSize *
+ExactSize::cloneCleaned() const
+{
+    return new ExactSize();
+}
+
 bool
 ExactSize::operator==(const Value &value) const
 {
@@ -92,126 +98,175 @@ ExactSize::toString() const
     return ss.str();
 }
 
+static void
+binaryOperation(ExactSize &result,
+                const Value &a,
+                const Value &b,
+                void(Value::*operation)(const Value&, const Value&))
+{
+    const ExactSize &aa = dynCast<const ExactSize&>(a),
+        &bb = dynCast<const ExactSize&>(b);
+
+    CANAL_ASSERT_MSG(aa.size() == bb.size(),
+                     "Binary operations with arrays "
+                     "require the array size to be equal.");
+
+    std::vector<Value*>::const_iterator itA = aa.mValues.begin(),
+        itB = bb.mValues.begin();
+
+    for (; itA != aa.mValues.end(); ++itA, ++itB)
+    {
+        Value *resultValue = (*itA)->cloneCleaned();
+        ((*resultValue).*(operation))(**itA, **itB);
+        result.mValues.push_back(resultValue);
+    }
+}
+
 void
 ExactSize::add(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::add);
 }
 
 void
 ExactSize::fadd(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::fadd);
 }
 
 void
 ExactSize::sub(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::sub);
 }
 
 void
 ExactSize::fsub(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::fsub);
 }
 
 void
 ExactSize::mul(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::mul);
 }
 
 void
 ExactSize::fmul(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::fmul);
 }
 
 void
 ExactSize::udiv(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::udiv);
 }
 
 void
 ExactSize::sdiv(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::sdiv);
 }
 
 void
 ExactSize::fdiv(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::fdiv);
 }
 
 void
 ExactSize::urem(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::urem);
 }
 
 void
 ExactSize::srem(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::srem);
 }
 
 void
 ExactSize::frem(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::frem);
 }
 
 void
 ExactSize::shl(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::shl);
 }
 
 void
 ExactSize::lshr(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::lshr);
 }
 
 void
 ExactSize::ashr(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::ashr);
 }
 
 void
 ExactSize::and_(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::and_);
 }
 
 void
 ExactSize::or_(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::or_);
 }
 
 void
 ExactSize::xor_(const Value &a, const Value &b)
 {
-    CANAL_NOT_IMPLEMENTED();
+    binaryOperation(*this, a, b, &Value::xor_);
+}
+
+static void
+cmpOperation(ExactSize &result,
+             const Value &a,
+             const Value &b,
+             llvm::CmpInst::Predicate predicate,
+             Value::CmpOperation operation)
+{
+    const ExactSize &aa = dynCast<const ExactSize&>(a),
+        &bb = dynCast<const ExactSize&>(b);
+
+    CANAL_ASSERT_MSG(aa.size() == bb.size(),
+                     "Binary operations with arrays "
+                     "require the array size to be equal.");
+
+    std::vector<Value*>::const_iterator itA = aa.mValues.begin(),
+        itB = bb.mValues.begin();
+
+    for (; itA != aa.mValues.end(); ++itA, ++itB)
+    {
+        Value *resultValue = new Integer::Container(1);
+        ((resultValue)->*(operation))(**itA, **itB, predicate);
+        result.mValues.push_back(resultValue);
+    }
 }
 
 void
 ExactSize::icmp(const Value &a, const Value &b,
                 llvm::CmpInst::Predicate predicate)
 {
-    CANAL_NOT_IMPLEMENTED();
+    cmpOperation(*this, a, b, predicate, &Value::icmp);
 }
 
 void
 ExactSize::fcmp(const Value &a, const Value &b,
                 llvm::CmpInst::Predicate predicate)
 {
-    CANAL_NOT_IMPLEMENTED();
+    cmpOperation(*this, a, b, predicate, &Value::fcmp);
 }
 
 std::vector<Value*>

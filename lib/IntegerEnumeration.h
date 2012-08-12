@@ -20,6 +20,8 @@ public:
     // Initializes to the given value.
     Enumeration(const llvm::APInt &number);
 
+    unsigned getBitWidth() const { return mNumBits; }
+
     // Lowest signed number represented by this abstract domain.
     // @param result
     //   Filled by the minimum value if it is known.  Otherwise, the
@@ -60,6 +62,9 @@ public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.
     virtual Enumeration *clone() const;
+    // Implementation of Value::cloneCleaned().
+    // Covariant return type.
+    virtual Enumeration *cloneCleaned() const;
     // Implementation of Value::operator==().
     virtual bool operator==(const Value& value) const;
     // Implementation of Value::merge().
@@ -115,13 +120,10 @@ public: // Implementation of AccuracyValue.
     virtual void setTop();
 
 protected:
-    typedef llvm::APInt(llvm::APInt::*APIntOperation)(const llvm::APInt&) const;
-    typedef llvm::APInt(llvm::APInt::*APIntOperationWithOverflow)(const llvm::APInt&, bool&) const;
-
     void applyOperation(const Value &a,
                         const Value &b,
-                        APIntOperation operation1,
-                        APIntOperationWithOverflow operation2);
+                        APIntUtils::Operation operation1,
+                        APIntUtils::OperationWithOverflow operation2);
 };
 
 } // namespace Integer

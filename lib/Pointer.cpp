@@ -136,6 +136,12 @@ InclusionBased::clone() const
     return new InclusionBased(*this);
 }
 
+InclusionBased *
+InclusionBased::cloneCleaned() const
+{
+    return new InclusionBased(mModule, mType);
+}
+
 bool
 InclusionBased::operator==(const Value &value) const
 {

@@ -35,6 +35,12 @@ SingleItem::clone() const
     return new SingleItem(*this);
 }
 
+SingleItem *
+SingleItem::cloneCleaned() const
+{
+    return new SingleItem();
+}
+
 bool
 SingleItem::operator==(const Value &value) const
 {

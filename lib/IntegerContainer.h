@@ -29,7 +29,7 @@ public:
     // Destructor.  Deletes the contents of the container.
     virtual ~Container();
 
-    int getBitWidth() const;
+    unsigned getBitWidth() const;
 
     Bits &getBits();
     const Bits &getBits() const;
@@ -84,6 +84,9 @@ public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.
     virtual Container *clone() const;
+    // Implementation of Value::cloneCleaned().
+    // Covariant return type.
+    virtual Container *cloneCleaned() const;
     // Implementation of Value::operator==().
     virtual bool operator==(const Value &value) const;
     // Implementation of Value::merge().

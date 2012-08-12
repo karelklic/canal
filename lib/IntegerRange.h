@@ -30,6 +30,8 @@ public:
     Range(unsigned numBits);
     Range(const llvm::APInt &constant);
 
+    unsigned getBitWidth() const { return mSignedFrom.getBitWidth(); }
+
     // Lowest signed number represented by this abstract domain.
     // @param result
     //   Filled by the minimum value if it is known.  Otherwise, the
@@ -70,6 +72,9 @@ public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.
     virtual Range *clone() const;
+    // Implementation of Value::cloneCleaned().
+    // Covariant return type.
+    virtual Range *cloneCleaned() const;
     // Implementation of Value::operator==().
     virtual bool operator==(const Value& value) const;
     // Implementation of Value::merge().

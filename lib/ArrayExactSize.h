@@ -25,6 +25,9 @@ public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.
     virtual ExactSize *clone() const;
+    // Implementation of Value::cloneCleaned().
+    // Covariant return type.
+    virtual ExactSize *cloneCleaned() const;
     // Implementation of Value::operator==().
     virtual bool operator==(const Value &value) const;
     // Implementation of Value::merge().

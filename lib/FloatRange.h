@@ -27,10 +27,15 @@ public:
     int compare(const Range &value,
                 llvm::CmpInst::Predicate predicate) const;
 
+    const llvm::fltSemantics &getSemantics() const { return mFrom.getSemantics(); }
+
 public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.
     virtual Range *clone() const;
+    // Implementation of Value::cloneCleaned().
+    // Covariant return type.
+    virtual Range *cloneCleaned() const;
     // Implementation of Value::operator==().
     virtual bool operator==(const Value& value) const;
     // Implementation of Value::merge().

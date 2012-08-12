@@ -102,6 +102,9 @@ public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type -- it really overrides Value::clone().
     virtual InclusionBased *clone() const;
+    // Implementation of Value::cloneCleaned().
+    // Covariant return type.
+    virtual InclusionBased *cloneCleaned() const;
     // Implementation of Value::operator==().
     virtual bool operator==(const Value &value) const;
     // Implementation of Value::merge().

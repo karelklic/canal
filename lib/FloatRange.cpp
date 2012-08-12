@@ -30,38 +30,38 @@ Range::compare(const Range &value,
     // Ordered means that neither operand is a QNAN while
     // unordered means that either operand may be a QNAN.
     //
-    //   Opcode         U L G E  Intuitive operation
-    case FCMP_FALSE: // 0 0 0 0  always false (always folded)
+    //   Opcode                        U L G E  Intuitive operation
+    case llvm::CmpInst::FCMP_FALSE: // 0 0 0 0  always false (always folded)
         break;
-    case FCMP_OEQ:   // 0 0 0 1  ordered and equal
+    case llvm::CmpInst::FCMP_OEQ:   // 0 0 0 1  ordered and equal
         break;
-    case FCMP_OGT:   // 0 0 1 0  ordered and greater than
+    case llvm::CmpInst::FCMP_OGT:   // 0 0 1 0  ordered and greater than
         break;
-    case FCMP_OGE:   // 0 0 1 1  ordered and greater than or equal
+    case llvm::CmpInst::FCMP_OGE:   // 0 0 1 1  ordered and greater than or equal
         break;
-    case FCMP_OLT:   // 0 1 0 0  ordered and less than
+    case llvm::CmpInst::FCMP_OLT:   // 0 1 0 0  ordered and less than
         break;
-    case FCMP_OLE:   // 0 1 0 1  ordered and less than or equal
+    case llvm::CmpInst::FCMP_OLE:   // 0 1 0 1  ordered and less than or equal
         break;
-    case FCMP_ONE:   // 0 1 1 0  ordered and operands are unequal
+    case llvm::CmpInst::FCMP_ONE:   // 0 1 1 0  ordered and operands are unequal
         break;
-    case FCMP_ORD:   // 0 1 1 1  ordered (no nans)
+    case llvm::CmpInst::FCMP_ORD:   // 0 1 1 1  ordered (no nans)
         break;
-    case FCMP_UNO:   // 1 0 0 0  unordered: isnan(X) | isnan(Y)
+    case llvm::CmpInst::FCMP_UNO:   // 1 0 0 0  unordered: isnan(X) | isnan(Y)
         break;
-    case FCMP_UEQ:   // 1 0 0 1  unordered or equal
+    case llvm::CmpInst::FCMP_UEQ:   // 1 0 0 1  unordered or equal
         break;
-    case FCMP_UGT:   // 1 0 1 0  unordered or greater than
+    case llvm::CmpInst::FCMP_UGT:   // 1 0 1 0  unordered or greater than
         break;
-    case FCMP_UGE:   // 1 0 1 1  unordered, greater than, or equal
+    case llvm::CmpInst::FCMP_UGE:   // 1 0 1 1  unordered, greater than, or equal
         break;
-    case FCMP_ULT:   // 1 1 0 0  unordered or less than
+    case llvm::CmpInst::FCMP_ULT:   // 1 1 0 0  unordered or less than
         break;
-    case FCMP_ULE:   // 1 1 0 1  unordered, less than, or equal
+    case llvm::CmpInst::FCMP_ULE:   // 1 1 0 1  unordered, less than, or equal
         break;
-    case FCMP_UNE:   // 1 1 1 0  unordered or not equal
+    case llvm::CmpInst::FCMP_UNE:   // 1 1 1 0  unordered or not equal
         break;
-    case FCMP_TRUE:  // 1 1 1 1  always true (always folded)
+    case llvm::CmpInst::FCMP_TRUE:  // 1 1 1 1  always true (always folded)
         break;
     default:
         CANAL_DIE();
@@ -74,6 +74,12 @@ Range *
 Range::clone() const
 {
     return new Range(*this);
+}
+
+Range *
+Range::cloneCleaned() const
+{
+    return new Range(getSemantics());
 }
 
 bool
@@ -147,8 +153,8 @@ Range::accuracy() const
     if (mTop)
         return 0.0f;
 
-    llvm::APFloat divisor = llvm::APFloat::getLargest(mFrom.getSemantics(), /*negative=*/false);
-    llvm::APFloat::opStatus status = divisor.subtract(llvm::APFloat::getLargest(mFrom.getSemantics(), /*negative=*/true), llvm::APFloat::rmNearestTiesToEven);
+    llvm::APFloat divisor = llvm::APFloat::getLargest(getSemantics(), /*negative=*/false);
+    llvm::APFloat::opStatus status = divisor.subtract(llvm::APFloat::getLargest(getSemantics(), /*negative=*/true), llvm::APFloat::rmNearestTiesToEven);
     CANAL_ASSERT(status == llvm::APFloat::opOK);
 
     llvm::APFloat dividend = mTo;

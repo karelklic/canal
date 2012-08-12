@@ -195,6 +195,12 @@ Bits::clone() const
     return new Bits(*this);
 }
 
+Bits *
+Bits::cloneCleaned() const
+{
+    return new Bits(getBitWidth());
+}
+
 bool
 Bits::operator==(const Value& value) const
 {
@@ -308,10 +314,10 @@ Bits::ashr(const Value &a, const Value &b)
 }
 
 static void
-applyBitOperation(Bits &result,
-                  const Value &a,
-                  const Value &b,
-                  int(*operation)(int,int))
+bitOperation(Bits &result,
+             const Value &a,
+             const Value &b,
+             int(*operation)(int,int))
 {
     const Bits &aa = dynCast<const Bits&>(a),
         &bb = dynCast<const Bits&>(b);
@@ -349,7 +355,7 @@ bitAnd(int valueA, int valueB)
 void
 Bits::and_(const Value &a, const Value &b)
 {
-    applyBitOperation(*this, a, b, bitAnd);
+    bitOperation(*this, a, b, bitAnd);
 }
 
 // First number in a pair is mBits1, second is mBits0
@@ -377,7 +383,7 @@ bitOr(int valueA, int valueB)
 void
 Bits::or_(const Value &a, const Value &b)
 {
-    applyBitOperation(*this, a, b, bitOr);
+    bitOperation(*this, a, b, bitOr);
 }
 
 // First number in a pair is mBits1, second is mBits0
@@ -405,7 +411,7 @@ bitXor(int valueA, int valueB)
 void
 Bits::xor_(const Value &a, const Value &b)
 {
-    applyBitOperation(*this, a, b, bitXor);
+    bitOperation(*this, a, b, bitXor);
 }
 
 void

@@ -29,6 +29,12 @@ Structure::clone() const
     return new Structure(*this);
 }
 
+Structure *
+Structure::cloneCleaned() const
+{
+    return new Structure();
+}
+
 bool
 Structure::operator==(const Value &value) const
 {

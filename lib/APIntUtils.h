@@ -27,6 +27,10 @@ struct SCompare
 
 typedef std::set<llvm::APInt, UCompare> USet;
 
+typedef llvm::APInt(llvm::APInt::*Operation)(const llvm::APInt&) const;
+typedef llvm::APInt(llvm::APInt::*OperationWithOverflow)(const llvm::APInt&,
+                                                         bool&) const;
+
 
 // APInt compatibility for LLVM 2.8 and older.
 // Operations that return overflow indicators.

@@ -132,7 +132,10 @@ mergeMaps(PlaceValueMap &map1, const PlaceValueMap &map2)
     {
 	PlaceValueMap::iterator it1 = map1.find(it2->first);
 	if (it1 == map1.end())
-            map1.insert(PlaceValueMap::value_type(it2->first, it2->second->clone()));
+        {
+            map1.insert(PlaceValueMap::value_type(it2->first,
+                                                  it2->second->clone()));
+        }
 	else
             it1->second->merge(*it2->second);
     }
@@ -167,7 +170,9 @@ replaceOrInsertMapItem(PlaceValueMap &map,
                        const llvm::Value &place,
                        Value *value)
 {
-    CANAL_ASSERT(value);
+    CANAL_ASSERT_MSG(value,
+                     "Attempted to insert NULL variable to state.");
+
     PlaceValueMap::iterator it = map.find(&place);
     if (it != map.end())
     {

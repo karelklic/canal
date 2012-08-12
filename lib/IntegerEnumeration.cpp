@@ -1,6 +1,7 @@
 #include "IntegerEnumeration.h"
 #include "Constant.h"
 #include "Utils.h"
+#include "FloatRange.h"
 #include <sstream>
 #include <iostream>
 
@@ -97,6 +98,12 @@ Enumeration *
 Enumeration::clone() const
 {
     return new Enumeration(*this);
+}
+
+Enumeration *
+Enumeration::cloneCleaned() const
+{
+    return new Enumeration(getBitWidth());
 }
 
 bool
@@ -266,19 +273,19 @@ Enumeration::icmp(const Value &a, const Value &b,
 
     switch (predicate)
     {
-    case ICMP_EQ:  // equal
+    case llvm::CmpInst::ICMP_EQ:  // equal
         // If both enumerations are equal, the result is 1.  If
         // enumeration intersection is empty, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mValues == bb.mValues)
-            mValues.push_back(1);
+            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
         break;
-    case ICMP_NE:  // not equal
+    case llvm::CmpInst::ICMP_NE:  // not equal
         // If both enumerations are equal, the result is 0.  If
         // enumeration intersection is empty, the result is 1.
         // Otherwise the result is the top value (both 0 and 1).
         break;
-    case ICMP_UGT: // unsigned greater than
+    case llvm::CmpInst::ICMP_UGT: // unsigned greater than
         // If the lowest element from the first enumeration is
         // unsigned greater than the largest element from the second
         // enumeration, the result is 1.  If the largest element from
@@ -286,19 +293,19 @@ Enumeration::icmp(const Value &a, const Value &b,
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         break;
-    case ICMP_UGE: // unsigned greater or equal
+    case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
         break;
-    case ICMP_ULT: // unsigned less than
+    case llvm::CmpInst::ICMP_ULT: // unsigned less than
         break;
-    case ICMP_ULE: // unsigned less or equal
+    case llvm::CmpInst::ICMP_ULE: // unsigned less or equal
         break;
-    case ICMP_SGT: // signed greater than
+    case llvm::CmpInst::ICMP_SGT: // signed greater than
         break;
-    case ICMP_SGE: // signed greater or equal
+    case llvm::CmpInst::ICMP_SGE: // signed greater or equal
         break;
-    case ICMP_SLT: // signed less than
+    case llvm::CmpInst::ICMP_SLT: // signed less than
         break;
-    case ICMP_SLE: // signed less or equal
+    case llvm::CmpInst::ICMP_SLE: // signed less or equal
         break;
     default:
         CANAL_DIE();
@@ -321,10 +328,10 @@ Enumeration::fcmp(const Value &a, const Value &b,
         setBottom();
         break;
     case 0:
-        mValues.push_back(0);
+        mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
         break;
     case 1:
-        mValues.push_back(1);
+        mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
         break;
     case 2:
         setTop();
@@ -357,7 +364,6 @@ Enumeration::setBottom()
     mTop = false;
 }
 
-
 bool
 Enumeration::isTop() const
 {
@@ -374,8 +380,8 @@ Enumeration::setTop()
 void
 Enumeration::applyOperation(const Value &a,
                             const Value &b,
-                            APIntOperation operation1,
-                            APIntOperationWithOverflow operation2)
+                            APIntUtils::Operation operation1,
+                            APIntUtils::OperationWithOverflow operation2)
 {
     const Enumeration &aa = dynCast<const Enumeration&>(a),
         &bb = dynCast<const Enumeration&>(b);

@@ -6,9 +6,13 @@
 
 namespace Canal {
 
-StackFrame::StackFrame(const llvm::Function *function, const State &initialState) : mFunction(function)
+StackFrame::StackFrame(const llvm::Function *function,
+                       const State &initialState)
+    : mFunction(function)
 {
-    llvm::Function::const_iterator it = function->begin(), itend = function->end();
+    llvm::Function::const_iterator it = function->begin(),
+        itend = function->end();
+
     for (; it != itend; ++it)
         mBlockInputState[it] = initialState;
 
@@ -25,7 +29,9 @@ Value *
 StackFrame::getReturnedValue() const
 {
     Value *mergedValue = NULL;
-    llvm::Function::const_iterator it = mFunction->begin(), itend = mFunction->end();
+    llvm::Function::const_iterator it = mFunction->begin(),
+        itend = mFunction->end();
+
     for (; it != itend; ++it)
     {
         if (!dynCast<const llvm::ReturnInst*>(it->getTerminator()))
@@ -47,7 +53,9 @@ StackFrame::getReturnedValue() const
 void
 StackFrame::mergeGlobalVariables(State &target) const
 {
-    llvm::Function::const_iterator it = mFunction->begin(), itend = mFunction->end();
+    llvm::Function::const_iterator it = mFunction->begin(),
+        itend = mFunction->end();
+
     for (; it != itend; ++it)
     {
         if (!dynCast<const llvm::ReturnInst*>(it->getTerminator()))
@@ -103,10 +111,14 @@ StackFrame::startBlock(llvm::Function::const_iterator block)
 
     // Merge out states of predecessors to input state of
     // current block.
-    llvm::const_pred_iterator it = llvm::pred_begin(block), itend = llvm::pred_end(block);
+    llvm::const_pred_iterator it = llvm::pred_begin(block),
+        itend = llvm::pred_end(block);
+
     for (; it != itend; ++it)
     {
-        CANAL_ASSERT(block != block->getParent()->getEntryBlock() && "Entry block cannot have predecessors!");
+        CANAL_ASSERT_MSG(block != block->getParent()->getEntryBlock(),
+                         "Entry block cannot have predecessors!");
+
         mBlockInputState[block].merge(mBlockOutputState[*it]);
     }
 
@@ -155,7 +167,10 @@ Stack::nextInstruction()
 
     Value *returnedValue = currentFrame.getReturnedValue();
     if (returnedValue)
-        parentFrame.mCurrentState.addFunctionVariable(*parentFrame.mCurrentInstruction, returnedValue);
+    {
+        parentFrame.mCurrentState.addFunctionVariable(
+            *parentFrame.mCurrentInstruction, returnedValue);
+    }
 
     currentFrame.mergeGlobalVariables(parentFrame.mCurrentState);
     mFrames.pop_back();
@@ -181,7 +196,8 @@ Stack::getCurrentFunction() const
 }
 
 void
-Stack::addFrame(const llvm::Function &function, const State &initialState)
+Stack::addFrame(const llvm::Function &function,
+                const State &initialState)
 {
     // Note that next instruction step is the jump to the first
     // instruction of the newly created frame.

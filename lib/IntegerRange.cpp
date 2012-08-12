@@ -92,6 +92,12 @@ Range::clone() const
     return new Range(*this);
 }
 
+Range *
+Range::cloneCleaned() const
+{
+    return new Range(getBitWidth());
+}
+
 bool
 Range::operator==(const Value& value) const
 {

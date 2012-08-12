@@ -50,6 +50,12 @@ Constant::clone() const
     return new Constant(*this);
 }
 
+Constant *
+Constant::cloneCleaned() const
+{
+    return new Constant();
+}
+
 bool
 Constant::operator==(const Value &value) const
 {
