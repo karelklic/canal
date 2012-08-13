@@ -419,7 +419,8 @@ Container::accuracy() const
     return accuracy;
 }
 
-bool Container::isBottom() const
+bool
+Container::isBottom() const
 {
     std::vector<Value*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
@@ -482,6 +483,12 @@ Container::setTop()
 
         accuracyValue->setTop();
     }
+}
+
+size_t
+Container::memoryBitSize() const
+{
+    return getBitWidth();
 }
 
 } // namespace Integer
