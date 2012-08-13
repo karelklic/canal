@@ -485,11 +485,5 @@ Container::setTop()
     }
 }
 
-size_t
-Container::memoryBitSize() const
-{
-    return getBitWidth();
-}
-
 } // namespace Integer
 } // namespace Canal

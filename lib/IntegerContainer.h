@@ -14,7 +14,7 @@ class Bits;
 class Enumeration;
 class Range;
 
-class Container : public Value, public AccuracyValue, public MemoryValue
+class Container : public Value, public AccuracyValue
 {
 public:
     std::vector<Value*> mValues;
@@ -140,10 +140,6 @@ public: // Implementation of AccuracyValue.
     virtual bool isTop() const;
     // Implementation of AccuracyValue::setTop().
     virtual void setTop();
-
-public: // Implementation of MemoryValue.
-    // Implementation of MemoryValue::memoryBitSize().
-    virtual size_t memoryBitSize() const;
 };
 
 } // namespace Integer
