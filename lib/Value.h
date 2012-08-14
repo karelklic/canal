@@ -51,6 +51,11 @@ public:
     // Create a string representation of the abstract value.
     virtual std::string toString() const = 0;
 
+    // Checks if the abstract value internal state matches the text
+    // description.  Full coverage of the state is not expected, the
+    // text can contain just partial information.
+    virtual bool matchesString(const std::string &text) const = 0;
+
     // Load the abstract value state from a string representation.
     // @param text
     //   The textual representation.  It must not contain any text

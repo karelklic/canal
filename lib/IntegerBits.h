@@ -97,6 +97,8 @@ public: // Implementation of Value.
     virtual size_t memoryUsage() const;
     // Implementation of Value::toString().
     virtual std::string toString() const;
+    // Implementation of Value::matchesString().
+    virtual bool matchesString(const std::string &text) const;
 
     // Implementation of Value::add().
     virtual void add(const Value &a, const Value &b);
