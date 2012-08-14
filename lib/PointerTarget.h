@@ -104,8 +104,9 @@ public:
     // This class owns the memory.
     std::vector<Value*> mOffsets;
 
-    // An additional, numeric offset on the top of mOffsets.  This
-    // class owns the memory.  It might be NULL instead of 0.
+    // An additional numeric offset on the top of mOffsets.  The value
+    // represents a number of bytes.  This class owns the memory.  It
+    // might be NULL instead of 0.
     Value *mNumericOffset;
 };
 
