@@ -3,6 +3,10 @@
 .libs
 *~
 Makefile
+/canal.config
+/canal.creator
+/canal.files
+/canal.includes
 
 /autom4te.cache
 /config.log
