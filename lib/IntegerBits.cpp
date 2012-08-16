@@ -1,6 +1,7 @@
 #include "IntegerBits.h"
 #include "Constant.h"
 #include "Utils.h"
+#include "APIntUtils.h"
 #include <sstream>
 
 namespace Canal {
@@ -17,12 +18,7 @@ Bits::Bits(const llvm::APInt &number) : mBits0(~number), mBits1(number)
 int
 Bits::getBitValue(unsigned pos) const
 {
-#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
-    // Old interface replaced in LLVM 2.9.
-    llvm::APInt bit(llvm::APInt::getBitsSet(mBits0.getBitWidth(), pos, pos + 1));
-#else
-    llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
-#endif
+    llvm::APInt bit(APIntUtils::getOneBitSet(mBits0.getBitWidth(), pos));
     if ((mBits1 & bit).getBoolValue())
         return (mBits0 & bit).getBoolValue() ? 2 : 1;
     else
@@ -32,12 +28,7 @@ Bits::getBitValue(unsigned pos) const
 void
 Bits::setBitValue(unsigned pos, int value)
 {
-#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
-    // Old interface replaced in LLVM 2.9.
-    llvm::APInt bit(llvm::APInt::getBitsSet(mBits0.getBitWidth(), pos, pos + 1));
-#else
-    llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
-#endif
+    llvm::APInt bit(APIntUtils::getOneBitSet(mBits0.getBitWidth(), pos));
     switch (value)
     {
     case -1:
@@ -67,9 +58,7 @@ Bits::signedMin(llvm::APInt &result) const
     CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
                      "The bit width must be the same.");
 
-    // Not available on LLVM 2.8:
-    //result.clearAllBits();
-    result.clear(result.getBitWidth());
+    APIntUtils::clearAllBits(result);
 
     for (int i = 0; i < getBitWidth(); ++i)
     {
@@ -81,14 +70,12 @@ Bits::signedMin(llvm::APInt &result) const
         case 0:
             break;
         case 1:
-            // Not available on LLVM 2.8:
-            //result.setBit(i);
-            result.set(i);
+            APIntUtils::setBit(result, i);
             break;
         case 2:
             // If not sign bit...
             if (i != getBitWidth() - 1)
-                result.set(i);
+                APIntUtils::setBit(result, i);
             break;
         default:
             CANAL_DIE();
@@ -104,7 +91,7 @@ Bits::signedMax(llvm::APInt &result) const
     CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
                      "The bit width must be the same.");
 
-    result.clear(result.getBitWidth());
+    APIntUtils::clearAllBits(result);
 
     for (int i = 0; i < getBitWidth(); ++i)
     {
@@ -116,12 +103,12 @@ Bits::signedMax(llvm::APInt &result) const
         case 0:
             break;
         case 1:
-            result.set(i);
+            APIntUtils::setBit(result, i);
             break;
         case 2:
             // If sign bit...
             if (i == getBitWidth() - 1)
-                result.set(i);
+                APIntUtils::setBit(result, i);
             break;
         default:
             CANAL_DIE();
@@ -137,7 +124,7 @@ Bits::unsignedMin(llvm::APInt &result) const
     CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
                      "The bit width must be the same.");
 
-    result.clear(result.getBitWidth());
+    APIntUtils::clearAllBits(result);
 
     for (int i = 0; i < getBitWidth(); ++i)
     {
@@ -150,7 +137,7 @@ Bits::unsignedMin(llvm::APInt &result) const
         case 2: // We choose 0 when both 0 and 1 are available...
             break;
         case 1:
-            result.set(i);
+            APIntUtils::setBit(result, i);
             break;
         default:
             CANAL_DIE();
@@ -166,7 +153,7 @@ Bits::unsignedMax(llvm::APInt &result) const
     CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
                      "The bit width must be the same.");
 
-    result.clear(result.getBitWidth());
+    APIntUtils::clearAllBits(result);
 
     for (int i = 0; i < getBitWidth(); ++i)
     {
@@ -179,7 +166,7 @@ Bits::unsignedMax(llvm::APInt &result) const
             break;
         case 1:
         case 2: // We choose 1 when both 0 and 1 are available...
-            result.set(i);
+            APIntUtils::setBit(result, i);
             break;
         default:
             CANAL_DIE();

@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "IntegerContainer.h"
 #include "Constant.h"
+#include <llvm/ADT/APInt.h>
 #include <sstream>
 #include <iostream>
 

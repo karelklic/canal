@@ -109,6 +109,13 @@ std::string toString(const llvm::APInt &num);
 std::string toString(const llvm::Type &type);
 std::string toString(const llvm::Constant &constant);
 
+#if LLVM_MAJOR >= 3
+// LLVM 3.0 does not allow to print const Types.
+llvm::raw_ostream &
+operator<<(llvm::raw_ostream& ostream,
+           const llvm::Type &type);
+#endif
+
 std::string indent(const std::string &input, int spaces);
 std::string indentExceptFirstLine(const std::string &input, int spaces);
 

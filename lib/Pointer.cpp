@@ -5,6 +5,7 @@
 #include "State.h"
 #include "SlotTracker.h"
 #include <llvm/BasicBlock.h>
+#include <llvm/Type.h>
 #include <sstream>
 
 namespace Canal {

@@ -50,6 +50,16 @@ toString(const llvm::Constant &constant)
     return s;
 }
 
+#if LLVM_MAJOR >= 3
+llvm::raw_ostream &
+operator<<(llvm::raw_ostream& ostream,
+           const llvm::Type &type)
+{
+    ostream << const_cast<llvm::Type&>(type);
+    return ostream;
+}
+#endif
+
 std::string
 indent(const std::string &input, int spaces)
 {
