@@ -361,7 +361,7 @@ Enumeration::icmp(const Value &a, const Value &b,
         }
         else this->setTop();
         break;
-    case llvm::CmpInst::ICMP_SGT: // signed greater than        
+    case llvm::CmpInst::ICMP_SGT: // signed greater than
         // If the lowest element from the first enumeration is
         // signed greater than the largest element from the second
         // enumeration, the result is 1.  If the largest element from
@@ -538,9 +538,11 @@ bool Enumeration::intersection(const Enumeration &a) const {
     //Taken from std::set_intersection (algorithm)
     while (i != this->mValues.end() && j != a.mValues.end()) {
         if ((*i).slt(*j)) i++;
-        else if ((*j).slt(*j)) j++;
+        else if ((*j).slt(*i)) j++;
         else return true;
     }
+
+    return false;
 }
 
 } // namespace Integer
