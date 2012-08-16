@@ -125,6 +125,11 @@ public: // Implementation of AccuracyValue.
     virtual bool isTop() const;
     // Implementation of AccuracyValue::setTop().
     virtual void setTop();
+
+protected:
+    bool intersection(const Range& a, const bool s = true, const bool u = true) const;
+
+    bool isSingleValue() const;
 };
 
 } // namespace Integer
