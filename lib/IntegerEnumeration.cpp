@@ -2,6 +2,7 @@
 #include "Constant.h"
 #include "Utils.h"
 #include "FloatRange.h"
+#include "StringUtils.h"
 #include <sstream>
 #include <iostream>
 
@@ -168,6 +169,19 @@ Enumeration::toString() const
         ss << "    " << Canal::toString(*it) << std::endl;
 
     return ss.str();
+}
+
+bool
+Enumeration::matchesString(const std::string &text) const
+{
+    const char *input = text.c_str();
+    int count = StringUtils::skipString(&input, "enumeration");
+    if (0 == count)
+        return false;
+
+    // TODO!
+
+    return true;
 }
 
 void

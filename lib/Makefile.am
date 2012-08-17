@@ -35,6 +35,8 @@ libcanal_la_SOURCES = \
 	Stack.h \
 	State.cpp \
 	State.h \
+	StringUtils.cpp \
+	StringUtils.h \
 	Structure.cpp \
 	Structure.h \
 	Utils.cpp \
