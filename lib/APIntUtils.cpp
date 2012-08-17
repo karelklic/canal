@@ -98,7 +98,7 @@ umul_ov(const llvm::APInt &a,
         const llvm::APInt &b,
         bool &overflow)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_MAJOR == 2
     llvm::APInt result = a * b;
     if (a != 0 && b != 0)
         overflow = result.udiv(b) != a || result.udiv(a) != b;
@@ -109,6 +109,37 @@ umul_ov(const llvm::APInt &a,
     return a.umul_ov(b, overflow);
 #endif
 }
+
+void
+clearAllBits(llvm::APInt &num)
+{
+#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+    num.clear(num.getBitWidth());
+#else
+    num.clearAllBits();
+#endif
+}
+
+void
+setBit(llvm::APInt &num, int bit)
+{
+#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+    num.set(bit);
+#else
+    num.setBit(bit);
+#endif
+}
+
+llvm::APInt
+getOneBitSet(unsigned bitWidth, int bit)
+{
+#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+    return llvm::APInt::getBitsSet(bitWidth, bit, bit + 1);
+#else
+    return llvm::APInt::getOneBitSet(bitWidth, bit);
+#endif
+}
+
 
 } // namespace APIntUtils
 } // namespace Canal

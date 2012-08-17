@@ -56,7 +56,7 @@ CommandHelp::run(const std::vector<std::string> &args)
             {
                 if (it != matches.begin())
                     printf(", ");
-                printf(it->c_str());
+                printf("%s", it->c_str());
             }
             puts("");
             return;

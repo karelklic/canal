@@ -62,6 +62,12 @@ llvm::APInt umul_ov(const llvm::APInt &a,
                     const llvm::APInt &b,
                     bool &overflow);
 
+void clearAllBits(llvm::APInt &num);
+
+void setBit(llvm::APInt &num, int bit);
+
+llvm::APInt getOneBitSet(unsigned bitWidth, int bit);
+
 } // namespace APIntUtils
 } // namespace Canal
 

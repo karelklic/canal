@@ -7,6 +7,7 @@
 #include "Value.h"
 #include <sstream>
 #include <llvm/BasicBlock.h>
+#include <llvm/ADT/APInt.h>
 
 namespace Canal {
 namespace Pointer {

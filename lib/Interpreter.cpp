@@ -16,6 +16,7 @@
 #include <llvm/Module.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Instructions.h>
+#include <llvm/Constants.h>
 #include <llvm/Support/CFG.h>
 #include <map>
 #include <cassert>
@@ -687,7 +688,7 @@ Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction,
 
     Array::ExactSize *result = new Array::ExactSize();
 
-#if LLVM_MAJOR >= 3
+#if LLVM_MAJOR == 3 && LLVM_MINOR >= 1
     llvm::SmallVector<int, 16> shuffleMask = instruction.getShuffleMask();
 #else
     llvm::SmallVector<int, 16> shuffleMask;

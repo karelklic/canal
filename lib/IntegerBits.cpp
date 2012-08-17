@@ -1,6 +1,7 @@
 #include "IntegerBits.h"
 #include "Constant.h"
 #include "Utils.h"
+#include "APIntUtils.h"
 #include <sstream>
 
 namespace Canal {
@@ -17,12 +18,7 @@ Bits::Bits(const llvm::APInt &number) : mBits0(~number), mBits1(number)
 int
 Bits::getBitValue(unsigned pos) const
 {
-#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
-    // Old interface replaced in LLVM 2.9.
-    llvm::APInt bit(llvm::APInt::getBitsSet(mBits0.getBitWidth(), pos, pos + 1));
-#else
-    llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
-#endif
+    llvm::APInt bit(APIntUtils::getOneBitSet(mBits0.getBitWidth(), pos));
     if ((mBits1 & bit).getBoolValue())
         return (mBits0 & bit).getBoolValue() ? 2 : 1;
     else
@@ -32,12 +28,7 @@ Bits::getBitValue(unsigned pos) const
 void
 Bits::setBitValue(unsigned pos, int value)
 {
-#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
-    // Old interface replaced in LLVM 2.9.
-    llvm::APInt bit(llvm::APInt::getBitsSet(mBits0.getBitWidth(), pos, pos + 1));
-#else
-    llvm::APInt bit(llvm::APInt::getOneBitSet(mBits0.getBitWidth(), pos));
-#endif
+    llvm::APInt bit(APIntUtils::getOneBitSet(mBits0.getBitWidth(), pos));
     switch (value)
     {
     case -1:
@@ -67,9 +58,7 @@ Bits::signedMin(llvm::APInt &result) const
     CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
                      "The bit width must be the same.");
 
-    // Not available on LLVM 2.8:
-    //result.clearAllBits();
-    result.clear(result.getBitWidth());
+    APIntUtils::clearAllBits(result);
 
     for (int i = 0; i < getBitWidth(); ++i)
     {
@@ -81,14 +70,12 @@ Bits::signedMin(llvm::APInt &result) const
         case 0:
             break;
         case 1:
-            // Not available on LLVM 2.8:
-            //result.setBit(i);
-            result.set(i);
+            APIntUtils::setBit(result, i);
             break;
         case 2:
             // If not sign bit...
             if (i != getBitWidth() - 1)
-                result.set(i);
+                APIntUtils::setBit(result, i);
             break;
         default:
             CANAL_DIE();
@@ -104,7 +91,7 @@ Bits::signedMax(llvm::APInt &result) const
     CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
                      "The bit width must be the same.");
 
-    result.clear(result.getBitWidth());
+    APIntUtils::clearAllBits(result);
 
     for (int i = 0; i < getBitWidth(); ++i)
     {
@@ -116,12 +103,12 @@ Bits::signedMax(llvm::APInt &result) const
         case 0:
             break;
         case 1:
-            result.set(i);
+            APIntUtils::setBit(result, i);
             break;
         case 2:
             // If sign bit...
             if (i == getBitWidth() - 1)
-                result.set(i);
+                APIntUtils::setBit(result, i);
             break;
         default:
             CANAL_DIE();
@@ -137,7 +124,7 @@ Bits::unsignedMin(llvm::APInt &result) const
     CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
                      "The bit width must be the same.");
 
-    result.clear(result.getBitWidth());
+    APIntUtils::clearAllBits(result);
 
     for (int i = 0; i < getBitWidth(); ++i)
     {
@@ -150,7 +137,7 @@ Bits::unsignedMin(llvm::APInt &result) const
         case 2: // We choose 0 when both 0 and 1 are available...
             break;
         case 1:
-            result.set(i);
+            APIntUtils::setBit(result, i);
             break;
         default:
             CANAL_DIE();
@@ -166,7 +153,7 @@ Bits::unsignedMax(llvm::APInt &result) const
     CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
                      "The bit width must be the same.");
 
-    result.clear(result.getBitWidth());
+    APIntUtils::clearAllBits(result);
 
     for (int i = 0; i < getBitWidth(); ++i)
     {
@@ -179,7 +166,7 @@ Bits::unsignedMax(llvm::APInt &result) const
             break;
         case 1:
         case 2: // We choose 1 when both 0 and 1 are available...
-            result.set(i);
+            APIntUtils::setBit(result, i);
             break;
         default:
             CANAL_DIE();
@@ -418,7 +405,178 @@ void
 Bits::icmp(const Value &a, const Value &b,
            llvm::CmpInst::Predicate predicate)
 {
-    CANAL_NOT_IMPLEMENTED();
+
+    const Bits &aa = dynCast<const Bits&>(a),
+            &bb = dynCast<const Bits&>(b);
+
+    if (aa.isTop() || bb.isTop())
+    {
+        setTop(); //Could be both
+        return;
+    }
+
+    if (aa.isBottom() || bb.isBottom())
+    {
+        setBottom(); //Undefined
+        return;
+    }
+
+    switch (predicate)
+    {
+    case llvm::CmpInst::ICMP_EQ:  // equal
+        // If it is the same object or all bits are known in
+        // both Bits and are the same, the result is 1.
+        // If all the bits are known on both bits, but there
+        // are not the same, the result is 0.
+        // Otherwise the result is the top value (both 0 and 1).
+        if (&a == &b || (~(aa.mBits0 ^ aa.mBits1) == 0 && aa == bb) ) {
+            this->mBits0 = ~1; this->mBits1 = 1;
+        }
+        else if (~(aa.mBits0 ^ aa.mBits1) == 0 && ~(bb.mBits0 ^ bb.mBits1) == 0) { //Both numbers are set but not equal
+            this->mBits0 = ~0; this->mBits1 = 0;
+        }
+        else this->setTop();
+        break;
+    case llvm::CmpInst::ICMP_NE:  // not equal
+        // If it is the same object or all bits are known in
+        // both Bits and are the same, the result is 1.
+        // If all the bits are known on both bits, but there
+        // are not the same, the result is 0.
+        // Otherwise the result is the top value (both 0 and 1).
+        if (&a == &b || (~(aa.mBits0 ^ aa.mBits1) == 0 && aa == bb) ) {
+            this->mBits0 = ~0; this->mBits1 = 0;
+        }
+        else if (~(aa.mBits0 ^ aa.mBits1) == 0 && ~(bb.mBits0 ^ bb.mBits1) == 0) { //Both numbers are set but not equal
+            this->mBits0 = ~1; this->mBits1 = 1;
+        }
+        else this->setTop();
+        break;
+    case llvm::CmpInst::ICMP_UGT: // unsigned greater than
+        switch (aa.compare(bb, false)) {
+        case 1:
+            this->mBits0 = ~1; this->mBits1 = 1;
+            break;
+        case 2:
+            this->setTop();
+            break;
+        default:
+            this->mBits0 = ~0; this->mBits1 = 0;
+        }
+        break;
+    case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
+        switch (aa.compare(bb, false)) {
+        case 0:
+        case 1:
+            this->mBits0 = ~1; this->mBits1 = 1;
+            break;
+        case 2:
+            this->setTop();
+            break;
+        default:
+            this->mBits0 = ~0; this->mBits1 = 0;
+        }
+        break;
+
+
+    case llvm::CmpInst::ICMP_ULT: // unsigned less than
+        switch (aa.compare(bb, false)) {
+        case -1:
+            this->mBits0 = ~1; this->mBits1 = 1;
+            break;
+        case 2:
+            this->setTop();
+            break;
+        default:
+            this->mBits0 = ~0; this->mBits1 = 0;
+        }
+        break;
+    case llvm::CmpInst::ICMP_ULE: // unsigned less or equal
+        switch (aa.compare(bb, false)) {
+        case 0:
+        case -1:
+            this->mBits0 = ~1; this->mBits1 = 1;
+            break;
+        case 2:
+            this->setTop();
+            break;
+        default:
+            this->mBits0 = ~0; this->mBits1 = 0;
+        }
+        break;
+    case llvm::CmpInst::ICMP_SGT: // signed greater than
+        switch (aa.compare(bb, true)) {
+        case 1:
+            this->mBits0 = ~1; this->mBits1 = 1;
+            break;
+        case 2:
+            this->setTop();
+            break;
+        default:
+            this->mBits0 = ~0; this->mBits1 = 0;
+        }
+        break;
+    case llvm::CmpInst::ICMP_SGE: // signed greater or equal
+        switch (aa.compare(bb, true)) {
+        case 0:
+        case 1:
+            this->mBits0 = ~1; this->mBits1 = 1;
+            break;
+        case 2:
+            this->setTop();
+            break;
+        default:
+            this->mBits0 = ~0; this->mBits1 = 0;
+        }
+        break;
+    case llvm::CmpInst::ICMP_SLT: // signed less than
+        switch (aa.compare(bb, true)) {
+        case -1:
+            this->mBits0 = ~1; this->mBits1 = 1;
+            break;
+        case 2:
+            this->setTop();
+            break;
+        default:
+            this->mBits0 = ~0; this->mBits1 = 0;
+        }
+        break;
+    case llvm::CmpInst::ICMP_SLE: // signed less or equal
+        switch (aa.compare(bb, true)) {
+        case 0:
+        case -1:
+            this->mBits0 = ~1; this->mBits1 = 1;
+            break;
+        case 2:
+            this->setTop();
+            break;
+        default:
+            this->mBits0 = ~0; this->mBits1 = 0;
+        }
+        break;
+    default:
+        CANAL_DIE();
+    }
+}
+
+//-1 if a < b, 0 if a == b, 1 if a > b, 2 if unknown
+int Bits::compare(const Bits &a, const bool s) const {
+    int i, j;
+    for (unsigned int pos = 0; pos < this->getBitWidth(); ++pos)
+    {
+        i = this->getBitValue(pos);
+        j = a.getBitValue(pos);
+        if (i == -1 || i == 2 || j == -1 || j == 2) {
+            return 2;
+        }
+        if (i != j) { //Inequality
+            if (i < j) { //a < b
+                return ((pos == 0 && s) ? 1 : -1);
+            }
+            //a > b
+            return 1;
+        }
+    }
+    return 0;
 }
 
 float
