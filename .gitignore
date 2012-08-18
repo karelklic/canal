@@ -17,6 +17,15 @@ Makefile
 /CMakeFiles/
 /cmake_install.cmake
 
+/docs/*.aux
+/docs/canal.idx
+/docs/canal.ilg
+/docs/canal.ind
+/docs/canal.log
+/docs/canal.out
+/docs/canal.toc
+/docs/doxygen-canal
+
 /lib/libcanal.la
 /lib/libcanal*.lo
 /lib/Config.h

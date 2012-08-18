@@ -243,6 +243,13 @@ Range::toString() const
     return ss.str();
 }
 
+bool
+Range::matchesString(const std::string &text,
+                     std::string &rationale) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 void
 Range::add(const Value &a, const Value &b)
 {
@@ -764,7 +771,7 @@ Range::icmp(const Value &a, const Value &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (&a == &b || (aa.isSingleValue() && aa == bb))
             mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (aa.intersection(bb))
+        else if (intersects(aa, bb, true, true))
             setTop();
 
         break;
@@ -772,7 +779,7 @@ Range::icmp(const Value &a, const Value &b,
         // If both ranges are equal, the result is 0.  If
         // range intersection is empty, the result is 1.
         // Otherwise the result is the top value (both 0 and 1).
-        if (!aa.intersection(bb))
+        if (!intersects(aa, bb, true, true))
             mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
         else if (!(&a == &b || (aa.isSingleValue() && aa == bb)))
             setTop();
@@ -788,7 +795,7 @@ Range::icmp(const Value &a, const Value &b,
 
         if (aa.mUnsignedFrom.ugt(bb.mUnsignedTo))
             mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (aa.intersection(bb, false, true))
+        else if (intersects(aa, bb, false, true))
             this->setTop();
 
         break;
@@ -801,7 +808,7 @@ Range::icmp(const Value &a, const Value &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mUnsignedFrom.uge(bb.mUnsignedTo))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (aa.intersection(bb, false, true))
+        else if (intersects(aa, bb, false, true))
             setTop();
 
         break;
@@ -814,7 +821,7 @@ Range::icmp(const Value &a, const Value &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mUnsignedTo.ult(bb.mUnsignedFrom))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (aa.intersection(bb, false, true))
+        else if (intersects(aa, bb, false, true))
             setTop();
 
         break;
@@ -827,7 +834,7 @@ Range::icmp(const Value &a, const Value &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mUnsignedTo.ule(bb.mUnsignedFrom))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (aa.intersection(bb, false, true))
+        else if (intersects(aa, bb, false, true))
             setTop();
 
         break;
@@ -840,7 +847,7 @@ Range::icmp(const Value &a, const Value &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mSignedFrom.sgt(bb.mSignedTo))
             mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (aa.intersection(bb, true, false))
+        else if (intersects(aa, bb, true, false))
             setTop();
 
         break;
@@ -853,7 +860,7 @@ Range::icmp(const Value &a, const Value &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mSignedFrom.sge(bb.mSignedTo))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (aa.intersection(bb, true, false))
+        else if (intersects(aa, bb, true, false))
             setTop();
 
         break;
@@ -866,7 +873,7 @@ Range::icmp(const Value &a, const Value &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mSignedTo.slt(bb.mSignedFrom))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (aa.intersection(bb, true, false))
+        else if (intersects(aa, bb, true, false))
             setTop();
 
         break;
@@ -879,7 +886,7 @@ Range::icmp(const Value &a, const Value &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mSignedTo.sle(bb.mSignedFrom))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (aa.intersection(bb, true, false))
+        else if (intersects(aa, bb, true, false))
             setTop();
 
         break;

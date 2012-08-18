@@ -93,6 +93,13 @@ Structure::toString() const
     return ss.str();
 }
 
+bool
+Structure::matchesString(const std::string &text,
+                         std::string &rationale) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 std::vector<Value*>
 Structure::getItem(const Value &offset) const
 {

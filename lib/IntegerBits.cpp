@@ -241,8 +241,10 @@ Bits::toString() const
 }
 
 bool
-Bits::matchesString(const std::string &text) const
+Bits::matchesString(const std::string &text,
+                    std::string &rationale) const
 {
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void

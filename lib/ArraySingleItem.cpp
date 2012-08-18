@@ -97,6 +97,13 @@ SingleItem::toString() const
     return ss.str();
 }
 
+bool
+SingleItem::matchesString(const std::string &text,
+                          std::string &rationale) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 void
 SingleItem::add(const Value &a, const Value &b)
 {

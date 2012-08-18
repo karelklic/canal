@@ -16,16 +16,16 @@ public:
     StackFrame(const llvm::Function *function,
                const State &initialState);
 
-    // Returns true if next instruction should be interpreted for this
-    // frame, and false when fixpoint has been reached.
+    /// Returns true if next instruction should be interpreted for this
+    /// frame, and false when fixpoint has been reached.
     bool nextInstruction();
 
     Value *getReturnedValue() const;
     void mergeGlobalVariables(State &target) const;
 
 public:
-    // Never is NULL.  It is a pointer just to allow storing instances
-    // of this class in std::vector.
+    /// Never is NULL.  It is a pointer just to allow storing instances
+    /// of this class in std::vector.
     const llvm::Function *mFunction;
     std::map<const llvm::BasicBlock*, State> mBlockInputState;
     std::map<const llvm::BasicBlock*, State> mBlockOutputState;
@@ -53,12 +53,12 @@ public:
     State &getCurrentState();
     const llvm::Function &getCurrentFunction() const;
 
-    // @param function
-    //   Function to be interpreted. Its instructions will be applied
-    //   in abstract domain on the provided input state.
-    // @param initialState
-    //   Initial state when entering the function.  It includes global
-    //   variables and function arguments.
+    /// @param function
+    ///   Function to be interpreted. Its instructions will be applied
+    ///   in abstract domain on the provided input state.
+    /// @param initialState
+    ///   Initial state when entering the function.  It includes global
+    ///   variables and function arguments.
     void addFrame(const llvm::Function &function,
                   const State &initialState);
 

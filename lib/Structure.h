@@ -18,29 +18,32 @@ public:
     virtual ~Structure();
 
 public: // Implementation of Value.
-    // Implementation of Value::clone().
-    // Covariant return type.
+    /// Implementation of Value::clone().
+    /// Covariant return type.
     virtual Structure *clone() const;
-    // Implementation of Value::cloneCleaned().
-    // Covariant return type.
+    /// Implementation of Value::cloneCleaned().
+    /// Covariant return type.
     virtual Structure *cloneCleaned() const;
-    // Implementation of Value::operator==().
+    /// Implementation of Value::operator==().
     virtual bool operator==(const Value &value) const;
-    // Implementation of Value::merge().
+    /// Implementation of Value::merge().
     virtual void merge(const Value &value);
-    // Implementation of Value::memoryUsage().
+    /// Implementation of Value::memoryUsage().
     virtual size_t memoryUsage() const;
-    // Implementation of Value::toString().
+    /// Implementation of Value::toString().
     virtual std::string toString() const;
+    /// Implementation of Value::matchesString().
+    virtual bool matchesString(const std::string &text,
+                               std::string &rationale) const;
 
 public: // Implementation of Array::Interface.
-    // Implementation of Array::Interface::getItem().
+    /// Implementation of Array::Interface::getItem().
     virtual std::vector<Value*> getItem(const Value &offset) const;
-    // Implementation of Array::Interface::getItem().
+    /// Implementation of Array::Interface::getItem().
     virtual Value *getItem(uint64_t offset) const;
-    // Implementation of Array::Interface::set().
+    /// Implementation of Array::Interface::set().
     virtual void setItem(const Value &offset, const Value &value);
-    // Implementation of Array::Interface::set().
+    /// Implementation of Array::Interface::set().
     virtual void setItem(uint64_t offset, const Value &value);
 };
 

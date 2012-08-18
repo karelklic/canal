@@ -55,7 +55,7 @@ parseCharLimited(const char **input, const char *allowed, char *result)
 int
 skipCharSequence(const char **input, char c)
 {
-    /* Skip all the occurences of c. */
+    // Skip all the occurences of c.
     int count = 0;
     while (skipChar(input, c))
         ++count;
@@ -112,6 +112,29 @@ parseDigit(const char **input)
 }
 
 int
+parseInt64(const char **input, int64_t *result)
+{
+    const char *localInput = *input;
+    char *numstr;
+    int length = parseCharSpan(&localInput,
+                               "+-0123456789",
+                               &numstr);
+    if (0 == length)
+        return 0;
+
+    char *endptr;
+    errno = 0;
+    unsigned long long r = strtoll(numstr, &endptr, 10);
+    bool failure = (errno || numstr == endptr || *endptr != '\0');
+    free(numstr);
+    if (failure) /* number too big or some other error */
+        return 0;
+    *result = r;
+    *input = localInput;
+    return length;
+}
+
+int
 parseUInt64(const char **input, uint64_t *result)
 {
     const char *localInput = *input;
@@ -127,7 +150,7 @@ parseUInt64(const char **input, uint64_t *result)
     unsigned long long r = strtoull(numstr, &endptr, 10);
     bool failure = (errno || numstr == endptr || *endptr != '\0');
     free(numstr);
-    if (failure) /* number too big or some other error */
+    if (failure) // The number is too big or some other error.
         return 0;
     *result = r;
     *input = localInput;
@@ -148,14 +171,14 @@ parseHexadecimalUInt64(const char **input, uint64_t *result)
                            "abcdef0123456789",
                            &numstr);
 
-    if (2 == count) /* parseCharSpan returned 0 */
+    if (2 == count) // parseCharSpan returned 0.
         return 0;
     char *endptr;
     errno = 0;
     unsigned long long r = strtoull(numstr, &endptr, 16);
     bool failure = (errno || numstr == endptr || *endptr != '\0');
     free(numstr);
-    if (failure) /* number too big or some other error */
+    if (failure) // The number is too big or some other error.
         return 0;
     *result = r;
     *input = localInput;

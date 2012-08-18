@@ -144,6 +144,13 @@ Range::toString() const
     return ss.str();
 }
 
+bool
+Range::matchesString(const std::string &text,
+                     std::string &rationale) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 float
 Range::accuracy() const
 {
@@ -153,8 +160,12 @@ Range::accuracy() const
     if (mTop)
         return 0.0f;
 
-    llvm::APFloat divisor = llvm::APFloat::getLargest(getSemantics(), /*negative=*/false);
-    llvm::APFloat::opStatus status = divisor.subtract(llvm::APFloat::getLargest(getSemantics(), /*negative=*/true), llvm::APFloat::rmNearestTiesToEven);
+    llvm::APFloat divisor = llvm::APFloat::getLargest(
+        getSemantics(), /*negative=*/false);
+    llvm::APFloat::opStatus status = divisor.subtract(
+        llvm::APFloat::getLargest(getSemantics(), /*negative=*/true),
+        llvm::APFloat::rmNearestTiesToEven);
+
     CANAL_ASSERT(status == llvm::APFloat::opOK);
 
     llvm::APFloat dividend = mTo;

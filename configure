@@ -789,6 +789,8 @@ LTLIBOBJS
 LIBOBJS
 O0CFLAGS
 AUTOM4TE
+DOXYGEN
+PDFLATEX
 CLANG
 LLVM_LDFLAGS
 LLVM_LIBS
@@ -5659,13 +5661,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:5662: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:5664: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5665: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:5667: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5668: output\"" >&5)
+  (eval echo "\"\$as_me:5670: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6870,7 +6872,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6873 "configure"' > conftest.$ac_ext
+  echo '#line 6875 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8947,11 +8949,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8950: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8952: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8954: \$? = $ac_status" >&5
+   echo "$as_me:8956: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9286,11 +9288,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9289: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9291: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9293: \$? = $ac_status" >&5
+   echo "$as_me:9295: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9391,11 +9393,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9394: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9396: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9398: \$? = $ac_status" >&5
+   echo "$as_me:9400: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9446,11 +9448,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9449: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9451: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9453: \$? = $ac_status" >&5
+   echo "$as_me:9455: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12249,7 +12251,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12252 "configure"
+#line 12254 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12345,7 +12347,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12348 "configure"
+#line 12350 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14365,11 +14367,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14368: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14370: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14372: \$? = $ac_status" >&5
+   echo "$as_me:14374: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14464,11 +14466,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14467: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14469: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14471: \$? = $ac_status" >&5
+   echo "$as_me:14473: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14516,11 +14518,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14519: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14521: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14523: \$? = $ac_status" >&5
+   echo "$as_me:14525: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15669,19 +15671,7 @@ if test "$CLANG" = "no"; then
 fi
 
 
-# Initialize the test suite.
-ac_config_commands="$ac_config_commands tests/atconfig"
-
-
-ac_config_files="$ac_config_files tests/Makefile tests/atlocal"
-
-
-AUTOM4TE=${AUTOM4TE-"${am_missing_run}autom4te"}
-
-# Needed by tests/atlocal.in.
-O0CFLAGS=`echo $CFLAGS | sed 's/-O[0-9] *//g'`
-
-
+# readline
 
 for ac_header in readline/readline.h
 do
@@ -15833,7 +15823,118 @@ fi
 done
 
 
-ac_config_files="$ac_config_files canal.spec Makefile lib/Makefile tool/Makefile wrappers/config.py wrappers/Makefile"
+# pdflatex
+# Extract the first word of "pdflatex", so it can be a program name with args.
+set dummy pdflatex; ac_word=$2
+{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PDFLATEX+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  case $PDFLATEX in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PDFLATEX="$PDFLATEX" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PDFLATEX="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_PDFLATEX" && ac_cv_path_PDFLATEX="no"
+  ;;
+esac
+fi
+PDFLATEX=$ac_cv_path_PDFLATEX
+if test -n "$PDFLATEX"; then
+  { $as_echo "$as_me:$LINENO: result: $PDFLATEX" >&5
+$as_echo "$PDFLATEX" >&6; }
+else
+  { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+if test "PDFLATEX" = "no"; then
+    echo "The pdflatex program was not found in the search path. Please ensure"
+    echo "that it is installed and its directory is included in the search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+# doxygen
+# Extract the first word of "doxygen", so it can be a program name with args.
+set dummy doxygen; ac_word=$2
+{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_DOXYGEN+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  case $DOXYGEN in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_DOXYGEN="$DOXYGEN" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_DOXYGEN="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_DOXYGEN" && ac_cv_path_DOXYGEN="no"
+  ;;
+esac
+fi
+DOXYGEN=$ac_cv_path_DOXYGEN
+if test -n "$DOXYGEN"; then
+  { $as_echo "$as_me:$LINENO: result: $DOXYGEN" >&5
+$as_echo "$DOXYGEN" >&6; }
+else
+  { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+if test "DOXYGEN" = "no"; then
+    echo "The doxygen program was not found in the search path. Please ensure"
+    echo "that it is installed and its directory is included in the search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+# Initialize the test suite.
+ac_config_commands="$ac_config_commands tests/atconfig"
+
+
+ac_config_files="$ac_config_files tests/Makefile tests/atlocal"
+
+
+AUTOM4TE=${AUTOM4TE-"${am_missing_run}autom4te"}
+
+# Needed by tests/atlocal.in.
+O0CFLAGS=`echo $CFLAGS | sed 's/-O[0-9] *//g'`
+
+
+ac_config_files="$ac_config_files canal.spec Makefile docs/Makefile lib/Makefile tool/Makefile wrappers/config.py wrappers/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -16843,6 +16944,7 @@ do
     "tests/atlocal") CONFIG_FILES="$CONFIG_FILES tests/atlocal" ;;
     "canal.spec") CONFIG_FILES="$CONFIG_FILES canal.spec" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "docs/Makefile") CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
     "tool/Makefile") CONFIG_FILES="$CONFIG_FILES tool/Makefile" ;;
     "wrappers/config.py") CONFIG_FILES="$CONFIG_FILES wrappers/config.py" ;;

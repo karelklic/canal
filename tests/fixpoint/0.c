@@ -1,3 +1,18 @@
+/*
+function main
+  %^positive
+    integer
+      enumeration 3
+  %^zero
+    integer
+      enumeration 0
+  %^negative
+    integer
+      enumeration -8
+  %^positive_negative
+    integer
+      enumeration 12
+*/
 // clang -emit-llvm -S 0.c
 
 int main(int argc, char **argv)

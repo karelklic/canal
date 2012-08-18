@@ -1,28 +1,360 @@
 % pdflatex canal.tex
-\documentclass{article}
+\documentclass[a4paper]{book}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{a4wide}
+\usepackage{makeidx}
 \usepackage{hyperref}
 \usepackage{fullpage}
 \usepackage{graphicx}
 \usepackage{fancybox}
+\usepackage{import}
+\usepackage{multicol}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{alltt}
+\usepackage{times}
+\usepackage{ifpdf}
+\RequirePackage{array}
+\RequirePackage{calc}
 
-\title{Canal}
+\makeindex
+
+\lstset{language=C++,inputencoding=utf8,basicstyle=\footnotesize,breaklines=true,breakatwhitespace=true,tabsize=4,numbers=left}
+
+% Generic environment used by all paragraph-based environments defined
+% below. Note that the command \title{...} needs to be defined inside
+% those environments!
+\newenvironment{DoxyDesc}[1]{%
+  \begin{list}{}%
+  {%
+    \settowidth{\labelwidth}{40pt}%
+    \setlength{\leftmargin}{\labelwidth}%
+    \setlength{\parsep}{0pt}%
+    \setlength{\itemsep}{-4pt}%
+    \renewcommand{\makelabel}{\entrylabel}%
+  }%
+  \item[#1:]}
+{\end{list}}
+
+% Used by <pre> ... </pre>
+\newenvironment{DoxyPre}{%
+  \small%
+  \begin{alltt}%
+}{%
+  \end{alltt}%
+  \normalsize%
+}
+
+% Used by @code ... @endcode
+\newenvironment{DoxyCode}{%
+  \footnotesize%
+  \verbatim%
+}{%
+  \endverbatim%
+  \normalsize%
+}
+
+% Used by @example, @include, @includelineno and @dontinclude
+\newenvironment{DoxyCodeInclude}{%
+  \DoxyCode%
+}{%
+  \endDoxyCode%
+}
+
+% Used by @verbatim ... @endverbatim
+\newenvironment{DoxyVerb}{%
+  \footnotesize%
+  \verbatim%
+}{%
+  \endverbatim%
+  \normalsize%
+}
+
+% Used by @verbinclude
+\newenvironment{DoxyVerbInclude}{%
+  \DoxyVerb%
+}{%
+  \endDoxyVerb%
+}
+
+% Used by numbered lists (using '-#' or <ol> ... </ol>)
+\newenvironment{DoxyEnumerate}{%
+  \enumerate%
+}{%
+  \endenumerate%
+}
+
+% Used by bullet lists (using '-', @li, @arg, or <ul> ... </ul>)
+\newenvironment{DoxyItemize}{%
+  \itemize%
+}{%
+  \enditemize%
+}
+
+% Used by description lists (using <dl> ... </dl>)
+\newenvironment{DoxyDescription}{%
+  \description%
+}{%
+  \enddescription%
+}
+
+% Used by @image, @dotfile, and @dot ... @enddot
+% (only if caption is specified)
+\newenvironment{DoxyImage}{%
+  \begin{figure}[H]%
+  \begin{center}%
+}{%
+  \end{center}%
+  \end{figure}%
+}
+
+% Used by @image, @dotfile, @dot ... @enddot, and @msc ... @endmsc
+% (only if no caption is specified)
+\newenvironment{DoxyImageNoCaption}{%
+}{%
+}
+
+% Used by @attention
+\newenvironment{DoxyAttention}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @author and @authors
+\newenvironment{DoxyAuthor}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @date
+\newenvironment{DoxyDate}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @invariant
+\newenvironment{DoxyInvariant}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @note
+\newenvironment{DoxyNote}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @post
+\newenvironment{DoxyPostcond}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @pre
+\newenvironment{DoxyPrecond}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @remark
+\newenvironment{DoxyRemark}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @return
+\newenvironment{DoxyReturn}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @since
+\newenvironment{DoxySince}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @see
+\newenvironment{DoxySeeAlso}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @version
+\newenvironment{DoxyVersion}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @warning
+\newenvironment{DoxyWarning}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @internal
+\newenvironment{DoxyInternal}[1]{%
+  \begin{DoxyDesc}{#1}%
+}{%
+  \end{DoxyDesc}%
+}
+
+% Used by @par and @paragraph
+\newenvironment{DoxyParagraph}[1]{%
+  \begin{list}{}%
+  {%
+    \settowidth{\labelwidth}{40pt}%
+    \setlength{\leftmargin}{\labelwidth}%
+    \setlength{\parsep}{0pt}%
+    \setlength{\itemsep}{-4pt}%
+    \renewcommand{\makelabel}{\entrylabel}%
+  }%
+  \item[#1]%
+}{%
+  \end{list}%
+}
+
+% Used by parameter lists
+\newenvironment{DoxyParams}[1]{%
+  \begin{DoxyDesc}{#1}%
+    \begin{description}%
+}{%
+    \end{description}%
+  \end{DoxyDesc}%
+}
+
+% Used by return value lists
+\newenvironment{DoxyRetVals}[1]{%
+  \begin{DoxyDesc}{#1}%
+    \begin{description}%
+}{%
+    \end{description}%
+  \end{DoxyDesc}%
+}
+
+% Used by exception lists
+\newenvironment{DoxyExceptions}[1]{%
+  \begin{DoxyDesc}{#1}%
+    \begin{description}%
+}{%
+    \end{description}%
+  \end{DoxyDesc}%
+}
+
+% Used by template parameter lists
+\newenvironment{DoxyTemplParams}[1]{%
+  \begin{DoxyDesc}{#1}%
+    \begin{description}%
+}{%
+    \end{description}%
+  \end{DoxyDesc}%
+}
+
+\newcommand{\doxyref}[3]{\textbf{#1} (\textnormal{#2}\,\pageref{#3})}
+
+\newenvironment{DoxyCompactList}%
+{\begin{list}{}{%
+  \setlength{\leftmargin}{0.5cm}%
+  \setlength{\itemsep}{0pt}%
+  \setlength{\parsep}{0pt}%
+  \setlength{\topsep}{0pt}%
+  \renewcommand{\makelabel}{\hfill}}}%
+{\end{list}}
+
+\newenvironment{DoxyCompactItemize}%
+{\begin{itemize}%
+  \setlength{\itemsep}{-3pt}%
+  \setlength{\parsep}{0pt}%
+  \setlength{\topsep}{0pt}%
+  \setlength{\partopsep}{0pt}}%
+{\end{itemize}}
+
+\newcommand{\PBS}[1]{\let\temp=\\#1\let\\=\temp}
+
+\newlength{\tmplength}
+
+\newenvironment{TabularC}[1]
+{
+\setlength{\tmplength}
+     {\linewidth/(#1)-\tabcolsep*2-\arrayrulewidth*(#1+1)/(#1)}
+      \par\begin{tabular*}{\linewidth}
+             {*{#1}{|>{\PBS\raggedright\hspace{0pt}}p{\the\tmplength}}|}
+}
+{\end{tabular*}\par}
+
+\newcommand{\entrylabel}[1]{
+   {\parbox[b]{\labelwidth-4pt}{\makebox[0pt][l]{\textbf{#1}}\vspace{1.5\baselineskip}}}}
+
+\newenvironment{Desc}
+{\begin{list}{}%
+  {%
+    \settowidth{\labelwidth}{40pt}%
+    \setlength{\leftmargin}{\labelwidth}%
+    \setlength{\parsep}{0pt}%
+    \setlength{\itemsep}{-4pt}%
+    \renewcommand{\makelabel}{\entrylabel}%
+  }%
+}
+{\end{list}}
+
+\newenvironment{Indent}
+  {\begin{list}{}{\setlength{\leftmargin}{0.5cm}}
+      \item[]\ignorespaces}
+  {\unskip\end{list}}
+
+\definecolor{comment}{rgb}{0.5,0.0,0.0}
+\definecolor{keyword}{rgb}{0.0,0.5,0.0}
+\definecolor{keywordtype}{rgb}{0.38,0.25,0.125}
+\definecolor{keywordflow}{rgb}{0.88,0.5,0.0}
+\definecolor{preprocessor}{rgb}{0.5,0.38,0.125}
+\definecolor{stringliteral}{rgb}{0.0,0.125,0.25}
+\definecolor{charliteral}{rgb}{0.0,0.5,0.5}
+\definecolor{vhdldigit}{rgb}{1.0,0.0,1.0}
+\definecolor{vhdlkeyword}{rgb}{0.43,0.0,0.43}
+\definecolor{vhdllogic}{rgb}{1.0,0.0,0.0}
+\definecolor{vhdlchar}{rgb}{0.0,0.0,0.0}
+
+
+\title{Canal\\
+\vskip 1em
+\large{a static code analysis tool}}
 \author{Karel Klíč}
 
 \begin{document}
 \maketitle
 
-Canal is a tool for increasing the understandability, traceability,
-precision, and correctness of C and C++ programs via the use of static
-code analysis, abstract interpretation, and abstractions.
-
-\cleardoublepage
 \tableofcontents
 
 \cleardoublepage
-\section{Overview}
+
+\chapter{Overview}
+
+Canal is a tool supporting the development of static code analysis
+techniques that increase the understandability, traceability, or
+correctness of computer programs.
+
+Canal can also be used to analyze the behaviour of real-world computer
+programs written in C and C++ languages.  Canal is written on the top
+of LLVM compiler framework and uses the LLVM intermediate
+representation to analyze programs.
+
+The Abstract Interpretation framework is used as a base for the
+embedded static analysis algorithms.
 
 \section{Use cases}
 \subsection{Analysis of program behaviour}
@@ -46,7 +378,9 @@ uncaught exceptions.
 \subsection{Specification}
 \subsection{Models}
 
-\section{Abstract Interpretation}
+\part{Concepts}
+
+\chapter{Abstract Interpretation}
 Our abstract interpreter comes in four flavours:
 \begin{description}
 \item[Context-insensitive flow-insensitive] For every function in a
@@ -96,9 +430,9 @@ the called function is interpreted with the provided parameters.
 \subsection{Flow sensitivity}
 
 
-\section{Abstractions}
+\chapter{Abstractions}
 
-\subsection{Memory}
+\section{Memory}
 Our memory abstraction for abstract interpretation recognizes four
 kinds of memory:
 \begin{description}
@@ -137,21 +471,21 @@ operations affecting a memory block allocated at certain place forms a
 single abstract value.  Context-sensite abstract interpretation helps
 to increase the precision of this memory abstraction.
 
-\subsection{Arrays}
+\section{Arrays}
 
-\subsection{Structures}
+\section{Structures}
 
-\subsection{Integers}
+\section{Integers}
 
-\subsection{Floating-point numbers}
+\section{Floating-point numbers}
 
-\subsection{Pointers}
+\section{Pointers}
 Pointer can be casted to a number via the \texttt{ptrtoint}
 instruction.  Usually, the resulting memory offset is used to achieve
 pointer arithmetics that are not available via \texttt{getelementptr}
 semantics.
 
-\section{Wishlist}
+\chapter{Wishlist}
 \begin{description}
 \item[Lazy model-checking abstract value] Allow to investigate just a
   single function, taking into account all possible parameter values
@@ -177,9 +511,76 @@ semantics.
   programs.
 \end{description}
 
+\part{Implementation}
+
+\chapter{Overview}
+
+Canal is implemented in the C++ language as defined in the C++98
+standard (ISO/IEC 14882:1998).  It uses the C++ standard library as
+well as some additional libraries:
+\begin{itemize}
+\item LLVM core libraries.  All versions from 2.8 up to 3.1 are
+  supported.
+\item Clang compiler.  All versions from 2.8 up to 3.1 are
+  supported.
+\item GNU readline or any of its BSD-licensed reimplementation.
+\item elfutils; this library is optional, and used only on
+  Linux-based operating systems
+\end{itemize}
+
+\chapter{Installation}
+
+%\section{Installation from source code on Microsoft Windows XP}
+
+%\section{Installation from source code on Mac OS X}
+
+%\section{Installation from source code on Ubuntu 12.04}
+
+%Canal can be built and installed on Ubuntu 12.04.
+
+\section{Installation from source code on Red Hat Enterprise Linux 6}
+
+Canal can be built and installed on Red Hat Enterprise Linux 6, but
+some additional packages must be installed from third-party
+repositories prior to building it.  Documentation can be build on Red
+Hat Eneterprise Linux 6 as well.
+
+Packages required by the build process:
+\begin{itemize}
+\item The core library requires \texttt{llvm-devel} and \texttt{clang}
+  packages, which can be obtained from Extra Packages for Enterprise
+  Linux (or EPEL) software repository.
+\item The command-line user interface tool requires
+  \texttt{elfutils-devel}and \texttt{readline-devel} packages.
+\item The documentation requires \texttt{doxygen},
+  \texttt{texlive-collection-basic}, \texttt{texlive-import},
+  \texttt{texlive-preprint}, \texttt{texlive-fullpage},
+  \texttt{texlive-a4wide}, \texttt{texlive-epstopdf} packages.  The
+  \texttt{texlive-*} packages can be obtained from Jindřich Nový's
+  TeXLive software repository, which is available at
+  \url{http://jnovy.fedorapeople.org/texlive/packages.el6/}.
+\end{itemize}
+
+The installed program requires \texttt{llvm}, \texttt{clang},
+\texttt{elfutils}, \texttt{readline} packages.
+
+\import{doxygen-canal/}{refman}
+
 \cleardoublepage
+\addcontentsline{toc}{chapter}{Bibliography}
 \begin{thebibliography}{9}
 
+\bibitem{lamport94}
+  Leslie Lamport,
+  \emph{\LaTeX: A Document Preparation System}.
+  Addison Wesley, Massachusetts,
+  2nd Edition,
+  1994.
+
 \end{thebibliography}
+
+\clearpage
+\addcontentsline{toc}{chapter}{Index}
+\printindex
 
 \end{document}

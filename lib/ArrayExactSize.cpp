@@ -98,6 +98,13 @@ ExactSize::toString() const
     return ss.str();
 }
 
+bool
+ExactSize::matchesString(const std::string &text,
+                         std::string &rationale) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 static void
 binaryOperation(ExactSize &result,
                 const Value &a,

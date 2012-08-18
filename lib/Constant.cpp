@@ -81,4 +81,11 @@ Constant::toString() const
     return ss.str();
 }
 
+bool
+Constant::matchesString(const std::string &text,
+                        std::string &rationale) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 } // namespace Canal

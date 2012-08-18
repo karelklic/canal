@@ -1,9 +1,9 @@
-# RESULT
+/*
 function main
   %^positive
     integer
       enumeration 3
-  %^zero       
+  %^zero
     integer
       enumeration 0
   %^negative
@@ -12,7 +12,7 @@ function main
   %^positive_negative
     integer
       enumeration 12
-# END RESULT
+*/
 
 int main(int argc, char **argv)
 {

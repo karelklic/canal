@@ -172,16 +172,156 @@ Enumeration::toString() const
 }
 
 bool
-Enumeration::matchesString(const std::string &text) const
+Enumeration::matchesString(const std::string &text,
+                           std::string &rationale) const
 {
     const char *input = text.c_str();
     int count = StringUtils::skipString(&input, "enumeration");
     if (0 == count)
+    {
+        rationale = "No 'enumeration' keyword.";
         return false;
+    }
 
-    // TODO!
+    count = StringUtils::skipCharSpan(&input, " \t\n");
+    if (0 == count)
+    {
+        rationale = "No space or newline after the "
+            "'enumeration' keyword.";
+        return false;
+    }
 
-    return true;
+    if (StringUtils::skipString(&input, "empty"))
+    {
+        StringUtils::skipCharSpan(&input, " \t\n");
+        if (*input == '\0')
+        {
+            if (mValues.empty() && !mTop)
+            {
+                rationale = "Enumeration is empty.";
+                return true;
+            }
+            else if (mTop)
+            {
+                rationale = "Enumeration is top.";
+                return false;
+            }
+            else
+            {
+                std::stringstream ss;
+                ss << "Enumeration contains " << mValues.size()
+                   << " items.";
+                rationale = ss.str();
+                return false;
+            }
+        }
+        else
+        {
+            rationale = "The 'empty' keyword is found, "
+                "but some unknown characters are following it.";
+            return false;
+        }
+    }
+
+    if (StringUtils::skipString(&input, "top"))
+    {
+        StringUtils::skipCharSpan(&input, " \t\n");
+        if (*input == '\0')
+        {
+            if (mTop)
+            {
+                rationale = "Enumeration is top.";
+                return true;
+            }
+            else if (mValues.empty())
+            {
+                rationale = "Enumeration is empty.";
+                return false;
+            }
+            else
+            {
+                std::stringstream ss;
+                ss << "Enumeration contains " << mValues.size()
+                   << " items.";
+                rationale = ss.str();
+                return false;
+            }
+        }
+        else
+        {
+            rationale = "The 'top' keyword is found, "
+                "but some unknown characters are following it.";
+            return false;
+        }
+    }
+
+    APIntUtils::USet remainingValues(mValues);
+
+    while (true)
+    {
+        int64_t int64;
+        uint64_t uint64;
+        if (StringUtils::parseHexadecimalUInt64(&input, &uint64) ||
+            StringUtils::parseUInt64(&input, &uint64))
+        {
+            llvm::APInt number(getBitWidth(), uint64);
+            APIntUtils::USet::iterator it = remainingValues.find(number);
+            if (it == remainingValues.end())
+            {
+                std::stringstream ss;
+                ss << "The value " << Canal::toString(number)
+                   << " was not found in the enumeration.";
+                rationale = ss.str();
+                return false;
+            }
+            else
+                remainingValues.erase(it);
+        }
+        else if (StringUtils::parseInt64(&input, &int64))
+        {
+            llvm::APInt number(getBitWidth(), int64);
+            APIntUtils::USet::iterator it = remainingValues.find(number);
+            if (it == remainingValues.end())
+            {
+                std::stringstream ss;
+                ss << "The value " << Canal::toString(number)
+                   << " was not found in the enumeration.";
+                rationale = ss.str();
+                return false;
+            }
+            else
+                remainingValues.erase(it);
+        }
+        else
+        {
+            rationale = "Failed to parse a number within an enumeration.";
+            return false;
+        }
+
+        if (*input == '\0')
+        {
+            if (remainingValues.empty())
+            {
+                rationale = "All enumeration numbers match to the specification.";
+                return true;
+            }
+            else
+            {
+                std::stringstream ss;
+                ss << "Enumeration contains " << remainingValues.size()
+                   << " additional items not mentioned in the specification.";
+                rationale = ss.str();
+                return false;
+            }
+        }
+
+        count = StringUtils::skipCharSpan(&input, " \t\n");
+        if (0 == count)
+        {
+            rationale = "No space or newline after a number in a number list.";
+            return false;
+        }
+    }
 }
 
 void
@@ -297,13 +437,13 @@ Enumeration::icmp(const Value &a, const Value &b,
 
     if (aa.isTop() || bb.isTop())
     {
-        setTop(); //Could be both
+        setTop(); // Could be both
         return;
     }
 
     if (aa.isBottom() || bb.isBottom())
     {
-        setBottom(); //Undefined
+        setBottom(); // Undefined
         return;
     }
 

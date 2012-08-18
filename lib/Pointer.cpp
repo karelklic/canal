@@ -223,5 +223,12 @@ InclusionBased::toString() const
     return ss.str();
 }
 
+bool
+InclusionBased::matchesString(const std::string &text,
+                              std::string &rationale) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 } // namespace Pointer
 } // namespace Canal

@@ -52,6 +52,28 @@ AC_PATH_PROG([CLANG], [clang], [no])
 [fi]
 AC_SUBST([CLANG])
 
+# readline
+AC_CHECK_HEADERS([readline/readline.h], [],
+	[AC_MSG_ERROR([Please install readline development headers])])
+
+# pdflatex
+AC_PATH_PROG([PDFLATEX], [pdflatex], [no])
+[if test "PDFLATEX" = "no"; then]
+    [echo "The pdflatex program was not found in the search path. Please ensure"]
+    [echo "that it is installed and its directory is included in the search path."]
+    [echo "Then run configure again before attempting to build Canal."]
+    [exit 1]
+[fi]
+
+# doxygen
+AC_PATH_PROG([DOXYGEN], [doxygen], [no])
+[if test "DOXYGEN" = "no"; then]
+    [echo "The doxygen program was not found in the search path. Please ensure"]
+    [echo "that it is installed and its directory is included in the search path."]
+    [echo "Then run configure again before attempting to build Canal."]
+    [exit 1]
+[fi]
+
 # Initialize the test suite.
 AC_CONFIG_TESTDIR(tests)
 AC_CONFIG_FILES([tests/Makefile tests/atlocal])
@@ -59,12 +81,10 @@ AM_MISSING_PROG([AUTOM4TE], [autom4te])
 # Needed by tests/atlocal.in.
 AC_SUBST([O0CFLAGS], [`echo $CFLAGS | sed 's/-O[[0-9]] *//g'`])
 
-AC_CHECK_HEADERS([readline/readline.h], [],
-	[AC_MSG_ERROR([Please install readline development headers])])
-
 AC_CONFIG_FILES([
     canal.spec
     Makefile
+    docs/Makefile
     lib/Makefile
     tool/Makefile
     wrappers/config.py

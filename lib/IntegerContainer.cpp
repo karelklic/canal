@@ -240,6 +240,13 @@ Container::toString() const
     return ss.str();
 }
 
+bool
+Container::matchesString(const std::string &text,
+                         std::string &rationale) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 // Converts value to container.  If the value is a constant, it is
 // converted to container and deleteAfter is set to true.
 static const Container *
