@@ -240,6 +240,11 @@ Bits::toString() const
     return ss.str();
 }
 
+bool
+Bits::matchesString(const std::string &text) const
+{
+}
+
 void
 Bits::add(const Value &a, const Value &b)
 {
