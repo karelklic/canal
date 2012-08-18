@@ -139,8 +139,6 @@ public: // Implementation of AccuracyValue.
     virtual bool isTop() const;
     // Implementation of AccuracyValue::setTop().
     virtual void setTop();
-protected:
-    int compare(const Bits& a, const bool s) const;
 };
 
 } // namespace Integer

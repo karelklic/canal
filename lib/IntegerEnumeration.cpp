@@ -266,6 +266,28 @@ Enumeration::xor_(const Value &a, const Value &b)
     applyOperation(a, b, &llvm::APInt::operator^, NULL);
 }
 
+static bool
+intersects(const Enumeration &a,
+           const Enumeration &b)
+{
+    // Signed and unsigned does not matter, it contains specific values
+    APIntUtils::USet::const_iterator ita = a.mValues.begin(),
+        itb = b.mValues.begin();
+
+    // Algorithm inspired by std::set_intersection
+    while (ita != a.mValues.end() && itb != b.mValues.end())
+    {
+        if ((*ita).slt(*itb))
+            ++ita;
+        else if ((*itb).slt(*ita))
+            ++itb;
+        else
+            return true;
+    }
+
+    return false;
+}
+
 void
 Enumeration::icmp(const Value &a, const Value &b,
                   llvm::CmpInst::Predicate predicate)
@@ -295,25 +317,23 @@ Enumeration::icmp(const Value &a, const Value &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (&a == &b || (aa.mValues.size() == 1 && aa.mValues == bb.mValues))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
-        else if (aa.intersection(bb)) {
-            this->setTop();
-        }
-        else {
+        else if (intersects(aa, bb))
+            setTop();
+        else
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
-        }
+
         break;
     case llvm::CmpInst::ICMP_NE:  // not equal
         // If both enumerations are equal, the result is 0.  If
         // enumeration intersection is empty, the result is 1.
         // Otherwise the result is the top value (both 0 and 1).
-
-        if (!aa.intersection(bb)) {
+        if (!intersects(aa, bb))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
-        }
-        else if (&a == &b || (aa.mValues.size() == 1 && aa.mValues == bb.mValues)) {
+        else if (&a == &b || (aa.mValues.size() == 1 && aa.mValues == bb.mValues))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
-        }
-        else this->setTop();
+        else
+            setTop();
+
         break;
     case llvm::CmpInst::ICMP_UGT: // unsigned greater than
         // If the lowest element from the first enumeration is
@@ -322,13 +342,13 @@ Enumeration::icmp(const Value &a, const Value &b,
         // the first enumeration is unsigned lower than the lowest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if ((*aa.mValues.begin()).ugt(*bb.mValues.rbegin())) {
+        if (aa.mValues.begin()->ugt(*bb.mValues.rbegin()))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
-        }
-        else if ((*aa.mValues.rbegin()).ult(*bb.mValues.begin())) {
+        else if (aa.mValues.rbegin()->ult(*bb.mValues.begin()))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
-        }
-        else this->setTop();
+        else
+            setTop();
+
         break;
     case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
         // If the largest element from the first enumeration is
@@ -337,13 +357,13 @@ Enumeration::icmp(const Value &a, const Value &b,
         // the first enumeration is unsigned larger than the largest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if ((*aa.mValues.begin()).uge(*bb.mValues.rbegin())) {
+        if (aa.mValues.begin()->uge(*bb.mValues.rbegin()))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
-        }
-        else if ((*aa.mValues.rbegin()).ult(*bb.mValues.begin())) {
+        else if (aa.mValues.rbegin()->ult(*bb.mValues.begin()))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
-        }
-        else this->setTop();
+        else
+            setTop();
+
         break;
     case llvm::CmpInst::ICMP_ULT: // unsigned less than
         // If the largest element from the first enumeration is
@@ -352,13 +372,13 @@ Enumeration::icmp(const Value &a, const Value &b,
         // the first enumeration is unsigned larger than the largest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if ((*aa.mValues.rbegin()).ult(*bb.mValues.begin())) {
+        if (aa.mValues.rbegin()->ult(*bb.mValues.begin()))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
-        }
-        else if ((*aa.mValues.begin()).ugt(*bb.mValues.rbegin())) {
+        else if (aa.mValues.begin()->ugt(*bb.mValues.rbegin()))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
-        }
-        else this->setTop();
+        else
+            setTop();
+
         break;
     case llvm::CmpInst::ICMP_ULE: // unsigned less or equal
         // If the largest element from the first enumeration is
@@ -367,13 +387,13 @@ Enumeration::icmp(const Value &a, const Value &b,
         // the first enumeration is unsigned larger than the largest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if ((*aa.mValues.rbegin()).ule(*bb.mValues.begin())) {
+        if (aa.mValues.rbegin()->ule(*bb.mValues.begin()))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
-        }
-        else if ((*aa.mValues.begin()).ugt(*bb.mValues.rbegin())) {
+        else if (aa.mValues.begin()->ugt(*bb.mValues.rbegin()))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
-        }
-        else this->setTop();
+        else
+            setTop();
+
         break;
     case llvm::CmpInst::ICMP_SGT: // signed greater than
         // If the lowest element from the first enumeration is
@@ -382,13 +402,13 @@ Enumeration::icmp(const Value &a, const Value &b,
         // the first enumeration is signed lower than the lowest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if ((*aa.mValues.lower_bound(bound)).sgt(*bb.mValues.upper_bound(bound))) {
+        if (aa.mValues.lower_bound(bound)->sgt(*bb.mValues.upper_bound(bound)))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
-        }
-        else if ((*aa.mValues.upper_bound(bound)).slt(*bb.mValues.lower_bound(bound))) {
+        else if (aa.mValues.upper_bound(bound)->slt(*bb.mValues.lower_bound(bound)))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
-        }
-        else this->setTop();
+        else
+            setTop();
+
         break;
     case llvm::CmpInst::ICMP_SGE: // signed greater or equal
         // If the lowest element from the first enumeration is
@@ -397,13 +417,13 @@ Enumeration::icmp(const Value &a, const Value &b,
         // the first enumeration is signed lower than the lowest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if ((*aa.mValues.lower_bound(bound)).sge(*bb.mValues.upper_bound(bound))) {
+        if (aa.mValues.lower_bound(bound)->sge(*bb.mValues.upper_bound(bound)))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
-        }
-        else if ((*aa.mValues.upper_bound(bound)).slt(*bb.mValues.lower_bound(bound))) {
+        else if (aa.mValues.upper_bound(bound)->slt(*bb.mValues.lower_bound(bound)))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
-        }
-        else this->setTop();
+        else
+            setTop();
+
         break;
     case llvm::CmpInst::ICMP_SLT: // signed less than
         // If the largest element from the first enumeration is
@@ -412,13 +432,13 @@ Enumeration::icmp(const Value &a, const Value &b,
         // the first enumeration is signed larger than the largest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if ((*aa.mValues.upper_bound(bound)).slt(*bb.mValues.lower_bound(bound))) {
+        if (aa.mValues.upper_bound(bound)->slt(*bb.mValues.lower_bound(bound)))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
-        }
-        else if ((*aa.mValues.lower_bound(bound)).sgt(*bb.mValues.upper_bound(bound))) {
+        else if (aa.mValues.lower_bound(bound)->sgt(*bb.mValues.upper_bound(bound)))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
-        }
-        else this->setTop();
+        else
+            setTop();
+
         break;
     case llvm::CmpInst::ICMP_SLE: // signed less or equal
         // If the largest element from the first enumeration is
@@ -427,13 +447,13 @@ Enumeration::icmp(const Value &a, const Value &b,
         // the first enumeration is signed larger than the largest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if ((*aa.mValues.upper_bound(bound)).sle(*bb.mValues.lower_bound(bound))) {
+        if (aa.mValues.upper_bound(bound)->sle(*bb.mValues.lower_bound(bound)))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
-        }
-        else if ((*aa.mValues.lower_bound(bound)).sgt(*bb.mValues.upper_bound(bound))) {
+        else if (aa.mValues.lower_bound(bound)->sgt(*bb.mValues.upper_bound(bound)))
             mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
-        }
-        else this->setTop();
+        else
+            setTop();
+
         break;
     default:
         CANAL_DIE();
@@ -544,19 +564,6 @@ Enumeration::applyOperation(const Value &a,
             }
         }
     }
-}
-
-bool Enumeration::intersection(const Enumeration &a) const {
-    //Signed and unsigned does not matter, it contains specific values
-    APIntUtils::USet::const_iterator i = this->mValues.begin(), j = a.mValues.begin();
-    //Taken from std::set_intersection (algorithm)
-    while (i != this->mValues.end() && j != a.mValues.end()) {
-        if ((*i).slt(*j)) i++;
-        else if ((*j).slt(*i)) j++;
-        else return true;
-    }
-
-    return false;
 }
 
 } // namespace Integer

@@ -401,6 +401,31 @@ Bits::xor_(const Value &a, const Value &b)
     bitOperation(*this, a, b, bitXor);
 }
 
+// -1 if a < b, 0 if a == b, 1 if a > b, 2 if unknown
+static int
+compare(const Bits &a, const Bits &b, bool signed_)
+{
+    for (unsigned pos = 0; pos < a.getBitWidth(); ++pos)
+    {
+        int i = a.getBitValue(pos);
+        int j = b.getBitValue(pos);
+        if (i == -1 || i == 2 || j == -1 || j == 2)
+            return 2;
+
+        if (i != j)
+        {
+            // Inequality
+            if (i < j) // a < b
+                return ((pos == 0 && signed_) ? 1 : -1);
+
+            // a > b
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 void
 Bits::icmp(const Value &a, const Value &b,
            llvm::CmpInst::Predicate predicate)
@@ -411,13 +436,13 @@ Bits::icmp(const Value &a, const Value &b,
 
     if (aa.isTop() || bb.isTop())
     {
-        setTop(); //Could be both
+        setTop(); // Could be both
         return;
     }
 
     if (aa.isBottom() || bb.isBottom())
     {
-        setBottom(); //Undefined
+        setBottom(); // Undefined
         return;
     }
 
@@ -429,13 +454,20 @@ Bits::icmp(const Value &a, const Value &b,
         // If all the bits are known on both bits, but there
         // are not the same, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b || (~(aa.mBits0 ^ aa.mBits1) == 0 && aa == bb) ) {
-            this->mBits0 = ~1; this->mBits1 = 1;
+        if (&a == &b || (~(aa.mBits0 ^ aa.mBits1) == 0 && aa == bb))
+        {
+            mBits0 = ~1;
+            mBits1 = 1;
         }
-        else if (~(aa.mBits0 ^ aa.mBits1) == 0 && ~(bb.mBits0 ^ bb.mBits1) == 0) { //Both numbers are set but not equal
-            this->mBits0 = ~0; this->mBits1 = 0;
+        else if (~(aa.mBits0 ^ aa.mBits1) == 0 && ~(bb.mBits0 ^ bb.mBits1) == 0)
+        {
+            // Both numbers are set but not equal
+            mBits0 = ~0;
+            mBits1 = 0;
         }
-        else this->setTop();
+        else
+            setTop();
+
         break;
     case llvm::CmpInst::ICMP_NE:  // not equal
         // If it is the same object or all bits are known in
@@ -443,140 +475,92 @@ Bits::icmp(const Value &a, const Value &b,
         // If all the bits are known on both bits, but there
         // are not the same, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b || (~(aa.mBits0 ^ aa.mBits1) == 0 && aa == bb) ) {
-            this->mBits0 = ~0; this->mBits1 = 0;
+        if (&a == &b || (~(aa.mBits0 ^ aa.mBits1) == 0 && aa == bb))
+        {
+            mBits0 = ~0;
+            mBits1 = 0;
         }
-        else if (~(aa.mBits0 ^ aa.mBits1) == 0 && ~(bb.mBits0 ^ bb.mBits1) == 0) { //Both numbers are set but not equal
-            this->mBits0 = ~1; this->mBits1 = 1;
+        else if (~(aa.mBits0 ^ aa.mBits1) == 0 && ~(bb.mBits0 ^ bb.mBits1) == 0)
+        {
+            // Both numbers are set but not equal
+            mBits0 = ~1;
+            mBits1 = 1;
         }
-        else this->setTop();
+        else
+            setTop();
+
         break;
     case llvm::CmpInst::ICMP_UGT: // unsigned greater than
-        switch (aa.compare(bb, false)) {
-        case 1:
-            this->mBits0 = ~1; this->mBits1 = 1;
-            break;
-        case 2:
-            this->setTop();
-            break;
-        default:
-            this->mBits0 = ~0; this->mBits1 = 0;
+        switch (compare(aa, bb, false))
+        {
+        case 1:  mBits0 = ~1; mBits1 = 1; break;
+        case 2:  setTop(); break;
+        default: mBits0 = ~0; mBits1 = 0;
         }
         break;
     case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
-        switch (aa.compare(bb, false)) {
+        switch (compare(aa, bb, false))
+        {
         case 0:
-        case 1:
-            this->mBits0 = ~1; this->mBits1 = 1;
-            break;
-        case 2:
-            this->setTop();
-            break;
-        default:
-            this->mBits0 = ~0; this->mBits1 = 0;
+        case 1:  mBits0 = ~1; mBits1 = 1; break;
+        case 2:  setTop(); break;
+        default: mBits0 = ~0; mBits1 = 0;
         }
         break;
-
-
     case llvm::CmpInst::ICMP_ULT: // unsigned less than
-        switch (aa.compare(bb, false)) {
-        case -1:
-            this->mBits0 = ~1; this->mBits1 = 1;
-            break;
-        case 2:
-            this->setTop();
-            break;
-        default:
-            this->mBits0 = ~0; this->mBits1 = 0;
+        switch (compare(aa, bb, false))
+        {
+        case -1: mBits0 = ~1; mBits1 = 1; break;
+        case 2:  setTop(); break;
+        default: mBits0 = ~0; mBits1 = 0;
         }
         break;
     case llvm::CmpInst::ICMP_ULE: // unsigned less or equal
-        switch (aa.compare(bb, false)) {
+        switch (compare(aa, bb, false))
+        {
         case 0:
-        case -1:
-            this->mBits0 = ~1; this->mBits1 = 1;
-            break;
-        case 2:
-            this->setTop();
-            break;
-        default:
-            this->mBits0 = ~0; this->mBits1 = 0;
+        case -1: mBits0 = ~1; mBits1 = 1; break;
+        case 2:  setTop(); break;
+        default: mBits0 = ~0; mBits1 = 0;
         }
         break;
     case llvm::CmpInst::ICMP_SGT: // signed greater than
-        switch (aa.compare(bb, true)) {
-        case 1:
-            this->mBits0 = ~1; this->mBits1 = 1;
-            break;
-        case 2:
-            this->setTop();
-            break;
-        default:
-            this->mBits0 = ~0; this->mBits1 = 0;
+        switch (compare(aa, bb, true))
+        {
+        case 1:  mBits0 = ~1; mBits1 = 1; break;
+        case 2:  setTop(); break;
+        default: mBits0 = ~0; mBits1 = 0;
         }
         break;
     case llvm::CmpInst::ICMP_SGE: // signed greater or equal
-        switch (aa.compare(bb, true)) {
+        switch (compare(aa, bb, true))
+        {
         case 0:
-        case 1:
-            this->mBits0 = ~1; this->mBits1 = 1;
-            break;
-        case 2:
-            this->setTop();
-            break;
-        default:
-            this->mBits0 = ~0; this->mBits1 = 0;
+        case 1:  mBits0 = ~1; mBits1 = 1; break;
+        case 2:  setTop(); break;
+        default: mBits0 = ~0; mBits1 = 0;
         }
         break;
     case llvm::CmpInst::ICMP_SLT: // signed less than
-        switch (aa.compare(bb, true)) {
-        case -1:
-            this->mBits0 = ~1; this->mBits1 = 1;
-            break;
-        case 2:
-            this->setTop();
-            break;
-        default:
-            this->mBits0 = ~0; this->mBits1 = 0;
+        switch (compare(aa, bb, true))
+        {
+        case -1: mBits0 = ~1; mBits1 = 1; break;
+        case 2:  setTop(); break;
+        default: mBits0 = ~0; mBits1 = 0;
         }
         break;
     case llvm::CmpInst::ICMP_SLE: // signed less or equal
-        switch (aa.compare(bb, true)) {
+        switch (compare(aa, bb, true))
+        {
         case 0:
-        case -1:
-            this->mBits0 = ~1; this->mBits1 = 1;
-            break;
-        case 2:
-            this->setTop();
-            break;
-        default:
-            this->mBits0 = ~0; this->mBits1 = 0;
+        case -1: mBits0 = ~1; mBits1 = 1; break;
+        case 2:  setTop(); break;
+        default: mBits0 = ~0; mBits1 = 0;
         }
         break;
     default:
         CANAL_DIE();
     }
-}
-
-//-1 if a < b, 0 if a == b, 1 if a > b, 2 if unknown
-int Bits::compare(const Bits &a, const bool s) const {
-    int i, j;
-    for (unsigned int pos = 0; pos < this->getBitWidth(); ++pos)
-    {
-        i = this->getBitValue(pos);
-        j = a.getBitValue(pos);
-        if (i == -1 || i == 2 || j == -1 || j == 2) {
-            return 2;
-        }
-        if (i != j) { //Inequality
-            if (i < j) { //a < b
-                return ((pos == 0 && s) ? 1 : -1);
-            }
-            //a > b
-            return 1;
-        }
-    }
-    return 0;
 }
 
 float

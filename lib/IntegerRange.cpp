@@ -86,6 +86,16 @@ Range::unsignedMax(llvm::APInt &result) const
     return true;
 }
 
+bool
+Range::isSingleValue() const
+{
+    if (isBottom() || mSignedTop || mUnsignedTop)
+        return false;
+
+    return mSignedFrom == mSignedTo &&
+        mUnsignedFrom == mUnsignedTo;
+}
+
 Range *
 Range::clone() const
 {
@@ -247,17 +257,27 @@ Range::add(const Value &a, const Value &b)
     mSignedTop = aa.mSignedTop || bb.mSignedTop;
     if (!mSignedTop)
     {
-        mSignedFrom = APIntUtils::sadd_ov(aa.mSignedFrom, bb.mSignedFrom, mSignedTop);
+        mSignedFrom = APIntUtils::sadd_ov(aa.mSignedFrom,
+                                          bb.mSignedFrom,
+                                          mSignedTop);
+
         if (!mSignedTop)
-            mSignedTo = APIntUtils::sadd_ov(aa.mSignedTo, bb.mSignedTo, mSignedTop);
+            mSignedTo = APIntUtils::sadd_ov(aa.mSignedTo,
+                                            bb.mSignedTo,
+                                            mSignedTop);
     }
 
     mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
     if (!mUnsignedTop)
     {
-        mUnsignedFrom = APIntUtils::uadd_ov(aa.mUnsignedFrom, bb.mUnsignedFrom, mUnsignedTop);
+        mUnsignedFrom = APIntUtils::uadd_ov(aa.mUnsignedFrom,
+                                            bb.mUnsignedFrom,
+                                            mUnsignedTop);
+
         if (!mUnsignedTop)
-            mUnsignedTo = APIntUtils::uadd_ov(aa.mUnsignedTo, bb.mUnsignedTo, mUnsignedTop);
+            mUnsignedTo = APIntUtils::uadd_ov(aa.mUnsignedTo,
+                                              bb.mUnsignedTo,
+                                              mUnsignedTop);
     }
 }
 
@@ -275,17 +295,27 @@ Range::sub(const Value &a, const Value &b)
     mSignedTop = aa.mSignedTop || bb.mSignedTop;
     if (!mSignedTop)
     {
-        mSignedFrom = APIntUtils::ssub_ov(aa.mSignedFrom, bb.mSignedTo, mSignedTop);
+        mSignedFrom = APIntUtils::ssub_ov(aa.mSignedFrom,
+                                          bb.mSignedTo,
+                                          mSignedTop);
+
         if (!mSignedTop)
-            mSignedTo = APIntUtils::ssub_ov(aa.mSignedTo, bb.mSignedFrom, mSignedTop);
+            mSignedTo = APIntUtils::ssub_ov(aa.mSignedTo,
+                                            bb.mSignedFrom,
+                                            mSignedTop);
     }
 
     mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
     if (!mUnsignedTop)
     {
-        mUnsignedFrom = APIntUtils::usub_ov(aa.mUnsignedFrom, bb.mUnsignedTo, mUnsignedTop);
+        mUnsignedFrom = APIntUtils::usub_ov(aa.mUnsignedFrom,
+                                            bb.mUnsignedTo,
+                                            mUnsignedTop);
+
         if (!mUnsignedTop)
-            mUnsignedTo = APIntUtils::usub_ov(aa.mUnsignedTo, bb.mUnsignedFrom, mUnsignedTop);
+            mUnsignedTo = APIntUtils::usub_ov(aa.mUnsignedTo,
+                                              bb.mUnsignedFrom,
+                                              mUnsignedTop);
     }
 }
 
@@ -665,6 +695,43 @@ Range::xor_(const Value &a, const Value &b)
     setTop();
 }
 
+// Assumes that neither a nor b are empty or top
+static bool
+intersects(const Range &a,
+           const Range &b,
+           bool signed_,
+           bool unsigned_)
+{
+    llvm::APInt i, j;
+    if (signed_)
+    {
+        a.signedMax(i);
+        b.signedMin(j);
+        if (i.sge(j))
+            return true;
+
+        a.signedMin(i);
+        b.signedMax(j);
+        if (i.sle(j))
+            return true;
+    }
+
+    if (unsigned_)
+    {
+        a.unsignedMax(i);
+        b.unsignedMin(j);
+        if (i.uge(j))
+            return true;
+
+        a.unsignedMin(i);
+        b.unsignedMax(j);
+        if (i.ule(j))
+            return true;
+    }
+
+    return false;
+}
+
 void
 Range::icmp(const Value &a, const Value &b,
             llvm::CmpInst::Predicate predicate)
@@ -674,16 +741,20 @@ Range::icmp(const Value &a, const Value &b,
 
     if (aa.isTop() || bb.isTop())
     {
-        setTop(); //Could be both
+        // Result could be both true and false.
+        setTop();
         return;
     }
 
     if (aa.isBottom() || bb.isBottom())
     {
-        setBottom(); //Undefined
+        // Result is undefined.  Fixpoint calculation need to
+        // propagate the value of parameters.
+        setBottom();
         return;
     }
-    this->mEmpty = false;
+
+    mEmpty = false;
 
     switch (predicate)
     {
@@ -691,24 +762,21 @@ Range::icmp(const Value &a, const Value &b,
         // If both ranges are equal, the result is 1.  If
         // range intersection is empty, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b || (aa.isSingleValue() && aa == bb) ) {
-            this->mSignedFrom = this->mSignedTo = this->mUnsignedFrom = this->mUnsignedTo = 1;
-        }
-        else if (aa.intersection(bb)) {
-            this->setTop();
-        }
+        if (&a == &b || (aa.isSingleValue() && aa == bb))
+            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
+        else if (aa.intersection(bb))
+            setTop();
+
         break;
     case llvm::CmpInst::ICMP_NE:  // not equal
         // If both ranges are equal, the result is 0.  If
         // range intersection is empty, the result is 1.
         // Otherwise the result is the top value (both 0 and 1).
+        if (!aa.intersection(bb))
+            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
+        else if (!(&a == &b || (aa.isSingleValue() && aa == bb)))
+            setTop();
 
-        if (!aa.intersection(bb)) {
-            this->mSignedFrom = this->mSignedTo = this->mUnsignedFrom = this->mUnsignedTo = 1;
-        }
-        else if (!(&a == &b || (aa.isSingleValue() && aa == bb))) {
-            this->setTop();
-        }
         break;
     case llvm::CmpInst::ICMP_UGT: // unsigned greater than
         // If the lowest element from the first range is
@@ -718,12 +786,11 @@ Range::icmp(const Value &a, const Value &b,
         // element from the second range, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
 
-        if (aa.mUnsignedFrom.ugt(bb.mUnsignedTo)) {
-            this->mSignedFrom = this->mSignedTo = this->mUnsignedFrom = this->mUnsignedTo = 1;
-        }
-        else if (aa.intersection(bb, false, true)) {
+        if (aa.mUnsignedFrom.ugt(bb.mUnsignedTo))
+            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
+        else if (aa.intersection(bb, false, true))
             this->setTop();
-        }
+
         break;
     case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
         // If the lowest element from the first range is
@@ -732,13 +799,11 @@ Range::icmp(const Value &a, const Value &b,
         // the first range is unsigned lower than the lowest
         // element from the second range, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
+        if (aa.mUnsignedFrom.uge(bb.mUnsignedTo))
+           mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
+        else if (aa.intersection(bb, false, true))
+            setTop();
 
-        if (aa.mUnsignedFrom.uge(bb.mUnsignedTo)) {
-           this->mSignedFrom = this->mSignedTo = this->mUnsignedFrom = this->mUnsignedTo = 1;
-        }
-        else if (aa.intersection(bb, false, true)) {
-            this->setTop();
-        }
         break;
     case llvm::CmpInst::ICMP_ULT: // unsigned less than
         // If the largest element from the first range is
@@ -747,13 +812,11 @@ Range::icmp(const Value &a, const Value &b,
         // the first range is unsigned larger than the largest
         // element from the second range, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
+        if (aa.mUnsignedTo.ult(bb.mUnsignedFrom))
+           mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
+        else if (aa.intersection(bb, false, true))
+            setTop();
 
-        if (aa.mUnsignedTo.ult(bb.mUnsignedFrom)) {
-           this->mSignedFrom = this->mSignedTo = this->mUnsignedFrom = this->mUnsignedTo = 1;
-        }
-        else if (aa.intersection(bb, false, true)) {
-            this->setTop();
-        }
         break;
     case llvm::CmpInst::ICMP_ULE: // unsigned less or equal
         // If the largest element from the first range is
@@ -762,13 +825,11 @@ Range::icmp(const Value &a, const Value &b,
         // the first range is unsigned larger than the largest
         // element from the second range, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
+        if (aa.mUnsignedTo.ule(bb.mUnsignedFrom))
+           mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
+        else if (aa.intersection(bb, false, true))
+            setTop();
 
-        if (aa.mUnsignedTo.ule(bb.mUnsignedFrom)) {
-           this->mSignedFrom = this->mSignedTo = this->mUnsignedFrom = this->mUnsignedTo = 1;
-        }
-        else if (aa.intersection(bb, false, true)) {
-            this->setTop();
-        }
         break;
     case llvm::CmpInst::ICMP_SGT: // signed greater than
         // If the lowest element from the first range is
@@ -777,13 +838,11 @@ Range::icmp(const Value &a, const Value &b,
         // the first range is signed lower than the lowest
         // element from the second range, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
+        if (aa.mSignedFrom.sgt(bb.mSignedTo))
+            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
+        else if (aa.intersection(bb, true, false))
+            setTop();
 
-        if (aa.mSignedFrom.sgt(bb.mSignedTo)) {
-            this->mSignedFrom = this->mSignedTo = this->mUnsignedFrom = this->mUnsignedTo = 1;
-        }
-        else if (aa.intersection(bb, true, false)) {
-            this->setTop();
-        }
         break;
     case llvm::CmpInst::ICMP_SGE: // signed greater or equal
         // If the lowest element from the first range is
@@ -792,13 +851,11 @@ Range::icmp(const Value &a, const Value &b,
         // the first range is signed lower than the lowest
         // element from the second range, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
+        if (aa.mSignedFrom.sge(bb.mSignedTo))
+           mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
+        else if (aa.intersection(bb, true, false))
+            setTop();
 
-        if (aa.mSignedFrom.sge(bb.mSignedTo)) {
-           this->mSignedFrom = this->mSignedTo = this->mUnsignedFrom = this->mUnsignedTo = 1;
-        }
-        else if (aa.intersection(bb, true, false)) {
-            this->setTop();
-        }
         break;
     case llvm::CmpInst::ICMP_SLT: // signed less than
         // If the largest element from the first range is
@@ -807,13 +864,11 @@ Range::icmp(const Value &a, const Value &b,
         // the first range is signed larger than the largest
         // element from the second range, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
+        if (aa.mSignedTo.slt(bb.mSignedFrom))
+           mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
+        else if (aa.intersection(bb, true, false))
+            setTop();
 
-        if (aa.mSignedTo.slt(bb.mSignedFrom)) {
-           this->mSignedFrom = this->mSignedTo = this->mUnsignedFrom = this->mUnsignedTo = 1;
-        }
-        else if (aa.intersection(bb, true, false)) {
-            this->setTop();
-        }
         break;
     case llvm::CmpInst::ICMP_SLE: // signed less or equal
         // If the largest element from the first range is
@@ -822,13 +877,11 @@ Range::icmp(const Value &a, const Value &b,
         // the first range is signed larger than the largest
         // element from the second range, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
+        if (aa.mSignedTo.sle(bb.mSignedFrom))
+           mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
+        else if (aa.intersection(bb, true, false))
+            setTop();
 
-        if (aa.mSignedTo.sle(bb.mSignedFrom)) {
-           this->mSignedFrom = this->mSignedTo = this->mUnsignedFrom = this->mUnsignedTo = 1;
-        }
-        else if (aa.intersection(bb, true, false)) {
-            this->setTop();
-        }
         break;
     default:
         CANAL_DIE();
@@ -930,38 +983,6 @@ Range::setTop()
 {
     mEmpty = false;
     mSignedTop = mUnsignedTop = true;
-}
-
-bool Range::intersection(const Range &a, const bool s, const bool u) const {
-    //Predicate - neither this nor a are empty nor top
-    llvm::APInt i, j;
-    if (s) {
-        this->signedMax(i);
-        a.signedMin(j);
-        if (i.sge(j)) return true;
-
-        this->signedMin(i);
-        a.signedMax(j);
-        if (i.sle(j)) return true;
-    }
-
-    if (u) {
-        this->unsignedMax(i);
-        a.unsignedMin(j);
-        if (i.uge(j)) return true;
-
-        this->unsignedMin(i);
-        a.unsignedMax(j);
-        if (i.ule(j)) return true;
-    }
-
-    return false;
-}
-
-bool Range::isSingleValue() const {
-    if (this->isBottom() || this->mSignedTop || this->mUnsignedTop) return false;
-
-    return this->mSignedFrom == this->mSignedTo && this->mUnsignedFrom == this->mUnsignedTo;
 }
 
 } // namespace Integer

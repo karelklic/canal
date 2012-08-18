@@ -251,7 +251,9 @@ asContainer(const Value &value, bool &deleteAfter)
     {
         const Constant *constant = dynCast<const Constant*>(&value);
         CANAL_ASSERT_MSG(constant,
-                         "Unsupported type cannot be converted to integer container.");
+                         "Unsupported type cannot be converted "
+                         "to integer container.");
+
         container = new Container(constant->getAPInt());
         deleteAfter = true;
     }

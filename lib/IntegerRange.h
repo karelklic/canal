@@ -68,6 +68,10 @@ public:
     //   correct value.
     bool unsignedMax(llvm::APInt &result) const;
 
+    // Returns true if the range represents a single number.  Signed
+    // and unsigned representations might differ, though.
+    bool isSingleValue() const;
+
 public: // Implementation of Value.
     // Implementation of Value::clone().
     // Covariant return type.
@@ -125,11 +129,6 @@ public: // Implementation of AccuracyValue.
     virtual bool isTop() const;
     // Implementation of AccuracyValue::setTop().
     virtual void setTop();
-
-protected:
-    bool intersection(const Range& a, const bool s = true, const bool u = true) const;
-
-    bool isSingleValue() const;
 };
 
 } // namespace Integer

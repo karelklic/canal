@@ -126,7 +126,6 @@ protected:
                         const Value &b,
                         APIntUtils::Operation operation1,
                         APIntUtils::OperationWithOverflow operation2);
-    bool intersection(const Enumeration& a) const;
 };
 
 } // namespace Integer
