@@ -99,7 +99,8 @@ public: // Implementation of Value.
     /// Implementation of Value::matchesString().
     /// Examples:
     ///   integer
-    ///     enumeration -8
+    ///     enumeration
+    ///       -8
     ///   integer
     ///     enumeration -10 2 4 6 8
     ///     range -10 8

@@ -4,6 +4,7 @@
 #include "IntegerRange.h"
 #include "Constant.h"
 #include "Utils.h"
+#include "StringUtils.h"
 #include "APIntUtils.h"
 #include <sstream>
 #include <iostream>
@@ -244,6 +245,14 @@ bool
 Container::matchesString(const std::string &text,
                          std::string &rationale) const
 {
+    const char *input = text.c_str();
+    int count = StringUtils::skipString(&input, "integer");
+    if (0 == count)
+    {
+        rationale = "No 'integer' keyword.";
+        return false;
+    }
+
     CANAL_NOT_IMPLEMENTED();
 }
 

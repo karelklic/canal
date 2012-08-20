@@ -16,6 +16,10 @@
 \usepackage{alltt}
 \usepackage{times}
 \usepackage{ifpdf}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{txfonts}
+
 \RequirePackage{array}
 \RequirePackage{calc}
 
@@ -344,17 +348,34 @@
 
 \chapter{Overview}
 
-Canal is a tool supporting the development of static code analysis
-techniques that increase the understandability, traceability, or
-correctness of computer programs.
+For a sufficiently complex software system, its maintainability and
+extensibility is limited by our ability to understand and correctly
+approximate the behaviour of the system, trace the impact of system
+parts to each other, control the impact of modifications, ensure
+correctness of the critical parts, and fixing bugs before they cause
+serious consequences in production.
 
-Canal can also be used to analyze the behaviour of real-world computer
-programs written in C and C++ languages.  Canal is written on the top
-of LLVM compiler framework and uses the LLVM intermediate
-representation to analyze programs.
+The maintainability and extensibility is affected by the programming
+language of implementation.  Efficient low-level languages such as C
+and C++ increase the complexity of the system by being closely aligned
+with hardware. Systems must handle memory management, operate with
+machine-dependent integers and floating point numbers, and use system
+calls with complex invariants and interdependencies.
 
-The Abstract Interpretation framework is used as a base for the
-embedded static analysis algorithms.
+Canal is a framework combining existing static analysis techniques
+improving maintainability, understanding, traceability and correctness
+in a coherent manner.  The purpose of the framework is to make
+existing techniques accessible and evaluable, and to support the
+implementation of new techniques and allowing high quality
+experiments.  Currently, techniques are often presented without proper
+experiments on real-world complex systems, or just with a proprietary
+implementation that cannot be investigated, so actual applicability
+and impact of many techniques is unknown.  We hope to change this
+situation.
+
+The implementation can be used for a static analysis of real-world
+complex software systems written in efficient low-level languages such
+as C and C++.
 
 \section{Use cases}
 \subsection{Analysis of program behaviour}
@@ -378,7 +399,114 @@ uncaught exceptions.
 \subsection{Specification}
 \subsection{Models}
 
+\chapter{Installation}
+
+%\section{Installation from source code on Microsoft Windows XP}
+
+%\section{Installation from source code on Mac OS X}
+
+%\section{Installation from source code on Ubuntu 12.04}
+
+%Canal can be built and installed on Ubuntu 12.04.
+
+\section{Installation from source code on Red Hat Enterprise Linux 6}
+
+Canal can be built and installed on Red Hat Enterprise Linux 6, but
+some additional packages must be installed from third-party
+repositories prior to building it.  Documentation can be build on Red
+Hat Eneterprise Linux 6 as well.
+
+Packages required by the build process:
+\begin{itemize}
+\item The core library requires \texttt{llvm-devel} and \texttt{clang}
+  packages, which can be obtained from Extra Packages for Enterprise
+  Linux (or EPEL) software repository.
+\item The command-line user interface tool requires
+  \texttt{elfutils-devel}and \texttt{readline-devel} packages.
+\item The documentation requires \texttt{doxygen},
+  \texttt{texlive-collection-basic}, \texttt{texlive-import},
+  \texttt{texlive-preprint}, \texttt{texlive-fullpage},
+  \texttt{texlive-a4wide}, \texttt{texlive-epstopdf} packages.  The
+  \texttt{texlive-*} packages can be obtained from Jindřich Nový's
+  TeXLive software repository, which is available at
+  \url{http://jnovy.fedorapeople.org/texlive/packages.el6/}.
+\end{itemize}
+
+The installed program requires \texttt{llvm}, \texttt{clang},
+\texttt{elfutils}, \texttt{readline} packages.
+
 \part{Concepts}
+
+\chapter{Preliminaries}
+
+Definitions from the order theory.  More details can be found in
+\cite{DP02}.
+
+A binary relation $\sqsubseteq$ is \emph{reflexive} on a set
+$\mathcal{D}$ if every element is related to itself: $a \sqsubseteq a$
+for all $a \in \mathcal{D}$.  A binary relation $\sqsubseteq$ is
+\emph{antisymmetric} on a set $\mathcal{D}$ if the following
+implication holds: $a \sqsubseteq b$ and $b \sqsubseteq a$ implies $a
+= b$.  A binary relation $\sqsubseteq$ is \emph{transitive} on a set
+$\mathcal{D}$ if whenever an element $a$ is related to an element $b$,
+and $b$ is in turn related to an element $c$, then $a$ is also related
+to $c$: $a \sqsubseteq b$ and $b \sqsubseteq c$ implies $a \sqsubseteq
+c$.
+
+A \emph{partial order} $\sqsubseteq$ is a binary relation on a set
+$\mathcal{D}$ which is reflexive, antisymmetric and transitive.  A
+\emph{partial ordered set} or \emph{poset} for short is an ordered
+pair $(\mathcal{D}, \sqsubseteq)$ of a set $\mathcal{D}$ together with
+a partial ordering $\sqsubseteq$.
+
+An element $a$ in a poset $(\mathcal{D}, \sqsubseteq)$ is called
+\emph{maximal} if it is not less than any other element in
+$\mathcal{D}$: $\nexists b \in \mathcal{D}, a \sqsubset b$.  If there
+is an unique maximal element, we call it the \emph{greatest element}
+and denote it by $\top$.  Similarly, an element $a$ in a poset
+$(\mathcal{D}, \sqsubseteq)$ is called \emph{minimal} if it is not
+greater than any other element in $\mathcal{D}$: $\nexists b \in
+\mathcal{D}, b \sqsubset a$.  If there is an unique minimal element,
+we call it the \emph{least element} and denote it by $\bot$.
+
+Let $(\mathcal{D}, \sqsubseteq)$ be a poset and $A \subseteq
+\mathcal{D}$.  An element $u \in \mathcal{D}$ is an \emph{upper bound}
+of $A$ if $a \sqsubseteq u$ for all elements $a \in A$. The
+\emph{least upper bound} or \emph{lub} for short is an element $x$
+that is an upper bound on a subset $A$ and is less than all other
+upper bounds on $A$; such an element is denoted by $\bigsqcup A$.
+Similarly, an element $l \in \mathcal{D}$ is a \emph{lower bound} of
+$A$ if $l \sqsubseteq a$ for all elements $a \in A$. The
+\emph{greatest lower bound} or \emph{glb} for short is an element $x$
+that is a lower bound on a subset $A$ and is greater than all other
+lower bounds on $A$; such an element is denoted by $\bigsqcap A$.
+
+A \emph{lattice} $(\mathcal{D}, \sqsubseteq, \sqcup, \sqcap)$ is a
+partially ordered set in which any two elements $a, b \in \mathcal{D}$
+have both a least upper bound, denoted by $a \sqcup b$, and a greatest
+lower bound, denoted by $a \sqcap b$.  A \emph{complete lattice}
+$(\mathcal{D}, \sqsubseteq, \sqcup, \sqcap, \bot, \top)$ is a
+partially ordered set in which every subset $A \subseteq \mathcal{D}$
+has a least upper bound and a greatest lower bound.
+
+A \emph{fixpoint} of a function $F$ is an element $X$ such that $F(X)
+= X$.
+
+A function $F \in \mathcal{D}_1 \to \mathcal{D}_2$ between two posets
+$(\mathcal{D}_1, \sqsubseteq_1)$ and $(\mathcal{D}_2, \sqsubseteq_2)$
+is \emph{monotonic} if $X \sqsubseteq_1 Y \implies F(X) \sqsubseteq_2
+F(Y)$.  A function $F \in \mathcal{D}_1 \to \mathcal{D}_2$ is
+\emph{strict} if $F(\bot_1) = \bot_2$.  A function $F \in
+\mathcal{D}_1 \to \mathcal{D}_2$ is \emph{continuous} if it preserves
+the existing limits of increasing chains $(X_i)_{i \in I}$:
+$F(\bigsqcup_1 \{ X_i \mid i \in I \}) = \bigsqcup_2 \{ F(X_i) \mid i
+\in I \}$ whenever $\bigsqcup_1 \{ X_i \mid i \in I \}$ exists.
+
+
+\chapter{LLVM}
+LLVM was first presented in \cite{LA04}.
+
+Formalized in \cite{ZNMZ12}.
 
 \chapter{Abstract Interpretation}
 Our abstract interpreter comes in four flavours:
@@ -432,7 +560,13 @@ the called function is interpreted with the provided parameters.
 
 \chapter{Abstractions}
 
+\section{Multi threading}
+Multi-threading abstraction for Abstract Interpretation appeared in
+\cite{M11}.
+
 \section{Memory}
+Memory abstraction appeared in \cite{M06}.
+
 Our memory abstraction for abstract interpretation recognizes four
 kinds of memory:
 \begin{description}
@@ -476,8 +610,10 @@ to increase the precision of this memory abstraction.
 \section{Structures}
 
 \section{Integers}
+Precise machine integer abstraction appeared in \cite{M12}.
 
 \section{Floating-point numbers}
+Precise machine floating-point abstraction appeared in \cite{M12}.
 
 \section{Pointers}
 Pointer can be casted to a number via the \texttt{ptrtoint}
@@ -528,54 +664,59 @@ well as some additional libraries:
   Linux-based operating systems
 \end{itemize}
 
-\chapter{Installation}
-
-%\section{Installation from source code on Microsoft Windows XP}
-
-%\section{Installation from source code on Mac OS X}
-
-%\section{Installation from source code on Ubuntu 12.04}
-
-%Canal can be built and installed on Ubuntu 12.04.
-
-\section{Installation from source code on Red Hat Enterprise Linux 6}
-
-Canal can be built and installed on Red Hat Enterprise Linux 6, but
-some additional packages must be installed from third-party
-repositories prior to building it.  Documentation can be build on Red
-Hat Eneterprise Linux 6 as well.
-
-Packages required by the build process:
-\begin{itemize}
-\item The core library requires \texttt{llvm-devel} and \texttt{clang}
-  packages, which can be obtained from Extra Packages for Enterprise
-  Linux (or EPEL) software repository.
-\item The command-line user interface tool requires
-  \texttt{elfutils-devel}and \texttt{readline-devel} packages.
-\item The documentation requires \texttt{doxygen},
-  \texttt{texlive-collection-basic}, \texttt{texlive-import},
-  \texttt{texlive-preprint}, \texttt{texlive-fullpage},
-  \texttt{texlive-a4wide}, \texttt{texlive-epstopdf} packages.  The
-  \texttt{texlive-*} packages can be obtained from Jindřich Nový's
-  TeXLive software repository, which is available at
-  \url{http://jnovy.fedorapeople.org/texlive/packages.el6/}.
-\end{itemize}
-
-The installed program requires \texttt{llvm}, \texttt{clang},
-\texttt{elfutils}, \texttt{readline} packages.
-
 \import{doxygen-canal/}{refman}
 
 \cleardoublepage
 \addcontentsline{toc}{chapter}{Bibliography}
 \begin{thebibliography}{9}
 
-\bibitem{lamport94}
-  Leslie Lamport,
-  \emph{\LaTeX: A Document Preparation System}.
-  Addison Wesley, Massachusetts,
-  2nd Edition,
-  1994.
+\bibitem{CC77} Patrick Cousot and Radhia Cousot.  Abstract
+  Interpretation: A Unified Lattice Model for Static Analysis of
+  Programs by Construction or Approximation of Fixpoints.  In
+  \emph{POPL '77: Proceedings of the 4th ACM SIGACT-SIGPLAN symposium
+    on Principles of programming languages}, 1977.
+
+\bibitem{CC79} Patrick Cousot and Radhia Cousot.  Systematic Design of
+  Program Analysis Frameworks.  In \emph{POPL '79: Proceedings of the
+    6th ACM SIGACT-SIGPLAN symposium on Principles of Programming
+    Languages}, 1979.
+
+\bibitem{HCXE02} Seth Hallem, Benjamin Chelf, Yichen Xie, and Dawson
+  Engler.  A System and Language for Building System-Specific, Static
+  Analyses.  In \emph{PLDI '02: Proceedings of the ACM SIGPLAN 2002
+    Conference on Programming language design and implementation},
+  2002.
+
+\bibitem{DP02} Brian Albert Davey and Hilary Ann
+  Priestley. Introduction to Lattices and Order. 2nd ed. Cambridge
+  University Press, 2002.
+
+\bibitem{LA04} Chris Lattner and Vikram Adve.  LLVM: A Compilation
+  Framework for Lifelong Program Analysis \& Transformation. In
+  \emph{CGO '04: Proceedings of the International Symposium on Code
+    Generation and Optimization: Feedback-directed and Runtime
+    Optimization}, 2004.
+
+\bibitem{M06} Antoine Miné.  Field-Sensitive Value Analysis of
+  Embedded C Programs with Union Types and Pointer Arithmetics.  In
+  \emph{LCTES '06: Proceedings of the 2006 ACM SIGPLAN/SIGBED
+    conference on Language, compilers, and tool support for embedded
+    systems}, 2006.
+
+\bibitem{M11} Antoine Miné.  Static Analysis of Run-time Errors in
+  Embedded Critical Parallel C Programs.  In \emph{ESOP '11:
+    Proceedings of The 20th European Symposium on Programming}, 2011.
+
+\bibitem{M12} Antoine Miné.  Abstract Domains for Bit-Level Machine
+  Integer and Floating-point Operations.  In \emph{WING '12:
+    Proceedings of The 4th International Workshop on Invariant
+    Generation}, 2012.
+
+\bibitem{ZNMZ12} Jianzhou Zhao, Santosh Nagarakatte, Milo
+  M. K. Martin, and Steve Zdancewic.  Formalizing the LLVM
+  Intermediate Representation for Verified Program Transformations. In
+  \emph{POPL '12: Proceedings of the 39th annual ACM SIGPLAN-SIGACT
+    symposium on Principles of programming languages}, 2012.
 
 \end{thebibliography}
 
