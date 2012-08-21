@@ -1,5 +1,6 @@
 #include "Value.h"
 #include "Utils.h"
+#include <typeinfo>
 #include <llvm/Support/raw_ostream.h>
 
 namespace Canal {
@@ -13,7 +14,9 @@ Value::operator!=(const Value &rhs) const
 void
 Value::merge(const Value &v)
 {
-    CANAL_NOT_IMPLEMENTED();
+    CANAL_DIE_MSG("merge not implemented for "
+                  << typeid(*this).name() << " and "
+                  << typeid(v).name());
 }
 
 void
