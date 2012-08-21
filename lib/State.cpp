@@ -1,6 +1,7 @@
 #include "State.h"
 #include "Value.h"
 #include "Utils.h"
+#include "Constant.h"
 #include <llvm/Support/raw_ostream.h>
 
 namespace Canal {
@@ -137,7 +138,24 @@ mergeMaps(PlaceValueMap &map1, const PlaceValueMap &map2)
                                                   it2->second->clone()));
         }
 	else
-            it1->second->merge(*it2->second);
+        {
+            // Constants need to be converted to a modifiable value
+            // before merging.
+            Constant *const1 = dynCast<Constant*>(it1->second);
+            if (const1)
+            {
+                Constant *const2 = dynCast<Constant*>(it2->second);
+                if (!const2 || *const1 != *const2)
+                {
+                    Value *value1 = const1->toModifiableValue();
+                    delete const1;
+                    it1->second = value1;
+                    it1->second->merge(*it2->second);
+                }
+            }
+            else
+                it1->second->merge(*it2->second);
+        }
     }
 }
 
