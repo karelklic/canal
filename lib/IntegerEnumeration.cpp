@@ -141,8 +141,13 @@ Enumeration::merge(const Value &value)
     const Enumeration &enumeration =
         dynCast<const Enumeration&>(value);
 
-    mValues.insert(enumeration.mValues.begin(),
-                   enumeration.mValues.end());
+    if (enumeration.isTop())
+        setTop();
+    else
+    {
+        mValues.insert(enumeration.mValues.begin(),
+                       enumeration.mValues.end());
+    }
 }
 
 size_t
