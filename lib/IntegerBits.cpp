@@ -225,7 +225,7 @@ Bits::toString() const
 {
     std::stringstream ss;
     ss << "bits ";
-    for (int pos = 0; pos < mBits0.getBitWidth(); ++pos)
+    for (int pos = mBits0.getBitWidth() - 1; pos >= 0; --pos)
     {
         switch (getBitValue(pos))
         {

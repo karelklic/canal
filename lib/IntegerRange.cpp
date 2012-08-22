@@ -218,23 +218,32 @@ Range::toString() const
         ss << " empty" << std::endl;
     else
     {
-        std::stringstream sign;
-        sign << mSignedFrom.toString(10, true) << " to "
-             << mSignedTo.toString(10, true);
-        std::stringstream unsign;
-        unsign << mUnsignedFrom.toString(10, false) << " to "
-               << mUnsignedTo.toString(10, false);
+        llvm::APInt sMin, sMax, uMin, uMax;
+        bool success = signedMin(sMin);
+        CANAL_ASSERT(success);
+        success = signedMax(sMax);
+        CANAL_ASSERT(success);
+        success = unsignedMin(uMin);
+        CANAL_ASSERT(success);
+        success = unsignedMax(uMax);
+        CANAL_ASSERT(success);
 
-        if (mSignedTop || mUnsignedTop || sign.str() != unsign.str())
+        std::stringstream sign, unsign;
+        sign << sMin.toString(10, true) << " to "
+             << sMax.toString(10, true);
+        if (mSignedTop)
+            sign << " (top)";
+
+        unsign << uMin.toString(10, false) << " to "
+               << uMax.toString(10, false);
+        if (mUnsignedTop)
+            unsign << " (top)";
+
+        if (sign.str() != unsign.str())
         {
             ss << std::endl;
-            ss << "    signed ";
-            ss << (mSignedTop ? "-infinity to infinity" : sign.str());
-            ss << std::endl;
-
-            ss << "    unsigned ";
-            ss << (mUnsignedTop ? "0 to infinity" : unsign.str());
-            ss << std::endl;
+            ss << "    signed " << sign.str() << std::endl;
+            ss << "    unsigned " << unsign.str() << std::endl;
         }
         else
             ss << " " << sign.str() << std::endl;
