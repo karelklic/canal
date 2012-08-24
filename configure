@@ -789,6 +789,7 @@ LTLIBOBJS
 LIBOBJS
 O0CFLAGS
 AUTOM4TE
+DOT
 DOXYGEN
 PDFLATEX
 CLANG
@@ -798,6 +799,7 @@ LLVM_CFLAGS
 LLVM_VERSION
 LLVM_LINK
 LLVM_CONFIG
+LIBTOOL_DEPS
 CXXCPP
 OTOOL64
 OTOOL
@@ -916,8 +918,8 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_maintainer_mode
-enable_static
 enable_dependency_tracking
+enable_static
 enable_shared
 with_pic
 enable_fast_install
@@ -1569,9 +1571,9 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
-  --enable-static[=PKGS]  build static libraries [default=no]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
+  --enable-static[=PKGS]  build static libraries [default=no]
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
@@ -2586,37 +2588,6 @@ else
 fi
 
   MAINT=$MAINTAINER_MODE_TRUE
-
-
-
-# Check whether --enable-static was given.
-if test "${enable_static+set}" = set; then
-  enableval=$enable_static; p=${PACKAGE-default}
-    case $enableval in
-    yes) enable_static=yes ;;
-    no) enable_static=no ;;
-    *)
-     enable_static=no
-      # Look at the argument we got.  We use all the common list separators.
-      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
-      for pkg in $enableval; do
-	IFS="$lt_save_ifs"
-	if test "X$pkg" = "X$p"; then
-	  enable_static=yes
-	fi
-      done
-      IFS="$lt_save_ifs"
-      ;;
-    esac
-else
-  enable_static=no
-fi
-
-
-
-
-
-
 
 
 
@@ -5093,6 +5064,41 @@ _ACEOF
 _ACEOF
 
 
+ac_config_headers="$ac_config_headers lib/Config.h"
+
+
+# Initialize libtool.
+# Check whether --enable-static was given.
+if test "${enable_static+set}" = set; then
+  enableval=$enable_static; p=${PACKAGE-default}
+    case $enableval in
+    yes) enable_static=yes ;;
+    no) enable_static=no ;;
+    *)
+     enable_static=no
+      # Look at the argument we got.  We use all the common list separators.
+      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
+      for pkg in $enableval; do
+	IFS="$lt_save_ifs"
+	if test "X$pkg" = "X$p"; then
+	  enable_static=yes
+	fi
+      done
+      IFS="$lt_save_ifs"
+      ;;
+    esac
+else
+  enable_static=no
+fi
+
+
+
+
+
+
+
+
+
 case `pwd` in
   *\ * | *\	*)
     { $as_echo "$as_me:$LINENO: WARNING: Libtool does not cope well with whitespace in \`pwd\`" >&5
@@ -5661,13 +5667,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:5664: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:5670: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5667: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:5673: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5670: output\"" >&5)
+  (eval echo "\"\$as_me:5676: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6872,7 +6878,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6875 "configure"' > conftest.$ac_ext
+  echo '#line 6881 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8949,11 +8955,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8952: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8958: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8956: \$? = $ac_status" >&5
+   echo "$as_me:8962: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9288,11 +9294,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9291: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9297: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9295: \$? = $ac_status" >&5
+   echo "$as_me:9301: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9393,11 +9399,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9396: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9402: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9400: \$? = $ac_status" >&5
+   echo "$as_me:9406: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9448,11 +9454,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9451: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9457: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9455: \$? = $ac_status" >&5
+   echo "$as_me:9461: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12251,7 +12257,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12254 "configure"
+#line 12260 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12347,7 +12353,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12350 "configure"
+#line 12356 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14367,11 +14373,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14370: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14376: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14374: \$? = $ac_status" >&5
+   echo "$as_me:14380: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14466,11 +14472,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14469: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14475: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14473: \$? = $ac_status" >&5
+   echo "$as_me:14479: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14518,11 +14524,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14521: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14527: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14525: \$? = $ac_status" >&5
+   echo "$as_me:14531: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15505,7 +15511,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # Only expand once:
 
 
-ac_config_headers="$ac_config_headers lib/Config.h"
 
 
 # LLVM
@@ -15865,7 +15870,7 @@ $as_echo "no" >&6; }
 fi
 
 
-if test "PDFLATEX" = "no"; then
+if test "$PDFLATEX" = "no"; then
     echo "The pdflatex program was not found in the search path. Please ensure"
     echo "that it is installed and its directory is included in the search path."
     echo "Then run configure again before attempting to build Canal."
@@ -15914,8 +15919,57 @@ $as_echo "no" >&6; }
 fi
 
 
-if test "DOXYGEN" = "no"; then
+if test "$DOXYGEN" = "no"; then
     echo "The doxygen program was not found in the search path. Please ensure"
+    echo "that it is installed and its directory is included in the search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+# dot (part of graphviz
+# Extract the first word of "dot", so it can be a program name with args.
+set dummy dot; ac_word=$2
+{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_DOT+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  case $DOT in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_DOT="$DOT" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_DOT="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_DOT" && ac_cv_path_DOT="no"
+  ;;
+esac
+fi
+DOT=$ac_cv_path_DOT
+if test -n "$DOT"; then
+  { $as_echo "$as_me:$LINENO: result: $DOT" >&5
+$as_echo "$DOT" >&6; }
+else
+  { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+if test "DOT" = "no"; then
+    echo "The dot program was not found in the search path. Please ensure"
     echo "that it is installed and its directory is included in the search path."
     echo "Then run configure again before attempting to build Canal."
     exit 1
@@ -16937,8 +16991,8 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
-    "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "lib/Config.h") CONFIG_HEADERS="$CONFIG_HEADERS lib/Config.h" ;;
+    "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "tests/atconfig") CONFIG_COMMANDS="$CONFIG_COMMANDS tests/atconfig" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tests/atlocal") CONFIG_FILES="$CONFIG_FILES tests/atlocal" ;;

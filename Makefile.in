@@ -125,6 +125,7 @@ CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DOT = @DOT@
 DOXYGEN = @DOXYGEN@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -145,6 +146,7 @@ LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
 LLVM_CFLAGS = @LLVM_CFLAGS@
 LLVM_CONFIG = @LLVM_CONFIG@
@@ -232,7 +234,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = lib tool wrappers tests
+SUBDIRS = lib tool wrappers tests docs
 EXTRA_DIST = canal.spec.in
 UPLOAD_URI = kklic@fedorahosted.org:canal
 RPM_DIRS = --define "_sourcedir `pwd`" \
@@ -719,6 +721,10 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags tags-recursive uninstall uninstall-am
 
+
+# Automatic update of libtool.
+libtool: $(LIBTOOL_DEPS)
+	$(SHELL) ./config.status libtool
 .PHONY: upload
 upload:
 	make dist-gzip
