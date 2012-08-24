@@ -183,7 +183,7 @@ InclusionBased::merge(const Value &value)
 
     CANAL_ASSERT_MSG(vv.mType == mType,
                      "Unexpected different types in a pointer merge ("
-                     << *vv.mType << " != " << *mType << ")");
+                     << Canal::toString(*vv.mType) << " != " << Canal::toString(*mType) << ")");
 
     PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
     for (; valueit != vv.mTargets.end(); ++valueit)
