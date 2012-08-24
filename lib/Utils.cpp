@@ -35,7 +35,7 @@ toString(const llvm::Type &type)
 {
     std::string s;
     llvm::raw_string_ostream os(s);
-    os << type;
+    os << const_cast<llvm::Type&>(type);
     os.flush();
     return s;
 }
