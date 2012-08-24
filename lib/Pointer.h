@@ -20,7 +20,7 @@ namespace Pointer {
 typedef std::map<const llvm::Value*, Target*> PlaceTargetMap;
 
 /// Inclusion-based flow-insensitive abstract pointer.
-class InclusionBased : public Value
+class InclusionBased : public Value, public AccuracyValue
 {
 private:
     /// Used in toString.
@@ -39,6 +39,9 @@ private:
     /// The type object is owned by LLVM and not deleted by the
     /// InclusionBased class.
     const llvm::Type *mType;
+
+    /// If true, this pointer can point anywhere.
+    bool mTop;
 
 public:
     /// Standard constructor.
@@ -116,6 +119,18 @@ public: // Implementation of Value.
     /// Implementation of Value::matchesString().
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
+
+public: // Implementation of AccuracyValue.
+    /// Implementation of AccuracyValue::accuracy().
+    virtual float accuracy() const;
+    /// Implementation of AccuracyValue::isBottom().
+    virtual bool isBottom() const;
+    /// Implementation of AccuracyValue::setBottom().
+    virtual void setBottom();
+    /// Implementation of AccuracyValue::isTop().
+    virtual bool isTop() const;
+    /// Implementation of AccuracyValue::setTop().
+    virtual void setTop();
 };
 
 } // namespace Pointer

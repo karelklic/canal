@@ -13,14 +13,15 @@ namespace Pointer {
 
 InclusionBased::InclusionBased(const llvm::Module &module,
                                const llvm::Type *type)
-    : mModule(module), mType(type)
+    : mModule(module), mType(type), mTop(false)
 {
 }
 
 InclusionBased::InclusionBased(const InclusionBased &second)
     : mModule(second.mModule),
       mType(second.mType),
-      mTargets(second.mTargets)
+      mTargets(second.mTargets),
+      mTop(second.mTop)
 {
     PlaceTargetMap::iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
@@ -44,6 +45,9 @@ InclusionBased::addTarget(Target::Type type,
 {
     CANAL_ASSERT_MSG(instruction,
                      "Instruction is mandatory.");
+
+    if (mTop)
+        return;
 
     Target *pointerTarget = new Target(type, target, offsets, numericOffset);
 
@@ -156,6 +160,11 @@ InclusionBased::operator==(const Value &value) const
     if (pointer->mType != mType)
         return false;
 
+    if (pointer->mTop != mTop)
+        return false;
+
+    CANAL_ASSERT(!mTop || (pointer->mTargets.empty() && mTargets.empty()));
+
     // Check if it has the same number of targets.
     if (pointer->mTargets.size() != mTargets.size())
         return false;
@@ -185,15 +194,23 @@ InclusionBased::merge(const Value &value)
                      "Unexpected different types in a pointer merge ("
                      << *vv.mType << " != " << *mType << ")");
 
-    PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
-    for (; valueit != vv.mTargets.end(); ++valueit)
+    if (mTop)
+        return;
+
+    if (vv.isTop())
+        setTop();
+    else
     {
-        PlaceTargetMap::iterator it = mTargets.find(valueit->first);
-        if (it == mTargets.end())
-            mTargets.insert(PlaceTargetMap::value_type(
-                                valueit->first, new Target(*valueit->second)));
-        else
-            it->second->merge(*valueit->second);
+        PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
+        for (; valueit != vv.mTargets.end(); ++valueit)
+        {
+            PlaceTargetMap::iterator it = mTargets.find(valueit->first);
+            if (it == mTargets.end())
+                mTargets.insert(PlaceTargetMap::value_type(
+                                    valueit->first, new Target(*valueit->second)));
+            else
+                it->second->merge(*valueit->second);
+        }
     }
 }
 
@@ -216,9 +233,17 @@ InclusionBased::toString() const
     std::stringstream ss;
     ss << "pointer" << std::endl;
     ss << "    type " << Canal::toString(*mType) << std::endl;
-    PlaceTargetMap::const_iterator it = mTargets.begin();
-    for (; it != mTargets.end(); ++it)
-        ss << indent(it->second->toString(slotTracker), 4);
+    if (mTop)
+    {
+        CANAL_ASSERT(mTargets.empty());
+        ss << "    top" << std::endl;
+    }
+    else
+    {
+        PlaceTargetMap::const_iterator it = mTargets.begin();
+        for (; it != mTargets.end(); ++it)
+            ss << indent(it->second->toString(slotTracker), 4);
+    }
 
     return ss.str();
 }
@@ -228,6 +253,38 @@ InclusionBased::matchesString(const std::string &text,
                               std::string &rationale) const
 {
     CANAL_NOT_IMPLEMENTED();
+}
+
+float
+InclusionBased::accuracy() const
+{
+    return mTop ? 0.0f : 1.0f;
+}
+
+bool
+InclusionBased::isBottom() const
+{
+    return !mTop && mTargets.empty();
+}
+
+void
+InclusionBased::setBottom()
+{
+    mTop = false;
+    mTargets.clear();
+}
+
+bool
+InclusionBased::isTop() const
+{
+    return mTop;
+}
+
+void
+InclusionBased::setTop()
+{
+    mTop = true;
+    mTargets.clear();
 }
 
 } // namespace Pointer
