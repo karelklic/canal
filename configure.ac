@@ -1,13 +1,16 @@
 AC_PREREQ([2.60])
-AC_INIT([canal], [0])
+AC_INIT([canal],[0])
 AM_INIT_AUTOMAKE([-Wall])
 AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])
-AC_DISABLE_STATIC
 AC_PROG_CXX
-AC_GNU_SOURCE
-AC_PROG_LIBTOOL
+AC_USE_SYSTEM_EXTENSIONS
 AC_CONFIG_HEADERS([lib/Config.h])
+
+# Initialize libtool.
+AC_DISABLE_STATIC
+LT_INIT
+AC_SUBST([LIBTOOL_DEPS])
 
 # LLVM
 AC_PATH_PROG([LLVM_CONFIG], [llvm-config], [no])
@@ -58,7 +61,7 @@ AC_CHECK_HEADERS([readline/readline.h], [],
 
 # pdflatex
 AC_PATH_PROG([PDFLATEX], [pdflatex], [no])
-[if test "PDFLATEX" = "no"; then]
+[if test "$PDFLATEX" = "no"; then]
     [echo "The pdflatex program was not found in the search path. Please ensure"]
     [echo "that it is installed and its directory is included in the search path."]
     [echo "Then run configure again before attempting to build Canal."]
@@ -67,8 +70,17 @@ AC_PATH_PROG([PDFLATEX], [pdflatex], [no])
 
 # doxygen
 AC_PATH_PROG([DOXYGEN], [doxygen], [no])
-[if test "DOXYGEN" = "no"; then]
+[if test "$DOXYGEN" = "no"; then]
     [echo "The doxygen program was not found in the search path. Please ensure"]
+    [echo "that it is installed and its directory is included in the search path."]
+    [echo "Then run configure again before attempting to build Canal."]
+    [exit 1]
+[fi]
+
+# dot (part of graphviz
+AC_PATH_PROG([DOT], [dot], [no])
+[if test "DOT" = "no"; then]
+    [echo "The dot program was not found in the search path. Please ensure"]
     [echo "that it is installed and its directory is included in the search path."]
     [echo "Then run configure again before attempting to build Canal."]
     [exit 1]

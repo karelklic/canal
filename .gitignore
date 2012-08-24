@@ -24,7 +24,8 @@ Makefile
 /docs/canal.log
 /docs/canal.out
 /docs/canal.toc
-/docs/doxygen-canal
+/docs/doxygen-lib
+/docs/doxygen-tool
 
 /lib/libcanal.la
 /lib/libcanal*.lo

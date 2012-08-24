@@ -1,8 +1,12 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = lib tool wrappers tests
+SUBDIRS = lib tool wrappers tests docs
 
 EXTRA_DIST = canal.spec.in
+
+# Automatic update of libtool.
+libtool: $(LIBTOOL_DEPS)
+	$(SHELL) ./config.status libtool
 
 UPLOAD_URI = kklic@fedorahosted.org:canal
 .PHONY: upload

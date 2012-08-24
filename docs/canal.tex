@@ -2,337 +2,23 @@
 \documentclass[a4paper]{book}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{a4wide}
 \usepackage{makeidx}
 \usepackage{hyperref}
-\usepackage{fullpage}
 \usepackage{graphicx}
-\usepackage{fancybox}
 \usepackage{import}
-\usepackage{multicol}
-\usepackage{float}
-\usepackage{listings}
-\usepackage{alltt}
-\usepackage{times}
-\usepackage{ifpdf}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{txfonts}
+\usepackage{float}
+\usepackage{doxygen-lib/doxygen}
 
-\RequirePackage{array}
-\RequirePackage{calc}
+\fancyfoot[RE]{\fancyplain{}{}}
+\fancyfoot[LO]{\fancyplain{}{}}
+
+\setcounter{tocdepth}{2}
 
 \makeindex
-
-\lstset{language=C++,inputencoding=utf8,basicstyle=\footnotesize,breaklines=true,breakatwhitespace=true,tabsize=4,numbers=left}
-
-% Generic environment used by all paragraph-based environments defined
-% below. Note that the command \title{...} needs to be defined inside
-% those environments!
-\newenvironment{DoxyDesc}[1]{%
-  \begin{list}{}%
-  {%
-    \settowidth{\labelwidth}{40pt}%
-    \setlength{\leftmargin}{\labelwidth}%
-    \setlength{\parsep}{0pt}%
-    \setlength{\itemsep}{-4pt}%
-    \renewcommand{\makelabel}{\entrylabel}%
-  }%
-  \item[#1:]}
-{\end{list}}
-
-% Used by <pre> ... </pre>
-\newenvironment{DoxyPre}{%
-  \small%
-  \begin{alltt}%
-}{%
-  \end{alltt}%
-  \normalsize%
-}
-
-% Used by @code ... @endcode
-\newenvironment{DoxyCode}{%
-  \footnotesize%
-  \verbatim%
-}{%
-  \endverbatim%
-  \normalsize%
-}
-
-% Used by @example, @include, @includelineno and @dontinclude
-\newenvironment{DoxyCodeInclude}{%
-  \DoxyCode%
-}{%
-  \endDoxyCode%
-}
-
-% Used by @verbatim ... @endverbatim
-\newenvironment{DoxyVerb}{%
-  \footnotesize%
-  \verbatim%
-}{%
-  \endverbatim%
-  \normalsize%
-}
-
-% Used by @verbinclude
-\newenvironment{DoxyVerbInclude}{%
-  \DoxyVerb%
-}{%
-  \endDoxyVerb%
-}
-
-% Used by numbered lists (using '-#' or <ol> ... </ol>)
-\newenvironment{DoxyEnumerate}{%
-  \enumerate%
-}{%
-  \endenumerate%
-}
-
-% Used by bullet lists (using '-', @li, @arg, or <ul> ... </ul>)
-\newenvironment{DoxyItemize}{%
-  \itemize%
-}{%
-  \enditemize%
-}
-
-% Used by description lists (using <dl> ... </dl>)
-\newenvironment{DoxyDescription}{%
-  \description%
-}{%
-  \enddescription%
-}
-
-% Used by @image, @dotfile, and @dot ... @enddot
-% (only if caption is specified)
-\newenvironment{DoxyImage}{%
-  \begin{figure}[H]%
-  \begin{center}%
-}{%
-  \end{center}%
-  \end{figure}%
-}
-
-% Used by @image, @dotfile, @dot ... @enddot, and @msc ... @endmsc
-% (only if no caption is specified)
-\newenvironment{DoxyImageNoCaption}{%
-}{%
-}
-
-% Used by @attention
-\newenvironment{DoxyAttention}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @author and @authors
-\newenvironment{DoxyAuthor}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @date
-\newenvironment{DoxyDate}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @invariant
-\newenvironment{DoxyInvariant}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @note
-\newenvironment{DoxyNote}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @post
-\newenvironment{DoxyPostcond}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @pre
-\newenvironment{DoxyPrecond}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @remark
-\newenvironment{DoxyRemark}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @return
-\newenvironment{DoxyReturn}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @since
-\newenvironment{DoxySince}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @see
-\newenvironment{DoxySeeAlso}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @version
-\newenvironment{DoxyVersion}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @warning
-\newenvironment{DoxyWarning}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @internal
-\newenvironment{DoxyInternal}[1]{%
-  \begin{DoxyDesc}{#1}%
-}{%
-  \end{DoxyDesc}%
-}
-
-% Used by @par and @paragraph
-\newenvironment{DoxyParagraph}[1]{%
-  \begin{list}{}%
-  {%
-    \settowidth{\labelwidth}{40pt}%
-    \setlength{\leftmargin}{\labelwidth}%
-    \setlength{\parsep}{0pt}%
-    \setlength{\itemsep}{-4pt}%
-    \renewcommand{\makelabel}{\entrylabel}%
-  }%
-  \item[#1]%
-}{%
-  \end{list}%
-}
-
-% Used by parameter lists
-\newenvironment{DoxyParams}[1]{%
-  \begin{DoxyDesc}{#1}%
-    \begin{description}%
-}{%
-    \end{description}%
-  \end{DoxyDesc}%
-}
-
-% Used by return value lists
-\newenvironment{DoxyRetVals}[1]{%
-  \begin{DoxyDesc}{#1}%
-    \begin{description}%
-}{%
-    \end{description}%
-  \end{DoxyDesc}%
-}
-
-% Used by exception lists
-\newenvironment{DoxyExceptions}[1]{%
-  \begin{DoxyDesc}{#1}%
-    \begin{description}%
-}{%
-    \end{description}%
-  \end{DoxyDesc}%
-}
-
-% Used by template parameter lists
-\newenvironment{DoxyTemplParams}[1]{%
-  \begin{DoxyDesc}{#1}%
-    \begin{description}%
-}{%
-    \end{description}%
-  \end{DoxyDesc}%
-}
-
-\newcommand{\doxyref}[3]{\textbf{#1} (\textnormal{#2}\,\pageref{#3})}
-
-\newenvironment{DoxyCompactList}%
-{\begin{list}{}{%
-  \setlength{\leftmargin}{0.5cm}%
-  \setlength{\itemsep}{0pt}%
-  \setlength{\parsep}{0pt}%
-  \setlength{\topsep}{0pt}%
-  \renewcommand{\makelabel}{\hfill}}}%
-{\end{list}}
-
-\newenvironment{DoxyCompactItemize}%
-{\begin{itemize}%
-  \setlength{\itemsep}{-3pt}%
-  \setlength{\parsep}{0pt}%
-  \setlength{\topsep}{0pt}%
-  \setlength{\partopsep}{0pt}}%
-{\end{itemize}}
-
-\newcommand{\PBS}[1]{\let\temp=\\#1\let\\=\temp}
-
-\newlength{\tmplength}
-
-\newenvironment{TabularC}[1]
-{
-\setlength{\tmplength}
-     {\linewidth/(#1)-\tabcolsep*2-\arrayrulewidth*(#1+1)/(#1)}
-      \par\begin{tabular*}{\linewidth}
-             {*{#1}{|>{\PBS\raggedright\hspace{0pt}}p{\the\tmplength}}|}
-}
-{\end{tabular*}\par}
-
-\newcommand{\entrylabel}[1]{
-   {\parbox[b]{\labelwidth-4pt}{\makebox[0pt][l]{\textbf{#1}}\vspace{1.5\baselineskip}}}}
-
-\newenvironment{Desc}
-{\begin{list}{}%
-  {%
-    \settowidth{\labelwidth}{40pt}%
-    \setlength{\leftmargin}{\labelwidth}%
-    \setlength{\parsep}{0pt}%
-    \setlength{\itemsep}{-4pt}%
-    \renewcommand{\makelabel}{\entrylabel}%
-  }%
-}
-{\end{list}}
-
-\newenvironment{Indent}
-  {\begin{list}{}{\setlength{\leftmargin}{0.5cm}}
-      \item[]\ignorespaces}
-  {\unskip\end{list}}
-
-\definecolor{comment}{rgb}{0.5,0.0,0.0}
-\definecolor{keyword}{rgb}{0.0,0.5,0.0}
-\definecolor{keywordtype}{rgb}{0.38,0.25,0.125}
-\definecolor{keywordflow}{rgb}{0.88,0.5,0.0}
-\definecolor{preprocessor}{rgb}{0.5,0.38,0.125}
-\definecolor{stringliteral}{rgb}{0.0,0.125,0.25}
-\definecolor{charliteral}{rgb}{0.0,0.5,0.5}
-\definecolor{vhdldigit}{rgb}{1.0,0.0,1.0}
-\definecolor{vhdlkeyword}{rgb}{0.43,0.0,0.43}
-\definecolor{vhdllogic}{rgb}{1.0,0.0,0.0}
-\definecolor{vhdlchar}{rgb}{0.0,0.0,0.0}
-
 
 \title{Canal\\
 \vskip 1em
@@ -365,17 +51,13 @@ calls with complex invariants and interdependencies.
 Canal is a framework combining existing static analysis techniques
 improving maintainability, understanding, traceability and correctness
 in a coherent manner.  The purpose of the framework is to make
-existing techniques accessible and evaluable, and to support the
-implementation of new techniques and allowing high quality
-experiments.  Currently, techniques are often presented without proper
-experiments on real-world complex systems, or just with a proprietary
-implementation that cannot be investigated, so actual applicability
-and impact of many techniques is unknown.  We hope to change this
-situation.
-
-The implementation can be used for a static analysis of real-world
-complex software systems written in efficient low-level languages such
-as C and C++.
+existing techniques accessible and evaluable, to support the
+implementation of new techniques, and to allow experiments.
+Currently, techniques are often presented without proper experiments
+on real-world complex systems, or just with a proprietary
+implementation that cannot be investigated.  The consequence is that
+actual applicability of many techniques for industrial use is unknown.
+We hope to change this situation.
 
 \section{Use cases}
 \subsection{Analysis of program behaviour}
@@ -411,29 +93,43 @@ uncaught exceptions.
 
 \section{Installation from source code on Red Hat Enterprise Linux 6}
 
-Canal can be built and installed on Red Hat Enterprise Linux 6, but
-some additional packages must be installed from third-party
-repositories prior to building it.  Documentation can be build on Red
-Hat Eneterprise Linux 6 as well.
+Canal can be built, installed, and developed on a computer with the
+Red Hat Enterprise Linux 6 operating system.
 
-Packages required by the build process:
+\paragraph*{Prerequisites}
+Specific software packages are required by the build process and
+should be installed prior to building Canal:
 \begin{itemize}
 \item The core library requires \texttt{llvm-devel} and \texttt{clang}
   packages, which can be obtained from Extra Packages for Enterprise
   Linux (or EPEL) software repository.
 \item The command-line user interface tool requires
-  \texttt{elfutils-devel}and \texttt{readline-devel} packages.
-\item The documentation requires \texttt{doxygen},
-  \texttt{texlive-collection-basic}, \texttt{texlive-import},
-  \texttt{texlive-preprint}, \texttt{texlive-fullpage},
-  \texttt{texlive-a4wide}, \texttt{texlive-epstopdf} packages.  The
-  \texttt{texlive-*} packages can be obtained from Jindřich Nový's
-  TeXLive software repository, which is available at
-  \url{http://jnovy.fedorapeople.org/texlive/packages.el6/}.
+  \texttt{elfutils-devel} and \texttt{readline-devel} packages.
+\item The documentation requires \texttt{doxygen}, \texttt{graphviz},
+  and \texttt{texlive-latex} packages.
 \end{itemize}
+The compiled and installed Canal requires \texttt{llvm},
+\texttt{clang}, \texttt{elfutils}, and \texttt{readline} packages.
 
-The installed program requires \texttt{llvm}, \texttt{clang},
-\texttt{elfutils}, \texttt{readline} packages.
+\section{Installation from source code on Fedora 17}
+
+Canal can be built, installed, and developed on a computer with the
+Fedora 17 operating system.
+
+\paragraph*{Prerequisites}
+Specific software packages are required by the build process and
+should be installed prior to building Canal:
+\begin{itemize}
+\item The core library requires \texttt{llvm-devel} and \texttt{clang}
+  packages.
+\item The command-line user interface tool requires
+  \texttt{elfutils-devel} and \texttt{readline-devel} packages.
+\item The documentation requires \texttt{doxygen}, \texttt{graphviz},
+  and \texttt{texlive-latex} packages.
+\end{itemize}
+The compiled and installed Canal requires \texttt{llvm},
+\texttt{clang}, \texttt{elfutils}, and \texttt{readline} packages.
+
 
 \part{Concepts}
 
@@ -651,20 +347,30 @@ semantics.
 
 \chapter{Overview}
 
+Canal can be used for a static analysis of real-world complex software
+systems written in efficient low-level languages C and C++.  It uses
+the LLVM intermediate representation for the static analysis.
+
 Canal is implemented in the C++ language as defined in the C++98
-standard (ISO/IEC 14882:1998).  It uses the C++ standard library as
-well as some additional libraries:
+standard (ISO/IEC 14882:1998).  It uses the C++ standard library and
+some additional libraries:
 \begin{itemize}
 \item LLVM core libraries.  All versions from 2.8 up to 3.1 are
   supported.
-\item Clang compiler.  All versions from 2.8 up to 3.1 are
-  supported.
-\item GNU readline or any of its BSD-licensed reimplementation.
-\item elfutils; this library is optional, and used only on
-  Linux-based operating systems
+\item Clang compiler.  Any version working with a supported version of
+  LLVM should work.
+\item GNU readline.  Any BSD-licensed reimplementation can be used as
+  an alternative.
+\item elfutils.  This library is used only on Linux-based operating
+  systems.
 \end{itemize}
 
-\import{doxygen-canal/}{refman}
+\import{doxygen-lib/}{refman}
+\import{doxygen-tool/}{refman}
+
+\chapter{Known Bugs}
+Pointers should have the possibility to be set to top.
+
 
 \cleardoublepage
 \addcontentsline{toc}{chapter}{Bibliography}

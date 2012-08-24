@@ -1,8 +1,8 @@
-docfiles = canal.tex canal.pdf
+dist_doc_DATA = canal.tex canal.pdf
 
 CLEANFILES = *.aux canal.log canal.out canal.toc canal.pdf
 
-canal.pdf: canal.tex doxygen-canal/refman.tex
+canal.pdf: canal.tex doxygen-lib/refman.tex doxygen-tool/refman.tex
 	echo Calling pdflatex twice to handle all references.
 	$(PDFLATEX) canal.tex
 	makeindex canal.idx
@@ -15,13 +15,22 @@ canal.pdf: canal.tex doxygen-canal/refman.tex
 	      latex_count=`expr $$latex_count - 1` ;\
 	    done
 
-doxygen-canal/refman.tex: doxygen.conf ../lib/*.h
-	$(DOXYGEN) doxygen.conf
-	sed -i'~' '4d' doxygen-canal/refman.tex
-	sed -i'~' '/\\printindex$$/d' doxygen-canal/refman.tex
-	sed -i'~' '/\\end{document}$$/d' doxygen-canal/refman.tex
-	sed -i'~' 's/\\chapter{Class Index}$$/\\chapter{Library Class Index}/' doxygen-canal/refman.tex
-	sed -i'~' 's/\\chapter{Class Documentation}$$/\\chapter{Library Class Documentation}/' doxygen-canal/refman.tex
+doxygen-lib/refman.tex: doxygen-lib.conf ../lib/*.h
+	$(DOXYGEN) doxygen-lib.conf
+	sed -i'~' '4d' doxygen-lib/refman.tex
+	sed -i'~' '/\\printindex$$/d' doxygen-lib/refman.tex
+	sed -i'~' '/\\end{document}$$/d' doxygen-lib/refman.tex
+	sed -i'~' 's/\\chapter{Class Index}$$/\\chapter{Library Class Index}/' doxygen-lib/refman.tex
+	sed -i'~' 's/\\chapter{Class Documentation}$$/\\chapter{Library Class Documentation}/' doxygen-lib/refman.tex
+
+doxygen-tool/refman.tex: doxygen-tool.conf ../lib/*.h
+	$(DOXYGEN) doxygen-tool.conf
+	sed -i'~' '4d' doxygen-tool/refman.tex
+	sed -i'~' '/\\printindex$$/d' doxygen-tool/refman.tex
+	sed -i'~' '/\\end{document}$$/d' doxygen-tool/refman.tex
+	sed -i'~' 's/\\chapter{Class Index}$$/\\chapter{Tool Class Index}/' doxygen-tool/refman.tex
+	sed -i'~' 's/\\chapter{Class Documentation}$$/\\chapter{Tool Class Documentation}/' doxygen-tool/refman.tex
 
 clean-local:
-	-rm -rf doxygen-canal
+	-rm -rf doxygen-lib
+	-rm -rf doxygen-tool
