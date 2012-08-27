@@ -22,13 +22,13 @@ Enumeration::Enumeration(const llvm::APInt &number) : mTop(false)
 bool
 Enumeration::signedMin(llvm::APInt &result) const
 {
-    if (mValues.empty())
-        return false;
-
     if (mTop)
         result = llvm::APInt::getSignedMinValue(mNumBits);
     else
     {
+        if (mValues.empty())
+            return false;
+
         // We assume the set is sorted by unsigned comparison.
         APIntUtils::USet::const_iterator it = mValues.begin();
         result = *it++;
@@ -45,13 +45,13 @@ Enumeration::signedMin(llvm::APInt &result) const
 bool
 Enumeration::signedMax(llvm::APInt &result) const
 {
-    if (mValues.empty())
-        return false;
-
     if (mTop)
         result = llvm::APInt::getSignedMaxValue(mNumBits);
     else
     {
+        if (mValues.empty())
+            return false;
+
         // We assume the set is sorted by unsigned comparison.
         APIntUtils::USet::const_iterator it = mValues.begin();
         result = *it++;
@@ -68,30 +68,26 @@ Enumeration::signedMax(llvm::APInt &result) const
 bool
 Enumeration::unsignedMin(llvm::APInt &result) const
 {
-    if (mValues.empty())
-        return false;
-
     if (mTop)
         result = llvm::APInt::getMinValue(mNumBits);
-    else
+    else {
+        if (mValues.empty()) return false;
         // We assume the set is sorted by unsigned comparison.
         result = *mValues.begin();
-
+    }
     return true;
 }
 
 bool
 Enumeration::unsignedMax(llvm::APInt &result) const
 {
-    if (mValues.empty())
-        return false;
-
     if (mTop)
         result = llvm::APInt::getMaxValue(mNumBits);
-    else
+    else {
+        if (mValues.empty()) return false;
         // We assume the set is sorted by unsigned comparison.
         result = *mValues.rbegin();
-
+    }
     return true;
 }
 

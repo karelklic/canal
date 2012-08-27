@@ -88,4 +88,12 @@ Constant::matchesString(const std::string &text,
     CANAL_NOT_IMPLEMENTED();
 }
 
+void
+Constant::merge(const Value &value)
+{
+    CANAL_ASSERT_MSG(*this == value, "merge not implemented for "
+                  << typeid(*this).name() << " and "
+                  << typeid(value).name());
+}
+
 } // namespace Canal

@@ -136,11 +136,12 @@ State::addMainFrame()
 
     for (int i = 0; it != function->getArgumentList().end(); ++it, ++i)
     {
-        llvm::APInt signedOne(/*numBits=*/64, /*value=*/1, /*isSigned=*/true);
         switch (i)
         {
         case 0:
         {
+            const llvm::IntegerType* type = llvm::cast<llvm::IntegerType>((*it).getType());
+            llvm::APInt signedOne(/*numBits=*/type->getBitWidth(), /*value=*/1, /*isSigned=*/true);
             Canal::Value *argc = new Canal::Integer::Container(signedOne);
             initialState.addFunctionVariable(*it, argc);
             break;

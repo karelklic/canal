@@ -139,22 +139,8 @@ mergeMaps(PlaceValueMap &map1, const PlaceValueMap &map2)
         }
 	else
         {
-            // Constants need to be converted to a modifiable value
-            // before merging.
-            Constant *const1 = dynCast<Constant*>(it1->second);
-            if (const1)
-            {
-                Constant *const2 = dynCast<Constant*>(it2->second);
-                if (!const2 || *const1 != *const2)
-                {
-                    Value *value1 = const1->toModifiableValue();
-                    delete const1;
-                    it1->second = value1;
-                    it1->second->merge(*it2->second);
-                }
-            }
-            else
-                it1->second->merge(*it2->second);
+            it1->second = Value::handleMergeConstants(it1->second, it2->second);
+            it1->second->merge(*it2->second);
         }
     }
 }
@@ -169,8 +155,10 @@ State::merge(const State &state)
 
     if (mReturnedValue)
     {
-        if (state.mReturnedValue)
+        if (state.mReturnedValue) {
+            mReturnedValue = Value::handleMergeConstants(mReturnedValue, state.mReturnedValue);
             mReturnedValue->merge(*state.mReturnedValue);
+        }
     }
     else if (state.mReturnedValue)
         mReturnedValue = state.mReturnedValue->clone();

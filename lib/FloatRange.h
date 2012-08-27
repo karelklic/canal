@@ -26,8 +26,13 @@ public:
     //   2 - both true and false are possible (top value)
     int compare(const Range &value,
                 llvm::CmpInst::Predicate predicate) const;
+    bool isNaN() const;
 
     const llvm::fltSemantics &getSemantics() const { return mFrom.getSemantics(); }
+    bool isSingleValue() const;
+    bool intersects(const Range &value) const;
+    llvm::APFloat getMax() const;
+    llvm::APFloat getMin() const;
 
 public: // Implementation of Value.
     // Implementation of Value::clone().

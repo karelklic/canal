@@ -723,26 +723,22 @@ intersects(const Range &a,
     {
         a.signedMax(i);
         b.signedMin(j);
-        if (i.sge(j))
-            return true;
-
-        a.signedMin(i);
-        b.signedMax(j);
-        if (i.sle(j))
-            return true;
+        if (i.sge(j)) {
+            b.signedMax(i);
+            a.signedMin(j);
+            if (i.sge(j)) return true;
+        }
     }
 
     if (unsigned_)
     {
         a.unsignedMax(i);
         b.unsignedMin(j);
-        if (i.uge(j))
-            return true;
-
-        a.unsignedMin(i);
-        b.unsignedMax(j);
-        if (i.ule(j))
-            return true;
+        if (i.uge(j)) {
+            b.unsignedMax(i);
+            a.unsignedMin(j);
+            if (i.uge(j)) return true;
+        }
     }
 
     return false;

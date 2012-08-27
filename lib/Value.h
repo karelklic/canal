@@ -27,6 +27,8 @@ public:
                                        const Value&,
                                        llvm::CmpInst::Predicate predicate);
 
+    /// Prepare value so that merge will not fail on assert when what is Constant.
+    static Value* handleMergeConstants(Value *what, const Value* target);
 public:
     /// Create a copy of this value.
     virtual Value *clone() const = 0;
