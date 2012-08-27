@@ -25,8 +25,7 @@ add_definitions( -DDATADIR="${CMAKE_CURRENT_BINARY_DIR}" )
 
 # Let's suppose we want to build a JIT compiler with support for
 # binary code (no interpreter):
-#llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES native nativecodegen engine backend codegen jit)
-llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES all)
+llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES bitreader asmparser target)
 
 
 add_subdirectory("lib/")
