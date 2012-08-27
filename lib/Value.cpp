@@ -1,5 +1,6 @@
 #include "Value.h"
 #include "Utils.h"
+#include "Constant.h"
 #include <typeinfo>
 #include <llvm/Support/raw_ostream.h>
 
@@ -237,6 +238,24 @@ bool
 VariablePrecisionValue::limitMemoryUsage(size_t size)
 {
     CANAL_NOT_IMPLEMENTED();
+}
+
+Value*
+Value::handleMergeConstants(Value* what, const Value *target) {
+    // Constants need to be converted to a modifiable value
+    // before merging.
+    Constant *const1 = dynCast<Constant*>(what);
+    if (const1)
+    {
+        const Constant *const2 = dynCast<const Constant*>(target);
+        if (!const2 || *const1 != *const2)
+        {
+            Value *value1 = const1->toModifiableValue();
+            delete const1;
+            return value1;
+        }
+    }
+    return what;
 }
 
 } // namespace Canal

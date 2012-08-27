@@ -127,10 +127,14 @@ Target::merge(const Target &target)
 
         llvm::APInt zero = llvm::APInt::getNullValue(
             numericOffsetInt.getBitWidth());
-        mNumericOffset->merge(Integer::Container(zero));
+        Integer::Container zeroContainer(zero);
+        mNumericOffset = Value::handleMergeConstants(mNumericOffset, &zeroContainer);
+        mNumericOffset->merge(zeroContainer);
     }
-    else if (mNumericOffset)
+    else if (mNumericOffset) {
+        mNumericOffset = Value::handleMergeConstants(mNumericOffset, target.mNumericOffset);
         mNumericOffset->merge(*target.mNumericOffset);
+    }
 
     CANAL_ASSERT(mType == target.mType);
     switch (mType)
@@ -147,8 +151,10 @@ Target::merge(const Target &target)
         CANAL_ASSERT(mOffsets.size() == target.mOffsets.size());
         std::vector<Value*>::iterator it1 = mOffsets.begin();
         std::vector<Value*>::const_iterator it2 = target.mOffsets.begin();
-        for (; it1 != mOffsets.end(); ++it1, ++it2)
+        for (; it1 != mOffsets.end(); ++it1, ++it2) {
+            (*it1) = Value::handleMergeConstants(*it1, *it2);
             (*it1)->merge(**it2);
+        }
         break;
     }
     default:

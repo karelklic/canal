@@ -47,6 +47,7 @@ public: // Implementation of Value.
     // Implementation of Value::matchesString().
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
+    virtual void merge(const Value &value);
 };
 
 } // namespace Canal
