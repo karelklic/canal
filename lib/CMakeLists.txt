@@ -1,4 +1,4 @@
-add_library(lib APIntUtils.cpp
+add_library(canal SHARED APIntUtils.cpp
 ArrayExactSize.cpp
 ArrayInterface.cpp
 ArraySingleItem.cpp
@@ -20,3 +20,4 @@ StringUtils.cpp
 Structure.cpp
 Utils.cpp
 Value.cpp)
+target_link_libraries(canal ${REQ_LLVM_LIBRARIES})
