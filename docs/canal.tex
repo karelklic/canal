@@ -11,7 +11,8 @@
 \usepackage{amssymb}
 \usepackage{txfonts}
 \usepackage{float}
-\usepackage{doxygen-lib/doxygen}
+\usepackage{galois}
+\usepackage{doxygen}
 
 \fancyfoot[RE]{\fancyplain{}{}}
 \fancyfoot[LO]{\fancyplain{}{}}
@@ -20,9 +21,7 @@
 
 \makeindex
 
-\title{Canal\\
-\vskip 1em
-\large{a static code analysis tool}}
+\title{Canal}
 \author{Karel Klíč}
 
 \begin{document}
@@ -42,22 +41,23 @@ correctness of the critical parts, and fixing bugs before they cause
 serious consequences in production.
 
 The maintainability and extensibility is affected by the programming
-language of implementation.  Efficient low-level languages such as C
-and C++ increase the complexity of the system by being closely aligned
-with hardware. Systems must handle memory management, operate with
-machine-dependent integers and floating point numbers, and use system
-calls with complex invariants and interdependencies.
+language of the implementation.  Efficient low-level languages such as
+C and C++ increase the complexity of the system by being closely
+aligned with hardware. Systems must handle memory management, operate
+on machine-dependent integers and floating point numbers, and
+cooperate with an environment with complex invariants and
+interdependencies.
 
-Canal is a framework combining existing static analysis techniques
-improving maintainability, understanding, traceability and correctness
-in a coherent manner.  The purpose of the framework is to make
-existing techniques accessible and evaluable, to support the
-implementation of new techniques, and to allow experiments.
-Currently, techniques are often presented without proper experiments
-on real-world complex systems, or just with a proprietary
-implementation that cannot be investigated.  The consequence is that
-actual applicability of many techniques for industrial use is unknown.
-We hope to change this situation.
+Canal is a framework combining existing static analysis techniques in
+order to improve the maintainability, understanding, traceability and
+correctness of imperative programs in a coherent manner.  The purpose
+of the framework is to make existing techniques accessible and
+evaluable, to support the implementation of new techniques, and to
+encourage experiments.  Currently, techniques are often presented
+without proper experiments on real-world complex systems, or just with
+a proprietary implementation that cannot be investigated.  As a
+consequence, actual applicability of many techniques for industrial
+use is unknown.
 
 \section{Use cases}
 \subsection{Analysis of program behaviour}
@@ -76,10 +76,6 @@ Double free, memory leaks, buffer overflow and underflow, division by
 zero, invalid access to memory, locking and concurrency errors,
 uncaught exceptions.
 
-\section{Artifacts}
-\subsection{Source code}
-\subsection{Specification}
-\subsection{Models}
 
 \chapter{Installation}
 
@@ -135,8 +131,8 @@ The compiled and installed Canal requires \texttt{llvm},
 
 \chapter{Preliminaries}
 
-Definitions from the order theory.  More details can be found in
-\cite{DP02}.
+As a preliminary step we shall define terms from the order theory.
+Detailed explanation can be found in \cite{DP02} and \cite{BCG02}.
 
 A binary relation $\sqsubseteq$ is \emph{reflexive} on a set
 $\mathcal{D}$ if every element is related to itself: $a \sqsubseteq a$
@@ -183,10 +179,10 @@ have both a least upper bound, denoted by $a \sqcup b$, and a greatest
 lower bound, denoted by $a \sqcap b$.  A \emph{complete lattice}
 $(\mathcal{D}, \sqsubseteq, \sqcup, \sqcap, \bot, \top)$ is a
 partially ordered set in which every subset $A \subseteq \mathcal{D}$
-has a least upper bound and a greatest lower bound.
-
-A \emph{fixpoint} of a function $F$ is an element $X$ such that $F(X)
-= X$.
+has a least upper bound and a greatest lower bound.  A complete
+lattice therefore has the greatest element $\top$ defined as
+$\bigsqcup \mathcal{D}$, and the lowest element $\bot$ defined as
+$\bigsqcap \mathcal{D}$.
 
 A function $F \in \mathcal{D}_1 \to \mathcal{D}_2$ between two posets
 $(\mathcal{D}_1, \sqsubseteq_1)$ and $(\mathcal{D}_2, \sqsubseteq_2)$
@@ -198,13 +194,144 @@ the existing limits of increasing chains $(X_i)_{i \in I}$:
 $F(\bigsqcup_1 \{ X_i \mid i \in I \}) = \bigsqcup_2 \{ F(X_i) \mid i
 \in I \}$ whenever $\bigsqcup_1 \{ X_i \mid i \in I \}$ exists.
 
+A \emph{fixpoint} of a function $F : \mathcal{D} \to \mathcal{D}$ on a
+poset $(\mathcal{D}, \sqsubseteq)$ is an element $x \in \mathcal{D}$
+such that $F(x) = x$.  A \emph{prefixpoint} is an element $x \in
+\mathcal{D}$ such that $x \sqsubseteq F(x)$.  A \emph{postfixpoint} is
+an element $x \in \mathcal{D}$ such that $F(x) \sqsubseteq x$.  A set
+of all fixpoints is denoted by $\text{fp}(F)$.  A set of all
+prefixpoints is denoted by $\text{prefp}(F)$.  A set of all
+postfixpoints is denoted by $\text{postfp}(F)$.  The \emph{least
+  fixpoint} or \emph{lfp} of a fuction $F$ on a poset $(\mathcal{D},
+\sqsubseteq)$ satisfies $\text{lfp} \in \text{fp}(F)$ and $\forall p
+\in \text{fp}(F) : \text{lfp} \sqsubseteq p$.
+
+A \emph{Galois connection} is a pair of two functions $\alpha :
+\mathcal{D}_1 \to \mathcal{D}_2$ and $\gamma : \mathcal{D}_2 \to
+\mathcal{D}_1$ on two preordered sets $(\mathcal{D}_1, \sqsubseteq_1)$
+and $(\mathcal{D}_2, \sqsubseteq_2)$ iff $\forall d_1 \in
+\mathcal{D}_1, \forall d_2 \in \mathcal{D}_2 : \alpha(d_1)
+\sqsubseteq_2 d_2 \equiv d_1 \sqsubseteq_1 \gamma(d_2)$.  It is
+denoted by $(\mathcal{D}_1, \sqsubseteq_1) \galois{\alpha}{\gamma}
+(\mathcal{D}_2, \sqsubseteq_2)$.
+
 
 \chapter{LLVM}
-LLVM was first presented in \cite{LA04}.
 
-Formalized in \cite{ZNMZ12}.
+Canal is built on the top of the LLVM \cite{LA04} (Low-level Virtual
+Machine) compiler technology framework.  Canal performs its static
+analysis over the LLVM intermediate representation, which is
+independent of source language and hide the complexity of target
+architecture.  Canal is tested with C and C++ front-ends on 32-bit and
+64-bit operating systems with little-endian memory layout, but it is
+expected that other source languages and platforms are supportable at
+low cost.
+
+LLVM is suitable for efficient static analysis due to its design.  Due
+to its type safety and Static Single Assignment (SSA) nature, most
+operations can be easily and precisely handled in static analysis.
+However, it is low enough level to support not only type conversion
+(creating a value of one data type from a value of another data type),
+but also type casting (changing the interpretation of the bit pattern
+representing a value from one type to another), pointer arithmetics,
+and manual memory management.
+
+A subset of LLVM intermediate representation has been formalized in
+\cite{ZNMZ12}.  Figure \ref{fig:llvmsyntax} presents an updated
+abstract syntax that captures all attributes handled by Canal.
+
+\begin{figure}[hb]
+\begin{tabular}{ l r c l }
+Modules & \textit{mod} & ::= & $\overline{\textit{layout}}$ $\overline{\textit{asm}}$ $\overline{\textit{namedt}}$ $\overline{\textit{namedm}}$ $\overline{\textit{alias}}$ $\overline{\textit{prod}}$ \\
+
+Layouts & \textit{layout} & ::= & \textbf{bigendian}~~|~~\textbf{littleendian}~~|~~\textbf{ptr} \textit{sz} $\textit{align}_{\textit{abi}}$ $\textit{align}_{\textit{pref}}$ \\
+ & & | & \textbf{int} \textit{sz} $\textit{align}_{\textit{abi}}$ $\textit{align}_{\textit{pref}}$~~|~~\textbf{float} \textit{sz} $\textit{align}_{\textit{abi}}$ $\textit{align}_{\textit{pref}}$ \\
+& & | & \textbf{aggr} \textit{sz} $\textit{align}_{\textit{abi}}$ $\textit{align}_{\textit{pref}}$~~|~~\textbf{vec} \textit{sz} $\textit{align}_{\textit{abi}}$ $\textit{align}_{\textit{pref}}$ \\
+& & | & \textbf{stack} \textit{sz} $\textit{align}_{\textit{abi}}$ $\textit{align}_{\textit{pref}}$ \\
+
+Products & \textit{prod} & ::= & \textit{id} = \textbf{global} \textit{typ const align}~~|~~\textbf{define} \textit{typ} $\textit{id}(\overline{\textit{arg}})\{\overline{\textit{b}}\}$~~|~~\textbf{declare} \textit{typ} \textit{id}($\overline{\textit{arg}}$) \\
+
+Floats & \textit{fp} & ::= & \textbf{half}~~|~~\textbf{float}~~|~~\textbf{double}~~|~~\textbf{x86\_fp80}~~|~~\textbf{fp128}~~|~~\textbf{ppc\_fp128} \\
+
+Types & \textit{typ} & ::= & \textbf{i}\textit{sz}~~|~~\textit{fp}~~|~~\textbf{void}~~|~~\textit{typ}$*$~~|~~[ \textit{sz} $\times$ \textit{typ} ]~~|~~$\big\{\overline{\textit{typ}_j}^j\big\}$~~|~~\textit{typ} $\overline{\textit{typ}_j}^j$~~|~~\textit{id}~~|~~\textbf{label} \\
+& & | & \textbf{metadata} \\
+
+Values & \textit{val} & ::= & \textit{id}~~|~~\textit{cnst} \\
+
+Binops & \textit{bop} & ::= & \textbf{add}~~|~~\textbf{sub}~~|~~\textbf{mul}~~|~~\textbf{udiv}~~|~~\textbf{sdiv}~~|~~\textbf{urem}~~|~~\textbf{srem}~~|~~\textbf{shl}~~|~~\textbf{lshr}~~|~~\textbf{ashr} \\
+& & | & \textbf{and}~~|~~\textbf{or}~~|~~\textbf{xor} \\
+
+Float ops & \textit{fbop} & ::= & \textbf{fadd}~~|~~\textbf{fsub}~~|~~\textbf{fmul}~~|~~\textbf{fdiv}~~|~~\textbf{frem} \\
+
+Extension & \textit{eop} & ::= & \textbf{zext}~~|~~\textbf{sext}~~|~~\textbf{fpext} \\
+
+Cast ops & \textit{cop} & ::= & \textbf{fptoui}~~|~~\textbf{ptrtoint}~~|~~\textbf{inttoptr}~~|~~\textbf{bitcast} \\
+
+Trunc ops & \textit{trop} & ::= & $\textbf{trunc}_{\textit{int}}$~~|~~$\textbf{trunc}_{\textit{fp}}$ \\
+
+Constants & \textit{cnst} & ::= & \textbf{i}\textit{sz} \textit{Int}~~|~~\textit{fp Float}~~|~~\textit{typ} $*$ \textit{id}~~|~~(\textit{typ}$*$) \textbf{null}~~|~~\textit{typ} \textbf{zeroinitializer} \\
+& & | & \textit{typ}$\big[\overline{\textit{cnst}_j}^j\big]$~~|~~$\big\{\overline{\textit{cnst}_j}^j\big\}$~~|~~\textit{typ} \textbf{undef}~~|~~\textit{bop} $\textit{cnst}_1$ $\textit{cnst}_2$~~|~~\textit{fbop} $\textit{cnst}_1$ $\textit{cnst}_2$ \\
+& & | & \textit{trop} \textit{cnst} \textbf{to} \textit{typ}~~|~~\textit{eop cnst} \textbf{to} \textit{typ}~~|~~\textit{cop cnst} \textbf{to} \textit{typ} \\
+& & | & \textbf{getelementptr} \textit{cnst} $\overline{\textit{cnst}_j}^j$~~|~~\textbf{select} $\textit{cnst}_0$ $\textit{cnst}_1$ $\textit{cnst}_2$ \\
+& & | & \textbf{icmp} \textit{cond} $\textit{cnst}_1$ $\textit{cnst}_2$~~|~~\textbf{fcmp} \textit{fcond} $\textit{cnst}_1$ $\textit{cnst}_2$ \\
+
+Blocks & \textit{b} & ::= & \textit{l} $\overline{\mathit{\phi}}$ $\overline{\textit{c}}$ \textit{tmn} \\
+
+$\phi$ nodes & $\mathit{\phi}$ & ::= & \textit{id} = \textbf{phi} \textit{typ} $\overline{\big[\textit{val}_j, \textit{l}_j\big]}^j$ \\
+
+Tmns & \textit{tmn} & ::= & \textbf{br} \textit{val} $\textit{l}_1$ $\textit{l}_2$~~|~~\textbf{br} \textit{l}~~|~~\textbf{ret} \textit{typ val}~~|~~\textbf{ret void}~~|~~\textbf{unreachable} \\
+
+Commands & \textit{c} & ::= & \textit{id} = \textit{bop} (\textbf{int} \textit{sz}) $\textit{val}_1$ $\textit{val}_2$~~|~~\textit{id} = \textit{fbop} \textit{fp} $\textit{val}_1$ $\textit{val}_2$ \\
+& & | & \textbf{store} \textit{typ} $\textit{val}_1$ $\textit{val}_2$ \textit{align}~~|~~\textit{id} = \textbf{malloc} \textit{typ val align}~~|~~\textbf{free} (\textit{typ}$*$) \textit{val} \\
+& & | & \textit{id} = \textbf{alloca} \textit{typ val align}~~|~~\textit{id} = \textit{trop} $\textit{typ}_1$ \textit{val} \textbf{to} $\textit{typ}_2$ \\
+& & | & \textit{id} = \textit{eop} $\textit{typ}_1$ \textit{val} \textbf{to} $\textit{typ}_2$~~|~~\textit{id} = \textit{cop} $\textit{typ}_1$ \textit{val} \textbf{to} $\textit{typ}_2$ \\
+& & | & \textit{id} = \textbf{select} $\textit{val}_0$ \textit{typ} $\textit{val}_1$ $\textit{val}_2$~~|~~\textit{option id} = \textbf{call} $\textit{typ}_0$ $\textit{val}_0$ $\overline{\textit{param}}$ \\
+& & | & \textit{id} = \textbf{icmp} \textit{cond typ} $\textit{val}_1$ $\textit{val}_2$~~|~~\textit{id} = \textbf{fcmp} \textit{fcond fp} $\textit{val}_1$ $\textit{val}_2$ \\
+& & | & \textit{id} = \textbf{getelementptr} ( \textit{typ} $*$ ) \textit{val} $\overline{\textit{val}_j}^j$~~|~~\textit{id} = \textbf{load} (\textit{typ}$*$) $\textit{val}$ \textit{align} \\
+
+\end{tabular}
+\caption{Abstract syntax for a subset of LLVM.}
+\label{fig:llvmsyntax}
+\end{figure}
+
+A module \textit{mod} represents a translation unit of the input
+program.  Most importantly, a module specifies list of \textit{prod}
+that can be function declarations, function definitions, and global
+variables.  It might also specify a target specific data layout string
+\textit{layout} that specifies how data is to be laid out in memory,
+module-level inline assembler blocks \textit{asm}, named types
+\textit{namedt} that make the program shorter and easier to read,
+named metadata \textit{namedm} that provide a collection of metadata,
+and aliases \textit{alias} that act as a second name for the aliasee.
+
+Types \textit{typ} include arbitrary bit-width integers
+$\textbf{i}\textit{sz} \mid \textit{sz} \in \mathbb{N}^*$, such as
+\textbf{i}1, \textbf{i}8, \textbf{i}32, \textbf{i}64.  They also
+include floating point types \textit{fp}.  The \textbf{void} type does
+not represent any value and has no size.  Pointers $\textit{typ}*$ are
+used to specify memory locations.  Arrays [ \textit{sz} $\times$
+  \textit{typ} ] have statically known size \textit{sz}.  Structures
+$\big\{\overline{\textit{typ}_j}^j\big\}$ are defined as a list of
+types.  Functions \textit{typ} $\overline{\textit{typ}_j}^j$ consist
+of a return type and a list of parameter types.  Types can also be
+named by identifiers \textit{id}, which is useful for the definition
+of recursive types.  The \textbf{label} type represents code labels.
+The \textbf{metadata} type represents embedded metadata.
 
 \chapter{Abstract Interpretation}
+
+Define:
+context sensitivity
+context sensitivity lattice (infinite height due to recursion)
+path sensitivity
+path sensitivity lattice (infinite height due to loops)
+flow sensitivity
+
+Call graph
+Call stack
+Operational fixpoint calculation.
+Equation-based fixpoint calculation.
+
 Our abstract interpreter comes in four flavours:
 \begin{description}
 \item[Context-insensitive flow-insensitive] For every function in a
@@ -230,10 +357,18 @@ interpreter is operational.
 The precision of abstract interpreter is greately tunable. Here are
 the aspects to consider:
 \begin{description}
-\item[Interpreter flavour] Context-sensitivity and flow-sensitivity
+\item[Interpreter flavour] Context-sensitivity and path-sensitivity
   increase both precision and complexity.
+
+Context and path sensitivity form a lattice when compared by the
+degree of sensitiveness.
+
 \item[Widening and narrowing] Selection and parameters of widening and
   narrowing operators affect both precision and complexity.
+
+Widening operators form a lattice when compared by the speed of
+convergence.
+
 \item[Relations in abstract domains] Type and number of relations in
   abstract domains affect both precision and complexity.
 \item[Memory for abstract domains] Parameters of some abstract domains
@@ -396,6 +531,10 @@ Pointers should have the possibility to be set to top.
 \bibitem{DP02} Brian Albert Davey and Hilary Ann
   Priestley. Introduction to Lattices and Order. 2nd ed. Cambridge
   University Press, 2002.
+
+\bibitem{BCG02} Roland Backhouse, Roy Crole, and Jeremy Gibbons, eds.
+  Algebraic and Coalgebraic Methods in the Mathematics of Program
+  Construction.  Springer-Verlag, 2002.
 
 \bibitem{LA04} Chris Lattner and Vikram Adve.  LLVM: A Compilation
   Framework for Lifelong Program Analysis \& Transformation. In

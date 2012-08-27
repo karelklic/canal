@@ -1,0 +1,591 @@
+\def\fileversion{1.05}
+\def\filedate{2005/03/19}
+% \iffalse meta-comment
+%
+% This file can be redistributed and/or modified under the terms of 
+% the LaTeX Project Public License from CTAN archives, as described at
+% http://www.latex-project.org/lppl.txt.  Either LPPL Version 1.3 or, 
+% at your option, any later version.
+% 
+% \fi
+%
+% \CheckSum{423}
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+%%
+%
+% \iffalse
+%%
+%% Source File: galois.dtx 
+%% Copyright 1994 1998 1999 2006 Patrick.Cousot@ens.fr
+%%
+%
+%<*dtx>
+          \ProvidesFile{galois.dtx}
+%</dtx>
+%<package>\NeedsTeXFormat{LaTeX2e}
+%<package>\ProvidesPackage{galois}
+%    \begin{macrocode}
+%<*driver>
+\documentclass{ltxdoc}
+%    \end{macrocode}
+%
+%    We don't want everything to appear in the index.
+%    \begin{macrocode}
+\DoNotIndex{\,,\:,\ ,\hfill,\hskip,\hspace}
+\DoNotIndex{\@ifundefined,\@tempdima,\@tempdimb,\@tempdimc}
+\DoNotIndex{\DoNotIndex,\NeedsTeXFormat,\ifx,\else,\fi,\ifdim,\fi,\endtrivlist}
+\DoNotIndex{\addtolength,\divide,\circ,\cleaders,\ensuremath}
+\DoNotIndex{\begin,\end,\bgroup,\egroup,\begingroup,\endgroup}
+\DoNotIndex{\catcode,\noexpand,\protect,\string,\space,\put,\equiv}
+\DoNotIndex{\filedate,\filename,\fileversion,\ProcessOptions}
+\DoNotIndex{\hbox,\raisebox,\rlap,\llap,\relax,\rule,\smash}
+\DoNotIndex{\let,\def,\newcommand,\newenvironment,\DeclareOption}
+\DoNotIndex{\m@th,\mathchoice,\mathord,\mathrel,\max,\mkern,\newlength}
+\DoNotIndex{\setlength,\settodepth,\settoheight,\settowidth}
+\DoNotIndex{\tiny,\scriptstyle,\scriptscriptstyle,\undefined}
+\DoNotIndex{\leftarrow,\rightarrow,\longleftarrow,\longrightarrow}
+\makeatother
+%
+\CodelineNumbered
+\CodelineIndex
+\EnableCrossrefs
+\RecordChanges
+%
+\usepackage[color]{galois}
+\begin{document}
+\DocInput{galois.dtx}
+\PrintIndex
+\PrintChanges
+\end{document}
+%</driver>
+%    \end{macrocode}
+% \fi
+%         \ProvidesFile{galois.dtx}
+       [\filedate\space v\fileversion, Galois connections, Patrick.Cousot@ens.fr]
+%
+%
+% \changes{v0.00}{1996/11/25}%
+%    {Initial version for LaTeX 2.09}
+% \changes{v1.00}{1997/05/19}%
+%    {Adapted to LaTeX2e}
+% \changes{v1.01}{1998/10/19}%
+%    {Check "\textbackslash comp" is not already defined (as in "mathtime.sty")}
+% \changes{v1.02}{1998/11/13}%
+%    {Rewritting of extendable arrows using the TeX book left/right arrowfill 
+%     p. 357. Added and renamed style parameters ("\textbackslash GaloisSep" now 
+%     "\textbackslash GaloisArrowTagSep")}
+% \changes{v1.03}{1999/04/02}%
+%    {Renamed internal macros to avoid interferences with other packages
+%     "\textbackslash rightarrowfill" $\rightarrow$ "\textbackslash @GALOISrightarrowfill"
+%     "\textbackslash leftarrowfill"  $\rightarrow$ "\textbackslash @GALOISleftarrowfill"}
+% \changes{v1.04}{1999/05/01}%
+%    {\LaTeX{} package file documentation}
+% \changes{v1.05}{2005/03/19}%
+%    {Added color option}
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% \title{The \textsf{galois} package\thanks{This file
+%        has version number \fileversion, last
+%        revised \filedate.}}
+% \author{Patrick Cousot\\
+% \texttt{Patrick.Cousot@ens.fr}}
+% 
+% \date{\filedate}
+%
+% \maketitle
+%
+% ^^A                 x  
+% ^^A \mor{x} =   |------->   total morphism 
+% ^^A
+% \newcommand{\mor}[1]{\mathrel{\raisebox{-0.1ex}^^A fix heigt of 2nd parameter of  stackrel
+% {$\stackrel{\hbox{$\scriptscriptstyle #1$}}{\raisebox{0pt}[0.5ex][0pt]^^A fix height of 1st parameter of stackrel
+% {$\longmapsto$}}$}}}
+% 
+% \section{Introduction}
+% 
+% This |galois| package introduces two-dimensional notations for 
+% Galois connections.
+%
+% \section{Detailled explanations on Galois connections}
+%
+% If $(L$, ${\leq})$ and $(M$, ${\sqsubseteq})$ are posets, $\alpha\in 
+% L\mapsto M$, $\gamma\in M\mapsto L$ and $\forall x\in L, y\in M$: 
+% $\alpha(x)\sqsubseteq y$ $\iff$ $x\leq\gamma(y)$ then the pair 
+% $\langle \alpha$, $\gamma\rangle$ is a {\em Galois connection}, 
+% written |\galois{\alpha}{\gamma}|:
+% \DescribeMacro{\galois}
+% \begin{displaymath}
+% (L,\,{\leq})\galois{\alpha}{\gamma}(M,\,{\sqsubseteq})
+% \end{displaymath}
+% In a Galois connection, $\alpha$ is onto if and only if $\gamma$ is 
+% one-to-one if and only if $\alpha \comp \gamma$ = 1 (where ${\comp}$ 
+% is the functional composition and 1 the identity), written
+% |\galoiS{\alpha}{\gamma}|:
+% \DescribeMacro{\galoiS}
+% \begin{displaymath}
+% (L,\,{\leq})\galoiS{\alpha}{\gamma}(M,\,{\sqsubseteq})
+% \end{displaymath}
+% $\alpha$ is one-to-one if and only if $\gamma$ is onto
+% if and only if $\gamma\comp\alpha$ = 1, written
+% |\Galois{\alpha}{\gamma}|:
+% \DescribeMacro{\Galois}
+% \begin{displaymath}
+% (L,\,{\leq})\Galois{\alpha}{\gamma}(M,\,{\sqsubseteq})
+% \end{displaymath}
+% For a bijection, we write
+% |\GaloiS{\alpha}{\gamma}|:
+% \DescribeMacro{\GaloiS}
+% \begin{displaymath}
+% (L,\,{\leq})\GaloiS{\alpha}{\gamma}(M,\,{\sqsubseteq})
+% \end{displaymath}
+% The surjection on the quotient of $M$ by the equivalence relation 
+% $x\equiv y$ defined by $\gamma(x)=\gamma(y)$ is denoted
+% |\galoiSr{\alpha}{\gamma}|:
+% \DescribeMacro{\galoiSr}
+% \begin{displaymath}
+% (L,\,{\leq})\galoiSr{\alpha}{\gamma}(M,\,{\sqsubseteq})
+% \end{displaymath}
+% The composition of Galois connections:
+% \begin{displaymath}
+% (L,\,{\leq})\galois{\alpha_1}{\gamma_1}(M,\,{\sqsubseteq})
+% \quad{\rm and}\quad
+% (M,\,{\sqsubseteq})\galois{\alpha_2}{\gamma_2}(N,\,{\preceq})
+% \end{displaymath}
+% is a Galois connection (the composition $\comp$ of functions is
+% |\comp|):
+% \DescribeMacro{\comp}
+% \begin{displaymath}
+% (L,\,{\leq})\galois{\alpha_2\comp\alpha_1}{\gamma_1\comp\gamma_2}(N,\,{\preceq})
+% \end{displaymath}
+% Galois connections 
+% $(L,\,{\leq})\galois{\alpha}{\gamma}(M,\,\sqsubseteq)$ can be lifted 
+% from sets of properties to sets of monotone functions:
+% \begin{displaymath}
+% (L\mor{m}L,\,{\leq})\galois{\lambda{\varphi}\cdot{\alpha\comp\varphi\comp\gamma}}{\lambda{\phi}\cdot{\gamma\comp\phi\comp\alpha}}(M\mor{m}M,\,{\sqsubseteq})
+% \end{displaymath}
+% where the ordering on functions is pointwise that is 
+% $\varphi\preceq\phi$ if and only if $\forall 
+% x:\varphi(x)\preceq\phi(x)$.  Observe that the length of the arrows
+% stretches automatically to the appropriate width.
+%
+% \section{Package options}
+%
+%  \begin{macro}{color}
+%  The \texttt{color} option is required for colored Galois
+%  connections is in 
+%     \begin{center}
+%        \begin{tabular}{cc}
+%          |\galois[red]{\alpha}{\gamma}| &
+%          $\galois[red]{\alpha}{\gamma}$,\\[1ex]
+%          |\Galois{\alpha}[blue]{\gamma}| &
+%          $\Galois{\alpha}[blue]{\gamma}$,\\[1ex]
+%          |\GaloiS[red]{\alpha}[blue]{\gamma}| &
+%          $\GaloiS[red]{\alpha}[blue]{\gamma}$,\\[1ex]
+%          |\galoiSr[red]{\alpha}[blue]{\gamma}| &
+%          $\galoiSr[red]{\alpha}[blue]{\gamma}$, or\\[1ex]
+%         |\comp[red]| & $\comp[red]$\ .
+%       \end{tabular}
+%    \end{center}
+%  Without '|color|' option, these colors are ignored.
+%  \begin{macro}{\@GALOIScolor}
+% |\@GALOIScolor| is |\color| with the |color| option and later
+% defined as |\relax| in absence of |color| option.
+%    \begin{macrocode}
+\DeclareOption{color}{%
+  \def\@GALOIScolor{\color}}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\ProcessOptions
+%    \end{macrocode}
+%  \end{macro}
+%  \end{macro}
+%
+% \section{Style parameters}
+% 
+% You can use Galois connections in any size (footnotes, transparencies, 
+% etc.) :
+% {\tiny tiny $L\galois{\alpha}{\gamma}M$},
+% {\scriptsize scriptsize $L\galois{\alpha}{\gamma}M$},
+% {\footnotesize footnotesize $L\galois{\alpha}{\gamma}M$},
+% {\small small $L\galois{\alpha}{\gamma}M$},
+% {\normalsize normalsize $L\galois{\alpha}{\gamma}M$},
+% {\large large $L\galois{\alpha}{\gamma}M$},
+% {\Large Large $L\galois{\alpha}{\gamma}M$},
+% {\LARGE LARGE $L\galois{\alpha}{\gamma}M$},
+% {\huge huge $L\galois{\alpha}{\gamma}M$},
+% {\Huge Huge $L\galois{\alpha}{\gamma}M$}.
+% Observe that in $\GaloiS{\rule{3cm}{1cm}}{\rule{0.5cm}{1cm}}$ the 
+% width of arrows and height of enclosing box are automatically adjusted 
+% according to the size of $\alpha$ and $\gamma$.  You can adjust the 
+% following parameters:
+% \DescribeMacro{\GaloisStyle}
+% \begin{description}
+% \item[]|\GaloisStyle|          : style of upper and lower tags 
+% (|\scripstyle | by default);
+% \end{description}
+% \DescribeMacro{\GaloisArrowThickness}
+% \begin{description}
+% \item[]|\GaloisArrowThickness| : thickness of the arrow stems 
+% \footnote{stem is ``tige'' in french.}; 
+% (|0.1ex| by default);
+% \end{description}
+% \DescribeMacro{\GaloisArrowsSep}
+% \begin{description}
+% \item[]|\GaloisArrowsSep|      : distance between the arrows  
+% (|0.2ex| by default);
+% \end{description}
+% \DescribeMacro{\GaloisArrowTagSep}
+% \begin{description}
+% \item[]|\GaloisArrowTagSep|    : distance between arrows and tags 
+% (|0.5ex| by default).
+% \end{description}
+% For example with:
+% \begin{quote}
+% |\renewcommand{\GaloisArrowsSep}{1cm}|\\
+% |\renewcommand{\GaloisArrowTagSep}{0pt}|
+% \end{quote}
+% we get
+% \renewcommand{\GaloisArrowsSep}{1cm}\renewcommand{\GaloisArrowTagSep}{0pt}
+% $\GaloiS{\rule{3cm}{1cm}}{\rule{0.5cm}{1cm}}$ while with:
+% \begin{quote}
+% |\renewcommand{\GaloisArrowsSep}{0pt}|\\
+% |\renewcommand{\GaloisArrowTagSep}{5mm}|
+% \end{quote}
+% we get \renewcommand{\GaloisArrowsSep}{0pt}\renewcommand{\GaloisArrowTagSep}{5mm}
+% $\GaloiS{\rule{3cm}{1cm}}{\rule{0.5cm}{1cm}}$ and with
+% \begin{quote}
+% |\renewcommand{\GaloisArrowsSep}{0pt}|\\
+% |\renewcommand{\GaloisArrowTagSep}{0pt}|
+% \end{quote}
+% we get 
+% \renewcommand{\GaloisArrowsSep}{0pt}\renewcommand{\GaloisArrowTagSep}{0pt} 
+% $\GaloiS{\rule{3cm}{1cm}}{\rule{0.5cm}{1cm}}$.
+%
+% \StopEventually{}
+%
+% \section{Implementation}
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+% Require |color| package for '|color|' option else coloring is ignored.
+%    \begin{macrocode}
+\ifx\@GALOIScolor\undefined
+\def\@GALOIScolor#1{\relax}%
+\else
+\RequirePackage{color}%
+\fi
+%    \end{macrocode}
+%
+% ^^A Reset style parameters to default
+% \renewcommand{\GaloisStyle}{\scriptstyle}%
+% \renewcommand{\GaloisArrowThickness}{0.1ex}%
+% \renewcommand{\GaloisArrowsSep}{0.2ex}%
+% \renewcommand{\GaloisArrowTagSep}{0.5ex}% 
+% \begin{macro}{\comp}
+% \begin{macro}{\@GALOIScomp}
+% Define functional composition $f\comp g(x)$ is $f(g(x))$ (if not 
+% already defined e.g.\ as in |mathtime.sty|). |\comp[color]| will
+% draw in color (black by default).
+%    \begin{macrocode}
+\@ifundefined{comp}{%
+% Scan the optional color argument
+\newcommand{\comp}{\@ifnextchar[{\@GALOIScomp}{\@GALOIScomp[black]}}%
+% Defined the colored functional composition \@GALOIScomp[color]
+\def\@GALOIScomp[#1]{\mathchoice
+{\mathrel{\raisebox{0.2ex}{$\@GALOIScolor{#1}\scriptstyle\circ$}}}%
+{\mathrel{\raisebox{0.2ex}{$\@GALOIScolor{#1}\scriptstyle\circ$}}}%
+{\mathrel{\raisebox{0.1ex}{$\@GALOIScolor{#1}\scriptscriptstyle\circ$}}}%
+{\mathrel{\raisebox{0.1ex}{$\@GALOIScolor{#1}\scriptscriptstyle\circ$}}}}%
+}{}%
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% Style commands:
+% \begin{macro}{\GaloisStyle}
+% Style of $a$ and $b$ in $\galois{a}{b}$, $\Galois{a}{b}$, $\galoiS{a}{b}$ or 
+% $\GaloiS{a}{b}$:
+%    \begin{macrocode}
+\newcommand{\GaloisStyle}{\scriptstyle}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\GaloisArrowThickness}
+% Thickness of the arrow stems (0.1ex by default):
+%    \begin{macrocode}
+\newcommand{\GaloisArrowThickness}{0.1ex}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\GaloisArrowsSep}
+% Distance between the lower and upper arrows (0.2ex by default):
+%    \begin{macrocode}
+\newcommand{\GaloisArrowsSep}{0.2ex}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\GaloisArrowTagSep}
+% Distance between the lower arrow and the top of $a$ and the 
+% top-arrow and the bottom of $b$ (0.5ex by default)
+%    \begin{macrocode}
+\newcommand{\GaloisArrowTagSep}{0.5ex}% 
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@GALOISalphadepth}
+% \begin{macro}{\@GALOISalphaheight}
+% \begin{macro}{\@GALOISgammadepth}
+% \begin{macro}{\@GALOISwidth}
+% \begin{macro}{\@GALOISheight}
+% \begin{macro}{\@GALOISdepth}
+% \begin{macro}{\@GALOIStotalheight}
+% \begin{macro}{\@GALOISGap}
+% \begin{macro}{\@GALOISalphaarrowwidth}
+% \begin{macro}{\@GALOISalphaarrowhalfheight}
+% \begin{macro}{\@GALOISgammaarrowwidth}
+% \begin{macro}{\@GALOISgammaarrowhalfheight}
+% Auxiliary lengths:
+%    \begin{macrocode}{}
+\newlength{\@GALOISalphadepth}%
+\newlength{\@GALOISalphaheight}%
+\newlength{\@GALOISgammadepth}%
+\newlength{\@GALOISwidth}%
+\newlength{\@GALOISheight}%
+\newlength{\@GALOISdepth}%
+\newlength{\@GALOIStotalheight}%
+\newlength{\@GALOISGap}%
+\newlength{\@GALOISalphaarrowwidth}%
+\newlength{\@GALOISalphaarrowhalfheight}%
+\newlength{\@GALOISgammaarrowwidth}%
+\newlength{\@GALOISgammaarrowhalfheight}%
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\Galois@put}
+% |\Galois@put(x,y-d){text}| puts text at coordinates $(x,y-d)$, in
+% a box of size 0\texttt{pt} $\times$ 0\texttt{pt}:
+%    \begin{macrocode}
+\def\Galois@put(#1,#2-#3)#4{\rlap{\smash{\hskip#1\setlength{\@tempdimc}{#2}%
+\addtolength{\@tempdimc}{-#3}\raisebox{\@tempdimc}{#4}}}}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@GALOISrightarrowfill}
+%  |\@GALOISrightarrowfill{\rightarrow}|, see \TeX book p.\ 357.
+%    \begin{macrocode}
+\def\@GALOISrightarrowfill#1{$\m@th \smash- \mkern-7mu%
+ \cleaders\hbox{$\mkern-2mu \smash- \mkern-2mu$}\hfill%
+ \mkern-7mu \mathord{#1}$}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\@GALOISleftarrowfill}
+% |\@GALOISleftarrowfill{\leftarrow}|, see \TeX book p.\ 357.
+%    \begin{macrocode}
+\def\@GALOISleftarrowfill#1{$\m@th \mathord{#1} \mkern-7mu%
+  \cleaders\hbox{$\mkern-2mu \smash- \mkern-2mu$}\hfill%
+  \mkern-7mu \smash-$}%
+%    \end{macrocode}
+% \end{macro}
+%
+% Stacking $a$, the arrows and $g$ in $\galois{a}{g}$:
+% \begin{macro}{\@GALOIS}
+% \begin{macro}{\@GALOISca}
+% \begin{macro}{\@GALOISca}
+% |\@GALOIS{-->}{<--}{a}{g}| constructs $\galois{a}{g}$.
+% |\@GALOIS{-->}{<--}[colora]{a}{g}|,
+% |\@GALOIS{-->}{<--}{a}[colorg]{g}| and
+% |\@GALOIS{-->}{<--}[colora]{a}[colorg]{g}|
+% add colors |colora| for the $a$-arrow and |colorg| for
+% the$ g$ arrow.
+%    \begin{macrocode}
+%    First, scan the alpha color optional argument (black
+%    otherwise)
+\def\@GALOIS#1#2{\@ifnextchar[{\@GALOISca{#1}{#2}}{\@GALOISca{#1}{#2}[black]}}%
+%    Second scan the gamma color optional argument (black
+%    otherwise)
+\def\@GALOISca#1#2[#3]#4{\@ifnextchar[{\@GALOIScacg{#1}{#2}[#3]{#4}}%
+                                      {\@GALOIScacg{#1}{#2}[#3]{#4}[black]}}%
+%    Finally \@GALOIScacg{-->}{<--}[colora]{a}[colorg]{g} stacks $a$,
+%    the arrows and $g$ in $\galois{a}{g}$, using colors with the
+%    'color' option.
+\def\@GALOIScacg#1#2[#3]#4[#5]#6{%
+\ensuremath{\mathrel{%
+\def\@GALOISalphatag{\ $\@GALOIScolor{#3}\GaloisStyle#4$\ }%
+\def\@GALOISgammatag{\ $\@GALOIScolor{#5}\GaloisStyle#6$\ }%
+% compute width of alpha/lower and gamma/upper arrows
+\settowidth{\@GALOISalphaarrowwidth}{$\mathord{#1}$}%
+\settowidth{\@GALOISgammaarrowwidth}{$\mathord{#2}$}%
+% compute width of the picture \@GALOISwidth
+\ifdim\@GALOISalphaarrowwidth>\@GALOISgammaarrowwidth%
+\settowidth{\@tempdima}{\hbox{\hspace*{\@GALOISalphaarrowwidth}\@GALOISalphatag}}%
+\settowidth{\@tempdimb}{\hbox{\hspace*{\@GALOISalphaarrowwidth}\@GALOISgammatag}}%
+\else%
+\settowidth{\@tempdima}{\hbox{\hspace*{\@GALOISgammaarrowwidth}\@GALOISalphatag}}%
+\settowidth{\@tempdimb}{\hbox{\hspace*{\@GALOISgammaarrowwidth}\@GALOISgammatag}}%
+\fi%
+\ifdim\@tempdima>\@tempdimb%
+\setlength{\@GALOISwidth}{\@tempdima}%
+\else%
+\setlength{\@GALOISwidth}{\@tempdimb}%
+\fi%
+\def\@GALOISrightarrow{\hbox to\@GALOISwidth
+{\@GALOIScolor{#3}\@GALOISrightarrowfill{#1}}}%
+\def\@GALOISleftarrow{\hbox to\@GALOISwidth
+{\@GALOIScolor{#5}\@GALOISleftarrowfill{#2}}}%
+% compute half height of alpha/lower arrow
+\settodepth{\@GALOISalphaarrowhalfheight}{$\mathord{#1}$}%
+\settoheight{\@tempdima}{$\mathord{#1}$}%
+\addtolength{\@GALOISalphaarrowhalfheight}{\@tempdima}%
+\divide \@GALOISalphaarrowhalfheight by 2%
+% compute half height of gamma/upper arrow
+\settodepth{\@GALOISgammaarrowhalfheight}{$\mathord{#2}$}%
+\settoheight{\@tempdima}{$\mathord{#2}$}%
+\addtolength{\@GALOISgammaarrowhalfheight}{\@tempdima}%
+\divide \@GALOISgammaarrowhalfheight by 2%
+% compute the distance between the two arrows \@GALOISGap = 
+%   \max(\@GALOISalphaarrowhalfheight,
+%        \@GALOISgammaarrowhalfheight)+\GaloisArrowsSep
+\ifdim\@GALOISalphaarrowhalfheight>\@GALOISgammaarrowhalfheight%
+\setlength{\@GALOISGap}{\@GALOISalphaarrowhalfheight}%
+\else%
+\addtolength{\@GALOISGap}{\@GALOISgammaarrowhalfheight}%
+\fi%
+\addtolength{\@GALOISGap}{\GaloisArrowsSep}%
+% lift from the stems thickness
+\addtolength{\@GALOISGap}{\GaloisArrowThickness }%
+\addtolength{\@GALOISGap}{\GaloisArrowThickness }%
+% compute height \@GALOISheight depth \@GALOISdepth
+% and total height \@GALOIStotalheight  of the picture
+\settodepth{\@GALOISalphadepth}{\@GALOISalphatag}%
+\settoheight{\@GALOISalphaheight}{\@GALOISalphatag}%
+\settodepth{\@GALOISgammadepth}{\@GALOISgammatag}%
+% compute depth \@GALOISdepth of the picture
+% \@GALOISdepth = \@GALOISalphadepth
+%               + \@GALOISalphaheight % vertical size of alpha tag
+%               + \GaloisArrowTagSep  % between top of tag and arrow 
+\setlength{\@GALOISdepth}{\@GALOISalphadepth}%
+\addtolength{\@GALOISdepth}{\@GALOISalphaheight}%
+\addtolength{\@GALOISdepth}{\GaloisArrowTagSep}%
+%  lift from the stem thickness
+\addtolength{\@GALOISdepth}{-\GaloisArrowThickness }%
+% compute height \@GALOISheight of the picture
+\setlength{\@GALOISheight}{\@GALOISGap}%
+\addtolength{\@GALOISheight}{\GaloisArrowTagSep}%
+\addtolength{\@GALOISheight}{\@GALOISgammadepth}%
+\settoheight{\@tempdima}{\@GALOISgammatag}%
+\addtolength{\@GALOISheight}{\@tempdima}%
+% compute  total height \@GALOIStotalheight of the picture
+% \@GALOIStotalheight = \@GALOISdepth + \@GALOISheight
+\setlength{\@GALOIStotalheight}{\@GALOISdepth}%
+\addtolength{\@GALOIStotalheight}{\@GALOISheight}%
+% put alpha arrow
+\Galois@put(0pt,0pt-\@GALOISalphaarrowhalfheight){\@GALOISrightarrow}%
+% put gamma arrow
+\Galois@put(0pt,\@GALOISGap-\@GALOISalphaarrowhalfheight){\@GALOISleftarrow}%
+% put alpha
+\setlength{\@tempdima}{\@GALOISwidth}%
+\settowidth{\@tempdimb}{\@GALOISalphatag}%
+\addtolength{\@tempdima}{-\@tempdimb}%
+\divide\@tempdima by 2%
+\Galois@put(\@tempdima,\@GALOISalphadepth-\@GALOISdepth){\@GALOISalphatag}%
+% put gamma
+\setlength{\@tempdima}{\@GALOISwidth}%
+\settowidth{\@tempdimb}{\@GALOISgammatag}%
+\addtolength{\@tempdima}{-\@tempdimb}%
+\divide\@tempdima by 2%
+\setlength{\@tempdimb}{\@GALOISalphadepth}%
+\addtolength{\@tempdimb}{\@GALOISalphaheight}%
+\addtolength{\@tempdimb}{\GaloisArrowTagSep}%
+\addtolength{\@tempdimb}{\GaloisArrowTagSep}%
+\addtolength{\@tempdimb}{\@GALOISGap}%
+\addtolength{\@tempdimb}{\@GALOISgammadepth}%
+\Galois@put(\@tempdima,\@tempdimb-\@GALOISdepth){\@GALOISgammatag}%
+\rule[-\@GALOISdepth]{0pt}{\@GALOIStotalheight}% set depth and height
+\hspace*{\@GALOISwidth}% set width
+}}}%
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\galois}
+% |\galois{a}{g}| is $\galois{a}{g}$.
+%    \begin{macrocode}
+\newcommand{\galois}{\@GALOIS{\rightarrow}{\leftarrow}}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\galoiS}
+% |\galoiS{a}{g}| is $\galoiS{a}{g}$ ($a$ onto, $g$ one-to-one, $a 
+% \comp g = 1$):
+%    \begin{macrocode}
+\def\@GALOISmytwoheadrightarrow{\rlap{$\:\,{\rightarrow}$}{\longrightarrow}}%
+\def\@GALOIStwoheadrightarrow{\protect\@GALOISmytwoheadrightarrow}%
+\newcommand{\galoiS}{\@GALOIS{\@GALOIStwoheadrightarrow}{\leftarrow}}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\galoiSr}
+% |\galoiSr{a}{g}| is $\galoiSr{a}{g}$.
+%    \begin{macrocode}
+\def\@GALOISmytwoheadrightarrowreduc{\rlap{\smash{\hskip1ex\raisebox{0.815ex}%
+{\tiny$\equiv$}}}\rlap{$\:\,{\rightarrow}$}{\longrightarrow}}%
+\def\@GALOIStwoheadrightarrowreduc{\protect\@GALOISmytwoheadrightarrowreduc}%
+\newcommand{\galoiSr}{\@GALOIS{\@GALOIStwoheadrightarrowreduc}{\leftarrow}}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Galois}
+% |\Galois{a}{g}| is $\Galois{a}{g}$ ($a$ one-to-one, $g$ onto, $g 
+% \comp a = 1$):
+%    \begin{macrocode}
+\def\@GALOISmytwoheadleftarrow{\rlap{$\:{\leftarrow}$}{\longleftarrow}}%
+\def\@GALOIStwoheadleftarrow{\protect\@GALOISmytwoheadleftarrow}%
+\newcommand{\Galois}{\@GALOIS{\rightarrow}{\@GALOIStwoheadleftarrow}}%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\GaloiS}
+% |\GaloiS{a}{g}| is $\GaloiS{a}{g}$ ($a$ bijective with inverse $g$).
+%    \begin{macrocode}
+\newcommand{\GaloiS}{\@GALOIS%
+{\@GALOIStwoheadrightarrow}{\@GALOISmytwoheadleftarrow}}%
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \Finale
+%
+\endinput
