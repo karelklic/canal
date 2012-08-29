@@ -7,13 +7,19 @@
 namespace Canal {
 namespace Integer {
 
-Bits::Bits(const Environment &environment, unsigned numBits)
-    : Domain(environment), mBits0(numBits, 0), mBits1(numBits, 0)
+Bits::Bits(const Environment &environment,
+           unsigned bitWidth)
+    : Domain(environment),
+      mBits0(bitWidth, 0),
+      mBits1(bitWidth, 0)
 {
 }
 
-Bits::Bits(const Environment &environment, const llvm::APInt &number)
-    : Domain(environment), mBits0(~number), mBits1(number)
+Bits::Bits(const Environment &environment,
+           const llvm::APInt &number)
+    : Domain(environment),
+      mBits0(~number),
+      mBits1(number)
 {
 }
 

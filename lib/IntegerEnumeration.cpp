@@ -9,37 +9,41 @@
 namespace Canal {
 namespace Integer {
 
-Enumeration::Enumeration(const Environment &environment, unsigned numBits)
-    : Domain(environment), mTop(false), mNumBits(numBits)
+Enumeration::Enumeration(const Environment &environment,
+                         unsigned bitWidth)
+    : Domain(environment), mTop(false), mBitWidth(bitWidth)
 {
-    CANAL_ASSERT(numBits);
+    CANAL_ASSERT(mBitWidth > 0);
 }
 
-Enumeration::Enumeration(const Environment &environment, const llvm::APInt &number)
-    : Domain(environment), mTop(false), mNumBits(number.getBitWidth())
+Enumeration::Enumeration(const Environment &environment,
+                         const llvm::APInt &number)
+    : Domain(environment), mTop(false), mBitWidth(number.getBitWidth())
 {
     mValues.insert(number);
-    CANAL_ASSERT(mNumBits);
+    CANAL_ASSERT(mBitWidth > 0);
 }
 
 bool
 Enumeration::signedMin(llvm::APInt &result) const
 {
     if (mTop)
-        result = llvm::APInt::getSignedMinValue(mNumBits);
+        result = llvm::APInt::getSignedMinValue(mBitWidth);
     else
     {
         if (mValues.empty())
             return false;
 
         //Find lowest negative number
-        APIntUtils::USet::const_iterator bound = mValues.lower_bound(llvm::APInt::getSignedMinValue(mNumBits));
-        if (bound == mValues.end()) { //If there is no negative number in this enumeration
-            result = *mValues.begin(); //then the first element in this enumeration is lowest
+        APIntUtils::USet::const_iterator bound = mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
+        if (bound == mValues.end())
+        {
+            // If there is no negative number in this enumeration then
+            // the first element in this enumeration is lowest
+            result = *mValues.begin();
         }
-        else {
+        else
             result = *bound;
-        }
     }
 
     return true;
@@ -49,14 +53,14 @@ bool
 Enumeration::signedMax(llvm::APInt &result) const
 {
     if (mTop)
-        result = llvm::APInt::getSignedMaxValue(mNumBits);
+        result = llvm::APInt::getSignedMaxValue(mBitWidth);
     else
     {
         if (mValues.empty())
             return false;
 
         //Find lowest negative number
-        APIntUtils::USet::const_iterator bound = mValues.lower_bound(llvm::APInt::getSignedMinValue(mNumBits));
+        APIntUtils::USet::const_iterator bound = mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
         if (bound == mValues.end() || //If there is no negative number in this enumeration
                 bound == mValues.begin()) { //or first element in this enumeration is negative
             result = *mValues.rend(); //then the last element in this enumeration is highest
@@ -73,7 +77,7 @@ bool
 Enumeration::unsignedMin(llvm::APInt &result) const
 {
     if (mTop)
-        result = llvm::APInt::getMinValue(mNumBits);
+        result = llvm::APInt::getMinValue(mBitWidth);
     else {
         if (mValues.empty()) return false;
         // We assume the set is sorted by unsigned comparison.
@@ -86,7 +90,7 @@ bool
 Enumeration::unsignedMax(llvm::APInt &result) const
 {
     if (mTop)
-        result = llvm::APInt::getMaxValue(mNumBits);
+        result = llvm::APInt::getMaxValue(mBitWidth);
     else {
         if (mValues.empty()) return false;
         // We assume the set is sorted by unsigned comparison.
@@ -465,11 +469,11 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // enumeration intersection is empty, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (&a == &b || (aa.mValues.size() == 1 && aa.mValues == bb.mValues))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (intersects(aa, bb))
             setTop();
         else
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
 
         break;
     case llvm::CmpInst::ICMP_NE:  // not equal
@@ -477,9 +481,9 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // enumeration intersection is empty, the result is 1.
         // Otherwise the result is the top value (both 0 and 1).
         if (!intersects(aa, bb))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (&a == &b || (aa.mValues.size() == 1 && aa.mValues == bb.mValues))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
 
@@ -492,9 +496,9 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mValues.begin()->ugt(*bb.mValues.rbegin()))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (aa.mValues.rbegin()->ult(*bb.mValues.begin()))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
 
@@ -507,9 +511,9 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mValues.begin()->uge(*bb.mValues.rbegin()))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (aa.mValues.rbegin()->ult(*bb.mValues.begin()))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
 
@@ -522,9 +526,9 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mValues.rbegin()->ult(*bb.mValues.begin()))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (aa.mValues.begin()->ugt(*bb.mValues.rbegin()))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
 
@@ -537,9 +541,9 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mValues.rbegin()->ule(*bb.mValues.begin()))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (aa.mValues.begin()->ugt(*bb.mValues.rbegin()))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
 
@@ -552,9 +556,9 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (minA.sgt(maxB))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (maxA.slt(minB))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
 
@@ -567,9 +571,9 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (minA.sge(maxB))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (maxA.slt(minB))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
 
@@ -582,9 +586,9 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (maxA.slt(minB))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (minA.sgt(maxB))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
 
@@ -597,9 +601,9 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (maxA.sle(minB))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (minA.sgt(maxB))
-            mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
+            mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
 
@@ -629,10 +633,10 @@ Enumeration::fcmp(const Domain &a, const Domain &b,
         setBottom();
         break;
     case 0:
-        mValues.insert(llvm::APInt(/*numBits*/1, /*val*/0));
+        mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         break;
     case 1:
-        mValues.insert(llvm::APInt(/*numBits*/1, /*val*/1));
+        mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         break;
     case 2:
         setTop();

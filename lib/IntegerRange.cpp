@@ -9,15 +9,15 @@ namespace Canal {
 namespace Integer {
 
 Range::Range(const Environment &environment,
-             unsigned numBits)
+             unsigned bitWidth)
     : Domain(environment),
       mEmpty(true),
       mSignedTop(false),
-      mSignedFrom(numBits, 0),
-      mSignedTo(numBits, 0),
+      mSignedFrom(bitWidth, 0),
+      mSignedTo(bitWidth, 0),
       mUnsignedTop(false),
-      mUnsignedFrom(numBits, 0),
-      mUnsignedTo(numBits, 0)
+      mUnsignedFrom(bitWidth, 0),
+      mUnsignedTo(bitWidth, 0)
 {
 }
 

@@ -12,15 +12,18 @@ class Enumeration : public Domain, public AccuracyDomain
 public:
     APIntUtils::USet mValues;
     bool mTop;
-    unsigned mNumBits;
+    unsigned mBitWidth;
 
 public:
     /// Initializes to the lowest value.
-    Enumeration(const Environment &environment, unsigned numBits);
-    /// Initializes to the given value.
-    Enumeration(const Environment &environment, const llvm::APInt &number);
+    Enumeration(const Environment &environment,
+                unsigned bitWidth);
 
-    unsigned getBitWidth() const { return mNumBits; }
+    /// Initializes to the given value.
+    Enumeration(const Environment &environment,
+                const llvm::APInt &number);
+
+    unsigned getBitWidth() const { return mBitWidth; }
 
     /// Lowest signed number represented by this abstract domain.
     /// @param result
