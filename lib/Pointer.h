@@ -22,7 +22,7 @@ typedef std::map<const llvm::Value*, Target*> PlaceTargetMap;
 /// Inclusion-based flow-insensitive abstract pointer.
 class InclusionBased : public Value, public AccuracyValue
 {
-private:
+public:
     /// llvm::Value represents a position in the program.  It points to
     /// the instruction where the target was assigned/stored to the
     /// pointer.
@@ -33,9 +33,8 @@ private:
     /// Conversion is needed during store and load operations in such a
     /// case.
     //
-    /// The type object is owned by LLVM and not deleted by the
-    /// InclusionBased class.
-    const llvm::Type *mType;
+    /// The type object is owned by the LLVM framework.
+    const llvm::Type &mType;
 
     /// If true, this pointer can point anywhere.
     bool mTop;
@@ -43,10 +42,15 @@ private:
 public:
     /// Standard constructor.
     InclusionBased(const Environment &environment,
-                   const llvm::Type *type);
+                   const llvm::Type &type);
 
     /// Copy constructor.
     InclusionBased(const InclusionBased &second);
+
+    /// Copy constructor which changes the pointer type.
+    /// Useful for bitcast and getelementptr operations.
+    InclusionBased(const InclusionBased &second,
+                   const llvm::Type &newType);
 
     /// Standard destructor.
     virtual ~InclusionBased();
@@ -88,13 +92,13 @@ public:
     Value *dereferenceAndMerge(const State &state) const;
 
     /// Creates a copy of this object with a different pointer type.
-    InclusionBased *bitcast(const llvm::Type *type) const;
+    InclusionBased *bitcast(const llvm::Type &type) const;
 
     /// Creates a copy of this object pointing to subtargets.
     /// @param offsets
     ///   Pointer takes ownership of the values inside the vector.
     InclusionBased *getElementPtr(const std::vector<Value*> &offsets,
-                                  const llvm::Type *type) const;
+                                  const llvm::Type &type) const;
 
     void store(const Value &value, State &state);
 

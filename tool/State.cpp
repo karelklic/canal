@@ -153,7 +153,7 @@ State::addMainFrame()
 
             Canal::Pointer::InclusionBased *argv =
                 new Canal::Pointer::InclusionBased(*mModule,
-                                                   pointerType.getElementType());
+                                                   *pointerType.getElementType());
             initialState.addFunctionVariable(*it, argv);
             // Canal::Array::SingleItem *argumentList = new Canal::Array::SingleItem();
             // argumentList->mSize = new Canal::Integer::Container(signedOne);

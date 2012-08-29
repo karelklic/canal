@@ -14,8 +14,6 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
-
-
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -35,9 +33,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = wrappers
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/config.py.in
+subdir = tests/integration
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -47,34 +44,10 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/lib/Config.h
-CONFIG_CLEAN_FILES = config.py
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(wrapperdir)" "$(DESTDIR)$(wrapperdir)"
-SCRIPTS = $(wrapper_SCRIPTS)
 SOURCES =
 DIST_SOURCES =
-DATA = $(wrapper_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -216,10 +189,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-wrapper_SCRIPTS = gcc g++ ld extract-llvm
-wrapper_DATA = args.py config.py
-wrapperdir = $(datadir)/canal/wrappers
-EXTRA_DIST = $(wrapper_SCRIPTS) args.py config.py.in
+EXTRA_DIST = \
+	0-numeric.c \
+	1-pointer.c \
+	2-string.c
+
 all: all-am
 
 .SUFFIXES:
@@ -232,9 +206,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu wrappers/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu tests/integration/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu wrappers/Makefile
+	  $(AUTOMAKE) --gnu tests/integration/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -253,68 +227,12 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-config.py: $(top_builddir)/config.status $(srcdir)/config.py.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-install-wrapperSCRIPTS: $(wrapper_SCRIPTS)
-	@$(NORMAL_INSTALL)
-	test -z "$(wrapperdir)" || $(MKDIR_P) "$(DESTDIR)$(wrapperdir)"
-	@list='$(wrapper_SCRIPTS)'; test -n "$(wrapperdir)" || list=; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n' \
-	    -e 'h;s|.*|.|' \
-	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
-	      if (++n[d] == $(am__install_max)) { \
-		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
-	    else { print "f", d "/" $$4, $$1 } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	     test -z "$$files" || { \
-	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(wrapperdir)$$dir'"; \
-	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(wrapperdir)$$dir" || exit $$?; \
-	     } \
-	; done
-
-uninstall-wrapperSCRIPTS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(wrapper_SCRIPTS)'; test -n "$(wrapperdir)" || exit 0; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	       sed -e 's,.*/,,;$(transform)'`; \
-	test -n "$$list" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(wrapperdir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(wrapperdir)" && rm -f $$files
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-wrapperDATA: $(wrapper_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(wrapperdir)" || $(MKDIR_P) "$(DESTDIR)$(wrapperdir)"
-	@list='$(wrapper_DATA)'; test -n "$(wrapperdir)" || list=; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(wrapperdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(wrapperdir)" || exit $$?; \
-	done
-
-uninstall-wrapperDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(wrapper_DATA)'; test -n "$(wrapperdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(wrapperdir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(wrapperdir)" && rm -f $$files
 tags: TAGS
 TAGS:
 
@@ -354,11 +272,8 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(SCRIPTS) $(DATA)
+all-am: Makefile
 installdirs:
-	for dir in "$(DESTDIR)$(wrapperdir)" "$(DESTDIR)$(wrapperdir)"; do \
-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -404,7 +319,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-wrapperDATA install-wrapperSCRIPTS
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -448,7 +363,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-wrapperDATA uninstall-wrapperSCRIPTS
+uninstall-am:
 
 .MAKE: install-am install-strip
 
@@ -459,11 +374,9 @@ uninstall-am: uninstall-wrapperDATA uninstall-wrapperSCRIPTS
 	install-exec install-exec-am install-html install-html-am \
 	install-info install-info-am install-man install-pdf \
 	install-pdf-am install-ps install-ps-am install-strip \
-	install-wrapperDATA install-wrapperSCRIPTS installcheck \
-	installcheck-am installdirs maintainer-clean \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-wrapperDATA uninstall-wrapperSCRIPTS
+	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

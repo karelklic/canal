@@ -14,7 +14,7 @@ namespace Canal {
 namespace Pointer {
 
 InclusionBased::InclusionBased(const Environment &environment,
-                               const llvm::Type *type)
+                               const llvm::Type &type)
     : Value(environment), mType(type), mTop(false)
 {
 }
@@ -30,6 +30,17 @@ InclusionBased::InclusionBased(const InclusionBased &second)
         it->second = new Target(*it->second);
 }
 
+InclusionBased::InclusionBased(const InclusionBased &second,
+                               const llvm::Type &newType)
+    : Value(second.mEnvironment),
+      mType(newType),
+      mTargets(second.mTargets),
+      mTop(second.mTop)
+{
+    PlaceTargetMap::iterator it = mTargets.begin();
+    for (; it != mTargets.end(); ++it)
+        it->second = new Target(*it->second);
+}
 
 InclusionBased::~InclusionBased()
 {
@@ -85,19 +96,16 @@ InclusionBased::dereferenceAndMerge(const State &state) const
 }
 
 InclusionBased *
-InclusionBased::bitcast(const llvm::Type *type) const
+InclusionBased::bitcast(const llvm::Type &type) const
 {
-    InclusionBased *result = clone();
-    result->mType = type;
-    return result;
+    return new InclusionBased(*this, type);
 }
 
 InclusionBased *
 InclusionBased::getElementPtr(const std::vector<Value*> &offsets,
-                              const llvm::Type *type) const
+                              const llvm::Type &type) const
 {
-    InclusionBased *result = clone();
-    result->mType = type;
+    InclusionBased *result = new InclusionBased(*this, type);
 
     PlaceTargetMap::iterator targetIt = result->mTargets.begin();
     for (; targetIt != result->mTargets.end(); ++targetIt)
@@ -159,7 +167,7 @@ InclusionBased::operator==(const Value &value) const
     if (!pointer)
         return false;
 
-    if (pointer->mType != mType)
+    if (&pointer->mType != &mType)
         return false;
 
     if (pointer->mTop != mTop)
@@ -205,9 +213,10 @@ InclusionBased::merge(const Value &value)
 
     const InclusionBased &vv = dynCast<const InclusionBased&>(value);
 
-    CANAL_ASSERT_MSG(vv.mType == mType,
+    CANAL_ASSERT_MSG(&vv.mType == &mType,
                      "Unexpected different types in a pointer merge ("
-                     << Canal::toString(*vv.mType) << " != " << Canal::toString(*mType) << ")");
+                     << Canal::toString(vv.mType) << " != "
+                     << Canal::toString(mType) << ")");
 
     if (mTop)
         return;
@@ -246,7 +255,7 @@ InclusionBased::toString() const
 {
     std::stringstream ss;
     ss << "pointer" << std::endl;
-    ss << "    type " << Canal::toString(*mType) << std::endl;
+    ss << "    type " << Canal::toString(mType) << std::endl;
     if (mTop)
     {
         CANAL_ASSERT(mTargets.empty());

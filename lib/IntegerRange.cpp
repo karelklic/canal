@@ -8,7 +8,8 @@
 namespace Canal {
 namespace Integer {
 
-Range::Range(const Environment &environment, unsigned numBits)
+Range::Range(const Environment &environment,
+             unsigned numBits)
     : Value(environment),
       mEmpty(true),
       mSignedTop(false),
@@ -20,7 +21,8 @@ Range::Range(const Environment &environment, unsigned numBits)
 {
 }
 
-Range::Range(const Environment &environment, const llvm::APInt &constant)
+Range::Range(const Environment &environment,
+             const llvm::APInt &constant)
     : Value(environment),
       mEmpty(false),
       mSignedTop(false),
@@ -116,6 +118,10 @@ Range::operator==(const Value& value) const
     const Range *range = dynCast<const Range*>(&value);
     if (!range)
         return false;
+
+    if (getBitWidth() != range->getBitWidth())
+        return false;
+
     if (mEmpty || range->mEmpty)
         return mEmpty == range->mEmpty;
     if (mSignedTop ^ range->mSignedTop || mUnsignedTop ^ range->mUnsignedTop)

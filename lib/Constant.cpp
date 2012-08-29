@@ -26,7 +26,8 @@ Constant::getAPInt() const
 }
 
 bool
-Constant::isNullPtr() const {
+Constant::isNullPtr() const
+{
     return llvm::isa<llvm::ConstantPointerNull>(mConstant);
 }
 
@@ -48,7 +49,10 @@ Constant::toModifiableValue() const
     if (isAPInt())
         return new Integer::Container(mEnvironment, getAPInt());
     else if (isNullPtr())
-        return new Pointer::InclusionBased(mEnvironment, llvmCast<llvm::ConstantPointerNull>(mConstant)->getType());
+    {
+        // TODO
+        return new Pointer::InclusionBased(mEnvironment, *llvmCast<llvm::ConstantPointerNull>(mConstant)->getType());
+    }
     else
         CANAL_DIE();
 }
