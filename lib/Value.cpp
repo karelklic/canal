@@ -6,6 +6,10 @@
 
 namespace Canal {
 
+Value::Value(Environment &environment) : mEnvironment(environment)
+{
+}
+
 bool
 Value::operator!=(const Value &rhs) const
 {

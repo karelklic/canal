@@ -15,7 +15,7 @@ public:
     std::vector<Value*> mValues;
 
 public:
-    ExactSize();
+    ExactSize(Environment &environment);
     ExactSize(const ExactSize &exactSize);
     virtual ~ExactSize();
 

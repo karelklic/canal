@@ -10,11 +10,11 @@
 namespace Canal {
 namespace Array {
 
-ExactSize::ExactSize()
+ExactSize::ExactSize(Environment &environment) : Value(environment)
 {
 }
 
-ExactSize::ExactSize(const ExactSize &exactSize)
+ExactSize::ExactSize(const ExactSize &exactSize) : Value(exactSize.mEnvironment)
 {
     mValues = exactSize.mValues;
     std::vector<Value*>::iterator it = mValues.begin();
@@ -38,7 +38,7 @@ ExactSize::clone() const
 ExactSize *
 ExactSize::cloneCleaned() const
 {
-    return new ExactSize();
+    return new ExactSize(mEnvironment);
 }
 
 bool

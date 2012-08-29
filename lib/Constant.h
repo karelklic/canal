@@ -18,7 +18,7 @@ public:
     const llvm::Constant *mConstant;
 
 public:
-    Constant(const llvm::Constant *constant = NULL);
+    Constant(Environment &environment, const llvm::Constant *constant);
 
     // Checks if this constant is an integer number.
     bool isAPInt() const;

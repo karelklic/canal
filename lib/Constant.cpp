@@ -7,7 +7,8 @@
 
 namespace Canal {
 
-Constant::Constant(const llvm::Constant *constant) : mConstant(constant)
+Constant::Constant(Environment &environment, const llvm::Constant *constant)
+    : Value(environment), mConstant(constant)
 {
 }
 
@@ -53,7 +54,7 @@ Constant::clone() const
 Constant *
 Constant::cloneCleaned() const
 {
-    return new Constant();
+    return new Constant(mEnvironment, NULL);
 }
 
 bool

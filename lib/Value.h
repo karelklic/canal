@@ -12,9 +12,13 @@ class raw_ostream;
 namespace Canal {
 
 class State;
+class Environment;
 
 class Value
 {
+protected:
+    Environment &mEnvironment;
+
 public:
     typedef void(Value::*CastOperation)(const Value&);
 
@@ -27,7 +31,11 @@ public:
 
     /// Prepare value so that merge will not fail on assert when what is Constant.
     static Value* handleMergeConstants(Value *what, const Value* target);
+
 public:
+    /// Standard constructor.
+    Value(Environment &environment);
+
     /// Create a copy of this value.
     virtual Value *clone() const = 0;
 
