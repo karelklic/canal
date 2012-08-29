@@ -58,6 +58,9 @@ public:
     ///   correct value.
     bool unsignedMax(llvm::APInt &result) const;
 
+    /// Does this enumeration represent single value?
+    bool isSingleValue() const;
+
 public: // Implementation of Value.
     /// Implementation of Value::clone().
     /// Covariant return type.

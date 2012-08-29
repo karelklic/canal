@@ -570,6 +570,11 @@ Bits::icmp(const Value &a, const Value &b,
     }
 }
 
+bool
+Bits::isSingleValue() const {
+    return ~(mBits0 ^ mBits1) == 0;
+}
+
 float
 Bits::accuracy() const
 {

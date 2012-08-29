@@ -110,6 +110,8 @@ public: // Implementation of Value.
     virtual InclusionBased *cloneCleaned() const;
     /// Implementation of Value::operator==().
     virtual bool operator==(const Value &value) const;
+    /// Does this pointer point to single target?
+    bool isSingleTarget() const;
     /// Implementation of Value::merge().
     virtual void merge(const Value &value);
     /// Implementation of Value::memoryUsage().

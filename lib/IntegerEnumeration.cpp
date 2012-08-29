@@ -601,6 +601,11 @@ Enumeration::icmp(const Value &a, const Value &b,
     }
 }
 
+bool
+Enumeration::isSingleValue() const {
+    return (!mTop && mValues.size() == 1);
+}
+
 void
 Enumeration::fcmp(const Value &a, const Value &b,
                   llvm::CmpInst::Predicate predicate)
