@@ -22,7 +22,7 @@ public:
     Value *mSize;
 
 public:
-    SingleItem();
+    SingleItem(const Environment &environment);
     SingleItem(const SingleItem &singleItem);
     virtual ~SingleItem();
 

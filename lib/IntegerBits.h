@@ -28,9 +28,9 @@ public:
 
 public:
     /// Initializes to the lowest value.
-    Bits(unsigned numBits);
+    Bits(const Environment &environment, unsigned numBits);
     /// Initializes to the given value.
-    Bits(const llvm::APInt &number);
+    Bits(const Environment &environment, const llvm::APInt &number);
 
     /// Return the number of bits of the represented number.
     unsigned getBitWidth() const { return mBits0.getBitWidth(); }
@@ -81,6 +81,9 @@ public:
     ///   True if the result is known and the parameter was set to
     ///   correct value.
     bool unsignedMax(llvm::APInt &result) const;
+
+    /// Does these bits represent single value?
+    bool isSingleValue() const;
 
 public: // Implementation of Value.
     /// Implementation of Value::clone().

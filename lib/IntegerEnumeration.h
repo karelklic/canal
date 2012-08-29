@@ -16,9 +16,9 @@ public:
 
 public:
     /// Initializes to the lowest value.
-    Enumeration(unsigned numBits);
+    Enumeration(const Environment &environment, unsigned numBits);
     /// Initializes to the given value.
-    Enumeration(const llvm::APInt &number);
+    Enumeration(const Environment &environment, const llvm::APInt &number);
 
     unsigned getBitWidth() const { return mNumBits; }
 
@@ -57,6 +57,9 @@ public:
     ///   True if the result is known and the parameter was set to
     ///   correct value.
     bool unsignedMax(llvm::APInt &result) const;
+
+    /// Does this enumeration represent single value?
+    bool isSingleValue() const;
 
 public: // Implementation of Value.
     /// Implementation of Value::clone().

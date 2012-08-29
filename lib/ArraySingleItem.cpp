@@ -9,11 +9,12 @@
 namespace Canal {
 namespace Array {
 
-SingleItem::SingleItem() : mValue(NULL), mSize(NULL)
+SingleItem::SingleItem(const Environment &environment)
+    : Value(environment), mValue(NULL), mSize(NULL)
 {
 }
 
-SingleItem::SingleItem(const SingleItem &singleItem)
+SingleItem::SingleItem(const SingleItem &singleItem) : Value(singleItem.mEnvironment)
 {
     mValue = singleItem.mValue;
     if (mValue)
@@ -39,7 +40,7 @@ SingleItem::clone() const
 SingleItem *
 SingleItem::cloneCleaned() const
 {
-    return new SingleItem();
+    return new SingleItem(mEnvironment);
 }
 
 bool

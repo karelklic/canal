@@ -14,6 +14,7 @@ namespace Canal {
 class State;
 class SlotTracker;
 class Value;
+class Environment;
 
 namespace Integer {
 class Container;
@@ -61,7 +62,8 @@ public:
     //
     ///   This parameter is mandatory for pointers of Constant type,
     ///   because it contains the constant.
-    Target(Type type,
+    Target(const Environment &environment,
+           Type type,
            const llvm::Value *target,
            const std::vector<Value*> &offsets,
            Value *numericOffset);
@@ -91,6 +93,8 @@ public:
     std::vector<Value*> dereference(const State &state) const;
 
 public:
+    const Environment &mEnvironment;
+
     /// Type of the target.
     Type mType;
 

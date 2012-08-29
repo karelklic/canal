@@ -23,9 +23,6 @@ typedef std::map<const llvm::Value*, Target*> PlaceTargetMap;
 class InclusionBased : public Value, public AccuracyValue
 {
 private:
-    /// Used in toString.
-    const llvm::Module &mModule;
-
     /// llvm::Value represents a position in the program.  It points to
     /// the instruction where the target was assigned/stored to the
     /// pointer.
@@ -45,7 +42,7 @@ private:
 
 public:
     /// Standard constructor.
-    InclusionBased(const llvm::Module &module,
+    InclusionBased(const Environment &environment,
                    const llvm::Type *type);
 
     /// Copy constructor.
@@ -110,6 +107,8 @@ public: // Implementation of Value.
     virtual InclusionBased *cloneCleaned() const;
     /// Implementation of Value::operator==().
     virtual bool operator==(const Value &value) const;
+    /// Does this pointer point to single target?
+    bool isSingleTarget() const;
     /// Implementation of Value::merge().
     virtual void merge(const Value &value);
     /// Implementation of Value::memoryUsage().

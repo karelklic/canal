@@ -18,12 +18,14 @@ public:
     const llvm::Constant *mConstant;
 
 public:
-    Constant(const llvm::Constant *constant = NULL);
+    Constant(const Environment &environment, const llvm::Constant *constant);
 
     // Checks if this constant is an integer number.
     bool isAPInt() const;
     // Returns number for integer constant.
     const llvm::APInt &getAPInt() const;
+
+    bool isNullPtr() const;
 
     bool isGetElementPtr() const;
 

@@ -4,6 +4,8 @@
 #include "Utils.h"
 #include "State.h"
 #include "SlotTracker.h"
+#include "IntegerContainer.h"
+#include "Environment.h"
 #include <llvm/BasicBlock.h>
 #include <llvm/Type.h>
 #include <sstream>
@@ -11,14 +13,14 @@
 namespace Canal {
 namespace Pointer {
 
-InclusionBased::InclusionBased(const llvm::Module &module,
+InclusionBased::InclusionBased(const Environment &environment,
                                const llvm::Type *type)
-    : mModule(module), mType(type), mTop(false)
+    : Value(environment), mType(type), mTop(false)
 {
 }
 
 InclusionBased::InclusionBased(const InclusionBased &second)
-    : mModule(second.mModule),
+    : Value(second.mEnvironment),
       mType(second.mType),
       mTargets(second.mTargets),
       mTop(second.mTop)
@@ -49,7 +51,7 @@ InclusionBased::addTarget(Target::Type type,
     if (mTop)
         return;
 
-    Target *pointerTarget = new Target(type, target, offsets, numericOffset);
+    Target *pointerTarget = new Target(mEnvironment, type, target, offsets, numericOffset);
 
     PlaceTargetMap::iterator it = mTargets.find(instruction);
     if (it != mTargets.end())
@@ -144,7 +146,7 @@ InclusionBased::clone() const
 InclusionBased *
 InclusionBased::cloneCleaned() const
 {
-    return new InclusionBased(mModule, mType);
+    return new InclusionBased(mEnvironment, mType);
 }
 
 bool
@@ -178,6 +180,19 @@ InclusionBased::operator==(const Value &value) const
             return false;
     }
 
+    return true;
+}
+
+bool
+InclusionBased::isSingleTarget() const {
+    if (mTop || mTargets.size() != 1) return false;
+    const Target *target = mTargets.begin()->second;
+    const Canal::Integer::Container* tmp = dynCast<const Canal::Integer::Container*>(target->mNumericOffset);
+    if (!tmp->isSingleValue()) return false;
+    for (std::vector<Value*>::const_iterator it = target->mOffsets.begin(); it != target->mOffsets.end(); it ++) {
+        tmp = dynCast<const Canal::Integer::Container*>(*it);
+        if (!tmp->isSingleValue()) return false;
+    }
     return true;
 }
 
@@ -229,7 +244,6 @@ InclusionBased::memoryUsage() const
 std::string
 InclusionBased::toString() const
 {
-    SlotTracker slotTracker(mModule);
     std::stringstream ss;
     ss << "pointer" << std::endl;
     ss << "    type " << Canal::toString(*mType) << std::endl;
@@ -242,7 +256,7 @@ InclusionBased::toString() const
     {
         PlaceTargetMap::const_iterator it = mTargets.begin();
         for (; it != mTargets.end(); ++it)
-            ss << indent(it->second->toString(slotTracker), 4);
+            ss << indent(it->second->toString(mEnvironment.mSlotTracker), 4);
     }
 
     return ss.str();

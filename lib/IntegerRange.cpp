@@ -8,8 +8,9 @@
 namespace Canal {
 namespace Integer {
 
-Range::Range(unsigned numBits)
-    : mEmpty(true),
+Range::Range(const Environment &environment, unsigned numBits)
+    : Value(environment),
+      mEmpty(true),
       mSignedTop(false),
       mSignedFrom(numBits, 0),
       mSignedTo(numBits, 0),
@@ -19,8 +20,9 @@ Range::Range(unsigned numBits)
 {
 }
 
-Range::Range(const llvm::APInt &constant)
-    : mEmpty(false),
+Range::Range(const Environment &environment, const llvm::APInt &constant)
+    : Value(environment),
+      mEmpty(false),
       mSignedTop(false),
       mSignedFrom(constant),
       mSignedTo(constant),
@@ -105,7 +107,7 @@ Range::clone() const
 Range *
 Range::cloneCleaned() const
 {
-    return new Range(getBitWidth());
+    return new Range(mEnvironment, getBitWidth());
 }
 
 bool

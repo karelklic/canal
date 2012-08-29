@@ -13,7 +13,7 @@ public:
     std::vector<Value*> mMembers;
 
 public:
-    Structure() {};
+    Structure(const Environment &environment);
     Structure(const Structure &structure);
     virtual ~Structure();
 

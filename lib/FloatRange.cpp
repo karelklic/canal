@@ -7,8 +7,9 @@
 namespace Canal {
 namespace Float {
 
-Range::Range(const llvm::fltSemantics &semantics)
-    : mFrom(semantics),
+Range::Range(const Environment &environment, const llvm::fltSemantics &semantics)
+    : Value(environment),
+      mFrom(semantics),
       mTo(semantics),
       mEmpty(true),
       mTop(false)
@@ -152,7 +153,7 @@ Range::clone() const
 Range *
 Range::cloneCleaned() const
 {
-    return new Range(getSemantics());
+    return new Range(mEnvironment, getSemantics());
 }
 
 bool

@@ -12,6 +12,7 @@ class raw_ostream;
 namespace Canal {
 
 class State;
+class Environment;
 
 /// @brief
 /// Base class for all abstract domains.
@@ -27,9 +28,15 @@ public:
                                        const Value&,
                                        llvm::CmpInst::Predicate predicate);
 
+    const Environment &mEnvironment;
+
     /// Prepare value so that merge will not fail on assert when what is Constant.
     static Value* handleMergeConstants(Value *what, const Value* target);
+
 public:
+    /// Standard constructor.
+    Value(const Environment &environment);
+
     /// Create a copy of this value.
     virtual Value *clone() const = 0;
 

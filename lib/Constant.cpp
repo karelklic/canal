@@ -1,13 +1,15 @@
 #include "Constant.h"
 #include "IntegerContainer.h"
 #include "Utils.h"
+#include "Pointer.h"
 #include <sstream>
 #include <llvm/Constants.h>
 #include <llvm/Support/raw_ostream.h>
 
 namespace Canal {
 
-Constant::Constant(const llvm::Constant *constant) : mConstant(constant)
+Constant::Constant(const Environment &environment, const llvm::Constant *constant)
+    : Value(environment), mConstant(constant)
 {
 }
 
@@ -21,6 +23,11 @@ const llvm::APInt &
 Constant::getAPInt() const
 {
     return llvmCast<llvm::ConstantInt>(mConstant)->getValue();
+}
+
+bool
+Constant::isNullPtr() const {
+    return llvm::isa<llvm::ConstantPointerNull>(mConstant);
 }
 
 bool
@@ -39,7 +46,9 @@ Value *
 Constant::toModifiableValue() const
 {
     if (isAPInt())
-        return new Integer::Container(getAPInt());
+        return new Integer::Container(mEnvironment, getAPInt());
+    else if (isNullPtr())
+        return new Pointer::InclusionBased(mEnvironment, llvmCast<llvm::ConstantPointerNull>(mConstant)->getType());
     else
         CANAL_DIE();
 }
@@ -53,7 +62,7 @@ Constant::clone() const
 Constant *
 Constant::cloneCleaned() const
 {
-    return new Constant();
+    return new Constant(mEnvironment, NULL);
 }
 
 bool

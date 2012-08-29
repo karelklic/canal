@@ -12,11 +12,13 @@
 namespace Canal {
 namespace Pointer {
 
-Target::Target(Type type,
+Target::Target(const Environment &environment,
+               Type type,
                const llvm::Value *target,
                const std::vector<Value*> &offsets,
                Value *numericOffset)
-    : mType(type),
+    : mEnvironment(environment),
+      mType(type),
       mInstruction(target),
       mOffsets(offsets),
       mNumericOffset(numericOffset)
@@ -41,7 +43,8 @@ Target::Target(Type type,
                      "pointers, because it contains the constant.");
 }
 
-Target::Target(const Target &target) : mType(target.mType),
+Target::Target(const Target &target) : mEnvironment(target.mEnvironment),
+                                       mType(target.mType),
                                        mInstruction(target.mInstruction),
                                        mOffsets(target.mOffsets),
                                        mNumericOffset(target.mNumericOffset)
@@ -127,7 +130,7 @@ Target::merge(const Target &target)
 
         llvm::APInt zero = llvm::APInt::getNullValue(
             numericOffsetInt.getBitWidth());
-        Integer::Container zeroContainer(zero);
+        Integer::Container zeroContainer(mEnvironment, zero);
         mNumericOffset = Value::handleMergeConstants(mNumericOffset, &zeroContainer);
         mNumericOffset->merge(zeroContainer);
     }

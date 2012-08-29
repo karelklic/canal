@@ -15,7 +15,7 @@ class Environment
 public:
     const llvm::Module &mModule;
     llvm::TargetData mTargetData;
-    SlotTracker mSlotTracker;
+    mutable SlotTracker mSlotTracker;
 
 public:
     // @param module

@@ -8,7 +8,11 @@
 
 namespace Canal {
 
-Structure::Structure(const Structure &structure)
+Structure::Structure(const Environment &environment) : Value(environment)
+{
+}
+
+Structure::Structure(const Structure &structure) : Value(structure.mEnvironment)
 {
     mMembers = structure.mMembers;
     std::vector<Value*>::iterator it = mMembers.begin();
@@ -32,7 +36,7 @@ Structure::clone() const
 Structure *
 Structure::cloneCleaned() const
 {
-    return new Structure();
+    return new Structure(mEnvironment);
 }
 
 bool
