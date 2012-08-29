@@ -7,11 +7,13 @@
 namespace Canal {
 namespace Integer {
 
-Bits::Bits(unsigned numBits) : mBits0(numBits, 0), mBits1(numBits, 0)
+Bits::Bits(const Environment &environment, unsigned numBits)
+    : Value(environment), mBits0(numBits, 0), mBits1(numBits, 0)
 {
 }
 
-Bits::Bits(const llvm::APInt &number) : mBits0(~number), mBits1(number)
+Bits::Bits(const Environment &environment, const llvm::APInt &number)
+    : Value(environment), mBits0(~number), mBits1(number)
 {
 }
 
@@ -185,7 +187,7 @@ Bits::clone() const
 Bits *
 Bits::cloneCleaned() const
 {
-    return new Bits(getBitWidth());
+    return new Bits(mEnvironment, getBitWidth());
 }
 
 bool

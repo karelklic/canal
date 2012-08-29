@@ -13,21 +13,21 @@
 namespace Canal {
 namespace Integer {
 
-Container::Container(unsigned numBits)
+Container::Container(const Environment &environment, unsigned numBits) : Value(environment)
 {
-    mValues.push_back(new Bits(numBits));
-    mValues.push_back(new Enumeration(numBits));
-    mValues.push_back(new Range(numBits));
+    mValues.push_back(new Bits(environment, numBits));
+    mValues.push_back(new Enumeration(environment, numBits));
+    mValues.push_back(new Range(environment, numBits));
 }
 
-Container::Container(const llvm::APInt &number)
+Container::Container(const Environment &environment, const llvm::APInt &number) : Value(environment)
 {
-    mValues.push_back(new Bits(number));
-    mValues.push_back(new Enumeration(number));
-    mValues.push_back(new Range(number));
+    mValues.push_back(new Bits(environment, number));
+    mValues.push_back(new Enumeration(environment, number));
+    mValues.push_back(new Range(environment, number));
 }
 
-Container::Container(const Container &container)
+Container::Container(const Container &container) : Value(container.mEnvironment)
 {
     mValues = container.mValues;
     std::vector<Value*>::iterator it = mValues.begin();
@@ -181,7 +181,7 @@ Container::clone() const
 Container *
 Container::cloneCleaned() const
 {
-    return new Container(getBitWidth());
+    return new Container(mEnvironment, getBitWidth());
 }
 
 bool
@@ -271,7 +271,7 @@ asContainer(const Value &value, bool &deleteAfter)
                          "Unsupported type cannot be converted "
                          "to integer container. (" << typeid(value).name() << ")");
 
-        container = new Container(constant->getAPInt());
+        container = new Container(value.mEnvironment, constant->getAPInt());
         deleteAfter = true;
     }
 
@@ -389,46 +389,61 @@ cmpOperation(Container &result,
     const Canal::Pointer::InclusionBased* aPointer =
             dynCast<const Canal::Pointer::InclusionBased*>(&a),
             *bPointer = dynCast<const Canal::Pointer::InclusionBased*>(&b);
+
     bool deletePtrA = false, deletePtrB = false;
     const Constant* aConstant = dynCast<const Constant*>(&a),
             *bConstant = dynCast<const Constant*>(&b);
-    if ( (aPointer || aConstant->isNullPtr()) && (bPointer || bConstant->isNullPtr()) ) {
+
+    if ((aPointer || aConstant->isNullPtr()) && (bPointer || bConstant->isNullPtr()))
+    {
         CANAL_ASSERT(operation == &Value::icmp);
-        if (aConstant) {
+        if (aConstant)
+        {
             aPointer = dynCast<const Canal::Pointer::InclusionBased*>(aConstant->toModifiableValue());
             deletePtrA = true;
         }
-        if (bConstant) {
+        if (bConstant)
+        {
             bPointer = dynCast<const Canal::Pointer::InclusionBased*>(bConstant->toModifiableValue());
             deletePtrB = true;
         }
-        bool cmpSingle = aPointer->isSingleTarget() && bPointer->isSingleTarget(), cmpeq = (*aPointer == *bPointer);
+
+        bool cmpSingle = aPointer->isSingleTarget() && bPointer->isSingleTarget(),
+            cmpeq = (*aPointer == *bPointer);
+
         result.setBottom();
-        switch (predicate) {
+        switch (predicate)
+        {
         case llvm::CmpInst::ICMP_EQ:
         case llvm::CmpInst::ICMP_UGE:
         case llvm::CmpInst::ICMP_ULE:
         case llvm::CmpInst::ICMP_SGE:
         case llvm::CmpInst::ICMP_SLE:
-            if (cmpeq && cmpSingle) result.merge(Container(llvm::APInt(1, 1, false)));
-            else {
+            if (cmpeq && cmpSingle)
+                result.merge(Container(result.mEnvironment, llvm::APInt(1, 1, false)));
+            else
+            {
                 if (predicate == llvm::CmpInst::ICMP_EQ && cmpSingle)
-                    result.merge(Container(llvm::APInt(1, 0, false)));
+                    result.merge(Container(result.mEnvironment, llvm::APInt(1, 0, false)));
                 else result.setTop();
             }
             break;
         case llvm::CmpInst::ICMP_NE:
             if (cmpSingle)
-                result.merge(Container(llvm::APInt(1, (cmpeq ? 0 : 1), false)));
-            else result.setTop();
+                result.merge(Container(result.mEnvironment, llvm::APInt(1, (cmpeq ? 0 : 1), false)));
+            else
+                result.setTop();
             break;
         default:
             result.setTop();
         }
-        if (deletePtrA) delete aPointer;
-        if (deletePtrB) delete bPointer;
+        if (deletePtrA)
+            delete aPointer;
+        if (deletePtrB)
+            delete bPointer;
         return;
     }
+
     bool deleteAA, deleteBB;
     const Container *aa = asContainer(a, deleteAA),
         *bb = asContainer(b, deleteBB);

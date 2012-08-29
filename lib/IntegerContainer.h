@@ -20,10 +20,10 @@ public:
     std::vector<Value*> mValues;
 
 public:
-    Container(unsigned numBits);
+    Container(const Environment &environment, unsigned numBits);
     /// Creates a new container with an initial value.  Signedness,
     /// number of bits is taken from the provided number.
-    Container(const llvm::APInt &number);
+    Container(const Environment &environment, const llvm::APInt &number);
     /// Copy constructor.  Creates independent copy of the container.
     Container(const Container &container);
     /// Destructor.  Deletes the contents of the container.

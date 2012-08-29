@@ -16,9 +16,9 @@ public:
 
 public:
     /// Initializes to the lowest value.
-    Enumeration(unsigned numBits);
+    Enumeration(const Environment &environment, unsigned numBits);
     /// Initializes to the given value.
-    Enumeration(const llvm::APInt &number);
+    Enumeration(const Environment &environment, const llvm::APInt &number);
 
     unsigned getBitWidth() const { return mNumBits; }
 

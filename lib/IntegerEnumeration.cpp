@@ -9,12 +9,13 @@
 namespace Canal {
 namespace Integer {
 
-Enumeration::Enumeration(unsigned numBits) : mTop(false),
-                                             mNumBits(numBits)
+Enumeration::Enumeration(const Environment &environment, unsigned numBits)
+    : Value(environment), mTop(false), mNumBits(numBits)
 {
 }
 
-Enumeration::Enumeration(const llvm::APInt &number) : mTop(false)
+Enumeration::Enumeration(const Environment &environment, const llvm::APInt &number)
+    : Value(environment), mTop(false)
 {
     mValues.insert(number);
 }
@@ -100,7 +101,7 @@ Enumeration::clone() const
 Enumeration *
 Enumeration::cloneCleaned() const
 {
-    return new Enumeration(getBitWidth());
+    return new Enumeration(mEnvironment, getBitWidth());
 }
 
 bool

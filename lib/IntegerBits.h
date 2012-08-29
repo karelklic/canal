@@ -28,9 +28,9 @@ public:
 
 public:
     /// Initializes to the lowest value.
-    Bits(unsigned numBits);
+    Bits(const Environment &environment, unsigned numBits);
     /// Initializes to the given value.
-    Bits(const llvm::APInt &number);
+    Bits(const Environment &environment, const llvm::APInt &number);
 
     /// Return the number of bits of the represented number.
     unsigned getBitWidth() const { return mBits0.getBitWidth(); }

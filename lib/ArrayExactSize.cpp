@@ -10,7 +10,7 @@
 namespace Canal {
 namespace Array {
 
-ExactSize::ExactSize(Environment &environment) : Value(environment)
+ExactSize::ExactSize(const Environment &environment) : Value(environment)
 {
 }
 
@@ -256,7 +256,7 @@ cmpOperation(ExactSize &result,
 
     for (; itA != aa.mValues.end(); ++itA, ++itB)
     {
-        Value *resultValue = new Integer::Container(1);
+        Value *resultValue = new Integer::Container(result.mEnvironment, 1);
         ((resultValue)->*(operation))(**itA, **itB, predicate);
         result.mValues.push_back(resultValue);
     }

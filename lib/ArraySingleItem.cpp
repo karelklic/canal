@@ -9,7 +9,7 @@
 namespace Canal {
 namespace Array {
 
-SingleItem::SingleItem(Environment &environment)
+SingleItem::SingleItem(const Environment &environment)
     : Value(environment), mValue(NULL), mSize(NULL)
 {
 }

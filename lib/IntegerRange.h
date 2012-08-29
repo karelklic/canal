@@ -27,8 +27,8 @@ public:
 
 public:
     /// Initializes to the lowest value.
-    Range(unsigned numBits);
-    Range(const llvm::APInt &constant);
+    Range(const Environment &environment, unsigned numBits);
+    Range(const Environment &environment, const llvm::APInt &constant);
 
     unsigned getBitWidth() const { return mSignedFrom.getBitWidth(); }
 

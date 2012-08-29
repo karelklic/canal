@@ -16,7 +16,8 @@ public:
     llvm::APFloat mTo;
 
 public:
-    Range(const llvm::fltSemantics &semantics);
+    Range(const Environment &environment,
+          const llvm::fltSemantics &semantics);
 
     // Compares a range with another range.
     // @returns

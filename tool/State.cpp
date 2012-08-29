@@ -142,7 +142,7 @@ State::addMainFrame()
         {
             const llvm::IntegerType* type = llvm::cast<llvm::IntegerType>((*it).getType());
             llvm::APInt signedOne(/*numBits=*/type->getBitWidth(), /*value=*/1, /*isSigned=*/true);
-            Canal::Value *argc = new Canal::Integer::Container(signedOne);
+            Canal::Value *argc = new Canal::Integer::Container(mEnvironment, signedOne);
             initialState.addFunctionVariable(*it, argc);
             break;
         }

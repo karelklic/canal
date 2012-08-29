@@ -51,7 +51,7 @@ getFloatingPointSemantics(const llvm::Type &type)
 }
 
 static Value *
-typeToEmptyValue(const llvm::Type &type, const llvm::Module &module)
+typeToEmptyValue(const llvm::Type &type, const Environment &environment)
 {
     if (type.isVoidTy())
         return NULL;
@@ -59,19 +59,19 @@ typeToEmptyValue(const llvm::Type &type, const llvm::Module &module)
     if (type.isIntegerTy())
     {
         llvm::IntegerType &integerType = llvmCast<llvm::IntegerType>(type);
-        return new Integer::Container(integerType.getBitWidth());
+        return new Integer::Container(environment, integerType.getBitWidth());
     }
 
     if (type.isFloatingPointTy())
     {
         const llvm::fltSemantics *semantics = getFloatingPointSemantics(type);
-        return new Float::Range(*semantics);
+        return new Float::Range(environment, *semantics);
     }
 
     if (type.isPointerTy())
     {
         const llvm::PointerType &pointerType = llvmCast<const llvm::PointerType>(type);
-        return new Pointer::InclusionBased(module, pointerType.getElementType());
+        return new Pointer::InclusionBased(environment, pointerType.getElementType());
     }
 
     if (type.isArrayTy() || type.isVectorTy())
@@ -82,12 +82,12 @@ typeToEmptyValue(const llvm::Type &type, const llvm::Module &module)
     if (type.isStructTy())
     {
         const llvm::StructType &structType = llvmCast<llvm::StructType>(type);
-        Structure *structure = new Structure();
+        Structure *structure = new Structure(environment);
 
         llvm::StructType::element_iterator it = structType.element_begin(),
             itend = structType.element_end();
         for (; it != itend; ++it)
-            structure->mMembers.push_back(typeToEmptyValue(**it, module));
+            structure->mMembers.push_back(typeToEmptyValue(**it, environment));
 
         return structure;
     }
@@ -105,13 +105,13 @@ Interpreter::addGlobalVariables(State &state,
     for (; git != gitend; ++git)
     {
         if (git->isConstant())
-            state.addGlobalVariable(*git, new Canal::Constant(git));
+            state.addGlobalVariable(*git, new Constant(environment, git));
         else
         {
             // When it is not a constant, then it is a pointer to a
             // global block.
             state.addGlobalBlock(*git, typeToEmptyValue(*git->getType()->getElementType(),
-                                                        environment.mModule));
+                                                        environment));
 
             Value *value = typeToEmptyValue(*git->getType(),
                                             environment.mModule);
@@ -306,11 +306,11 @@ Interpreter::ret(const llvm::ReturnInst &instruction,
                 delete constant;
             }
 
-            Constant c(llvmCast<llvm::Constant>(value));
+            Constant c(environment, llvmCast<llvm::Constant>(value));
             state.mReturnedValue->merge(c);
         }
         else
-            state.mReturnedValue = new Constant(llvmCast<llvm::Constant>(value));
+            state.mReturnedValue = new Constant(environment, llvmCast<llvm::Constant>(value));
     }
 }
 
@@ -361,7 +361,7 @@ variableOrConstant(const llvm::Value &place, State &state, Constant &constant)
 template<typename T> static void
 interpretCall(const T &instruction,
               Stack &stack,
-              const llvm::Module &module)
+              const Environment &environment)
 {
     State &state = stack.getCurrentState();
     llvm::Function *function = instruction.getCalledFunction();
@@ -379,7 +379,7 @@ interpretCall(const T &instruction,
         // Create result TOP value of required type.
         const llvm::Type *type = instruction.getType();
         Value *returnedValue = typeToEmptyValue(*instruction.getType(),
-                                                module);
+                                                environment);
 
         // If the function returns nothing (void), we are finished.
         if (!returnedValue)
@@ -401,7 +401,7 @@ interpretCall(const T &instruction,
     for (int i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
     {
         llvm::Value *operand = instruction.getArgOperand(i);
-        Constant c;
+        Constant c(environment, NULL);
         Value *value = variableOrConstant(*operand, state, c);
         if (!value)
             return;
@@ -430,12 +430,16 @@ Interpreter::unreachable(const llvm::UnreachableInst &instruction,
 static void
 binaryOperation(const llvm::BinaryOperator &instruction,
                 State &state,
-                const llvm::Module &module,
+                const Environment &environment,
                 Value::BinaryOperation operation)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.
-    Constant constants[2];
+    Constant constants[2] = {
+        Constant(environment, NULL),
+        Constant(environment, NULL)
+    };
+
     Value *values[2] = {
         variableOrConstant(*instruction.getOperand(0), state, constants[0]),
         variableOrConstant(*instruction.getOperand(1), state, constants[1])
@@ -445,7 +449,7 @@ binaryOperation(const llvm::BinaryOperator &instruction,
 
     // Create result value of required type and then run the desired
     // operation.
-    Value *result = typeToEmptyValue(*instruction.getType(), module);
+    Value *result = typeToEmptyValue(*instruction.getType(), environment);
     ((result)->*(operation))(*values[0], *values[1]);
 
     // Store the result value to the state.
@@ -603,7 +607,11 @@ Interpreter::extractelement(const llvm::ExtractElementInst &instruction,
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.  Fixpoint
     // calculation is probably not far enough.
-    Constant constants[2];
+    Constant constants[2] = {
+        Constant(environment, NULL),
+        Constant(environment, NULL)
+    };
+
     Value *values[2] = {
         variableOrConstant(*instruction.getOperand(0), state, constants[0]),
         variableOrConstant(*instruction.getOperand(1), state, constants[1])
@@ -640,7 +648,12 @@ Interpreter::insertelement(const llvm::InsertElementInst &instruction,
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.  Fixpoint
     // calculation is probably not far enough.
-    Constant constants[3];
+    Constant constants[3] = {
+        Constant(environment, NULL),
+        Constant(environment, NULL),
+        Constant(environment, NULL)
+    };
+
     Value *values[3] = {
         variableOrConstant(*instruction.getOperand(0), state, constants[0]),
         variableOrConstant(*instruction.getOperand(1), state, constants[1]),
@@ -673,7 +686,11 @@ Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction,
 {
     State &state = stack.getCurrentState();
 
-    Constant constants[2];
+    Constant constants[2] = {
+        Constant(environment, NULL),
+        Constant(environment, NULL)
+    };
+
     Value *values[2] = {
         variableOrConstant(*instruction.getOperand(0), state, constants[0]),
         variableOrConstant(*instruction.getOperand(1), state, constants[1])
@@ -686,7 +703,7 @@ Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction,
     Array::ExactSize *array1 = dynCast<Array::ExactSize*>(values[1]);
     CANAL_ASSERT_MSG(array1, "Invalid type in shufflevector.");
 
-    Array::ExactSize *result = new Array::ExactSize();
+    Array::ExactSize *result = new Array::ExactSize(environment);
 
 #if LLVM_MAJOR == 3 && LLVM_MINOR >= 1
     llvm::SmallVector<int, 16> shuffleMask = instruction.getShuffleMask();
@@ -770,7 +787,7 @@ Interpreter::extractvalue(const llvm::ExtractValueInst &instruction,
                           State &state,
                           const Environment &environment)
 {
-    Constant constant;
+    Constant constant(environment, NULL);
     Value *aggregate = variableOrConstant(
         *instruction.getAggregateOperand(),
         state,
@@ -788,7 +805,7 @@ Interpreter::insertvalue(const llvm::InsertValueInst &instruction,
                          State &state,
                          const Environment &environment)
 {
-    Constant aggregateConstant;
+    Constant aggregateConstant(environment, NULL);
     Value *aggregate = variableOrConstant(
         *instruction.getAggregateOperand(),
         state,
@@ -797,7 +814,7 @@ Interpreter::insertvalue(const llvm::InsertValueInst &instruction,
     if (!aggregate)
         return;
 
-    Constant insertedConstant;
+    Constant insertedConstant(environment, NULL);
     Value *insertedValue = variableOrConstant(
         *instruction.getInsertedValueOperand(),
         state,
@@ -831,7 +848,7 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction,
             const llvm::ConstantInt *constant =
                 llvmCast<llvm::ConstantInt>(arraySize);
 
-            abstractSize = new Constant(constant);
+            abstractSize = new Constant(environment, constant);
         }
         else
         {
@@ -847,7 +864,7 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction,
             abstractSize = abstractSize->clone();
         }
 
-        Array::SingleItem *array = new Array::SingleItem();
+        Array::SingleItem *array = new Array::SingleItem(environment);
         array->mValue = value;
         array->mSize = abstractSize;
         value = array;
@@ -855,7 +872,7 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction,
 
     state.addFunctionBlock(instruction, value);
     Pointer::InclusionBased *pointer =
-        new Pointer::InclusionBased(environment.mModule, type);
+        new Pointer::InclusionBased(environment, type);
 
     pointer->addTarget(Pointer::Target::FunctionBlock,
                        &instruction,
@@ -900,6 +917,7 @@ Interpreter::load(const llvm::LoadInst &instruction,
 //   values.  Caller takes ownership of the values.
 template<typename T> static bool
 getElementPtrOffsets(std::vector<Value*> &result,
+                     const Environment &environment,
                      T iteratorStart,
                      T iteratorEnd,
                      const State &state)
@@ -925,7 +943,7 @@ getElementPtrOffsets(std::vector<Value*> &result,
             llvm::ConstantInt *constant =
                 llvmCast<llvm::ConstantInt>(it);
 
-            result.push_back(new Constant(constant));
+            result.push_back(new Constant(environment, constant));
         }
         else
         {
@@ -981,6 +999,7 @@ Interpreter::store(const llvm::StoreInst &instruction,
             std::vector<Value*> offsets;
             bool allOffsetsPresent = getElementPtrOffsets(
                 offsets,
+                environment,
                 constantExpr->op_begin() + 1,
                 constantExpr->op_end(),
                 state);
@@ -1003,7 +1022,7 @@ Interpreter::store(const llvm::StoreInst &instruction,
             value = constPointer;
         }
         else
-            value = new Constant(constant);
+            value = new Constant(environment, constant);
     }
 
     pointer.store(*value, state);
@@ -1034,6 +1053,7 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
     // targets.
     std::vector<Value*> offsets;
     bool allOffsetsPresent = getElementPtrOffsets(offsets,
+                                                  environment,
                                                   instruction.idx_begin(),
                                                   instruction.idx_end(),
                                                   state);
@@ -1051,10 +1071,10 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
 static void
 castOperation(const llvm::CastInst &instruction,
               State &state,
-              const llvm::Module &module,
+              const Environment &environment,
               Value::CastOperation operation)
 {
-    Constant constant;
+    Constant constant(environment, NULL);
     Value *source = variableOrConstant(
         *instruction.getOperand(0),
         state,
@@ -1066,7 +1086,7 @@ castOperation(const llvm::CastInst &instruction,
     // Create result value of required type and then run the desired
     // operation.
     Value *result = typeToEmptyValue(*instruction.getDestTy(),
-                                     module);
+                                     environment);
     ((result)->*(operation))(*source);
 
     // Store the result value to the state.
@@ -1259,12 +1279,17 @@ Interpreter::bitcast(const llvm::BitCastInst &instruction,
 
 static void
 cmpOperation(const llvm::CmpInst &instruction,
+             const Environment &environment,
              State &state,
              Value::CmpOperation operation)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.
-    Constant constants[2];
+    Constant constants[2] = {
+        Constant(environment, NULL),
+        Constant(environment, NULL)
+    };
+
     Value *values[2] = {
         variableOrConstant(*instruction.getOperand(0), state, constants[0]),
         variableOrConstant(*instruction.getOperand(1), state, constants[1])
@@ -1273,7 +1298,7 @@ cmpOperation(const llvm::CmpInst &instruction,
         return;
 
     // TODO: suppot arrays
-    Value *resultValue = new Integer::Container(1);
+    Value *resultValue = new Integer::Container(environment, 1);
     ((resultValue)->*(operation))(*values[0],
                                   *values[1],
                                   instruction.getPredicate());
@@ -1286,7 +1311,7 @@ Interpreter::icmp(const llvm::ICmpInst &instruction,
                   State &state,
                   const Environment &environment)
 {
-    cmpOperation(instruction, state, &Value::icmp);
+    cmpOperation(instruction, environment, state, &Value::icmp);
 }
 
 void
@@ -1294,7 +1319,7 @@ Interpreter::fcmp(const llvm::FCmpInst &instruction,
                   State &state,
                   const Environment &environment)
 {
-    cmpOperation(instruction, state, &Value::fcmp);
+    cmpOperation(instruction, environment, state, &Value::fcmp);
 }
 
 void
@@ -1305,7 +1330,7 @@ Interpreter::phi(const llvm::PHINode &instruction,
     Value *mergedValue = NULL;
     for (int i = 0; i < instruction.getNumIncomingValues(); ++i)
     {
-        Constant c;
+        Constant c(environment, NULL);
         Value *value = variableOrConstant(*instruction.getIncomingValue(i),
                                           state, c);
         if (!value)
@@ -1338,7 +1363,9 @@ Interpreter::select(const llvm::SelectInst &instruction,
     if (!condition)
         return;
 
-    Constant trueConstant, falseConstant;
+    Constant trueConstant(environment, NULL),
+        falseConstant(environment, NULL);
+
     Value *trueValue = variableOrConstant(*instruction.getTrueValue(),
                                           state, trueConstant);
     Value *falseValue = variableOrConstant(*instruction.getFalseValue(),

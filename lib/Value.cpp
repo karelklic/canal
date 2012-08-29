@@ -6,7 +6,7 @@
 
 namespace Canal {
 
-Value::Value(Environment &environment) : mEnvironment(environment)
+Value::Value(const Environment &environment) : mEnvironment(environment)
 {
 }
 

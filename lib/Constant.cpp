@@ -8,7 +8,7 @@
 
 namespace Canal {
 
-Constant::Constant(Environment &environment, const llvm::Constant *constant)
+Constant::Constant(const Environment &environment, const llvm::Constant *constant)
     : Value(environment), mConstant(constant)
 {
 }
@@ -46,11 +46,9 @@ Value *
 Constant::toModifiableValue() const
 {
     if (isAPInt())
-        return new Integer::Container(getAPInt());
+        return new Integer::Container(mEnvironment, getAPInt());
     else if (isNullPtr())
-        //TODO - create null pointer
-        //return new Canal::Pointer::InclusionBased(, llvmCast<llvm::ConstantPointerNull>(mConstant)->getType());
-        return NULL;
+        return new Pointer::InclusionBased(mEnvironment, llvmCast<llvm::ConstantPointerNull>(mConstant)->getType());
     else
         CANAL_DIE();
 }
