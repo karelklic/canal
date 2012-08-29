@@ -14,6 +14,8 @@ namespace Canal {
 class State;
 class Environment;
 
+/// @brief
+/// Base class for all abstract domains.
 class Value
 {
 protected:
@@ -119,7 +121,8 @@ public:
 llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
                               const Value &value);
 
-/// Base class for abstract states that can inform about accuracy.
+/// @brief
+/// Base class for abstract domains with the concept of value accuracy.
 class AccuracyValue
 {
 public:
@@ -143,7 +146,8 @@ public:
     virtual void setTop();
 };
 
-/// Base class for abstract values that can lower the precision and
+/// @brief
+/// Base class for abstract domains that can lower the precision and
 /// memory requirements on demand.
 class VariablePrecisionValue
 {

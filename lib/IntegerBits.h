@@ -82,6 +82,9 @@ public:
     ///   correct value.
     bool unsignedMax(llvm::APInt &result) const;
 
+    /// Does these bits represent single value?
+    bool isSingleValue() const;
+
 public: // Implementation of Value.
     /// Implementation of Value::clone().
     /// Covariant return type.

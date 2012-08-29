@@ -4,6 +4,7 @@
 #include "Utils.h"
 #include "State.h"
 #include "SlotTracker.h"
+#include "IntegerContainer.h"
 #include <llvm/BasicBlock.h>
 #include <llvm/Type.h>
 #include <sstream>
@@ -178,6 +179,19 @@ InclusionBased::operator==(const Value &value) const
             return false;
     }
 
+    return true;
+}
+
+bool
+InclusionBased::isSingleTarget() const {
+    if (mTop || mTargets.size() != 1) return false;
+    const Target *target = mTargets.begin()->second;
+    const Canal::Integer::Container* tmp = dynCast<const Canal::Integer::Container*>(target->mNumericOffset);
+    if (!tmp->isSingleValue()) return false;
+    for (std::vector<Value*>::const_iterator it = target->mOffsets.begin(); it != target->mOffsets.end(); it ++) {
+        tmp = dynCast<const Canal::Integer::Container*>(*it);
+        if (!tmp->isSingleValue()) return false;
+    }
     return true;
 }
 

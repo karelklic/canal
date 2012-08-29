@@ -1,6 +1,7 @@
 #include "Constant.h"
 #include "IntegerContainer.h"
 #include "Utils.h"
+#include "Pointer.h"
 #include <sstream>
 #include <llvm/Constants.h>
 #include <llvm/Support/raw_ostream.h>
@@ -25,6 +26,11 @@ Constant::getAPInt() const
 }
 
 bool
+Constant::isNullPtr() const {
+    return llvm::isa<llvm::ConstantPointerNull>(mConstant);
+}
+
+bool
 Constant::isGetElementPtr() const
 {
     const llvm::ConstantExpr *constant =
@@ -41,6 +47,10 @@ Constant::toModifiableValue() const
 {
     if (isAPInt())
         return new Integer::Container(getAPInt());
+    else if (isNullPtr())
+        //TODO - create null pointer
+        //return new Canal::Pointer::InclusionBased(, llvmCast<llvm::ConstantPointerNull>(mConstant)->getType());
+        return NULL;
     else
         CANAL_DIE();
 }

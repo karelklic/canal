@@ -151,6 +151,8 @@ public: // Implementation of AccuracyValue.
     virtual bool isTop() const;
     /// Implementation of AccuracyValue::setTop().
     virtual void setTop();
+    /// Find out whether all representations contain only single value
+    bool isSingleValue() const;
 };
 
 } // namespace Integer
