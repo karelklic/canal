@@ -39,8 +39,9 @@ Makefile
 /tests/testsuite
 /tests/testsuite.log
 /tests/testsuite.dir
-/tests/PointerTest
-/tests/InterpreterTest
+/tests/unit/PointerTest
+/tests/unit/InterpreterTest
+/tests/unit/IntegerRangeTest
 /tests/*.o
 
 /wrappers/config.py
