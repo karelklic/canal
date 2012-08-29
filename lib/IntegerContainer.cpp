@@ -393,9 +393,7 @@ cmpOperation(Container &result,
     bool deletePtrA = false, deletePtrB = false;
     const Constant* aConstant = dynCast<const Constant*>(&a),
             *bConstant = dynCast<const Constant*>(&b);
-
-    if ((aPointer || aConstant->isNullPtr()) && (bPointer || bConstant->isNullPtr()))
-    {
+    if ( (aPointer || aConstant && aConstant->isNullPtr()) && (bPointer || bConstant && bConstant->isNullPtr()) ) {
         CANAL_ASSERT(operation == &Value::icmp);
         if (aConstant)
         {
