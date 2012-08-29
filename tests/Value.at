@@ -1,5 +1,0 @@
-AT_BANNER([Value])
-
-AT_SETUP([Pointer])
-AT_CHECK([../../PointerTest], 0)
-AT_CLEANUP

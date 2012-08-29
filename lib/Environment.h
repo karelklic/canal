@@ -6,6 +6,7 @@
 
 namespace llvm {
 class Module;
+class LLVMContext;
 } // namespace llvm
 
 namespace Canal {
@@ -21,6 +22,8 @@ public:
     // @param module
     //   LLVM module that contains all functions.
     Environment(const llvm::Module &module);
+
+    llvm::LLVMContext &getContext() const;
 };
 
 } // namespace Canal

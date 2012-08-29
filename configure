@@ -791,12 +791,23 @@ O0CFLAGS
 AUTOM4TE
 DOT
 DOXYGEN
+LATEX_INPUTENC
+LATEX_A4WIDE
+LATEX_MAKEIDX
+LATEX_HYPERREF
+LATEX_GRAPHICX
+LATEX_IMPORT
+LATEX_AMSMATH
+LATEX_AMSSYMB
+LATEX_TXFONTS
+LATEX_FLOAT
+LATEX_GALOIS
 PDFLATEX
-CLANG
 LLVM_LDFLAGS
 LLVM_LIBS
 LLVM_CFLAGS
 LLVM_VERSION
+CLANG
 LLVM_LINK
 LLVM_CONFIG
 LIBTOOL_DEPS
@@ -5667,13 +5678,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:5670: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:5681: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5673: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:5684: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5676: output\"" >&5)
+  (eval echo "\"\$as_me:5687: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6878,7 +6889,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6881 "configure"' > conftest.$ac_ext
+  echo '#line 6892 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8955,11 +8966,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8958: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8969: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8962: \$? = $ac_status" >&5
+   echo "$as_me:8973: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9294,11 +9305,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9297: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9308: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9301: \$? = $ac_status" >&5
+   echo "$as_me:9312: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9399,11 +9410,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9402: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9413: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9406: \$? = $ac_status" >&5
+   echo "$as_me:9417: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9454,11 +9465,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9457: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9468: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9461: \$? = $ac_status" >&5
+   echo "$as_me:9472: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12257,7 +12268,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12260 "configure"
+#line 12271 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12353,7 +12364,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12356 "configure"
+#line 12367 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14373,11 +14384,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14376: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14387: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14380: \$? = $ac_status" >&5
+   echo "$as_me:14391: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14472,11 +14483,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14475: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14486: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14479: \$? = $ac_status" >&5
+   echo "$as_me:14490: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14524,11 +14535,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14527: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14538: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14531: \$? = $ac_status" >&5
+   echo "$as_me:14542: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15513,7 +15524,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-# LLVM
+# Program testing macro
+
+
+# LLVM and Clang
+
 # Extract the first word of "llvm-config", so it can be a program name with args.
 set dummy llvm-config; ac_word=$2
 { $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -15561,6 +15576,8 @@ if test "$LLVM_CONFIG" = "no"; then
     echo "Then run configure again before attempting to build Canal."
     exit 1
 fi
+
+
 
 # Extract the first word of "llvm-link", so it can be a program name with args.
 set dummy llvm-link; ac_word=$2
@@ -15611,22 +15628,7 @@ if test "$LLVM_LINK" = "no"; then
 fi
 
 
-LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
 
-
-LLVM_CFLAGS=`$LLVM_CONFIG --cppflags | sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
-
-
-LLVM_LIBS=`$LLVM_CONFIG --libs`
-
-
-LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
-
-
-# Quadrigraphs: [ gives you [ and ] gives you ].
-CPPFLAGS+=`$LLVM_CONFIG --version | sed 's/\([0-9]*\).\([0-9]*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
-
-# CLANG
 # Extract the first word of "clang", so it can be a program name with args.
 set dummy clang; ac_word=$2
 { $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -15675,6 +15677,18 @@ if test "$CLANG" = "no"; then
     exit 1
 fi
 
+
+LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
+
+LLVM_CFLAGS=`$LLVM_CONFIG --cppflags | sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
+
+LLVM_LIBS=`$LLVM_CONFIG --libs`
+
+LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
+
+
+# Quadrigraphs: [ gives you [ and ] gives you ].
+CPPFLAGS+=`$LLVM_CONFIG --version | sed 's/\([0-9]*\).\([0-9]*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
 
 # readline
 
@@ -15828,7 +15842,8 @@ fi
 done
 
 
-# pdflatex
+# pdfLaTeX
+
 # Extract the first word of "pdflatex", so it can be a program name with args.
 set dummy pdflatex; ac_word=$2
 { $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -15877,7 +15892,461 @@ if test "$PDFLATEX" = "no"; then
     exit 1
 fi
 
-# doxygen
+
+
+# LaTeX testing macro
+
+
+# LaTeX package testing macro
+
+
+# LaTeX package critical testing macro
+
+
+# LaTeX packages
+
+
+{ $as_echo "$as_me:$LINENO: checking for galois latex package in class book" >&5
+$as_echo_n "checking for galois latex package in class book... " >&6; }
+if test "${ac_cv_latex_galois+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+ac_cv_latex_galois="no"; export ac_cv_latex_galois;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{galois}
+\begin{document}
+\end{document}
+
+EOF
+cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_galois=yes; export ac_cv_latex_galois;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_latex_galois" >&5
+$as_echo "$ac_cv_latex_galois" >&6; }
+export LATEX_GALOIS=$ac_cv_latex_galois
+
+
+if test "$LATEX_GALOIS" = "no"; then
+    echo "The galois LaTeX library was not found. Please ensure that it is "
+    echo "installed and its directory is included in the LaTeX search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+
+
+
+{ $as_echo "$as_me:$LINENO: checking for float latex package in class book" >&5
+$as_echo_n "checking for float latex package in class book... " >&6; }
+if test "${ac_cv_latex_float+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+ac_cv_latex_float="no"; export ac_cv_latex_float;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{float}
+\begin{document}
+\end{document}
+
+EOF
+cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_float=yes; export ac_cv_latex_float;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_latex_float" >&5
+$as_echo "$ac_cv_latex_float" >&6; }
+export LATEX_FLOAT=$ac_cv_latex_float
+
+
+if test "$LATEX_FLOAT" = "no"; then
+    echo "The float LaTeX library was not found. Please ensure that it is "
+    echo "installed and its directory is included in the LaTeX search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+
+
+
+{ $as_echo "$as_me:$LINENO: checking for txfonts latex package in class book" >&5
+$as_echo_n "checking for txfonts latex package in class book... " >&6; }
+if test "${ac_cv_latex_txfonts+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+ac_cv_latex_txfonts="no"; export ac_cv_latex_txfonts;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{txfonts}
+\begin{document}
+\end{document}
+
+EOF
+cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_txfonts=yes; export ac_cv_latex_txfonts;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_latex_txfonts" >&5
+$as_echo "$ac_cv_latex_txfonts" >&6; }
+export LATEX_TXFONTS=$ac_cv_latex_txfonts
+
+
+if test "$LATEX_TXFONTS" = "no"; then
+    echo "The txfonts LaTeX library was not found. Please ensure that it is "
+    echo "installed and its directory is included in the LaTeX search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+
+
+
+{ $as_echo "$as_me:$LINENO: checking for amssymb latex package in class book" >&5
+$as_echo_n "checking for amssymb latex package in class book... " >&6; }
+if test "${ac_cv_latex_amssymb+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+ac_cv_latex_amssymb="no"; export ac_cv_latex_amssymb;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{amssymb}
+\begin{document}
+\end{document}
+
+EOF
+cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_amssymb=yes; export ac_cv_latex_amssymb;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_latex_amssymb" >&5
+$as_echo "$ac_cv_latex_amssymb" >&6; }
+export LATEX_AMSSYMB=$ac_cv_latex_amssymb
+
+
+if test "$LATEX_AMSSYMB" = "no"; then
+    echo "The amssymb LaTeX library was not found. Please ensure that it is "
+    echo "installed and its directory is included in the LaTeX search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+
+
+
+{ $as_echo "$as_me:$LINENO: checking for amsmath latex package in class book" >&5
+$as_echo_n "checking for amsmath latex package in class book... " >&6; }
+if test "${ac_cv_latex_amsmath+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+ac_cv_latex_amsmath="no"; export ac_cv_latex_amsmath;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{amsmath}
+\begin{document}
+\end{document}
+
+EOF
+cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_amsmath=yes; export ac_cv_latex_amsmath;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_latex_amsmath" >&5
+$as_echo "$ac_cv_latex_amsmath" >&6; }
+export LATEX_AMSMATH=$ac_cv_latex_amsmath
+
+
+if test "$LATEX_AMSMATH" = "no"; then
+    echo "The amsmath LaTeX library was not found. Please ensure that it is "
+    echo "installed and its directory is included in the LaTeX search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+
+
+
+{ $as_echo "$as_me:$LINENO: checking for import latex package in class book" >&5
+$as_echo_n "checking for import latex package in class book... " >&6; }
+if test "${ac_cv_latex_import+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+ac_cv_latex_import="no"; export ac_cv_latex_import;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{import}
+\begin{document}
+\end{document}
+
+EOF
+cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_import=yes; export ac_cv_latex_import;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_latex_import" >&5
+$as_echo "$ac_cv_latex_import" >&6; }
+export LATEX_IMPORT=$ac_cv_latex_import
+
+
+if test "$LATEX_IMPORT" = "no"; then
+    echo "The import LaTeX library was not found. Please ensure that it is "
+    echo "installed and its directory is included in the LaTeX search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+
+
+
+{ $as_echo "$as_me:$LINENO: checking for graphicx latex package in class book" >&5
+$as_echo_n "checking for graphicx latex package in class book... " >&6; }
+if test "${ac_cv_latex_graphicx+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+ac_cv_latex_graphicx="no"; export ac_cv_latex_graphicx;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{graphicx}
+\begin{document}
+\end{document}
+
+EOF
+cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_graphicx=yes; export ac_cv_latex_graphicx;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_latex_graphicx" >&5
+$as_echo "$ac_cv_latex_graphicx" >&6; }
+export LATEX_GRAPHICX=$ac_cv_latex_graphicx
+
+
+if test "$LATEX_GRAPHICX" = "no"; then
+    echo "The graphicx LaTeX library was not found. Please ensure that it is "
+    echo "installed and its directory is included in the LaTeX search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+
+
+
+{ $as_echo "$as_me:$LINENO: checking for hyperref latex package in class book" >&5
+$as_echo_n "checking for hyperref latex package in class book... " >&6; }
+if test "${ac_cv_latex_hyperref+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+ac_cv_latex_hyperref="no"; export ac_cv_latex_hyperref;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{hyperref}
+\begin{document}
+\end{document}
+
+EOF
+cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_hyperref=yes; export ac_cv_latex_hyperref;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_latex_hyperref" >&5
+$as_echo "$ac_cv_latex_hyperref" >&6; }
+export LATEX_HYPERREF=$ac_cv_latex_hyperref
+
+
+if test "$LATEX_HYPERREF" = "no"; then
+    echo "The hyperref LaTeX library was not found. Please ensure that it is "
+    echo "installed and its directory is included in the LaTeX search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+
+
+
+{ $as_echo "$as_me:$LINENO: checking for makeidx latex package in class book" >&5
+$as_echo_n "checking for makeidx latex package in class book... " >&6; }
+if test "${ac_cv_latex_makeidx+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+ac_cv_latex_makeidx="no"; export ac_cv_latex_makeidx;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{makeidx}
+\begin{document}
+\end{document}
+
+EOF
+cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_makeidx=yes; export ac_cv_latex_makeidx;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_latex_makeidx" >&5
+$as_echo "$ac_cv_latex_makeidx" >&6; }
+export LATEX_MAKEIDX=$ac_cv_latex_makeidx
+
+
+if test "$LATEX_MAKEIDX" = "no"; then
+    echo "The makeidx LaTeX library was not found. Please ensure that it is "
+    echo "installed and its directory is included in the LaTeX search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+
+
+
+{ $as_echo "$as_me:$LINENO: checking for a4wide latex package in class book" >&5
+$as_echo_n "checking for a4wide latex package in class book... " >&6; }
+if test "${ac_cv_latex_a4wide+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+ac_cv_latex_a4wide="no"; export ac_cv_latex_a4wide;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{a4wide}
+\begin{document}
+\end{document}
+
+EOF
+cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_a4wide=yes; export ac_cv_latex_a4wide;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_latex_a4wide" >&5
+$as_echo "$ac_cv_latex_a4wide" >&6; }
+export LATEX_A4WIDE=$ac_cv_latex_a4wide
+
+
+if test "$LATEX_A4WIDE" = "no"; then
+    echo "The a4wide LaTeX library was not found. Please ensure that it is "
+    echo "installed and its directory is included in the LaTeX search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+
+
+
+{ $as_echo "$as_me:$LINENO: checking for inputenc latex package in class book" >&5
+$as_echo_n "checking for inputenc latex package in class book... " >&6; }
+if test "${ac_cv_latex_inputenc+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+ac_cv_latex_inputenc="no"; export ac_cv_latex_inputenc;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{inputenc}
+\begin{document}
+\end{document}
+
+EOF
+cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_inputenc=yes; export ac_cv_latex_inputenc;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_latex_inputenc" >&5
+$as_echo "$ac_cv_latex_inputenc" >&6; }
+export LATEX_INPUTENC=$ac_cv_latex_inputenc
+
+
+if test "$LATEX_INPUTENC" = "no"; then
+    echo "The inputenc LaTeX library was not found. Please ensure that it is "
+    echo "installed and its directory is included in the LaTeX search path."
+    echo "Then run configure again before attempting to build Canal."
+    exit 1
+fi
+
+
+
+# Doxygen
+
 # Extract the first word of "doxygen", so it can be a program name with args.
 set dummy doxygen; ac_word=$2
 { $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -15926,7 +16395,10 @@ if test "$DOXYGEN" = "no"; then
     exit 1
 fi
 
-# dot (part of graphviz
+
+
+# dot (part of graphviz)
+
 # Extract the first word of "dot", so it can be a program name with args.
 set dummy dot; ac_word=$2
 { $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -15968,18 +16440,18 @@ $as_echo "no" >&6; }
 fi
 
 
-if test "DOT" = "no"; then
+if test "$DOT" = "no"; then
     echo "The dot program was not found in the search path. Please ensure"
     echo "that it is installed and its directory is included in the search path."
     echo "Then run configure again before attempting to build Canal."
     exit 1
 fi
 
+
+
 # Initialize the test suite.
 ac_config_commands="$ac_config_commands tests/atconfig"
 
-
-ac_config_files="$ac_config_files tests/Makefile tests/atlocal"
 
 
 AUTOM4TE=${AUTOM4TE-"${am_missing_run}autom4te"}
@@ -15988,7 +16460,7 @@ AUTOM4TE=${AUTOM4TE-"${am_missing_run}autom4te"}
 O0CFLAGS=`echo $CFLAGS | sed 's/-O[0-9] *//g'`
 
 
-ac_config_files="$ac_config_files canal.spec Makefile docs/Makefile lib/Makefile tool/Makefile wrappers/config.py wrappers/Makefile"
+ac_config_files="$ac_config_files canal.spec Makefile docs/Makefile lib/Makefile tests/Makefile tests/atlocal tests/integration/Makefile tests/unit/Makefile tool/Makefile wrappers/config.py wrappers/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -16994,12 +17466,14 @@ do
     "lib/Config.h") CONFIG_HEADERS="$CONFIG_HEADERS lib/Config.h" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "tests/atconfig") CONFIG_COMMANDS="$CONFIG_COMMANDS tests/atconfig" ;;
-    "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
-    "tests/atlocal") CONFIG_FILES="$CONFIG_FILES tests/atlocal" ;;
     "canal.spec") CONFIG_FILES="$CONFIG_FILES canal.spec" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "docs/Makefile") CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
+    "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
+    "tests/atlocal") CONFIG_FILES="$CONFIG_FILES tests/atlocal" ;;
+    "tests/integration/Makefile") CONFIG_FILES="$CONFIG_FILES tests/integration/Makefile" ;;
+    "tests/unit/Makefile") CONFIG_FILES="$CONFIG_FILES tests/unit/Makefile" ;;
     "tool/Makefile") CONFIG_FILES="$CONFIG_FILES tool/Makefile" ;;
     "wrappers/config.py") CONFIG_FILES="$CONFIG_FILES wrappers/config.py" ;;
     "wrappers/Makefile") CONFIG_FILES="$CONFIG_FILES wrappers/Makefile" ;;

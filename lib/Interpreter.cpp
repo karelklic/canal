@@ -71,7 +71,8 @@ typeToEmptyValue(const llvm::Type &type, const Environment &environment)
     if (type.isPointerTy())
     {
         const llvm::PointerType &pointerType = llvmCast<const llvm::PointerType>(type);
-        return new Pointer::InclusionBased(environment, pointerType.getElementType());
+        CANAL_ASSERT(pointerType.getElementType());
+        return new Pointer::InclusionBased(environment, *pointerType.getElementType());
     }
 
     if (type.isArrayTy() || type.isVectorTy())
@@ -836,6 +837,7 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction,
 {
     State &state = stack.getCurrentState();
     const llvm::Type *type = instruction.getAllocatedType();
+    CANAL_ASSERT(type);
     Value *value = typeToEmptyValue(*type, environment.mModule);
 
     if (instruction.isArrayAllocation())
@@ -872,7 +874,7 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction,
 
     state.addFunctionBlock(instruction, value);
     Pointer::InclusionBased *pointer =
-        new Pointer::InclusionBased(environment, type);
+        new Pointer::InclusionBased(environment, *type);
 
     pointer->addTarget(Pointer::Target::FunctionBlock,
                        &instruction,
@@ -1010,9 +1012,10 @@ Interpreter::store(const llvm::StoreInst &instruction,
 
             const llvm::PointerType &pointerType =
                 llvmCast<const llvm::PointerType>(*constantExpr->getType());
+            CANAL_ASSERT(pointerType.getElementType());
 
             Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
-                environment.mModule, pointerType.getElementType());
+                environment.mModule, *pointerType.getElementType());
             constPointer->addTarget(Pointer::Target::GlobalVariable,
                                     &instruction,
                                     *constantExpr->op_begin(),
@@ -1062,8 +1065,10 @@ Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
         return;
 
     const llvm::PointerType *pointerType = instruction.getType();
+    CANAL_ASSERT(pointerType);
+    CANAL_ASSERT(pointerType->getElementType());
     Pointer::InclusionBased *result = source.getElementPtr(
-        offsets, pointerType->getElementType());
+        offsets, *pointerType->getElementType());
 
     state.addFunctionVariable(instruction, result);
 }
@@ -1250,7 +1255,7 @@ Interpreter::inttoptr(const llvm::IntToPtrInst &instruction,
         llvmCast<const llvm::PointerType>(*instruction.getDestTy());
 
     Pointer::InclusionBased *result =
-        source.bitcast(pointerType.getElementType());
+        source.bitcast(*pointerType.getElementType());
 
     state.addFunctionVariable(instruction, result);
 }
@@ -1273,7 +1278,7 @@ Interpreter::bitcast(const llvm::BitCastInst &instruction,
     Pointer::InclusionBased &sourcePointer =
         dynCast<Pointer::InclusionBased&>(*source);
 
-    Value *resultPointer = sourcePointer.bitcast(destinationType);
+    Value *resultPointer = sourcePointer.bitcast(*destinationType);
     state.addFunctionVariable(instruction, resultPointer);
 }
 
