@@ -10,7 +10,7 @@ namespace Integer {
 
 Range::Range(const Environment &environment,
              unsigned numBits)
-    : Value(environment),
+    : Domain(environment),
       mEmpty(true),
       mSignedTop(false),
       mSignedFrom(numBits, 0),
@@ -23,7 +23,7 @@ Range::Range(const Environment &environment,
 
 Range::Range(const Environment &environment,
              const llvm::APInt &constant)
-    : Value(environment),
+    : Domain(environment),
       mEmpty(false),
       mSignedTop(false),
       mSignedFrom(constant),
@@ -113,7 +113,7 @@ Range::cloneCleaned() const
 }
 
 bool
-Range::operator==(const Value& value) const
+Range::operator==(const Domain& value) const
 {
     const Range *range = dynCast<const Range*>(&value);
     if (!range)
@@ -143,7 +143,7 @@ Range::operator==(const Value& value) const
 }
 
 void
-Range::merge(const Value &value)
+Range::merge(const Domain &value)
 {
     // Handle values represeting a constant.
     if (const Constant *constant = dynCast<const Constant*>(&value))
@@ -268,7 +268,7 @@ Range::matchesString(const std::string &text,
 }
 
 void
-Range::add(const Value &a, const Value &b)
+Range::add(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -306,7 +306,7 @@ Range::add(const Value &a, const Value &b)
 }
 
 void
-Range::sub(const Value &a, const Value &b)
+Range::sub(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -446,7 +446,7 @@ minMax(bool isSigned,
 }
 
 void
-Range::mul(const Value &a, const Value &b)
+Range::mul(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -530,7 +530,7 @@ Range::mul(const Value &a, const Value &b)
 }
 
 void
-Range::udiv(const Value &a, const Value &b)
+Range::udiv(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -559,7 +559,7 @@ Range::udiv(const Value &a, const Value &b)
 }
 
 void
-Range::sdiv(const Value &a, const Value &b)
+Range::sdiv(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -608,7 +608,7 @@ Range::sdiv(const Value &a, const Value &b)
 }
 
 void
-Range::urem(const Value &a, const Value &b)
+Range::urem(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -622,7 +622,7 @@ Range::urem(const Value &a, const Value &b)
 }
 
 void
-Range::srem(const Value &a, const Value &b)
+Range::srem(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -636,7 +636,7 @@ Range::srem(const Value &a, const Value &b)
 }
 
 void
-Range::shl(const Value &a, const Value &b)
+Range::shl(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -650,7 +650,7 @@ Range::shl(const Value &a, const Value &b)
 }
 
 void
-Range::lshr(const Value &a, const Value &b)
+Range::lshr(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -664,7 +664,7 @@ Range::lshr(const Value &a, const Value &b)
 }
 
 void
-Range::ashr(const Value &a, const Value &b)
+Range::ashr(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -678,7 +678,7 @@ Range::ashr(const Value &a, const Value &b)
 }
 
 void
-Range::and_(const Value &a, const Value &b)
+Range::and_(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -692,7 +692,7 @@ Range::and_(const Value &a, const Value &b)
 }
 
 void
-Range::or_(const Value &a, const Value &b)
+Range::or_(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -706,7 +706,7 @@ Range::or_(const Value &a, const Value &b)
 }
 
 void
-Range::xor_(const Value &a, const Value &b)
+Range::xor_(const Domain &a, const Domain &b)
 {
     const Range &aa = dynCast<const Range&>(a),
         &bb = dynCast<const Range&>(b);
@@ -753,7 +753,7 @@ intersects(const Range &a,
 }
 
 void
-Range::icmp(const Value &a, const Value &b,
+Range::icmp(const Domain &a, const Domain &b,
             llvm::CmpInst::Predicate predicate)
 {
     const Range &aa = dynCast<const Range&>(a),

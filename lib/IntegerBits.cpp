@@ -8,12 +8,12 @@ namespace Canal {
 namespace Integer {
 
 Bits::Bits(const Environment &environment, unsigned numBits)
-    : Value(environment), mBits0(numBits, 0), mBits1(numBits, 0)
+    : Domain(environment), mBits0(numBits, 0), mBits1(numBits, 0)
 {
 }
 
 Bits::Bits(const Environment &environment, const llvm::APInt &number)
-    : Value(environment), mBits0(~number), mBits1(number)
+    : Domain(environment), mBits0(~number), mBits1(number)
 {
 }
 
@@ -191,7 +191,7 @@ Bits::cloneCleaned() const
 }
 
 bool
-Bits::operator==(const Value& value) const
+Bits::operator==(const Domain& value) const
 {
     const Bits *other = dynCast<const Bits*>(&value);
     if (!other)
@@ -200,7 +200,7 @@ Bits::operator==(const Value& value) const
 }
 
 void
-Bits::merge(const Value &value)
+Bits::merge(const Domain &value)
 {
     const Constant *constant = dynCast<const Constant*>(&value);
     if (constant)
@@ -250,69 +250,69 @@ Bits::matchesString(const std::string &text,
 }
 
 void
-Bits::add(const Value &a, const Value &b)
+Bits::add(const Domain &a, const Domain &b)
 {
     setTop();
 }
 
 void
-Bits::sub(const Value &a, const Value &b)
+Bits::sub(const Domain &a, const Domain &b)
 {
     setTop();
 }
 
 void
-Bits::mul(const Value &a, const Value &b)
+Bits::mul(const Domain &a, const Domain &b)
 {
     setTop();
 }
 
 void
-Bits::udiv(const Value &a, const Value &b)
+Bits::udiv(const Domain &a, const Domain &b)
 {
     setTop();
 }
 
 void
-Bits::sdiv(const Value &a, const Value &b)
+Bits::sdiv(const Domain &a, const Domain &b)
 {
     setTop();
 }
 
 void
-Bits::urem(const Value &a, const Value &b)
+Bits::urem(const Domain &a, const Domain &b)
 {
     setTop();
 }
 
 void
-Bits::srem(const Value &a, const Value &b)
+Bits::srem(const Domain &a, const Domain &b)
 {
     setTop();
 }
 
 void
-Bits::shl(const Value &a, const Value &b)
+Bits::shl(const Domain &a, const Domain &b)
 {
     setTop();
 }
 
 void
-Bits::lshr(const Value &a, const Value &b)
+Bits::lshr(const Domain &a, const Domain &b)
 {
     setTop();
 }
 
 void
-Bits::ashr(const Value &a, const Value &b)
+Bits::ashr(const Domain &a, const Domain &b)
 {
     setTop();
 }
 
 static void
 bitOperation(Bits &result,
-             const Value &a,
-             const Value &b,
+             const Domain &a,
+             const Domain &b,
              int(*operation)(int,int))
 {
     const Bits &aa = dynCast<const Bits&>(a),
@@ -349,7 +349,7 @@ bitAnd(int valueA, int valueB)
 }
 
 void
-Bits::and_(const Value &a, const Value &b)
+Bits::and_(const Domain &a, const Domain &b)
 {
     bitOperation(*this, a, b, bitAnd);
 }
@@ -377,7 +377,7 @@ bitOr(int valueA, int valueB)
 }
 
 void
-Bits::or_(const Value &a, const Value &b)
+Bits::or_(const Domain &a, const Domain &b)
 {
     bitOperation(*this, a, b, bitOr);
 }
@@ -405,7 +405,7 @@ bitXor(int valueA, int valueB)
 }
 
 void
-Bits::xor_(const Value &a, const Value &b)
+Bits::xor_(const Domain &a, const Domain &b)
 {
     bitOperation(*this, a, b, bitXor);
 }
@@ -436,7 +436,7 @@ compare(const Bits &a, const Bits &b, bool signed_)
 }
 
 void
-Bits::icmp(const Value &a, const Value &b,
+Bits::icmp(const Domain &a, const Domain &b,
            llvm::CmpInst::Predicate predicate)
 {
 

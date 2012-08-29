@@ -1,14 +1,14 @@
 #include "ArrayInterface.h"
-#include "Value.h"
+#include "Domain.h"
 
 namespace Canal {
 namespace Array {
 
-Value *Interface::getValue(const Value &offset) const
+Domain *Interface::getValue(const Domain &offset) const
 {
-    Value *result = NULL;
-    std::vector<Value*> items(getItem(offset));
-    std::vector<Value*>::const_iterator it = items.begin();
+    Domain *result = NULL;
+    std::vector<Domain*> items(getItem(offset));
+    std::vector<Domain*>::const_iterator it = items.begin();
     for (; it != items.end(); ++it)
     {
         if (!result)

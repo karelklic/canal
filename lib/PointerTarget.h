@@ -13,7 +13,7 @@ namespace Canal {
 
 class State;
 class SlotTracker;
-class Value;
+class Domain;
 class Environment;
 
 namespace Integer {
@@ -65,8 +65,8 @@ public:
     Target(const Environment &environment,
            Type type,
            const llvm::Value *target,
-           const std::vector<Value*> &offsets,
-           Value *numericOffset);
+           const std::vector<Domain*> &offsets,
+           Domain *numericOffset);
 
     /// Copy constructor.
     Target(const Target &target);
@@ -86,11 +86,11 @@ public:
     std::string toString(SlotTracker &slotTracker) const;
 
     /// Dereference the target in a certain state.  Dereferencing might
-    /// result in multiple Values being returned due to the nature of
+    /// result in multiple values being returned due to the nature of
     /// mOffsets (offsets might include integer ranges).  The returned
     /// pointers point to the memory owned by State and its abstract
     /// domains -- caller must not release the memory.
-    std::vector<Value*> dereference(const State &state) const;
+    std::vector<Domain*> dereference(const State &state) const;
 
 public:
     const Environment &mEnvironment;
@@ -106,12 +106,12 @@ public:
 
     /// Array or struct offsets in the GetElementPtr style.
     /// This class owns the memory.
-    std::vector<Value*> mOffsets;
+    std::vector<Domain*> mOffsets;
 
     /// An additional numeric offset on the top of mOffsets.  The value
     /// represents a number of bytes.  This class owns the memory.  It
     /// might be NULL instead of 0.
-    Value *mNumericOffset;
+    Domain *mNumericOffset;
 };
 
 } // namespace Pointer

@@ -9,7 +9,7 @@
 namespace Canal {
 
 Constant::Constant(const Environment &environment, const llvm::Constant *constant)
-    : Value(environment), mConstant(constant)
+    : Domain(environment), mConstant(constant)
 {
 }
 
@@ -43,7 +43,7 @@ Constant::isGetElementPtr() const
     return constant->getOpcode() == llvm::Instruction::GetElementPtr;
 }
 
-Value *
+Domain *
 Constant::toModifiableValue() const
 {
     if (isAPInt())
@@ -70,7 +70,7 @@ Constant::cloneCleaned() const
 }
 
 bool
-Constant::operator==(const Value &value) const
+Constant::operator==(const Domain &value) const
 {
     // Check if rhs has the same type.
     const Constant *constant = dynCast<const Constant*>(&value);
@@ -102,7 +102,7 @@ Constant::matchesString(const std::string &text,
 }
 
 void
-Constant::merge(const Value &value)
+Constant::merge(const Domain &value)
 {
     CANAL_ASSERT_MSG(*this == value, "merge not implemented for "
                   << typeid(*this).name() << " and "

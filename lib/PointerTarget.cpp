@@ -4,7 +4,7 @@
 #include "SlotTracker.h"
 #include "State.h"
 #include "Utils.h"
-#include "Value.h"
+#include "Domain.h"
 #include <sstream>
 #include <llvm/BasicBlock.h>
 #include <llvm/ADT/APInt.h>
@@ -15,8 +15,8 @@ namespace Pointer {
 Target::Target(const Environment &environment,
                Type type,
                const llvm::Value *target,
-               const std::vector<Value*> &offsets,
-               Value *numericOffset)
+               const std::vector<Domain*> &offsets,
+               Domain *numericOffset)
     : mEnvironment(environment),
       mType(type),
       mInstruction(target),
@@ -49,7 +49,7 @@ Target::Target(const Target &target) : mEnvironment(target.mEnvironment),
                                        mOffsets(target.mOffsets),
                                        mNumericOffset(target.mNumericOffset)
 {
-    std::vector<Value*>::iterator it = mOffsets.begin();
+    std::vector<Domain*>::iterator it = mOffsets.begin();
     for (; it != mOffsets.end(); ++it)
         *it = (*it)->clone();
 
@@ -59,7 +59,7 @@ Target::Target(const Target &target) : mEnvironment(target.mEnvironment),
 
 Target::~Target()
 {
-    std::vector<Value*>::iterator it = mOffsets.begin(),
+    std::vector<Domain*>::iterator it = mOffsets.begin(),
         itend = mOffsets.end();
     for (; it != itend; ++it)
         delete *it;
@@ -94,7 +94,7 @@ Target::operator==(const Target &target) const
             return false;
 
         // Check the targets.
-        std::vector<Value*>::const_iterator it1 = mOffsets.begin(),
+        std::vector<Domain*>::const_iterator it1 = mOffsets.begin(),
             it2 = target.mOffsets.begin();
         for (; it1 != mOffsets.end(); ++it1, ++it2)
         {
@@ -131,11 +131,16 @@ Target::merge(const Target &target)
         llvm::APInt zero = llvm::APInt::getNullValue(
             numericOffsetInt.getBitWidth());
         Integer::Container zeroContainer(mEnvironment, zero);
-        mNumericOffset = Value::handleMergeConstants(mNumericOffset, &zeroContainer);
+        mNumericOffset = Domain::handleMergeConstants(mNumericOffset,
+                                                      &zeroContainer);
+
         mNumericOffset->merge(zeroContainer);
     }
-    else if (mNumericOffset) {
-        mNumericOffset = Value::handleMergeConstants(mNumericOffset, target.mNumericOffset);
+    else if (mNumericOffset)
+    {
+        mNumericOffset = Domain::handleMergeConstants(mNumericOffset,
+                                                      target.mNumericOffset);
+
         mNumericOffset->merge(*target.mNumericOffset);
     }
 
@@ -152,12 +157,14 @@ Target::merge(const Target &target)
     {
         CANAL_ASSERT(mInstruction == target.mInstruction);
         CANAL_ASSERT(mOffsets.size() == target.mOffsets.size());
-        std::vector<Value*>::iterator it1 = mOffsets.begin();
-        std::vector<Value*>::const_iterator it2 = target.mOffsets.begin();
-        for (; it1 != mOffsets.end(); ++it1, ++it2) {
-            (*it1) = Value::handleMergeConstants(*it1, *it2);
+        std::vector<Domain*>::iterator it1 = mOffsets.begin();
+        std::vector<Domain*>::const_iterator it2 = target.mOffsets.begin();
+        for (; it1 != mOffsets.end(); ++it1, ++it2)
+        {
+            (*it1) = Domain::handleMergeConstants(*it1, *it2);
             (*it1)->merge(**it2);
         }
+
         break;
     }
     default:
@@ -171,7 +178,7 @@ Target::memoryUsage() const
     size_t size = sizeof(Target);
 
     // Add the size of the offsets.
-    std::vector<Value*>::const_iterator it = mOffsets.begin();
+    std::vector<Domain*>::const_iterator it = mOffsets.begin();
     for (; it != mOffsets.end(); ++it)
         size += (*it)->memoryUsage();
 
@@ -249,7 +256,7 @@ Target::toString(SlotTracker &slotTracker) const
     if (!mOffsets.empty())
     {
         ss << "    offsets" << std::endl;
-        std::vector<Value*>::const_iterator it = mOffsets.begin();
+        std::vector<Domain*>::const_iterator it = mOffsets.begin();
         for (; it != mOffsets.end(); ++it)
             ss << indent((*it)->toString(), 8);
     }
@@ -263,10 +270,10 @@ Target::toString(SlotTracker &slotTracker) const
     return ss.str();
 }
 
-std::vector<Value*>
+std::vector<Domain*>
 Target::dereference(const State &state) const
 {
-    std::vector<Value*> result;
+    std::vector<Domain*> result;
 
     switch (mType)
     {
@@ -280,14 +287,14 @@ Target::dereference(const State &state) const
         result.push_back(state.findBlock(*mInstruction));
         CANAL_ASSERT(result[0]);
 
-        std::vector<Value*>::const_iterator itOffsets = mOffsets.begin();
+        std::vector<Domain*>::const_iterator itOffsets = mOffsets.begin();
         for (; itOffsets != mOffsets.end(); ++itOffsets)
         {
-            std::vector<Value*> nextLevelResult;
-            std::vector<Value*>::const_iterator itItems = result.begin();
+            std::vector<Domain*> nextLevelResult;
+            std::vector<Domain*>::const_iterator itItems = result.begin();
             for (; itItems != result.end(); ++itItems)
             {
-                std::vector<Value*> items;
+                std::vector<Domain*> items;
                 Array::Interface &array = dynCast<Array::Interface&>(**itItems);
                 items = array.getItem(**itOffsets);
                 nextLevelResult.insert(nextLevelResult.end(),

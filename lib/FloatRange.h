@@ -1,13 +1,13 @@
 #ifndef LIBCANAL_FLOAT_RANGE_H
 #define LIBCANAL_FLOAT_RANGE_H
 
-#include "Value.h"
+#include "Domain.h"
 #include <llvm/ADT/APFloat.h>
 
 namespace Canal {
 namespace Float {
 
-class Range : public Value, public AccuracyValue
+class Range : public Domain, public AccuracyDomain
 {
 public:
     bool mEmpty;
@@ -35,35 +35,35 @@ public:
     llvm::APFloat getMax() const;
     llvm::APFloat getMin() const;
 
-public: // Implementation of Value.
-    // Implementation of Value::clone().
+public: // Implementation of Domain.
+    // Implementation of Domain::clone().
     // Covariant return type.
     virtual Range *clone() const;
-    // Implementation of Value::cloneCleaned().
+    // Implementation of Domain::cloneCleaned().
     // Covariant return type.
     virtual Range *cloneCleaned() const;
-    // Implementation of Value::operator==().
-    virtual bool operator==(const Value& value) const;
-    // Implementation of Value::merge().
-    virtual void merge(const Value &value);
-    // Implementation of Value::memoryUsage().
+    // Implementation of Domain::operator==().
+    virtual bool operator==(const Domain& value) const;
+    // Implementation of Domain::merge().
+    virtual void merge(const Domain &value);
+    // Implementation of Domain::memoryUsage().
     virtual size_t memoryUsage() const;
-    // Implementation of Value::toString().
+    // Implementation of Domain::toString().
     virtual std::string toString() const;
-    // Implementation of Value::matchesString().
+    // Implementation of Domain::matchesString().
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
 
-public: // Implementation of AccuracyValue.
-    // Implementation of AccuracyValue::accuracy().
+public: // Implementation of AccuracyDomain.
+    // Implementation of AccuracyDomain::accuracy().
     virtual float accuracy() const;
-    // Implementation of AccuracyValue::isBottom().
+    // Implementation of AccuracyDomain::isBottom().
     virtual bool isBottom() const;
-    // Implementation of AccuracyValue::setBottom().
+    // Implementation of AccuracyDomain::setBottom().
     virtual void setBottom();
-    // Implementation of AccuracyValue::isTop().
+    // Implementation of AccuracyDomain::isTop().
     virtual bool isTop() const;
-    // Implementation of AccuracyValue::setTop().
+    // Implementation of AccuracyDomain::setTop().
     virtual void setTop();
 };
 

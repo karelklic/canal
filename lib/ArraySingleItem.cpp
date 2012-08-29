@@ -10,11 +10,11 @@ namespace Canal {
 namespace Array {
 
 SingleItem::SingleItem(const Environment &environment)
-    : Value(environment), mValue(NULL), mSize(NULL)
+    : Domain(environment), mValue(NULL), mSize(NULL)
 {
 }
 
-SingleItem::SingleItem(const SingleItem &singleItem) : Value(singleItem.mEnvironment)
+SingleItem::SingleItem(const SingleItem &singleItem) : Domain(singleItem.mEnvironment)
 {
     mValue = singleItem.mValue;
     if (mValue)
@@ -44,7 +44,7 @@ SingleItem::cloneCleaned() const
 }
 
 bool
-SingleItem::operator==(const Value &value) const
+SingleItem::operator==(const Domain &value) const
 {
     const SingleItem *singleItem =
         dynCast<const SingleItem*>(&value);
@@ -66,7 +66,7 @@ SingleItem::operator==(const Value &value) const
 }
 
 void
-SingleItem::merge(const Value &value)
+SingleItem::merge(const Domain &value)
 {
     const SingleItem &singleItem = dynCast<const SingleItem&>(value);
     CANAL_ASSERT_MSG(mValue && singleItem.mValue,
@@ -106,129 +106,129 @@ SingleItem::matchesString(const std::string &text,
 }
 
 void
-SingleItem::add(const Value &a, const Value &b)
+SingleItem::add(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::fadd(const Value &a, const Value &b)
+SingleItem::fadd(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::sub(const Value &a, const Value &b)
+SingleItem::sub(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::fsub(const Value &a, const Value &b)
+SingleItem::fsub(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::mul(const Value &a, const Value &b)
+SingleItem::mul(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::fmul(const Value &a, const Value &b)
+SingleItem::fmul(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::udiv(const Value &a, const Value &b)
+SingleItem::udiv(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::sdiv(const Value &a, const Value &b)
+SingleItem::sdiv(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::fdiv(const Value &a, const Value &b)
+SingleItem::fdiv(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::urem(const Value &a, const Value &b)
+SingleItem::urem(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::srem(const Value &a, const Value &b)
+SingleItem::srem(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::frem(const Value &a, const Value &b)
+SingleItem::frem(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::shl(const Value &a, const Value &b)
+SingleItem::shl(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::lshr(const Value &a, const Value &b)
+SingleItem::lshr(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::ashr(const Value &a, const Value &b)
+SingleItem::ashr(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::and_(const Value &a, const Value &b)
+SingleItem::and_(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::or_(const Value &a, const Value &b)
+SingleItem::or_(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::xor_(const Value &a, const Value &b)
+SingleItem::xor_(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::icmp(const Value &a, const Value &b,
+SingleItem::icmp(const Domain &a, const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-SingleItem::fcmp(const Value &a, const Value &b,
+SingleItem::fcmp(const Domain &a, const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 static void
-assertOffsetFitsToArray(uint64_t offset, const Value &size)
+assertOffsetFitsToArray(uint64_t offset, const Domain &size)
 {
     // Get maximum size of the array.
     const Integer::Container &integerSize =
@@ -242,7 +242,7 @@ assertOffsetFitsToArray(uint64_t offset, const Value &size)
 }
 
 static void
-assertOffsetFitsToArray(const Value &offset, const Value &size)
+assertOffsetFitsToArray(const Domain &offset, const Domain &size)
 {
     // Check if the offset might point to the array.
     if (const Constant *constant = dynCast<const Constant*>(&offset))
@@ -263,16 +263,16 @@ assertOffsetFitsToArray(const Value &offset, const Value &size)
     }
 }
 
-std::vector<Value*>
-SingleItem::getItem(const Value &offset) const
+std::vector<Domain*>
+SingleItem::getItem(const Domain &offset) const
 {
     assertOffsetFitsToArray(offset, *mSize);
-    std::vector<Value*> result;
+    std::vector<Domain*> result;
     result.push_back(mValue);
     return result;
 }
 
-Value *
+Domain *
 SingleItem::getItem(uint64_t offset) const
 {
     assertOffsetFitsToArray(offset, *mSize);
@@ -280,14 +280,14 @@ SingleItem::getItem(uint64_t offset) const
 }
 
 void
-SingleItem::setItem(const Value &offset, const Value &value)
+SingleItem::setItem(const Domain &offset, const Domain &value)
 {
     assertOffsetFitsToArray(offset, *mSize);
     mValue->merge(value);
 }
 
 void
-SingleItem::setItem(uint64_t offset, const Value &value)
+SingleItem::setItem(uint64_t offset, const Domain &value)
 {
     assertOffsetFitsToArray(offset, *mSize);
     mValue->merge(value);

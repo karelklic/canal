@@ -1,7 +1,7 @@
 #ifndef LIBCANAL_CONSTANT_H
 #define LIBCANAL_CONSTANT_H
 
-#include "Value.h"
+#include "Domain.h"
 
 namespace llvm {
     class Constant;
@@ -10,9 +10,9 @@ namespace llvm {
 
 namespace Canal {
 
-class Value;
+class Domain;
 
-class Constant : public Value
+class Constant : public Domain
 {
 public:
     const llvm::Constant *mConstant;
@@ -31,25 +31,25 @@ public:
 
     // Creates a modifiable value from the constant.  Caller is
     // responsible for releasing its memory.
-    Value *toModifiableValue() const;
+    Domain *toModifiableValue() const;
 
-public: // Implementation of Value.
-    // Implementation of Value::clone().
+public: // Implementation of Domain.
+    // Implementation of Domain::clone().
     // Covariant return type.
     virtual Constant *clone() const;
-    // Implementation of Value::cloneCleaned().
+    // Implementation of Domain::cloneCleaned().
     // Covariant return type.
     virtual Constant *cloneCleaned() const;
-    // Implementation of Value::operator==().
-    virtual bool operator==(const Value &value) const;
-    // Implementation of Value::memoryUsage().
+    // Implementation of Domain::operator==().
+    virtual bool operator==(const Domain &value) const;
+    // Implementation of Domain::memoryUsage().
     virtual size_t memoryUsage() const;
-    // Implementation of Value::toString().
+    // Implementation of Domain::toString().
     virtual std::string toString() const;
-    // Implementation of Value::matchesString().
+    // Implementation of Domain::matchesString().
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
-    virtual void merge(const Value &value);
+    virtual void merge(const Domain &value);
 };
 
 } // namespace Canal

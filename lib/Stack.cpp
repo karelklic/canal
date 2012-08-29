@@ -1,5 +1,5 @@
 #include "Stack.h"
-#include "Value.h"
+#include "Domain.h"
 #include "Utils.h"
 #include <llvm/Instructions.h>
 #include <llvm/Support/CFG.h>
@@ -25,10 +25,10 @@ StackFrame::nextInstruction()
     return ++mCurrentInstruction == mCurrentBlock->end() ? nextBlock() : true;
 }
 
-Value *
+Domain *
 StackFrame::getReturnedValue() const
 {
-    Value *mergedValue = NULL;
+    Domain *mergedValue = NULL;
     llvm::Function::const_iterator it = mFunction->begin(),
         itend = mFunction->end();
 
@@ -37,7 +37,7 @@ StackFrame::getReturnedValue() const
         if (!dynCast<const llvm::ReturnInst*>(it->getTerminator()))
             continue;
 
-        Value *returnedValue = mBlockOutputState.find(it)->second.mReturnedValue;
+        Domain *returnedValue = mBlockOutputState.find(it)->second.mReturnedValue;
         if (!returnedValue)
             continue;
 
@@ -165,7 +165,7 @@ Stack::nextInstruction()
     CANAL_ASSERT(llvm::isa<llvm::CallInst>(parentFrame.mCurrentInstruction) ||
                  llvm::isa<llvm::InvokeInst>(parentFrame.mCurrentInstruction));
 
-    Value *returnedValue = currentFrame.getReturnedValue();
+    Domain *returnedValue = currentFrame.getReturnedValue();
     if (returnedValue)
     {
         parentFrame.mCurrentState.addFunctionVariable(

@@ -13,31 +13,36 @@
 namespace Canal {
 namespace Integer {
 
-Container::Container(const Environment &environment, unsigned numBits) : Value(environment)
+Container::Container(const Environment &environment,
+                     unsigned bitWidth)
+    : Domain(environment)
 {
-    mValues.push_back(new Bits(environment, numBits));
-    mValues.push_back(new Enumeration(environment, numBits));
-    mValues.push_back(new Range(environment, numBits));
+    mValues.push_back(new Bits(environment, bitWidth));
+    mValues.push_back(new Enumeration(environment, bitWidth));
+    mValues.push_back(new Range(environment, bitWidth));
 }
 
-Container::Container(const Environment &environment, const llvm::APInt &number) : Value(environment)
+Container::Container(const Environment &environment,
+                     const llvm::APInt &number)
+    : Domain(environment)
 {
     mValues.push_back(new Bits(environment, number));
     mValues.push_back(new Enumeration(environment, number));
     mValues.push_back(new Range(environment, number));
 }
 
-Container::Container(const Container &container) : Value(container.mEnvironment)
+Container::Container(const Container &container)
+    : Domain(container.mEnvironment)
 {
     mValues = container.mValues;
-    std::vector<Value*>::iterator it = mValues.begin();
+    std::vector<Domain*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
-        *it = static_cast<Value*>((*it)->clone());
+        *it = (*it)->clone();
 }
 
 Container::~Container()
 {
-    std::vector<Value*>::const_iterator it = mValues.begin();
+    std::vector<Domain*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         delete *it;
 }
@@ -185,14 +190,14 @@ Container::cloneCleaned() const
 }
 
 bool
-Container::operator==(const Value &value) const
+Container::operator==(const Domain &value) const
 {
     const Container *container = dynCast<const Container*>(&value);
     if (!container)
         return false;
 
     CANAL_ASSERT(mValues.size() == container->mValues.size());
-    std::vector<Value*>::const_iterator ita(mValues.begin()),
+    std::vector<Domain*>::const_iterator ita(mValues.begin()),
         itb(container->mValues.begin());
     for (; ita != mValues.end(); ++ita, ++itb)
     {
@@ -204,9 +209,9 @@ Container::operator==(const Value &value) const
 }
 
 void
-Container::merge(const Value &value)
+Container::merge(const Domain &value)
 {
-    std::vector<Value*>::iterator it = mValues.begin();
+    std::vector<Domain*>::iterator it = mValues.begin();
     if (const Constant *constant = dynCast<const Constant*>(&value))
     {
         for (; it != mValues.end(); ++it)
@@ -216,7 +221,7 @@ Container::merge(const Value &value)
 
     const Container &container = dynCast<const Container&>(value);
     CANAL_ASSERT(mValues.size() == container.mValues.size());
-    std::vector<Value*>::const_iterator it2 = container.mValues.begin();
+    std::vector<Domain*>::const_iterator it2 = container.mValues.begin();
     for (; it != mValues.end(); ++it, ++it2)
         (*it)->merge(**it2);
 }
@@ -225,7 +230,7 @@ size_t
 Container::memoryUsage() const
 {
     size_t size(0);
-    std::vector<Value*>::const_iterator it = mValues.begin();
+    std::vector<Domain*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         size += (*it)->memoryUsage();
     return size;
@@ -236,7 +241,7 @@ Container::toString() const
 {
     std::stringstream ss;
     ss << "integerContainer" << std::endl;
-    std::vector<Value*>::const_iterator it = mValues.begin();
+    std::vector<Domain*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         ss << indent((*it)->toString(), 4);
     return ss.str();
@@ -260,7 +265,7 @@ Container::matchesString(const std::string &text,
 // Converts value to container.  If the value is a constant, it is
 // converted to container and deleteAfter is set to true.
 static const Container *
-asContainer(const Value &value, bool &deleteAfter)
+asContainer(const Domain &value, bool &deleteAfter)
 {
     deleteAfter = false;
     const Container *container = dynCast<const Container*>(&value);
@@ -280,16 +285,16 @@ asContainer(const Value &value, bool &deleteAfter)
 
 static void
 binaryOperation(Container &result,
-                const Value &a,
-                const Value &b,
-                Value::BinaryOperation operation)
+                const Domain &a,
+                const Domain &b,
+                Domain::BinaryOperation operation)
 {
     bool deleteAA, deleteBB;
     const Container *aa = asContainer(a, deleteAA),
         *bb = asContainer(b, deleteBB);
 
-    std::vector<Value*>::iterator it(result.mValues.begin());
-    std::vector<Value*>::const_iterator ita = aa->mValues.begin(),
+    std::vector<Domain*>::iterator it(result.mValues.begin());
+    std::vector<Domain*>::const_iterator ita = aa->mValues.begin(),
         itb = bb->mValues.begin();
 
     for (; it != result.mValues.end(); ++it, ++ita, ++itb)
@@ -302,89 +307,89 @@ binaryOperation(Container &result,
 }
 
 void
-Container::add(const Value &a, const Value &b)
+Container::add(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::add);
+    binaryOperation(*this, a, b, &Domain::add);
 }
 
 void
-Container::sub(const Value &a, const Value &b)
+Container::sub(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::sub);
+    binaryOperation(*this, a, b, &Domain::sub);
 }
 
 void
-Container::mul(const Value &a, const Value &b)
+Container::mul(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::mul);
+    binaryOperation(*this, a, b, &Domain::mul);
 }
 
 void
-Container::udiv(const Value &a, const Value &b)
+Container::udiv(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::udiv);
+    binaryOperation(*this, a, b, &Domain::udiv);
 }
 
 void
-Container::sdiv(const Value &a, const Value &b)
+Container::sdiv(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::sdiv);
+    binaryOperation(*this, a, b, &Domain::sdiv);
 }
 
 void
-Container::urem(const Value &a, const Value &b)
+Container::urem(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::urem);
+    binaryOperation(*this, a, b, &Domain::urem);
 }
 
 void
-Container::srem(const Value &a, const Value &b)
+Container::srem(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::srem);
+    binaryOperation(*this, a, b, &Domain::srem);
 }
 
 void
-Container::shl(const Value &a, const Value &b)
+Container::shl(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::shl);
+    binaryOperation(*this, a, b, &Domain::shl);
 }
 
 void
-Container::lshr(const Value &a, const Value &b)
+Container::lshr(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::lshr);
+    binaryOperation(*this, a, b, &Domain::lshr);
 }
 
 void
-Container::ashr(const Value &a, const Value &b)
+Container::ashr(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::ashr);
+    binaryOperation(*this, a, b, &Domain::ashr);
 }
 
 void
-Container::and_(const Value &a, const Value &b)
+Container::and_(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::and_);
+    binaryOperation(*this, a, b, &Domain::and_);
 }
 
 void
-Container::or_(const Value &a, const Value &b)
+Container::or_(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::or_);
+    binaryOperation(*this, a, b, &Domain::or_);
 }
 
 void
-Container::xor_(const Value &a, const Value &b)
+Container::xor_(const Domain &a, const Domain &b)
 {
-    binaryOperation(*this, a, b, &Value::xor_);
+    binaryOperation(*this, a, b, &Domain::xor_);
 }
 
 static void
 cmpOperation(Container &result,
-             const Value &a,
-             const Value &b,
+             const Domain &a,
+             const Domain &b,
              llvm::CmpInst::Predicate predicate,
-             Value::CmpOperation operation)
+             Domain::CmpOperation operation)
 {
     const Canal::Pointer::InclusionBased* aPointer =
             dynCast<const Canal::Pointer::InclusionBased*>(&a),
@@ -394,7 +399,7 @@ cmpOperation(Container &result,
     const Constant* aConstant = dynCast<const Constant*>(&a),
             *bConstant = dynCast<const Constant*>(&b);
     if ( (aPointer || aConstant && aConstant->isNullPtr()) && (bPointer || bConstant && bConstant->isNullPtr()) ) {
-        CANAL_ASSERT(operation == &Value::icmp);
+        CANAL_ASSERT(operation == &Domain::icmp);
         if (aConstant)
         {
             aPointer = dynCast<const Canal::Pointer::InclusionBased*>(aConstant->toModifiableValue());
@@ -446,8 +451,8 @@ cmpOperation(Container &result,
     const Container *aa = asContainer(a, deleteAA),
         *bb = asContainer(b, deleteBB);
 
-    std::vector<Value*>::iterator it(result.mValues.begin());
-    std::vector<Value*>::const_iterator ita = aa->mValues.begin(),
+    std::vector<Domain*>::iterator it(result.mValues.begin());
+    std::vector<Domain*>::const_iterator ita = aa->mValues.begin(),
         itb = bb->mValues.begin();
 
     for (; it != result.mValues.end(); ++it, ++ita, ++itb)
@@ -461,28 +466,28 @@ cmpOperation(Container &result,
 
 
 void
-Container::icmp(const Value &a, const Value &b,
+Container::icmp(const Domain &a, const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
-    cmpOperation(*this, a, b, predicate, &Value::icmp);
+    cmpOperation(*this, a, b, predicate, &Domain::icmp);
 }
 
 void
-Container::fcmp(const Value &a, const Value &b,
+Container::fcmp(const Domain &a, const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
-    cmpOperation(*this, a, b, predicate, &Value::fcmp);
+    cmpOperation(*this, a, b, predicate, &Domain::fcmp);
 }
 
 float
 Container::accuracy() const
 {
     float accuracy = 0;
-    std::vector<Value*>::const_iterator it = mValues.begin();
+    std::vector<Domain*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        const AccuracyValue *accuracyValue =
-            dynCast<const AccuracyValue*>(*it);
+        const AccuracyDomain *accuracyValue =
+            dynCast<const AccuracyDomain*>(*it);
 
         if (!accuracyValue)
             continue;
@@ -497,11 +502,11 @@ Container::accuracy() const
 bool
 Container::isBottom() const
 {
-    std::vector<Value*>::const_iterator it = mValues.begin();
+    std::vector<Domain*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        const AccuracyValue *accuracyValue =
-            dynCast<const AccuracyValue*>(*it);
+        const AccuracyDomain *accuracyValue =
+            dynCast<const AccuracyDomain*>(*it);
 
         if (!accuracyValue)
             continue;
@@ -515,11 +520,11 @@ Container::isBottom() const
 void
 Container::setBottom()
 {
-    std::vector<Value*>::iterator it = mValues.begin();
+    std::vector<Domain*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        AccuracyValue *accuracyValue =
-            dynCast<AccuracyValue*>(*it);
+        AccuracyDomain *accuracyValue =
+            dynCast<AccuracyDomain*>(*it);
 
         if (!accuracyValue)
             continue;
@@ -531,11 +536,11 @@ Container::setBottom()
 bool
 Container::isTop() const
 {
-    std::vector<Value*>::const_iterator it = mValues.begin();
+    std::vector<Domain*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        const AccuracyValue *accuracyValue =
-            dynCast<const AccuracyValue*>(*it);
+        const AccuracyDomain *accuracyValue =
+            dynCast<const AccuracyDomain*>(*it);
 
         if (!accuracyValue)
             continue;
@@ -549,10 +554,10 @@ Container::isTop() const
 void
 Container::setTop()
 {
-    std::vector<Value*>::iterator it = mValues.begin();
+    std::vector<Domain*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        AccuracyValue *accuracyValue = dynCast<AccuracyValue*>(*it);
+        AccuracyDomain *accuracyValue = dynCast<AccuracyDomain*>(*it);
         if (!accuracyValue)
             continue;
 
@@ -561,8 +566,11 @@ Container::setTop()
 }
 
 bool
-Container::isSingleValue() const {
-    return getBits().isSingleValue() && getEnumeration().isSingleValue() && getRange().isSingleValue();
+Container::isSingleValue() const
+{
+    return getBits().isSingleValue()
+        && getEnumeration().isSingleValue()
+        && getRange().isSingleValue();
 }
 
 } // namespace Integer

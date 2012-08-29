@@ -1,4 +1,4 @@
-#include "Value.h"
+#include "Domain.h"
 #include "Utils.h"
 #include "Constant.h"
 #include <typeinfo>
@@ -6,18 +6,18 @@
 
 namespace Canal {
 
-Value::Value(const Environment &environment) : mEnvironment(environment)
+Domain::Domain(const Environment &environment) : mEnvironment(environment)
 {
 }
 
 bool
-Value::operator!=(const Value &rhs) const
+Domain::operator!=(const Domain &rhs) const
 {
     return !operator==(rhs);
 }
 
 void
-Value::merge(const Value &v)
+Domain::merge(const Domain &v)
 {
     CANAL_DIE_MSG("merge not implemented for "
                   << typeid(*this).name() << " and "
@@ -25,183 +25,183 @@ Value::merge(const Value &v)
 }
 
 void
-Value::add(const Value &a, const Value &b)
+Domain::add(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::fadd(const Value &a, const Value &b)
+Domain::fadd(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::sub(const Value &a, const Value &b)
+Domain::sub(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::fsub(const Value &a, const Value &b)
+Domain::fsub(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::mul(const Value &a, const Value &b)
+Domain::mul(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::fmul(const Value &a, const Value &b)
+Domain::fmul(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::udiv(const Value &a, const Value &b)
+Domain::udiv(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::sdiv(const Value &a, const Value &b)
+Domain::sdiv(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::fdiv(const Value &a, const Value &b)
+Domain::fdiv(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::urem(const Value &a, const Value &b)
+Domain::urem(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::srem(const Value &a, const Value &b)
+Domain::srem(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::frem(const Value &a, const Value &b)
+Domain::frem(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::shl(const Value &a, const Value &b)
+Domain::shl(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::lshr(const Value &a, const Value &b)
+Domain::lshr(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::ashr(const Value &a, const Value &b)
+Domain::ashr(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::and_(const Value &a, const Value &b)
+Domain::and_(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::or_(const Value &a, const Value &b)
+Domain::or_(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::xor_(const Value &a, const Value &b)
+Domain::xor_(const Domain &a, const Domain &b)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::icmp(const Value &a, const Value &b,
+Domain::icmp(const Domain &a, const Domain &b,
             llvm::CmpInst::Predicate predicate)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::fcmp(const Value &a, const Value &b,
+Domain::fcmp(const Domain &a, const Domain &b,
             llvm::CmpInst::Predicate predicate)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::trunc(const Value &value)
+Domain::trunc(const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::zext(const Value &value)
+Domain::zext(const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::sext(const Value &value)
+Domain::sext(const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::fptrunc(const Value &value)
+Domain::fptrunc(const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::Value::fpext(const Value &value)
+Domain::fpext(const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::fptoui(const Value &value)
+Domain::fptoui(const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::fptosi(const Value &value)
+Domain::fptosi(const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::uitofp(const Value &value)
+Domain::uitofp(const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Value::Value::sitofp(const Value &value)
+Domain::sitofp(const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 llvm::raw_ostream&
-operator<<(llvm::raw_ostream& ostream, const Value &value)
+operator<<(llvm::raw_ostream& ostream, const Domain &value)
 {
     ostream << value.toString();
     return ostream;
@@ -209,43 +209,44 @@ operator<<(llvm::raw_ostream& ostream, const Value &value)
 
 
 float
-AccuracyValue::accuracy() const
+AccuracyDomain::accuracy() const
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 bool
-AccuracyValue::isBottom() const
+AccuracyDomain::isBottom() const
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-AccuracyValue::setBottom()
+AccuracyDomain::setBottom()
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 bool
-AccuracyValue::isTop() const
+AccuracyDomain::isTop() const
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-AccuracyValue::setTop()
+AccuracyDomain::setTop()
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 bool
-VariablePrecisionValue::limitMemoryUsage(size_t size)
+VariablePrecisionDomain::limitMemoryUsage(size_t size)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
-Value*
-Value::handleMergeConstants(Value* what, const Value *target) {
+Domain *
+Domain::handleMergeConstants(Domain* what, const Domain *target)
+{
     // Constants need to be converted to a modifiable value
     // before merging.
     Constant *const1 = dynCast<Constant*>(what);
@@ -254,11 +255,12 @@ Value::handleMergeConstants(Value* what, const Value *target) {
         const Constant *const2 = dynCast<const Constant*>(target);
         if (!const2 || *const1 != *const2)
         {
-            Value *value1 = const1->toModifiableValue();
+            Domain *value1 = const1->toModifiableValue();
             delete const1;
             return value1;
         }
     }
+
     return what;
 }
 

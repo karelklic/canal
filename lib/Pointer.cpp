@@ -15,12 +15,12 @@ namespace Pointer {
 
 InclusionBased::InclusionBased(const Environment &environment,
                                const llvm::Type &type)
-    : Value(environment), mType(type), mTop(false)
+    : Domain(environment), mType(type), mTop(false)
 {
 }
 
 InclusionBased::InclusionBased(const InclusionBased &second)
-    : Value(second.mEnvironment),
+    : Domain(second.mEnvironment),
       mType(second.mType),
       mTargets(second.mTargets),
       mTop(second.mTop)
@@ -32,7 +32,7 @@ InclusionBased::InclusionBased(const InclusionBased &second)
 
 InclusionBased::InclusionBased(const InclusionBased &second,
                                const llvm::Type &newType)
-    : Value(second.mEnvironment),
+    : Domain(second.mEnvironment),
       mType(newType),
       mTargets(second.mTargets),
       mTop(second.mTop)
@@ -53,8 +53,8 @@ void
 InclusionBased::addTarget(Target::Type type,
                           const llvm::Value *instruction,
                           const llvm::Value *target,
-                          const std::vector<Value*> &offsets,
-                          Value *numericOffset)
+                          const std::vector<Domain*> &offsets,
+                          Domain *numericOffset)
 {
     CANAL_ASSERT_MSG(instruction,
                      "Instruction is mandatory.");
@@ -74,15 +74,15 @@ InclusionBased::addTarget(Target::Type type,
         mTargets.insert(PlaceTargetMap::value_type(instruction, pointerTarget));
 }
 
-Value *
+Domain *
 InclusionBased::dereferenceAndMerge(const State &state) const
 {
-    Value *mergedValue = NULL;
+    Domain *mergedValue = NULL;
     PlaceTargetMap::const_iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
     {
-        std::vector<Value*> values = it->second->dereference(state);
-        std::vector<Value*>::const_iterator it = values.begin();
+        std::vector<Domain*> values = it->second->dereference(state);
+        std::vector<Domain*>::const_iterator it = values.begin();
         for (; it != values.end(); ++it)
         {
             if (mergedValue)
@@ -102,7 +102,7 @@ InclusionBased::bitcast(const llvm::Type &type) const
 }
 
 InclusionBased *
-InclusionBased::getElementPtr(const std::vector<Value*> &offsets,
+InclusionBased::getElementPtr(const std::vector<Domain*> &offsets,
                               const llvm::Type &type) const
 {
     InclusionBased *result = new InclusionBased(*this, type);
@@ -110,7 +110,7 @@ InclusionBased::getElementPtr(const std::vector<Value*> &offsets,
     PlaceTargetMap::iterator targetIt = result->mTargets.begin();
     for (; targetIt != result->mTargets.end(); ++targetIt)
     {
-        std::vector<Value*>::const_iterator offsetIt = offsets.begin();
+        std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
         for (; offsetIt != offsets.end(); ++offsetIt)
         {
             if (targetIt == result->mTargets.begin())
@@ -122,7 +122,7 @@ InclusionBased::getElementPtr(const std::vector<Value*> &offsets,
 
     if (result->mTargets.empty())
     {
-        std::vector<Value*>::const_iterator offsetIt = offsets.begin();
+        std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
         for (; offsetIt != offsets.end(); ++offsetIt)
             delete *offsetIt;
     }
@@ -131,15 +131,15 @@ InclusionBased::getElementPtr(const std::vector<Value*> &offsets,
 }
 
 void
-InclusionBased::store(const Value &value, State &state)
+InclusionBased::store(const Domain &value, State &state)
 {
     // Go through all target memory blocks for the pointer and merge
     // them with the value being stored.
     PlaceTargetMap::const_iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
     {
-        std::vector<Value*> destinations = it->second->dereference(state);
-        std::vector<Value*>::iterator it = destinations.begin();
+        std::vector<Domain*> destinations = it->second->dereference(state);
+        std::vector<Domain*>::iterator it = destinations.begin();
         for (; it != destinations.end(); ++it)
             (*it)->merge(value);
     }
@@ -158,7 +158,7 @@ InclusionBased::cloneCleaned() const
 }
 
 bool
-InclusionBased::operator==(const Value &value) const
+InclusionBased::operator==(const Domain &value) const
 {
     // Check if the value has the same type.
     const InclusionBased *pointer =
@@ -192,20 +192,32 @@ InclusionBased::operator==(const Value &value) const
 }
 
 bool
-InclusionBased::isSingleTarget() const {
-    if (mTop || mTargets.size() != 1) return false;
+InclusionBased::isSingleTarget() const
+{
+    if (mTop || mTargets.size() != 1)
+        return false;
+
     const Target *target = mTargets.begin()->second;
-    const Canal::Integer::Container* tmp = dynCast<const Canal::Integer::Container*>(target->mNumericOffset);
-    if (!tmp->isSingleValue()) return false;
-    for (std::vector<Value*>::const_iterator it = target->mOffsets.begin(); it != target->mOffsets.end(); it ++) {
-        tmp = dynCast<const Canal::Integer::Container*>(*it);
-        if (!tmp->isSingleValue()) return false;
+
+    const Integer::Container *tmp =
+        dynCast<const Integer::Container*>(target->mNumericOffset);
+
+    if (!tmp->isSingleValue())
+        return false;
+
+    std::vector<Domain*>::const_iterator it = target->mOffsets.begin();
+    for (; it != target->mOffsets.end(); ++it)
+    {
+        tmp = dynCast<const Integer::Container*>(*it);
+        if (!tmp->isSingleValue())
+            return false;
     }
+
     return true;
 }
 
 void
-InclusionBased::merge(const Value &value)
+InclusionBased::merge(const Domain &value)
 {
     CANAL_ASSERT_MSG(!dynCast<const Constant*>(&value),
                      "Constant values are not supported for pointers."

@@ -1,12 +1,12 @@
 #ifndef LIBCANAL_POINTER_H
 #define LIBCANAL_POINTER_H
 
-#include "Value.h"
+#include "Domain.h"
 #include "PointerTarget.h"
 #include <map>
 
 namespace llvm {
-    class Value;
+class Domain;
 }
 
 namespace Canal {
@@ -20,7 +20,7 @@ namespace Pointer {
 typedef std::map<const llvm::Value*, Target*> PlaceTargetMap;
 
 /// Inclusion-based flow-insensitive abstract pointer.
-class InclusionBased : public Value, public AccuracyValue
+class InclusionBased : public Domain, public AccuracyDomain
 {
 public:
     /// llvm::Value represents a position in the program.  It points to
@@ -82,14 +82,14 @@ public:
     void addTarget(Target::Type type,
                    const llvm::Value *instruction,
                    const llvm::Value *target,
-                   const std::vector<Value*> &offsets,
-                   Value *numericOffset);
+                   const std::vector<Domain*> &offsets,
+                   Domain *numericOffset);
 
     /// Dereference all targets and merge the results into single
     /// abstract value.  The returned value is owned by the caller.
     /// @returns
     ///   It might return NULL.
-    Value *dereferenceAndMerge(const State &state) const;
+    Domain *dereferenceAndMerge(const State &state) const;
 
     /// Creates a copy of this object with a different pointer type.
     InclusionBased *bitcast(const llvm::Type &type) const;
@@ -97,42 +97,42 @@ public:
     /// Creates a copy of this object pointing to subtargets.
     /// @param offsets
     ///   Pointer takes ownership of the values inside the vector.
-    InclusionBased *getElementPtr(const std::vector<Value*> &offsets,
+    InclusionBased *getElementPtr(const std::vector<Domain*> &offsets,
                                   const llvm::Type &type) const;
 
-    void store(const Value &value, State &state);
+    void store(const Domain &value, State &state);
 
-public: // Implementation of Value.
-    /// Implementation of Value::clone().
-    /// Covariant return type -- it really overrides Value::clone().
+public: // Implementation of Domain.
+    /// Implementation of Domain::clone().
+    /// Covariant return type -- it really overrides Domain::clone().
     virtual InclusionBased *clone() const;
-    /// Implementation of Value::cloneCleaned().
+    /// Implementation of Domain::cloneCleaned().
     /// Covariant return type.
     virtual InclusionBased *cloneCleaned() const;
-    /// Implementation of Value::operator==().
-    virtual bool operator==(const Value &value) const;
+    /// Implementation of Domain::operator==().
+    virtual bool operator==(const Domain &value) const;
     /// Does this pointer point to single target?
     bool isSingleTarget() const;
-    /// Implementation of Value::merge().
-    virtual void merge(const Value &value);
-    /// Implementation of Value::memoryUsage().
+    /// Implementation of Domain::merge().
+    virtual void merge(const Domain &value);
+    /// Implementation of Domain::memoryUsage().
     virtual size_t memoryUsage() const;
-    /// Implementation of Value::toString().
+    /// Implementation of Domain::toString().
     virtual std::string toString() const;
-    /// Implementation of Value::matchesString().
+    /// Implementation of Domain::matchesString().
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
 
-public: // Implementation of AccuracyValue.
-    /// Implementation of AccuracyValue::accuracy().
+public: // Implementation of AccuracyDomain.
+    /// Implementation of AccuracyDomain::accuracy().
     virtual float accuracy() const;
-    /// Implementation of AccuracyValue::isBottom().
+    /// Implementation of AccuracyDomain::isBottom().
     virtual bool isBottom() const;
-    /// Implementation of AccuracyValue::setBottom().
+    /// Implementation of AccuracyDomain::setBottom().
     virtual void setBottom();
-    /// Implementation of AccuracyValue::isTop().
+    /// Implementation of AccuracyDomain::isTop().
     virtual bool isTop() const;
-    /// Implementation of AccuracyValue::setTop().
+    /// Implementation of AccuracyDomain::setTop().
     virtual void setTop();
 };
 

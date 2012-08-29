@@ -5,11 +5,11 @@
 #include <vector>
 
 namespace llvm {
-    class Value;
-    class GlobalValue;
-    class Module;
-    class Function;
-    class MDNode;
+class Value;
+class GlobalValue;
+class Module;
+class Function;
+class MDNode;
 }
 
 namespace Canal {

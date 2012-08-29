@@ -10,13 +10,13 @@ namespace Canal {
 namespace Integer {
 
 Enumeration::Enumeration(const Environment &environment, unsigned numBits)
-    : Value(environment), mTop(false), mNumBits(numBits)
+    : Domain(environment), mTop(false), mNumBits(numBits)
 {
     CANAL_ASSERT(numBits);
 }
 
 Enumeration::Enumeration(const Environment &environment, const llvm::APInt &number)
-    : Value(environment), mTop(false), mNumBits(number.getBitWidth())
+    : Domain(environment), mTop(false), mNumBits(number.getBitWidth())
 {
     mValues.insert(number);
     CANAL_ASSERT(mNumBits);
@@ -108,7 +108,7 @@ Enumeration::cloneCleaned() const
 }
 
 bool
-Enumeration::operator==(const Value& value) const
+Enumeration::operator==(const Domain &value) const
 {
     const Enumeration *enumeration =
         dynCast<const Enumeration*>(&value);
@@ -125,7 +125,7 @@ Enumeration::operator==(const Value& value) const
 }
 
 void
-Enumeration::merge(const Value &value)
+Enumeration::merge(const Domain &value)
 {
     if (mTop)
         return;
@@ -330,19 +330,19 @@ Enumeration::matchesString(const std::string &text,
 }
 
 void
-Enumeration::add(const Value &a, const Value &b)
+Enumeration::add(const Domain &a, const Domain &b)
 {
     applyOperation(a, b, &llvm::APInt::operator+, NULL);
 }
 
 void
-Enumeration::sub(const Value &a, const Value &b)
+Enumeration::sub(const Domain &a, const Domain &b)
 {
     applyOperation(a, b, &llvm::APInt::operator-, NULL);
 }
 
 void
-Enumeration::mul(const Value &a, const Value &b)
+Enumeration::mul(const Domain &a, const Domain &b)
 {
 #if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
     applyOperation(a, b, &llvm::APInt::operator*, NULL);
@@ -352,61 +352,61 @@ Enumeration::mul(const Value &a, const Value &b)
 }
 
 void
-Enumeration::udiv(const Value &a, const Value &b)
+Enumeration::udiv(const Domain &a, const Domain &b)
 {
     applyOperation(a, b, &llvm::APInt::udiv, NULL);
 }
 
 void
-Enumeration::sdiv(const Value &a, const Value &b)
+Enumeration::sdiv(const Domain &a, const Domain &b)
 {
     applyOperation(a, b, &llvm::APInt::sdiv, NULL);
 }
 
 void
-Enumeration::urem(const Value &a, const Value &b)
+Enumeration::urem(const Domain &a, const Domain &b)
 {
     applyOperation(a, b, &llvm::APInt::urem, NULL);
 }
 
 void
-Enumeration::srem(const Value &a, const Value &b)
+Enumeration::srem(const Domain &a, const Domain &b)
 {
     applyOperation(a, b, &llvm::APInt::srem, NULL);
 }
 
 void
-Enumeration::shl(const Value &a, const Value &b)
+Enumeration::shl(const Domain &a, const Domain &b)
 {
     applyOperation(a, b, &llvm::APInt::shl, NULL);
 }
 
 void
-Enumeration::lshr(const Value &a, const Value &b)
+Enumeration::lshr(const Domain &a, const Domain &b)
 {
     applyOperation(a, b, &llvm::APInt::lshr, NULL);
 }
 
 void
-Enumeration::ashr(const Value &a, const Value &b)
+Enumeration::ashr(const Domain &a, const Domain &b)
 {
     applyOperation(a, b, &llvm::APInt::ashr, NULL);
 }
 
 void
-Enumeration::and_(const Value &a, const Value &b)
+Enumeration::and_(const Domain &a, const Domain &b)
 {
     applyOperation(a, b, &llvm::APInt::operator&, NULL);
 }
 
 void
-Enumeration::or_(const Value &a, const Value &b)
+Enumeration::or_(const Domain &a, const Domain &b)
 {
     applyOperation(a, b, &llvm::APInt::operator|, NULL);
 }
 
 void
-Enumeration::xor_(const Value &a, const Value &b)
+Enumeration::xor_(const Domain &a, const Domain &b)
 {
     applyOperation(a, b, &llvm::APInt::operator^, NULL);
 }
@@ -434,7 +434,7 @@ intersects(const Enumeration &a,
 }
 
 void
-Enumeration::icmp(const Value &a, const Value &b,
+Enumeration::icmp(const Domain &a, const Domain &b,
                   llvm::CmpInst::Predicate predicate)
 {
     const Enumeration &aa = dynCast<const Enumeration&>(a),
@@ -610,12 +610,13 @@ Enumeration::icmp(const Value &a, const Value &b,
 }
 
 bool
-Enumeration::isSingleValue() const {
+Enumeration::isSingleValue() const
+{
     return (!mTop && mValues.size() == 1);
 }
 
 void
-Enumeration::fcmp(const Value &a, const Value &b,
+Enumeration::fcmp(const Domain &a, const Domain &b,
                   llvm::CmpInst::Predicate predicate)
 {
     const Float::Range &aa = dynCast<const Float::Range&>(a),
@@ -678,8 +679,8 @@ Enumeration::setTop()
 }
 
 void
-Enumeration::applyOperation(const Value &a,
-                            const Value &b,
+Enumeration::applyOperation(const Domain &a,
+                            const Domain &b,
                             APIntUtils::Operation operation1,
                             APIntUtils::OperationWithOverflow operation2)
 {

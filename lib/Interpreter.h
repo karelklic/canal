@@ -58,7 +58,7 @@ namespace Canal {
 
 class State;
 class Machine;
-class Value;
+class Domain;
 class Stack;
 class Environment;
 

@@ -4,7 +4,7 @@
 #include "Command.h"
 
 namespace llvm {
-    class Value;
+class Value;
 }
 
 class CommandPrint : public Command

@@ -8,7 +8,7 @@ namespace Canal {
 namespace Float {
 
 Range::Range(const Environment &environment, const llvm::fltSemantics &semantics)
-    : Value(environment),
+    : Domain(environment),
       mFrom(semantics),
       mTo(semantics),
       mEmpty(true),
@@ -157,7 +157,7 @@ Range::cloneCleaned() const
 }
 
 bool
-Range::operator==(const Value& value) const
+Range::operator==(const Domain& value) const
 {
     const Range *range = dynCast<const Range*>(&value);
     if (!range)
@@ -172,7 +172,7 @@ Range::operator==(const Value& value) const
 }
 
 void
-Range::merge(const Value &value)
+Range::merge(const Domain &value)
 {
     const Range &range = dynCast<const Range&>(value);
     if (range.mEmpty)

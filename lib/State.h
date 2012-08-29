@@ -12,11 +12,11 @@ class raw_ostream;
 
 namespace Canal {
 
-class Value;
+class Domain;
 
 /// llvm::Value represents a place in the program (an instruction,
 /// instance of llvm::Instruction).
-typedef std::map<const llvm::Value*, Value*> PlaceValueMap;
+typedef std::map<const llvm::Value*, Domain*> PlaceValueMap;
 
 /// Includes global variables and heap.
 /// Includes function-level memory and variables (=stack).
@@ -50,7 +50,7 @@ public:
     /// @param place
     ///   Represents a place in the program where the global variable
     ///   is defined and assigned.
-    void addGlobalVariable(const llvm::Value &place, Value *value);
+    void addGlobalVariable(const llvm::Value &place, Domain *value);
 
     /// Adds a register-type value to the stack.
     /// @param place
@@ -62,12 +62,12 @@ public:
     /// @see
     ///   To add a value created by alloca to the stack, use the method
     ///   addFunctionBlock.
-    void addFunctionVariable(const llvm::Value &place, Value *value);
+    void addFunctionVariable(const llvm::Value &place, Domain *value);
 
-    void addGlobalBlock(const llvm::Value &place, Value *value);
+    void addGlobalBlock(const llvm::Value &place, Domain *value);
 
     /// Adds a value created by alloca to the stack.
-    void addFunctionBlock(const llvm::Value &place, Value *value);
+    void addFunctionBlock(const llvm::Value &place, Domain *value);
 
     const PlaceValueMap &getGlobalVariables() const { return mGlobalVariables; }
     const PlaceValueMap &getGlobalBlocks() const { return mGlobalBlocks; }
@@ -77,16 +77,16 @@ public:
     /// Search both global and function variables for a place.  If the
     /// place is found, the variable is returned.  Otherwise NULL is
     /// returned.
-    Value *findVariable(const llvm::Value &place) const;
+    Domain *findVariable(const llvm::Value &place) const;
 
     /// Search both global and function blocks for a place.  If the
     /// place is found, the block is returned.  Otherwise NULL is
     /// returned.
-    Value *findBlock(const llvm::Value &place) const;
+    Domain *findBlock(const llvm::Value &place) const;
 
 protected:
     /// The key (llvm::Value*) is not owned by this class.  It is not
-    /// deleted.  The value (Value*) memory is owned by this
+    /// deleted.  The value (Domain*) memory is owned by this
     /// class, so it is deleted in state destructor.
     PlaceValueMap mGlobalVariables;
 
@@ -104,7 +104,7 @@ protected:
     /// contains a pointer to a StackBlocks item.
     ///
     /// The key (llvm::Value*) is not owned by this class.  It is not
-    /// deleted.  The value (Value*) memory is owned by this
+    /// deleted.  The value (Domain*) memory is owned by this
     /// class, so it is deleted in state destructor.
     PlaceValueMap mFunctionVariables;
 
@@ -119,7 +119,7 @@ protected:
 
 public:
     /// Value returned from function.
-    Value *mReturnedValue;
+    Domain *mReturnedValue;
 };
 
 /// Support writing of operational state to output stream.  Used for

@@ -10,6 +10,8 @@ libcanal_la_SOURCES = \
 	ArraySingleItem.h \
 	Constant.cpp \
 	Constant.h \
+	Domain.cpp \
+	Domain.h \
 	Environment.cpp \
 	Environment.h \
 	FloatRange.cpp \
@@ -40,9 +42,7 @@ libcanal_la_SOURCES = \
 	Structure.cpp \
 	Structure.h \
 	Utils.cpp \
-	Utils.h \
-	Value.cpp \
-	Value.h
+	Utils.h
 
 libcanal_la_CXXFLAGS = $(LLVM_CFLAGS)
 libcanal_la_LDFLAGS = $(LLVM_LDFLAGS) $(LLVM_LIBS) -version-info 0:0:0

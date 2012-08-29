@@ -4,7 +4,7 @@
 #include "Utils.h"
 #include "../lib/SlotTracker.h"
 #include "../lib/Stack.h"
-#include "../lib/Value.h"
+#include "../lib/Domain.h"
 #include "../lib/Utils.h"
 #include <llvm/ValueSymbolTable.h>
 #include <llvm/Module.h>
@@ -163,7 +163,7 @@ printVariable(const std::string &fullName, State &state)
         return;
     }
 
-    Canal::Value *value = NULL;
+    Canal::Domain *value = NULL;
     if (isBlock)
         value = currentState.findBlock(*position);
     else

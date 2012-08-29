@@ -1,4 +1,4 @@
-#include "Value.h"
+#include "Domain.h"
 #include <llvm/Pass.h>
 #include <llvm/Module.h>
 #include <llvm/Function.h>
@@ -23,12 +23,12 @@ public:
 
     const llvm::Function::ArgumentListType &list = main->getArgumentList();
 
-    std::vector<Value> values;
+    std::vector<Domain> values;
     interpretFunction(*main, values);
   }
 
   void interpretFunction(const llvm::Function &F,
-			 const std::vector<Value> &Arguments)
+			 const std::vector<Domain> &Arguments)
   {
     for (llvm::Function::const_iterator i = F.begin(), e = F.end(); i != e; ++i)
       {

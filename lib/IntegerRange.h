@@ -1,14 +1,14 @@
 #ifndef LIBCANAL_INTEGER_RANGE_H
 #define LIBCANAL_INTEGER_RANGE_H
 
-#include "Value.h"
+#include "Domain.h"
 #include <llvm/Constants.h>
 
 namespace Canal {
 namespace Integer {
 
 /// Abstracts integer values as a range min - max.
-class Range : public Value, public AccuracyValue
+class Range : public Domain, public AccuracyDomain
 {
 public:
     bool mEmpty;
@@ -72,65 +72,65 @@ public:
     /// and unsigned representations might differ, though.
     bool isSingleValue() const;
 
-public: // Implementation of Value.
-    /// Implementation of Value::clone().
+public: // Implementation of Domain.
+    /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Range *clone() const;
-    /// Implementation of Value::cloneCleaned().
+    /// Implementation of Domain::cloneCleaned().
     /// Covariant return type.
     virtual Range *cloneCleaned() const;
-    /// Implementation of Value::operator==().
-    virtual bool operator==(const Value& value) const;
-    /// Implementation of Value::merge().
-    virtual void merge(const Value &value);
-    /// Implementation of Value::memoryUsage().
+    /// Implementation of Domain::operator==().
+    virtual bool operator==(const Domain& value) const;
+    /// Implementation of Domain::merge().
+    virtual void merge(const Domain &value);
+    /// Implementation of Domain::memoryUsage().
     virtual size_t memoryUsage() const;
-    /// Implementation of Value::toString().
+    /// Implementation of Domain::toString().
     virtual std::string toString() const;
-    /// Implementation of Value::matchesString().
+    /// Implementation of Domain::matchesString().
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
 
-    /// Implementation of Value::add().
-    virtual void add(const Value &a, const Value &b);
-    /// Implementation of Value::sub().
-    virtual void sub(const Value &a, const Value &b);
-    /// Implementation of Value::mul().
-    virtual void mul(const Value &a, const Value &b);
-    /// Implementation of Value::udiv().
-    virtual void udiv(const Value &a, const Value &b);
-    /// Implementation of Value::sdiv().
-    virtual void sdiv(const Value &a, const Value &b);
-    /// Implementation of Value::urem().
-    virtual void urem(const Value &a, const Value &b);
-    /// Implementation of Value::srem().
-    virtual void srem(const Value &a, const Value &b);
-    /// Implementation of Value::shl().
-    virtual void shl(const Value &a, const Value &b);
-    /// Implementation of Value::lshr().
-    virtual void lshr(const Value &a, const Value &b);
-    /// Implementation of Value::ashr().
-    virtual void ashr(const Value &a, const Value &b);
-    /// Implementation of Value::and_().
-    virtual void and_(const Value &a, const Value &b);
-    /// Implementation of Value::or_().
-    virtual void or_(const Value &a, const Value &b);
-    /// Implementation of Value::xor_().
-    virtual void xor_(const Value &a, const Value &b);
-    /// Implementation of Value::icmp().
-    virtual void icmp(const Value &a, const Value &b,
+    /// Implementation of Domain::add().
+    virtual void add(const Domain &a, const Domain &b);
+    /// Implementation of Domain::sub().
+    virtual void sub(const Domain &a, const Domain &b);
+    /// Implementation of Domain::mul().
+    virtual void mul(const Domain &a, const Domain &b);
+    /// Implementation of Domain::udiv().
+    virtual void udiv(const Domain &a, const Domain &b);
+    /// Implementation of Domain::sdiv().
+    virtual void sdiv(const Domain &a, const Domain &b);
+    /// Implementation of Domain::urem().
+    virtual void urem(const Domain &a, const Domain &b);
+    /// Implementation of Domain::srem().
+    virtual void srem(const Domain &a, const Domain &b);
+    /// Implementation of Domain::shl().
+    virtual void shl(const Domain &a, const Domain &b);
+    /// Implementation of Domain::lshr().
+    virtual void lshr(const Domain &a, const Domain &b);
+    /// Implementation of Domain::ashr().
+    virtual void ashr(const Domain &a, const Domain &b);
+    /// Implementation of Domain::and_().
+    virtual void and_(const Domain &a, const Domain &b);
+    /// Implementation of Domain::or_().
+    virtual void or_(const Domain &a, const Domain &b);
+    /// Implementation of Domain::xor_().
+    virtual void xor_(const Domain &a, const Domain &b);
+    /// Implementation of Domain::icmp().
+    virtual void icmp(const Domain &a, const Domain &b,
                       llvm::CmpInst::Predicate predicate);
 
-public: // Implementation of AccuracyValue.
-    /// Implementation of AccuracyValue::accuracy().
+public: // Implementation of AccuracyDomain.
+    /// Implementation of AccuracyDomain::accuracy().
     virtual float accuracy() const;
-    /// Implementation of AccuracyValue::isBottom().
+    /// Implementation of AccuracyDomain::isBottom().
     virtual bool isBottom() const;
-    /// Implementation of AccuracyValue::setBottom().
+    /// Implementation of AccuracyDomain::setBottom().
     virtual void setBottom();
-    /// Implementation of AccuracyValue::isTop().
+    /// Implementation of AccuracyDomain::isTop().
     virtual bool isTop() const;
-    /// Implementation of AccuracyValue::setTop().
+    /// Implementation of AccuracyDomain::setTop().
     virtual void setTop();
 };
 

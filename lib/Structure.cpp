@@ -8,21 +8,23 @@
 
 namespace Canal {
 
-Structure::Structure(const Environment &environment) : Value(environment)
+Structure::Structure(const Environment &environment)
+    : Domain(environment)
 {
 }
 
-Structure::Structure(const Structure &structure) : Value(structure.mEnvironment)
+Structure::Structure(const Structure &structure)
+    : Domain(structure.mEnvironment)
 {
     mMembers = structure.mMembers;
-    std::vector<Value*>::iterator it = mMembers.begin();
+    std::vector<Domain*>::iterator it = mMembers.begin();
     for (; it != mMembers.end(); ++it)
         *it = (*it)->clone();
 }
 
 Structure::~Structure()
 {
-    std::vector<Value*>::iterator it = mMembers.begin();
+    std::vector<Domain*>::iterator it = mMembers.begin();
     for (; it != mMembers.end(); ++it)
         delete (*it);
 }
@@ -40,7 +42,7 @@ Structure::cloneCleaned() const
 }
 
 bool
-Structure::operator==(const Value &value) const
+Structure::operator==(const Domain &value) const
 {
     const Structure *structure = dynCast<const Structure*>(&value);
     if (!structure)
@@ -49,7 +51,7 @@ Structure::operator==(const Value &value) const
     if (mMembers.size() != structure->mMembers.size())
         return false;
 
-    std::vector<Value*>::const_iterator itA = mMembers.begin(),
+    std::vector<Domain*>::const_iterator itA = mMembers.begin(),
         itAend = mMembers.end(),
         itB = structure->mMembers.begin();
     for (; itA != itAend; ++itA, ++itB)
@@ -62,12 +64,12 @@ Structure::operator==(const Value &value) const
 }
 
 void
-Structure::merge(const Value &value)
+Structure::merge(const Domain &value)
 {
     const Structure &structure = dynCast<const Structure&>(value);
     CANAL_ASSERT(mMembers.size() == structure.mMembers.size());
-    std::vector<Value*>::iterator itA = mMembers.begin();
-    std::vector<Value*>::const_iterator itAend = mMembers.end(),
+    std::vector<Domain*>::iterator itA = mMembers.begin();
+    std::vector<Domain*>::const_iterator itAend = mMembers.end(),
         itB = structure.mMembers.begin();
     for (; itA != itAend; ++itA, ++itB)
         (*itA)->merge(**itB);
@@ -77,8 +79,8 @@ size_t
 Structure::memoryUsage() const
 {
     size_t size = sizeof(Structure);
-    size += mMembers.capacity() * sizeof(Value*);
-    std::vector<Value*>::const_iterator it = mMembers.begin();
+    size += mMembers.capacity() * sizeof(Domain*);
+    std::vector<Domain*>::const_iterator it = mMembers.begin();
     for (; it != mMembers.end(); ++it)
         size += (*it)->memoryUsage();
 
@@ -90,7 +92,7 @@ Structure::toString() const
 {
     std::stringstream ss;
     ss << "structure" << std::endl;
-    std::vector<Value*>::const_iterator it = mMembers.begin();
+    std::vector<Domain*>::const_iterator it = mMembers.begin();
     for (; it != mMembers.end(); ++it)
         ss << indent((*it)->toString(), 4);
 
@@ -104,10 +106,10 @@ Structure::matchesString(const std::string &text,
     CANAL_NOT_IMPLEMENTED();
 }
 
-std::vector<Value*>
-Structure::getItem(const Value &offset) const
+std::vector<Domain*>
+Structure::getItem(const Domain &offset) const
 {
-    std::vector<Value*> result;
+    std::vector<Domain*> result;
     if (const Constant *constant = dynCast<const Constant*>(&offset))
     {
         CANAL_ASSERT(constant->isAPInt());
@@ -178,7 +180,7 @@ Structure::getItem(const Value &offset) const
     return result;
 }
 
-Value *
+Domain *
 Structure::getItem(uint64_t offset) const
 {
     CANAL_ASSERT_MSG(offset < mMembers.size(),
@@ -188,13 +190,13 @@ Structure::getItem(uint64_t offset) const
 }
 
 void
-Structure::setItem(const Value &offset, const Value &value)
+Structure::setItem(const Domain &offset, const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Structure::setItem(uint64_t offset, const Value &value)
+Structure::setItem(uint64_t offset, const Domain &value)
 {
     CANAL_ASSERT_MSG(offset < mMembers.size(),
                      "Offset out of bounds.");

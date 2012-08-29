@@ -8,7 +8,7 @@
 
 namespace Canal {
 
-class Value;
+class Domain;
 
 class StackFrame
 {
@@ -20,7 +20,7 @@ public:
     /// frame, and false when fixpoint has been reached.
     bool nextInstruction();
 
-    Value *getReturnedValue() const;
+    Domain *getReturnedValue() const;
     void mergeGlobalVariables(State &target) const;
 
 public:

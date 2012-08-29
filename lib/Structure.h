@@ -1,50 +1,50 @@
 #ifndef LIBCANAL_STRUCTURE_H
 #define LIBCANAL_STRUCTURE_H
 
-#include "Value.h"
+#include "Domain.h"
 #include "ArrayInterface.h"
 #include <vector>
 
 namespace Canal {
 
-class Structure : public Value, public Array::Interface
+class Structure : public Domain, public Array::Interface
 {
 public:
-    std::vector<Value*> mMembers;
+    std::vector<Domain*> mMembers;
 
 public:
     Structure(const Environment &environment);
     Structure(const Structure &structure);
     virtual ~Structure();
 
-public: // Implementation of Value.
-    /// Implementation of Value::clone().
+public: // Implementation of Domain.
+    /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Structure *clone() const;
-    /// Implementation of Value::cloneCleaned().
+    /// Implementation of Domain::cloneCleaned().
     /// Covariant return type.
     virtual Structure *cloneCleaned() const;
-    /// Implementation of Value::operator==().
-    virtual bool operator==(const Value &value) const;
-    /// Implementation of Value::merge().
-    virtual void merge(const Value &value);
-    /// Implementation of Value::memoryUsage().
+    /// Implementation of Domain::operator==().
+    virtual bool operator==(const Domain &value) const;
+    /// Implementation of Domain::merge().
+    virtual void merge(const Domain &value);
+    /// Implementation of Domain::memoryUsage().
     virtual size_t memoryUsage() const;
-    /// Implementation of Value::toString().
+    /// Implementation of Domain::toString().
     virtual std::string toString() const;
-    /// Implementation of Value::matchesString().
+    /// Implementation of Domain::matchesString().
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
 
 public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::getItem().
-    virtual std::vector<Value*> getItem(const Value &offset) const;
+    virtual std::vector<Domain*> getItem(const Domain &offset) const;
     /// Implementation of Array::Interface::getItem().
-    virtual Value *getItem(uint64_t offset) const;
+    virtual Domain *getItem(uint64_t offset) const;
     /// Implementation of Array::Interface::set().
-    virtual void setItem(const Value &offset, const Value &value);
+    virtual void setItem(const Domain &offset, const Domain &value);
     /// Implementation of Array::Interface::set().
-    virtual void setItem(uint64_t offset, const Value &value);
+    virtual void setItem(uint64_t offset, const Domain &value);
 };
 
 } // namespace Canal

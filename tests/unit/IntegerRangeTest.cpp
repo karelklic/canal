@@ -11,7 +11,11 @@ static void
 testConstructors(const Environment &environment)
 {
     Integer::Range range(environment, 1);
-    CANAL_ASSERT(range.mEmpty);
+    CANAL_ASSERT(range.mEmpty && !range.mSignedTop && !range.mUnsignedTop);
+    CANAL_ASSERT(range.mSignedFrom == range.mSignedTo);
+    CANAL_ASSERT(range.mUnsignedFrom == range.mUnsignedTo);
+    CANAL_ASSERT(range.mSignedFrom.getSExtValue() == 0);
+    CANAL_ASSERT(range.mUnsignedFrom.getZExtValue() == 0);
 }
 
 static void

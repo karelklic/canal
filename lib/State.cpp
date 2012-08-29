@@ -1,5 +1,5 @@
 #include "State.h"
-#include "Value.h"
+#include "Domain.h"
 #include "Utils.h"
 #include "Constant.h"
 #include <llvm/Support/raw_ostream.h>
@@ -139,7 +139,7 @@ mergeMaps(PlaceValueMap &map1, const PlaceValueMap &map2)
         }
 	else
         {
-            it1->second = Value::handleMergeConstants(it1->second, it2->second);
+            it1->second = Domain::handleMergeConstants(it1->second, it2->second);
             it1->second->merge(*it2->second);
         }
     }
@@ -155,8 +155,11 @@ State::merge(const State &state)
 
     if (mReturnedValue)
     {
-        if (state.mReturnedValue) {
-            mReturnedValue = Value::handleMergeConstants(mReturnedValue, state.mReturnedValue);
+        if (state.mReturnedValue)
+        {
+            mReturnedValue = Domain::handleMergeConstants(mReturnedValue,
+                                                         state.mReturnedValue);
+
             mReturnedValue->merge(*state.mReturnedValue);
         }
     }
@@ -174,7 +177,7 @@ State::mergeGlobalLevel(const State &state)
 static void
 replaceOrInsertMapItem(PlaceValueMap &map,
                        const llvm::Value &place,
-                       Value *value)
+                       Domain *value)
 {
     CANAL_ASSERT_MSG(value,
                      "Attempted to insert NULL variable to state.");
@@ -186,33 +189,33 @@ replaceOrInsertMapItem(PlaceValueMap &map,
         it->second = value;
     }
     else
-        map.insert(std::pair<const llvm::Value*, Value*>(&place, value));
+        map.insert(std::pair<const llvm::Value*, Domain*>(&place, value));
 }
 
-void State::addGlobalVariable(const llvm::Value &place, Value *value)
+void State::addGlobalVariable(const llvm::Value &place, Domain *value)
 {
     replaceOrInsertMapItem(mGlobalVariables, place, value);
 }
 
 void
-State::addFunctionVariable(const llvm::Value &place, Value *value)
+State::addFunctionVariable(const llvm::Value &place, Domain *value)
 {
     replaceOrInsertMapItem(mFunctionVariables, place, value);
 }
 
 void
-State::addGlobalBlock(const llvm::Value &place, Value *value)
+State::addGlobalBlock(const llvm::Value &place, Domain *value)
 {
     replaceOrInsertMapItem(mGlobalBlocks, place, value);
 }
 
 void
-State::addFunctionBlock(const llvm::Value &place, Value *value)
+State::addFunctionBlock(const llvm::Value &place, Domain *value)
 {
     replaceOrInsertMapItem(mFunctionBlocks, place, value);
 }
 
-Value *
+Domain *
 State::findVariable(const llvm::Value &place) const
 {
     PlaceValueMap::const_iterator it = mGlobalVariables.find(&place);
@@ -226,7 +229,7 @@ State::findVariable(const llvm::Value &place) const
     return NULL;
 }
 
-Value *
+Domain *
 State::findBlock(const llvm::Value &place) const
 {
     PlaceValueMap::const_iterator it = mGlobalBlocks.find(&place);
