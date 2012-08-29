@@ -12,79 +12,99 @@ AC_DISABLE_STATIC
 LT_INIT
 AC_SUBST([LIBTOOL_DEPS])
 
-# LLVM
-AC_PATH_PROG([LLVM_CONFIG], [llvm-config], [no])
-[if test "$LLVM_CONFIG" = "no"; then]
-    [echo "The llvm-config program was not found in the search path. Please ensure"]
+# Program testing macro
+AC_DEFUN([AC_PATH_PROG_CRITICAL],[
+AC_PATH_PROG($1, $2, [no])
+[if test "$$1" = "no"; then]
+    [echo "The $2 program was not found in the search path. Please ensure"]
     [echo "that it is installed and its directory is included in the search path."]
     [echo "Then run configure again before attempting to build Canal."]
     [exit 1]
 [fi]
+AC_SUBST($1)
+])
 
-AC_PATH_PROG([LLVM_LINK], [llvm-link], [no])
-[if test "$LLVM_LINK" = "no"; then]
-    [echo "The llvm-link program was not found in the search path. Please ensure"]
-    [echo "that it is installed and its directory is included in the search path."]
-    [echo "Then run configure again before attempting to build Canal."]
-    [exit 1]
-[fi]
-AC_SUBST([LLVM_LINK])
-
+# LLVM and Clang
+AC_PATH_PROG_CRITICAL([LLVM_CONFIG], [llvm-config])
+AC_PATH_PROG_CRITICAL([LLVM_LINK], [llvm-link])
+AC_PATH_PROG_CRITICAL([CLANG], [clang])
 LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
 AC_SUBST([LLVM_VERSION])
-
 LLVM_CFLAGS=`$LLVM_CONFIG --cppflags | sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
 AC_SUBST([LLVM_CFLAGS])
-
 LLVM_LIBS=`$LLVM_CONFIG --libs`
 AC_SUBST([LLVM_LIBS])
-
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 AC_SUBST([LLVM_LDFLAGS])
 
 # Quadrigraphs: @<:@ gives you [ and @:>@ gives you ].
 CPPFLAGS+=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
 
-# CLANG
-AC_PATH_PROG([CLANG], [clang], [no])
-[if test "$CLANG" = "no"; then]
-    [echo "The clang program was not found in the search path. Please ensure"]
-    [echo "that it is installed and its directory is included in the search path."]
-    [echo "Then run configure again before attempting to build Canal."]
-    [exit 1]
-[fi]
-AC_SUBST([CLANG])
-
 # readline
 AC_CHECK_HEADERS([readline/readline.h], [],
 	[AC_MSG_ERROR([Please install readline development headers])])
 
-# pdflatex
-AC_PATH_PROG([PDFLATEX], [pdflatex], [no])
-[if test "$PDFLATEX" = "no"; then]
-    [echo "The pdflatex program was not found in the search path. Please ensure"]
-    [echo "that it is installed and its directory is included in the search path."]
-    [echo "Then run configure again before attempting to build Canal."]
-    [exit 1]
-[fi]
+# pdfLaTeX
+AC_PATH_PROG_CRITICAL([PDFLATEX], [pdflatex])
 
-# doxygen
-AC_PATH_PROG([DOXYGEN], [doxygen], [no])
-[if test "$DOXYGEN" = "no"; then]
-    [echo "The doxygen program was not found in the search path. Please ensure"]
-    [echo "that it is installed and its directory is included in the search path."]
-    [echo "Then run configure again before attempting to build Canal."]
-    [exit 1]
-[fi]
+# LaTeX testing macro
+AC_DEFUN([_AC_LATEX_TEST],[
+rm -rf .tmps_latex 
+mkdir .tmps_latex 
+cd .tmps_latex 
+$2="no"; export $2;
+cat > testconf.tex << \EOF
+$1
+EOF
+cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && $2=yes; export $2;
+cd .. 
+rm -rf .tmps_latex 
+])
 
-# dot (part of graphviz
-AC_PATH_PROG([DOT], [dot], [no])
-[if test "DOT" = "no"; then]
-    [echo "The dot program was not found in the search path. Please ensure"]
-    [echo "that it is installed and its directory is included in the search path."]
+# LaTeX package testing macro
+AC_DEFUN([AC_LATEX_PACKAGE],[
+AC_CACHE_CHECK([for $2 latex package in class book],[ac_cv_latex_]$2,[
+_AC_LATEX_TEST([
+\documentclass{book}
+\usepackage{$2}
+\begin{document}
+\end{document}
+],[ac_cv_latex_]$2)
+])
+export $1=$[ac_cv_latex_]$2
+AC_SUBST($1)
+])
+
+# LaTeX package critical testing macro
+AC_DEFUN([AC_LATEX_PACKAGE_CRITICAL],[
+AC_LATEX_PACKAGE($1, $2)
+[if test "$$1" = "no"; then]
+    [echo "The $2 LaTeX library was not found. Please ensure that it is "]
+    [echo "installed and its directory is included in the LaTeX search path."]
     [echo "Then run configure again before attempting to build Canal."]
     [exit 1]
 [fi]
+AC_SUBST($1)
+])
+
+# LaTeX packages
+AC_LATEX_PACKAGE_CRITICAL([LATEX_GALOIS], [galois])
+AC_LATEX_PACKAGE_CRITICAL([LATEX_FLOAT], [float])
+AC_LATEX_PACKAGE_CRITICAL([LATEX_TXFONTS], [txfonts])
+AC_LATEX_PACKAGE_CRITICAL([LATEX_AMSSYMB], [amssymb])
+AC_LATEX_PACKAGE_CRITICAL([LATEX_AMSMATH], [amsmath])
+AC_LATEX_PACKAGE_CRITICAL([LATEX_IMPORT], [import])
+AC_LATEX_PACKAGE_CRITICAL([LATEX_GRAPHICX], [graphicx])
+AC_LATEX_PACKAGE_CRITICAL([LATEX_HYPERREF], [hyperref])
+AC_LATEX_PACKAGE_CRITICAL([LATEX_MAKEIDX], [makeidx])
+AC_LATEX_PACKAGE_CRITICAL([LATEX_A4WIDE], [a4wide])
+AC_LATEX_PACKAGE_CRITICAL([LATEX_INPUTENC], [inputenc])
+
+# Doxygen
+AC_PATH_PROG_CRITICAL([DOXYGEN], [doxygen])
+
+# dot (part of graphviz)
+AC_PATH_PROG_CRITICAL([DOT], [dot])
 
 # Initialize the test suite.
 AC_CONFIG_TESTDIR(tests)

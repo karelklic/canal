@@ -253,8 +253,10 @@ Products & \textit{prod} & ::= & \textit{id} = \textbf{global} \textit{typ const
 
 Floats & \textit{fp} & ::= & \textbf{half}~~|~~\textbf{float}~~|~~\textbf{double}~~|~~\textbf{x86\_fp80}~~|~~\textbf{fp128}~~|~~\textbf{ppc\_fp128} \\
 
-Types & \textit{typ} & ::= & \textbf{i}\textit{sz}~~|~~\textit{fp}~~|~~\textbf{void}~~|~~\textit{typ}$*$~~|~~[ \textit{sz} $\times$ \textit{typ} ]~~|~~$\big\{\overline{\textit{typ}_j}^j\big\}$~~|~~\textit{typ} $\overline{\textit{typ}_j}^j$~~|~~\textit{id}~~|~~\textbf{label} \\
-& & | & \textbf{metadata} \\
+Vec types & \textit{vtyp} & ::= & \textit{fp}~|~~\textbf{i}\textit{sz}~~|~~\textit{fp}$*$~~|~~\textbf{i}\textit{sz}$*$ \\
+
+Types & \textit{typ} & ::= & \textbf{i}\textit{sz}~~|~~\textit{fp}~~|~~\textbf{void}~~|~~\textit{typ}$*$~~|~~[\textit{sz} $\times$ \textit{typ}]~~|~~[\textit{sz} $\times$ \textit{vtyp}]~~|~~$\big\{\overline{\textit{typ}_j}^j\big\}$~~|~~\textit{typ} $\overline{\textit{typ}_j}^j$ \\
+& & | & \textit{id}~~|~~\textbf{label}~~|~~\textbf{metadata} \\
 
 Values & \textit{val} & ::= & \textit{id}~~|~~\textit{cnst} \\
 
@@ -287,7 +289,9 @@ Commands & \textit{c} & ::= & \textit{id} = \textit{bop} (\textbf{int} \textit{s
 & & | & \textit{id} = \textit{eop} $\textit{typ}_1$ \textit{val} \textbf{to} $\textit{typ}_2$~~|~~\textit{id} = \textit{cop} $\textit{typ}_1$ \textit{val} \textbf{to} $\textit{typ}_2$ \\
 & & | & \textit{id} = \textbf{select} $\textit{val}_0$ \textit{typ} $\textit{val}_1$ $\textit{val}_2$~~|~~\textit{option id} = \textbf{call} $\textit{typ}_0$ $\textit{val}_0$ $\overline{\textit{param}}$ \\
 & & | & \textit{id} = \textbf{icmp} \textit{cond typ} $\textit{val}_1$ $\textit{val}_2$~~|~~\textit{id} = \textbf{fcmp} \textit{fcond fp} $\textit{val}_1$ $\textit{val}_2$ \\
-& & | & \textit{id} = \textbf{getelementptr} ( \textit{typ} $*$ ) \textit{val} $\overline{\textit{val}_j}^j$~~|~~\textit{id} = \textbf{load} (\textit{typ}$*$) $\textit{val}$ \textit{align} \\
+& & | & \textit{id} = \textbf{getelementptr} (\textit{typ}$*$) \textit{val} $\overline{\textit{val}_j}^j$~~|~~\textit{id} = \textbf{load} (\textit{typ}$*$) $\textit{val}$ \textit{align} \\
+& & | & \textit{id} = \textbf{extractelement} [\textit{sz} $\times$ \textit{vtyp}] $\textit{val}_1$ $\textit{val}_2$ \\
+& & | & \textit{id} = \textbf{insertelement} [\textit{sz} $\times$ \textit{vtyp}] $\textit{val}_1$ $\textit{val}_2$ $\textit{val}_3$ \\
 
 \end{tabular}
 \caption{Abstract syntax for a subset of LLVM.}

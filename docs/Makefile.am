@@ -4,14 +4,14 @@ CLEANFILES = *.aux canal.log canal.out canal.toc canal.pdf
 
 canal.pdf: canal.tex doxygen-lib/refman.tex doxygen-tool/refman.tex
 	echo Calling pdflatex twice to handle all references.
-	TEXINPUTS="galois:doxygen-lib:" $(PDFLATEX) canal.tex
+	TEXINPUTS="doxygen-lib:" $(PDFLATEX) canal.tex
 	makeindex canal.idx
-	TEXINPUTS="galois:doxygen-lib:" $(PDFLATEX) canal.tex
+	TEXINPUTS="doxygen-lib:" $(PDFLATEX) canal.tex
 	latex_count=5 ; \
 	while egrep -s 'Rerun (LaTeX|to get cross-references right)' canal.log && [ $$latex_count -gt 0 ] ;\
 	    do \
 	      echo "Rerunning latex...." ;\
-	      TEXINPUTS="galois:doxygen-lib:" $(PDFLATEX) canal.tex ;\
+	      TEXINPUTS="doxygen-lib:" $(PDFLATEX) canal.tex ;\
 	      latex_count=`expr $$latex_count - 1` ;\
 	    done
 
