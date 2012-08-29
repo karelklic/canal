@@ -3,6 +3,7 @@ ArrayExactSize.cpp
 ArrayInterface.cpp
 ArraySingleItem.cpp
 Constant.cpp
+Domain.cpp
 Environment.cpp
 FloatRange.cpp
 IntegerBits.cpp
@@ -18,6 +19,5 @@ Stack.cpp
 State.cpp
 StringUtils.cpp
 Structure.cpp
-Utils.cpp
-Value.cpp)
+Utils.cpp)
 target_link_libraries(canal ${REQ_LLVM_LIBRARIES})
