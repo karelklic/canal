@@ -5,11 +5,11 @@ ArraySingleItem.cpp
 Constant.cpp
 Domain.cpp
 Environment.cpp
-FloatRange.cpp
-IntegerBits.cpp
+FloatInterval.cpp
+IntegerBitfield.cpp
 IntegerContainer.cpp
 IntegerEnumeration.cpp
-IntegerRange.cpp
+IntegerInterval.cpp
 Interpreter.cpp
 Pointer.cpp
 PointerTarget.cpp

@@ -3,7 +3,7 @@
 #include "Constant.h"
 #include "IntegerContainer.h"
 #include "IntegerEnumeration.h"
-#include "IntegerRange.h"
+#include "IntegerInterval.h"
 #include <sstream>
 
 namespace Canal {
@@ -123,7 +123,7 @@ Structure::getItem(const Domain &offset) const
     const Integer::Container &integer =
         dynCast<const Integer::Container&>(offset);
 
-    // First try an enumeration, then range.
+    // First try an enumeration, then interval.
     const Integer::Enumeration &enumeration = integer.getEnumeration();
     if (!enumeration.isTop())
     {
@@ -151,15 +151,15 @@ Structure::getItem(const Domain &offset) const
         return result;
     }
 
-    const Integer::Range &range = integer.getRange();
-    // Let's care about the unsigned range only.
-    if (!range.mUnsignedTop)
+    const Integer::Interval &interval = integer.getInterval();
+    // Let's care about the unsigned interval only.
+    if (!interval.mUnsignedTop)
     {
-        CANAL_ASSERT(range.mUnsignedFrom.getBitWidth() <= 64);
-        uint64_t from = range.mUnsignedFrom.getZExtValue();
+        CANAL_ASSERT(interval.mUnsignedFrom.getBitWidth() <= 64);
+        uint64_t from = interval.mUnsignedFrom.getZExtValue();
         // Included in the interval!
-        uint64_t to = range.mUnsignedTo.getZExtValue();
-        // At least part of the range should point to the array.
+        uint64_t to = interval.mUnsignedTo.getZExtValue();
+        // At least part of the interval should point to the array.
         // Otherwise it might be a bug in the interpreter that
         // requires investigation.
         CANAL_ASSERT(from < mMembers.size());
@@ -171,7 +171,7 @@ Structure::getItem(const Domain &offset) const
         return result;
     }
 
-    // Both enumeration and range are set to the top value, so return
+    // Both enumeration and interval are set to the top value, so return
     // all members.
     result.insert(result.end(), mMembers.begin(), mMembers.end());
 

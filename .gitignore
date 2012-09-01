@@ -41,7 +41,7 @@ Makefile
 /tests/testsuite.dir
 /tests/unit/PointerTest
 /tests/unit/InterpreterTest
-/tests/unit/IntegerRangeTest
+/tests/unit/IntegerIntervalTest
 /tests/*.o
 
 /wrappers/config.py

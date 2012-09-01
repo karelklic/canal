@@ -87,7 +87,7 @@ public:
 
     /// Dereference the target in a certain state.  Dereferencing might
     /// result in multiple values being returned due to the nature of
-    /// mOffsets (offsets might include integer ranges).  The returned
+    /// mOffsets (offsets might include integer intervals).  The returned
     /// pointers point to the memory owned by State and its abstract
     /// domains -- caller must not release the memory.
     std::vector<Domain*> dereference(const State &state) const;

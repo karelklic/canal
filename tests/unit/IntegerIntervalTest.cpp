@@ -1,4 +1,4 @@
-#include "lib/IntegerRange.h"
+#include "lib/IntegerInterval.h"
 #include "lib/Utils.h"
 #include "lib/Environment.h"
 #include <llvm/Module.h>
@@ -10,12 +10,12 @@ using namespace Canal;
 static void
 testConstructors(const Environment &environment)
 {
-    Integer::Range range(environment, 1);
-    CANAL_ASSERT(range.mEmpty && !range.mSignedTop && !range.mUnsignedTop);
-    CANAL_ASSERT(range.mSignedFrom == range.mSignedTo);
-    CANAL_ASSERT(range.mUnsignedFrom == range.mUnsignedTo);
-    CANAL_ASSERT(range.mSignedFrom.getSExtValue() == 0);
-    CANAL_ASSERT(range.mUnsignedFrom.getZExtValue() == 0);
+    Integer::Interval interval(environment, 1);
+    CANAL_ASSERT(interval.mEmpty && !interval.mSignedTop && !interval.mUnsignedTop);
+    CANAL_ASSERT(interval.mSignedFrom == interval.mSignedTo);
+    CANAL_ASSERT(interval.mUnsignedFrom == interval.mUnsignedTo);
+    CANAL_ASSERT(interval.mSignedFrom.getSExtValue() == 0);
+    CANAL_ASSERT(interval.mUnsignedFrom.getZExtValue() == 0);
 }
 
 static void
@@ -51,13 +51,13 @@ testCloneCleaned(const Environment &environment)
 static void
 testEquality(const Environment &environment)
 {
-    Integer::Range range1(environment, 1),
-        range2(environment, 1),
-        range3(environment, 2);
+    Integer::Interval interval1(environment, 1),
+        interval2(environment, 1),
+        interval3(environment, 2);
 
-    // Test empty ranges.
-    CANAL_ASSERT(range1 == range2);
-    CANAL_ASSERT(range1 != range3);
+    // Test empty intervals.
+    CANAL_ASSERT(interval1 == interval2);
+    CANAL_ASSERT(interval1 != interval3);
 }
 
 static void

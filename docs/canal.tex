@@ -4,12 +4,12 @@
 \usepackage[english]{babel}
 \usepackage{a4wide}
 \usepackage{makeidx}
-\usepackage{hyperref}
-\usepackage{graphicx}
-\usepackage{import}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{txfonts}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{import}
 \usepackage{float}
 \usepackage{galois}
 \usepackage{doxygen}
@@ -392,14 +392,9 @@ the called function is interpreted with the provided parameters.
 
 \subsection{Flow sensitivity}
 
-
 \chapter{Abstractions}
 
-\section{Multi threading}
-Multi-threading abstraction for Abstract Interpretation appeared in
-\cite{M11}.
-
-\section{Memory}
+\section{Memory Model}
 Memory abstraction appeared in \cite{M06}.
 
 Our memory abstraction for abstract interpretation recognizes four
@@ -440,23 +435,52 @@ operations affecting a memory block allocated at certain place forms a
 single abstract value.  Context-sensite abstract interpretation helps
 to increase the precision of this memory abstraction.
 
-\section{Arrays}
+\section{Array Abstract Domains}
 
-\section{Structures}
+\section{Structure Abstract Domain}
 
-\section{Integers}
-Precise machine integer abstraction appeared in \cite{M12}.
+\section{Integer Abstract Domains}
 
-\section{Floating-point numbers}
+\subsection{Integer Interval Domain $\mathcal{D}_i^\sharp$}
+
+The interval domain was first presented in \cite{CC76}.  It was
+particularly well described in \cite{M04}. More precise machine
+integer interval domain appeared in \cite{M12}.
+
+$D_i^\sharp \buildrel \text{d{}ef}\over = \{ [ l,h ] \mid l, h \in
+\mathbb{Z} \cup \{ \pm\infty \} \}$
+
+\subsection{Integer Bitfield Domain $\mathcal{D}_b^\sharp$}
+
+Described in \cite{M12}.  The domain associates two integers $z$ and
+$o$ to each variable. The integers represent bit masks for bits that
+can be set to 0 ($z$ero) and to 1 ($o$ne).
+
+\section{Abstract Domains for Floating-Point Numbers}
 Precise machine floating-point abstraction appeared in \cite{M12}.
 
-\section{Pointers}
+\section{Pointer Abstract Domains}
 Pointer can be casted to a number via the \texttt{ptrtoint}
 instruction.  Usually, the resulting memory offset is used to achieve
 pointer arithmetics that are not available via \texttt{getelementptr}
 semantics.
 
+\section{Combining Abstract Domains}
+
 \chapter{Wishlist}
+
+\section{Context-sensitivity abstract domain}
+Move context sensitivity to an abstract domain.  Context sensitive
+abstract domain remembers separate abstract values for nonoverlapping
+subsets of all contexts.
+
+\section{Path-sensitivity abstract domain}
+Introduce path-sensitivity as an abstract domain.
+
+\section{Multi threading}
+Multi-threading abstraction for Abstract Interpretation appeared in
+\cite{M11}.
+
 \begin{description}
 \item[Lazy model-checking abstract value] Allow to investigate just a
   single function, taking into account all possible parameter values
@@ -504,8 +528,8 @@ some additional libraries:
   systems.
 \end{itemize}
 
-\import{doxygen-lib/}{refman}
-\import{doxygen-tool/}{refman}
+\import{doxygen-lib/}{doxygen-lib}
+\import{doxygen-tool/}{doxygen-tool}
 
 \chapter{Known Bugs}
 Pointers should have the possibility to be set to top.
@@ -514,6 +538,10 @@ Pointers should have the possibility to be set to top.
 \cleardoublepage
 \addcontentsline{toc}{chapter}{Bibliography}
 \begin{thebibliography}{9}
+
+\bibitem{CC76} Patrick Cousot and Radhia Cousot.  Static Determination
+  of Dynamic Properties of Programs.  In {\em Proceedings of the
+    Second International Symposium on Programming}, 1976.
 
 \bibitem{CC77} Patrick Cousot and Radhia Cousot.  Abstract
   Interpretation: A Unified Lattice Model for Static Analysis of
@@ -539,6 +567,9 @@ Pointers should have the possibility to be set to top.
 \bibitem{BCG02} Roland Backhouse, Roy Crole, and Jeremy Gibbons, eds.
   Algebraic and Coalgebraic Methods in the Mathematics of Program
   Construction.  Springer-Verlag, 2002.
+
+\bibitem{M04} Antoine Miné.  Weakly relational numerical abstract
+  domains. Ph.D report.  2004.
 
 \bibitem{LA04} Chris Lattner and Vikram Adve.  LLVM: A Compilation
   Framework for Lifelong Program Analysis \& Transformation. In

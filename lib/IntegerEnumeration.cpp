@@ -1,7 +1,7 @@
 #include "IntegerEnumeration.h"
 #include "Constant.h"
 #include "Utils.h"
-#include "FloatRange.h"
+#include "FloatInterval.h"
 #include "StringUtils.h"
 #include <sstream>
 #include <iostream>
@@ -623,8 +623,8 @@ void
 Enumeration::fcmp(const Domain &a, const Domain &b,
                   llvm::CmpInst::Predicate predicate)
 {
-    const Float::Range &aa = dynCast<const Float::Range&>(a),
-        &bb = dynCast<const Float::Range&>(b);
+    const Float::Interval &aa = dynCast<const Float::Interval&>(a),
+        &bb = dynCast<const Float::Interval&>(b);
 
     int result = aa.compare(bb, predicate);
     switch (result)

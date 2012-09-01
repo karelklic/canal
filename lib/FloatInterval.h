@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_FLOAT_RANGE_H
-#define LIBCANAL_FLOAT_RANGE_H
+#ifndef LIBCANAL_FLOAT_INTERVAL_H
+#define LIBCANAL_FLOAT_INTERVAL_H
 
 #include "Domain.h"
 #include <llvm/ADT/APFloat.h>
@@ -7,7 +7,7 @@
 namespace Canal {
 namespace Float {
 
-class Range : public Domain, public AccuracyDomain
+class Interval : public Domain, public AccuracyDomain
 {
 public:
     bool mEmpty;
@@ -16,32 +16,37 @@ public:
     llvm::APFloat mTo;
 
 public:
-    Range(const Environment &environment,
-          const llvm::fltSemantics &semantics);
+    Interval(const Environment &environment,
+             const llvm::fltSemantics &semantics);
 
-    // Compares a range with another range.
+    // Compares a interval with another interval.
     // @returns
-    //  -1 - one of the ranges is empty
+    //  -1 - one of the intervals is empty
     //   0 - false (predicate not satisfied)
     //   1 - true  (predicate satisfied)
     //   2 - both true and false are possible (top value)
-    int compare(const Range &value,
+    int compare(const Interval &value,
                 llvm::CmpInst::Predicate predicate) const;
+
     bool isNaN() const;
 
-    const llvm::fltSemantics &getSemantics() const { return mFrom.getSemantics(); }
+    const llvm::fltSemantics &getSemantics() const;
+
     bool isSingleValue() const;
-    bool intersects(const Range &value) const;
+
+    bool intersects(const Interval &value) const;
+
     llvm::APFloat getMax() const;
+
     llvm::APFloat getMin() const;
 
 public: // Implementation of Domain.
     // Implementation of Domain::clone().
     // Covariant return type.
-    virtual Range *clone() const;
+    virtual Interval *clone() const;
     // Implementation of Domain::cloneCleaned().
     // Covariant return type.
-    virtual Range *cloneCleaned() const;
+    virtual Interval *cloneCleaned() const;
     // Implementation of Domain::operator==().
     virtual bool operator==(const Domain& value) const;
     // Implementation of Domain::merge().

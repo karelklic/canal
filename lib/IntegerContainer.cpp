@@ -1,7 +1,7 @@
 #include "IntegerContainer.h"
-#include "IntegerBits.h"
+#include "IntegerBitfield.h"
 #include "IntegerEnumeration.h"
-#include "IntegerRange.h"
+#include "IntegerInterval.h"
 #include "Constant.h"
 #include "Utils.h"
 #include "StringUtils.h"
@@ -17,18 +17,18 @@ Container::Container(const Environment &environment,
                      unsigned bitWidth)
     : Domain(environment)
 {
-    mValues.push_back(new Bits(environment, bitWidth));
+    mValues.push_back(new Bitfield(environment, bitWidth));
     mValues.push_back(new Enumeration(environment, bitWidth));
-    mValues.push_back(new Range(environment, bitWidth));
+    mValues.push_back(new Interval(environment, bitWidth));
 }
 
 Container::Container(const Environment &environment,
                      const llvm::APInt &number)
     : Domain(environment)
 {
-    mValues.push_back(new Bits(environment, number));
+    mValues.push_back(new Bitfield(environment, number));
     mValues.push_back(new Enumeration(environment, number));
-    mValues.push_back(new Range(environment, number));
+    mValues.push_back(new Interval(environment, number));
 }
 
 Container::Container(const Container &container)
@@ -53,16 +53,16 @@ Container::getBitWidth() const
     return getEnumeration().getBitWidth();
 }
 
-Bits &
-Container::getBits()
+Bitfield &
+Container::getBitfield()
 {
-    return dynCast<Bits&>(*mValues[0]);
+    return dynCast<Bitfield&>(*mValues[0]);
 }
 
-const Bits &
-Container::getBits() const
+const Bitfield &
+Container::getBitfield() const
 {
-    return dynCast<const Bits&>(*mValues[0]);
+    return dynCast<const Bitfield&>(*mValues[0]);
 }
 
 Enumeration &
@@ -77,16 +77,16 @@ Container::getEnumeration() const
     return dynCast<const Enumeration&>(*mValues[1]);
 }
 
-Range &
-Container::getRange()
+Interval &
+Container::getInterval()
 {
-    return dynCast<Range&>(*mValues[2]);
+    return dynCast<Interval&>(*mValues[2]);
 }
 
-const Range &
-Container::getRange() const
+const Interval &
+Container::getInterval() const
 {
-    return dynCast<const Range&>(*mValues[2]);
+    return dynCast<const Interval&>(*mValues[2]);
 }
 
 bool
@@ -96,13 +96,13 @@ Container::signedMin(llvm::APInt &result) const
         return false;
 
     llvm::APInt temp(getBitWidth(), 0);
-    if (!getRange().signedMin(temp))
+    if (!getInterval().signedMin(temp))
         return false;
 
     if (result.sgt(temp))
         result = temp;
 
-    if (!getBits().signedMin(temp))
+    if (!getBitfield().signedMin(temp))
         return false;
 
     if (result.sgt(temp))
@@ -118,13 +118,13 @@ Container::signedMax(llvm::APInt &result) const
         return false;
 
     llvm::APInt temp(getBitWidth(), 0);
-    if (!getRange().signedMax(temp))
+    if (!getInterval().signedMax(temp))
         return false;
 
     if (result.slt(temp))
         result = temp;
 
-    if (!getBits().signedMax(temp))
+    if (!getBitfield().signedMax(temp))
         return false;
 
     if (result.slt(temp))
@@ -140,13 +140,13 @@ Container::unsignedMin(llvm::APInt &result) const
         return false;
 
     llvm::APInt temp(getBitWidth(), 0);
-    if (!getRange().unsignedMin(temp))
+    if (!getInterval().unsignedMin(temp))
         return false;
 
     if (result.ugt(temp))
         result = temp;
 
-    if (!getBits().unsignedMin(temp))
+    if (!getBitfield().unsignedMin(temp))
         return false;
 
     if (result.ugt(temp))
@@ -162,13 +162,13 @@ Container::unsignedMax(llvm::APInt &result) const
         return false;
 
     llvm::APInt temp(getBitWidth(), 0);
-    if (!getRange().unsignedMax(temp))
+    if (!getInterval().unsignedMax(temp))
         return false;
 
     if (result.ult(temp))
         result = temp;
 
-    if (!getBits().unsignedMax(temp))
+    if (!getBitfield().unsignedMax(temp))
         return false;
 
     if (result.ult(temp))
@@ -568,9 +568,9 @@ Container::setTop()
 bool
 Container::isSingleValue() const
 {
-    return getBits().isSingleValue()
+    return getBitfield().isSingleValue()
         && getEnumeration().isSingleValue()
-        && getRange().isSingleValue();
+        && getInterval().isSingleValue();
 }
 
 } // namespace Integer

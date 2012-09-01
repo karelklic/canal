@@ -10,9 +10,9 @@ namespace llvm {
 namespace Canal {
 namespace Integer {
 
-class Bits;
+class Bitfield;
 class Enumeration;
-class Range;
+class Interval;
 
 class Container : public Domain, public AccuracyDomain
 {
@@ -20,28 +20,33 @@ public:
     std::vector<Domain*> mValues;
 
 public:
-    Container(const Environment &environment, unsigned bitWidth);
+    Container(const Environment &environment,
+              unsigned bitWidth);
+
     /// Creates a new container with an initial value.  Signedness,
     /// number of bits is taken from the provided number.
-    Container(const Environment &environment, const llvm::APInt &number);
+    Container(const Environment &environment,
+              const llvm::APInt &number);
+
     /// Copy constructor.  Creates independent copy of the container.
     Container(const Container &container);
+
     /// Destructor.  Deletes the contents of the container.
     virtual ~Container();
 
     unsigned getBitWidth() const;
 
-    Bits &getBits();
-    const Bits &getBits() const;
+    Bitfield &getBitfield();
+    const Bitfield &getBitfield() const;
 
     Enumeration &getEnumeration();
     const Enumeration &getEnumeration() const;
 
-    Range &getRange();
-    const Range &getRange() const;
+    Interval &getInterval();
+    const Interval &getInterval() const;
 
     /// Lowest signed number represented by this container.  Uses the
-    /// abstract domain (enum, range, bits) with highest precision.
+    /// abstract domain (enum, interval, bits) with highest precision.
     /// @param result
     ///   Filled by the minimum value if it is known.  Otherwise, the
     ///   value is undefined.
@@ -51,7 +56,7 @@ public:
     bool signedMin(llvm::APInt &result) const;
 
     /// Highest signed number represented by this container.  Uses the
-    /// abstract domain (enum, range, bits) with highest precision.
+    /// abstract domain (enum, interval, bits) with highest precision.
     /// @param result
     ///   Filled by the maximum value if it is known.  Otherwise, the
     ///   value is undefined.
@@ -61,7 +66,7 @@ public:
     bool signedMax(llvm::APInt &result) const;
 
     /// Lowest unsigned number represented by this container.  Uses the
-    /// abstract domain (enum, range, bits) with highest precision.
+    /// abstract domain (enum, interval, bits) with highest precision.
     /// @param result
     ///   Filled by the minimum value if it is known.  Otherwise, the
     ///   value is undefined.
@@ -71,7 +76,7 @@ public:
     bool unsignedMin(llvm::APInt &result) const;
 
     /// Highest unsigned number represented by this container.  Uses
-    /// the abstract domain (enum, range, bits) with highest precision.
+    /// the abstract domain (enum, interval, bits) with highest precision.
     /// @param result
     ///   Filled by the maximum value if it is known.  Otherwise, the
     ///   value is undefined.
@@ -103,7 +108,7 @@ public: // Implementation of Domain.
     ///       -8
     ///   integer
     ///     enumeration -10 2 4 6 8
-    ///     range -10 8
+    ///     interval -10 8
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
 

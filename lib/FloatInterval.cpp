@@ -1,4 +1,4 @@
-#include "FloatRange.h"
+#include "FloatInterval.h"
 #include "Constant.h"
 #include "Utils.h"
 #include <sstream>
@@ -7,7 +7,8 @@
 namespace Canal {
 namespace Float {
 
-Range::Range(const Environment &environment, const llvm::fltSemantics &semantics)
+Interval::Interval(const Environment &environment,
+                   const llvm::fltSemantics &semantics)
     : Domain(environment),
       mFrom(semantics),
       mTo(semantics),
@@ -17,8 +18,8 @@ Range::Range(const Environment &environment, const llvm::fltSemantics &semantics
 }
 
 int
-Range::compare(const Range &value,
-               llvm::CmpInst::Predicate predicate) const
+Interval::compare(const Interval &value,
+                  llvm::CmpInst::Predicate predicate) const
 {
     if (isTop() || value.isTop())
         return 2;
@@ -60,7 +61,7 @@ Range::compare(const Range &value,
 
     switch (predicate)
     {
-    // For more info, see Canal::Integer::Range::icmp implementation.
+    // For more info, see Canal::Integer::Interval::icmp implementation.
     // Ordered means that neither operand is a QNAN while
     // unordered means that either operand may be a QNAN.
     //
@@ -110,8 +111,14 @@ Range::compare(const Range &value,
     }
 }
 
+const llvm::fltSemantics &
+Interval::getSemantics() const
+{
+    return mFrom.getSemantics();
+}
+
 bool
-Range::isSingleValue() const
+Interval::isSingleValue() const
 {
     if (isBottom() || isTop())
         return false;
@@ -119,7 +126,9 @@ Range::isSingleValue() const
     return mFrom.compare(mTo) == llvm::APFloat::cmpEqual;
 }
 
-bool Range::intersects(const Range &value) const {
+bool
+Interval::intersects(const Interval &value) const
+{
     llvm::APFloat::cmpResult res;
     res = this->getMax().compare(value.getMin());
     if (res == llvm::APFloat::cmpEqual || res == llvm::APFloat::cmpGreaterThan) {
@@ -131,79 +140,85 @@ bool Range::intersects(const Range &value) const {
     return false;
 }
 
-llvm::APFloat Range::getMax() const {
+llvm::APFloat
+Interval::getMax() const
+{
     return (mTop ? llvm::APFloat::getLargest(getSemantics(), false) : mTo);
 }
 
-llvm::APFloat Range::getMin() const {
+llvm::APFloat
+Interval::getMin() const
+{
     return (mTop ? llvm::APFloat::getLargest(getSemantics(), true) : mFrom);
 }
 
 
-bool Range::isNaN() const {
+bool
+Interval::isNaN() const
+{
     return this->mFrom.isNaN() || this->mTo.isNaN();
 }
 
-Range *
-Range::clone() const
+Interval *
+Interval::clone() const
 {
-    return new Range(*this);
+    return new Interval(*this);
 }
 
-Range *
-Range::cloneCleaned() const
+Interval *
+Interval::cloneCleaned() const
 {
-    return new Range(mEnvironment, getSemantics());
+    return new Interval(mEnvironment, getSemantics());
 }
 
 bool
-Range::operator==(const Domain& value) const
+Interval::operator==(const Domain& value) const
 {
-    const Range *range = dynCast<const Range*>(&value);
-    if (!range)
+    const Interval *interval = dynCast<const Interval*>(&value);
+    if (!interval)
         return false;
     if (mEmpty)
-        return range->mEmpty;
+        return interval->mEmpty;
     if (isTop())
-        return range->isTop();
+        return interval->isTop();
 
-    return mFrom.compare(range->mFrom) == llvm::APFloat::cmpEqual &&
-        mTo.compare(range->mTo) == llvm::APFloat::cmpEqual;
+    return mFrom.compare(interval->mFrom) == llvm::APFloat::cmpEqual &&
+        mTo.compare(interval->mTo) == llvm::APFloat::cmpEqual;
 }
 
 void
-Range::merge(const Domain &value)
+Interval::merge(const Domain &value)
 {
-    const Range &range = dynCast<const Range&>(value);
-    if (range.mEmpty)
+    const Interval &interval = dynCast<const Interval&>(value);
+    if (interval.mEmpty)
         return;
 
     mEmpty = false;
 
-    if (range.isTop())
+    if (interval.isTop())
     {
         mTop = true;
         return;
     }
 
-    if (mFrom.compare(range.mFrom) == llvm::APFloat::cmpGreaterThan)
-        mFrom = range.mFrom;
+    if (mFrom.compare(interval.mFrom) == llvm::APFloat::cmpGreaterThan)
+        mFrom = interval.mFrom;
 
-    if (mTo.compare(range.mTo) == llvm::APFloat::cmpLessThan)
-        mTo = range.mTo;
+    if (mTo.compare(interval.mTo) == llvm::APFloat::cmpLessThan)
+        mTo = interval.mTo;
 }
 
 size_t
-Range::memoryUsage() const
+Interval::memoryUsage() const
 {
-    return sizeof(Range);
+    return sizeof(Interval);
 }
 
 std::string
-Range::toString() const
+Interval::toString() const
 {
     std::stringstream ss;
-    ss << "floatRange ";
+    ss << "floatInterval ";
     if (mEmpty)
         ss << "empty";
     else if (mTop)
@@ -219,14 +234,14 @@ Range::toString() const
 }
 
 bool
-Range::matchesString(const std::string &text,
+Interval::matchesString(const std::string &text,
                      std::string &rationale) const
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 float
-Range::accuracy() const
+Interval::accuracy() const
 {
     if (mEmpty)
         return 1.0f;
@@ -255,25 +270,25 @@ Range::accuracy() const
 }
 
 bool
-Range::isBottom() const
+Interval::isBottom() const
 {
     return mEmpty;
 }
 
 void
-Range::setBottom()
+Interval::setBottom()
 {
     mEmpty = true;
 }
 
 bool
-Range::isTop() const
+Interval::isTop() const
 {
     return !mEmpty && mTop;
 }
 
 void
-Range::setTop()
+Interval::setTop()
 {
     mEmpty = false;
     mTop = true;

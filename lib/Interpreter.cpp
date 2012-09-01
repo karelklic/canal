@@ -3,8 +3,8 @@
 #include "ArraySingleItem.h"
 #include "Constant.h"
 #include "Environment.h"
-#include "FloatRange.h"
-#include "IntegerBits.h"
+#include "FloatInterval.h"
+#include "IntegerBitfield.h"
 #include "IntegerContainer.h"
 #include "Pointer.h"
 #include "Stack.h"
@@ -65,7 +65,7 @@ typeToEmptyValue(const llvm::Type &type, const Environment &environment)
     if (type.isFloatingPointTy())
     {
         const llvm::fltSemantics *semantics = getFloatingPointSemantics(type);
-        return new Float::Range(environment, *semantics);
+        return new Float::Interval(environment, *semantics);
     }
 
     if (type.isPointerTy())
@@ -1380,8 +1380,8 @@ Interpreter::select(const llvm::SelectInst &instruction,
     const Integer::Container &conditionInt =
         dynCast<const Integer::Container&>(*condition);
 
-    CANAL_ASSERT(conditionInt.getBits().getBitWidth() == 1);
-    switch (conditionInt.getBits().getBitValue(0))
+    CANAL_ASSERT(conditionInt.getBitfield().getBitWidth() == 1);
+    switch (conditionInt.getBitfield().getBitValue(0))
     {
     case -1:
         // The condition result is undefined.  Let's wait for

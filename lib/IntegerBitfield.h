@@ -10,33 +10,33 @@ namespace Integer {
 /// Abstracts integers as a bitfield.
 ///
 /// For every bit, we have 4 possible states:
-///  mBits0  mBits1  State
+///  mZeroes  mOnes  State
 /// -----------------------
 ///    0        0    Nothing was set to the bit (lowest lattice value - bottom)
 ///    1        0    The bit is set to 0
 ///    0        1    The bit is set to 1
 ///    1        1    The bit can be both 0 and 1 (highest lattice value - top)
-class Bits : public Domain, public AccuracyDomain
+class Bitfield : public Domain, public AccuracyDomain
 {
 public:
-    /// When a bit in mBits0 is 1, the value is known to contain zero
+    /// When a bit in mZeroes is 1, the value is known to contain zero
     /// at this position.
-    llvm::APInt mBits0;
-    /// When a bit in mBits1 is 1, the value is known to contain one at
+    llvm::APInt mZeroes;
+    /// When a bit in mOnes is 1, the value is known to contain one at
     /// this position.
-    llvm::APInt mBits1;
+    llvm::APInt mOnes;
 
 public:
     /// Initializes to the lowest value.
-    Bits(const Environment &environment,
-         unsigned bitWidth);
+    Bitfield(const Environment &environment,
+             unsigned bitWidth);
 
     /// Initializes to the given value.
-    Bits(const Environment &environment,
-         const llvm::APInt &number);
+    Bitfield(const Environment &environment,
+             const llvm::APInt &number);
 
     /// Return the number of bits of the represented number.
-    unsigned getBitWidth() const { return mBits0.getBitWidth(); }
+    unsigned getBitWidth() const { return mZeroes.getBitWidth(); }
 
     /// Returns 0 if the bit is known to be 0.  Returns 1 if the bit is
     /// known to be 1.  Returns -1 if the bit value is unknown.
@@ -91,10 +91,10 @@ public:
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
-    virtual Bits *clone() const;
+    virtual Bitfield *clone() const;
     /// Implementation of Domain::cloneCleaned().
     /// Covariant return type.
-    virtual Bits *cloneCleaned() const;
+    virtual Bitfield *cloneCleaned() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain& value) const;
     /// Implementation of Domain::merge().

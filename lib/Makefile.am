@@ -14,16 +14,16 @@ libcanal_la_SOURCES = \
 	Domain.h \
 	Environment.cpp \
 	Environment.h \
-	FloatRange.cpp \
-	FloatRange.h \
-	IntegerBits.cpp \
-	IntegerBits.h \
+	FloatInterval.cpp \
+	FloatInterval.h \
+	IntegerBitfield.cpp \
+	IntegerBitfield.h \
 	IntegerContainer.cpp \
 	IntegerContainer.h \
 	IntegerEnumeration.cpp \
 	IntegerEnumeration.h \
-	IntegerRange.cpp \
-	IntegerRange.h \
+	IntegerInterval.cpp \
+	IntegerInterval.h \
 	Interpreter.cpp \
 	Interpreter.h \
 	Pointer.cpp \

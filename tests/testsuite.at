@@ -13,8 +13,8 @@ AT_SETUP([Pointer::InclusionBased])
 AT_CHECK([../../unit/PointerTest], 0)
 AT_CLEANUP
 
-AT_SETUP([Integer::Range])
-AT_CHECK([../../unit/IntegerRangeTest], 0)
+AT_SETUP([Integer::Interval])
+AT_CHECK([../../unit/IntegerIntervalTest], 0)
 AT_CLEANUP
 
 AT_BANNER([Fixpoint Computation Unit Tests])

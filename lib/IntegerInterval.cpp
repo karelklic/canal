@@ -1,4 +1,4 @@
-#include "IntegerRange.h"
+#include "IntegerInterval.h"
 #include "Constant.h"
 #include "Utils.h"
 #include "APIntUtils.h"
@@ -8,7 +8,7 @@
 namespace Canal {
 namespace Integer {
 
-Range::Range(const Environment &environment,
+Interval::Interval(const Environment &environment,
              unsigned bitWidth)
     : Domain(environment),
       mEmpty(true),
@@ -21,7 +21,7 @@ Range::Range(const Environment &environment,
 {
 }
 
-Range::Range(const Environment &environment,
+Interval::Interval(const Environment &environment,
              const llvm::APInt &constant)
     : Domain(environment),
       mEmpty(false),
@@ -35,7 +35,7 @@ Range::Range(const Environment &environment,
 }
 
 bool
-Range::signedMin(llvm::APInt &result) const
+Interval::signedMin(llvm::APInt &result) const
 {
     if (mEmpty)
         return false;
@@ -49,7 +49,7 @@ Range::signedMin(llvm::APInt &result) const
 }
 
 bool
-Range::signedMax(llvm::APInt &result) const
+Interval::signedMax(llvm::APInt &result) const
 {
     if (mEmpty)
         return false;
@@ -63,7 +63,7 @@ Range::signedMax(llvm::APInt &result) const
 }
 
 bool
-Range::unsignedMin(llvm::APInt &result) const
+Interval::unsignedMin(llvm::APInt &result) const
 {
     if (mEmpty)
         return false;
@@ -77,7 +77,7 @@ Range::unsignedMin(llvm::APInt &result) const
 }
 
 bool
-Range::unsignedMax(llvm::APInt &result) const
+Interval::unsignedMax(llvm::APInt &result) const
 {
     if (mEmpty)
         return false;
@@ -91,7 +91,7 @@ Range::unsignedMax(llvm::APInt &result) const
 }
 
 bool
-Range::isSingleValue() const
+Interval::isSingleValue() const
 {
     if (isBottom() || mSignedTop || mUnsignedTop)
         return false;
@@ -100,41 +100,41 @@ Range::isSingleValue() const
         mUnsignedFrom == mUnsignedTo;
 }
 
-Range *
-Range::clone() const
+Interval *
+Interval::clone() const
 {
-    return new Range(*this);
+    return new Interval(*this);
 }
 
-Range *
-Range::cloneCleaned() const
+Interval *
+Interval::cloneCleaned() const
 {
-    return new Range(mEnvironment, getBitWidth());
+    return new Interval(mEnvironment, getBitWidth());
 }
 
 bool
-Range::operator==(const Domain& value) const
+Interval::operator==(const Domain& value) const
 {
-    const Range *range = dynCast<const Range*>(&value);
-    if (!range)
+    const Interval *interval = dynCast<const Interval*>(&value);
+    if (!interval)
         return false;
 
-    if (getBitWidth() != range->getBitWidth())
+    if (getBitWidth() != interval->getBitWidth())
         return false;
 
-    if (mEmpty || range->mEmpty)
-        return mEmpty == range->mEmpty;
-    if (mSignedTop ^ range->mSignedTop || mUnsignedTop ^ range->mUnsignedTop)
+    if (mEmpty || interval->mEmpty)
+        return mEmpty == interval->mEmpty;
+    if (mSignedTop ^ interval->mSignedTop || mUnsignedTop ^ interval->mUnsignedTop)
         return false;
 
-    if (!mSignedTop && (mSignedFrom != range->mSignedFrom ||
-                        mSignedTo != range->mSignedTo))
+    if (!mSignedTop && (mSignedFrom != interval->mSignedFrom ||
+                        mSignedTo != interval->mSignedTo))
     {
         return false;
     }
 
-    if (!mUnsignedTop && (mUnsignedFrom != range->mUnsignedFrom ||
-                          mUnsignedTo != range->mUnsignedTo))
+    if (!mUnsignedTop && (mUnsignedFrom != interval->mUnsignedFrom ||
+                          mUnsignedTo != interval->mUnsignedTo))
     {
         return false;
     }
@@ -143,7 +143,7 @@ Range::operator==(const Domain& value) const
 }
 
 void
-Range::merge(const Domain &value)
+Interval::merge(const Domain &value)
 {
     // Handle values represeting a constant.
     if (const Constant *constant = dynCast<const Constant*>(&value))
@@ -178,50 +178,50 @@ Range::merge(const Domain &value)
         return;
     }
 
-    const Range &range = dynCast<const Range&>(value);
-    if (range.mEmpty)
+    const Interval &interval = dynCast<const Interval&>(value);
+    if (interval.mEmpty)
         return;
 
     mEmpty = false;
 
     if (!mSignedTop)
     {
-        if (range.mSignedTop)
+        if (interval.mSignedTop)
             mSignedTop = true;
         else
         {
-            if (!mSignedFrom.sle(range.mSignedFrom))
-                mSignedFrom = range.mSignedFrom;
-            if (!mSignedTo.sge(range.mSignedTo))
-                mSignedTo = range.mSignedTo;
+            if (!mSignedFrom.sle(interval.mSignedFrom))
+                mSignedFrom = interval.mSignedFrom;
+            if (!mSignedTo.sge(interval.mSignedTo))
+                mSignedTo = interval.mSignedTo;
         }
     }
 
     if (!mUnsignedTop)
     {
-        if (range.mUnsignedTop)
+        if (interval.mUnsignedTop)
             mUnsignedTop = true;
         else
         {
-            if (!mUnsignedFrom.ule(range.mUnsignedFrom))
-                mUnsignedFrom = range.mUnsignedFrom;
-            if (!mUnsignedTo.uge(range.mUnsignedTo))
-                mUnsignedTo = range.mUnsignedTo;
+            if (!mUnsignedFrom.ule(interval.mUnsignedFrom))
+                mUnsignedFrom = interval.mUnsignedFrom;
+            if (!mUnsignedTo.uge(interval.mUnsignedTo))
+                mUnsignedTo = interval.mUnsignedTo;
         }
     }
 }
 
 size_t
-Range::memoryUsage() const
+Interval::memoryUsage() const
 {
-    return sizeof(Range);
+    return sizeof(Interval);
 }
 
 std::string
-Range::toString() const
+Interval::toString() const
 {
     std::stringstream ss;
-    ss << "range";
+    ss << "interval";
     if (mEmpty)
         ss << " empty" << std::endl;
     else
@@ -261,17 +261,17 @@ Range::toString() const
 }
 
 bool
-Range::matchesString(const std::string &text,
+Interval::matchesString(const std::string &text,
                      std::string &rationale) const
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-Range::add(const Domain &a, const Domain &b)
+Interval::add(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -306,10 +306,10 @@ Range::add(const Domain &a, const Domain &b)
 }
 
 void
-Range::sub(const Domain &a, const Domain &b)
+Interval::sub(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -446,10 +446,10 @@ minMax(bool isSigned,
 }
 
 void
-Range::mul(const Domain &a, const Domain &b)
+Interval::mul(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -530,10 +530,10 @@ Range::mul(const Domain &a, const Domain &b)
 }
 
 void
-Range::udiv(const Domain &a, const Domain &b)
+Interval::udiv(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -559,10 +559,10 @@ Range::udiv(const Domain &a, const Domain &b)
 }
 
 void
-Range::sdiv(const Domain &a, const Domain &b)
+Interval::sdiv(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -608,10 +608,10 @@ Range::sdiv(const Domain &a, const Domain &b)
 }
 
 void
-Range::urem(const Domain &a, const Domain &b)
+Interval::urem(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -622,10 +622,10 @@ Range::urem(const Domain &a, const Domain &b)
 }
 
 void
-Range::srem(const Domain &a, const Domain &b)
+Interval::srem(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -636,10 +636,10 @@ Range::srem(const Domain &a, const Domain &b)
 }
 
 void
-Range::shl(const Domain &a, const Domain &b)
+Interval::shl(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -650,10 +650,10 @@ Range::shl(const Domain &a, const Domain &b)
 }
 
 void
-Range::lshr(const Domain &a, const Domain &b)
+Interval::lshr(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -664,10 +664,10 @@ Range::lshr(const Domain &a, const Domain &b)
 }
 
 void
-Range::ashr(const Domain &a, const Domain &b)
+Interval::ashr(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -678,10 +678,10 @@ Range::ashr(const Domain &a, const Domain &b)
 }
 
 void
-Range::and_(const Domain &a, const Domain &b)
+Interval::and_(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -692,10 +692,10 @@ Range::and_(const Domain &a, const Domain &b)
 }
 
 void
-Range::or_(const Domain &a, const Domain &b)
+Interval::or_(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -706,10 +706,10 @@ Range::or_(const Domain &a, const Domain &b)
 }
 
 void
-Range::xor_(const Domain &a, const Domain &b)
+Interval::xor_(const Domain &a, const Domain &b)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -721,8 +721,8 @@ Range::xor_(const Domain &a, const Domain &b)
 
 // Assumes that neither a nor b are empty or top
 static bool
-intersects(const Range &a,
-           const Range &b,
+intersects(const Interval &a,
+           const Interval &b,
            bool signed_,
            bool unsigned_)
 {
@@ -753,11 +753,11 @@ intersects(const Range &a,
 }
 
 void
-Range::icmp(const Domain &a, const Domain &b,
+Interval::icmp(const Domain &a, const Domain &b,
             llvm::CmpInst::Predicate predicate)
 {
-    const Range &aa = dynCast<const Range&>(a),
-        &bb = dynCast<const Range&>(b);
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
 
     if (aa.isTop() || bb.isTop())
     {
@@ -779,8 +779,8 @@ Range::icmp(const Domain &a, const Domain &b,
     switch (predicate)
     {
     case llvm::CmpInst::ICMP_EQ:  // equal
-        // If both ranges are equal, the result is 1.  If
-        // range intersection is empty, the result is 0.
+        // If both intervals are equal, the result is 1.  If
+        // interval intersection is empty, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (&a == &b || (aa.isSingleValue() && aa == bb))
             mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
@@ -789,8 +789,8 @@ Range::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_NE:  // not equal
-        // If both ranges are equal, the result is 0.  If
-        // range intersection is empty, the result is 1.
+        // If both intervals are equal, the result is 0.  If
+        // interval intersection is empty, the result is 1.
         // Otherwise the result is the top value (both 0 and 1).
         if (!intersects(aa, bb, true, true))
             mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
@@ -799,11 +799,11 @@ Range::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_UGT: // unsigned greater than
-        // If the lowest element from the first range is
+        // If the lowest element from the first interval is
         // unsigned greater than the largest element from the second
-        // range, the result is 1.  If the largest element from
-        // the first range is unsigned lower than the lowest
-        // element from the second range, the result is 0.
+        // interval, the result is 1.  If the largest element from
+        // the first interval is unsigned lower than the lowest
+        // element from the second interval, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
 
         if (aa.mUnsignedFrom.ugt(bb.mUnsignedTo))
@@ -813,11 +813,11 @@ Range::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
-        // If the lowest element from the first range is
+        // If the lowest element from the first interval is
         // unsigned greater or equal than the largest element from the second
-        // range, the result is 1.  If the largest element from
-        // the first range is unsigned lower than the lowest
-        // element from the second range, the result is 0.
+        // interval, the result is 1.  If the largest element from
+        // the first interval is unsigned lower than the lowest
+        // element from the second interval, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mUnsignedFrom.uge(bb.mUnsignedTo))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
@@ -826,11 +826,11 @@ Range::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_ULT: // unsigned less than
-        // If the largest element from the first range is
+        // If the largest element from the first interval is
         // unsigned lower than the lowest element from the second
-        // range, the result is 1.  If the lowest element from
-        // the first range is unsigned larger than the largest
-        // element from the second range, the result is 0.
+        // interval, the result is 1.  If the lowest element from
+        // the first interval is unsigned larger than the largest
+        // element from the second interval, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mUnsignedTo.ult(bb.mUnsignedFrom))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
@@ -839,11 +839,11 @@ Range::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_ULE: // unsigned less or equal
-        // If the largest element from the first range is
+        // If the largest element from the first interval is
         // unsigned lower or equal the lowest element from the second
-        // range, the result is 1.  If the lowest element from
-        // the first range is unsigned larger than the largest
-        // element from the second range, the result is 0.
+        // interval, the result is 1.  If the lowest element from
+        // the first interval is unsigned larger than the largest
+        // element from the second interval, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mUnsignedTo.ule(bb.mUnsignedFrom))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
@@ -852,11 +852,11 @@ Range::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_SGT: // signed greater than
-        // If the lowest element from the first range is
+        // If the lowest element from the first interval is
         // signed greater than the largest element from the second
-        // range, the result is 1.  If the largest element from
-        // the first range is signed lower than the lowest
-        // element from the second range, the result is 0.
+        // interval, the result is 1.  If the largest element from
+        // the first interval is signed lower than the lowest
+        // element from the second interval, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mSignedFrom.sgt(bb.mSignedTo))
             mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
@@ -865,11 +865,11 @@ Range::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_SGE: // signed greater or equal
-        // If the lowest element from the first range is
+        // If the lowest element from the first interval is
         // signed greater or equal than the largest element from the second
-        // range, the result is 1.  If the largest element from
-        // the first range is signed lower than the lowest
-        // element from the second range, the result is 0.
+        // interval, the result is 1.  If the largest element from
+        // the first interval is signed lower than the lowest
+        // element from the second interval, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mSignedFrom.sge(bb.mSignedTo))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
@@ -878,11 +878,11 @@ Range::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_SLT: // signed less than
-        // If the largest element from the first range is
+        // If the largest element from the first interval is
         // signed lower than the lowest element from the second
-        // range, the result is 1.  If the lowest element from
-        // the first range is signed larger than the largest
-        // element from the second range, the result is 0.
+        // interval, the result is 1.  If the lowest element from
+        // the first interval is signed larger than the largest
+        // element from the second interval, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mSignedTo.slt(bb.mSignedFrom))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
@@ -891,11 +891,11 @@ Range::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_SLE: // signed less or equal
-        // If the largest element from the first range is
+        // If the largest element from the first interval is
         // signed lower or equal the lowest element from the second
-        // range, the result is 1.  If the lowest element from
-        // the first range is signed larger than the largest
-        // element from the second range, the result is 0.
+        // interval, the result is 1.  If the lowest element from
+        // the first interval is signed larger than the largest
+        // element from the second interval, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mSignedTo.sle(bb.mSignedFrom))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
@@ -909,7 +909,7 @@ Range::icmp(const Domain &a, const Domain &b,
 }
 
 float
-Range::accuracy() const
+Interval::accuracy() const
 {
     if (mEmpty)
         return 1.0f;
@@ -981,25 +981,25 @@ Range::accuracy() const
 }
 
 bool
-Range::isBottom() const
+Interval::isBottom() const
 {
     return mEmpty;
 }
 
 void
-Range::setBottom()
+Interval::setBottom()
 {
     mEmpty = true;
 }
 
 bool
-Range::isTop() const
+Interval::isTop() const
 {
     return !mEmpty && mSignedTop && mUnsignedTop;
 }
 
 void
-Range::setTop()
+Interval::setTop()
 {
     mEmpty = false;
     mSignedTop = mUnsignedTop = true;

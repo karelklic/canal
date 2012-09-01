@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_INTEGER_RANGE_H
-#define LIBCANAL_INTEGER_RANGE_H
+#ifndef LIBCANAL_INTEGER_INTERVAL_H
+#define LIBCANAL_INTEGER_INTERVAL_H
 
 #include "Domain.h"
 #include <llvm/Constants.h>
@@ -7,10 +7,14 @@
 namespace Canal {
 namespace Integer {
 
-/// Abstracts integer values as a range min - max.
-class Range : public Domain, public AccuracyDomain
+/// Abstracts integer values as a interval min - max.
+class Interval : public Domain, public AccuracyDomain
 {
 public:
+    /// @brief Indicates an empty interval.
+    ///
+    /// When it is set to true, other members' values are not
+    /// considered as valid.
     bool mEmpty;
 
     bool mSignedTop;
@@ -26,11 +30,14 @@ public:
     llvm::APInt mUnsignedTo;
 
 public:
-    /// Initializes to the lowest value.
-    Range(const Environment &environment,
+    /// @brief Standard constructor.
+    ///
+    /// Initializes an empty interval.
+    Interval(const Environment &environment,
           unsigned bitWidth);
 
-    Range(const Environment &environment,
+    /// @brief Standard constructor.
+    Interval(const Environment &environment,
           const llvm::APInt &constant);
 
     unsigned getBitWidth() const { return mSignedFrom.getBitWidth(); }
@@ -71,17 +78,17 @@ public:
     ///   correct value.
     bool unsignedMax(llvm::APInt &result) const;
 
-    /// Returns true if the range represents a single number.  Signed
+    /// Returns true if the interval represents a single number.  Signed
     /// and unsigned representations might differ, though.
     bool isSingleValue() const;
 
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
-    virtual Range *clone() const;
+    virtual Interval *clone() const;
     /// Implementation of Domain::cloneCleaned().
     /// Covariant return type.
-    virtual Range *cloneCleaned() const;
+    virtual Interval *cloneCleaned() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain& value) const;
     /// Implementation of Domain::merge().
@@ -140,4 +147,4 @@ public: // Implementation of AccuracyDomain.
 } // namespace Integer
 } // namespace Canal
 
-#endif // LIBCANAL_INTEGER_RANGE_H
+#endif // LIBCANAL_INTEGER_INTERVAL_H
