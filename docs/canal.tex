@@ -336,65 +336,10 @@ Call stack
 Operational fixpoint calculation.
 Equation-based fixpoint calculation.
 
-Our abstract interpreter comes in four flavours:
-\begin{description}
-\item[Context-insensitive flow-insensitive] For every function in a
-  program, the fixpoint is calculated with a single set of abstract
-  values that encompasses all function calls.
-\item[Context-insensitive flow-sensitive] For every function in a
-  program, the fixpoint is calculated with a single set of abstract
-  values that encompasses all function calls, but every possible path
-  through the function is calculated separately.
-\item[Context-sensitive flow-insensitive] The fixpoint is calculated
-  with a set of abstract values specifically created for every
-  function call.
-\item[Context-sensitive flow-sensitive] The fixpoint is calculated
-  with a set of abstract values specifically created for every
-  possible path in a function call.  Path conditions are taken into
-  account.
-\end{description}
-
 Abstract interpreter can be either operational or equation-based.  Our
 interpreter is operational.
 
-\subsection{Tuning}
-The precision of abstract interpreter is greately tunable. Here are
-the aspects to consider:
-\begin{description}
-\item[Interpreter flavour] Context-sensitivity and path-sensitivity
-  increase both precision and complexity.
-
-Context and path sensitivity form a lattice when compared by the
-degree of sensitiveness.
-
-\item[Widening and narrowing] Selection and parameters of widening and
-  narrowing operators affect both precision and complexity.
-
-Widening operators form a lattice when compared by the speed of
-convergence.
-
-\item[Relations in abstract domains] Type and number of relations in
-  abstract domains affect both precision and complexity.
-\item[Memory for abstract domains] Parameters of some abstract domains
-  allow to trade memory for better precision.
-\end{description}
-
-Maximal precision of abstract interpreter is same as for symbolic
-executor, but abstract interpreter is more tunable.
-
-\subsection{Context sensitivity}
-Context sensitivity is achieved by keeping a function call stack.
-Every stack frame keeps the complete state of a function fixpoint
-calculation (all local and global variables).  When a function call is
-reached during the fixpoint computation and function call parameters
-are already initialized, a new frame is placed on the top of stack and
-the called function is interpreted with the provided parameters.
-
-\subsection{Flow sensitivity}
-
-\chapter{Abstractions}
-
-\section{Memory Model}
+\chapter{Memory Model}
 Memory abstraction appeared in \cite{M06}.
 
 Our memory abstraction for abstract interpretation recognizes four
@@ -435,13 +380,13 @@ operations affecting a memory block allocated at certain place forms a
 single abstract value.  Context-sensite abstract interpretation helps
 to increase the precision of this memory abstraction.
 
-\section{Array Abstract Domains}
+\chapter{Array Abstract Domains}
 
-\section{Structure Abstract Domain}
+\chapter{Structure Abstract Domain}
 
-\section{Integer Abstract Domains}
+\chapter{Integer Abstract Domains}
 
-\subsection{Integer Interval Domain $\mathcal{D}_i^\sharp$}
+\section{Integer Interval Domain $\mathcal{D}_i^\sharp$}
 
 The interval domain was first presented in \cite{CC76}.  It was
 particularly well described in \cite{M04}. More precise machine
@@ -450,61 +395,65 @@ integer interval domain appeared in \cite{M12}.
 $D_i^\sharp \buildrel \text{d{}ef}\over = \{ [ l,h ] \mid l, h \in
 \mathbb{Z} \cup \{ \pm\infty \} \}$
 
-\subsection{Integer Bitfield Domain $\mathcal{D}_b^\sharp$}
+\section{Integer Bitfield Domain $\mathcal{D}_b^\sharp$}
 
 Described in \cite{M12}.  The domain associates two integers $z$ and
 $o$ to each variable. The integers represent bit masks for bits that
 can be set to 0 ($z$ero) and to 1 ($o$ne).
 
-\section{Abstract Domains for Floating-Point Numbers}
+\chapter{Abstract Domains for Floating-Point Numbers}
 Precise machine floating-point abstraction appeared in \cite{M12}.
 
-\section{Pointer Abstract Domains}
+\chapter{Pointer Abstract Domains}
 Pointer can be casted to a number via the \texttt{ptrtoint}
 instruction.  Usually, the resulting memory offset is used to achieve
 pointer arithmetics that are not available via \texttt{getelementptr}
 semantics.
 
-\section{Combining Abstract Domains}
+\chapter{Abstract Domain Combination}
+
+Trees of abstract domains as done in ASTRÉE are described in
+\cite{CCFMMMR06}.
 
 \chapter{Wishlist}
 
-\section{Context-sensitivity abstract domain}
-Move context sensitivity to an abstract domain.  Context sensitive
-abstract domain remembers separate abstract values for nonoverlapping
-subsets of all contexts.
+\section{Reduced Product of Abstract Domains}
+Including cooperation.
 
-\section{Path-sensitivity abstract domain}
-Introduce path-sensitivity as an abstract domain.
+\section{Widening and Narrowing}
+Implement widening and narrowing operators for integers and other
+abstract domains as required.
 
-\section{Multi threading}
+\section{String Abstract Domains}
+Implement abstract domains specific for C strings.
+
+\section{Trace Partitioning}
+Move context sensitivity to an abstract domain based on trace
+partitioning \cite{MR05}.  This change will allow us to introduce
+path-sensitivity just by extending this domain.
+
+\section{Fixpoint Recalculation}
+Allow to recompute fixpoint with a few variables changing their
+abstract domain layout.
+
+\section{Multi Threading}
 Multi-threading abstraction for Abstract Interpretation appeared in
 \cite{M11}.
 
-\begin{description}
-\item[Lazy model-checking abstract value] Allow to investigate just a
-  single function, taking into account all possible parameter values
-  and shapes (perhaps limited by a pre-condition).  Parameter values
-  and shapes must be smartly provided depending on the boundary
-  requirements of the checked code.  This allows a kind of model
-  checking, and use of model checking algorithms and ideas.
-\item[Widening operators] Implement widening operators for integers
-  and other abstract domains as required.
-\item[Narrowing operators] Implement narrowing operators for integers
-  and other abstract domains as required.
-\item[String abstractions] Implement abstract domains specific for C
-  strings.
-\item[Weakly relational numeric abstractions] Implement weakly
-  relational integer and floating-point abstract domains.
-\item[Basic block abstraction] Implement basic block summaries that
-  speed-up the static analysis.
-\item[Function abstraction] Implement function summaries that speed-up
-  the static analysis.
-\item[Parallelization] Make abstract interpreter to use multiple
-  threads for fixpoint calculation on the right level.
-\item[Concurrency check] Add support for checking of multi-threaded
-  programs.
-\end{description}
+\section{Symbolic Abstract Domains}
+
+\section{Weakly-Relational Abstract Domains}
+Implement weakly relational integer and floating-point abstract
+domains.
+
+\section{Compositional Analysis}
+Analyze funcions, modules, or libraries separately, and merge the
+results afterwards.  Theory can be found in \cite{CC01} and
+\cite{CC02}.
+
+\section{Parallelization}
+Make abstract interpreter to use multiple threads for fixpoint
+calculation on symmetric multiprocessor systems.  See \cite{M05}.
 
 \part{Implementation}
 
@@ -534,6 +483,17 @@ some additional libraries:
 \chapter{Known Bugs}
 Pointers should have the possibility to be set to top.
 
+\chapter{Wishlist}
+
+\section{Support of Multiple Platforms}
+Support Microsoft Windows and Mac OS X natively.
+
+\section{Automatic Tests}
+Unit tests and integration tests.
+
+\section{Graphical User Interface}
+Extend Eclipse to provide an user interface to Canal.
+
 
 \cleardoublepage
 \addcontentsline{toc}{chapter}{Bibliography}
@@ -554,11 +514,21 @@ Pointers should have the possibility to be set to top.
     6th ACM SIGACT-SIGPLAN symposium on Principles of Programming
     Languages}, 1979.
 
+\bibitem{CC01} Patrick Cousot and Radhia Cousot.  Compositional
+  Separate Modular Static Analysis of Programs by Abstract
+  Interpretation.  In \emph{SSGRR '01: Proceedings of the Second
+    International Conference on Advances in Infrastructure for
+    E-Business, E-Science and E-Education on the Internet}, 2001.
+
 \bibitem{HCXE02} Seth Hallem, Benjamin Chelf, Yichen Xie, and Dawson
   Engler.  A System and Language for Building System-Specific, Static
   Analyses.  In \emph{PLDI '02: Proceedings of the ACM SIGPLAN 2002
     Conference on Programming language design and implementation},
   2002.
+
+\bibitem{CC02} Patrick Cousot and Radhia Cousot.  Modular Static
+  Program Analysis.  In \emph{CC '02: International Conference on
+    Compiler Construction}, 2002.
 
 \bibitem{DP02} Brian Albert Davey and Hilary Ann
   Priestley. Introduction to Lattices and Order. 2nd ed. Cambridge
@@ -577,11 +547,24 @@ Pointers should have the possibility to be set to top.
     Generation and Optimization: Feedback-directed and Runtime
     Optimization}, 2004.
 
+\bibitem{MR05} Laurent Mauborgne and Xavier Rival.  Trace Partitioning
+  in Abstract Interpretation Based Static Analyzers.  In \emph{ESOP
+    '05: European Symposium on Programming}, 2005.
+
+\bibitem{M05} David Monniaux.  The parallel implementation of the
+  Astrée static analyzer.  2005.
+
 \bibitem{M06} Antoine Miné.  Field-Sensitive Value Analysis of
   Embedded C Programs with Union Types and Pointer Arithmetics.  In
   \emph{LCTES '06: Proceedings of the 2006 ACM SIGPLAN/SIGBED
     conference on Language, compilers, and tool support for embedded
     systems}, 2006.
+
+\bibitem{CCFMMMR06} Patrick Cousot, Radhia Cousot, Jérôme Feret,
+  Laurent Mauborgne, Antoine Miné, David Monniaux, and Xavier Rival.
+  Combination of Abstractions in the ASTRÉE Static Analyzer. In
+  \emph{ASIAN '06: 11th Annual Asian Computing Science Conference},
+  2006.
 
 \bibitem{M11} Antoine Miné.  Static Analysis of Run-time Errors in
   Embedded Critical Parallel C Programs.  In \emph{ESOP '11:
