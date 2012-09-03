@@ -75,15 +75,16 @@ libcanal_la_LIBADD =
 am_libcanal_la_OBJECTS = libcanal_la-APIntUtils.lo \
 	libcanal_la-ArrayExactSize.lo libcanal_la-ArrayInterface.lo \
 	libcanal_la-ArraySingleItem.lo libcanal_la-Constant.lo \
-	libcanal_la-Environment.lo libcanal_la-FloatRange.lo \
-	libcanal_la-IntegerBits.lo libcanal_la-IntegerContainer.lo \
-	libcanal_la-IntegerEnumeration.lo libcanal_la-IntegerRange.lo \
-	libcanal_la-Interpreter.lo libcanal_la-Pointer.lo \
-	libcanal_la-PointerTarget.lo libcanal_la-SELinuxModulePass.lo \
-	libcanal_la-SlotTracker.lo libcanal_la-Stack.lo \
-	libcanal_la-State.lo libcanal_la-StringUtils.lo \
-	libcanal_la-Structure.lo libcanal_la-Utils.lo \
-	libcanal_la-Value.lo
+	libcanal_la-Domain.lo libcanal_la-Environment.lo \
+	libcanal_la-FloatInterval.lo libcanal_la-IntegerBitfield.lo \
+	libcanal_la-IntegerContainer.lo \
+	libcanal_la-IntegerEnumeration.lo \
+	libcanal_la-IntegerInterval.lo libcanal_la-Interpreter.lo \
+	libcanal_la-Pointer.lo libcanal_la-PointerTarget.lo \
+	libcanal_la-SELinuxModulePass.lo libcanal_la-SlotTracker.lo \
+	libcanal_la-Stack.lo libcanal_la-State.lo \
+	libcanal_la-StringUtils.lo libcanal_la-Structure.lo \
+	libcanal_la-Utils.lo
 libcanal_la_OBJECTS = $(am_libcanal_la_OBJECTS)
 libcanal_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(libcanal_la_CXXFLAGS) \
@@ -267,18 +268,20 @@ libcanal_la_SOURCES = \
 	ArraySingleItem.h \
 	Constant.cpp \
 	Constant.h \
+	Domain.cpp \
+	Domain.h \
 	Environment.cpp \
 	Environment.h \
-	FloatRange.cpp \
-	FloatRange.h \
-	IntegerBits.cpp \
-	IntegerBits.h \
+	FloatInterval.cpp \
+	FloatInterval.h \
+	IntegerBitfield.cpp \
+	IntegerBitfield.h \
 	IntegerContainer.cpp \
 	IntegerContainer.h \
 	IntegerEnumeration.cpp \
 	IntegerEnumeration.h \
-	IntegerRange.cpp \
-	IntegerRange.h \
+	IntegerInterval.cpp \
+	IntegerInterval.h \
 	Interpreter.cpp \
 	Interpreter.h \
 	Pointer.cpp \
@@ -297,9 +300,7 @@ libcanal_la_SOURCES = \
 	Structure.cpp \
 	Structure.h \
 	Utils.cpp \
-	Utils.h \
-	Value.cpp \
-	Value.h
+	Utils.h
 
 libcanal_la_CXXFLAGS = $(LLVM_CFLAGS)
 libcanal_la_LDFLAGS = $(LLVM_LDFLAGS) $(LLVM_LIBS) -version-info 0:0:0
@@ -400,12 +401,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-ArrayInterface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-ArraySingleItem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Constant.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Domain.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Environment.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-FloatRange.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerBits.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-FloatInterval.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerBitfield.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerContainer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerEnumeration.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerRange.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerInterval.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Interpreter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Pointer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-PointerTarget.Plo@am__quote@
@@ -416,7 +418,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-StringUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Structure.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Utils.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Value.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -474,6 +475,13 @@ libcanal_la-Constant.lo: Constant.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Constant.lo `test -f 'Constant.cpp' || echo '$(srcdir)/'`Constant.cpp
 
+libcanal_la-Domain.lo: Domain.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Domain.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Domain.Tpo -c -o libcanal_la-Domain.lo `test -f 'Domain.cpp' || echo '$(srcdir)/'`Domain.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-Domain.Tpo $(DEPDIR)/libcanal_la-Domain.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Domain.cpp' object='libcanal_la-Domain.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Domain.lo `test -f 'Domain.cpp' || echo '$(srcdir)/'`Domain.cpp
+
 libcanal_la-Environment.lo: Environment.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Environment.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Environment.Tpo -c -o libcanal_la-Environment.lo `test -f 'Environment.cpp' || echo '$(srcdir)/'`Environment.cpp
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-Environment.Tpo $(DEPDIR)/libcanal_la-Environment.Plo
@@ -481,19 +489,19 @@ libcanal_la-Environment.lo: Environment.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Environment.lo `test -f 'Environment.cpp' || echo '$(srcdir)/'`Environment.cpp
 
-libcanal_la-FloatRange.lo: FloatRange.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-FloatRange.lo -MD -MP -MF $(DEPDIR)/libcanal_la-FloatRange.Tpo -c -o libcanal_la-FloatRange.lo `test -f 'FloatRange.cpp' || echo '$(srcdir)/'`FloatRange.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-FloatRange.Tpo $(DEPDIR)/libcanal_la-FloatRange.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FloatRange.cpp' object='libcanal_la-FloatRange.lo' libtool=yes @AMDEPBACKSLASH@
+libcanal_la-FloatInterval.lo: FloatInterval.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-FloatInterval.lo -MD -MP -MF $(DEPDIR)/libcanal_la-FloatInterval.Tpo -c -o libcanal_la-FloatInterval.lo `test -f 'FloatInterval.cpp' || echo '$(srcdir)/'`FloatInterval.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-FloatInterval.Tpo $(DEPDIR)/libcanal_la-FloatInterval.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FloatInterval.cpp' object='libcanal_la-FloatInterval.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-FloatRange.lo `test -f 'FloatRange.cpp' || echo '$(srcdir)/'`FloatRange.cpp
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-FloatInterval.lo `test -f 'FloatInterval.cpp' || echo '$(srcdir)/'`FloatInterval.cpp
 
-libcanal_la-IntegerBits.lo: IntegerBits.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-IntegerBits.lo -MD -MP -MF $(DEPDIR)/libcanal_la-IntegerBits.Tpo -c -o libcanal_la-IntegerBits.lo `test -f 'IntegerBits.cpp' || echo '$(srcdir)/'`IntegerBits.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-IntegerBits.Tpo $(DEPDIR)/libcanal_la-IntegerBits.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerBits.cpp' object='libcanal_la-IntegerBits.lo' libtool=yes @AMDEPBACKSLASH@
+libcanal_la-IntegerBitfield.lo: IntegerBitfield.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-IntegerBitfield.lo -MD -MP -MF $(DEPDIR)/libcanal_la-IntegerBitfield.Tpo -c -o libcanal_la-IntegerBitfield.lo `test -f 'IntegerBitfield.cpp' || echo '$(srcdir)/'`IntegerBitfield.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-IntegerBitfield.Tpo $(DEPDIR)/libcanal_la-IntegerBitfield.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerBitfield.cpp' object='libcanal_la-IntegerBitfield.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-IntegerBits.lo `test -f 'IntegerBits.cpp' || echo '$(srcdir)/'`IntegerBits.cpp
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-IntegerBitfield.lo `test -f 'IntegerBitfield.cpp' || echo '$(srcdir)/'`IntegerBitfield.cpp
 
 libcanal_la-IntegerContainer.lo: IntegerContainer.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-IntegerContainer.lo -MD -MP -MF $(DEPDIR)/libcanal_la-IntegerContainer.Tpo -c -o libcanal_la-IntegerContainer.lo `test -f 'IntegerContainer.cpp' || echo '$(srcdir)/'`IntegerContainer.cpp
@@ -509,12 +517,12 @@ libcanal_la-IntegerEnumeration.lo: IntegerEnumeration.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-IntegerEnumeration.lo `test -f 'IntegerEnumeration.cpp' || echo '$(srcdir)/'`IntegerEnumeration.cpp
 
-libcanal_la-IntegerRange.lo: IntegerRange.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-IntegerRange.lo -MD -MP -MF $(DEPDIR)/libcanal_la-IntegerRange.Tpo -c -o libcanal_la-IntegerRange.lo `test -f 'IntegerRange.cpp' || echo '$(srcdir)/'`IntegerRange.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-IntegerRange.Tpo $(DEPDIR)/libcanal_la-IntegerRange.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerRange.cpp' object='libcanal_la-IntegerRange.lo' libtool=yes @AMDEPBACKSLASH@
+libcanal_la-IntegerInterval.lo: IntegerInterval.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-IntegerInterval.lo -MD -MP -MF $(DEPDIR)/libcanal_la-IntegerInterval.Tpo -c -o libcanal_la-IntegerInterval.lo `test -f 'IntegerInterval.cpp' || echo '$(srcdir)/'`IntegerInterval.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-IntegerInterval.Tpo $(DEPDIR)/libcanal_la-IntegerInterval.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerInterval.cpp' object='libcanal_la-IntegerInterval.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-IntegerRange.lo `test -f 'IntegerRange.cpp' || echo '$(srcdir)/'`IntegerRange.cpp
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-IntegerInterval.lo `test -f 'IntegerInterval.cpp' || echo '$(srcdir)/'`IntegerInterval.cpp
 
 libcanal_la-Interpreter.lo: Interpreter.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Interpreter.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Interpreter.Tpo -c -o libcanal_la-Interpreter.lo `test -f 'Interpreter.cpp' || echo '$(srcdir)/'`Interpreter.cpp
@@ -585,13 +593,6 @@ libcanal_la-Utils.lo: Utils.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Utils.cpp' object='libcanal_la-Utils.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Utils.lo `test -f 'Utils.cpp' || echo '$(srcdir)/'`Utils.cpp
-
-libcanal_la-Value.lo: Value.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Value.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Value.Tpo -c -o libcanal_la-Value.lo `test -f 'Value.cpp' || echo '$(srcdir)/'`Value.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-Value.Tpo $(DEPDIR)/libcanal_la-Value.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Value.cpp' object='libcanal_la-Value.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Value.lo `test -f 'Value.cpp' || echo '$(srcdir)/'`Value.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo

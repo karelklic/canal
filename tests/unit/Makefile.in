@@ -34,8 +34,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = InterpreterTest$(EXEEXT) IntegerRangeTest$(EXEEXT) \
-	PointerTest$(EXEEXT)
+noinst_PROGRAMS = InterpreterTest$(EXEEXT) \
+	IntegerIntervalTest$(EXEEXT) PointerTest$(EXEEXT)
 subdir = tests/unit
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -50,14 +50,14 @@ CONFIG_HEADER = $(top_builddir)/lib/Config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-am_IntegerRangeTest_OBJECTS =  \
-	IntegerRangeTest-IntegerRangeTest.$(OBJEXT)
-IntegerRangeTest_OBJECTS = $(am_IntegerRangeTest_OBJECTS)
-IntegerRangeTest_DEPENDENCIES = ../../lib/libcanal.la
-IntegerRangeTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+am_IntegerIntervalTest_OBJECTS =  \
+	IntegerIntervalTest-IntegerIntervalTest.$(OBJEXT)
+IntegerIntervalTest_OBJECTS = $(am_IntegerIntervalTest_OBJECTS)
+IntegerIntervalTest_DEPENDENCIES = ../../lib/libcanal.la
+IntegerIntervalTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
-	$(IntegerRangeTest_CXXFLAGS) $(CXXFLAGS) \
-	$(IntegerRangeTest_LDFLAGS) $(LDFLAGS) -o $@
+	$(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) \
+	$(IntegerIntervalTest_LDFLAGS) $(LDFLAGS) -o $@
 am_InterpreterTest_OBJECTS =  \
 	InterpreterTest-InterpreterTest.$(OBJEXT)
 InterpreterTest_OBJECTS = $(am_InterpreterTest_OBJECTS)
@@ -85,10 +85,10 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(IntegerRangeTest_SOURCES) $(InterpreterTest_SOURCES) \
+SOURCES = $(IntegerIntervalTest_SOURCES) $(InterpreterTest_SOURCES) \
 	$(PointerTest_SOURCES)
-DIST_SOURCES = $(IntegerRangeTest_SOURCES) $(InterpreterTest_SOURCES) \
-	$(PointerTest_SOURCES)
+DIST_SOURCES = $(IntegerIntervalTest_SOURCES) \
+	$(InterpreterTest_SOURCES) $(PointerTest_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -237,11 +237,11 @@ InterpreterTest_SOURCES = InterpreterTest.cpp
 InterpreterTest_LDADD = ../../lib/libcanal.la
 InterpreterTest_LIBS = $(LLVM_LIBS)
 InterpreterTest_LDFLAGS = $(LLVM_LDFLAGS)
-IntegerRangeTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
-IntegerRangeTest_SOURCES = IntegerRangeTest.cpp
-IntegerRangeTest_LDADD = ../../lib/libcanal.la
-IntegerRangeTest_LIBS = $(LLVM_LIBS)
-IntegerRangeTest_LDFLAGS = $(LLVM_LDFLAGS)
+IntegerIntervalTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
+IntegerIntervalTest_SOURCES = IntegerIntervalTest.cpp
+IntegerIntervalTest_LDADD = ../../lib/libcanal.la
+IntegerIntervalTest_LIBS = $(LLVM_LIBS)
+IntegerIntervalTest_LDFLAGS = $(LLVM_LDFLAGS)
 PointerTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
 PointerTest_SOURCES = PointerTest.cpp
 PointerTest_LDADD = ../../lib/libcanal.la
@@ -290,9 +290,9 @@ clean-noinstPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-IntegerRangeTest$(EXEEXT): $(IntegerRangeTest_OBJECTS) $(IntegerRangeTest_DEPENDENCIES) 
-	@rm -f IntegerRangeTest$(EXEEXT)
-	$(IntegerRangeTest_LINK) $(IntegerRangeTest_OBJECTS) $(IntegerRangeTest_LDADD) $(LIBS)
+IntegerIntervalTest$(EXEEXT): $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_DEPENDENCIES) 
+	@rm -f IntegerIntervalTest$(EXEEXT)
+	$(IntegerIntervalTest_LINK) $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_LDADD) $(LIBS)
 InterpreterTest$(EXEEXT): $(InterpreterTest_OBJECTS) $(InterpreterTest_DEPENDENCIES) 
 	@rm -f InterpreterTest$(EXEEXT)
 	$(InterpreterTest_LINK) $(InterpreterTest_OBJECTS) $(InterpreterTest_LDADD) $(LIBS)
@@ -306,7 +306,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerRangeTest-IntegerRangeTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/InterpreterTest-InterpreterTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PointerTest-PointerTest.Po@am__quote@
 
@@ -331,19 +331,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
-IntegerRangeTest-IntegerRangeTest.o: IntegerRangeTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerRangeTest_CXXFLAGS) $(CXXFLAGS) -MT IntegerRangeTest-IntegerRangeTest.o -MD -MP -MF $(DEPDIR)/IntegerRangeTest-IntegerRangeTest.Tpo -c -o IntegerRangeTest-IntegerRangeTest.o `test -f 'IntegerRangeTest.cpp' || echo '$(srcdir)/'`IntegerRangeTest.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/IntegerRangeTest-IntegerRangeTest.Tpo $(DEPDIR)/IntegerRangeTest-IntegerRangeTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerRangeTest.cpp' object='IntegerRangeTest-IntegerRangeTest.o' libtool=no @AMDEPBACKSLASH@
+IntegerIntervalTest-IntegerIntervalTest.o: IntegerIntervalTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -MT IntegerIntervalTest-IntegerIntervalTest.o -MD -MP -MF $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Tpo -c -o IntegerIntervalTest-IntegerIntervalTest.o `test -f 'IntegerIntervalTest.cpp' || echo '$(srcdir)/'`IntegerIntervalTest.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Tpo $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerIntervalTest.cpp' object='IntegerIntervalTest-IntegerIntervalTest.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerRangeTest_CXXFLAGS) $(CXXFLAGS) -c -o IntegerRangeTest-IntegerRangeTest.o `test -f 'IntegerRangeTest.cpp' || echo '$(srcdir)/'`IntegerRangeTest.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -c -o IntegerIntervalTest-IntegerIntervalTest.o `test -f 'IntegerIntervalTest.cpp' || echo '$(srcdir)/'`IntegerIntervalTest.cpp
 
-IntegerRangeTest-IntegerRangeTest.obj: IntegerRangeTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerRangeTest_CXXFLAGS) $(CXXFLAGS) -MT IntegerRangeTest-IntegerRangeTest.obj -MD -MP -MF $(DEPDIR)/IntegerRangeTest-IntegerRangeTest.Tpo -c -o IntegerRangeTest-IntegerRangeTest.obj `if test -f 'IntegerRangeTest.cpp'; then $(CYGPATH_W) 'IntegerRangeTest.cpp'; else $(CYGPATH_W) '$(srcdir)/IntegerRangeTest.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/IntegerRangeTest-IntegerRangeTest.Tpo $(DEPDIR)/IntegerRangeTest-IntegerRangeTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerRangeTest.cpp' object='IntegerRangeTest-IntegerRangeTest.obj' libtool=no @AMDEPBACKSLASH@
+IntegerIntervalTest-IntegerIntervalTest.obj: IntegerIntervalTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -MT IntegerIntervalTest-IntegerIntervalTest.obj -MD -MP -MF $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Tpo -c -o IntegerIntervalTest-IntegerIntervalTest.obj `if test -f 'IntegerIntervalTest.cpp'; then $(CYGPATH_W) 'IntegerIntervalTest.cpp'; else $(CYGPATH_W) '$(srcdir)/IntegerIntervalTest.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Tpo $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerIntervalTest.cpp' object='IntegerIntervalTest-IntegerIntervalTest.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerRangeTest_CXXFLAGS) $(CXXFLAGS) -c -o IntegerRangeTest-IntegerRangeTest.obj `if test -f 'IntegerRangeTest.cpp'; then $(CYGPATH_W) 'IntegerRangeTest.cpp'; else $(CYGPATH_W) '$(srcdir)/IntegerRangeTest.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -c -o IntegerIntervalTest-IntegerIntervalTest.obj `if test -f 'IntegerIntervalTest.cpp'; then $(CYGPATH_W) 'IntegerIntervalTest.cpp'; else $(CYGPATH_W) '$(srcdir)/IntegerIntervalTest.cpp'; fi`
 
 InterpreterTest-InterpreterTest.o: InterpreterTest.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(InterpreterTest_CXXFLAGS) $(CXXFLAGS) -MT InterpreterTest-InterpreterTest.o -MD -MP -MF $(DEPDIR)/InterpreterTest-InterpreterTest.Tpo -c -o InterpreterTest-InterpreterTest.o `test -f 'InterpreterTest.cpp' || echo '$(srcdir)/'`InterpreterTest.cpp
