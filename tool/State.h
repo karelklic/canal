@@ -3,10 +3,10 @@
 
 #include <set>
 #include <string>
-#include "../lib/Environment.h"
-#include "../lib/Interpreter.h"
-#include "../lib/SlotTracker.h"
-#include "../lib/Stack.h"
+#include "lib/Environment.h"
+#include "lib/Interpreter.h"
+#include "lib/SlotTracker.h"
+#include "lib/Stack.h"
 
 namespace llvm {
     class Module;

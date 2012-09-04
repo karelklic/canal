@@ -1,7 +1,7 @@
 #include "CommandBacktrace.h"
 #include "Commands.h"
 #include "State.h"
-#include "../lib/Stack.h"
+#include "lib/Stack.h"
 #include <cstdio>
 
 CommandBacktrace::CommandBacktrace(Commands &commands)

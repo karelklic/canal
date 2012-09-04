@@ -2,10 +2,10 @@
 #include "Commands.h"
 #include "State.h"
 #include "Utils.h"
-#include "../lib/SlotTracker.h"
-#include "../lib/Stack.h"
-#include "../lib/Domain.h"
-#include "../lib/Utils.h"
+#include "lib/SlotTracker.h"
+#include "lib/Stack.h"
+#include "lib/Domain.h"
+#include "lib/Utils.h"
 #include <llvm/ValueSymbolTable.h>
 #include <llvm/Module.h>
 #include <cstdio>

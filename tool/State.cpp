@@ -1,10 +1,10 @@
 #include "State.h"
 #include "Utils.h"
-#include "../lib/Utils.h"
-#include "../lib/State.h"
-#include "../lib/IntegerContainer.h"
-#include "../lib/Pointer.h"
-#include "../lib/Constant.h"
+#include "lib/Utils.h"
+#include "lib/State.h"
+#include "lib/IntegerContainer.h"
+#include "lib/Pointer.h"
+#include "lib/Constant.h"
 #include <llvm/Function.h>
 #include <llvm/Module.h>
 #include <llvm/ADT/APInt.h>

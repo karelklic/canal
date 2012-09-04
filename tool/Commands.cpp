@@ -17,7 +17,7 @@
 #include "CommandStart.h"
 #include "CommandStep.h"
 #include "State.h"
-#include "../lib/Utils.h"
+#include "lib/Utils.h"
 #include <cstring>
 #include <cstdio>
 
