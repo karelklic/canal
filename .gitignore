@@ -1,6 +1,9 @@
 *.o
 .deps
 .libs
+CMakeFiles/
+*.cmake
+Testing/
 *~
 Makefile
 /canal.config
@@ -14,7 +17,6 @@ Makefile
 /libtool
 /llvm-root.cmake
 /CMakeCache.txt
-/CMakeFiles/
 /cmake_install.cmake
 
 /docs/*.aux
