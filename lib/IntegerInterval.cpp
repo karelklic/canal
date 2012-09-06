@@ -990,6 +990,8 @@ void
 Interval::setBottom()
 {
     mEmpty = true;
+    mUnsignedTop = mSignedTop = false;
+    mUnsignedFrom = mUnsignedTo = mSignedFrom = mSignedTo = 0;
 }
 
 bool
