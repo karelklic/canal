@@ -418,15 +418,24 @@ Bitfield::xor_(const Domain &a, const Domain &b)
 
 // -1 if a < b, 0 if a == b, 1 if a > b, 2 if unknown
 static int
-compare(const Bitfield &a, const Bitfield &b, bool signed_)
+compare(const Bitfield &a, const Bitfield &b, bool signed_, bool equality = false)
 {
+    //Possible todo - TT >= 10 if signed
     bool first = true;
     for (int pos = a.getBitWidth() - 1; pos >= 0; --pos)
     {
         int i = a.getBitValue(pos);
         int j = b.getBitValue(pos);
-        if (i == -1 || i == 2 || j == -1 || j == 2)
+        if (i == -1 || i == 2 || j == -1 || j == 2) {
+            if (equality && !first) {
+                //If comparing with equality, then if one value is set and the other one is TOP:
+                //0<=TOP and 1>=TOP -> return 0<TOP and 1>TOP, and comparison operator will handle the result correctly
+                if ((i == -1 || i == 2) && (j == -1 || j == 2)) return 2; //If both values are top
+                if (i == 0 || i == 1) return (i ? -1 : 1); //If first value is set
+                else return (j ? -1 : 1); //If second value is set
+            }
             return 2;
+        }
 
         if (i != j)
         {
@@ -516,7 +525,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         }
         break;
     case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
-        switch (compare(aa, bb, false))
+        switch (compare(aa, bb, false, true))
         {
         case 0:
         case 1:  mZeroes = ~1; mOnes = 1; break;
@@ -533,7 +542,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         }
         break;
     case llvm::CmpInst::ICMP_ULE: // unsigned less or equal
-        switch (compare(aa, bb, false))
+        switch (compare(aa, bb, false, true))
         {
         case 0:
         case -1: mZeroes = ~1; mOnes = 1; break;
@@ -550,7 +559,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         }
         break;
     case llvm::CmpInst::ICMP_SGE: // signed greater or equal
-        switch (compare(aa, bb, true))
+        switch (compare(aa, bb, true, true))
         {
         case 0:
         case 1:  mZeroes = ~1; mOnes = 1; break;
@@ -567,7 +576,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         }
         break;
     case llvm::CmpInst::ICMP_SLE: // signed less or equal
-        switch (compare(aa, bb, true))
+        switch (compare(aa, bb, true, true))
         {
         case 0:
         case -1: mZeroes = ~1; mOnes = 1; break;
