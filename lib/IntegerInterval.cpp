@@ -93,11 +93,25 @@ Interval::unsignedMax(llvm::APInt &result) const
 bool
 Interval::isSingleValue() const
 {
-    if (isBottom() || mSignedTop || mUnsignedTop)
+    return isSignedSingleValue() && isUnsignedSingleValue();
+}
+
+bool
+Interval::isSignedSingleValue() const
+{
+    if (isBottom() || mSignedTop)
         return false;
 
-    return mSignedFrom == mSignedTo &&
-        mUnsignedFrom == mUnsignedTo;
+    return mSignedFrom == mSignedTo;
+}
+
+bool
+Interval::isUnsignedSingleValue() const
+{
+    if (isBottom() || mUnsignedTop)
+        return false;
+
+    return mUnsignedFrom == mUnsignedTo;
 }
 
 Interval *
@@ -774,6 +788,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         return;
     }
 
+    setBottom(); //Interval 0-0
     mEmpty = false;
 
     switch (predicate)
@@ -782,21 +797,43 @@ Interval::icmp(const Domain &a, const Domain &b,
         // If both intervals are equal, the result is 1.  If
         // interval intersection is empty, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b || (aa.isSingleValue() && aa == bb))
+        if (&a == &b) {
             mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (intersects(aa, bb, true, true))
-            setTop();
+            break;
+        }
+
+        //Signed equality
+        if (aa.isSignedSingleValue() && bb.isSignedSingleValue() && aa.mSignedFrom == bb.mSignedFrom) {
+            mSignedFrom = mSignedTo = 1;
+        }
+        else if (intersects(aa, bb, true, false)) mSignedTop = true;
+
+        //Unsigned equality
+        if (aa.isUnsignedSingleValue() && bb.isUnsignedSingleValue() && aa.mUnsignedFrom == bb.mUnsignedFrom) {
+            mUnsignedFrom = mUnsignedTo = 1;
+        }
+        else if (intersects(aa, bb, false, true)) mUnsignedTop = true;
 
         break;
     case llvm::CmpInst::ICMP_NE:  // not equal
         // If both intervals are equal, the result is 0.  If
         // interval intersection is empty, the result is 1.
         // Otherwise the result is the top value (both 0 and 1).
-        if (!intersects(aa, bb, true, true))
-            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (!(&a == &b || (aa.isSingleValue() && aa == bb)))
-            setTop();
+        if (&a == &b) {
+            break;
+        }
 
+        //Signed inequality
+        if (intersects(aa, bb, true, false)) mSignedTop = true;
+        else if (!(aa.isSignedSingleValue() && bb.isSignedSingleValue() && aa.mSignedFrom == bb.mSignedFrom)) {
+            mSignedFrom = mSignedTo = 1;
+        }
+
+        //Unsigned inequality
+        if (intersects(aa, bb, false, true)) mUnsignedTop = true;
+        else if (!(aa.isUnsignedSingleValue() && bb.isUnsignedSingleValue() && aa.mUnsignedFrom == bb.mUnsignedFrom)) {
+            mUnsignedFrom = mUnsignedTo = 1;
+        }
         break;
     case llvm::CmpInst::ICMP_UGT: // unsigned greater than
         // If the lowest element from the first interval is
