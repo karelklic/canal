@@ -23,6 +23,9 @@ add_definitions( ${LLVM_DEFINITIONS} )
 
 add_definitions( -DDATADIR="${CMAKE_CURRENT_BINARY_DIR}" )
 
+SET(CMAKE_BUILD_TYPE "debug")
+ENABLE_TESTING()
+
 # Let's suppose we want to build a JIT compiler with support for
 # binary code (no interpreter):
 llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES bitreader asmparser target)
@@ -30,3 +33,4 @@ llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES bitreader asmparser target)
 
 add_subdirectory("lib/")
 add_subdirectory("tool/")
+add_subdirectory("tests/")

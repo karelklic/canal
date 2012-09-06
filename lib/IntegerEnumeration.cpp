@@ -456,6 +456,7 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         return;
     }
 
+    setBottom();
     llvm::APInt minA, maxA, minB, maxB;
     aa.signedMin(minA);
     aa.signedMax(maxA);

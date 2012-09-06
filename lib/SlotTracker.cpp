@@ -1,5 +1,5 @@
 #include "SlotTracker.h"
-#include "../lib/Utils.h"
+#include "Utils.h"
 #include <llvm/Module.h>
 #include <llvm/Function.h>
 #include <llvm/Type.h>

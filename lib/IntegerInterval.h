@@ -82,6 +82,12 @@ public:
     /// and unsigned representations might differ, though.
     bool isSingleValue() const;
 
+    /// Returns true if the interval represents a signed single value.
+    bool isSignedSingleValue() const;
+
+    /// Returns true if the interval represents a unsigned single value.
+    bool isUnsignedSingleValue() const;
+
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.

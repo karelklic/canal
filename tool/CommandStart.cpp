@@ -2,7 +2,7 @@
 #include "Commands.h"
 #include "State.h"
 #include "Utils.h"
-#include "../lib/Stack.h"
+#include "lib/Stack.h"
 #include <cstdio>
 
 CommandStart::CommandStart(Commands &commands)
