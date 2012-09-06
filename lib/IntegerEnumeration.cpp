@@ -63,7 +63,7 @@ Enumeration::signedMax(llvm::APInt &result) const
         APIntUtils::USet::const_iterator bound = mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
         if (bound == mValues.end() || //If there is no negative number in this enumeration
                 bound == mValues.begin()) { //or first element in this enumeration is negative
-            result = *mValues.rend(); //then the last element in this enumeration is highest
+            result = *mValues.rbegin(); //then the last element in this enumeration is highest
         }
         else { //There are some positive numbers as well
             result = *(--bound); //then the highest number is the one directly preceeding lowest negative number
