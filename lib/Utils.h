@@ -18,7 +18,7 @@
                      << __FUNCTION__ << ") fatal error: "        \
                      << msg << "\n"                              \
                      << Canal::getCurrentBacktrace();            \
-        exit(1);                                                 \
+        abort();                                                 \
     }
 
 /// Error.  Writes a message to stderr.  Program continues to run.
@@ -42,7 +42,7 @@
                      << __FUNCTION__ << ") assert failed: "             \
                      << #expr << "\n"                                   \
                      << Canal::getCurrentBacktrace();                   \
-        exit(1);                                                        \
+        abort();                                                        \
     }
 
 /// Assertion check.  On failuer, a message and the expression is
@@ -56,7 +56,7 @@
                      << __FUNCTION__ << ") assert failed: "             \
                      << msg << " [" << #expr << "]\n"                   \
                      << Canal::getCurrentBacktrace();                   \
-        exit(1);                                                        \
+        abort();                                                        \
     }
 
 /// Termination.  The location where the program terminated is written
@@ -79,7 +79,7 @@
                      << __FUNCTION__ << "): dead code location reached" \
                      << ": " << msg << "\n"                             \
                      << Canal::getCurrentBacktrace();                   \
-        exit(1);                                                        \
+        abort();                                                        \
     }
 
 /// Report a function or a code block that is not implemented but it
@@ -91,7 +91,7 @@
                      << __LINE__ << "("                                 \
                      << __FUNCTION__ << "): not implemented\n"          \
                      << Canal::getCurrentBacktrace();                   \
-        exit(1);                                                        \
+        abort();                                                        \
     }
 
 namespace llvm {
