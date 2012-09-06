@@ -98,7 +98,7 @@ Target::operator==(const Target &target) const
             it2 = target.mOffsets.begin();
         for (; it1 != mOffsets.end(); ++it1, ++it2)
         {
-            if (*it1 != *it2)
+            if (**it1 != **it2)
                 return false;
         }
 
