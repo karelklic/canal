@@ -420,7 +420,8 @@ Bitfield::xor_(const Domain &a, const Domain &b)
 static int
 compare(const Bitfield &a, const Bitfield &b, bool signed_)
 {
-    for (unsigned pos = 0; pos < a.getBitWidth(); ++pos)
+    bool first = true;
+    for (int pos = a.getBitWidth() - 1; pos >= 0; --pos)
     {
         int i = a.getBitValue(pos);
         int j = b.getBitValue(pos);
@@ -431,11 +432,12 @@ compare(const Bitfield &a, const Bitfield &b, bool signed_)
         {
             // Inequality
             if (i < j) // a < b
-                return ((pos == 0 && signed_) ? 1 : -1);
+                return ((first && signed_) ? 1 : -1);
 
             // a > b
             return 1;
         }
+        first = false;
     }
 
     return 0;
