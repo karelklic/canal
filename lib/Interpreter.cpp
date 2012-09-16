@@ -77,7 +77,7 @@ typeToEmptyValue(const llvm::Type &type, const Environment &environment)
 
     if (type.isArrayTy() || type.isVectorTy())
     {
-        CANAL_NOT_IMPLEMENTED();
+        return new Array::SingleItem(environment);
     }
 
     if (type.isStructTy())
