@@ -12,18 +12,6 @@ AC_DISABLE_STATIC
 LT_INIT
 AC_SUBST([LIBTOOL_DEPS])
 
-# Program testing macro
-AC_DEFUN([AC_PATH_PROG_CRITICAL],[
-AC_PATH_PROG($1, $2, [no])
-[if test "$$1" = "no"; then]
-    [echo "The $2 program was not found in the search path. Please ensure"]
-    [echo "that it is installed and its directory is included in the search path."]
-    [echo "Then run configure again before attempting to build Canal."]
-    [exit 1]
-[fi]
-AC_SUBST($1)
-])
-
 # LLVM and Clang
 AC_PATH_PROG_CRITICAL([LLVM_CONFIG], [llvm-config])
 AC_PATH_PROG_CRITICAL([LLVM_LINK], [llvm-link])
@@ -37,7 +25,7 @@ AC_SUBST([LLVM_LIBS])
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 AC_SUBST([LLVM_LDFLAGS])
 
-# Quadrigraphs: @<:@ gives you [ and @:>@ gives you ].
+# Quadrigraphs are used here: @<:@ gives you [ and @:>@ gives you ].
 CPPFLAGS+=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
 
 # readline
@@ -45,66 +33,50 @@ AC_CHECK_HEADERS([readline/readline.h], [],
 	[AC_MSG_ERROR([Please install readline development headers])])
 
 # pdfLaTeX
-AC_PATH_PROG_CRITICAL([PDFLATEX], [pdflatex])
-
-# LaTeX testing macro
-AC_DEFUN([_AC_LATEX_TEST],[
-rm -rf .tmps_latex 
-mkdir .tmps_latex 
-cd .tmps_latex 
-$2="no"; export $2;
-cat > testconf.tex << \EOF
-$1
-EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && $2=yes; export $2;
-cd .. 
-rm -rf .tmps_latex 
-])
-
-# LaTeX package testing macro
-AC_DEFUN([AC_LATEX_PACKAGE],[
-AC_CACHE_CHECK([for $2 latex package in class book],[ac_cv_latex_]$2,[
-_AC_LATEX_TEST([
-\documentclass{book}
-\usepackage{$2}
-\begin{document}
-\end{document}
-],[ac_cv_latex_]$2)
-])
-export $1=$[ac_cv_latex_]$2
-AC_SUBST($1)
-])
-
-# LaTeX package critical testing macro
-AC_DEFUN([AC_LATEX_PACKAGE_CRITICAL],[
-AC_LATEX_PACKAGE($1, $2)
-[if test "$$1" = "no"; then]
-    [echo "The $2 LaTeX library was not found. Please ensure that it is "]
-    [echo "installed and its directory is included in the LaTeX search path."]
-    [echo "Then run configure again before attempting to build Canal."]
-    [exit 1]
-[fi]
-AC_SUBST($1)
-])
+AC_PATH_PROG_OPTIONAL([PDFLATEX], [pdflatex],
+		      [echo "Documentation will not be build.  If you want to build"]
+		      [echo "the documentation, ensure that pdflatex is installed"]
+		      [echo "and included in the search path."])
 
 # LaTeX packages
-AC_LATEX_PACKAGE_CRITICAL([LATEX_GALOIS], [galois])
-AC_LATEX_PACKAGE_CRITICAL([LATEX_FLOAT], [float])
-AC_LATEX_PACKAGE_CRITICAL([LATEX_TXFONTS], [txfonts])
-AC_LATEX_PACKAGE_CRITICAL([LATEX_AMSSYMB], [amssymb])
-AC_LATEX_PACKAGE_CRITICAL([LATEX_AMSMATH], [amsmath])
-AC_LATEX_PACKAGE_CRITICAL([LATEX_IMPORT], [import])
-AC_LATEX_PACKAGE_CRITICAL([LATEX_GRAPHICX], [graphicx])
-AC_LATEX_PACKAGE_CRITICAL([LATEX_HYPERREF], [hyperref])
-AC_LATEX_PACKAGE_CRITICAL([LATEX_MAKEIDX], [makeidx])
-AC_LATEX_PACKAGE_CRITICAL([LATEX_A4WIDE], [a4wide])
-AC_LATEX_PACKAGE_CRITICAL([LATEX_INPUTENC], [inputenc])
+AC_LATEX_PACKAGE_OPTIONAL([LATEX_GALOIS], [galois])
+AC_LATEX_PACKAGE_OPTIONAL([LATEX_FLOAT], [float])
+AC_LATEX_PACKAGE_OPTIONAL([LATEX_TXFONTS], [txfonts])
+AC_LATEX_PACKAGE_OPTIONAL([LATEX_AMSSYMB], [amssymb])
+AC_LATEX_PACKAGE_OPTIONAL([LATEX_AMSMATH], [amsmath])
+AC_LATEX_PACKAGE_OPTIONAL([LATEX_IMPORT], [import])
+AC_LATEX_PACKAGE_OPTIONAL([LATEX_GRAPHICX], [graphicx])
+AC_LATEX_PACKAGE_OPTIONAL([LATEX_HYPERREF], [hyperref])
+AC_LATEX_PACKAGE_OPTIONAL([LATEX_MAKEIDX], [makeidx])
+AC_LATEX_PACKAGE_OPTIONAL([LATEX_A4WIDE], [a4wide])
+AC_LATEX_PACKAGE_OPTIONAL([LATEX_INPUTENC], [inputenc])
 
 # Doxygen
-AC_PATH_PROG_CRITICAL([DOXYGEN], [doxygen])
+AC_PATH_PROG_OPTIONAL([DOXYGEN], [doxygen],
+		      [echo "Documentation will not be build.  If you want to"]
+		      [echo "build the documentation, ensure that doxygen is installed"]
+		      [echo "and included in the search path."])
 
 # dot (part of graphviz)
-AC_PATH_PROG_CRITICAL([DOT], [dot])
+AC_PATH_PROG_OPTIONAL([DOT], [dot],
+		      [echo "Documentation will not be build.  If you want to"]
+		      [echo "build the documentation, ensure that dot is installed"]
+		      [echo "and included in the search path."])
+
+AM_CONDITIONAL([BUILD_DOCUMENTATION], test \( "$DOXYGEN" != "no" \) \
+				      	-a \( "$DOT" != "no" \) \
+					-a \( "$PDFLATEX" != "no" \) \
+					-a \( "$LATEX_GALOIS" != "no" \) \
+					-a \( "$LATEX_FLOAT" != "no" \) \
+					-a \( "$LATEX_TXFONTS" != "no" \) \
+					-a \( "$LATEX_AMSSYMB" != "no" \) \
+					-a \( "$LATEX_AMSMATH" != "no" \) \
+					-a \( "$LATEX_IMPORT" != "no" \) \
+					-a \( "$LATEX_GRAPHICX" != "no" \) \
+					-a \( "$LATEX_HYPERREF" != "no" \) \
+					-a \( "$LATEX_MAKEIDX" != "no" \) \
+					-a \( "$LATEX_A4WIDE" != "no" \) \
+					-a \( "$LATEX_INPUTENC" != "no" \))
 
 # Initialize the test suite.
 AC_CONFIG_TESTDIR(tests)

@@ -1,6 +1,9 @@
-dist_doc_DATA = canal.tex canal.pdf
-
+doc_DATA = canal.tex canal.pdf
 CLEANFILES = *.aux canal.log canal.out canal.toc canal.pdf
+
+clean-local:
+	-rm -rf doxygen-lib
+	-rm -rf doxygen-tool
 
 canal.pdf: canal.tex doxygen-lib/doxygen-lib.tex doxygen-tool/doxygen-tool.tex
 	echo Calling pdflatex twice to handle all references.
@@ -45,7 +48,3 @@ doxygen-tool/doxygen-tool.tex: doxygen-tool.conf ../lib/*.h
 	mv doxygen-tool/{,doxygen-tool-}hierarchy.tex
 	mv doxygen-tool/{,doxygen-tool-}annotated.tex
 	mv doxygen-tool/{refman,doxygen-tool}.tex
-
-clean-local:
-	-rm -rf doxygen-lib
-	-rm -rf doxygen-tool
