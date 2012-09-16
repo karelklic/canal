@@ -789,19 +789,49 @@ LTLIBOBJS
 LIBOBJS
 O0CFLAGS
 AUTOM4TE
+BUILD_DOCUMENTATION_FALSE
+BUILD_DOCUMENTATION_TRUE
+HAVE_DOT_FALSE
+HAVE_DOT_TRUE
 DOT
+HAVE_DOXYGEN_FALSE
+HAVE_DOXYGEN_TRUE
 DOXYGEN
+HAVE_LATEX_INPUTENC_FALSE
+HAVE_LATEX_INPUTENC_TRUE
 LATEX_INPUTENC
+HAVE_LATEX_A4WIDE_FALSE
+HAVE_LATEX_A4WIDE_TRUE
 LATEX_A4WIDE
+HAVE_LATEX_MAKEIDX_FALSE
+HAVE_LATEX_MAKEIDX_TRUE
 LATEX_MAKEIDX
+HAVE_LATEX_HYPERREF_FALSE
+HAVE_LATEX_HYPERREF_TRUE
 LATEX_HYPERREF
+HAVE_LATEX_GRAPHICX_FALSE
+HAVE_LATEX_GRAPHICX_TRUE
 LATEX_GRAPHICX
+HAVE_LATEX_IMPORT_FALSE
+HAVE_LATEX_IMPORT_TRUE
 LATEX_IMPORT
+HAVE_LATEX_AMSMATH_FALSE
+HAVE_LATEX_AMSMATH_TRUE
 LATEX_AMSMATH
+HAVE_LATEX_AMSSYMB_FALSE
+HAVE_LATEX_AMSSYMB_TRUE
 LATEX_AMSSYMB
+HAVE_LATEX_TXFONTS_FALSE
+HAVE_LATEX_TXFONTS_TRUE
 LATEX_TXFONTS
+HAVE_LATEX_FLOAT_FALSE
+HAVE_LATEX_FLOAT_TRUE
 LATEX_FLOAT
+HAVE_LATEX_GALOIS_FALSE
+HAVE_LATEX_GALOIS_TRUE
 LATEX_GALOIS
+HAVE_PDFLATEX_FALSE
+HAVE_PDFLATEX_TRUE
 PDFLATEX
 LLVM_LDFLAGS
 LLVM_LIBS
@@ -5678,13 +5708,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:5681: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:5711: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5684: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:5714: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5687: output\"" >&5)
+  (eval echo "\"\$as_me:5717: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6889,7 +6919,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6892 "configure"' > conftest.$ac_ext
+  echo '#line 6922 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8966,11 +8996,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8969: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8999: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8973: \$? = $ac_status" >&5
+   echo "$as_me:9003: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9305,11 +9335,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9308: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9338: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9312: \$? = $ac_status" >&5
+   echo "$as_me:9342: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9410,11 +9440,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9413: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9443: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9417: \$? = $ac_status" >&5
+   echo "$as_me:9447: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9465,11 +9495,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9468: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9498: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9472: \$? = $ac_status" >&5
+   echo "$as_me:9502: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12268,7 +12298,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12271 "configure"
+#line 12301 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12364,7 +12394,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12367 "configure"
+#line 12397 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14384,11 +14414,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14387: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14417: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14391: \$? = $ac_status" >&5
+   echo "$as_me:14421: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14483,11 +14513,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14486: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14516: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14490: \$? = $ac_status" >&5
+   echo "$as_me:14520: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14535,11 +14565,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14538: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14568: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14542: \$? = $ac_status" >&5
+   echo "$as_me:14572: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15524,9 +15554,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-# Program testing macro
-
-
 # LLVM and Clang
 
 # Extract the first word of "llvm-config", so it can be a program name with args.
@@ -15687,7 +15714,7 @@ LLVM_LIBS=`$LLVM_CONFIG --libs`
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 
 
-# Quadrigraphs: [ gives you [ and ] gives you ].
+# Quadrigraphs are used here: [ gives you [ and ] gives you ].
 CPPFLAGS+=`$LLVM_CONFIG --version | sed 's/\([0-9]*\).\([0-9]*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
 
 # readline
@@ -15885,22 +15912,22 @@ $as_echo "no" >&6; }
 fi
 
 
-if test "$PDFLATEX" = "no"; then
-    echo "The pdflatex program was not found in the search path. Please ensure"
-    echo "that it is installed and its directory is included in the search path."
-    echo "Then run configure again before attempting to build Canal."
-    exit 1
+ if test "$PDFLATEX" != "no"; then
+  HAVE_PDFLATEX_TRUE=
+  HAVE_PDFLATEX_FALSE='#'
+else
+  HAVE_PDFLATEX_TRUE='#'
+  HAVE_PDFLATEX_FALSE=
 fi
 
+if test "$PDFLATEX" = "no"; then
+    echo "The pdflatex program was not found in the search path."
+    echo "Documentation will not be build.  If you want to build"
+		      echo "the documentation, ensure that pdflatex is installed"
+		      echo "and included in the search path."
+    echo "Then run configure again before attempting to build Canal."
+fi
 
-
-# LaTeX testing macro
-
-
-# LaTeX package testing macro
-
-
-# LaTeX package critical testing macro
 
 
 # LaTeX packages
@@ -15936,11 +15963,20 @@ $as_echo "$ac_cv_latex_galois" >&6; }
 export LATEX_GALOIS=$ac_cv_latex_galois
 
 
+ if test "$LATEX_GALOIS" != "no"; then
+  HAVE_LATEX_GALOIS_TRUE=
+  HAVE_LATEX_GALOIS_FALSE='#'
+else
+  HAVE_LATEX_GALOIS_TRUE='#'
+  HAVE_LATEX_GALOIS_FALSE=
+fi
+
 if test "$LATEX_GALOIS" = "no"; then
-    echo "The galois LaTeX library was not found. Please ensure that it is "
-    echo "installed and its directory is included in the LaTeX search path."
+    echo "The galois LaTeX library was not found."
+    echo "Documentation will not be build.  If you want to"
+    echo "build the documentation, ensure that galois is installed"
+    echo "and included in the LaTeX search path."
     echo "Then run configure again before attempting to build Canal."
-    exit 1
 fi
 
 
@@ -15976,11 +16012,20 @@ $as_echo "$ac_cv_latex_float" >&6; }
 export LATEX_FLOAT=$ac_cv_latex_float
 
 
+ if test "$LATEX_FLOAT" != "no"; then
+  HAVE_LATEX_FLOAT_TRUE=
+  HAVE_LATEX_FLOAT_FALSE='#'
+else
+  HAVE_LATEX_FLOAT_TRUE='#'
+  HAVE_LATEX_FLOAT_FALSE=
+fi
+
 if test "$LATEX_FLOAT" = "no"; then
-    echo "The float LaTeX library was not found. Please ensure that it is "
-    echo "installed and its directory is included in the LaTeX search path."
+    echo "The float LaTeX library was not found."
+    echo "Documentation will not be build.  If you want to"
+    echo "build the documentation, ensure that float is installed"
+    echo "and included in the LaTeX search path."
     echo "Then run configure again before attempting to build Canal."
-    exit 1
 fi
 
 
@@ -16016,11 +16061,20 @@ $as_echo "$ac_cv_latex_txfonts" >&6; }
 export LATEX_TXFONTS=$ac_cv_latex_txfonts
 
 
+ if test "$LATEX_TXFONTS" != "no"; then
+  HAVE_LATEX_TXFONTS_TRUE=
+  HAVE_LATEX_TXFONTS_FALSE='#'
+else
+  HAVE_LATEX_TXFONTS_TRUE='#'
+  HAVE_LATEX_TXFONTS_FALSE=
+fi
+
 if test "$LATEX_TXFONTS" = "no"; then
-    echo "The txfonts LaTeX library was not found. Please ensure that it is "
-    echo "installed and its directory is included in the LaTeX search path."
+    echo "The txfonts LaTeX library was not found."
+    echo "Documentation will not be build.  If you want to"
+    echo "build the documentation, ensure that txfonts is installed"
+    echo "and included in the LaTeX search path."
     echo "Then run configure again before attempting to build Canal."
-    exit 1
 fi
 
 
@@ -16056,11 +16110,20 @@ $as_echo "$ac_cv_latex_amssymb" >&6; }
 export LATEX_AMSSYMB=$ac_cv_latex_amssymb
 
 
+ if test "$LATEX_AMSSYMB" != "no"; then
+  HAVE_LATEX_AMSSYMB_TRUE=
+  HAVE_LATEX_AMSSYMB_FALSE='#'
+else
+  HAVE_LATEX_AMSSYMB_TRUE='#'
+  HAVE_LATEX_AMSSYMB_FALSE=
+fi
+
 if test "$LATEX_AMSSYMB" = "no"; then
-    echo "The amssymb LaTeX library was not found. Please ensure that it is "
-    echo "installed and its directory is included in the LaTeX search path."
+    echo "The amssymb LaTeX library was not found."
+    echo "Documentation will not be build.  If you want to"
+    echo "build the documentation, ensure that amssymb is installed"
+    echo "and included in the LaTeX search path."
     echo "Then run configure again before attempting to build Canal."
-    exit 1
 fi
 
 
@@ -16096,11 +16159,20 @@ $as_echo "$ac_cv_latex_amsmath" >&6; }
 export LATEX_AMSMATH=$ac_cv_latex_amsmath
 
 
+ if test "$LATEX_AMSMATH" != "no"; then
+  HAVE_LATEX_AMSMATH_TRUE=
+  HAVE_LATEX_AMSMATH_FALSE='#'
+else
+  HAVE_LATEX_AMSMATH_TRUE='#'
+  HAVE_LATEX_AMSMATH_FALSE=
+fi
+
 if test "$LATEX_AMSMATH" = "no"; then
-    echo "The amsmath LaTeX library was not found. Please ensure that it is "
-    echo "installed and its directory is included in the LaTeX search path."
+    echo "The amsmath LaTeX library was not found."
+    echo "Documentation will not be build.  If you want to"
+    echo "build the documentation, ensure that amsmath is installed"
+    echo "and included in the LaTeX search path."
     echo "Then run configure again before attempting to build Canal."
-    exit 1
 fi
 
 
@@ -16136,11 +16208,20 @@ $as_echo "$ac_cv_latex_import" >&6; }
 export LATEX_IMPORT=$ac_cv_latex_import
 
 
+ if test "$LATEX_IMPORT" != "no"; then
+  HAVE_LATEX_IMPORT_TRUE=
+  HAVE_LATEX_IMPORT_FALSE='#'
+else
+  HAVE_LATEX_IMPORT_TRUE='#'
+  HAVE_LATEX_IMPORT_FALSE=
+fi
+
 if test "$LATEX_IMPORT" = "no"; then
-    echo "The import LaTeX library was not found. Please ensure that it is "
-    echo "installed and its directory is included in the LaTeX search path."
+    echo "The import LaTeX library was not found."
+    echo "Documentation will not be build.  If you want to"
+    echo "build the documentation, ensure that import is installed"
+    echo "and included in the LaTeX search path."
     echo "Then run configure again before attempting to build Canal."
-    exit 1
 fi
 
 
@@ -16176,11 +16257,20 @@ $as_echo "$ac_cv_latex_graphicx" >&6; }
 export LATEX_GRAPHICX=$ac_cv_latex_graphicx
 
 
+ if test "$LATEX_GRAPHICX" != "no"; then
+  HAVE_LATEX_GRAPHICX_TRUE=
+  HAVE_LATEX_GRAPHICX_FALSE='#'
+else
+  HAVE_LATEX_GRAPHICX_TRUE='#'
+  HAVE_LATEX_GRAPHICX_FALSE=
+fi
+
 if test "$LATEX_GRAPHICX" = "no"; then
-    echo "The graphicx LaTeX library was not found. Please ensure that it is "
-    echo "installed and its directory is included in the LaTeX search path."
+    echo "The graphicx LaTeX library was not found."
+    echo "Documentation will not be build.  If you want to"
+    echo "build the documentation, ensure that graphicx is installed"
+    echo "and included in the LaTeX search path."
     echo "Then run configure again before attempting to build Canal."
-    exit 1
 fi
 
 
@@ -16216,11 +16306,20 @@ $as_echo "$ac_cv_latex_hyperref" >&6; }
 export LATEX_HYPERREF=$ac_cv_latex_hyperref
 
 
+ if test "$LATEX_HYPERREF" != "no"; then
+  HAVE_LATEX_HYPERREF_TRUE=
+  HAVE_LATEX_HYPERREF_FALSE='#'
+else
+  HAVE_LATEX_HYPERREF_TRUE='#'
+  HAVE_LATEX_HYPERREF_FALSE=
+fi
+
 if test "$LATEX_HYPERREF" = "no"; then
-    echo "The hyperref LaTeX library was not found. Please ensure that it is "
-    echo "installed and its directory is included in the LaTeX search path."
+    echo "The hyperref LaTeX library was not found."
+    echo "Documentation will not be build.  If you want to"
+    echo "build the documentation, ensure that hyperref is installed"
+    echo "and included in the LaTeX search path."
     echo "Then run configure again before attempting to build Canal."
-    exit 1
 fi
 
 
@@ -16256,11 +16355,20 @@ $as_echo "$ac_cv_latex_makeidx" >&6; }
 export LATEX_MAKEIDX=$ac_cv_latex_makeidx
 
 
+ if test "$LATEX_MAKEIDX" != "no"; then
+  HAVE_LATEX_MAKEIDX_TRUE=
+  HAVE_LATEX_MAKEIDX_FALSE='#'
+else
+  HAVE_LATEX_MAKEIDX_TRUE='#'
+  HAVE_LATEX_MAKEIDX_FALSE=
+fi
+
 if test "$LATEX_MAKEIDX" = "no"; then
-    echo "The makeidx LaTeX library was not found. Please ensure that it is "
-    echo "installed and its directory is included in the LaTeX search path."
+    echo "The makeidx LaTeX library was not found."
+    echo "Documentation will not be build.  If you want to"
+    echo "build the documentation, ensure that makeidx is installed"
+    echo "and included in the LaTeX search path."
     echo "Then run configure again before attempting to build Canal."
-    exit 1
 fi
 
 
@@ -16296,11 +16404,20 @@ $as_echo "$ac_cv_latex_a4wide" >&6; }
 export LATEX_A4WIDE=$ac_cv_latex_a4wide
 
 
+ if test "$LATEX_A4WIDE" != "no"; then
+  HAVE_LATEX_A4WIDE_TRUE=
+  HAVE_LATEX_A4WIDE_FALSE='#'
+else
+  HAVE_LATEX_A4WIDE_TRUE='#'
+  HAVE_LATEX_A4WIDE_FALSE=
+fi
+
 if test "$LATEX_A4WIDE" = "no"; then
-    echo "The a4wide LaTeX library was not found. Please ensure that it is "
-    echo "installed and its directory is included in the LaTeX search path."
+    echo "The a4wide LaTeX library was not found."
+    echo "Documentation will not be build.  If you want to"
+    echo "build the documentation, ensure that a4wide is installed"
+    echo "and included in the LaTeX search path."
     echo "Then run configure again before attempting to build Canal."
-    exit 1
 fi
 
 
@@ -16336,11 +16453,20 @@ $as_echo "$ac_cv_latex_inputenc" >&6; }
 export LATEX_INPUTENC=$ac_cv_latex_inputenc
 
 
+ if test "$LATEX_INPUTENC" != "no"; then
+  HAVE_LATEX_INPUTENC_TRUE=
+  HAVE_LATEX_INPUTENC_FALSE='#'
+else
+  HAVE_LATEX_INPUTENC_TRUE='#'
+  HAVE_LATEX_INPUTENC_FALSE=
+fi
+
 if test "$LATEX_INPUTENC" = "no"; then
-    echo "The inputenc LaTeX library was not found. Please ensure that it is "
-    echo "installed and its directory is included in the LaTeX search path."
+    echo "The inputenc LaTeX library was not found."
+    echo "Documentation will not be build.  If you want to"
+    echo "build the documentation, ensure that inputenc is installed"
+    echo "and included in the LaTeX search path."
     echo "Then run configure again before attempting to build Canal."
-    exit 1
 fi
 
 
@@ -16388,11 +16514,20 @@ $as_echo "no" >&6; }
 fi
 
 
+ if test "$DOXYGEN" != "no"; then
+  HAVE_DOXYGEN_TRUE=
+  HAVE_DOXYGEN_FALSE='#'
+else
+  HAVE_DOXYGEN_TRUE='#'
+  HAVE_DOXYGEN_FALSE=
+fi
+
 if test "$DOXYGEN" = "no"; then
-    echo "The doxygen program was not found in the search path. Please ensure"
-    echo "that it is installed and its directory is included in the search path."
+    echo "The doxygen program was not found in the search path."
+    echo "Documentation will not be build.  If you want to"
+		      echo "build the documentation, ensure that doxygen is installed"
+		      echo "and included in the search path."
     echo "Then run configure again before attempting to build Canal."
-    exit 1
 fi
 
 
@@ -16440,13 +16575,44 @@ $as_echo "no" >&6; }
 fi
 
 
-if test "$DOT" = "no"; then
-    echo "The dot program was not found in the search path. Please ensure"
-    echo "that it is installed and its directory is included in the search path."
-    echo "Then run configure again before attempting to build Canal."
-    exit 1
+ if test "$DOT" != "no"; then
+  HAVE_DOT_TRUE=
+  HAVE_DOT_FALSE='#'
+else
+  HAVE_DOT_TRUE='#'
+  HAVE_DOT_FALSE=
 fi
 
+if test "$DOT" = "no"; then
+    echo "The dot program was not found in the search path."
+    echo "Documentation will not be build.  If you want to"
+		      echo "build the documentation, ensure that dot is installed"
+		      echo "and included in the search path."
+    echo "Then run configure again before attempting to build Canal."
+fi
+
+
+
+ if test \( "$DOXYGEN" != "no" \) \
+				      	-a \( "$DOT" != "no" \) \
+					-a \( "$PDFLATEX" != "no" \) \
+					-a \( "$LATEX_GALOIS" != "no" \) \
+					-a \( "$LATEX_FLOAT" != "no" \) \
+					-a \( "$LATEX_TXFONTS" != "no" \) \
+					-a \( "$LATEX_AMSSYMB" != "no" \) \
+					-a \( "$LATEX_AMSMATH" != "no" \) \
+					-a \( "$LATEX_IMPORT" != "no" \) \
+					-a \( "$LATEX_GRAPHICX" != "no" \) \
+					-a \( "$LATEX_HYPERREF" != "no" \) \
+					-a \( "$LATEX_MAKEIDX" != "no" \) \
+					-a \( "$LATEX_A4WIDE" != "no" \) \
+					-a \( "$LATEX_INPUTENC" != "no" \); then
+  BUILD_DOCUMENTATION_TRUE=
+  BUILD_DOCUMENTATION_FALSE='#'
+else
+  BUILD_DOCUMENTATION_TRUE='#'
+  BUILD_DOCUMENTATION_FALSE=
+fi
 
 
 # Initialize the test suite.
@@ -16600,6 +16766,111 @@ if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   { { $as_echo "$as_me:$LINENO: error: conditional \"am__fastdepCXX\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 $as_echo "$as_me: error: conditional \"am__fastdepCXX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_PDFLATEX_TRUE}" && test -z "${HAVE_PDFLATEX_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_PDFLATEX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_PDFLATEX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_LATEX_GALOIS_TRUE}" && test -z "${HAVE_LATEX_GALOIS_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_LATEX_GALOIS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_LATEX_GALOIS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_LATEX_FLOAT_TRUE}" && test -z "${HAVE_LATEX_FLOAT_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_LATEX_FLOAT\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_LATEX_FLOAT\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_LATEX_TXFONTS_TRUE}" && test -z "${HAVE_LATEX_TXFONTS_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_LATEX_TXFONTS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_LATEX_TXFONTS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_LATEX_AMSSYMB_TRUE}" && test -z "${HAVE_LATEX_AMSSYMB_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_LATEX_AMSSYMB\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_LATEX_AMSSYMB\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_LATEX_AMSMATH_TRUE}" && test -z "${HAVE_LATEX_AMSMATH_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_LATEX_AMSMATH\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_LATEX_AMSMATH\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_LATEX_IMPORT_TRUE}" && test -z "${HAVE_LATEX_IMPORT_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_LATEX_IMPORT\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_LATEX_IMPORT\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_LATEX_GRAPHICX_TRUE}" && test -z "${HAVE_LATEX_GRAPHICX_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_LATEX_GRAPHICX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_LATEX_GRAPHICX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_LATEX_HYPERREF_TRUE}" && test -z "${HAVE_LATEX_HYPERREF_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_LATEX_HYPERREF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_LATEX_HYPERREF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_LATEX_MAKEIDX_TRUE}" && test -z "${HAVE_LATEX_MAKEIDX_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_LATEX_MAKEIDX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_LATEX_MAKEIDX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_LATEX_A4WIDE_TRUE}" && test -z "${HAVE_LATEX_A4WIDE_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_LATEX_A4WIDE\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_LATEX_A4WIDE\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_LATEX_INPUTENC_TRUE}" && test -z "${HAVE_LATEX_INPUTENC_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_LATEX_INPUTENC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_LATEX_INPUTENC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_DOXYGEN_TRUE}" && test -z "${HAVE_DOXYGEN_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_DOXYGEN\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_DOXYGEN\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_DOT_TRUE}" && test -z "${HAVE_DOT_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_DOT\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_DOT\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${BUILD_DOCUMENTATION_TRUE}" && test -z "${BUILD_DOCUMENTATION_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"BUILD_DOCUMENTATION\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"BUILD_DOCUMENTATION\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
