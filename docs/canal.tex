@@ -79,53 +79,58 @@ uncaught exceptions.
 
 \chapter{Installation}
 
-%\section{Installation from source code on Microsoft Windows XP}
+This chapter provides instructions for installing Canal on supported
+platforms.  Canal can be built and installed on most GNU/Linux
+operating systems.
 
-%\section{Installation from source code on Mac OS X}
+% Microsoft Windows 7, Mac OS X, Ubuntu 12.04
 
-%\section{Installation from source code on Ubuntu 12.04}
-
-%Canal can be built and installed on Ubuntu 12.04.
-
-\section{Installation from source code on Red Hat Enterprise Linux 6}
+\section{Installation from source code on Fedora and Red Hat Enterprise Linux}
 
 Canal can be built, installed, and developed on a computer with the
-Red Hat Enterprise Linux 6 operating system.
+Red Hat Enterprise Linux 6 or Fedora 17 operating systems.
 
 \paragraph*{Prerequisites}
 Specific software packages are required by the build process and
 should be installed prior to building Canal:
 \begin{itemize}
-\item The core library requires \texttt{llvm-devel} and \texttt{clang}
-  packages, which can be obtained from Extra Packages for Enterprise
-  Linux (or EPEL) software repository.
-\item The command-line user interface tool requires
-  \texttt{elfutils-devel} and \texttt{readline-devel} packages.
-\item The documentation requires \texttt{doxygen}, \texttt{graphviz},
-  and \texttt{texlive-latex} packages.
+\item The \texttt{llvm-devel} and \texttt{clang} packages.  On Red Hat
+  Enterprise Linux, these packages can be obtained from Extra Packages
+  for Enterprise Linux (EPEL) software repository.
+\item The \texttt{elfutils-devel} and \texttt{readline-devel} packages.
+  These are needed for the command-line user interface tool.
+\item The \texttt{doxygen}, \texttt{graphviz}, and
+  \texttt{texlive-latex} packages.  These are needed to build the
+  documentation.  If not present, the documentation is not built.
 \end{itemize}
-The compiled and installed Canal requires \texttt{llvm},
-\texttt{clang}, \texttt{elfutils}, and \texttt{readline} packages.
 
-\section{Installation from source code on Fedora 17}
+\paragraph*{Building and installing}
+Autotools (also known as GNU build system) are used to build Canal on
+these platforms.  The first step is to configure the source code,
+telling Canal where various dependencies are located and where various
+files will be installed.  To do so, go to the directory with the
+Canal source code tree and run the \texttt{configure} script:
 
-Canal can be built, installed, and developed on a computer with the
-Fedora 17 operating system.
+\texttt{./configure}
 
-\paragraph*{Prerequisites}
-Specific software packages are required by the build process and
-should be installed prior to building Canal:
-\begin{itemize}
-\item The core library requires \texttt{llvm-devel} and \texttt{clang}
-  packages.
-\item The command-line user interface tool requires
-  \texttt{elfutils-devel} and \texttt{readline-devel} packages.
-\item The documentation requires \texttt{doxygen}, \texttt{graphviz},
-  and \texttt{texlive-latex} packages.
-\end{itemize}
-The compiled and installed Canal requires \texttt{llvm},
-\texttt{clang}, \texttt{elfutils}, and \texttt{readline} packages.
+It prints messages telling which features it checks and which
+dependencies it found.
 
+Once the \texttt{configure} script has been run, you can compile Canal
+by running \texttt{make}:
+
+\texttt{make}
+
+After compiling Canal, you can verify your compiled program can
+operate well by running the test suite and seeing that all tests pass:
+
+\texttt{make check}
+
+Canal can be now installed. If it is going to be installed to system
+directories, special priviledges might be needed.  To install Canal,
+run
+
+\texttt{make install}
 
 \part{Concepts}
 
