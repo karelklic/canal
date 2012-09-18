@@ -138,6 +138,7 @@ Enumeration::merge(const Domain &value)
     if (constant)
     {
         CANAL_ASSERT(constant->isAPInt());
+        CANAL_ASSERT(constant->getAPInt().getBitWidth() == getBitWidth());
         mValues.insert(constant->getAPInt());
         return;
     }
@@ -149,6 +150,7 @@ Enumeration::merge(const Domain &value)
         setTop();
     else
     {
+        CANAL_ASSERT(enumeration.getBitWidth() == getBitWidth());
         mValues.insert(enumeration.mValues.begin(),
                        enumeration.mValues.end());
     }
@@ -457,6 +459,7 @@ Enumeration::icmp(const Domain &a, const Domain &b,
     }
 
     setBottom();
+    mBitWidth = 1;
     llvm::APInt minA, maxA, minB, maxB;
     aa.signedMin(minA);
     aa.signedMax(maxA);
@@ -627,6 +630,8 @@ Enumeration::fcmp(const Domain &a, const Domain &b,
     const Float::Interval &aa = dynCast<const Float::Interval&>(a),
         &bb = dynCast<const Float::Interval&>(b);
 
+    setBottom();
+    mBitWidth = 1;
     int result = aa.compare(bb, predicate);
     switch (result)
     {
@@ -697,6 +702,7 @@ Enumeration::applyOperation(const Domain &a,
         setTop();
         return;
     }
+    CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
 
     APIntUtils::USet::const_iterator aaIt = aa.mValues.begin();
     for (; aaIt != aa.mValues.end(); ++aaIt)
