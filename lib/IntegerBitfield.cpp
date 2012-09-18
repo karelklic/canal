@@ -60,12 +60,19 @@ Bitfield::setBitValue(unsigned pos, int value)
     }
 }
 
+static inline void resizeResult(llvm::APInt &result, const unsigned bitWidth)
+{
+    if (result.getBitWidth() != bitWidth) {
+        if (result.getBitWidth() < bitWidth) result.zext(bitWidth);
+        else result.trunc(bitWidth);
+    }
+}
+
 bool
 Bitfield::signedMin(llvm::APInt &result) const
 {
-    CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
-                     "The bit width must be the same.");
 
+    resizeResult(result, getBitWidth());
     APIntUtils::clearAllBits(result);
 
     for (int i = 0; i < getBitWidth(); ++i)
@@ -96,9 +103,7 @@ Bitfield::signedMin(llvm::APInt &result) const
 bool
 Bitfield::signedMax(llvm::APInt &result) const
 {
-    CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
-                     "The bit width must be the same.");
-
+    resizeResult(result, getBitWidth());
     APIntUtils::clearAllBits(result);
 
     for (int i = 0; i < getBitWidth(); ++i)
@@ -129,9 +134,7 @@ Bitfield::signedMax(llvm::APInt &result) const
 bool
 Bitfield::unsignedMin(llvm::APInt &result) const
 {
-    CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
-                     "The bit width must be the same.");
-
+    resizeResult(result, getBitWidth());
     APIntUtils::clearAllBits(result);
 
     for (int i = 0; i < getBitWidth(); ++i)
@@ -158,9 +161,7 @@ Bitfield::unsignedMin(llvm::APInt &result) const
 bool
 Bitfield::unsignedMax(llvm::APInt &result) const
 {
-    CANAL_ASSERT_MSG(result.getBitWidth() == getBitWidth(),
-                     "The bit width must be the same.");
-
+    resizeResult(result, getBitWidth());
     APIntUtils::clearAllBits(result);
 
     for (int i = 0; i < getBitWidth(); ++i)
