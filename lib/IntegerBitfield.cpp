@@ -452,6 +452,23 @@ compare(const Bitfield &a, const Bitfield &b, bool signed_, bool equality = fals
     return 0;
 }
 
+//0 if equal, 1 if not equal, -1 if unknown
+static int
+compareEqual(const Bitfield &a, const Bitfield &b) {
+    bool wasTop = false;
+    for (int pos = a.getBitWidth() - 1; pos >= 0; --pos)
+    {
+        int i = a.getBitValue(pos);
+        int j = b.getBitValue(pos);
+        if (i == -1 || i == 2 || j == -1 || j == 2) {
+            wasTop = true; //You found unknown value -> the bitfields are not equal
+            continue;
+        }
+        if (i != j) return 1;
+    }
+    return (wasTop ? -1 : 0);
+}
+
 void
 Bitfield::icmp(const Domain &a, const Domain &b,
            llvm::CmpInst::Predicate predicate)
@@ -477,43 +494,39 @@ Bitfield::icmp(const Domain &a, const Domain &b,
     case llvm::CmpInst::ICMP_EQ:  // equal
         // If it is the same object or all bits are known in
         // both Bitfield and are the same, the result is 1.
-        // If all the bits are known on both bits, but there
-        // are not the same, the result is 0.
+        // If there is at least one known bit in both Bitfields,
+        // that differs, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b || (~(aa.mZeroes ^ aa.mOnes) == 0 && aa == bb))
-        {
+        if (&a == &b) { //Same object
             mZeroes = ~1;
             mOnes = 1;
+            break;
         }
-        else if (~(aa.mZeroes ^ aa.mOnes) == 0 && ~(bb.mZeroes ^ bb.mOnes) == 0)
+        switch (compareEqual(aa, bb))
         {
-            // Both numbers are set but not equal
-            mZeroes = ~0;
-            mOnes = 0;
+        case 0:  mZeroes = ~1; mOnes = 1; break;
+        case 1:  mZeroes = ~0; mOnes = 0; break;
+        default: setTop(); break;
         }
-        else
-            setTop();
 
         break;
     case llvm::CmpInst::ICMP_NE:  // not equal
         // If it is the same object or all bits are known in
-        // both Bitfield and are the same, the result is 1.
-        // If all the bits are known on both bits, but there
-        // are not the same, the result is 0.
+        // both Bitfield and are the same, the result is 0.
+        // If there is at least one known bit in both Bitfields,
+        // that differs, the result is 1.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b || (~(aa.mZeroes ^ aa.mOnes) == 0 && aa == bb))
-        {
+        if (&a == &b) { //Same object
             mZeroes = ~0;
             mOnes = 0;
+            break;
         }
-        else if (~(aa.mZeroes ^ aa.mOnes) == 0 && ~(bb.mZeroes ^ bb.mOnes) == 0)
+        switch (compareEqual(aa, bb))
         {
-            // Both numbers are set but not equal
-            mZeroes = ~1;
-            mOnes = 1;
+        case 0:  mZeroes = ~0; mOnes = 0; break;
+        case 1:  mZeroes = ~1; mOnes = 1; break;
+        default: setTop(); break;
         }
-        else
-            setTop();
 
         break;
     case llvm::CmpInst::ICMP_UGT: // unsigned greater than
