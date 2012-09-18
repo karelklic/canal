@@ -324,8 +324,8 @@ bitOperation(Bitfield &result,
 {
     const Bitfield &aa = dynCast<const Bitfield&>(a),
         &bb = dynCast<const Bitfield&>(b);
-    CANAL_ASSERT(result.getBitWidth() == aa.getBitWidth() &&
-                 aa.getBitWidth() == bb.getBitWidth());
+    CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
+    resizeResult(result, aa.getBitWidth());
     for (int pos = 0; pos < aa.getBitWidth(); ++pos)
     {
         result.setBitValue(pos, operation(aa.getBitValue(pos),
@@ -489,6 +489,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         setBottom(); // Undefined
         return;
     }
+    CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
 
     switch (predicate)
     {
