@@ -511,12 +511,12 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // If the largest element from the first enumeration is
         // unsigned lower or equal the lowest element from the second
         // enumeration, the result is 1.  If the lowest element from
-        // the first enumeration is unsigned larger than the largest
+        // the first enumeration is unsigned larger or equal than the largest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mValues.begin()->uge(*bb.mValues.rbegin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
-        else if (aa.mValues.rbegin()->ult(*bb.mValues.begin()))
+        else if (aa.mValues.rbegin()->ule(*bb.mValues.begin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
@@ -541,12 +541,12 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // If the largest element from the first enumeration is
         // unsigned lower or equal the lowest element from the second
         // enumeration, the result is 1.  If the lowest element from
-        // the first enumeration is unsigned larger than the largest
+        // the first enumeration is unsigned larger or equal than the largest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mValues.rbegin()->ule(*bb.mValues.begin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
-        else if (aa.mValues.begin()->ugt(*bb.mValues.rbegin()))
+        else if (aa.mValues.begin()->uge(*bb.mValues.rbegin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
@@ -571,12 +571,12 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // If the lowest element from the first enumeration is
         // signed greater or equal than the largest element from the second
         // enumeration, the result is 1.  If the largest element from
-        // the first enumeration is signed lower than the lowest
+        // the first enumeration is signed lower or equal than the lowest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (minA.sge(maxB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
-        else if (maxA.slt(minB))
+        else if (maxA.sle(minB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
@@ -601,12 +601,12 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // If the largest element from the first enumeration is
         // signed lower or equal the lowest element from the second
         // enumeration, the result is 1.  If the lowest element from
-        // the first enumeration is signed larger than the largest
+        // the first enumeration is signed larger or equal than the largest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (maxA.sle(minB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
-        else if (minA.sgt(maxB))
+        else if (minA.sge(maxB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();

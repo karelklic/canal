@@ -858,7 +858,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mUnsignedFrom.uge(bb.mUnsignedTo))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (intersects(aa, bb, false, true))
+        else if (!aa.mUnsignedTo.ule(bb.mUnsignedFrom))
             setTop();
 
         break;
@@ -884,7 +884,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mUnsignedTo.ule(bb.mUnsignedFrom))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (intersects(aa, bb, false, true))
+        else if (!aa.mUnsignedFrom.uge(bb.mUnsignedTo))
             setTop();
 
         break;
@@ -910,7 +910,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mSignedFrom.sge(bb.mSignedTo))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (intersects(aa, bb, true, false))
+        else if (!aa.mSignedTo.sle(bb.mSignedFrom))
             setTop();
 
         break;
@@ -936,8 +936,9 @@ Interval::icmp(const Domain &a, const Domain &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mSignedTo.sle(bb.mSignedFrom))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (intersects(aa, bb, true, false))
+        else if (!aa.mSignedFrom.sge(bb.mSignedTo))
             setTop();
+
 
         break;
     default:
