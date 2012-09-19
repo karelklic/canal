@@ -540,6 +540,11 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         }
         break;
     case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
+        if (&a == &b) { //Same object
+            mZeroes = ~1;
+            mOnes = 1;
+            break;
+        }
         switch (compare(aa, bb, false, true))
         {
         case 0:
@@ -557,6 +562,11 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         }
         break;
     case llvm::CmpInst::ICMP_ULE: // unsigned less or equal
+        if (&a == &b) { //Same object
+            mZeroes = ~1;
+            mOnes = 1;
+            break;
+        }
         switch (compare(aa, bb, false, true))
         {
         case 0:
@@ -574,6 +584,11 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         }
         break;
     case llvm::CmpInst::ICMP_SGE: // signed greater or equal
+        if (&a == &b) { //Same object
+            mZeroes = ~1;
+            mOnes = 1;
+            break;
+        }
         switch (compare(aa, bb, true, true))
         {
         case 0:
@@ -591,6 +606,11 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         }
         break;
     case llvm::CmpInst::ICMP_SLE: // signed less or equal
+        if (&a == &b) { //Same object
+            mZeroes = ~1;
+            mOnes = 1;
+            break;
+        }
         switch (compare(aa, bb, true, true))
         {
         case 0:
