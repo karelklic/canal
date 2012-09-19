@@ -514,7 +514,7 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // the first enumeration is unsigned larger or equal than the largest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (aa.mValues.begin()->uge(*bb.mValues.rbegin()))
+        if (aa.mValues.begin()->uge(*bb.mValues.rbegin()) || &a == &b)
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (aa.mValues.rbegin()->ule(*bb.mValues.begin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
@@ -544,7 +544,7 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // the first enumeration is unsigned larger or equal than the largest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (aa.mValues.rbegin()->ule(*bb.mValues.begin()))
+        if (aa.mValues.rbegin()->ule(*bb.mValues.begin()) || &a == &b)
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (aa.mValues.begin()->uge(*bb.mValues.rbegin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
@@ -574,7 +574,7 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // the first enumeration is signed lower or equal than the lowest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (minA.sge(maxB))
+        if (minA.sge(maxB) || &a == &b)
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (maxA.sle(minB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
@@ -604,7 +604,7 @@ Enumeration::icmp(const Domain &a, const Domain &b,
         // the first enumeration is signed larger or equal than the largest
         // element from the second enumeration, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (maxA.sle(minB))
+        if (maxA.sle(minB) || &a == &b)
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (minA.sge(maxB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));

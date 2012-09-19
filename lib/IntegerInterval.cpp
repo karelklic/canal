@@ -856,7 +856,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         // the first interval is unsigned lower than the lowest
         // element from the second interval, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (aa.mUnsignedFrom.uge(bb.mUnsignedTo))
+        if (aa.mUnsignedFrom.uge(bb.mUnsignedTo) || &a == &b)
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
         else if (!aa.mUnsignedTo.ule(bb.mUnsignedFrom))
             setTop();
@@ -882,7 +882,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         // the first interval is unsigned larger than the largest
         // element from the second interval, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (aa.mUnsignedTo.ule(bb.mUnsignedFrom))
+        if (aa.mUnsignedTo.ule(bb.mUnsignedFrom) || &a == &b)
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
         else if (!aa.mUnsignedFrom.uge(bb.mUnsignedTo))
             setTop();
@@ -908,7 +908,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         // the first interval is signed lower than the lowest
         // element from the second interval, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (aa.mSignedFrom.sge(bb.mSignedTo))
+        if (aa.mSignedFrom.sge(bb.mSignedTo) || &a == &b)
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
         else if (!aa.mSignedTo.sle(bb.mSignedFrom))
             setTop();
@@ -934,7 +934,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         // the first interval is signed larger than the largest
         // element from the second interval, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (aa.mSignedTo.sle(bb.mSignedFrom))
+        if (aa.mSignedTo.sle(bb.mSignedFrom) || &a == &b)
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
         else if (!aa.mSignedFrom.sge(bb.mSignedTo))
             setTop();
