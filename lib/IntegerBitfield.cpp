@@ -324,9 +324,8 @@ bitOperation(Bitfield &result,
 {
     const Bitfield &aa = dynCast<const Bitfield&>(a),
         &bb = dynCast<const Bitfield&>(b);
-    CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
-    resizeResult(result.mOnes, aa.getBitWidth());
-    resizeResult(result.mZeroes, aa.getBitWidth());
+    CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth() &&
+                 result.getBitWidth() == aa.getBitWidth());
     for (int pos = 0; pos < aa.getBitWidth(); ++pos)
     {
         result.setBitValue(pos, operation(aa.getBitValue(pos),
