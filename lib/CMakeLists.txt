@@ -20,4 +20,5 @@ State.cpp
 StringUtils.cpp
 Structure.cpp
 Utils.cpp)
-target_link_libraries(canal ${REQ_LLVM_LIBRARIES})
+
+target_link_libraries(canal "${LLVM_MODULE_LIBS} ${LLVM_LDFLAGS}")

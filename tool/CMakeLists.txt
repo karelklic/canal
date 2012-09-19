@@ -1,5 +1,6 @@
 include_directories(${CANAL_SOURCE_DIR})
 link_directories(${CANAL_SOURCE_DIR}/lib)
+
 add_executable(canal-tool Canal.cpp
 CommandBacktrace.cpp
 CommandBreak.cpp
@@ -22,5 +23,6 @@ CommandStart.cpp
 CommandStep.cpp
 State.cpp
 Utils.cpp)
+
 target_link_libraries(canal-tool canal readline elf)
 SET_TARGET_PROPERTIES(canal-tool PROPERTIES OUTPUT_NAME canal)

@@ -1,23 +1,23 @@
 *.o
 .deps
 .libs
-CMakeFiles/
-*.cmake
-Testing/
 *~
 Makefile
+CMakeFiles
+cmake_install.cmake
+CTestTestfile.cmake
+CMakeCache.txt
+
+/Testing
+
 /canal.config
 /canal.creator
 /canal.files
 /canal.includes
-
 /autom4te.cache
 /config.log
 /config.status
 /libtool
-/llvm-root.cmake
-/CMakeCache.txt
-/cmake_install.cmake
 
 /docs/*.aux
 /docs/canal.idx
@@ -33,6 +33,7 @@ Makefile
 /lib/libcanal*.lo
 /lib/Config.h
 /lib/stamp-h1
+/lib/libcanal.so
 
 /tool/canal
 
@@ -44,6 +45,7 @@ Makefile
 /tests/unit/PointerTest
 /tests/unit/InterpreterTest
 /tests/unit/IntegerIntervalTest
+/tests/unit/ICMPTest
 /tests/*.o
 
 /wrappers/config.py
