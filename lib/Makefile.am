@@ -24,8 +24,8 @@ libcanal_la_SOURCES = \
 	IntegerEnumeration.h \
 	IntegerInterval.cpp \
 	IntegerInterval.h \
-	Interpreter.cpp \
-	Interpreter.h \
+	Operations.cpp \
+	Operations.h \
 	Pointer.cpp \
 	Pointer.h \
 	PointerTarget.cpp \

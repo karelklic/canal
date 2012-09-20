@@ -5,7 +5,7 @@
 
 namespace Canal
 {
-    class Interpreter;
+    class Operations;
     class Stack;
 }
 

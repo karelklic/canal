@@ -1,13 +1,13 @@
 ## --------- ##
 ## Programs. ##
 ## --------- ##
-noinst_PROGRAMS = InterpreterTest IntegerIntervalTest PointerTest
+noinst_PROGRAMS = OperationsTest IntegerIntervalTest PointerTest
 
-InterpreterTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
-InterpreterTest_SOURCES = InterpreterTest.cpp
-InterpreterTest_LDADD = ../../lib/libcanal.la
-InterpreterTest_LIBS = $(LLVM_LIBS)
-InterpreterTest_LDFLAGS = $(LLVM_LDFLAGS)
+OperationsTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
+OperationsTest_SOURCES = OperationsTest.cpp
+OperationsTest_LDADD = ../../lib/libcanal.la
+OperationsTest_LIBS = $(LLVM_LIBS)
+OperationsTest_LDFLAGS = $(LLVM_LDFLAGS)
 
 IntegerIntervalTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
 IntegerIntervalTest_SOURCES = IntegerIntervalTest.cpp

@@ -4,7 +4,7 @@
 #include <set>
 #include <string>
 #include "lib/Environment.h"
-#include "lib/Interpreter.h"
+#include "lib/Operations.h"
 #include "lib/SlotTracker.h"
 #include "lib/Stack.h"
 
@@ -47,7 +47,7 @@ protected:
     const llvm::Module *mModule;
     Canal::Environment mEnvironment;
     Canal::Stack mStack;
-    Canal::Interpreter mInterpreter;
+    Canal::Operations mOperations;
     std::set<std::string> mFunctionBreakpoints;
 };
 
