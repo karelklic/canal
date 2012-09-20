@@ -79,7 +79,7 @@ am_libcanal_la_OBJECTS = libcanal_la-APIntUtils.lo \
 	libcanal_la-FloatInterval.lo libcanal_la-IntegerBitfield.lo \
 	libcanal_la-IntegerContainer.lo \
 	libcanal_la-IntegerEnumeration.lo \
-	libcanal_la-IntegerInterval.lo libcanal_la-Interpreter.lo \
+	libcanal_la-IntegerInterval.lo libcanal_la-Operations.lo \
 	libcanal_la-Pointer.lo libcanal_la-PointerTarget.lo \
 	libcanal_la-SELinuxModulePass.lo libcanal_la-SlotTracker.lo \
 	libcanal_la-Stack.lo libcanal_la-State.lo \
@@ -282,8 +282,8 @@ libcanal_la_SOURCES = \
 	IntegerEnumeration.h \
 	IntegerInterval.cpp \
 	IntegerInterval.h \
-	Interpreter.cpp \
-	Interpreter.h \
+	Operations.cpp \
+	Operations.h \
 	Pointer.cpp \
 	Pointer.h \
 	PointerTarget.cpp \
@@ -408,7 +408,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerContainer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerEnumeration.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerInterval.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Interpreter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Operations.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Pointer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-PointerTarget.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-SELinuxModulePass.Plo@am__quote@
@@ -524,12 +524,12 @@ libcanal_la-IntegerInterval.lo: IntegerInterval.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-IntegerInterval.lo `test -f 'IntegerInterval.cpp' || echo '$(srcdir)/'`IntegerInterval.cpp
 
-libcanal_la-Interpreter.lo: Interpreter.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Interpreter.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Interpreter.Tpo -c -o libcanal_la-Interpreter.lo `test -f 'Interpreter.cpp' || echo '$(srcdir)/'`Interpreter.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-Interpreter.Tpo $(DEPDIR)/libcanal_la-Interpreter.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Interpreter.cpp' object='libcanal_la-Interpreter.lo' libtool=yes @AMDEPBACKSLASH@
+libcanal_la-Operations.lo: Operations.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Operations.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Operations.Tpo -c -o libcanal_la-Operations.lo `test -f 'Operations.cpp' || echo '$(srcdir)/'`Operations.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-Operations.Tpo $(DEPDIR)/libcanal_la-Operations.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Operations.cpp' object='libcanal_la-Operations.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Interpreter.lo `test -f 'Interpreter.cpp' || echo '$(srcdir)/'`Interpreter.cpp
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Operations.lo `test -f 'Operations.cpp' || echo '$(srcdir)/'`Operations.cpp
 
 libcanal_la-Pointer.lo: Pointer.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Pointer.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Pointer.Tpo -c -o libcanal_la-Pointer.lo `test -f 'Pointer.cpp' || echo '$(srcdir)/'`Pointer.cpp
