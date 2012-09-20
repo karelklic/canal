@@ -34,8 +34,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = InterpreterTest$(EXEEXT) \
-	IntegerIntervalTest$(EXEEXT) PointerTest$(EXEEXT)
+noinst_PROGRAMS = OperationsTest$(EXEEXT) IntegerIntervalTest$(EXEEXT) \
+	PointerTest$(EXEEXT)
 subdir = tests/unit
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -58,14 +58,13 @@ IntegerIntervalTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
 	$(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) \
 	$(IntegerIntervalTest_LDFLAGS) $(LDFLAGS) -o $@
-am_InterpreterTest_OBJECTS =  \
-	InterpreterTest-InterpreterTest.$(OBJEXT)
-InterpreterTest_OBJECTS = $(am_InterpreterTest_OBJECTS)
-InterpreterTest_DEPENDENCIES = ../../lib/libcanal.la
-InterpreterTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+am_OperationsTest_OBJECTS = OperationsTest-OperationsTest.$(OBJEXT)
+OperationsTest_OBJECTS = $(am_OperationsTest_OBJECTS)
+OperationsTest_DEPENDENCIES = ../../lib/libcanal.la
+OperationsTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
-	$(InterpreterTest_CXXFLAGS) $(CXXFLAGS) \
-	$(InterpreterTest_LDFLAGS) $(LDFLAGS) -o $@
+	$(OperationsTest_CXXFLAGS) $(CXXFLAGS) \
+	$(OperationsTest_LDFLAGS) $(LDFLAGS) -o $@
 am_PointerTest_OBJECTS = PointerTest-PointerTest.$(OBJEXT)
 PointerTest_OBJECTS = $(am_PointerTest_OBJECTS)
 PointerTest_DEPENDENCIES = ../../lib/libcanal.la
@@ -85,10 +84,10 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(IntegerIntervalTest_SOURCES) $(InterpreterTest_SOURCES) \
+SOURCES = $(IntegerIntervalTest_SOURCES) $(OperationsTest_SOURCES) \
 	$(PointerTest_SOURCES)
 DIST_SOURCES = $(IntegerIntervalTest_SOURCES) \
-	$(InterpreterTest_SOURCES) $(PointerTest_SOURCES)
+	$(OperationsTest_SOURCES) $(PointerTest_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -232,11 +231,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-InterpreterTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
-InterpreterTest_SOURCES = InterpreterTest.cpp
-InterpreterTest_LDADD = ../../lib/libcanal.la
-InterpreterTest_LIBS = $(LLVM_LIBS)
-InterpreterTest_LDFLAGS = $(LLVM_LDFLAGS)
+OperationsTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
+OperationsTest_SOURCES = OperationsTest.cpp
+OperationsTest_LDADD = ../../lib/libcanal.la
+OperationsTest_LIBS = $(LLVM_LIBS)
+OperationsTest_LDFLAGS = $(LLVM_LDFLAGS)
 IntegerIntervalTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
 IntegerIntervalTest_SOURCES = IntegerIntervalTest.cpp
 IntegerIntervalTest_LDADD = ../../lib/libcanal.la
@@ -293,9 +292,9 @@ clean-noinstPROGRAMS:
 IntegerIntervalTest$(EXEEXT): $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_DEPENDENCIES) 
 	@rm -f IntegerIntervalTest$(EXEEXT)
 	$(IntegerIntervalTest_LINK) $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_LDADD) $(LIBS)
-InterpreterTest$(EXEEXT): $(InterpreterTest_OBJECTS) $(InterpreterTest_DEPENDENCIES) 
-	@rm -f InterpreterTest$(EXEEXT)
-	$(InterpreterTest_LINK) $(InterpreterTest_OBJECTS) $(InterpreterTest_LDADD) $(LIBS)
+OperationsTest$(EXEEXT): $(OperationsTest_OBJECTS) $(OperationsTest_DEPENDENCIES) 
+	@rm -f OperationsTest$(EXEEXT)
+	$(OperationsTest_LINK) $(OperationsTest_OBJECTS) $(OperationsTest_LDADD) $(LIBS)
 PointerTest$(EXEEXT): $(PointerTest_OBJECTS) $(PointerTest_DEPENDENCIES) 
 	@rm -f PointerTest$(EXEEXT)
 	$(PointerTest_LINK) $(PointerTest_OBJECTS) $(PointerTest_LDADD) $(LIBS)
@@ -307,7 +306,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/InterpreterTest-InterpreterTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OperationsTest-OperationsTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PointerTest-PointerTest.Po@am__quote@
 
 .cpp.o:
@@ -345,19 +344,19 @@ IntegerIntervalTest-IntegerIntervalTest.obj: IntegerIntervalTest.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -c -o IntegerIntervalTest-IntegerIntervalTest.obj `if test -f 'IntegerIntervalTest.cpp'; then $(CYGPATH_W) 'IntegerIntervalTest.cpp'; else $(CYGPATH_W) '$(srcdir)/IntegerIntervalTest.cpp'; fi`
 
-InterpreterTest-InterpreterTest.o: InterpreterTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(InterpreterTest_CXXFLAGS) $(CXXFLAGS) -MT InterpreterTest-InterpreterTest.o -MD -MP -MF $(DEPDIR)/InterpreterTest-InterpreterTest.Tpo -c -o InterpreterTest-InterpreterTest.o `test -f 'InterpreterTest.cpp' || echo '$(srcdir)/'`InterpreterTest.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/InterpreterTest-InterpreterTest.Tpo $(DEPDIR)/InterpreterTest-InterpreterTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='InterpreterTest.cpp' object='InterpreterTest-InterpreterTest.o' libtool=no @AMDEPBACKSLASH@
+OperationsTest-OperationsTest.o: OperationsTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -MT OperationsTest-OperationsTest.o -MD -MP -MF $(DEPDIR)/OperationsTest-OperationsTest.Tpo -c -o OperationsTest-OperationsTest.o `test -f 'OperationsTest.cpp' || echo '$(srcdir)/'`OperationsTest.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/OperationsTest-OperationsTest.Tpo $(DEPDIR)/OperationsTest-OperationsTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='OperationsTest.cpp' object='OperationsTest-OperationsTest.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(InterpreterTest_CXXFLAGS) $(CXXFLAGS) -c -o InterpreterTest-InterpreterTest.o `test -f 'InterpreterTest.cpp' || echo '$(srcdir)/'`InterpreterTest.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -c -o OperationsTest-OperationsTest.o `test -f 'OperationsTest.cpp' || echo '$(srcdir)/'`OperationsTest.cpp
 
-InterpreterTest-InterpreterTest.obj: InterpreterTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(InterpreterTest_CXXFLAGS) $(CXXFLAGS) -MT InterpreterTest-InterpreterTest.obj -MD -MP -MF $(DEPDIR)/InterpreterTest-InterpreterTest.Tpo -c -o InterpreterTest-InterpreterTest.obj `if test -f 'InterpreterTest.cpp'; then $(CYGPATH_W) 'InterpreterTest.cpp'; else $(CYGPATH_W) '$(srcdir)/InterpreterTest.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/InterpreterTest-InterpreterTest.Tpo $(DEPDIR)/InterpreterTest-InterpreterTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='InterpreterTest.cpp' object='InterpreterTest-InterpreterTest.obj' libtool=no @AMDEPBACKSLASH@
+OperationsTest-OperationsTest.obj: OperationsTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -MT OperationsTest-OperationsTest.obj -MD -MP -MF $(DEPDIR)/OperationsTest-OperationsTest.Tpo -c -o OperationsTest-OperationsTest.obj `if test -f 'OperationsTest.cpp'; then $(CYGPATH_W) 'OperationsTest.cpp'; else $(CYGPATH_W) '$(srcdir)/OperationsTest.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/OperationsTest-OperationsTest.Tpo $(DEPDIR)/OperationsTest-OperationsTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='OperationsTest.cpp' object='OperationsTest-OperationsTest.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(InterpreterTest_CXXFLAGS) $(CXXFLAGS) -c -o InterpreterTest-InterpreterTest.obj `if test -f 'InterpreterTest.cpp'; then $(CYGPATH_W) 'InterpreterTest.cpp'; else $(CYGPATH_W) '$(srcdir)/InterpreterTest.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -c -o OperationsTest-OperationsTest.obj `if test -f 'OperationsTest.cpp'; then $(CYGPATH_W) 'OperationsTest.cpp'; else $(CYGPATH_W) '$(srcdir)/OperationsTest.cpp'; fi`
 
 PointerTest-PointerTest.o: PointerTest.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(PointerTest_CXXFLAGS) $(CXXFLAGS) -MT PointerTest-PointerTest.o -MD -MP -MF $(DEPDIR)/PointerTest-PointerTest.Tpo -c -o PointerTest-PointerTest.o `test -f 'PointerTest.cpp' || echo '$(srcdir)/'`PointerTest.cpp
