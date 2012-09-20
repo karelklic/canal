@@ -67,10 +67,10 @@ class Environment;
 ///
 /// This is an abstract class, which is used as a base class for
 /// actual abstract interpretation implementations.
-class Interpreter
+class Operations
 {
 public:
-    virtual ~Interpreter() {};
+    virtual ~Operations() {};
 
     /// Adds all global variables and constants from a module to the
     /// state.

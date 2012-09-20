@@ -1,10 +1,10 @@
 # Test suite for canal.
 # See http://www.gnu.org/software/hello/manual/autoconf/Writing-Testsuites.html
 
-AT_BANNER([Interpreter Unit Tests])
+AT_BANNER([Operations Unit Tests])
 
-AT_SETUP([Interpreter])
-AT_CHECK([../../unit/InterpreterTest], 0)
+AT_SETUP([Operations])
+AT_CHECK([../../unit/OperationsTest], 0)
 AT_CLEANUP
 
 AT_BANNER([Abstract Domain Unit Tests])

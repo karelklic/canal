@@ -1,4 +1,4 @@
-#include "Interpreter.h"
+#include "Operations.h"
 #include "ArrayExactSize.h"
 #include "ArraySingleItem.h"
 #include "Constant.h"
@@ -97,7 +97,7 @@ typeToEmptyValue(const llvm::Type &type, const Environment &environment)
 }
 
 void
-Interpreter::addGlobalVariables(State &state,
+Operations::addGlobalVariables(State &state,
                                 const Environment &environment)
 {
     // Add global constants.
@@ -130,7 +130,7 @@ Interpreter::addGlobalVariables(State &state,
 }
 
 bool
-Interpreter::step(Stack &stack,
+Operations::step(Stack &stack,
                   const Environment &environment)
 {
     interpretInstruction(stack, environment);
@@ -138,7 +138,7 @@ Interpreter::step(Stack &stack,
 }
 
 void
-Interpreter::interpretInstruction(Stack &stack,
+Operations::interpretInstruction(Stack &stack,
                                   const Environment &environment)
 {
     const llvm::Instruction &instruction =
@@ -275,7 +275,7 @@ Interpreter::interpretInstruction(Stack &stack,
 }
 
 void
-Interpreter::ret(const llvm::ReturnInst &instruction,
+Operations::ret(const llvm::ReturnInst &instruction,
                  State &state,
                  const Environment &environment)
 {
@@ -316,7 +316,7 @@ Interpreter::ret(const llvm::ReturnInst &instruction,
 }
 
 void
-Interpreter::br(const llvm::BranchInst &instruction,
+Operations::br(const llvm::BranchInst &instruction,
                 State &state,
                 const Environment &environment)
 {
@@ -324,7 +324,7 @@ Interpreter::br(const llvm::BranchInst &instruction,
 }
 
 void
-Interpreter::switch_(const llvm::SwitchInst &instruction,
+Operations::switch_(const llvm::SwitchInst &instruction,
                      State &state,
                      const Environment &environment)
 {
@@ -332,7 +332,7 @@ Interpreter::switch_(const llvm::SwitchInst &instruction,
 }
 
 void
-Interpreter::indirectbr(const llvm::IndirectBrInst &instruction,
+Operations::indirectbr(const llvm::IndirectBrInst &instruction,
                         State &state,
                         const Environment &environment)
 {
@@ -413,7 +413,7 @@ interpretCall(const T &instruction,
 }
 
 void
-Interpreter::invoke(const llvm::InvokeInst &instruction,
+Operations::invoke(const llvm::InvokeInst &instruction,
                     Stack &stack,
                     const Environment &environment)
 {
@@ -421,7 +421,7 @@ Interpreter::invoke(const llvm::InvokeInst &instruction,
 }
 
 void
-Interpreter::unreachable(const llvm::UnreachableInst &instruction,
+Operations::unreachable(const llvm::UnreachableInst &instruction,
                          State &state,
                          const Environment &environment)
 {
@@ -457,7 +457,7 @@ binaryOperation(const llvm::BinaryOperator &instruction,
     state.addFunctionVariable(instruction, result);
 }
 
-void Interpreter::add(const llvm::BinaryOperator &instruction,
+void Operations::add(const llvm::BinaryOperator &instruction,
                       State &state,
                       const Environment &environment)
 {
@@ -465,7 +465,7 @@ void Interpreter::add(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::fadd(const llvm::BinaryOperator &instruction,
+Operations::fadd(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -473,7 +473,7 @@ Interpreter::fadd(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::sub(const llvm::BinaryOperator &instruction,
+Operations::sub(const llvm::BinaryOperator &instruction,
                  State &state,
                  const Environment &environment)
 {
@@ -481,7 +481,7 @@ Interpreter::sub(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::fsub(const llvm::BinaryOperator &instruction,
+Operations::fsub(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -489,7 +489,7 @@ Interpreter::fsub(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::mul(const llvm::BinaryOperator &instruction,
+Operations::mul(const llvm::BinaryOperator &instruction,
                  State &state,
                  const Environment &environment)
 {
@@ -497,7 +497,7 @@ Interpreter::mul(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::fmul(const llvm::BinaryOperator &instruction,
+Operations::fmul(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -505,7 +505,7 @@ Interpreter::fmul(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::udiv(const llvm::BinaryOperator &instruction,
+Operations::udiv(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -513,7 +513,7 @@ Interpreter::udiv(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::sdiv(const llvm::BinaryOperator &instruction,
+Operations::sdiv(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -521,7 +521,7 @@ Interpreter::sdiv(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::fdiv(const llvm::BinaryOperator &instruction,
+Operations::fdiv(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -529,7 +529,7 @@ Interpreter::fdiv(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::urem(const llvm::BinaryOperator &instruction,
+Operations::urem(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -537,7 +537,7 @@ Interpreter::urem(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::srem(const llvm::BinaryOperator &instruction,
+Operations::srem(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -545,7 +545,7 @@ Interpreter::srem(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::frem(const llvm::BinaryOperator &instruction,
+Operations::frem(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -553,7 +553,7 @@ Interpreter::frem(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::shl(const llvm::BinaryOperator &instruction,
+Operations::shl(const llvm::BinaryOperator &instruction,
                  State &state,
                  const Environment &environment)
 {
@@ -561,7 +561,7 @@ Interpreter::shl(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::lshr(const llvm::BinaryOperator &instruction,
+Operations::lshr(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -569,7 +569,7 @@ Interpreter::lshr(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::ashr(const llvm::BinaryOperator &instruction,
+Operations::ashr(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -577,7 +577,7 @@ Interpreter::ashr(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::and_(const llvm::BinaryOperator &instruction,
+Operations::and_(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -585,7 +585,7 @@ Interpreter::and_(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::or_(const llvm::BinaryOperator &instruction,
+Operations::or_(const llvm::BinaryOperator &instruction,
                  State &state,
                  const Environment &environment)
 {
@@ -593,7 +593,7 @@ Interpreter::or_(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::xor_(const llvm::BinaryOperator &instruction,
+Operations::xor_(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -601,7 +601,7 @@ Interpreter::xor_(const llvm::BinaryOperator &instruction,
 }
 
 void
-Interpreter::extractelement(const llvm::ExtractElementInst &instruction,
+Operations::extractelement(const llvm::ExtractElementInst &instruction,
                             State &state,
                             const Environment &environment)
 {
@@ -642,7 +642,7 @@ Interpreter::extractelement(const llvm::ExtractElementInst &instruction,
 }
 
 void
-Interpreter::insertelement(const llvm::InsertElementInst &instruction,
+Operations::insertelement(const llvm::InsertElementInst &instruction,
                            State &state,
                            const Environment &environment)
 {
@@ -681,7 +681,7 @@ Interpreter::insertelement(const llvm::InsertElementInst &instruction,
 }
 
 void
-Interpreter::shufflevector(const llvm::ShuffleVectorInst &instruction,
+Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
                            Stack &stack,
                            const Environment &environment)
 {
@@ -784,7 +784,7 @@ getValueLocation(Domain *aggregate, const T &instruction)
 }
 
 void
-Interpreter::extractvalue(const llvm::ExtractValueInst &instruction,
+Operations::extractvalue(const llvm::ExtractValueInst &instruction,
                           State &state,
                           const Environment &environment)
 {
@@ -802,7 +802,7 @@ Interpreter::extractvalue(const llvm::ExtractValueInst &instruction,
 }
 
 void
-Interpreter::insertvalue(const llvm::InsertValueInst &instruction,
+Operations::insertvalue(const llvm::InsertValueInst &instruction,
                          State &state,
                          const Environment &environment)
 {
@@ -831,7 +831,7 @@ Interpreter::insertvalue(const llvm::InsertValueInst &instruction,
 }
 
 void
-Interpreter::alloca_(const llvm::AllocaInst &instruction,
+Operations::alloca_(const llvm::AllocaInst &instruction,
                      Stack &stack,
                      const Environment &environment)
 {
@@ -886,7 +886,7 @@ Interpreter::alloca_(const llvm::AllocaInst &instruction,
 }
 
 void
-Interpreter::load(const llvm::LoadInst &instruction,
+Operations::load(const llvm::LoadInst &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -958,7 +958,7 @@ getElementPtrOffsets(std::vector<Domain*> &result,
 }
 
 void
-Interpreter::store(const llvm::StoreInst &instruction,
+Operations::store(const llvm::StoreInst &instruction,
                    State &state,
                    const Environment &environment)
 {
@@ -1035,7 +1035,7 @@ Interpreter::store(const llvm::StoreInst &instruction,
 }
 
 void
-Interpreter::getelementptr(const llvm::GetElementPtrInst &instruction,
+Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
                            Stack &stack,
                            const Environment &environment)
 {
@@ -1100,7 +1100,7 @@ castOperation(const llvm::CastInst &instruction,
 
 
 void
-Interpreter::trunc(const llvm::TruncInst &instruction,
+Operations::trunc(const llvm::TruncInst &instruction,
                    State &state,
                    const Environment &environment)
 {
@@ -1111,7 +1111,7 @@ Interpreter::trunc(const llvm::TruncInst &instruction,
 }
 
 void
-Interpreter::zext(const llvm::ZExtInst &instruction,
+Operations::zext(const llvm::ZExtInst &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -1122,7 +1122,7 @@ Interpreter::zext(const llvm::ZExtInst &instruction,
 }
 
 void
-Interpreter::sext(const llvm::SExtInst &instruction,
+Operations::sext(const llvm::SExtInst &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -1133,7 +1133,7 @@ Interpreter::sext(const llvm::SExtInst &instruction,
 }
 
 void
-Interpreter::fptrunc(const llvm::FPTruncInst &instruction,
+Operations::fptrunc(const llvm::FPTruncInst &instruction,
                      State &state,
                      const Environment &environment)
 {
@@ -1144,7 +1144,7 @@ Interpreter::fptrunc(const llvm::FPTruncInst &instruction,
 }
 
 void
-Interpreter::fpext(const llvm::FPExtInst &instruction,
+Operations::fpext(const llvm::FPExtInst &instruction,
                    State &state,
                    const Environment &environment)
 {
@@ -1155,7 +1155,7 @@ Interpreter::fpext(const llvm::FPExtInst &instruction,
 }
 
 void
-Interpreter::fptoui(const llvm::FPToUIInst &instruction,
+Operations::fptoui(const llvm::FPToUIInst &instruction,
                     State &state,
                     const Environment &environment)
 {
@@ -1166,7 +1166,7 @@ Interpreter::fptoui(const llvm::FPToUIInst &instruction,
 }
 
 void
-Interpreter::fptosi(const llvm::FPToSIInst &instruction,
+Operations::fptosi(const llvm::FPToSIInst &instruction,
                     State &state,
                     const Environment &environment)
 {
@@ -1177,7 +1177,7 @@ Interpreter::fptosi(const llvm::FPToSIInst &instruction,
 }
 
 void
-Interpreter::uitofp(const llvm::UIToFPInst &instruction,
+Operations::uitofp(const llvm::UIToFPInst &instruction,
                     State &state,
                     const Environment &environment)
 {
@@ -1188,7 +1188,7 @@ Interpreter::uitofp(const llvm::UIToFPInst &instruction,
 }
 
 void
-Interpreter::sitofp(const llvm::SIToFPInst &instruction,
+Operations::sitofp(const llvm::SIToFPInst &instruction,
                     State &state,
                     const Environment &environment)
 {
@@ -1199,7 +1199,7 @@ Interpreter::sitofp(const llvm::SIToFPInst &instruction,
 }
 
 void
-Interpreter::ptrtoint(const llvm::PtrToIntInst &instruction,
+Operations::ptrtoint(const llvm::PtrToIntInst &instruction,
                       State &state,
                       const Environment &environment)
 {
@@ -1240,7 +1240,7 @@ Interpreter::ptrtoint(const llvm::PtrToIntInst &instruction,
 }
 
 void
-Interpreter::inttoptr(const llvm::IntToPtrInst &instruction,
+Operations::inttoptr(const llvm::IntToPtrInst &instruction,
                       State &state,
                       const Environment &environment)
 {
@@ -1261,7 +1261,7 @@ Interpreter::inttoptr(const llvm::IntToPtrInst &instruction,
 }
 
 void
-Interpreter::bitcast(const llvm::BitCastInst &instruction,
+Operations::bitcast(const llvm::BitCastInst &instruction,
                      State &state,
                      const Environment &environment)
 {
@@ -1312,7 +1312,7 @@ cmpOperation(const llvm::CmpInst &instruction,
 }
 
 void
-Interpreter::icmp(const llvm::ICmpInst &instruction,
+Operations::icmp(const llvm::ICmpInst &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -1320,7 +1320,7 @@ Interpreter::icmp(const llvm::ICmpInst &instruction,
 }
 
 void
-Interpreter::fcmp(const llvm::FCmpInst &instruction,
+Operations::fcmp(const llvm::FCmpInst &instruction,
                   State &state,
                   const Environment &environment)
 {
@@ -1328,7 +1328,7 @@ Interpreter::fcmp(const llvm::FCmpInst &instruction,
 }
 
 void
-Interpreter::phi(const llvm::PHINode &instruction,
+Operations::phi(const llvm::PHINode &instruction,
                  State &state,
                  const Environment &environment)
 {
@@ -1360,7 +1360,7 @@ Interpreter::phi(const llvm::PHINode &instruction,
 }
 
 void
-Interpreter::select(const llvm::SelectInst &instruction,
+Operations::select(const llvm::SelectInst &instruction,
                     State &state,
                     const Environment &environment)
 {
@@ -1406,7 +1406,7 @@ Interpreter::select(const llvm::SelectInst &instruction,
 }
 
 void
-Interpreter::call(const llvm::CallInst &instruction,
+Operations::call(const llvm::CallInst &instruction,
                   Stack &stack,
                   const Environment &environment)
 {
@@ -1414,7 +1414,7 @@ Interpreter::call(const llvm::CallInst &instruction,
 }
 
 void
-Interpreter::va_arg(const llvm::VAArgInst &instruction,
+Operations::va_arg(const llvm::VAArgInst &instruction,
                     State &state,
                     const Environment &environment)
 {
@@ -1425,7 +1425,7 @@ Interpreter::va_arg(const llvm::VAArgInst &instruction,
 // Instructions available since LLVM 3.0
 
 void
-Interpreter::resume(const llvm::ResumeInst &instruction,
+Operations::resume(const llvm::ResumeInst &instruction,
                     State &state,
                     const Environment &environment)
 {
@@ -1433,7 +1433,7 @@ Interpreter::resume(const llvm::ResumeInst &instruction,
 }
 
 void
-Interpreter::fence(const llvm::FenceInst &instruction,
+Operations::fence(const llvm::FenceInst &instruction,
                    State &state,
                    const Environment &environment)
 {
@@ -1441,7 +1441,7 @@ Interpreter::fence(const llvm::FenceInst &instruction,
 }
 
 void
-Interpreter::cmpxchg(const llvm::AtomicCmpXchgInst &instruction,
+Operations::cmpxchg(const llvm::AtomicCmpXchgInst &instruction,
                      State &state,
                      const Environment &environment)
 {
@@ -1449,7 +1449,7 @@ Interpreter::cmpxchg(const llvm::AtomicCmpXchgInst &instruction,
 }
 
 void
-Interpreter::atomicrmw(const llvm::AtomicRMWInst &instruction,
+Operations::atomicrmw(const llvm::AtomicRMWInst &instruction,
                        State &state,
                        const Environment &environment)
 {
@@ -1457,7 +1457,7 @@ Interpreter::atomicrmw(const llvm::AtomicRMWInst &instruction,
 }
 
 void
-Interpreter::landingpad(const llvm::LandingPadInst &instruction,
+Operations::landingpad(const llvm::LandingPadInst &instruction,
                         State &state,
                         const Environment &environment)
 {

@@ -30,7 +30,7 @@ State::run()
     bool running = true;
     while (running)
     {
-        running = mInterpreter.step(mStack, mEnvironment);
+        running = mOperations.step(mStack, mEnvironment);
         if (reachedBreakpoint())
             return;
     }
@@ -43,7 +43,7 @@ State::step(int count)
 {
     for (int i = 0; i < count; ++i)
     {
-        bool running = mInterpreter.step(mStack, mEnvironment);
+        bool running = mOperations.step(mStack, mEnvironment);
         if (!running)
         {
             puts("Program finished.");
@@ -62,7 +62,7 @@ State::next(int count)
     for (int i = 0; i < count; ++i)
     {
         size_t stackSize = mStack.getFrames().size();
-        bool running = mInterpreter.step(mStack, mEnvironment);
+        bool running = mOperations.step(mStack, mEnvironment);
         if (!running)
         {
             puts("Program finished.");
@@ -73,7 +73,7 @@ State::next(int count)
 
         while (stackSize < mStack.getFrames().size())
         {
-            mInterpreter.step(mStack, mEnvironment);
+            mOperations.step(mStack, mEnvironment);
             if (reachedBreakpoint())
                 return;
         }
@@ -88,7 +88,7 @@ State::finish()
     size_t stackSize = mStack.getFrames().size();
     while (stackSize <= mStack.getFrames().size())
     {
-        bool running = mInterpreter.step(mStack, mEnvironment);
+        bool running = mOperations.step(mStack, mEnvironment);
         if (!running)
         {
             puts("Program finished.");
@@ -174,7 +174,7 @@ State::addMainFrame()
     }
 
     // Add global variables and constants to the state.
-    mInterpreter.addGlobalVariables(initialState, mEnvironment);
+    mOperations.addGlobalVariables(initialState, mEnvironment);
 
     // Add the first frame to the stack.
     mStack.addFrame(*function, initialState);

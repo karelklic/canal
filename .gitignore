@@ -43,7 +43,7 @@ CMakeCache.txt
 /tests/testsuite.log
 /tests/testsuite.dir
 /tests/unit/PointerTest
-/tests/unit/InterpreterTest
+/tests/unit/OperationsTest
 /tests/unit/IntegerIntervalTest
 /tests/unit/ICMPTest
 /tests/*.o

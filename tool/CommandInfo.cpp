@@ -3,7 +3,7 @@
 #include "Commands.h"
 #include <cstdio>
 #include <llvm/Module.h>
-#include "lib/Interpreter.h"
+#include "lib/Operations.h"
 #include "lib/Utils.h"
 
 CommandInfo::CommandInfo(Commands &commands)
