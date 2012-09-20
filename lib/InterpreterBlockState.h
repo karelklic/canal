@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_STATE_H
-#define LIBCANAL_STATE_H
+#ifndef LIBCANAL_INTERPRETER_BLOCK_STATE_H
+#define LIBCANAL_INTERPRETER_BLOCK_STATE_H
 
 #include <map>
 #include <vector>
@@ -14,12 +14,17 @@ namespace Canal {
 
 class Domain;
 
+namespace InterpreterBlock {
+
 /// llvm::Value represents a place in the program (an instruction,
 /// instance of llvm::Instruction).
 typedef std::map<const llvm::Value*, Domain*> PlaceValueMap;
 
-/// Includes global variables and heap.
-/// Includes function-level memory and variables (=stack).
+/// @brief Abstract memory state.
+///
+/// Consists of function-level variables (also called registers) and
+/// stack memory, global variables and heap, and return value.  All
+/// variables are in abstract domain.
 class State
 {
 public:
@@ -122,11 +127,7 @@ public:
     Domain *mReturnedValue;
 };
 
-/// Support writing of operational state to output stream.  Used for
-/// logging purposes.
-llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
-			      const State &state);
-
+} // namespace InterpreterBlock
 } // namespace Canal
 
-#endif // LIBCANAL_STATE_H
+#endif // LIBCANAL_INTERPRETER_BLOCK_STATE_H

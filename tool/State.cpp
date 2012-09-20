@@ -10,14 +10,12 @@
 #include <llvm/ADT/APInt.h>
 #include <cstdio>
 
-State::State(const llvm::Module *module) : mModule(module),
-                                           mEnvironment(*module)
+State::State(const llvm::Module *module) : mEnvironment(module)
 {
 }
 
 State::~State()
 {
-    delete mModule;
 }
 
 bool

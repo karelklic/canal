@@ -3,14 +3,11 @@
 
 #include <set>
 #include <string>
-#include "lib/Environment.h"
-#include "lib/Interpreter.h"
-#include "lib/SlotTracker.h"
-#include "lib/Stack.h"
+#include "lib/InterpreterBlock.h"
 
 namespace llvm {
-    class Module;
-}
+class Module;
+} // namespace llvm
 
 // State of the interpreter.
 class State
@@ -19,11 +16,9 @@ public:
     State(const llvm::Module *module);
     ~State();
 
-    const llvm::Module &getModule() const { return *mModule; }
     const Canal::Environment &getEnvironment() const { return mEnvironment; }
-    Canal::Stack &getStack() { return mStack; }
-    const Canal::Stack &getStack() const { return mStack; }
-    Canal::SlotTracker &getSlotTracker() { return mEnvironment.mSlotTracker; }
+    const llvm::Module &getModule() const { return mInterpreter.getModule(); }
+    Canal::SlotTracker &getSlotTracker() const { return mInterpreter.getSlotTracker(); }
 
     // Check if the interpreter is in the middle of interpretation.
     // This is true if something is on the stack.
@@ -44,10 +39,7 @@ protected:
     bool reachedBreakpoint();
 
 protected:
-    const llvm::Module *mModule;
-    Canal::Environment mEnvironment;
-    Canal::Stack mStack;
-    Canal::Interpreter mInterpreter;
+    Canal::InterpreterBlock::Iterpreter mInterpreter;
     std::set<std::string> mFunctionBreakpoints;
 };
 

@@ -1,10 +1,11 @@
-#include "State.h"
+#include "InterpreterBlockState.h"
 #include "Domain.h"
 #include "Utils.h"
 #include "Constant.h"
 #include <llvm/Support/raw_ostream.h>
 
 namespace Canal {
+namespace InterpreterBlock {
 
 State::State() : mReturnedValue(NULL)
 {
@@ -243,15 +244,5 @@ State::findBlock(const llvm::Value &place) const
     return NULL;
 }
 
-llvm::raw_ostream&
-operator<<(llvm::raw_ostream& ostream,
-           const State &state)
-{
-    ostream << "State(function variables: "
-            << state.getFunctionVariables().size()
-            << ", global variables: "
-            << state.getGlobalVariables().size()
-            << ")";
-}
-
+} // namespace InterpreterBlock
 } // namespace Canal
