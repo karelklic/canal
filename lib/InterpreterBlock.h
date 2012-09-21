@@ -17,14 +17,16 @@ class Interpreter
 public:
     Interpreter(const llvm::Module *module);
 
+    const Environment &getEnvironment() const { return mEnvironment; }
     const llvm::Module &getModule() const { return mEnvironment.getModule(); }
     SlotTracker &getSlotTracker() const { return mEnvironment.getSlotTracker(); }
-
+    const Operations &getOperations() const { return mOperations; }
+    Iterator &getIterator() { return mIterator; }
 
 protected:
     Environment mEnvironment;
 
-    Interpreter mInterpreter;
+    Operations mOperations;
 
     Iterator mIterator;
 

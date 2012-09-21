@@ -7,8 +7,6 @@
 #include "IntegerBitfield.h"
 #include "IntegerContainer.h"
 #include "Pointer.h"
-#include "Stack.h"
-#include "State.h"
 #include "Structure.h"
 #include "Utils.h"
 #include "Domain.h"

@@ -79,10 +79,11 @@ am_libcanal_la_OBJECTS = libcanal_la-APIntUtils.lo \
 	libcanal_la-FloatInterval.lo libcanal_la-IntegerBitfield.lo \
 	libcanal_la-IntegerContainer.lo \
 	libcanal_la-IntegerEnumeration.lo \
-	libcanal_la-IntegerInterval.lo libcanal_la-Operations.lo \
+	libcanal_la-IntegerInterval.lo \
+	libcanal_la-InterpreterBlockIterator.lo \
+	libcanal_la-InterpreterBlockState.lo libcanal_la-Operations.lo \
 	libcanal_la-Pointer.lo libcanal_la-PointerTarget.lo \
 	libcanal_la-SELinuxModulePass.lo libcanal_la-SlotTracker.lo \
-	libcanal_la-Stack.lo libcanal_la-State.lo \
 	libcanal_la-StringUtils.lo libcanal_la-Structure.lo \
 	libcanal_la-Utils.lo
 libcanal_la_OBJECTS = $(am_libcanal_la_OBJECTS)
@@ -282,6 +283,13 @@ libcanal_la_SOURCES = \
 	IntegerEnumeration.h \
 	IntegerInterval.cpp \
 	IntegerInterval.h \
+	InterpreterBlockBasicBlock.h \
+	InterpreterBlockFunction.h \
+	InterpreterBlock.h \
+	InterpreterBlockIterator.cpp \
+	InterpreterBlockIterator.h \
+	InterpreterBlockState.cpp \
+	InterpreterBlockState.h \
 	Operations.cpp \
 	Operations.h \
 	Pointer.cpp \
@@ -291,10 +299,6 @@ libcanal_la_SOURCES = \
 	SELinuxModulePass.cpp \
 	SlotTracker.cpp \
 	SlotTracker.h \
-	Stack.cpp \
-	Stack.h \
-	State.cpp \
-	State.h \
 	StringUtils.cpp \
 	StringUtils.h \
 	Structure.cpp \
@@ -408,13 +412,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerContainer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerEnumeration.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerInterval.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-InterpreterBlockIterator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-InterpreterBlockState.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Operations.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Pointer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-PointerTarget.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-SELinuxModulePass.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-SlotTracker.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Stack.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-State.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-StringUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Structure.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Utils.Plo@am__quote@
@@ -524,6 +528,20 @@ libcanal_la-IntegerInterval.lo: IntegerInterval.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-IntegerInterval.lo `test -f 'IntegerInterval.cpp' || echo '$(srcdir)/'`IntegerInterval.cpp
 
+libcanal_la-InterpreterBlockIterator.lo: InterpreterBlockIterator.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-InterpreterBlockIterator.lo -MD -MP -MF $(DEPDIR)/libcanal_la-InterpreterBlockIterator.Tpo -c -o libcanal_la-InterpreterBlockIterator.lo `test -f 'InterpreterBlockIterator.cpp' || echo '$(srcdir)/'`InterpreterBlockIterator.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-InterpreterBlockIterator.Tpo $(DEPDIR)/libcanal_la-InterpreterBlockIterator.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='InterpreterBlockIterator.cpp' object='libcanal_la-InterpreterBlockIterator.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-InterpreterBlockIterator.lo `test -f 'InterpreterBlockIterator.cpp' || echo '$(srcdir)/'`InterpreterBlockIterator.cpp
+
+libcanal_la-InterpreterBlockState.lo: InterpreterBlockState.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-InterpreterBlockState.lo -MD -MP -MF $(DEPDIR)/libcanal_la-InterpreterBlockState.Tpo -c -o libcanal_la-InterpreterBlockState.lo `test -f 'InterpreterBlockState.cpp' || echo '$(srcdir)/'`InterpreterBlockState.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-InterpreterBlockState.Tpo $(DEPDIR)/libcanal_la-InterpreterBlockState.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='InterpreterBlockState.cpp' object='libcanal_la-InterpreterBlockState.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-InterpreterBlockState.lo `test -f 'InterpreterBlockState.cpp' || echo '$(srcdir)/'`InterpreterBlockState.cpp
+
 libcanal_la-Operations.lo: Operations.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Operations.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Operations.Tpo -c -o libcanal_la-Operations.lo `test -f 'Operations.cpp' || echo '$(srcdir)/'`Operations.cpp
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-Operations.Tpo $(DEPDIR)/libcanal_la-Operations.Plo
@@ -558,20 +576,6 @@ libcanal_la-SlotTracker.lo: SlotTracker.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='SlotTracker.cpp' object='libcanal_la-SlotTracker.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-SlotTracker.lo `test -f 'SlotTracker.cpp' || echo '$(srcdir)/'`SlotTracker.cpp
-
-libcanal_la-Stack.lo: Stack.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Stack.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Stack.Tpo -c -o libcanal_la-Stack.lo `test -f 'Stack.cpp' || echo '$(srcdir)/'`Stack.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-Stack.Tpo $(DEPDIR)/libcanal_la-Stack.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Stack.cpp' object='libcanal_la-Stack.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Stack.lo `test -f 'Stack.cpp' || echo '$(srcdir)/'`Stack.cpp
-
-libcanal_la-State.lo: State.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-State.lo -MD -MP -MF $(DEPDIR)/libcanal_la-State.Tpo -c -o libcanal_la-State.lo `test -f 'State.cpp' || echo '$(srcdir)/'`State.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-State.Tpo $(DEPDIR)/libcanal_la-State.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='State.cpp' object='libcanal_la-State.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-State.lo `test -f 'State.cpp' || echo '$(srcdir)/'`State.cpp
 
 libcanal_la-StringUtils.lo: StringUtils.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-StringUtils.lo -MD -MP -MF $(DEPDIR)/libcanal_la-StringUtils.Tpo -c -o libcanal_la-StringUtils.lo `test -f 'StringUtils.cpp' || echo '$(srcdir)/'`StringUtils.cpp
