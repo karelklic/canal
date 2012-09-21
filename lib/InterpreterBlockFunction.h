@@ -1,8 +1,8 @@
 #ifndef LIBCANAL_INTERPRETER_BLOCK_FUNCTION_H
 #define LIBCANAL_INTERPRETER_BLOCK_FUNCTION_H
 
-#include "InterpreterBlockState.h"
 #include "InterpreterBlockBasicBlock.h"
+#include "State.h"
 #include <llvm/Function.h>
 
 namespace Canal {

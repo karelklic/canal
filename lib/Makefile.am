@@ -29,8 +29,6 @@ libcanal_la_SOURCES = \
 	InterpreterBlock.h \
 	InterpreterBlockIterator.cpp \
 	InterpreterBlockIterator.h \
-	InterpreterBlockState.cpp \
-	InterpreterBlockState.h \
 	Operations.cpp \
 	Operations.h \
 	Pointer.cpp \
@@ -40,6 +38,8 @@ libcanal_la_SOURCES = \
 	SELinuxModulePass.cpp \
 	SlotTracker.cpp \
 	SlotTracker.h \
+	State.cpp \
+	State.h \
 	StringUtils.cpp \
 	StringUtils.h \
 	Structure.cpp \

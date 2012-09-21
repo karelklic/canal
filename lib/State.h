@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_INTERPRETER_BLOCK_STATE_H
-#define LIBCANAL_INTERPRETER_BLOCK_STATE_H
+#ifndef LIBCANAL_STATE_H
+#define LIBCANAL_STATE_H
 
 #include <map>
 #include <vector>
@@ -13,8 +13,6 @@ class raw_ostream;
 namespace Canal {
 
 class Domain;
-
-namespace InterpreterBlock {
 
 /// llvm::Value represents a place in the program (an instruction,
 /// instance of llvm::Instruction).
@@ -127,7 +125,6 @@ public:
     Domain *mReturnedValue;
 };
 
-} // namespace InterpreterBlock
 } // namespace Canal
 
-#endif // LIBCANAL_INTERPRETER_BLOCK_STATE_H
+#endif // LIBCANAL_STATE_H
