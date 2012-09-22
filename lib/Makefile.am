@@ -8,8 +8,8 @@ libcanal_la_SOURCES = \
 	ArrayInterface.h \
 	ArraySingleItem.cpp \
 	ArraySingleItem.h \
-	Constant.cpp \
-	Constant.h \
+	Constructors.cpp \
+	Constructors.h \
 	Domain.cpp \
 	Domain.h \
 	Environment.cpp \
@@ -24,8 +24,11 @@ libcanal_la_SOURCES = \
 	IntegerEnumeration.h \
 	IntegerInterval.cpp \
 	IntegerInterval.h \
+	InterpreterBlockBasicBlock.cpp \
 	InterpreterBlockBasicBlock.h \
+	InterpreterBlockFunction.cpp \
 	InterpreterBlockFunction.h \
+	InterpreterBlock.cpp \
 	InterpreterBlock.h \
 	InterpreterBlockIterator.cpp \
 	InterpreterBlockIterator.h \

@@ -1,8 +1,9 @@
 #ifndef LIBCANAL_INTERPRETER_BLOCK_H
 #define LIBCANAL_INTERPRETER_BLOCK_H
 
+#include "Constructors.h"
 #include "Environment.h"
-#include "Interpreter.h"
+#include "Operations.h"
 #include "InterpreterBlockFunction.h"
 #include "InterpreterBlockIterator.h"
 
@@ -15,6 +16,8 @@ namespace InterpreterBlock {
 class Interpreter
 {
 public:
+    /// @param module
+    ///   Interpreter takes ownership of the module.
     Interpreter(const llvm::Module *module);
 
     const Environment &getEnvironment() const { return mEnvironment; }
@@ -27,6 +30,8 @@ protected:
     Environment mEnvironment;
 
     Operations mOperations;
+
+    Constructors mConstructors;
 
     Iterator mIterator;
 

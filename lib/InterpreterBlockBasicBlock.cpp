@@ -3,7 +3,8 @@
 BasicBlock::BasicBlock(const llvm::BasicBlock &basicBlock)
     : mBasicBlock(basicBlock)
 {
-    // TODO: create bottom values for every instruction.
+    // TODO: create bottom values for every instruction.  Both input
+    // and output state.
 }
 
 void
