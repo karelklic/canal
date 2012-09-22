@@ -4,14 +4,15 @@
 #include "lib/State.h"
 #include "lib/IntegerContainer.h"
 #include "lib/Pointer.h"
-#include "lib/Constant.h"
 #include <llvm/Function.h>
 #include <llvm/Module.h>
 #include <llvm/ADT/APInt.h>
 #include <cstdio>
 
 State::State(const llvm::Module *module) : mModule(module),
-                                           mEnvironment(*module)
+                                           mEnvironment(*module),
+                                           mConstructors(mEnvironment),
+                                           mOperations(mEnvironment, mConstructors)
 {
 }
 
@@ -32,7 +33,7 @@ State::run()
     bool running = true;
     while (running)
     {
-        running = mOperations.step(mStack, mEnvironment);
+        running = mOperations.step(mStack);
         if (reachedBreakpoint())
             return;
     }
@@ -45,7 +46,7 @@ State::step(int count)
 {
     for (int i = 0; i < count; ++i)
     {
-        bool running = mOperations.step(mStack, mEnvironment);
+        bool running = mOperations.step(mStack);
         if (!running)
         {
             puts("Program finished.");
@@ -64,7 +65,7 @@ State::next(int count)
     for (int i = 0; i < count; ++i)
     {
         size_t stackSize = mStack.getFrames().size();
-        bool running = mOperations.step(mStack, mEnvironment);
+        bool running = mOperations.step(mStack);
         if (!running)
         {
             puts("Program finished.");
@@ -75,7 +76,7 @@ State::next(int count)
 
         while (stackSize < mStack.getFrames().size())
         {
-            mOperations.step(mStack, mEnvironment);
+            mOperations.step(mStack);
             if (reachedBreakpoint())
                 return;
         }
@@ -90,7 +91,7 @@ State::finish()
     size_t stackSize = mStack.getFrames().size();
     while (stackSize <= mStack.getFrames().size())
     {
-        bool running = mOperations.step(mStack, mEnvironment);
+        bool running = mOperations.step(mStack);
         if (!running)
         {
             puts("Program finished.");
@@ -176,7 +177,7 @@ State::addMainFrame()
     }
 
     // Add global variables and constants to the state.
-    mOperations.addGlobalVariables(initialState, mEnvironment);
+    mOperations.addGlobalVariables(initialState);
 
     // Add the first frame to the stack.
     mStack.addFrame(*function, initialState);

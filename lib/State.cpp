@@ -1,7 +1,6 @@
 #include "State.h"
 #include "Domain.h"
 #include "Utils.h"
-#include "Constant.h"
 #include <llvm/Support/raw_ostream.h>
 
 namespace Canal {
@@ -138,10 +137,7 @@ mergeMaps(PlaceValueMap &map1, const PlaceValueMap &map2)
                                                   it2->second->clone()));
         }
 	else
-        {
-            it1->second = Domain::handleMergeConstants(it1->second, it2->second);
             it1->second->merge(*it2->second);
-        }
     }
 }
 
@@ -156,12 +152,7 @@ State::merge(const State &state)
     if (mReturnedValue)
     {
         if (state.mReturnedValue)
-        {
-            mReturnedValue = Domain::handleMergeConstants(mReturnedValue,
-                                                         state.mReturnedValue);
-
             mReturnedValue->merge(*state.mReturnedValue);
-        }
     }
     else if (state.mReturnedValue)
         mReturnedValue = state.mReturnedValue->clone();

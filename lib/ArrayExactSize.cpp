@@ -1,5 +1,4 @@
 #include "ArrayExactSize.h"
-#include "Constant.h"
 #include "IntegerContainer.h"
 #include "IntegerEnumeration.h"
 #include "IntegerInterval.h"
@@ -280,15 +279,6 @@ std::vector<Domain*>
 ExactSize::getItem(const Domain &offset) const
 {
     std::vector<Domain*> result;
-    if (const Constant *constant = dynCast<const Constant*>(&offset))
-    {
-        CANAL_ASSERT(constant->isAPInt());
-        CANAL_ASSERT(constant->getAPInt().getBitWidth() <= 64);
-        uint64_t numOffset = constant->getAPInt().getZExtValue();
-        CANAL_ASSERT(numOffset < mValues.size());
-        result.push_back(mValues[numOffset]);
-        return result;
-    }
 
     const Integer::Container &integer =
         dynCast<const Integer::Container&>(offset);
@@ -359,17 +349,6 @@ ExactSize::getItem(uint64_t offset) const
 void
 ExactSize::setItem(const Domain &offset, const Domain &value)
 {
-    const Constant *constant = dynCast<const Constant*>(&offset);
-    if (constant)
-    {
-        CANAL_ASSERT(constant->isAPInt());
-        CANAL_ASSERT(constant->getAPInt().getBitWidth() <= 64);
-        uint64_t numOffset = constant->getAPInt().getZExtValue();
-        CANAL_ASSERT(numOffset < mValues.size());
-        mValues[numOffset]->merge(value);
-        return;
-    }
-
     const Integer::Container &integer =
         dynCast<const Integer::Container&>(offset);
 
