@@ -11,6 +11,13 @@ protected:
 
     State mInputState;
     State mOutputState;
+
+public:
+    BasicBlock(const llvm::BasicBlock &basicBlock);
+
+    /// @brief Merges output states of basic blocks to the input
+    /// state.
+    void mergeOutputToInput(const BasicBlock &basicBlock);
 };
 
 } // namespace InterpreterBlock
