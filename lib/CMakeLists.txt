@@ -1,8 +1,9 @@
-add_library(canal SHARED APIntUtils.cpp
+add_library(canal SHARED
+APIntUtils.cpp
 ArrayExactSize.cpp
 ArrayInterface.cpp
 ArraySingleItem.cpp
-Constant.cpp
+Constructors.cpp
 Domain.cpp
 Environment.cpp
 FloatInterval.cpp

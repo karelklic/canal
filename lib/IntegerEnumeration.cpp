@@ -1,5 +1,4 @@
 #include "IntegerEnumeration.h"
-#include "Constant.h"
 #include "Utils.h"
 #include "FloatInterval.h"
 #include "StringUtils.h"
@@ -133,15 +132,6 @@ Enumeration::merge(const Domain &value)
 {
     if (mTop)
         return;
-
-    const Constant *constant = dynCast<const Constant*>(&value);
-    if (constant)
-    {
-        CANAL_ASSERT(constant->isAPInt());
-        CANAL_ASSERT(constant->getAPInt().getBitWidth() == getBitWidth());
-        mValues.insert(constant->getAPInt());
-        return;
-    }
 
     const Enumeration &enumeration =
         dynCast<const Enumeration&>(value);

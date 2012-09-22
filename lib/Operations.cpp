@@ -1,7 +1,7 @@
 #include "Operations.h"
 #include "ArrayExactSize.h"
 #include "ArraySingleItem.h"
-#include "Constant.h"
+#include "Constructors.h"
 #include "Environment.h"
 #include "FloatInterval.h"
 #include "IntegerBitfield.h"
@@ -23,221 +23,120 @@
 
 namespace Canal {
 
-static const llvm::fltSemantics *
-getFloatingPointSemantics(const llvm::Type &type)
+Operations::Operations(const Environment &environment,
+                       const Constructors &constructors) : mEnvironment(environment),
+                                                           mConstructors(constructors)
 {
-    CANAL_ASSERT(type.isFloatingPointTy());
-
-    const llvm::fltSemantics *semantics;
-#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
-    if (type.isHalfTy())
-        semantics = &llvm::APFloat::IEEEhalf;
-    else
-#endif
-    if (type.isFloatTy())
-        semantics = &llvm::APFloat::IEEEsingle;
-    else if (type.isDoubleTy())
-        semantics = &llvm::APFloat::IEEEdouble;
-    else if (type.isFP128Ty())
-        semantics = &llvm::APFloat::IEEEquad;
-    else if (type.isPPC_FP128Ty())
-        semantics = &llvm::APFloat::PPCDoubleDouble;
-    else if (type.isX86_FP80Ty())
-        semantics = &llvm::APFloat::x87DoubleExtended;
-    else
-        CANAL_DIE();
-    return semantics;
-}
-
-static Domain *
-typeToEmptyValue(const llvm::Type &type, const Environment &environment)
-{
-    if (type.isVoidTy())
-        return NULL;
-
-    if (type.isIntegerTy())
-    {
-        llvm::IntegerType &integerType = llvmCast<llvm::IntegerType>(type);
-        return new Integer::Container(environment, integerType.getBitWidth());
-    }
-
-    if (type.isFloatingPointTy())
-    {
-        const llvm::fltSemantics *semantics = getFloatingPointSemantics(type);
-        return new Float::Interval(environment, *semantics);
-    }
-
-    if (type.isPointerTy())
-    {
-        const llvm::PointerType &pointerType = llvmCast<const llvm::PointerType>(type);
-        CANAL_ASSERT(pointerType.getElementType());
-        return new Pointer::InclusionBased(environment, *pointerType.getElementType());
-    }
-
-    if (type.isArrayTy() || type.isVectorTy())
-    {
-        return new Array::SingleItem(environment);
-    }
-
-    if (type.isStructTy())
-    {
-        const llvm::StructType &structType = llvmCast<llvm::StructType>(type);
-        Structure *structure = new Structure(environment);
-
-        llvm::StructType::element_iterator it = structType.element_begin(),
-            itend = structType.element_end();
-        for (; it != itend; ++it)
-            structure->mMembers.push_back(typeToEmptyValue(**it, environment));
-
-        return structure;
-    }
-
-    CANAL_DIE_MSG("unsupported llvm::Type::TypeID: " << type.getTypeID());
-}
-
-void
-Operations::addGlobalVariables(State &state,
-                               const Environment &environment)
-{
-    // Add global constants.
-    llvm::Module::const_global_iterator git = environment.getModule().global_begin();
-    llvm::Module::const_global_iterator gitend = environment.getModule().global_end();
-    for (; git != gitend; ++git)
-    {
-        if (git->isConstant())
-            state.addGlobalVariable(*git, new Constant(environment, git));
-        else
-        {
-            // When it is not a constant, then it is a pointer to a
-            // global block.
-            state.addGlobalBlock(*git, typeToEmptyValue(*git->getType()->getElementType(),
-                                                        environment));
-
-            Domain *value = typeToEmptyValue(*git->getType(),
-                                             environment);
-
-            Pointer::InclusionBased &pointer = dynCast<Pointer::InclusionBased&>(*value);
-            pointer.addTarget(Pointer::Target::GlobalBlock,
-                              git,
-                              git,
-                              std::vector<Domain*>(),
-                              NULL);
-
-            state.addGlobalVariable(*git, value);
-        }
-    }
 }
 
 bool
-Operations::step(Stack &stack,
-                  const Environment &environment)
+Operations::step(Stack &stack)
 {
-    interpretInstruction(stack, environment);
+    interpretInstruction(stack);
     return stack.nextInstruction();
 }
 
 void
-Operations::interpretInstruction(Stack &stack,
-                                  const Environment &environment)
+Operations::interpretInstruction(Stack &stack)
 {
     const llvm::Instruction &instruction =
         stack.getCurrentInstruction();
     State &state = stack.getCurrentState();
 
     if (llvm::isa<llvm::CallInst>(instruction))
-        call((const llvm::CallInst&)instruction, stack, environment);
+        call((const llvm::CallInst&)instruction, stack);
     else if (llvm::isa<llvm::ICmpInst>(instruction))
-        icmp((const llvm::ICmpInst&)instruction, state, environment);
+        icmp((const llvm::ICmpInst&)instruction, state);
     else if (llvm::isa<llvm::FCmpInst>(instruction))
-        fcmp((const llvm::FCmpInst&)instruction, state, environment);
+        fcmp((const llvm::FCmpInst&)instruction, state);
     else if (llvm::isa<llvm::ExtractElementInst>(instruction))
-        extractelement((const llvm::ExtractElementInst&)instruction, state, environment);
+        extractelement((const llvm::ExtractElementInst&)instruction, state);
     else if (llvm::isa<llvm::GetElementPtrInst>(instruction))
-        getelementptr((const llvm::GetElementPtrInst&)instruction, stack, environment);
+        getelementptr((const llvm::GetElementPtrInst&)instruction, stack);
     else if (llvm::isa<llvm::InsertElementInst>(instruction))
-        insertelement((const llvm::InsertElementInst&)instruction, state, environment);
+        insertelement((const llvm::InsertElementInst&)instruction, state);
     else if (llvm::isa<llvm::InsertValueInst>(instruction))
-        insertvalue((const llvm::InsertValueInst&)instruction, state, environment);
+        insertvalue((const llvm::InsertValueInst&)instruction, state);
 #if LLVM_MAJOR >= 3
     // Instructions available since LLVM 3.0
     else if (llvm::isa<llvm::LandingPadInst>(instruction))
-        landingpad((const llvm::LandingPadInst&)instruction, state, environment);
+        landingpad((const llvm::LandingPadInst&)instruction, state);
     else if (llvm::isa<llvm::AtomicCmpXchgInst>(instruction))
-        cmpxchg((const llvm::AtomicCmpXchgInst&)instruction, state, environment);
+        cmpxchg((const llvm::AtomicCmpXchgInst&)instruction, state);
     else if (llvm::isa<llvm::AtomicRMWInst>(instruction))
-        atomicrmw((const llvm::AtomicRMWInst&)instruction, state, environment);
+        atomicrmw((const llvm::AtomicRMWInst&)instruction, state);
     else if (llvm::isa<llvm::FenceInst>(instruction))
-        fence((const llvm::FenceInst&)instruction, state, environment);
+        fence((const llvm::FenceInst&)instruction, state);
 #endif
     else if (llvm::isa<llvm::PHINode>(instruction))
-        phi((const llvm::PHINode&)instruction, state, environment);
+        phi((const llvm::PHINode&)instruction, state);
     else if (llvm::isa<llvm::SelectInst>(instruction))
-        select((const llvm::SelectInst&)instruction, state, environment);
+        select((const llvm::SelectInst&)instruction, state);
     else if (llvm::isa<llvm::ShuffleVectorInst>(instruction))
-        shufflevector((const llvm::ShuffleVectorInst&)instruction, stack, environment);
+        shufflevector((const llvm::ShuffleVectorInst&)instruction, stack);
     else if (llvm::isa<llvm::StoreInst>(instruction))
-        store((const llvm::StoreInst&)instruction, state, environment);
+        store((const llvm::StoreInst&)instruction, state);
     else if (llvm::isa<llvm::UnaryInstruction>(instruction))
     {
         if (llvm::isa<llvm::AllocaInst>(instruction))
-            alloca_((const llvm::AllocaInst&)instruction, stack, environment);
+            alloca_((const llvm::AllocaInst&)instruction, stack);
         else if (llvm::isa<llvm::CastInst>(instruction))
         {
             if (llvm::isa<llvm::BitCastInst>(instruction))
-                bitcast((const llvm::BitCastInst&)instruction, state, environment);
+                bitcast((const llvm::BitCastInst&)instruction, state);
             else if (llvm::isa<llvm::FPExtInst>(instruction))
-                fpext((const llvm::FPExtInst&)instruction, state, environment);
+                fpext((const llvm::FPExtInst&)instruction, state);
             else if (llvm::isa<llvm::FPToSIInst>(instruction))
-                fptosi((const llvm::FPToSIInst&)instruction, state, environment);
+                fptosi((const llvm::FPToSIInst&)instruction, state);
             else if (llvm::isa<llvm::FPToUIInst>(instruction))
-                fptoui((const llvm::FPToUIInst&)instruction, state, environment);
+                fptoui((const llvm::FPToUIInst&)instruction, state);
             else if (llvm::isa<llvm::FPTruncInst>(instruction))
-                fptrunc((const llvm::FPTruncInst&)instruction, state, environment);
+                fptrunc((const llvm::FPTruncInst&)instruction, state);
             else if (llvm::isa<llvm::IntToPtrInst>(instruction))
-                inttoptr((const llvm::IntToPtrInst&)instruction, state, environment);
+                inttoptr((const llvm::IntToPtrInst&)instruction, state);
             else if (llvm::isa<llvm::PtrToIntInst>(instruction))
-                ptrtoint((const llvm::PtrToIntInst&)instruction, state, environment);
+                ptrtoint((const llvm::PtrToIntInst&)instruction, state);
             else if (llvm::isa<llvm::SExtInst>(instruction))
-                sext((const llvm::SExtInst&)instruction, state, environment);
+                sext((const llvm::SExtInst&)instruction, state);
             else if (llvm::isa<llvm::SIToFPInst>(instruction))
-                sitofp((const llvm::SIToFPInst&)instruction, state, environment);
+                sitofp((const llvm::SIToFPInst&)instruction, state);
             else if (llvm::isa<llvm::TruncInst>(instruction))
-                trunc((const llvm::TruncInst&)instruction, state, environment);
+                trunc((const llvm::TruncInst&)instruction, state);
             else if (llvm::isa<llvm::UIToFPInst>(instruction))
-                uitofp((const llvm::UIToFPInst&)instruction, state, environment);
+                uitofp((const llvm::UIToFPInst&)instruction, state);
             else if (llvm::isa<llvm::ZExtInst>(instruction))
-                zext((const llvm::ZExtInst&)instruction, state, environment);
+                zext((const llvm::ZExtInst&)instruction, state);
             else
                 CANAL_FATAL_ERROR("Unknown cast instruction: " << instruction);
         }
         else if (llvm::isa<llvm::ExtractValueInst>(instruction))
-            extractvalue((const llvm::ExtractValueInst&)instruction, state, environment);
+            extractvalue((const llvm::ExtractValueInst&)instruction, state);
         else if (llvm::isa<llvm::LoadInst>(instruction))
-            load((const llvm::LoadInst&)instruction, state, environment);
+            load((const llvm::LoadInst&)instruction, state);
         else if (llvm::isa<llvm::VAArgInst>(instruction))
-            va_arg((const llvm::VAArgInst&)instruction, state, environment);
+            va_arg((const llvm::VAArgInst&)instruction, state);
         else
             CANAL_FATAL_ERROR("Unknown unary instruction: " << instruction);
     }
     else if (llvm::isa<llvm::TerminatorInst>(instruction))
     {
         if (llvm::isa<llvm::BranchInst>(instruction))
-            br((const llvm::BranchInst&)instruction, state, environment);
+            br((const llvm::BranchInst&)instruction, state);
         else if (llvm::isa<llvm::IndirectBrInst>(instruction))
-            indirectbr((const llvm::IndirectBrInst&)instruction, state, environment);
+            indirectbr((const llvm::IndirectBrInst&)instruction, state);
         else if (llvm::isa<llvm::InvokeInst>(instruction))
-            invoke((const llvm::InvokeInst&)instruction, stack, environment);
+            invoke((const llvm::InvokeInst&)instruction, stack);
 #if LLVM_MAJOR >= 3
         // Resume instruction is available since LLVM 3.0
         else if (llvm::isa<llvm::ResumeInst>(instruction))
-            resume((const llvm::ResumeInst&)instruction, state, environment);
+            resume((const llvm::ResumeInst&)instruction, state);
 #endif
         else if (llvm::isa<llvm::ReturnInst>(instruction))
-            ret((const llvm::ReturnInst&)instruction, state, environment);
+            ret((const llvm::ReturnInst&)instruction, state);
         else if (llvm::isa<llvm::SwitchInst>(instruction))
-            switch_((const llvm::SwitchInst&)instruction, state, environment);
+            switch_((const llvm::SwitchInst&)instruction, state);
         else if (llvm::isa<llvm::UnreachableInst>(instruction))
-            unreachable((const llvm::UnreachableInst&)instruction, state, environment);
+            unreachable((const llvm::UnreachableInst&)instruction, state);
         else
             CANAL_FATAL_ERROR("Unknown terminator instruction: " << instruction);
     }
@@ -247,24 +146,24 @@ Operations::interpretInstruction(Stack &stack,
         assert(binaryOp.getNumOperands() == 2);
         switch (binaryOp.getOpcode())
 	{
-	case llvm::Instruction::Add:  add(binaryOp, state, environment);  break;
-	case llvm::Instruction::FAdd: fadd(binaryOp, state, environment); break;
-	case llvm::Instruction::Sub:  sub(binaryOp, state, environment);  break;
-	case llvm::Instruction::FSub: fsub(binaryOp, state, environment); break;
-	case llvm::Instruction::Mul:  mul(binaryOp, state, environment);  break;
-	case llvm::Instruction::FMul: fmul(binaryOp, state, environment); break;
-	case llvm::Instruction::UDiv: udiv(binaryOp, state, environment); break;
-	case llvm::Instruction::SDiv: sdiv(binaryOp, state, environment); break;
-	case llvm::Instruction::FDiv: fdiv(binaryOp, state, environment); break;
-	case llvm::Instruction::URem: urem(binaryOp, state, environment); break;
-	case llvm::Instruction::SRem: srem(binaryOp, state, environment); break;
-	case llvm::Instruction::FRem: frem(binaryOp, state, environment); break;
-	case llvm::Instruction::Shl:  shl(binaryOp, state, environment);  break;
-	case llvm::Instruction::LShr: lshr(binaryOp, state, environment); break;
-	case llvm::Instruction::AShr: ashr(binaryOp, state, environment); break;
-	case llvm::Instruction::And:  and_(binaryOp, state, environment); break;
-	case llvm::Instruction::Or:   or_(binaryOp, state, environment);  break;
-	case llvm::Instruction::Xor:  xor_(binaryOp, state, environment); break;
+	case llvm::Instruction::Add:  add(binaryOp, state);  break;
+	case llvm::Instruction::FAdd: fadd(binaryOp, state); break;
+	case llvm::Instruction::Sub:  sub(binaryOp, state);  break;
+	case llvm::Instruction::FSub: fsub(binaryOp, state); break;
+	case llvm::Instruction::Mul:  mul(binaryOp, state);  break;
+	case llvm::Instruction::FMul: fmul(binaryOp, state); break;
+	case llvm::Instruction::UDiv: udiv(binaryOp, state); break;
+	case llvm::Instruction::SDiv: sdiv(binaryOp, state); break;
+	case llvm::Instruction::FDiv: fdiv(binaryOp, state); break;
+	case llvm::Instruction::URem: urem(binaryOp, state); break;
+	case llvm::Instruction::SRem: srem(binaryOp, state); break;
+	case llvm::Instruction::FRem: frem(binaryOp, state); break;
+	case llvm::Instruction::Shl:  shl(binaryOp, state);  break;
+	case llvm::Instruction::LShr: lshr(binaryOp, state); break;
+	case llvm::Instruction::AShr: ashr(binaryOp, state); break;
+	case llvm::Instruction::And:  and_(binaryOp, state); break;
+	case llvm::Instruction::Or:   or_(binaryOp, state);  break;
+	case llvm::Instruction::Xor:  xor_(binaryOp, state); break;
 	default:
             CANAL_FATAL_ERROR(binaryOp);
 	}
@@ -273,95 +172,26 @@ Operations::interpretInstruction(Stack &stack,
         CANAL_FATAL_ERROR("Unknown instruction: " << instruction.getOpcodeName());
 }
 
-void
-Operations::ret(const llvm::ReturnInst &instruction,
-                 State &state,
-                 const Environment &environment)
-{
-    llvm::Value *value = instruction.getReturnValue();
-    // Return value is optional, some functions return nothing.
-    if (!value)
-        return;
-
-    Domain *variable = state.findVariable(*value);
-    // It might happen that the variable is not found in state,
-    // because the function has not yet reached fixpoint.
-    if (variable)
-    {
-        if (state.mReturnedValue)
-            state.mReturnedValue->merge(*variable);
-        else
-            state.mReturnedValue = variable->clone();
-    }
-    else if (llvm::isa<llvm::Constant>(value))
-    {
-        if (state.mReturnedValue)
-        {
-            // If the returned value is constant, convert it to
-            // something that can merge other values.
-            Constant *constant = dynCast<Constant*>(state.mReturnedValue);
-            if (constant)
-            {
-                state.mReturnedValue = constant->toModifiableValue();
-                delete constant;
-            }
-
-            Constant c(environment, llvmCast<llvm::Constant>(value));
-            state.mReturnedValue->merge(c);
-        }
-        else
-            state.mReturnedValue = new Constant(environment, llvmCast<llvm::Constant>(value));
-    }
-}
-
-void
-Operations::br(const llvm::BranchInst &instruction,
-                State &state,
-                const Environment &environment)
-{
-    // Ignore.
-}
-
-void
-Operations::switch_(const llvm::SwitchInst &instruction,
-                     State &state,
-                     const Environment &environment)
-{
-    // Ignore.
-}
-
-void
-Operations::indirectbr(const llvm::IndirectBrInst &instruction,
-                        State &state,
-                        const Environment &environment)
-{
-    // Ignore.
-}
-
-// Given a place in source code, return the corresponding variable
-// from the abstract interpreter state. If the place contains a
-// constant, fill the provided constant variable with it.
-// @return
-//  Returns a pointer to the variable if it is found in the state.
-//  Returns a pointer to the provided constant if the place contains a
-//  constant.  Otherwise, it returns NULL.
-static Domain *
-variableOrConstant(const llvm::Value &place, State &state, Constant &constant)
+Domain *
+Operations::variableOrConstant(const llvm::Value &place,
+                               State &state,
+                               llvm::OwningPtr<Domain> &constant) const
 {
     if (llvm::isa<llvm::Constant>(place))
     {
-        constant.mConstant = llvmCast<llvm::Constant>(&place);
-        return &constant;
+        Domain *constValue = mConstructors.create(llvmCast<llvm::Constant>(place));
+        llvm::OwningPtr<Domain> ptr(constValue);
+        constant.swap(ptr);
+        return constValue;
     }
 
     // Either NULL or existing variable.
     return state.findVariable(place);
 }
 
-template<typename T> static void
-interpretCall(const T &instruction,
-              Stack &stack,
-              const Environment &environment)
+template<typename T> void
+Operations::interpretCall(const T &instruction,
+                          Stack &stack)
 {
     State &state = stack.getCurrentState();
     llvm::Function *function = instruction.getCalledFunction();
@@ -378,8 +208,7 @@ interpretCall(const T &instruction,
 
         // Create result TOP value of required type.
         const llvm::Type *type = instruction.getType();
-        Domain *returnedValue = typeToEmptyValue(*instruction.getType(),
-                                                environment);
+        Domain *returnedValue = mConstructors.create(*instruction.getType());
 
         // If the function returns nothing (void), we are finished.
         if (!returnedValue)
@@ -401,10 +230,12 @@ interpretCall(const T &instruction,
     for (int i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
     {
         llvm::Value *operand = instruction.getArgOperand(i);
-        Constant c(environment, NULL);
-        Domain *value = variableOrConstant(*operand, state, c);
+
+        llvm::OwningPtr<Domain> constant;
+        Domain *value = variableOrConstant(*operand, state, constant);
         if (!value)
             return;
+
         initialState.addFunctionVariable(*it, value->clone());
     }
 
@@ -412,34 +243,13 @@ interpretCall(const T &instruction,
 }
 
 void
-Operations::invoke(const llvm::InvokeInst &instruction,
-                    Stack &stack,
-                    const Environment &environment)
-{
-    interpretCall(instruction, stack, environment);
-}
-
-void
-Operations::unreachable(const llvm::UnreachableInst &instruction,
-                         State &state,
-                         const Environment &environment)
-{
-    // Ignore.
-}
-
-static void
-binaryOperation(const llvm::BinaryOperator &instruction,
-                State &state,
-                const Environment &environment,
-                Domain::BinaryOperation operation)
+Operations::binaryOperation(const llvm::BinaryOperator &instruction,
+                            State &state,
+                            Domain::BinaryOperation operation)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.
-    Constant constants[2] = {
-        Constant(environment, NULL),
-        Constant(environment, NULL)
-    };
-
+    llvm::OwningPtr<Domain> constants[2];
     Domain *values[2] = {
         variableOrConstant(*instruction.getOperand(0), state, constants[0]),
         variableOrConstant(*instruction.getOperand(1), state, constants[1])
@@ -449,169 +259,302 @@ binaryOperation(const llvm::BinaryOperator &instruction,
 
     // Create result value of required type and then run the desired
     // operation.
-    Domain *result = typeToEmptyValue(*instruction.getType(), environment);
+    Domain *result = mConstructors.create(*instruction.getType());
     ((result)->*(operation))(*values[0], *values[1]);
 
     // Store the result value to the state.
     state.addFunctionVariable(instruction, result);
 }
 
-void Operations::add(const llvm::BinaryOperator &instruction,
-                      State &state,
-                      const Environment &environment)
+template<typename T> bool
+Operations::getElementPtrOffsets(std::vector<Domain*> &result,
+                                 T iteratorStart,
+                                 T iteratorEnd,
+                                 const State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::add);
+    // Check that all variables exist before building the offset list.
+    for (T it = iteratorStart; it != iteratorEnd; ++it)
+    {
+        if (llvm::isa<llvm::ConstantInt>(it))
+            continue;
+
+        Domain *offset = state.findVariable(*it->get());
+        // Not all offsets are necesarily known at each pass before
+        // reaching a fixpoint.
+        if (!offset)
+            return false;
+    }
+
+    // Build the offset list.
+    for (T it = iteratorStart; it != iteratorEnd; ++it)
+    {
+        if (llvm::isa<llvm::ConstantInt>(it))
+        {
+            const llvm::ConstantInt *constant =
+                llvmCast<llvm::ConstantInt>(it);
+
+            result.push_back(mConstructors.create(*constant));
+        }
+        else
+        {
+            Domain *offset = state.findVariable(*it->get());
+            result.push_back(offset->clone());
+        }
+    }
+
+    return true;
+}
+
+void
+Operations::castOperation(const llvm::CastInst &instruction,
+                          State &state,
+                          Domain::CastOperation operation)
+{
+    llvm::OwningPtr<Domain> constant;
+    Domain *source = variableOrConstant(
+        *instruction.getOperand(0),
+        state,
+        constant);
+
+    if (!source)
+        return;
+
+    // Create result value of required type and then run the desired
+    // operation.
+    Domain *result = mConstructors.create(*instruction.getDestTy());
+
+    ((result)->*(operation))(*source);
+
+    // Store the result value to the state.
+    state.addFunctionVariable(instruction, result);
+}
+
+void
+Operations::cmpOperation(const llvm::CmpInst &instruction,
+                         State &state,
+                         Domain::CmpOperation operation)
+{
+    // Find operands in state, and encapsulate constant operands (such
+    // as numbers).  If some operand is not known, exit.
+    llvm::OwningPtr<Domain> constants[2];
+    Domain *values[2] = {
+        variableOrConstant(*instruction.getOperand(0), state, constants[0]),
+        variableOrConstant(*instruction.getOperand(1), state, constants[1])
+    };
+
+    if (!values[0] || !values[1])
+        return;
+
+    // TODO: suppot arrays
+    Domain *resultValue = new Integer::Container(mEnvironment, 1);
+    ((resultValue)->*(operation))(*values[0],
+                                  *values[1],
+                                  instruction.getPredicate());
+
+    state.addFunctionVariable(instruction, resultValue);
+}
+
+void
+Operations::ret(const llvm::ReturnInst &instruction,
+                State &state)
+{
+    llvm::Value *value = instruction.getReturnValue();
+    // Return value is optional, some functions return nothing.
+    if (!value)
+        return;
+
+    Domain *variable = state.findVariable(*value);
+    // It might happen that the variable is not found in state,
+    // because the function has not yet reached fixpoint.
+    if (variable)
+    {
+        if (state.mReturnedValue)
+            state.mReturnedValue->merge(*variable);
+        else
+            state.mReturnedValue = variable->clone();
+    }
+    else if (llvm::isa<llvm::Constant>(value))
+    {
+        llvm::Constant &constValue = llvmCast<llvm::Constant>(*value);
+        Domain *retValue = mConstructors.create(constValue);
+        if (state.mReturnedValue)
+        {
+            state.mReturnedValue->merge(*retValue);
+            delete retValue;
+        }
+        else
+            state.mReturnedValue = retValue;
+    }
+}
+
+void
+Operations::br(const llvm::BranchInst &instruction,
+               State &state)
+{
+    // Ignore.
+}
+
+void
+Operations::switch_(const llvm::SwitchInst &instruction,
+                    State &state)
+{
+    // Ignore.
+}
+
+void
+Operations::indirectbr(const llvm::IndirectBrInst &instruction,
+                       State &state)
+{
+    // Ignore.
+}
+
+void
+Operations::invoke(const llvm::InvokeInst &instruction,
+                   Stack &stack)
+{
+    interpretCall(instruction, stack);
+}
+
+void
+Operations::unreachable(const llvm::UnreachableInst &instruction,
+                        State &state)
+{
+    // Ignore.
+}
+
+void Operations::add(const llvm::BinaryOperator &instruction,
+                     State &state)
+{
+    binaryOperation(instruction, state, &Domain::add);
 }
 
 void
 Operations::fadd(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::fadd);
+    binaryOperation(instruction, state, &Domain::fadd);
 }
 
 void
 Operations::sub(const llvm::BinaryOperator &instruction,
-                 State &state,
-                 const Environment &environment)
+                State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::sub);
+    binaryOperation(instruction, state, &Domain::sub);
 }
 
 void
 Operations::fsub(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::fsub);
+    binaryOperation(instruction, state, &Domain::fsub);
 }
 
 void
 Operations::mul(const llvm::BinaryOperator &instruction,
-                 State &state,
-                 const Environment &environment)
+                State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::mul);
+    binaryOperation(instruction, state, &Domain::mul);
 }
 
 void
 Operations::fmul(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::fmul);
+    binaryOperation(instruction, state, &Domain::fmul);
 }
 
 void
 Operations::udiv(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::udiv);
+    binaryOperation(instruction, state, &Domain::udiv);
 }
 
 void
 Operations::sdiv(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::sdiv);
+    binaryOperation(instruction, state, &Domain::sdiv);
 }
 
 void
 Operations::fdiv(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::fdiv);
+    binaryOperation(instruction, state, &Domain::fdiv);
 }
 
 void
 Operations::urem(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::urem);
+    binaryOperation(instruction, state, &Domain::urem);
 }
 
 void
 Operations::srem(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::srem);
+    binaryOperation(instruction, state, &Domain::srem);
 }
 
 void
 Operations::frem(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::frem);
+    binaryOperation(instruction, state, &Domain::frem);
 }
 
 void
 Operations::shl(const llvm::BinaryOperator &instruction,
-                 State &state,
-                 const Environment &environment)
+                State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::shl);
+    binaryOperation(instruction, state, &Domain::shl);
 }
 
 void
 Operations::lshr(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::lshr);
+    binaryOperation(instruction, state, &Domain::lshr);
 }
 
 void
 Operations::ashr(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::ashr);
+    binaryOperation(instruction, state, &Domain::ashr);
 }
 
 void
 Operations::and_(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::and_);
+    binaryOperation(instruction, state, &Domain::and_);
 }
 
 void
 Operations::or_(const llvm::BinaryOperator &instruction,
-                 State &state,
-                 const Environment &environment)
+                State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::or_);
+    binaryOperation(instruction, state, &Domain::or_);
 }
 
 void
 Operations::xor_(const llvm::BinaryOperator &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    binaryOperation(instruction, state, environment, &Domain::xor_);
+    binaryOperation(instruction, state, &Domain::xor_);
 }
 
 void
 Operations::extractelement(const llvm::ExtractElementInst &instruction,
-                            State &state,
-                            const Environment &environment)
+                           State &state)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.  Fixpoint
     // calculation is probably not far enough.
-    Constant constants[2] = {
-        Constant(environment, NULL),
-        Constant(environment, NULL)
-    };
-
+    llvm::OwningPtr<Domain> constants[2];
     Domain *values[2] = {
         variableOrConstant(*instruction.getOperand(0), state, constants[0]),
         variableOrConstant(*instruction.getOperand(1), state, constants[1])
@@ -622,19 +565,8 @@ Operations::extractelement(const llvm::ExtractElementInst &instruction,
     const Array::ExactSize *array =
         dynCast<const Array::ExactSize*>(values[0]);
 
-    bool deleteArray = false;
-    if (const Constant *constant = dynCast<const Constant*>(values[0]))
-    {
-        Domain *modifiable = constant->toModifiableValue();
-        array = dynCast<const Array::ExactSize*>(modifiable);
-        deleteArray = true;
-    }
-
     CANAL_ASSERT_MSG(array, "Invalid type of array.");
     Domain *result = array->getValue(*values[1]);
-
-    if (deleteArray)
-        delete array;
 
     // Store the result value to the state.
     state.addFunctionVariable(instruction, result);
@@ -642,17 +574,12 @@ Operations::extractelement(const llvm::ExtractElementInst &instruction,
 
 void
 Operations::insertelement(const llvm::InsertElementInst &instruction,
-                           State &state,
-                           const Environment &environment)
+                          State &state)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.  Fixpoint
     // calculation is probably not far enough.
-    Constant constants[3] = {
-        Constant(environment, NULL),
-        Constant(environment, NULL),
-        Constant(environment, NULL)
-    };
+    llvm::OwningPtr<Domain> constants[3];
 
     Domain *values[3] = {
         variableOrConstant(*instruction.getOperand(0), state, constants[0]),
@@ -663,14 +590,7 @@ Operations::insertelement(const llvm::InsertElementInst &instruction,
         return;
 
     Domain *result = values[0]->clone();
-
     Array::ExactSize *resultAsArray = dynCast<Array::ExactSize*>(result);
-
-    if (Constant *constant = dynCast<Constant*>(result))
-    {
-        Domain *modifiable = constant->toModifiableValue();
-        result = resultAsArray = dynCast<Array::ExactSize*>(modifiable);
-    }
 
     CANAL_ASSERT_MSG(result, "Invalid type of array.");
     resultAsArray->setItem(*values[2], *values[1]);
@@ -681,16 +601,11 @@ Operations::insertelement(const llvm::InsertElementInst &instruction,
 
 void
 Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
-                           Stack &stack,
-                           const Environment &environment)
+                          Stack &stack)
 {
     State &state = stack.getCurrentState();
 
-    Constant constants[2] = {
-        Constant(environment, NULL),
-        Constant(environment, NULL)
-    };
-
+    llvm::OwningPtr<Domain> constants[2];
     Domain *values[2] = {
         variableOrConstant(*instruction.getOperand(0), state, constants[0]),
         variableOrConstant(*instruction.getOperand(1), state, constants[1])
@@ -703,7 +618,7 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
     Array::ExactSize *array1 = dynCast<Array::ExactSize*>(values[1]);
     CANAL_ASSERT_MSG(array1, "Invalid type in shufflevector.");
 
-    Array::ExactSize *result = new Array::ExactSize(environment);
+    Array::ExactSize *result = new Array::ExactSize(mEnvironment);
 
 #if LLVM_MAJOR == 3 && LLVM_MINOR >= 1
     llvm::SmallVector<int, 16> shuffleMask = instruction.getShuffleMask();
@@ -737,8 +652,8 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
         int offset = *it;
         if (offset == -1)
         {
-            Domain *value = typeToEmptyValue(*instruction.getType()->getElementType(),
-                                             environment);
+            Domain *value = mConstructors.create(
+                *instruction.getType()->getElementType());
 
             result->mValues.push_back(value);
         }
@@ -764,14 +679,6 @@ getValueLocation(Domain *aggregate, const T &instruction)
         itend = instruction.idx_end();
     for (; it != itend; ++it)
     {
-        if (const Constant *constant = dynCast<const Constant*>(item))
-        {
-            // It would make sense to implement getValue() for
-            // Constant.  Converting constant via getModifableValue()
-            // leads to precision loss.
-            CANAL_NOT_IMPLEMENTED();
-        }
-
         const Array::Interface *array =
             dynCast<const Array::Interface*>(item);
 
@@ -784,10 +691,9 @@ getValueLocation(Domain *aggregate, const T &instruction)
 
 void
 Operations::extractvalue(const llvm::ExtractValueInst &instruction,
-                          State &state,
-                          const Environment &environment)
+                         State &state)
 {
-    Constant constant(environment, NULL);
+    llvm::OwningPtr<Domain> constant;
     Domain *aggregate = variableOrConstant(
         *instruction.getAggregateOperand(),
         state,
@@ -802,10 +708,9 @@ Operations::extractvalue(const llvm::ExtractValueInst &instruction,
 
 void
 Operations::insertvalue(const llvm::InsertValueInst &instruction,
-                         State &state,
-                         const Environment &environment)
+                        State &state)
 {
-    Constant aggregateConstant(environment, NULL);
+    llvm::OwningPtr<Domain> aggregateConstant;
     Domain *aggregate = variableOrConstant(
         *instruction.getAggregateOperand(),
         state,
@@ -814,7 +719,7 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
     if (!aggregate)
         return;
 
-    Constant insertedConstant(environment, NULL);
+    llvm::OwningPtr<Domain> insertedConstant;
     Domain *insertedValue = variableOrConstant(
         *instruction.getInsertedValueOperand(),
         state,
@@ -831,25 +736,23 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
 
 void
 Operations::alloca_(const llvm::AllocaInst &instruction,
-                     Stack &stack,
-                     const Environment &environment)
+                    Stack &stack)
 {
     State &state = stack.getCurrentState();
     const llvm::Type *type = instruction.getAllocatedType();
     CANAL_ASSERT(type);
-    Domain *value = typeToEmptyValue(*type, environment);
+    Domain *value = mConstructors.create(*type);
 
     if (instruction.isArrayAllocation())
     {
         const llvm::Value *arraySize = instruction.getArraySize();
         Domain *abstractSize = NULL;
 
-        if (llvm::isa<llvm::ConstantInt>(arraySize))
+        if (llvm::isa<llvm::Constant>(arraySize))
         {
-            const llvm::ConstantInt *constant =
-                llvmCast<llvm::ConstantInt>(arraySize);
-
-            abstractSize = new Constant(environment, constant);
+            const llvm::Constant &constant =
+                llvmCast<llvm::Constant>(*arraySize);
+            abstractSize = mConstructors.create(constant);
         }
         else
         {
@@ -865,7 +768,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
             abstractSize = abstractSize->clone();
         }
 
-        Array::SingleItem *array = new Array::SingleItem(environment);
+        Array::SingleItem *array = new Array::SingleItem(mEnvironment);
         array->mValue = value;
         array->mSize = abstractSize;
         value = array;
@@ -873,7 +776,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
 
     state.addFunctionBlock(instruction, value);
     Pointer::InclusionBased *pointer =
-        new Pointer::InclusionBased(environment, *type);
+        new Pointer::InclusionBased(mEnvironment, *type);
 
     pointer->addTarget(Pointer::Target::FunctionBlock,
                        &instruction,
@@ -886,8 +789,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
 
 void
 Operations::load(const llvm::LoadInst &instruction,
-                  State &state,
-                  const Environment &environment)
+                  State &state)
 {
     // Find the pointer in the state.  If the pointer is not
     // available, do nothing.
@@ -907,59 +809,9 @@ Operations::load(const llvm::LoadInst &instruction,
     state.addFunctionVariable(instruction, mergedValue);
 }
 
-// Went through the getelementptr offsets and assembly a list of
-// abstract values representing these offsets.
-// @returns
-//   True if the the operation has been successful.  This means that
-//   state contained all abstract values used as an offset.  False
-//   otherwise.  If false is returned, the result vector is empty.
-// @param result
-//   Vector where all offsets are going to be stored as abstract
-//   values.  Caller takes ownership of the values.
-template<typename T> static bool
-getElementPtrOffsets(std::vector<Domain*> &result,
-                     const Environment &environment,
-                     T iteratorStart,
-                     T iteratorEnd,
-                     const State &state)
-{
-    // Check that all variables exist before building the offset list.
-    for (T it = iteratorStart; it != iteratorEnd; ++it)
-    {
-        if (llvm::isa<llvm::ConstantInt>(it))
-            continue;
-
-        Domain *offset = state.findVariable(*it->get());
-        // Not all offsets are necesarily known at each pass before
-        // reaching a fixpoint.
-        if (!offset)
-            return false;
-    }
-
-    // Build the offset list.
-    for (T it = iteratorStart; it != iteratorEnd; ++it)
-    {
-        if (llvm::isa<llvm::ConstantInt>(it))
-        {
-            llvm::ConstantInt *constant =
-                llvmCast<llvm::ConstantInt>(it);
-
-            result.push_back(new Constant(environment, constant));
-        }
-        else
-        {
-            Domain *offset = state.findVariable(*it->get());
-            result.push_back(offset->clone());
-        }
-    }
-
-    return true;
-}
-
 void
 Operations::store(const llvm::StoreInst &instruction,
-                   State &state,
-                   const Environment &environment)
+                  State &state)
 {
     // Find the pointer in the state.  If the pointer is not
     // available, do nothing.
@@ -1000,7 +852,6 @@ Operations::store(const llvm::StoreInst &instruction,
             std::vector<Domain*> offsets;
             bool allOffsetsPresent = getElementPtrOffsets(
                 offsets,
-                environment,
                 constantExpr->op_begin() + 1,
                 constantExpr->op_end(),
                 state);
@@ -1014,7 +865,8 @@ Operations::store(const llvm::StoreInst &instruction,
             CANAL_ASSERT(pointerType.getElementType());
 
             Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
-                environment, *pointerType.getElementType());
+                mEnvironment, *pointerType.getElementType());
+
             constPointer->addTarget(Pointer::Target::GlobalVariable,
                                     &instruction,
                                     *constantExpr->op_begin(),
@@ -1024,7 +876,7 @@ Operations::store(const llvm::StoreInst &instruction,
             value = constPointer;
         }
         else
-            value = new Constant(environment, constant);
+            value = mConstructors.create(*constant);
     }
 
     pointer.store(*value, state);
@@ -1035,8 +887,7 @@ Operations::store(const llvm::StoreInst &instruction,
 
 void
 Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
-                           Stack &stack,
-                           const Environment &environment)
+                          Stack &stack)
 {
     CANAL_ASSERT(instruction.getNumOperands() > 1);
     State &state = stack.getCurrentState();
@@ -1055,7 +906,6 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
     // targets.
     std::vector<Domain*> offsets;
     bool allOffsetsPresent = getElementPtrOffsets(offsets,
-                                                  environment,
                                                   instruction.idx_begin(),
                                                   instruction.idx_end(),
                                                   state);
@@ -1072,135 +922,90 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
     state.addFunctionVariable(instruction, result);
 }
 
-static void
-castOperation(const llvm::CastInst &instruction,
-              State &state,
-              const Environment &environment,
-              Domain::CastOperation operation)
-{
-    Constant constant(environment, NULL);
-    Domain *source = variableOrConstant(
-        *instruction.getOperand(0),
-        state,
-        constant);
-
-    if (!source)
-        return;
-
-    // Create result value of required type and then run the desired
-    // operation.
-    Domain *result = typeToEmptyValue(*instruction.getDestTy(),
-                                     environment);
-    ((result)->*(operation))(*source);
-
-    // Store the result value to the state.
-    state.addFunctionVariable(instruction, result);
-}
-
-
 void
 Operations::trunc(const llvm::TruncInst &instruction,
-                   State &state,
-                   const Environment &environment)
+                  State &state)
 {
     castOperation(instruction,
                   state,
-                  environment,
                   &Domain::trunc);
 }
 
 void
 Operations::zext(const llvm::ZExtInst &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
     castOperation(instruction,
                   state,
-                  environment,
                   &Domain::zext);
 }
 
 void
 Operations::sext(const llvm::SExtInst &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
     castOperation(instruction,
                   state,
-                  environment,
                   &Domain::sext);
 }
 
 void
 Operations::fptrunc(const llvm::FPTruncInst &instruction,
-                     State &state,
-                     const Environment &environment)
+                    State &state)
 {
     castOperation(instruction,
                   state,
-                  environment,
                   &Domain::fptrunc);
 }
 
 void
 Operations::fpext(const llvm::FPExtInst &instruction,
-                   State &state,
-                   const Environment &environment)
+                  State &state)
 {
     castOperation(instruction,
                   state,
-                  environment,
                   &Domain::fpext);
 }
 
 void
 Operations::fptoui(const llvm::FPToUIInst &instruction,
-                    State &state,
-                    const Environment &environment)
+                   State &state)
 {
     castOperation(instruction,
                   state,
-                  environment,
                   &Domain::fptoui);
 }
 
 void
 Operations::fptosi(const llvm::FPToSIInst &instruction,
-                    State &state,
-                    const Environment &environment)
+                   State &state)
 {
     castOperation(instruction,
                   state,
-                  environment,
                   &Domain::fptosi);
 }
 
 void
 Operations::uitofp(const llvm::UIToFPInst &instruction,
-                    State &state,
-                    const Environment &environment)
+                   State &state)
 {
     castOperation(instruction,
                   state,
-                  environment,
                   &Domain::uitofp);
 }
 
 void
 Operations::sitofp(const llvm::SIToFPInst &instruction,
-                    State &state,
-                    const Environment &environment)
+                    State &state)
 {
     castOperation(instruction,
                   state,
-                  environment,
                   &Domain::sitofp);
 }
 
 void
 Operations::ptrtoint(const llvm::PtrToIntInst &instruction,
-                      State &state,
-                      const Environment &environment)
+                     State &state)
 {
     Domain *operand = state.findVariable(*instruction.getOperand(0));
     if (!operand)
@@ -1231,7 +1036,7 @@ Operations::ptrtoint(const llvm::PtrToIntInst &instruction,
         else
         {
             it->second.mNumericOffset =
-                typeToEmptyValue(*instruction.getDestTy(), environment.getModule());
+                mConstructors.create(*instruction.getDestTy());
         }
     }
 */
@@ -1240,8 +1045,7 @@ Operations::ptrtoint(const llvm::PtrToIntInst &instruction,
 
 void
 Operations::inttoptr(const llvm::IntToPtrInst &instruction,
-                      State &state,
-                      const Environment &environment)
+                     State &state)
 {
     Domain *operand = state.findVariable(*instruction.getOperand(0));
     if (!operand)
@@ -1261,8 +1065,7 @@ Operations::inttoptr(const llvm::IntToPtrInst &instruction,
 
 void
 Operations::bitcast(const llvm::BitCastInst &instruction,
-                     State &state,
-                     const Environment &environment)
+                    State &state)
 {
     const llvm::Type *sourceType = instruction.getSrcTy();
     const llvm::Type *destinationType = instruction.getDestTy();
@@ -1281,60 +1084,28 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
     state.addFunctionVariable(instruction, resultPointer);
 }
 
-static void
-cmpOperation(const llvm::CmpInst &instruction,
-             const Environment &environment,
-             State &state,
-             Domain::CmpOperation operation)
-{
-    // Find operands in state, and encapsulate constant operands (such
-    // as numbers).  If some operand is not known, exit.
-    Constant constants[2] = {
-        Constant(environment, NULL),
-        Constant(environment, NULL)
-    };
-
-    Domain *values[2] = {
-        variableOrConstant(*instruction.getOperand(0), state, constants[0]),
-        variableOrConstant(*instruction.getOperand(1), state, constants[1])
-    };
-    if (!values[0] || !values[1])
-        return;
-
-    // TODO: suppot arrays
-    Domain *resultValue = new Integer::Container(environment, 1);
-    ((resultValue)->*(operation))(*values[0],
-                                  *values[1],
-                                  instruction.getPredicate());
-
-    state.addFunctionVariable(instruction, resultValue);
-}
-
 void
 Operations::icmp(const llvm::ICmpInst &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    cmpOperation(instruction, environment, state, &Domain::icmp);
+    cmpOperation(instruction, state, &Domain::icmp);
 }
 
 void
 Operations::fcmp(const llvm::FCmpInst &instruction,
-                  State &state,
-                  const Environment &environment)
+                 State &state)
 {
-    cmpOperation(instruction, environment, state, &Domain::fcmp);
+    cmpOperation(instruction, state, &Domain::fcmp);
 }
 
 void
 Operations::phi(const llvm::PHINode &instruction,
-                 State &state,
-                 const Environment &environment)
+                State &state)
 {
     Domain *mergedValue = NULL;
     for (int i = 0; i < instruction.getNumIncomingValues(); ++i)
     {
-        Constant c(environment, NULL);
+        llvm::OwningPtr<Domain> c;
         Domain *value = variableOrConstant(*instruction.getIncomingValue(i),
                                            state, c);
         if (!value)
@@ -1343,13 +1114,7 @@ Operations::phi(const llvm::PHINode &instruction,
         if (mergedValue)
             mergedValue->merge(*value);
         else
-        {
-            Constant *constant = dynCast<Constant*>(value);
-            if (constant)
-                mergedValue = constant->toModifiableValue();
-            else
-                mergedValue = value->clone();
-        }
+            mergedValue = value->clone();
     }
 
     if (!mergedValue)
@@ -1360,18 +1125,16 @@ Operations::phi(const llvm::PHINode &instruction,
 
 void
 Operations::select(const llvm::SelectInst &instruction,
-                    State &state,
-                    const Environment &environment)
+                   State &state)
 {
     Domain *condition = state.findVariable(*instruction.getCondition());
     if (!condition)
         return;
 
-    Constant trueConstant(environment, NULL),
-        falseConstant(environment, NULL);
+    llvm::OwningPtr<Domain> trueConstant, falseConstant;
 
     Domain *trueValue = variableOrConstant(*instruction.getTrueValue(),
-                                          state, trueConstant);
+                                           state, trueConstant);
     Domain *falseValue = variableOrConstant(*instruction.getFalseValue(),
                                            state, falseConstant);
 
@@ -1406,16 +1169,14 @@ Operations::select(const llvm::SelectInst &instruction,
 
 void
 Operations::call(const llvm::CallInst &instruction,
-                  Stack &stack,
-                  const Environment &environment)
+                 Stack &stack)
 {
-    interpretCall(instruction, stack, environment);
+    interpretCall(instruction, stack);
 }
 
 void
 Operations::va_arg(const llvm::VAArgInst &instruction,
-                    State &state,
-                    const Environment &environment)
+                   State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
@@ -1425,40 +1186,35 @@ Operations::va_arg(const llvm::VAArgInst &instruction,
 
 void
 Operations::resume(const llvm::ResumeInst &instruction,
-                    State &state,
-                    const Environment &environment)
+                   State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
 Operations::fence(const llvm::FenceInst &instruction,
-                   State &state,
-                   const Environment &environment)
+                  State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
 Operations::cmpxchg(const llvm::AtomicCmpXchgInst &instruction,
-                     State &state,
-                     const Environment &environment)
+                    State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
 Operations::atomicrmw(const llvm::AtomicRMWInst &instruction,
-                       State &state,
-                       const Environment &environment)
+                      State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
 Operations::landingpad(const llvm::LandingPadInst &instruction,
-                        State &state,
-                        const Environment &environment)
+                       State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }

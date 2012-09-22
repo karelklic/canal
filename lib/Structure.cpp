@@ -1,6 +1,5 @@
 #include "Structure.h"
 #include "Utils.h"
-#include "Constant.h"
 #include "IntegerContainer.h"
 #include "IntegerEnumeration.h"
 #include "IntegerInterval.h"
@@ -110,16 +109,6 @@ std::vector<Domain*>
 Structure::getItem(const Domain &offset) const
 {
     std::vector<Domain*> result;
-    if (const Constant *constant = dynCast<const Constant*>(&offset))
-    {
-        CANAL_ASSERT(constant->isAPInt());
-        CANAL_ASSERT(constant->getAPInt().getBitWidth() <= 64);
-        uint64_t numOffset = constant->getAPInt().getZExtValue();
-        CANAL_ASSERT(numOffset < mMembers.size());
-        result.push_back(mMembers[numOffset]);
-        return result;
-    }
-
     const Integer::Container &integer =
         dynCast<const Integer::Container&>(offset);
 

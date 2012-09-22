@@ -1,6 +1,5 @@
 #include "Pointer.h"
 #include "ArraySingleItem.h"
-#include "Constant.h"
 #include "Utils.h"
 #include "State.h"
 #include "SlotTracker.h"
@@ -219,12 +218,7 @@ InclusionBased::isSingleTarget() const
 void
 InclusionBased::merge(const Domain &value)
 {
-    CANAL_ASSERT_MSG(!dynCast<const Constant*>(&value),
-                     "Constant values are not supported for pointers."
-                     "Getelementptr should be evaluated in the interpreter.");
-
     const InclusionBased &vv = dynCast<const InclusionBased&>(value);
-
     CANAL_ASSERT_MSG(&vv.mType == &mType,
                      "Unexpected different types in a pointer merge ("
                      << Canal::toString(vv.mType) << " != "

@@ -131,18 +131,10 @@ Target::merge(const Target &target)
         llvm::APInt zero = llvm::APInt::getNullValue(
             numericOffsetInt.getBitWidth());
         Integer::Container zeroContainer(mEnvironment, zero);
-        mNumericOffset = Domain::handleMergeConstants(mNumericOffset,
-                                                      &zeroContainer);
-
         mNumericOffset->merge(zeroContainer);
     }
     else if (mNumericOffset)
-    {
-        mNumericOffset = Domain::handleMergeConstants(mNumericOffset,
-                                                      target.mNumericOffset);
-
         mNumericOffset->merge(*target.mNumericOffset);
-    }
 
     CANAL_ASSERT(mType == target.mType);
     switch (mType)
@@ -160,10 +152,7 @@ Target::merge(const Target &target)
         std::vector<Domain*>::iterator it1 = mOffsets.begin();
         std::vector<Domain*>::const_iterator it2 = target.mOffsets.begin();
         for (; it1 != mOffsets.end(); ++it1, ++it2)
-        {
-            (*it1) = Domain::handleMergeConstants(*it1, *it2);
             (*it1)->merge(**it2);
-        }
 
         break;
     }
