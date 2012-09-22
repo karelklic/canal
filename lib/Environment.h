@@ -27,7 +27,7 @@ public:
     llvm::LLVMContext &getContext() const;
     const llvm::Module &getModule() const { return *mModule; }
     const llvm::TargetData &getTargetData() const { return mTargetData; }
-    llvm::SlotTracker &getSlotTracker() const { return mSlotTracker; }
+    SlotTracker &getSlotTracker() const { return mSlotTracker; }
 };
 
 } // namespace Canal

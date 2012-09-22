@@ -24,6 +24,11 @@ libcanal_la_SOURCES = \
 	IntegerEnumeration.h \
 	IntegerInterval.cpp \
 	IntegerInterval.h \
+	InterpreterBlockBasicBlock.h \
+	InterpreterBlockFunction.h \
+	InterpreterBlock.h \
+	InterpreterBlockIterator.cpp \
+	InterpreterBlockIterator.h \
 	Operations.cpp \
 	Operations.h \
 	Pointer.cpp \
@@ -33,8 +38,6 @@ libcanal_la_SOURCES = \
 	SELinuxModulePass.cpp \
 	SlotTracker.cpp \
 	SlotTracker.h \
-	Stack.cpp \
-	Stack.h \
 	State.cpp \
 	State.h \
 	StringUtils.cpp \

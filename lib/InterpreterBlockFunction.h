@@ -1,7 +1,15 @@
+#ifndef LIBCANAL_INTERPRETER_BLOCK_FUNCTION_H
+#define LIBCANAL_INTERPRETER_BLOCK_FUNCTION_H
+
+#include "InterpreterBlockBasicBlock.h"
+#include "State.h"
+#include <llvm/Function.h>
 
 namespace Canal {
-namespace Interpreter {
-namespace BasicBlock {
+
+class Value;
+
+namespace InterpreterBlock {
 
 class Function
 {
@@ -15,6 +23,7 @@ protected:
     Value *mReturnValue;
 };
 
-} // namespace BasicBlock
-} // namespace Interpreter
+} // namespace InterpreterBlock
 } // namespace Canal
+
+#endif // LIBCANAL_INTERPRETER_BLOCK_FUNCTION_H

@@ -7,11 +7,10 @@
 #include "IntegerBitfield.h"
 #include "IntegerContainer.h"
 #include "Pointer.h"
-#include "Stack.h"
-#include "State.h"
 #include "Structure.h"
 #include "Utils.h"
 #include "Domain.h"
+#include "State.h"
 #include <llvm/Function.h>
 #include <llvm/Module.h>
 #include <llvm/BasicBlock.h>
@@ -98,11 +97,11 @@ typeToEmptyValue(const llvm::Type &type, const Environment &environment)
 
 void
 Operations::addGlobalVariables(State &state,
-                                const Environment &environment)
+                               const Environment &environment)
 {
     // Add global constants.
-    llvm::Module::const_global_iterator git = environment.mModule.global_begin();
-    llvm::Module::const_global_iterator gitend = environment.mModule.global_end();
+    llvm::Module::const_global_iterator git = environment.getModule().global_begin();
+    llvm::Module::const_global_iterator gitend = environment.getModule().global_end();
     for (; git != gitend; ++git)
     {
         if (git->isConstant())
@@ -115,7 +114,7 @@ Operations::addGlobalVariables(State &state,
                                                         environment));
 
             Domain *value = typeToEmptyValue(*git->getType(),
-                                            environment.mModule);
+                                             environment);
 
             Pointer::InclusionBased &pointer = dynCast<Pointer::InclusionBased&>(*value);
             pointer.addTarget(Pointer::Target::GlobalBlock,
@@ -417,7 +416,7 @@ Operations::invoke(const llvm::InvokeInst &instruction,
                     Stack &stack,
                     const Environment &environment)
 {
-    interpretCall(instruction, stack, environment.mModule);
+    interpretCall(instruction, stack, environment);
 }
 
 void
@@ -461,7 +460,7 @@ void Operations::add(const llvm::BinaryOperator &instruction,
                       State &state,
                       const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::add);
+    binaryOperation(instruction, state, environment, &Domain::add);
 }
 
 void
@@ -469,7 +468,7 @@ Operations::fadd(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::fadd);
+    binaryOperation(instruction, state, environment, &Domain::fadd);
 }
 
 void
@@ -477,7 +476,7 @@ Operations::sub(const llvm::BinaryOperator &instruction,
                  State &state,
                  const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::sub);
+    binaryOperation(instruction, state, environment, &Domain::sub);
 }
 
 void
@@ -485,7 +484,7 @@ Operations::fsub(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::fsub);
+    binaryOperation(instruction, state, environment, &Domain::fsub);
 }
 
 void
@@ -493,7 +492,7 @@ Operations::mul(const llvm::BinaryOperator &instruction,
                  State &state,
                  const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::mul);
+    binaryOperation(instruction, state, environment, &Domain::mul);
 }
 
 void
@@ -501,7 +500,7 @@ Operations::fmul(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::fmul);
+    binaryOperation(instruction, state, environment, &Domain::fmul);
 }
 
 void
@@ -509,7 +508,7 @@ Operations::udiv(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::udiv);
+    binaryOperation(instruction, state, environment, &Domain::udiv);
 }
 
 void
@@ -517,7 +516,7 @@ Operations::sdiv(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::sdiv);
+    binaryOperation(instruction, state, environment, &Domain::sdiv);
 }
 
 void
@@ -525,7 +524,7 @@ Operations::fdiv(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::fdiv);
+    binaryOperation(instruction, state, environment, &Domain::fdiv);
 }
 
 void
@@ -533,7 +532,7 @@ Operations::urem(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::urem);
+    binaryOperation(instruction, state, environment, &Domain::urem);
 }
 
 void
@@ -541,7 +540,7 @@ Operations::srem(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::srem);
+    binaryOperation(instruction, state, environment, &Domain::srem);
 }
 
 void
@@ -549,7 +548,7 @@ Operations::frem(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::frem);
+    binaryOperation(instruction, state, environment, &Domain::frem);
 }
 
 void
@@ -557,7 +556,7 @@ Operations::shl(const llvm::BinaryOperator &instruction,
                  State &state,
                  const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::shl);
+    binaryOperation(instruction, state, environment, &Domain::shl);
 }
 
 void
@@ -565,7 +564,7 @@ Operations::lshr(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::lshr);
+    binaryOperation(instruction, state, environment, &Domain::lshr);
 }
 
 void
@@ -573,7 +572,7 @@ Operations::ashr(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::ashr);
+    binaryOperation(instruction, state, environment, &Domain::ashr);
 }
 
 void
@@ -581,7 +580,7 @@ Operations::and_(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::and_);
+    binaryOperation(instruction, state, environment, &Domain::and_);
 }
 
 void
@@ -589,7 +588,7 @@ Operations::or_(const llvm::BinaryOperator &instruction,
                  State &state,
                  const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::or_);
+    binaryOperation(instruction, state, environment, &Domain::or_);
 }
 
 void
@@ -597,7 +596,7 @@ Operations::xor_(const llvm::BinaryOperator &instruction,
                   State &state,
                   const Environment &environment)
 {
-    binaryOperation(instruction, state, environment.mModule, &Domain::xor_);
+    binaryOperation(instruction, state, environment, &Domain::xor_);
 }
 
 void
@@ -739,7 +738,7 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
         if (offset == -1)
         {
             Domain *value = typeToEmptyValue(*instruction.getType()->getElementType(),
-                                            environment.mModule);
+                                             environment);
 
             result->mValues.push_back(value);
         }
@@ -838,7 +837,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
     State &state = stack.getCurrentState();
     const llvm::Type *type = instruction.getAllocatedType();
     CANAL_ASSERT(type);
-    Domain *value = typeToEmptyValue(*type, environment.mModule);
+    Domain *value = typeToEmptyValue(*type, environment);
 
     if (instruction.isArrayAllocation())
     {
@@ -1015,7 +1014,7 @@ Operations::store(const llvm::StoreInst &instruction,
             CANAL_ASSERT(pointerType.getElementType());
 
             Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
-                environment.mModule, *pointerType.getElementType());
+                environment, *pointerType.getElementType());
             constPointer->addTarget(Pointer::Target::GlobalVariable,
                                     &instruction,
                                     *constantExpr->op_begin(),
@@ -1106,7 +1105,7 @@ Operations::trunc(const llvm::TruncInst &instruction,
 {
     castOperation(instruction,
                   state,
-                  environment.mModule,
+                  environment,
                   &Domain::trunc);
 }
 
@@ -1117,7 +1116,7 @@ Operations::zext(const llvm::ZExtInst &instruction,
 {
     castOperation(instruction,
                   state,
-                  environment.mModule,
+                  environment,
                   &Domain::zext);
 }
 
@@ -1128,7 +1127,7 @@ Operations::sext(const llvm::SExtInst &instruction,
 {
     castOperation(instruction,
                   state,
-                  environment.mModule,
+                  environment,
                   &Domain::sext);
 }
 
@@ -1139,7 +1138,7 @@ Operations::fptrunc(const llvm::FPTruncInst &instruction,
 {
     castOperation(instruction,
                   state,
-                  environment.mModule,
+                  environment,
                   &Domain::fptrunc);
 }
 
@@ -1150,7 +1149,7 @@ Operations::fpext(const llvm::FPExtInst &instruction,
 {
     castOperation(instruction,
                   state,
-                  environment.mModule,
+                  environment,
                   &Domain::fpext);
 }
 
@@ -1161,7 +1160,7 @@ Operations::fptoui(const llvm::FPToUIInst &instruction,
 {
     castOperation(instruction,
                   state,
-                  environment.mModule,
+                  environment,
                   &Domain::fptoui);
 }
 
@@ -1172,7 +1171,7 @@ Operations::fptosi(const llvm::FPToSIInst &instruction,
 {
     castOperation(instruction,
                   state,
-                  environment.mModule,
+                  environment,
                   &Domain::fptosi);
 }
 
@@ -1183,7 +1182,7 @@ Operations::uitofp(const llvm::UIToFPInst &instruction,
 {
     castOperation(instruction,
                   state,
-                  environment.mModule,
+                  environment,
                   &Domain::uitofp);
 }
 
@@ -1194,7 +1193,7 @@ Operations::sitofp(const llvm::SIToFPInst &instruction,
 {
     castOperation(instruction,
                   state,
-                  environment.mModule,
+                  environment,
                   &Domain::sitofp);
 }
 
@@ -1232,7 +1231,7 @@ Operations::ptrtoint(const llvm::PtrToIntInst &instruction,
         else
         {
             it->second.mNumericOffset =
-                typeToEmptyValue(*instruction.getDestTy(), environment.mModule);
+                typeToEmptyValue(*instruction.getDestTy(), environment.getModule());
         }
     }
 */
@@ -1410,7 +1409,7 @@ Operations::call(const llvm::CallInst &instruction,
                   Stack &stack,
                   const Environment &environment)
 {
-    interpretCall(instruction, stack, environment.mModule);
+    interpretCall(instruction, stack, environment);
 }
 
 void

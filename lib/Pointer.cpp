@@ -277,7 +277,7 @@ InclusionBased::toString() const
     {
         PlaceTargetMap::const_iterator it = mTargets.begin();
         for (; it != mTargets.end(); ++it)
-            ss << indent(it->second->toString(mEnvironment.mSlotTracker), 4);
+            ss << indent(it->second->toString(mEnvironment.getSlotTracker()), 4);
     }
 
     return ss.str();
