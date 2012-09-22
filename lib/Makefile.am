@@ -32,6 +32,10 @@ libcanal_la_SOURCES = \
 	InterpreterBlock.h \
 	InterpreterBlockIterator.cpp \
 	InterpreterBlockIterator.h \
+	InterpreterBlockModule.cpp \
+	InterpreterBlockModule.h \
+	InterpreterBlockOperationsCallback.cpp \
+	InterpreterBlockOperationsCallback.h \
 	Operations.cpp \
 	Operations.h \
 	Pointer.cpp \

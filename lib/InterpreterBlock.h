@@ -4,12 +4,15 @@
 #include "Constructors.h"
 #include "Environment.h"
 #include "Operations.h"
-#include "InterpreterBlockFunction.h"
+#include "InterpreterBlockModule.h"
 #include "InterpreterBlockIterator.h"
+#include "InterpreterBlockOperationsCallback.h"
+#include <vector>
 
 namespace Canal {
 
 class SlotTracker;
+class Domain;
 
 namespace InterpreterBlock {
 
@@ -19,25 +22,29 @@ public:
     /// @param module
     ///   Interpreter takes ownership of the module.
     Interpreter(const llvm::Module *module);
+    virtual ~Interpreter();
 
     const Environment &getEnvironment() const { return mEnvironment; }
-    const llvm::Module &getModule() const { return mEnvironment.getModule(); }
     SlotTracker &getSlotTracker() const { return mEnvironment.getSlotTracker(); }
     const Operations &getOperations() const { return mOperations; }
     Iterator &getIterator() { return mIterator; }
 
 protected:
-    Environment mEnvironment;
+    Domain *onFunctionCall(const llvm::Function &function,
+                           const std::vector<Domain*> &arguments);
 
-    Operations mOperations;
+protected:
+    Environment mEnvironment;
 
     Constructors mConstructors;
 
-    Iterator mIterator;
+    Module mModule;
 
-    // State of all functions is kept here.
-    // Workers iterate on functions until the fixpoint is reached.
-    std::vector<Function> mFunctions;
+    OperationsCallback mOperationsCallback;
+
+    Operations mOperations;
+
+    Iterator mIterator;
 };
 
 } // namespace InterpreterBlock

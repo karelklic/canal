@@ -5,6 +5,9 @@
 #include <llvm/BasicBlock.h>
 
 namespace Canal {
+
+class Constructors;
+
 namespace InterpreterBlock {
 
 class BasicBlock
@@ -16,7 +19,11 @@ protected:
     State mOutputState;
 
 public:
-    BasicBlock(const llvm::BasicBlock &basicBlock);
+    BasicBlock(const llvm::BasicBlock &basicBlock,
+               const Constructors &constructors);
+
+    llvm::BasicBlock::const_iterator begin() const { return mBasicBlock.begin(); }
+    llvm::BasicBlock::const_iterator end() const { return mBasicBlock.end(); }
 
     /// @brief Merges output states of basic blocks to the input
     /// state.

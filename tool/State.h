@@ -16,9 +16,9 @@ public:
     State(const llvm::Module *module);
     ~State();
 
-    const Canal::Environment &getEnvironment() const { return mEnvironment; }
-    const llvm::Module &getModule() const { return mInterpreter.getModule(); }
-    Canal::SlotTracker &getSlotTracker() const { return mInterpreter.getSlotTracker(); }
+    const Canal::Environment &getEnvironment() const { return mInterpreter.getEnvironment(); }
+    const llvm::Module &getModule() const { return getEnvironment().getModule(); }
+    Canal::SlotTracker &getSlotTracker() const { return getEnvironment().getSlotTracker(); }
 
     // Check if the interpreter is in the middle of interpretation.
     // This is true if something is on the stack.
@@ -39,7 +39,7 @@ protected:
     bool reachedBreakpoint();
 
 protected:
-    Canal::InterpreterBlock::Iterpreter mInterpreter;
+    Canal::InterpreterBlock::Interpreter mInterpreter;
     std::set<std::string> mFunctionBreakpoints;
 };
 

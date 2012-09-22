@@ -6,6 +6,7 @@
 #include "FloatInterval.h"
 #include "IntegerBitfield.h"
 #include "IntegerContainer.h"
+#include "OperationsCallback.h"
 #include "Pointer.h"
 #include "Structure.h"
 #include "Utils.h"
@@ -24,27 +25,20 @@
 namespace Canal {
 
 Operations::Operations(const Environment &environment,
-                       const Constructors &constructors) : mEnvironment(environment),
-                                                           mConstructors(constructors)
+                       const Constructors &constructors,
+                       OperationsCallback &callback)
+    : mEnvironment(environment),
+      mConstructors(constructors),
+      mCallback(callback)
 {
-}
-
-bool
-Operations::step(Stack &stack)
-{
-    interpretInstruction(stack);
-    return stack.nextInstruction();
 }
 
 void
-Operations::interpretInstruction(Stack &stack)
+Operations::interpretInstruction(const llvm::Instruction &instruction,
+                                 State &state)
 {
-    const llvm::Instruction &instruction =
-        stack.getCurrentInstruction();
-    State &state = stack.getCurrentState();
-
     if (llvm::isa<llvm::CallInst>(instruction))
-        call((const llvm::CallInst&)instruction, stack);
+        call((const llvm::CallInst&)instruction, state);
     else if (llvm::isa<llvm::ICmpInst>(instruction))
         icmp((const llvm::ICmpInst&)instruction, state);
     else if (llvm::isa<llvm::FCmpInst>(instruction))
@@ -52,7 +46,7 @@ Operations::interpretInstruction(Stack &stack)
     else if (llvm::isa<llvm::ExtractElementInst>(instruction))
         extractelement((const llvm::ExtractElementInst&)instruction, state);
     else if (llvm::isa<llvm::GetElementPtrInst>(instruction))
-        getelementptr((const llvm::GetElementPtrInst&)instruction, stack);
+        getelementptr((const llvm::GetElementPtrInst&)instruction, state);
     else if (llvm::isa<llvm::InsertElementInst>(instruction))
         insertelement((const llvm::InsertElementInst&)instruction, state);
     else if (llvm::isa<llvm::InsertValueInst>(instruction))
@@ -73,13 +67,13 @@ Operations::interpretInstruction(Stack &stack)
     else if (llvm::isa<llvm::SelectInst>(instruction))
         select((const llvm::SelectInst&)instruction, state);
     else if (llvm::isa<llvm::ShuffleVectorInst>(instruction))
-        shufflevector((const llvm::ShuffleVectorInst&)instruction, stack);
+        shufflevector((const llvm::ShuffleVectorInst&)instruction, state);
     else if (llvm::isa<llvm::StoreInst>(instruction))
         store((const llvm::StoreInst&)instruction, state);
     else if (llvm::isa<llvm::UnaryInstruction>(instruction))
     {
         if (llvm::isa<llvm::AllocaInst>(instruction))
-            alloca_((const llvm::AllocaInst&)instruction, stack);
+            alloca_((const llvm::AllocaInst&)instruction, state);
         else if (llvm::isa<llvm::CastInst>(instruction))
         {
             if (llvm::isa<llvm::BitCastInst>(instruction))
@@ -125,7 +119,7 @@ Operations::interpretInstruction(Stack &stack)
         else if (llvm::isa<llvm::IndirectBrInst>(instruction))
             indirectbr((const llvm::IndirectBrInst&)instruction, state);
         else if (llvm::isa<llvm::InvokeInst>(instruction))
-            invoke((const llvm::InvokeInst&)instruction, stack);
+            invoke((const llvm::InvokeInst&)instruction, state);
 #if LLVM_MAJOR >= 3
         // Resume instruction is available since LLVM 3.0
         else if (llvm::isa<llvm::ResumeInst>(instruction))
@@ -191,43 +185,14 @@ Operations::variableOrConstant(const llvm::Value &place,
 
 template<typename T> void
 Operations::interpretCall(const T &instruction,
-                          Stack &stack)
+                          State &state)
 {
-    State &state = stack.getCurrentState();
     llvm::Function *function = instruction.getCalledFunction();
-    // TODO: Handle some intristic functions.  Some of them can be
-    // safely ignored.
-    if (!function || function->isIntrinsic() || function->isDeclaration())
-    {
-        // Function not found.  Set the resultant value to the Top
-        // value.
-        printf("Function \"%s\" not available.\n", function->getName().data());
+    CANAL_ASSERT(function);
 
-        // TODO: Set memory accessed by non-static globals to
-        // the Top value.
-
-        // Create result TOP value of required type.
-        const llvm::Type *type = instruction.getType();
-        Domain *returnedValue = mConstructors.create(*instruction.getType());
-
-        // If the function returns nothing (void), we are finished.
-        if (!returnedValue)
-            return;
-
-        AccuracyDomain *accuracyValue = dynCast<AccuracyDomain*>(returnedValue);
-        if (accuracyValue)
-            accuracyValue->setTop();
-
-        state.addFunctionVariable(instruction, returnedValue);
-        return;
-    }
-
-    State initialState(state);
-    initialState.clearFunctionLevel();
-    llvm::Function::ArgumentListType::const_iterator it =
-        function->getArgumentList().begin();
-
-    for (int i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
+    // Create the function arguments.
+    std::vector<Domain*> arguments;
+    for (int i = 0; i < instruction.getNumArgOperands(); ++i)
     {
         llvm::Value *operand = instruction.getArgOperand(i);
 
@@ -236,10 +201,19 @@ Operations::interpretCall(const T &instruction,
         if (!value)
             return;
 
-        initialState.addFunctionVariable(*it, value->clone());
+        arguments.push_back(value->clone());
     }
 
-    stack.addFrame(*function, initialState);
+    Domain *result = mCallback.onFunctionCall(*function, arguments);
+
+    // Release the function arguments.
+    std::vector<Domain*>::const_iterator it = arguments.begin();
+    for (; it != arguments.end(); ++it)
+        delete *it;
+
+    // Store result.
+    if (result)
+        state.addFunctionVariable(instruction, result->clone());
 }
 
 void
@@ -410,9 +384,9 @@ Operations::indirectbr(const llvm::IndirectBrInst &instruction,
 
 void
 Operations::invoke(const llvm::InvokeInst &instruction,
-                   Stack &stack)
+                   State &state)
 {
-    interpretCall(instruction, stack);
+    interpretCall(instruction, state);
 }
 
 void
@@ -601,10 +575,8 @@ Operations::insertelement(const llvm::InsertElementInst &instruction,
 
 void
 Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
-                          Stack &stack)
+                          State &state)
 {
-    State &state = stack.getCurrentState();
-
     llvm::OwningPtr<Domain> constants[2];
     Domain *values[2] = {
         variableOrConstant(*instruction.getOperand(0), state, constants[0]),
@@ -736,9 +708,8 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
 
 void
 Operations::alloca_(const llvm::AllocaInst &instruction,
-                    Stack &stack)
+                    State &state)
 {
-    State &state = stack.getCurrentState();
     const llvm::Type *type = instruction.getAllocatedType();
     CANAL_ASSERT(type);
     Domain *value = mConstructors.create(*type);
@@ -887,10 +858,9 @@ Operations::store(const llvm::StoreInst &instruction,
 
 void
 Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
-                          Stack &stack)
+                          State &state)
 {
     CANAL_ASSERT(instruction.getNumOperands() > 1);
-    State &state = stack.getCurrentState();
 
     // Find the base pointer.
     Domain *base = state.findVariable(*instruction.getPointerOperand());
@@ -1169,9 +1139,9 @@ Operations::select(const llvm::SelectInst &instruction,
 
 void
 Operations::call(const llvm::CallInst &instruction,
-                 Stack &stack)
+                 State &state)
 {
-    interpretCall(instruction, stack);
+    interpretCall(instruction, state);
 }
 
 void

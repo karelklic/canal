@@ -11,12 +11,16 @@ IntegerBitfield.cpp
 IntegerContainer.cpp
 IntegerEnumeration.cpp
 IntegerInterval.cpp
+InterpreterBlockBasicBlock.cpp
+InterpreterBlock.cpp
+InterpreterBlockIterator.cpp
+InterpreterBlockModule.cpp
+InterpreterBlockOperationsCallback.cpp
 Operations.cpp
 Pointer.cpp
 PointerTarget.cpp
 SELinuxModulePass.cpp
 SlotTracker.cpp
-Stack.cpp
 State.cpp
 StringUtils.cpp
 Structure.cpp

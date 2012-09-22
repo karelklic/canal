@@ -1,42 +1,51 @@
 #include "InterpreterBlockIterator.h"
+#include "InterpreterBlockModule.h"
+#include "InterpreterBlockFunction.h"
+#include "InterpreterBlockBasicBlock.h"
 
 namespace Canal {
 namespace InterpreterBlock {
 
-void
-Iterator::registerOnFixpointReached(void(*fixpointReached)())
+Iterator::Iterator(Module &module) : mModule(module)
 {
-    mOnFixpointReached = fixpointReached;
+    mFunction = module.begin();
+    mBasicBlock = (*mFunction)->begin();
+    mInstruction = (*mBasicBlock)->begin();
 }
 
 void
-Iterator::registerOnNextProgramIterationStarted(void(*nextProgramIterationStarted)())
+Iterator::nextInstruction()
 {
-    mOnNextProgramIterationStarted = nextProgramIterationStarted;
 }
 
 void
-Iterator::registerOnFunctionEnter(void(*functionEnter)())
+Iterator::registerOnFixpointReached(void(*onFixpointReached)())
 {
-    mOnFunctionEnter = functionEnter;
+    mOnFixpointReached = onFixpointReached;
 }
 
 void
-Iterator::registerOnFunctionExit(void(*functionExit)())
+Iterator::registerOnFunctionEnter(void(*onFunctionEnter)())
 {
-    mOnFunctionExit = functionExit;
+    mOnFunctionEnter = onFunctionEnter;
 }
 
 void
-Iterator::registerOnBlockEnter(void(*blockEnter)())
+Iterator::registerOnFunctionExit(void(*onFunctionExit)())
 {
-    mOnBlockEnter = blockEnter;
+    mOnFunctionExit = onFunctionExit;
 }
 
 void
-Iterator::registerOnBlockExit(void(*blockExit)())
+Iterator::registerOnBasicBlockEnter(void(*onBasicBlockEnter)())
 {
-    mOnBlockExit = blockExit;
+    mOnBasicBlockEnter = onBasicBlockEnter;
+}
+
+void
+Iterator::registerOnBasicBlockExit(void(*onBasicBlockExit)())
+{
+    mOnBasicBlockExit = onBasicBlockExit;
 }
 
 } // namespace InterpreterBlock
