@@ -1,5 +1,4 @@
 #include "Commands.h"
-#include "CommandBacktrace.h"
 #include "CommandBreak.h"
 #include "CommandCd.h"
 #include "CommandContinue.h"
@@ -23,7 +22,6 @@
 
 Commands::Commands()
 {
-    mCommandList.push_back(new CommandBacktrace(*this));
     mCommandList.push_back(new CommandBreak(*this));
     mCommandList.push_back(new CommandCd(*this));
     mCommandList.push_back(new CommandContinue(*this));

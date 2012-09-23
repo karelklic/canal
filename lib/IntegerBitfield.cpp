@@ -74,7 +74,7 @@ Bitfield::signedMin(llvm::APInt &result) const
     resizeResult(result, getBitWidth());
     APIntUtils::clearAllBits(result);
 
-    for (int i = 0; i < getBitWidth(); ++i)
+    for (unsigned i = 0; i < getBitWidth(); ++i)
     {
         switch (getBitValue(i))
         {
@@ -105,7 +105,7 @@ Bitfield::signedMax(llvm::APInt &result) const
     resizeResult(result, getBitWidth());
     APIntUtils::clearAllBits(result);
 
-    for (int i = 0; i < getBitWidth(); ++i)
+    for (unsigned i = 0; i < getBitWidth(); ++i)
     {
         switch (getBitValue(i))
         {
@@ -136,7 +136,7 @@ Bitfield::unsignedMin(llvm::APInt &result) const
     resizeResult(result, getBitWidth());
     APIntUtils::clearAllBits(result);
 
-    for (int i = 0; i < getBitWidth(); ++i)
+    for (unsigned i = 0; i < getBitWidth(); ++i)
     {
         switch (getBitValue(i))
         {
@@ -163,7 +163,7 @@ Bitfield::unsignedMax(llvm::APInt &result) const
     resizeResult(result, getBitWidth());
     APIntUtils::clearAllBits(result);
 
-    for (int i = 0; i < getBitWidth(); ++i)
+    for (unsigned i = 0; i < getBitWidth(); ++i)
     {
         switch (getBitValue(i))
         {
@@ -316,7 +316,7 @@ bitOperation(Bitfield &result,
         &bb = dynCast<const Bitfield&>(b);
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth() &&
                  result.getBitWidth() == aa.getBitWidth());
-    for (int pos = 0; pos < aa.getBitWidth(); ++pos)
+    for (unsigned pos = 0; pos < aa.getBitWidth(); ++pos)
     {
         result.setBitValue(pos, operation(aa.getBitValue(pos),
                                           bb.getBitValue(pos)));
@@ -624,7 +624,7 @@ float
 Bitfield::accuracy() const
 {
     int variableBits = 0;
-    for (int pos = 0; pos < getBitWidth(); ++pos)
+    for (unsigned pos = 0; pos < getBitWidth(); ++pos)
     {
         if (getBitValue(pos) == 2)
             ++variableBits;

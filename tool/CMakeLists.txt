@@ -2,7 +2,6 @@ include_directories(${CANAL_SOURCE_DIR})
 link_directories(${CANAL_SOURCE_DIR}/lib)
 
 add_executable(canal-tool Canal.cpp
-CommandBacktrace.cpp
 CommandBreak.cpp
 CommandCd.cpp
 CommandContinue.cpp

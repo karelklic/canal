@@ -3,8 +3,6 @@ canal_SOURCES = \
 	Canal.cpp \
 	Command.h \
 	Command.cpp \
-	CommandBacktrace.h \
-	CommandBacktrace.cpp \
 	CommandBreak.h \
 	CommandBreak.cpp \
 	CommandCd.h \

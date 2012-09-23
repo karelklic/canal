@@ -9,10 +9,10 @@ namespace Float {
 Interval::Interval(const Environment &environment,
                    const llvm::fltSemantics &semantics)
     : Domain(environment),
-      mFrom(semantics),
-      mTo(semantics),
       mEmpty(true),
-      mTop(false)
+      mTop(false),
+      mFrom(semantics),
+      mTo(semantics)
 {
 }
 
