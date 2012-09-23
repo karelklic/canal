@@ -30,19 +30,33 @@ public:
 
     const llvm::BasicBlock &getEntryBlock() const;
 
+    BasicBlock &getBasicBlock(const llvm::BasicBlock &llvmBasicBlock);
+
     std::vector<BasicBlock*>::const_iterator begin() const { return mBasicBlocks.begin(); }
     std::vector<BasicBlock*>::const_iterator end() const { return mBasicBlocks.end(); }
 
     llvm::StringRef getName() const;
+
+    /// Update basic block input state from its predecessors and
+    /// function input state.
+    /// @param basicBlock
+    ///    Must be a member of this function.
+    ///    Its input state is updated.
+    void updateInputState(BasicBlock &basicBlock);
+
+    /// Update function output state from basci block output states.
+    void updateOutputState();
 
 protected:
     const llvm::Function &mFunction;
 
     std::vector<BasicBlock*> mBasicBlocks;
 
-    State mArguments;
+    // Function arguments, global variables.
+    State mInputState;
 
-    Domain *mReturnValue;
+    // Returned value, global variables.
+    State mOutputState;
 };
 
 } // namespace InterpreterBlock

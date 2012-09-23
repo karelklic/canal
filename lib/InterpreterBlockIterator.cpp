@@ -10,8 +10,11 @@ namespace InterpreterBlock {
 
 static IteratorCallback emptyCallback;
 
-    Iterator::Iterator(Module &module, Operations &operations)
-        : mModule(module), mOperations(operations), mCallback(&emptyCallback)
+Iterator::Iterator(Module &module, Operations &operations)
+    : mModule(module),
+      mOperations(operations),
+      mCallback(&emptyCallback),
+      mChanged(true)
 {
     mFunction = --mModule.end();
     mBasicBlock = --(*mFunction)->end();
@@ -30,6 +33,12 @@ Iterator::nextInstruction()
 
     if (mInstruction == (*mBasicBlock)->end())
     {
+        if (mState != (*mBasicBlock)->getOutputState())
+        {
+            (*mBasicBlock)->getOutputState().merge(mState);
+            mChanged = true;
+        }
+
         ++mBasicBlock;
 
         if (mBasicBlock == (*mFunction)->end())
@@ -41,6 +50,7 @@ Iterator::nextInstruction()
                 if (!mChanged)
                     mCallback->onFixpointReached();
 
+                mChanged = false;
                 mFunction = mModule.begin();
                 mCallback->onModuleEnter();
             }
@@ -49,6 +59,13 @@ Iterator::nextInstruction()
             mCallback->onFunctionEnter(**mFunction);
         }
 
+        // Update basic block input state from precedessors.  If it was
+        // not changed, there is no point in interpreting the block's code
+        // again.  The very first iteration is an exception, though.  The
+        // code must be interpreted at least once.
+        (*mFunction)->updateInputState(**mBasicBlock);
+
+        mState = (*mBasicBlock)->getInputState();
         mInstruction = (*mBasicBlock)->begin();
         mCallback->onBasicBlockEnter(**mBasicBlock);
     }
@@ -63,6 +80,7 @@ Iterator::nextInstruction()
 
         if (mBasicBlock == --(*mFunction)->end())
         {
+            (*mFunction)->updateOutputState();
             mCallback->onFunctionExit(**mFunction);
 
             if (mFunction == --mModule.end())

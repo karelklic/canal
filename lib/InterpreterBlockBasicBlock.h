@@ -22,12 +22,13 @@ public:
     BasicBlock(const llvm::BasicBlock &basicBlock,
                const Constructors &constructors);
 
+    const llvm::BasicBlock &getBasicBlock() const { return mBasicBlock; }
+
     llvm::BasicBlock::const_iterator begin() const { return mBasicBlock.begin(); }
     llvm::BasicBlock::const_iterator end() const { return mBasicBlock.end(); }
 
-    /// @brief Merges output states of basic blocks to the input
-    /// state.
-    void mergeOutputToInput(const BasicBlock &basicBlock);
+    State &getInputState() { return mInputState; }
+    State &getOutputState() { return mOutputState; }
 };
 
 } // namespace InterpreterBlock
