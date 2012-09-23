@@ -4,6 +4,7 @@
 #include <set>
 #include <string>
 #include "lib/InterpreterBlock.h"
+#include "IteratorCallback.h"
 
 namespace llvm {
 class Module;
@@ -16,8 +17,12 @@ public:
     State(const llvm::Module *module);
     ~State();
 
+    const Canal::InterpreterBlock::Interpreter &getInterpreter() const { return mInterpreter; }
+
     const Canal::Environment &getEnvironment() const { return mInterpreter.getEnvironment(); }
+
     const llvm::Module &getModule() const { return getEnvironment().getModule(); }
+
     Canal::SlotTracker &getSlotTracker() const { return getEnvironment().getSlotTracker(); }
 
     // Check if the interpreter is in the middle of interpretation.
@@ -26,14 +31,10 @@ public:
 
     void run();
     void step(int count);
-    void next(int count);
     void finish();
 
     // Add a breakpoint on function start.
     void addFunctionBreakpoint(const std::string &functionName);
-
-    // Adds the "main" function to stack.
-    void addMainFrame();
 
 protected:
     bool reachedBreakpoint();
@@ -41,6 +42,7 @@ protected:
 protected:
     Canal::InterpreterBlock::Interpreter mInterpreter;
     std::set<std::string> mFunctionBreakpoints;
+    IteratorCallback mIteratorCallback;
 };
 
 #endif // CANAL_STATE_H

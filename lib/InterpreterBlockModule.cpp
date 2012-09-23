@@ -66,5 +66,19 @@ Module::~Module()
         delete *it;
 }
 
+const Function *
+Module::getFunction(const char *name) const
+{
+    llvm::StringRef nameString(name);
+    std::vector<Function*>::const_iterator it = mFunctions.begin();
+    for (; it != mFunctions.end(); ++it)
+    {
+        if ((*it)->getName().equals(nameString))
+            return *it;
+    }
+
+    return NULL;
+}
+
 } // namespace InterpreterBlock
 } // namespace Canal

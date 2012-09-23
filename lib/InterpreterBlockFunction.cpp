@@ -37,6 +37,18 @@ Function::~Function()
         delete *it;
 }
 
+const llvm::BasicBlock &
+Function::getEntryBlock() const
+{
+    return mFunction.getEntryBlock();
+}
+
+llvm::StringRef
+Function::getName() const
+{
+    return mFunction.getName();
+}
+
 } // namespace InterpreterBlock
 } // namespace Canal
 

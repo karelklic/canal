@@ -14,6 +14,8 @@ class Domain;
 class OperationsCallback
 {
 public:
+    virtual ~OperationsCallback() {}
+
     virtual Domain *onFunctionCall(const llvm::Function &function,
                                    const std::vector<Domain*> &arguments) = 0;
 };

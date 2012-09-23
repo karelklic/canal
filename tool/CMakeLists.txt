@@ -10,7 +10,6 @@ CommandFile.cpp
 CommandFinish.cpp
 CommandHelp.cpp
 CommandInfo.cpp
-CommandNext.cpp
 CommandPrint.cpp
 CommandPwd.cpp
 CommandQuit.cpp
@@ -20,6 +19,7 @@ CommandShell.cpp
 CommandShow.cpp
 CommandStart.cpp
 CommandStep.cpp
+IteratorCallback.cpp
 State.cpp
 Utils.cpp)
 

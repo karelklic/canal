@@ -29,7 +29,5 @@ CommandStart::run(const std::vector<std::string> &args)
         return;
     }
 
-    mCommands.getState()->addMainFrame();
-    printf("Temporary breakpoint: \"main\".\n");
-    print(mCommands.getState()->getStack().getCurrentInstruction());
+    mCommands.getState()->step(1);
 }

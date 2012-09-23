@@ -2,50 +2,73 @@
 #include "InterpreterBlockModule.h"
 #include "InterpreterBlockFunction.h"
 #include "InterpreterBlockBasicBlock.h"
+#include "InterpreterBlockIteratorCallback.h"
+#include "Operations.h"
 
 namespace Canal {
 namespace InterpreterBlock {
 
-Iterator::Iterator(Module &module) : mModule(module)
+static IteratorCallback emptyCallback;
+
+    Iterator::Iterator(Module &module, Operations &operations)
+        : mModule(module), mOperations(operations), mCallback(&emptyCallback)
 {
-    mFunction = module.begin();
-    mBasicBlock = (*mFunction)->begin();
-    mInstruction = (*mBasicBlock)->begin();
+    mFunction = --mModule.end();
+    mBasicBlock = --(*mFunction)->end();
+    mInstruction = --(*mBasicBlock)->end();
 }
 
 void
 Iterator::nextInstruction()
 {
-}
+    // 1. Call all onEnter callbacks.
+    // 2. Move to next program instruction.
+    // 3. Perform operation.
+    // 4. Call all onExit callbacks.
 
-void
-Iterator::registerOnFixpointReached(void(*onFixpointReached)())
-{
-    mOnFixpointReached = onFixpointReached;
-}
+    ++mInstruction;
 
-void
-Iterator::registerOnFunctionEnter(void(*onFunctionEnter)())
-{
-    mOnFunctionEnter = onFunctionEnter;
-}
+    if (mInstruction == (*mBasicBlock)->end())
+    {
+        ++mBasicBlock;
 
-void
-Iterator::registerOnFunctionExit(void(*onFunctionExit)())
-{
-    mOnFunctionExit = onFunctionExit;
-}
+        if (mBasicBlock == (*mFunction)->end())
+        {
+            ++mFunction;
 
-void
-Iterator::registerOnBasicBlockEnter(void(*onBasicBlockEnter)())
-{
-    mOnBasicBlockEnter = onBasicBlockEnter;
-}
+            if (mFunction == mModule.end())
+            {
+                if (!mChanged)
+                    mCallback->onFixpointReached();
 
-void
-Iterator::registerOnBasicBlockExit(void(*onBasicBlockExit)())
-{
-    mOnBasicBlockExit = onBasicBlockExit;
+                mFunction = mModule.begin();
+                mCallback->onModuleEnter();
+            }
+
+            mBasicBlock = (*mFunction)->begin();
+            mCallback->onFunctionEnter(**mFunction);
+        }
+
+        mInstruction = (*mBasicBlock)->begin();
+        mCallback->onBasicBlockEnter(**mBasicBlock);
+    }
+
+    mCallback->onInstructionEnter(*mInstruction);
+    mOperations.interpretInstruction(*mInstruction, mState);
+    mCallback->onInstructionExit(*mInstruction);
+
+    if (mInstruction == --(*mBasicBlock)->end())
+    {
+        mCallback->onBasicBlockExit(**mBasicBlock);
+
+        if (mBasicBlock == --(*mFunction)->end())
+        {
+            mCallback->onFunctionExit(**mFunction);
+
+            if (mFunction == --mModule.end())
+                mCallback->onModuleExit();
+        }
+    }
 }
 
 } // namespace InterpreterBlock

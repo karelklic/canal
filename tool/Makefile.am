@@ -17,8 +17,6 @@ canal_SOURCES = \
 	CommandHelp.cpp \
 	CommandInfo.h \
 	CommandInfo.cpp \
-	CommandNext.h \
-	CommandNext.cpp \
 	CommandPrint.h \
 	CommandPrint.cpp \
 	CommandPwd.h \
@@ -37,6 +35,8 @@ canal_SOURCES = \
 	CommandStep.cpp \
 	Commands.h \
 	Commands.cpp \
+	IteratorCallback.h \
+	IteratorCallback.cpp \
 	State.h \
 	State.cpp \
 	Utils.h \

@@ -6,6 +6,7 @@
 #include "lib/Stack.h"
 #include "lib/Domain.h"
 #include "lib/Utils.h"
+#include "lib/InterpreterBlockFunction.h"
 #include <llvm/ValueSymbolTable.h>
 #include <llvm/Module.h>
 #include <cstdio>
@@ -66,7 +67,7 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args,
         return result;
 
     std::string arg(args[pointArg].substr(0, pointArgOffset));
-    Canal::State &curState = state->getStack().getCurrentState();
+    const Canal::State &curState = state->getInterpreter().getCurrentState();
 
     if (arg.empty() || arg == "%")
     {
@@ -129,17 +130,25 @@ printVariable(const std::string &fullName, State &state)
     bool isNumber;
     unsigned pos = stringToUnsigned(name.c_str(), isNumber);
 
-    Canal::Stack &stack = state.getStack();
-    Canal::State &currentState = stack.getCurrentState();
-    Canal::SlotTracker &slotTracker = state.getSlotTracker();
+    const Canal::InterpreterBlock::Interpreter &interpreter =
+        state.getInterpreter();
 
-    const llvm::Function *function = &stack.getCurrentFunction();
+    const Canal::State &currentState = interpreter.getCurrentState();
+    Canal::SlotTracker &slotTracker = interpreter.getSlotTracker();
+
+    const Canal::InterpreterBlock::Function *function =
+        &interpreter.getCurrentFunction();
+
     if (!functionName.empty())
     {
-        function = state.getModule().getFunction(functionName);
-        CANAL_ASSERT_MSG(function, "Cannot found already used function!");
+        function = interpreter.getModule().getFunction(functionName.c_str());
+        if (!function)
+        {
+            printf("Function %s not found.\n", functionName.c_str());
+            return;
+        }
     }
-    slotTracker.setActiveFunction(*function);
+    slotTracker.setActiveFunction(function->getFunction());
 
     if (isNumber)
     {
@@ -151,7 +160,7 @@ printVariable(const std::string &fullName, State &state)
     else
     {
         if (fullName[0] == '%' || (isBlock && !functionName.empty()))
-            position = function->getValueSymbolTable().lookup(name);
+            position = function->getFunction().getValueSymbolTable().lookup(name);
         else
             position = state.getModule().getValueSymbolTable().lookup(name);
     }
@@ -199,7 +208,8 @@ CommandPrint::run(const std::vector<std::string> &args)
     if (args[1] == "%" || args[1] == "@" || args[1] == "@^" || args[1] == "%^")
     {
         std::vector<std::string> variables;
-        Canal::State &curState = state->getStack().getCurrentState();
+        const Canal::State &curState =
+            state->getInterpreter().getCurrentState();
 
         bool addFunctionName = (args[1] == "@^");
         const Canal::PlaceValueMap *map = NULL;

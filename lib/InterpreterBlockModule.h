@@ -2,6 +2,7 @@
 #define LIBCANAL_INTERPRETER_BLOCK_MODULE_H
 
 #include <vector>
+#include <string>
 
 namespace llvm {
 class Module;
@@ -25,6 +26,9 @@ public:
 
     std::vector<Function*>::const_iterator begin() const { return mFunctions.begin(); }
     std::vector<Function*>::const_iterator end() const { return mFunctions.end(); }
+
+    const Function *getFunction(const char *name) const;
+    const Function *getFunction(const std::string &name) const { return getFunction(name.c_str()); }
 
 protected:
     const llvm::Module &mModule;

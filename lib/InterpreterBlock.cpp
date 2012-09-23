@@ -12,7 +12,7 @@ Interpreter::Interpreter(const llvm::Module *module)
       mModule(*module, mConstructors),
       mOperationsCallback(mModule),
       mOperations(mEnvironment, mConstructors, mOperationsCallback),
-      mIterator(mModule)
+      mIterator(mModule, mOperations)
 {
 }
 

@@ -192,7 +192,7 @@ Operations::interpretCall(const T &instruction,
 
     // Create the function arguments.
     std::vector<Domain*> arguments;
-    for (int i = 0; i < instruction.getNumArgOperands(); ++i)
+    for (unsigned i = 0; i < instruction.getNumArgOperands(); ++i)
     {
         llvm::Value *operand = instruction.getArgOperand(i);
 
@@ -1073,7 +1073,7 @@ Operations::phi(const llvm::PHINode &instruction,
                 State &state)
 {
     Domain *mergedValue = NULL;
-    for (int i = 0; i < instruction.getNumIncomingValues(); ++i)
+    for (unsigned i = 0; i < instruction.getNumIncomingValues(); ++i)
     {
         llvm::OwningPtr<Domain> c;
         Domain *value = variableOrConstant(*instruction.getIncomingValue(i),

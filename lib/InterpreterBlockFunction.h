@@ -6,6 +6,7 @@
 namespace llvm {
 class Function;
 class BasicBlock;
+class StringRef;
 } // namespace llvm
 
 namespace Canal {
@@ -25,10 +26,14 @@ public:
 
     virtual ~Function();
 
+    const llvm::Function &getFunction() const { return mFunction; }
+
     const llvm::BasicBlock &getEntryBlock() const;
 
     std::vector<BasicBlock*>::const_iterator begin() const { return mBasicBlocks.begin(); }
     std::vector<BasicBlock*>::const_iterator end() const { return mBasicBlocks.end(); }
+
+    llvm::StringRef getName() const;
 
 protected:
     const llvm::Function &mFunction;
