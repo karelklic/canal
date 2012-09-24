@@ -2,6 +2,7 @@
 #include "IntegerContainer.h"
 #include "Utils.h"
 #include "ArraySingleItem.h"
+#include "ArrayExactSize.h"
 #include "FloatInterval.h"
 #include "Pointer.h"
 #include "Structure.h"
@@ -114,7 +115,15 @@ Constructors::create(const llvm::Constant &value) const
 
     if (llvm::isa<llvm::ConstantArray>(value))
     {
-        CANAL_NOT_IMPLEMENTED();
+        const llvm::ConstantArray &arrayValue = llvmCast<llvm::ConstantArray>(value);
+        uint64_t elementCount = arrayValue.getType()->getNumElements();
+
+        Array::ExactSize *result = new Array::ExactSize(mEnvironment);
+
+        for (unsigned i = 0; i < elementCount; ++i)
+            result->mValues.push_back(create(*arrayValue.getOperand(i)));
+
+        return result;
     }
 
     if (llvm::isa<llvm::ConstantAggregateZero>(value))
