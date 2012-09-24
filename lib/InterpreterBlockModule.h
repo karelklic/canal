@@ -26,6 +26,7 @@ public:
     virtual ~Module();
 
     std::vector<Function*>::const_iterator begin() const { return mFunctions.begin(); }
+
     std::vector<Function*>::const_iterator end() const { return mFunctions.end(); }
 
     Function *getFunction(const char *name) const;

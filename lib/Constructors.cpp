@@ -96,6 +96,8 @@ Constructors::create(const llvm::Constant &value) const
         {
             CANAL_NOT_IMPLEMENTED();
         }
+
+        CANAL_NOT_IMPLEMENTED();
     }
 
     if (llvm::isa<llvm::ConstantFP>(value))

@@ -53,7 +53,12 @@ Module::Module(const llvm::Module &module,
         llvm::Module::const_iterator it = module.begin(),
             itend = module.end();
         for (; it != itend; ++it)
+        {
+            if (it->isDeclaration())
+                continue;
+
             mFunctions.push_back(new Function(*it, constructors));
+        }
     }
 }
 

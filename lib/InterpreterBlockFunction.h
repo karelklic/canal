@@ -33,6 +33,7 @@ public:
     BasicBlock &getBasicBlock(const llvm::BasicBlock &llvmBasicBlock);
 
     std::vector<BasicBlock*>::const_iterator begin() const { return mBasicBlocks.begin(); }
+
     std::vector<BasicBlock*>::const_iterator end() const { return mBasicBlocks.end(); }
 
     State &getInputState() { return mInputState; }
