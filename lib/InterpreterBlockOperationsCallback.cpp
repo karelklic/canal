@@ -21,6 +21,9 @@ createTopReturnValue(const llvm::Function &function,
                      Constructors &constructors)
 {
     const llvm::Type *type = function.getReturnType();
+    if (type->isVoidTy())
+        return NULL;
+
     Domain *result = constructors.create(*type);
 
     AccuracyDomain *accuracyValue = dynCast<AccuracyDomain*>(result);
@@ -43,8 +46,9 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
         printf("Intrinsic function \"%s\" not available.\n",
                function.getName().str().c_str());
 
-        resultState.addFunctionVariable(resultPlace,
-                                        createTopReturnValue(function, mConstructors));
+        Domain *returnValue = createTopReturnValue(function, mConstructors);
+        if (returnValue)
+            resultState.addFunctionVariable(resultPlace, returnValue);
 
         return;
     }
@@ -54,12 +58,12 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
         printf("External function \"%s\" not available.\n",
                function.getName().str().c_str());
 
-        resultState.addFunctionVariable(resultPlace,
-                                        createTopReturnValue(function, mConstructors));
+        Domain *returnValue = createTopReturnValue(function, mConstructors);
+        if (returnValue)
+            resultState.addFunctionVariable(resultPlace, returnValue);
 
         return;
     }
-
 
     Function *func = mModule.getFunction(function);
     CANAL_ASSERT_MSG(func, "Function not found in module!");

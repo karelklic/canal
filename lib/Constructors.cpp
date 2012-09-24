@@ -94,7 +94,31 @@ Constructors::create(const llvm::Constant &value) const
         const llvm::ConstantExpr &exprValue = llvmCast<llvm::ConstantExpr>(value);
         if (exprValue.getOpcode() == llvm::Instruction::GetElementPtr)
         {
-            CANAL_NOT_IMPLEMENTED();
+            std::vector<Domain*> offsets;
+            llvm::ConstantExpr::const_op_iterator it = exprValue.op_begin() + 1;
+            for (; it != exprValue.op_end(); ++it)
+            {
+                const llvm::ConstantInt &constant =
+                    llvmCast<llvm::ConstantInt>(**it);
+
+                offsets.push_back(create(constant));
+            }
+
+            const llvm::PointerType &pointerType =
+                llvmCast<const llvm::PointerType>(*exprValue.getType());
+
+            CANAL_ASSERT(pointerType.getElementType());
+
+            Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
+                mEnvironment, *pointerType.getElementType());
+
+            constPointer->addTarget(Pointer::Target::GlobalVariable,
+                                    &value,
+                                    *exprValue.op_begin(),
+                                    offsets,
+                                    NULL);
+
+            return constPointer;
         }
 
         CANAL_NOT_IMPLEMENTED();

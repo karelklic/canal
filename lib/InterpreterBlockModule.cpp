@@ -15,7 +15,7 @@ Module::Module(const llvm::Module &module,
 {
     // Prepare the state with all globals.  Global pointers are
     // allocated automatically -- they point to globals section.
-    State state;
+    State globalState;
     {
         llvm::Module::const_global_iterator it = module.global_begin(),
             itend = module.global_end();
@@ -25,13 +25,13 @@ Module::Module(const llvm::Module &module,
             if (it->isConstant() && it->hasInitializer())
             {
                 Domain *value = constructors.create(*it->getInitializer());
-                state.addGlobalVariable(*it, value);
+                globalState.addGlobalVariable(*it, value);
                 continue;
             }
 
             const llvm::Type &elementType = *it->getType()->getElementType();
             Domain *block = constructors.create(elementType);
-            state.addGlobalBlock(*it, block);
+            globalState.addGlobalBlock(*it, block);
 
             Domain *value = constructors.create(*it->getType());
 
@@ -44,7 +44,7 @@ Module::Module(const llvm::Module &module,
                               std::vector<Domain*>(),
                               NULL);
 
-            state.addGlobalVariable(*it, value);
+            globalState.addGlobalVariable(*it, value);
         }
     }
 
@@ -57,7 +57,9 @@ Module::Module(const llvm::Module &module,
             if (it->isDeclaration())
                 continue;
 
-            mFunctions.push_back(new Function(*it, constructors));
+            Function *function = new Function(*it, constructors);
+            function->getInputState().merge(globalState);
+            mFunctions.push_back(function);
         }
     }
 }
