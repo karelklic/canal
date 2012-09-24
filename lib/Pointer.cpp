@@ -20,8 +20,8 @@ InclusionBased::InclusionBased(const Environment &environment,
 
 InclusionBased::InclusionBased(const InclusionBased &second)
     : Domain(second.mEnvironment),
-      mType(second.mType),
       mTargets(second.mTargets),
+      mType(second.mType),
       mTop(second.mTop)
 {
     PlaceTargetMap::iterator it = mTargets.begin();
@@ -32,8 +32,8 @@ InclusionBased::InclusionBased(const InclusionBased &second)
 InclusionBased::InclusionBased(const InclusionBased &second,
                                const llvm::Type &newType)
     : Domain(second.mEnvironment),
-      mType(newType),
       mTargets(second.mTargets),
+      mType(newType),
       mTop(second.mTop)
 {
     PlaceTargetMap::iterator it = mTargets.begin();

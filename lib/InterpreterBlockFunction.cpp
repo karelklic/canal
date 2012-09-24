@@ -5,6 +5,7 @@
 #include <llvm/Function.h>
 #include <llvm/Type.h>
 #include <llvm/Support/CFG.h>
+#include <llvm/Instructions.h>
 
 namespace Canal {
 namespace InterpreterBlock {
@@ -17,6 +18,7 @@ Function::Function(const llvm::Function &function,
     {
         llvm::Function::const_arg_iterator it = function.arg_begin(),
             itend = function.arg_end();
+
         for (; it != itend; ++it)
         {
             Domain *argument = constructors.create(*it->getType());
@@ -28,6 +30,7 @@ Function::Function(const llvm::Function &function,
     {
         llvm::Function::const_iterator it = function.begin(),
             itend = function.end();
+
         for (; it != itend; ++it)
             mBasicBlocks.push_back(new BasicBlock(*it, constructors));
     }
@@ -96,9 +99,13 @@ Function::updateOutputState()
     std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
     for (; it != mBasicBlocks.end(); ++it)
     {
+        if (!llvmCast<llvm::ReturnInst>((*it)->getBasicBlock().getTerminator()))
+            continue;
+
         // Merge global blocks, global variables.  Merge function
         // blocks that do not belong to this function.
-        CANAL_NOT_IMPLEMENTED();
+        mOutputState.mergeGlobalLevel((*it)->getOutputState(),
+                                      getFunction());
     }
 }
 

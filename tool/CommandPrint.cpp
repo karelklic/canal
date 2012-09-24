@@ -3,7 +3,6 @@
 #include "State.h"
 #include "Utils.h"
 #include "lib/SlotTracker.h"
-#include "lib/Stack.h"
 #include "lib/Domain.h"
 #include "lib/Utils.h"
 #include "lib/InterpreterBlockFunction.h"

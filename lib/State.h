@@ -6,6 +6,7 @@
 #include <string>
 
 namespace llvm {
+class Function;
 class Value;
 class raw_ostream;
 } // namespace llvm
@@ -43,12 +44,12 @@ public:
 
     void merge(const State &state);
 
-    /// Merge only global variables and global memory blocks of the
-    /// provided state.  This is used after a function call, where the
-    /// modifications of the global state need to be merged to the
-    /// state of the caller, but its function level state is not
-    /// relevant.
-    void mergeGlobalLevel(const State &state);
+    /// Merge only variables and memory blocks external to a function.
+    /// This is used after a function call, where the modifications of
+    /// the global state need to be merged to the state of the caller,
+    /// but its local state is not relevant.
+    void mergeGlobalLevel(const State &state,
+                          const llvm::Function &currentFunction);
 
     /// @param place
     ///   Represents a place in the program where the global variable

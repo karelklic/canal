@@ -13,8 +13,8 @@ static IteratorCallback emptyCallback;
 Iterator::Iterator(Module &module, Operations &operations)
     : mModule(module),
       mOperations(operations),
-      mCallback(&emptyCallback),
-      mChanged(true)
+      mChanged(true),
+      mCallback(&emptyCallback)
 {
     mFunction = --mModule.end();
     mBasicBlock = --(*mFunction)->end();
