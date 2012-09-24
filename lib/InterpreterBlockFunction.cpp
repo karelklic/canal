@@ -99,7 +99,7 @@ Function::updateOutputState()
     std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
     for (; it != mBasicBlocks.end(); ++it)
     {
-        if (!llvmCast<llvm::ReturnInst>((*it)->getBasicBlock().getTerminator()))
+        if (!llvm::isa<llvm::ReturnInst>((*it)->getBasicBlock().getTerminator()))
             continue;
 
         // Merge global blocks, global variables.  Merge function

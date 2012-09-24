@@ -84,9 +84,18 @@ Constructors::create(const llvm::Constant &value) const
         const llvm::ConstantPointerNull &nullValue =
             llvmCast<llvm::ConstantPointerNull>(value);
 
-        const llvm::Type &type = *nullValue.getType();
+        const llvm::PointerType &pointerType = *nullValue.getType();
 
-        CANAL_NOT_IMPLEMENTED();
+        Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
+            mEnvironment, *pointerType.getElementType());
+
+        constPointer->addTarget(Pointer::Target::Constant,
+                                &value,
+                                NULL,
+                                std::vector<Domain*>(),
+                                NULL);
+
+        return constPointer;
     }
 
     if (llvm::isa<llvm::ConstantExpr>(value))
