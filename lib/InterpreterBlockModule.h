@@ -6,6 +6,7 @@
 
 namespace llvm {
 class Module;
+class Function;
 } // namespace llvm
 
 namespace Canal {
@@ -27,8 +28,11 @@ public:
     std::vector<Function*>::const_iterator begin() const { return mFunctions.begin(); }
     std::vector<Function*>::const_iterator end() const { return mFunctions.end(); }
 
-    const Function *getFunction(const char *name) const;
-    const Function *getFunction(const std::string &name) const { return getFunction(name.c_str()); }
+    Function *getFunction(const char *name) const;
+
+    Function *getFunction(const std::string &name) const { return getFunction(name.c_str()); }
+
+    Function *getFunction(const llvm::Function &function) const;
 
 protected:
     const llvm::Module &mModule;

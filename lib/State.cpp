@@ -148,9 +148,20 @@ State::merge(const State &state)
 {
     mergeMaps(mFunctionVariables, state.mFunctionVariables);
     mergeMaps(mFunctionBlocks, state.mFunctionBlocks);
+    mergeGlobal(state);
+    mergeReturnedValue(state);
+}
+
+void
+State::mergeGlobal(const State &state)
+{
     mergeMaps(mGlobalVariables, state.mGlobalVariables);
     mergeMaps(mGlobalBlocks, state.mGlobalBlocks);
+}
 
+void
+State::mergeReturnedValue(const State &state)
+{
     if (mReturnedValue)
     {
         if (state.mReturnedValue)
@@ -158,6 +169,12 @@ State::merge(const State &state)
     }
     else if (state.mReturnedValue)
         mReturnedValue = state.mReturnedValue->clone();
+}
+
+void
+State::mergeFunctionBlocks(const State &state)
+{
+    mergeMaps(mFunctionBlocks, state.mFunctionBlocks);
 }
 
 static bool
@@ -193,12 +210,9 @@ containsPlace(const llvm::Function &function,
 }
 
 void
-State::mergeGlobalLevel(const State &state,
-                        const llvm::Function &currentFunction)
+State::mergeForeignFunctionBlocks(const State &state,
+                                  const llvm::Function &currentFunction)
 {
-    mergeMaps(mGlobalVariables, state.mGlobalVariables);
-    mergeMaps(mGlobalBlocks, state.mGlobalBlocks);
-
     // Merge function blocks that do not belong to current function.
     PlaceValueMap::const_iterator it2 = state.mFunctionBlocks.begin(),
         it2end = state.mFunctionBlocks.end();
@@ -217,7 +231,6 @@ State::mergeGlobalLevel(const State &state,
 	else
             it1->second->merge(*it2->second);
     }
-
 }
 
 static void

@@ -190,9 +190,19 @@ Operations::interpretCall(const T &instruction,
     llvm::Function *function = instruction.getCalledFunction();
     CANAL_ASSERT(function);
 
-    // Create the function arguments.
-    std::vector<Domain*> arguments;
-    for (unsigned i = 0; i < instruction.getNumArgOperands(); ++i)
+    // Create the calling state.
+    State callingState;
+    callingState.mergeGlobal(state);
+
+    // TODO: not all function blocks should be merged to the state.
+    // Only the function blocks accessible from the arguments and
+    // global variables should be merged.
+    callingState.mergeFunctionBlocks(state);
+
+    // Add function arguments to the calling state.
+    llvm::Function::ArgumentListType::const_iterator it =
+        function->getArgumentList().begin();
+    for (unsigned i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
     {
         llvm::Value *operand = instruction.getArgOperand(i);
 
@@ -201,19 +211,13 @@ Operations::interpretCall(const T &instruction,
         if (!value)
             return;
 
-        arguments.push_back(value->clone());
+        callingState.addFunctionVariable(*it, value->clone());
     }
 
-    Domain *result = mCallback.onFunctionCall(*function, arguments);
-
-    // Release the function arguments.
-    std::vector<Domain*>::const_iterator it = arguments.begin();
-    for (; it != arguments.end(); ++it)
-        delete *it;
-
-    // Store result.
-    if (result)
-        state.addFunctionVariable(instruction, result->clone());
+    mCallback.onFunctionCall(*function,
+                             callingState,
+                             state,
+                             instruction);
 }
 
 void

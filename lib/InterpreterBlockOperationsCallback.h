@@ -4,6 +4,9 @@
 #include "OperationsCallback.h"
 
 namespace Canal {
+
+class Constructors;
+
 namespace InterpreterBlock {
 
 class Module;
@@ -12,12 +15,16 @@ class OperationsCallback : public Canal::OperationsCallback
 {
 protected:
     Module &mModule;
+    Constructors &mConstructors;
 
 public:
-    OperationsCallback(Module &module);
+    OperationsCallback(Module &module,
+                       Constructors &mConstructors);
 
-    Domain *onFunctionCall(const llvm::Function &function,
-                           const std::vector<Domain*> &arguments);
+    virtual void onFunctionCall(const llvm::Function &function,
+                                const State &callState,
+                                State &resultState,
+                                const llvm::Value &resultPlace);
 };
 
 } // namespace InterpreterBlock

@@ -42,14 +42,24 @@ public:
     /// Clears function variables, blocks and returned value.
     void clearFunctionLevel();
 
+    /// Merge everything.
     void merge(const State &state);
 
-    /// Merge only variables and memory blocks external to a function.
+    /// Merge global variables and blocks.
+    void mergeGlobal(const State &state);
+
+    /// Merge the returned value.
+    void mergeReturnedValue(const State &state);
+
+    /// Merge function blocks only.
+    void mergeFunctionBlocks(const State &state);
+
+    /// Merge function memory blocks external to a function.
     /// This is used after a function call, where the modifications of
     /// the global state need to be merged to the state of the caller,
     /// but its local state is not relevant.
-    void mergeGlobalLevel(const State &state,
-                          const llvm::Function &currentFunction);
+    void mergeForeignFunctionBlocks(const State &state,
+                                    const llvm::Function &currentFunction);
 
     /// @param place
     ///   Represents a place in the program where the global variable

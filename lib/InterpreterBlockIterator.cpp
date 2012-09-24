@@ -63,7 +63,7 @@ Iterator::nextInstruction()
         // not changed, there is no point in interpreting the block's code
         // again.  The very first iteration is an exception, though.  The
         // code must be interpreted at least once.
-        (*mFunction)->updateInputState(**mBasicBlock);
+        (*mFunction)->updateBasicBlockInputState(**mBasicBlock);
 
         mState = (*mBasicBlock)->getInputState();
         mInstruction = (*mBasicBlock)->begin();

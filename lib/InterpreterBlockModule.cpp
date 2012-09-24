@@ -22,10 +22,9 @@ Module::Module(const llvm::Module &module,
 
         for (; it != itend; ++it)
         {
-            if (it->isConstant())
+            if (it->isConstant() && it->hasInitializer())
             {
-                llvm::Constant &constant = llvmCast<llvm::Constant>(*it);
-                Domain *value = constructors.create(constant);
+                Domain *value = constructors.create(*it->getInitializer());
                 state.addGlobalVariable(*it, value);
                 continue;
             }
@@ -66,7 +65,7 @@ Module::~Module()
         delete *it;
 }
 
-const Function *
+Function *
 Module::getFunction(const char *name) const
 {
     llvm::StringRef nameString(name);
@@ -74,6 +73,19 @@ Module::getFunction(const char *name) const
     for (; it != mFunctions.end(); ++it)
     {
         if ((*it)->getName().equals(nameString))
+            return *it;
+    }
+
+    return NULL;
+}
+
+Function *
+Module::getFunction(const llvm::Function &function) const
+{
+    std::vector<Function*>::const_iterator it = mFunctions.begin();
+    for (; it != mFunctions.end(); ++it)
+    {
+        if (&(*it)->getFunction() == &function)
             return *it;
     }
 

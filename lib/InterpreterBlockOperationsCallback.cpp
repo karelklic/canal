@@ -1,67 +1,77 @@
 #include "InterpreterBlockOperationsCallback.h"
+#include "InterpreterBlockFunction.h"
+#include "InterpreterBlockModule.h"
+#include "Constructors.h"
 #include "Utils.h"
+#include "Domain.h"
+#include <llvm/Function.h>
+#include <cstdio>
 
 namespace Canal {
 namespace InterpreterBlock {
 
-OperationsCallback::OperationsCallback(Module &module)
-    : mModule(module)
+OperationsCallback::OperationsCallback(Module &module,
+                                       Constructors &constructors)
+    : mModule(module), mConstructors(constructors)
 {
 }
 
-Domain *
-OperationsCallback::onFunctionCall(const llvm::Function &function,
-                                   const std::vector<Domain*> &arguments)
+static Domain *
+createTopReturnValue(const llvm::Function &function,
+                     Constructors &constructors)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const llvm::Type *type = function.getReturnType();
+    Domain *result = constructors.create(*type);
 
-/*
-    // TODO: Handle some intristic functions.  Some of them can be
-    // safely ignored.
-    if (!function || function->isIntrinsic() || function->isDeclaration())
+    AccuracyDomain *accuracyValue = dynCast<AccuracyDomain*>(result);
+    if (accuracyValue)
+        accuracyValue->setTop();
+
+    return result;
+}
+
+void
+OperationsCallback::onFunctionCall(const llvm::Function &function,
+                                   const State &callState,
+                                   State &resultState,
+                                   const llvm::Value &resultPlace)
+{
+    // Function not found.  Set the resultant value to the Top
+    // value.
+    if (function.isIntrinsic())
     {
-        // Function not found.  Set the resultant value to the Top
-        // value.
-        printf("Function \"%s\" not available.\n", function->getName().data());
+        printf("Intrinsic function \"%s\" not available.\n",
+               function.getName().str().c_str());
 
-        // TODO: Set memory accessed by non-static globals to
-        // the Top value.
+        resultState.addFunctionVariable(resultPlace,
+                                        createTopReturnValue(function, mConstructors));
 
-        // Create result TOP value of required type.
-        const llvm::Type *type = instruction.getType();
-        Domain *returnedValue = mConstructors.create(*instruction.getType());
-
-        // If the function returns nothing (void), we are finished.
-        if (!returnedValue)
-            return;
-
-        AccuracyDomain *accuracyValue = dynCast<AccuracyDomain*>(returnedValue);
-        if (accuracyValue)
-            accuracyValue->setTop();
-
-        state.addFunctionVariable(instruction, returnedValue);
         return;
     }
 
-    State initialState(state);
-    initialState.clearFunctionLevel();
-    llvm::Function::ArgumentListType::const_iterator it =
-        function->getArgumentList().begin();
-
-    for (int i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
+    if (function.isDeclaration())
     {
-        llvm::Value *operand = instruction.getArgOperand(i);
+        printf("External function \"%s\" not available.\n",
+               function.getName().str().c_str());
 
-        llvm::OwningPtr<Domain> constant;
-        Domain *value = variableOrConstant(*operand, state, constant);
-        if (!value)
-            return;
+        resultState.addFunctionVariable(resultPlace,
+                                        createTopReturnValue(function, mConstructors));
 
-        initialState.addFunctionVariable(*it, value->clone());
+        return;
     }
 
-    stack.addFrame(*function, initialState);
-*/
+
+    Function *func = mModule.getFunction(function);
+    CANAL_ASSERT_MSG(func, "Function not found in module!");
+
+    func->getInputState().merge(callState);
+    resultState.mergeGlobal(func->getOutputState());
+    resultState.mergeFunctionBlocks(func->getOutputState());
+    if (func->getOutputState().mReturnedValue)
+    {
+        resultState.addFunctionVariable(resultPlace,
+                                        func->getOutputState().mReturnedValue->clone());
+    }
 }
 
 } // namespace InterpreterBlock

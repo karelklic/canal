@@ -35,6 +35,11 @@ public:
     std::vector<BasicBlock*>::const_iterator begin() const { return mBasicBlocks.begin(); }
     std::vector<BasicBlock*>::const_iterator end() const { return mBasicBlocks.end(); }
 
+    State &getInputState() { return mInputState; }
+    const State &getInputState() const { return mInputState; }
+
+    const State &getOutputState() const { return mOutputState; }
+
     llvm::StringRef getName() const;
 
     /// Update basic block input state from its predecessors and
@@ -42,9 +47,9 @@ public:
     /// @param basicBlock
     ///    Must be a member of this function.
     ///    Its input state is updated.
-    void updateInputState(BasicBlock &basicBlock);
+    void updateBasicBlockInputState(BasicBlock &basicBlock);
 
-    /// Update function output state from basci block output states.
+    /// Update function output state from basic block output states.
     void updateOutputState();
 
 protected:
