@@ -3,4 +3,4 @@ compiler:
   - gcc
   - clang
 script: ./configure && make && make check
-install: sudo apt-get install llvm-dev libelf-dev readline-dev
+install: sudo apt-get install llvm-dev libelf-dev libreadline-dev
