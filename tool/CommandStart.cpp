@@ -28,5 +28,5 @@ CommandStart::run(const std::vector<std::string> &args)
         return;
     }
 
-    mCommands.getState()->step(1);
+    mCommands.getState()->start();
 }

@@ -28,8 +28,19 @@ protected:
     /// the program.
     bool mChanged;
 
+    /// Indication that the iterator has been initialized and started
+    /// iterating.
+    bool mInitialized;
+
+    /// Function of the instruction that will be interpreted in the
+    /// next step.
     std::vector<Function*>::const_iterator mFunction;
+
+    /// Basic block of the instruction that will be interpreted in the
+    /// next step.
     std::vector<BasicBlock*>::const_iterator mBasicBlock;
+
+    /// The instruction that will be interpreted in the next step.
     llvm::BasicBlock::const_iterator mInstruction;
 
     /// Current state.
@@ -42,11 +53,15 @@ public:
     Iterator(Module &module,
              Operations &operations);
 
-    /// One step of the interpreter.  Interprets current instruction
+    void initialize();
+
+    /// One step of the interpreter.  Interprets the instruction
     /// and moves to the next one.
-    void nextInstruction();
+    void interpretInstruction();
 
     void setCallback(IteratorCallback &callback) { mCallback = &callback; }
+
+    bool isInitialized() const { return mInitialized; }
 
     const State &getCurrentState() const { return mState; }
 
@@ -55,6 +70,9 @@ public:
     const BasicBlock &getCurrentBasicBlock() const { return **mBasicBlock; }
 
     const llvm::Instruction &getCurrentInstruction() const { return *mInstruction; }
+
+protected:
+    void nextInstruction();
 };
 
 } // namespace InterpreterBlock

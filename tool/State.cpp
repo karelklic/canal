@@ -22,15 +22,25 @@ State::~State()
 bool
 State::isInterpreting() const
 {
-    return !mIteratorCallback.isFixpointReached();
+    return mInterpreter.getIterator().isInitialized() &&
+        !mIteratorCallback.isFixpointReached();
+}
+
+void
+State::start()
+{
+    mInterpreter.getIterator().initialize();
+    print(mInterpreter.getCurrentInstruction());
 }
 
 void
 State::run()
 {
+    mInterpreter.getIterator().initialize();
+
     while (!mIteratorCallback.isFixpointReached())
     {
-        mInterpreter.getIterator().nextInstruction();
+        mInterpreter.getIterator().interpretInstruction();
         if (reachedBreakpoint())
             return;
     }
@@ -41,7 +51,7 @@ State::step(int count)
 {
     for (int i = 0; i < count; ++i)
     {
-        mInterpreter.getIterator().nextInstruction();
+        mInterpreter.getIterator().interpretInstruction();
         if (mIteratorCallback.isFixpointReached())
             return;
         if (reachedBreakpoint())
@@ -56,7 +66,7 @@ State::finish()
 {
     while (!mIteratorCallback.isFunctionEnter())
     {
-        mInterpreter.getIterator().nextInstruction();
+        mInterpreter.getIterator().interpretInstruction();
         if (mIteratorCallback.isFixpointReached())
             return;
         if (reachedBreakpoint())
