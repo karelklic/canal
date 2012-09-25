@@ -87,10 +87,9 @@ am_libcanal_la_OBJECTS = libcanal_la-APIntUtils.lo \
 	libcanal_la-InterpreterBlockModule.lo \
 	libcanal_la-InterpreterBlockOperationsCallback.lo \
 	libcanal_la-Operations.lo libcanal_la-Pointer.lo \
-	libcanal_la-PointerTarget.lo libcanal_la-SELinuxModulePass.lo \
-	libcanal_la-SlotTracker.lo libcanal_la-State.lo \
-	libcanal_la-StringUtils.lo libcanal_la-Structure.lo \
-	libcanal_la-Utils.lo
+	libcanal_la-PointerTarget.lo libcanal_la-SlotTracker.lo \
+	libcanal_la-State.lo libcanal_la-StringUtils.lo \
+	libcanal_la-Structure.lo libcanal_la-Utils.lo
 libcanal_la_OBJECTS = $(am_libcanal_la_OBJECTS)
 libcanal_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(libcanal_la_CXXFLAGS) \
@@ -308,7 +307,6 @@ libcanal_la_SOURCES = \
 	Pointer.h \
 	PointerTarget.cpp \
 	PointerTarget.h \
-	SELinuxModulePass.cpp \
 	SlotTracker.cpp \
 	SlotTracker.h \
 	State.cpp \
@@ -435,7 +433,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Operations.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Pointer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-PointerTarget.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-SELinuxModulePass.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-SlotTracker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-State.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-StringUtils.Plo@am__quote@
@@ -609,13 +606,6 @@ libcanal_la-PointerTarget.lo: PointerTarget.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PointerTarget.cpp' object='libcanal_la-PointerTarget.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-PointerTarget.lo `test -f 'PointerTarget.cpp' || echo '$(srcdir)/'`PointerTarget.cpp
-
-libcanal_la-SELinuxModulePass.lo: SELinuxModulePass.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-SELinuxModulePass.lo -MD -MP -MF $(DEPDIR)/libcanal_la-SELinuxModulePass.Tpo -c -o libcanal_la-SELinuxModulePass.lo `test -f 'SELinuxModulePass.cpp' || echo '$(srcdir)/'`SELinuxModulePass.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-SELinuxModulePass.Tpo $(DEPDIR)/libcanal_la-SELinuxModulePass.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='SELinuxModulePass.cpp' object='libcanal_la-SELinuxModulePass.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-SELinuxModulePass.lo `test -f 'SELinuxModulePass.cpp' || echo '$(srcdir)/'`SELinuxModulePass.cpp
 
 libcanal_la-SlotTracker.lo: SlotTracker.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-SlotTracker.lo -MD -MP -MF $(DEPDIR)/libcanal_la-SlotTracker.Tpo -c -o libcanal_la-SlotTracker.lo `test -f 'SlotTracker.cpp' || echo '$(srcdir)/'`SlotTracker.cpp

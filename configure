@@ -15933,6 +15933,7 @@ fi
 
 
 # LaTeX packages
+if test "$PDFLATEX" != "no"; then
 
 
 { $as_echo "$as_me:$LINENO: checking for galois latex package in class book" >&5
@@ -16472,6 +16473,7 @@ if test "$LATEX_INPUTENC" = "no"; then
 fi
 
 
+fi
 
 # Doxygen
 
