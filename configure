@@ -15954,7 +15954,7 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-if "$PDFLATEX" != "no"; then
+if test "$PDFLATEX" != "no"; then
   cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_galois=yes; export ac_cv_latex_galois;
 fi
 cd ..
@@ -16005,7 +16005,7 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-if "$PDFLATEX" != "no"; then
+if test "$PDFLATEX" != "no"; then
   cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_float=yes; export ac_cv_latex_float;
 fi
 cd ..
@@ -16056,7 +16056,7 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-if "$PDFLATEX" != "no"; then
+if test "$PDFLATEX" != "no"; then
   cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_txfonts=yes; export ac_cv_latex_txfonts;
 fi
 cd ..
@@ -16107,7 +16107,7 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-if "$PDFLATEX" != "no"; then
+if test "$PDFLATEX" != "no"; then
   cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_amssymb=yes; export ac_cv_latex_amssymb;
 fi
 cd ..
@@ -16158,7 +16158,7 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-if "$PDFLATEX" != "no"; then
+if test "$PDFLATEX" != "no"; then
   cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_amsmath=yes; export ac_cv_latex_amsmath;
 fi
 cd ..
@@ -16209,7 +16209,7 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-if "$PDFLATEX" != "no"; then
+if test "$PDFLATEX" != "no"; then
   cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_import=yes; export ac_cv_latex_import;
 fi
 cd ..
@@ -16260,7 +16260,7 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-if "$PDFLATEX" != "no"; then
+if test "$PDFLATEX" != "no"; then
   cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_graphicx=yes; export ac_cv_latex_graphicx;
 fi
 cd ..
@@ -16311,7 +16311,7 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-if "$PDFLATEX" != "no"; then
+if test "$PDFLATEX" != "no"; then
   cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_hyperref=yes; export ac_cv_latex_hyperref;
 fi
 cd ..
@@ -16362,7 +16362,7 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-if "$PDFLATEX" != "no"; then
+if test "$PDFLATEX" != "no"; then
   cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_makeidx=yes; export ac_cv_latex_makeidx;
 fi
 cd ..
@@ -16413,7 +16413,7 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-if "$PDFLATEX" != "no"; then
+if test "$PDFLATEX" != "no"; then
   cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_a4wide=yes; export ac_cv_latex_a4wide;
 fi
 cd ..
@@ -16464,7 +16464,7 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-if "$PDFLATEX" != "no"; then
+if test "$PDFLATEX" != "no"; then
   cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_inputenc=yes; export ac_cv_latex_inputenc;
 fi
 cd ..
