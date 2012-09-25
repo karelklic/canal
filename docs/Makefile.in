@@ -431,14 +431,14 @@ clean-local:
 
 canal.pdf: canal.tex doxygen-lib/doxygen-lib.tex doxygen-tool/doxygen-tool.tex
 	echo Calling pdflatex twice to handle all references.
-	TEXINPUTS="doxygen-lib:" $(PDFLATEX) canal.tex
+	TEXINPUTS="doxygen-lib:" $(PDFLATEX) -halt-on-error canal.tex
 	makeindex canal.idx
-	TEXINPUTS="doxygen-lib:" $(PDFLATEX) canal.tex
+	TEXINPUTS="doxygen-lib:" $(PDFLATEX) -halt-on-error canal.tex
 	latex_count=5 ; \
 	while egrep -s 'Rerun (LaTeX|to get cross-references right)' canal.log && [ $$latex_count -gt 0 ] ;\
 	    do \
 	      echo "Rerunning latex...." ;\
-	      TEXINPUTS="doxygen-lib:" $(PDFLATEX) canal.tex ;\
+	      TEXINPUTS="doxygen-lib:" $(PDFLATEX) -halt-on-error canal.tex ;\
 	      latex_count=`expr $$latex_count - 1` ;\
 	    done
 
