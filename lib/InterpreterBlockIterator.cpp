@@ -35,7 +35,7 @@ Iterator::interpretInstruction()
     // Interpret the instruction.
     mOperations.interpretInstruction(*mInstruction, mState);
 
-    // Leave the instruction and move move to the next.
+    // Leave the instruction.
     mCallback->onInstructionExit(*mInstruction);
 
     if (mInstruction == --(*mBasicBlock)->end())
@@ -52,6 +52,7 @@ Iterator::interpretInstruction()
         }
     }
 
+    // Move to the next instruction.
     nextInstruction();
 }
 

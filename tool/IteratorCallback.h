@@ -10,8 +10,11 @@ protected:
 
     bool mFunctionEnter;
 
+    bool mBasicBlockEnter;
+
 public:
-    IteratorCallback() : mFixpointReached(false), mFunctionEnter(false) {}
+    IteratorCallback() : mFixpointReached(false), mFunctionEnter(false),
+        mBasicBlockEnter(false) {}
 
     virtual void onFixpointReached();
 
@@ -25,6 +28,7 @@ public:
 
     bool isFunctionEnter() { return mFunctionEnter; }
 
+    bool isBasicBlockEnter() { return mFunctionEnter; }
 };
 
 #endif // CANAL_ITERATOR_CALLBACK
