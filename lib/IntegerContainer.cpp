@@ -2,7 +2,6 @@
 #include "IntegerBitfield.h"
 #include "IntegerEnumeration.h"
 #include "IntegerInterval.h"
-#include "Constant.h"
 #include "Utils.h"
 #include "StringUtils.h"
 #include "APIntUtils.h"
@@ -212,13 +211,6 @@ void
 Container::merge(const Domain &value)
 {
     std::vector<Domain*>::iterator it = mValues.begin();
-    if (const Constant *constant = dynCast<const Constant*>(&value))
-    {
-        for (; it != mValues.end(); ++it)
-            (*it)->merge(*constant);
-        return;
-    }
-
     const Container &container = dynCast<const Container&>(value);
     CANAL_ASSERT(mValues.size() == container.mValues.size());
     std::vector<Domain*>::const_iterator it2 = container.mValues.begin();
@@ -262,48 +254,21 @@ Container::matchesString(const std::string &text,
     CANAL_NOT_IMPLEMENTED();
 }
 
-// Converts value to container.  If the value is a constant, it is
-// converted to container and deleteAfter is set to true.
-static const Container *
-asContainer(const Domain &value, bool &deleteAfter)
-{
-    deleteAfter = false;
-    const Container *container = dynCast<const Container*>(&value);
-    if (!container)
-    {
-        const Constant *constant = dynCast<const Constant*>(&value);
-        CANAL_ASSERT_MSG(constant,
-                         "Unsupported type cannot be converted "
-                         "to integer container. (" << typeid(value).name() << ")");
-
-        container = new Container(value.mEnvironment, constant->getAPInt());
-        deleteAfter = true;
-    }
-
-    return container;
-}
-
 static void
 binaryOperation(Container &result,
                 const Domain &a,
                 const Domain &b,
                 Domain::BinaryOperation operation)
 {
-    bool deleteAA, deleteBB;
-    const Container *aa = asContainer(a, deleteAA),
-        *bb = asContainer(b, deleteBB);
+    const Container &aa = dynCast<const Container&>(a),
+        &bb = dynCast<const Container&>(b);
 
     std::vector<Domain*>::iterator it(result.mValues.begin());
-    std::vector<Domain*>::const_iterator ita = aa->mValues.begin(),
-        itb = bb->mValues.begin();
+    std::vector<Domain*>::const_iterator ita = aa.mValues.begin(),
+        itb = bb.mValues.begin();
 
     for (; it != result.mValues.end(); ++it, ++ita, ++itb)
         ((**it).*(operation))(**ita, **itb);
-
-    if (deleteAA)
-        delete aa;
-    if (deleteBB)
-        delete bb;
 }
 
 void
@@ -391,26 +356,13 @@ cmpOperation(Container &result,
              llvm::CmpInst::Predicate predicate,
              Domain::CmpOperation operation)
 {
-    const Canal::Pointer::InclusionBased* aPointer =
+    const Canal::Pointer::InclusionBased *aPointer =
             dynCast<const Canal::Pointer::InclusionBased*>(&a),
-            *bPointer = dynCast<const Canal::Pointer::InclusionBased*>(&b);
+        *bPointer = dynCast<const Canal::Pointer::InclusionBased*>(&b);
 
-    bool deletePtrA = false, deletePtrB = false;
-    const Constant* aConstant = dynCast<const Constant*>(&a),
-            *bConstant = dynCast<const Constant*>(&b);
-    if ( (aPointer || aConstant && aConstant->isNullPtr()) && (bPointer || bConstant && bConstant->isNullPtr()) ) {
+    if (aPointer && bPointer)
+    {
         CANAL_ASSERT(operation == &Domain::icmp);
-        if (aConstant)
-        {
-            aPointer = dynCast<const Canal::Pointer::InclusionBased*>(aConstant->toModifiableValue());
-            deletePtrA = true;
-        }
-        if (bConstant)
-        {
-            bPointer = dynCast<const Canal::Pointer::InclusionBased*>(bConstant->toModifiableValue());
-            deletePtrB = true;
-        }
-
         bool cmpSingle = aPointer->isSingleTarget() && bPointer->isSingleTarget(),
             cmpeq = (*aPointer == *bPointer);
 
@@ -423,45 +375,43 @@ cmpOperation(Container &result,
         case llvm::CmpInst::ICMP_SGE:
         case llvm::CmpInst::ICMP_SLE:
             if (cmpeq && cmpSingle)
-                result.merge(Container(result.mEnvironment, llvm::APInt(1, 1, false)));
+                result.merge(Container(result.mEnvironment,
+                                       llvm::APInt(1, 1, false)));
             else
             {
                 if (predicate == llvm::CmpInst::ICMP_EQ && cmpSingle)
-                    result.merge(Container(result.mEnvironment, llvm::APInt(1, 0, false)));
-                else result.setTop();
+                {
+                    result.merge(Container(result.mEnvironment,
+                                           llvm::APInt(1, 0, false)));
+                }
+                else
+                    result.setTop();
             }
             break;
         case llvm::CmpInst::ICMP_NE:
             if (cmpSingle)
-                result.merge(Container(result.mEnvironment, llvm::APInt(1, (cmpeq ? 0 : 1), false)));
+            {
+                result.merge(Container(result.mEnvironment,
+                                       llvm::APInt(1, (cmpeq ? 0 : 1), false)));
+            }
             else
                 result.setTop();
             break;
         default:
             result.setTop();
         }
-        if (deletePtrA)
-            delete aPointer;
-        if (deletePtrB)
-            delete bPointer;
         return;
     }
 
-    bool deleteAA, deleteBB;
-    const Container *aa = asContainer(a, deleteAA),
-        *bb = asContainer(b, deleteBB);
+    const Container &aa = dynCast<const Container&>(a),
+        &bb = dynCast<const Container&>(b);
 
     std::vector<Domain*>::iterator it(result.mValues.begin());
-    std::vector<Domain*>::const_iterator ita = aa->mValues.begin(),
-        itb = bb->mValues.begin();
+    std::vector<Domain*>::const_iterator ita = aa.mValues.begin(),
+        itb = bb.mValues.begin();
 
     for (; it != result.mValues.end(); ++it, ++ita, ++itb)
         ((**it).*(operation))(**ita, **itb, predicate);
-
-    if (deleteAA)
-        delete aa;
-    if (deleteBB)
-        delete bb;
 }
 
 

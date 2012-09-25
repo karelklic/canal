@@ -1,5 +1,4 @@
 #include "FloatInterval.h"
-#include "Constant.h"
 #include "Utils.h"
 #include <sstream>
 #include <iostream>

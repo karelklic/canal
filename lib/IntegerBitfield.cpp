@@ -1,5 +1,4 @@
 #include "IntegerBitfield.h"
-#include "Constant.h"
 #include "Utils.h"
 #include "APIntUtils.h"
 #include <sstream>
@@ -209,15 +208,6 @@ Bitfield::operator==(const Domain& value) const
 void
 Bitfield::merge(const Domain &value)
 {
-    const Constant *constant = dynCast<const Constant*>(&value);
-    if (constant)
-    {
-        CANAL_ASSERT(constant->isAPInt());
-        mZeroes |= ~constant->getAPInt();
-        mOnes |= constant->getAPInt();
-        return;
-    }
-
     const Bitfield &bits = dynCast<const Bitfield&>(value);
     mZeroes |= bits.mZeroes;
     mOnes |= bits.mOnes;

@@ -1,5 +1,4 @@
 #include "IntegerInterval.h"
-#include "Constant.h"
 #include "Utils.h"
 #include "APIntUtils.h"
 #include <sstream>
@@ -159,44 +158,21 @@ Interval::operator==(const Domain& value) const
 void
 Interval::merge(const Domain &value)
 {
-    // Handle values represeting a constant.
-    if (const Constant *constant = dynCast<const Constant*>(&value))
-    {
-        CANAL_ASSERT(constant->isAPInt());
-        const llvm::APInt &constInt = constant->getAPInt();
-
-        if (mEmpty)
-        {
-            mEmpty = false;
-            mSignedFrom = mSignedTo = constInt;
-            mUnsignedFrom = mUnsignedTo = constInt;
-            return;
-        }
-
-        if (!mSignedTop)
-        {
-            if (!mSignedFrom.sle(constInt))
-                mSignedFrom = constInt;
-            if (!mSignedTo.sge(constInt))
-                mSignedTo = constInt;
-        }
-
-        if (!mUnsignedTop)
-        {
-            if (!mUnsignedFrom.sle(constInt))
-                mUnsignedFrom = constInt;
-            if (!mUnsignedTo.sge(constInt))
-                mUnsignedTo = constInt;
-        }
-
-        return;
-    }
-
     const Interval &interval = dynCast<const Interval&>(value);
     if (interval.mEmpty)
         return;
 
-    mEmpty = false;
+    if (mEmpty)
+    {
+        mEmpty = false;
+        mSignedTop = interval.mSignedTop;
+        mSignedFrom = interval.mSignedFrom;
+        mSignedTo = interval.mSignedTo;
+        mUnsignedTop = interval.mUnsignedTop;
+        mUnsignedFrom = interval.mUnsignedFrom;
+        mUnsignedTo = interval.mUnsignedTo;
+        return;
+    }
 
     if (!mSignedTop)
     {

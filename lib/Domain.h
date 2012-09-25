@@ -30,9 +30,6 @@ public:
 
     const Environment &mEnvironment;
 
-    /// Prepare value so that merge will not fail on assert when what is Constant.
-    static Domain* handleMergeConstants(Domain *what, const Domain* target);
-
 public:
     /// Standard constructor.
     Domain(const Environment &environment);

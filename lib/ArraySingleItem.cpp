@@ -1,7 +1,6 @@
 #include "ArraySingleItem.h"
 #include "Utils.h"
 #include "IntegerContainer.h"
-#include "Constant.h"
 #include <llvm/ADT/APInt.h>
 #include <sstream>
 #include <iostream>
@@ -14,7 +13,8 @@ SingleItem::SingleItem(const Environment &environment)
 {
 }
 
-SingleItem::SingleItem(const SingleItem &singleItem) : Domain(singleItem.mEnvironment)
+SingleItem::SingleItem(const SingleItem &singleItem)
+    : Domain(singleItem.mEnvironment)
 {
     mValue = singleItem.mValue;
     if (mValue)
@@ -245,22 +245,13 @@ static void
 assertOffsetFitsToArray(const Domain &offset, const Domain &size)
 {
     // Check if the offset might point to the array.
-    if (const Constant *constant = dynCast<const Constant*>(&offset))
-    {
-        CANAL_ASSERT(constant->isAPInt());
-        assertOffsetFitsToArray(constant->getAPInt().getZExtValue(), size);
-        return;
-    }
-    else
-    {
-        const Integer::Container &integerOffset =
-            dynCast<const Integer::Container&>(offset);
-        llvm::APInt unsignedMinOffset(integerOffset.getBitWidth(), 0);
-        bool offsetIsKnown = integerOffset.unsignedMin(unsignedMinOffset);
-        // The following requirement can be changed if necessary.
-        CANAL_ASSERT_MSG(offsetIsKnown, "Offset must be a known value.");
-        assertOffsetFitsToArray(unsignedMinOffset.getZExtValue(), size);
-    }
+    const Integer::Container &integerOffset =
+        dynCast<const Integer::Container&>(offset);
+    llvm::APInt unsignedMinOffset(integerOffset.getBitWidth(), 0);
+    bool offsetIsKnown = integerOffset.unsignedMin(unsignedMinOffset);
+    // The following requirement can be changed if necessary.
+    CANAL_ASSERT_MSG(offsetIsKnown, "Offset must be a known value.");
+    assertOffsetFitsToArray(unsignedMinOffset.getZExtValue(), size);
 }
 
 std::vector<Domain*>

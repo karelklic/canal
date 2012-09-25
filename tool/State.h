@@ -3,14 +3,15 @@
 
 #include <set>
 #include <string>
+#include "lib/Constructors.h"
 #include "lib/Environment.h"
 #include "lib/Operations.h"
 #include "lib/SlotTracker.h"
 #include "lib/Stack.h"
 
 namespace llvm {
-    class Module;
-}
+class Module;
+} // namespace llvm
 
 // State of the interpreter.
 class State
@@ -46,8 +47,9 @@ protected:
 protected:
     const llvm::Module *mModule;
     Canal::Environment mEnvironment;
-    Canal::Stack mStack;
+    Canal::Constructors mConstructors;
     Canal::Operations mOperations;
+    Canal::Stack mStack;
     std::set<std::string> mFunctionBreakpoints;
 };
 
