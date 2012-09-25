@@ -1,5 +1,4 @@
 #include "Commands.h"
-#include "CommandBacktrace.h"
 #include "CommandBreak.h"
 #include "CommandCd.h"
 #include "CommandContinue.h"
@@ -7,7 +6,6 @@
 #include "CommandFinish.h"
 #include "CommandHelp.h"
 #include "CommandInfo.h"
-#include "CommandNext.h"
 #include "CommandPrint.h"
 #include "CommandPwd.h"
 #include "CommandQuit.h"
@@ -23,7 +21,6 @@
 
 Commands::Commands()
 {
-    mCommandList.push_back(new CommandBacktrace(*this));
     mCommandList.push_back(new CommandBreak(*this));
     mCommandList.push_back(new CommandCd(*this));
     mCommandList.push_back(new CommandContinue(*this));
@@ -31,7 +28,6 @@ Commands::Commands()
     mCommandList.push_back(new CommandFinish(*this));
     mCommandList.push_back(new CommandHelp(*this));
     mCommandList.push_back(new CommandInfo(*this));
-    mCommandList.push_back(new CommandNext(*this));
     mCommandList.push_back(new CommandPrint(*this));
     mCommandList.push_back(new CommandPwd(*this));
     mCommandList.push_back(new CommandQuit(*this));
@@ -55,9 +51,7 @@ Commands::~Commands()
 {
     std::vector<Command*>::const_iterator it = mCommandList.begin();
     for (; it != mCommandList.end(); ++it)
-    {
         delete *it;
-    }
 }
 
 std::vector<std::string>

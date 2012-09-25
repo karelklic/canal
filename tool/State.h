@@ -3,11 +3,8 @@
 
 #include <set>
 #include <string>
-#include "lib/Constructors.h"
-#include "lib/Environment.h"
-#include "lib/Operations.h"
-#include "lib/SlotTracker.h"
-#include "lib/Stack.h"
+#include "lib/InterpreterBlock.h"
+#include "IteratorCallback.h"
 
 namespace llvm {
 class Module;
@@ -20,37 +17,35 @@ public:
     State(const llvm::Module *module);
     ~State();
 
-    const llvm::Module &getModule() const { return *mModule; }
-    const Canal::Environment &getEnvironment() const { return mEnvironment; }
-    Canal::Stack &getStack() { return mStack; }
-    const Canal::Stack &getStack() const { return mStack; }
-    Canal::SlotTracker &getSlotTracker() { return mEnvironment.mSlotTracker; }
+    Canal::InterpreterBlock::Interpreter &getInterpreter() { return mInterpreter; }
+
+    const Canal::InterpreterBlock::Interpreter &getInterpreter() const { return mInterpreter; }
+
+    const Canal::Environment &getEnvironment() const { return mInterpreter.getEnvironment(); }
+
+    const llvm::Module &getModule() const { return getEnvironment().getModule(); }
+
+    Canal::SlotTracker &getSlotTracker() const { return getEnvironment().getSlotTracker(); }
 
     // Check if the interpreter is in the middle of interpretation.
     // This is true if something is on the stack.
     bool isInterpreting() const;
 
+    void start();
     void run();
     void step(int count);
-    void next(int count);
     void finish();
 
     // Add a breakpoint on function start.
     void addFunctionBreakpoint(const std::string &functionName);
 
-    // Adds the "main" function to stack.
-    void addMainFrame();
-
 protected:
     bool reachedBreakpoint();
 
 protected:
-    const llvm::Module *mModule;
-    Canal::Environment mEnvironment;
-    Canal::Constructors mConstructors;
-    Canal::Operations mOperations;
-    Canal::Stack mStack;
+    Canal::InterpreterBlock::Interpreter mInterpreter;
     std::set<std::string> mFunctionBreakpoints;
+    IteratorCallback mIteratorCallback;
 };
 
 #endif // CANAL_STATE_H

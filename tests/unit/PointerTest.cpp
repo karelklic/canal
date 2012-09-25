@@ -40,7 +40,7 @@ main(int argc, char **argv)
     llvm::LLVMContext &context = llvm::getGlobalContext();
     llvm::llvm_shutdown_obj y;  // Call llvm_shutdown() on exit.
 
-    llvm::Module module("testModule", context);
+    llvm::Module *module = new llvm::Module("testModule", context);
     Environment environment(module);
 
     testConstructors(environment);

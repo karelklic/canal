@@ -27,6 +27,5 @@ CommandRun::run(const std::vector<std::string> &args)
         return;
     }
 
-    mCommands.getState()->addMainFrame();
     mCommands.getState()->run();
 }

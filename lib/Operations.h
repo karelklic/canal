@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_INTERPRETER_H
-#define LIBCANAL_INTERPRETER_H
+#ifndef LIBCANAL_OPERATIONS_H
+#define LIBCANAL_OPERATIONS_H
 
 #include "Domain.h"
 #include <map>
@@ -61,9 +61,9 @@ namespace Canal {
 class State;
 class Machine;
 class Domain;
-class Stack;
 class Environment;
 class Constructors;
+class OperationsCallback;
 
 /// Context-sensitive flow-insensitive operational abstract
 /// interpreter.  Interprets instructions in abstract domain.
@@ -75,26 +75,18 @@ class Operations
 protected:
     const Environment &mEnvironment;
     const Constructors &mConstructors;
+    OperationsCallback &mCallback;
 
 public:
     Operations(const Environment &environment,
-               const Constructors &constructors);
+               const Constructors &constructors,
+               OperationsCallback &callback);
 
     virtual ~Operations() {};
 
-    /// Adds all global variables and constants from a module to the
-    /// state.
-    void addGlobalVariables(State &state);
-
-    /// One step of the interpreter.  Interprets current instruction
-    /// and moves to the next one.
-    /// @returns
-    ///   True if next step is possible.  False on the end of the
-    ///   program.
-    virtual bool step(Stack &stack);
-
     /// Interprets current instruction.
-    void interpretInstruction(Stack &stack);
+    void interpretInstruction(const llvm::Instruction &instruction,
+                              State &state);
 
 protected: // Helper functions.
     /// Given a place in source code, return the corresponding variable
@@ -109,7 +101,7 @@ protected: // Helper functions.
                                llvm::OwningPtr<Domain> &constant) const;
 
     template<typename T> void interpretCall(const T &instruction,
-                                            Stack &stack);
+                                            State &state);
 
     void binaryOperation(const llvm::BinaryOperator &instruction,
                          State &state,
@@ -171,7 +163,7 @@ protected:
     /// control flow transfer to either the 'normal' label or the
     /// 'exception' label.  It's a terminator instruction.
     virtual void invoke(const llvm::InvokeInst &instruction,
-                        Stack &stack);
+                        State &state);
 
     /// No defined semantics. This instruction is used to inform the
     /// optimizer that a particular portion of the code is not
@@ -266,7 +258,7 @@ protected:
 
     /// It's a vector operation.
     virtual void shufflevector(const llvm::ShuffleVectorInst &instruction,
-                               Stack &stack);
+                               State &state);
 
     /// It's an aggregate operation.
     virtual void extractvalue(const llvm::ExtractValueInst &instruction,
@@ -278,7 +270,7 @@ protected:
 
     /// It's a memory access operation.
     virtual void alloca_(const llvm::AllocaInst &instruction,
-                         Stack &stack);
+                         State &state);
 
     /// It's a memory access operation.
     virtual void load(const llvm::LoadInst &instruction,
@@ -290,7 +282,7 @@ protected:
 
     /// It's a memory addressing operation.
     virtual void getelementptr(const llvm::GetElementPtrInst &instruction,
-                               Stack &stack);
+                               State &state);
 
     /// It's a conversion operation.
     virtual void trunc(const llvm::TruncInst &instruction,
@@ -353,7 +345,7 @@ protected:
                         State &state);
 
     virtual void call(const llvm::CallInst &instruction,
-                      Stack &stack);
+                      State &state);
 
     virtual void va_arg(const llvm::VAArgInst &instruction,
                         State &state);
@@ -383,4 +375,4 @@ protected:
 
 } // namespace Canal
 
-#endif // LIBCANAL_INTERPRETER_H
+#endif // LIBCANAL_OPERATIONS_H

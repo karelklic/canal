@@ -13,17 +13,21 @@ namespace Canal {
 
 class Environment
 {
-public:
-    const llvm::Module &mModule;
+protected:
+    const llvm::Module *mModule;
     llvm::TargetData mTargetData;
     mutable SlotTracker mSlotTracker;
 
 public:
     // @param module
     //   LLVM module that contains all functions.
-    Environment(const llvm::Module &module);
+    Environment(const llvm::Module *module);
+    ~Environment();
 
     llvm::LLVMContext &getContext() const;
+    const llvm::Module &getModule() const { return *mModule; }
+    const llvm::TargetData &getTargetData() const { return mTargetData; }
+    SlotTracker &getSlotTracker() const { return mSlotTracker; }
 };
 
 } // namespace Canal

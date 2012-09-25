@@ -6,12 +6,12 @@
 #include "FloatInterval.h"
 #include "IntegerBitfield.h"
 #include "IntegerContainer.h"
+#include "OperationsCallback.h"
 #include "Pointer.h"
-#include "Stack.h"
-#include "State.h"
 #include "Structure.h"
 #include "Utils.h"
 #include "Domain.h"
+#include "State.h"
 #include <llvm/Function.h>
 #include <llvm/Module.h>
 #include <llvm/BasicBlock.h>
@@ -25,62 +25,20 @@
 namespace Canal {
 
 Operations::Operations(const Environment &environment,
-                       const Constructors &constructors) : mEnvironment(environment),
-                                                           mConstructors(constructors)
+                       const Constructors &constructors,
+                       OperationsCallback &callback)
+    : mEnvironment(environment),
+      mConstructors(constructors),
+      mCallback(callback)
 {
 }
 
 void
-Operations::addGlobalVariables(State &state)
+Operations::interpretInstruction(const llvm::Instruction &instruction,
+                                 State &state)
 {
-    // Add global constants.
-    llvm::Module::const_global_iterator git = mEnvironment.mModule.global_begin();
-    llvm::Module::const_global_iterator gitend = mEnvironment.mModule.global_end();
-    for (; git != gitend; ++git)
-    {
-        if (git->isConstant())
-        {
-            if (!git->hasInitializer())
-                CANAL_NOT_IMPLEMENTED();
-
-            state.addGlobalVariable(*git, mConstructors.create(*git->getInitializer()));
-        }
-        else
-        {
-            // When it is not a constant, then it is a pointer to a
-            // global block.
-            Domain *block = mConstructors.create(*git->getType()->getElementType());
-            state.addGlobalBlock(*git, block);
-
-            Domain *value = mConstructors.create(*git->getType());
-            Pointer::InclusionBased &pointer = dynCast<Pointer::InclusionBased&>(*value);
-            pointer.addTarget(Pointer::Target::GlobalBlock,
-                              git,
-                              git,
-                              std::vector<Domain*>(),
-                              NULL);
-
-            state.addGlobalVariable(*git, value);
-        }
-    }
-}
-
-bool
-Operations::step(Stack &stack)
-{
-    interpretInstruction(stack);
-    return stack.nextInstruction();
-}
-
-void
-Operations::interpretInstruction(Stack &stack)
-{
-    const llvm::Instruction &instruction =
-        stack.getCurrentInstruction();
-    State &state = stack.getCurrentState();
-
     if (llvm::isa<llvm::CallInst>(instruction))
-        call((const llvm::CallInst&)instruction, stack);
+        call((const llvm::CallInst&)instruction, state);
     else if (llvm::isa<llvm::ICmpInst>(instruction))
         icmp((const llvm::ICmpInst&)instruction, state);
     else if (llvm::isa<llvm::FCmpInst>(instruction))
@@ -88,7 +46,7 @@ Operations::interpretInstruction(Stack &stack)
     else if (llvm::isa<llvm::ExtractElementInst>(instruction))
         extractelement((const llvm::ExtractElementInst&)instruction, state);
     else if (llvm::isa<llvm::GetElementPtrInst>(instruction))
-        getelementptr((const llvm::GetElementPtrInst&)instruction, stack);
+        getelementptr((const llvm::GetElementPtrInst&)instruction, state);
     else if (llvm::isa<llvm::InsertElementInst>(instruction))
         insertelement((const llvm::InsertElementInst&)instruction, state);
     else if (llvm::isa<llvm::InsertValueInst>(instruction))
@@ -109,13 +67,13 @@ Operations::interpretInstruction(Stack &stack)
     else if (llvm::isa<llvm::SelectInst>(instruction))
         select((const llvm::SelectInst&)instruction, state);
     else if (llvm::isa<llvm::ShuffleVectorInst>(instruction))
-        shufflevector((const llvm::ShuffleVectorInst&)instruction, stack);
+        shufflevector((const llvm::ShuffleVectorInst&)instruction, state);
     else if (llvm::isa<llvm::StoreInst>(instruction))
         store((const llvm::StoreInst&)instruction, state);
     else if (llvm::isa<llvm::UnaryInstruction>(instruction))
     {
         if (llvm::isa<llvm::AllocaInst>(instruction))
-            alloca_((const llvm::AllocaInst&)instruction, stack);
+            alloca_((const llvm::AllocaInst&)instruction, state);
         else if (llvm::isa<llvm::CastInst>(instruction))
         {
             if (llvm::isa<llvm::BitCastInst>(instruction))
@@ -161,7 +119,7 @@ Operations::interpretInstruction(Stack &stack)
         else if (llvm::isa<llvm::IndirectBrInst>(instruction))
             indirectbr((const llvm::IndirectBrInst&)instruction, state);
         else if (llvm::isa<llvm::InvokeInst>(instruction))
-            invoke((const llvm::InvokeInst&)instruction, stack);
+            invoke((const llvm::InvokeInst&)instruction, state);
 #if LLVM_MAJOR >= 3
         // Resume instruction is available since LLVM 3.0
         else if (llvm::isa<llvm::ResumeInst>(instruction))
@@ -213,57 +171,43 @@ Operations::variableOrConstant(const llvm::Value &place,
                                State &state,
                                llvm::OwningPtr<Domain> &constant) const
 {
+    Domain *variable = state.findVariable(place);
+    if (variable)
+        return variable;
+
     if (llvm::isa<llvm::Constant>(place))
     {
-        Domain *constValue = mConstructors.create(llvmCast<llvm::Constant>(place));
+        Domain *constValue =
+            mConstructors.create(llvmCast<llvm::Constant>(place));
+
         llvm::OwningPtr<Domain> ptr(constValue);
         constant.swap(ptr);
         return constValue;
     }
 
-    // Either NULL or existing variable.
-    return state.findVariable(place);
+    return NULL;
 }
 
 template<typename T> void
 Operations::interpretCall(const T &instruction,
-                          Stack &stack)
+                          State &state)
 {
-    State &state = stack.getCurrentState();
     llvm::Function *function = instruction.getCalledFunction();
-    // TODO: Handle some intristic functions.  Some of them can be
-    // safely ignored.
-    if (!function || function->isIntrinsic() || function->isDeclaration())
-    {
-        // Function not found.  Set the resultant value to the Top
-        // value.
-        printf("Function \"%s\" not available.\n", function->getName().data());
+    CANAL_ASSERT(function);
 
-        // TODO: Set memory accessed by non-static globals to
-        // the Top value.
+    // Create the calling state.
+    State callingState;
+    callingState.mergeGlobal(state);
 
-        // Create result TOP value of required type.
-        const llvm::Type *type = instruction.getType();
-        Domain *returnedValue = mConstructors.create(*instruction.getType());
+    // TODO: not all function blocks should be merged to the state.
+    // Only the function blocks accessible from the arguments and
+    // global variables should be merged.
+    callingState.mergeFunctionBlocks(state);
 
-        // If the function returns nothing (void), we are finished.
-        if (!returnedValue)
-            return;
-
-        AccuracyDomain *accuracyValue = dynCast<AccuracyDomain*>(returnedValue);
-        if (accuracyValue)
-            accuracyValue->setTop();
-
-        state.addFunctionVariable(instruction, returnedValue);
-        return;
-    }
-
-    State initialState(state);
-    initialState.clearFunctionLevel();
+    // Add function arguments to the calling state.
     llvm::Function::ArgumentListType::const_iterator it =
         function->getArgumentList().begin();
-
-    for (int i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
+    for (unsigned i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
     {
         llvm::Value *operand = instruction.getArgOperand(i);
 
@@ -272,10 +216,13 @@ Operations::interpretCall(const T &instruction,
         if (!value)
             return;
 
-        initialState.addFunctionVariable(*it, value->clone());
+        callingState.addFunctionVariable(*it, value->clone());
     }
 
-    stack.addFrame(*function, initialState);
+    mCallback.onFunctionCall(*function,
+                             callingState,
+                             state,
+                             instruction);
 }
 
 void
@@ -446,9 +393,9 @@ Operations::indirectbr(const llvm::IndirectBrInst &instruction,
 
 void
 Operations::invoke(const llvm::InvokeInst &instruction,
-                   Stack &stack)
+                   State &state)
 {
-    interpretCall(instruction, stack);
+    interpretCall(instruction, state);
 }
 
 void
@@ -637,10 +584,8 @@ Operations::insertelement(const llvm::InsertElementInst &instruction,
 
 void
 Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
-                          Stack &stack)
+                          State &state)
 {
-    State &state = stack.getCurrentState();
-
     llvm::OwningPtr<Domain> constants[2];
     Domain *values[2] = {
         variableOrConstant(*instruction.getOperand(0), state, constants[0]),
@@ -688,7 +633,8 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
         int offset = *it;
         if (offset == -1)
         {
-            Domain *value = mConstructors.create(*instruction.getType()->getElementType());
+            Domain *value = mConstructors.create(
+                *instruction.getType()->getElementType());
 
             result->mValues.push_back(value);
         }
@@ -771,9 +717,8 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
 
 void
 Operations::alloca_(const llvm::AllocaInst &instruction,
-                    Stack &stack)
+                    State &state)
 {
-    State &state = stack.getCurrentState();
     const llvm::Type *type = instruction.getAllocatedType();
     CANAL_ASSERT(type);
     Domain *value = mConstructors.create(*type);
@@ -848,83 +793,27 @@ void
 Operations::store(const llvm::StoreInst &instruction,
                   State &state)
 {
-    // Find the pointer in the state.  If the pointer is not
-    // available, do nothing.
-    Domain *variable = state.findVariable(*instruction.getPointerOperand());
-    if (!variable)
+    llvm::OwningPtr<Domain> constantPointer, constantValue;
+    Domain *pointer = variableOrConstant(*instruction.getPointerOperand(),
+                                         state, constantPointer);
+
+    Domain *value = variableOrConstant(*instruction.getValueOperand(),
+                                       state, constantValue);
+
+    if (!pointer || !value)
         return;
 
-    Pointer::InclusionBased &pointer =
-        dynCast<Pointer::InclusionBased&>(*variable);
+    Pointer::InclusionBased &inclusionBased =
+        dynCast<Pointer::InclusionBased&>(*pointer);
 
-    // Find the variable in the state.  Merge the provided value into
-    // all targets.
-    Domain *value = state.findVariable(*instruction.getValueOperand());
-    bool deleteValue = false;
-    if (!value)
-    {
-        // Handle storing of constant values.
-        const llvm::Constant *constant =
-            llvm::dyn_cast<llvm::Constant>(instruction.getValueOperand());
-
-        if (!constant)
-        {
-            // Give up.  Fixpoint calculation has not yet provided us
-            // the variable.
-            return;
-        }
-
-        deleteValue = true;
-
-        const llvm::ConstantExpr *constantExpr =
-            llvm::dyn_cast<llvm::ConstantExpr>(constant);
-
-        // Handle storing of getelementptr constant.  Our abstract
-        // pointer value does not handle that.
-        if (constantExpr &&
-            constantExpr->getOpcode() == llvm::Instruction::GetElementPtr)
-        {
-            std::vector<Domain*> offsets;
-            bool allOffsetsPresent = getElementPtrOffsets(
-                offsets,
-                constantExpr->op_begin() + 1,
-                constantExpr->op_end(),
-                state);
-
-            CANAL_ASSERT_MSG(allOffsetsPresent,
-                             "All offsets are expected to be present in "
-                             "a constant expression of getelementptr.");
-
-            const llvm::PointerType &pointerType =
-                llvmCast<const llvm::PointerType>(*constantExpr->getType());
-            CANAL_ASSERT(pointerType.getElementType());
-
-            Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
-                mEnvironment, *pointerType.getElementType());
-            constPointer->addTarget(Pointer::Target::GlobalVariable,
-                                    &instruction,
-                                    *constantExpr->op_begin(),
-                                    offsets,
-                                    NULL);
-
-            value = constPointer;
-        }
-        else
-            value = mConstructors.create(*constant);
-    }
-
-    pointer.store(*value, state);
-
-    if (deleteValue)
-        delete value;
+    inclusionBased.store(*value, state);
 }
 
 void
 Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
-                          Stack &stack)
+                          State &state)
 {
     CANAL_ASSERT(instruction.getNumOperands() > 1);
-    State &state = stack.getCurrentState();
 
     // Find the base pointer.
     Domain *base = state.findVariable(*instruction.getPointerOperand());
@@ -1070,7 +959,7 @@ Operations::ptrtoint(const llvm::PtrToIntInst &instruction,
         else
         {
             it->second.mNumericOffset =
-                mConstructors.create(*instruction.getDestTy(), environment.mModule);
+                mConstructors.create(*instruction.getDestTy());
         }
     }
 */
@@ -1137,7 +1026,7 @@ Operations::phi(const llvm::PHINode &instruction,
                 State &state)
 {
     Domain *mergedValue = NULL;
-    for (int i = 0; i < instruction.getNumIncomingValues(); ++i)
+    for (unsigned i = 0; i < instruction.getNumIncomingValues(); ++i)
     {
         llvm::OwningPtr<Domain> c;
         Domain *value = variableOrConstant(*instruction.getIncomingValue(i),
@@ -1203,9 +1092,9 @@ Operations::select(const llvm::SelectInst &instruction,
 
 void
 Operations::call(const llvm::CallInst &instruction,
-                 Stack &stack)
+                 State &state)
 {
-    interpretCall(instruction, stack);
+    interpretCall(instruction, state);
 }
 
 void

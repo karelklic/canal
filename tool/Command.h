@@ -15,6 +15,9 @@ public:
             const std::string &help,
             Commands &commands);
 
+    /// Standard virtual destructor.
+    virtual ~Command() {}
+
     // User printable name of the function.
     const std::string &getName() const { return mName; }
     // Command shortcut.  Empty string if command has none.

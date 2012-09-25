@@ -2,6 +2,8 @@
 #include "Domain.h"
 #include "Utils.h"
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/BasicBlock.h>
+#include <llvm/Function.h>
 
 namespace Canal {
 
@@ -146,9 +148,20 @@ State::merge(const State &state)
 {
     mergeMaps(mFunctionVariables, state.mFunctionVariables);
     mergeMaps(mFunctionBlocks, state.mFunctionBlocks);
+    mergeGlobal(state);
+    mergeReturnedValue(state);
+}
+
+void
+State::mergeGlobal(const State &state)
+{
     mergeMaps(mGlobalVariables, state.mGlobalVariables);
     mergeMaps(mGlobalBlocks, state.mGlobalBlocks);
+}
 
+void
+State::mergeReturnedValue(const State &state)
+{
     if (mReturnedValue)
     {
         if (state.mReturnedValue)
@@ -159,10 +172,65 @@ State::merge(const State &state)
 }
 
 void
-State::mergeGlobalLevel(const State &state)
+State::mergeFunctionBlocks(const State &state)
 {
-    mergeMaps(mGlobalVariables, state.mGlobalVariables);
-    mergeMaps(mGlobalBlocks, state.mGlobalBlocks);
+    mergeMaps(mFunctionBlocks, state.mFunctionBlocks);
+}
+
+static bool
+containsPlace(const llvm::BasicBlock &basicBlock,
+              const llvm::Value *place)
+{
+    llvm::BasicBlock::const_iterator it = basicBlock.begin(),
+        itend = basicBlock.end();
+
+    for (; it != itend; ++it)
+    {
+        if (it == place)
+            return true;
+    }
+
+    return false;
+}
+
+static bool
+containsPlace(const llvm::Function &function,
+              const llvm::Value *place)
+{
+    llvm::Function::const_iterator it = function.begin(),
+        itend = function.end();
+
+    for (; it != itend; ++it)
+    {
+        if (containsPlace(*it, place))
+            return true;
+    }
+
+    return false;
+}
+
+void
+State::mergeForeignFunctionBlocks(const State &state,
+                                  const llvm::Function &currentFunction)
+{
+    // Merge function blocks that do not belong to current function.
+    PlaceValueMap::const_iterator it2 = state.mFunctionBlocks.begin(),
+        it2end = state.mFunctionBlocks.end();
+
+    for (; it2 != it2end; ++it2)
+    {
+	PlaceValueMap::iterator it1 = mFunctionBlocks.find(it2->first);
+	if (it1 == mFunctionBlocks.end())
+        {
+            if (containsPlace(currentFunction, it2->first))
+                continue;
+
+            mFunctionBlocks.insert(PlaceValueMap::value_type(it2->first,
+                                                             it2->second->clone()));
+        }
+	else
+            it1->second->merge(*it2->second);
+    }
 }
 
 static void
@@ -232,17 +300,6 @@ State::findBlock(const llvm::Value &place) const
         return it->second;
 
     return NULL;
-}
-
-llvm::raw_ostream&
-operator<<(llvm::raw_ostream& ostream,
-           const State &state)
-{
-    ostream << "State(function variables: "
-            << state.getFunctionVariables().size()
-            << ", global variables: "
-            << state.getGlobalVariables().size()
-            << ")";
 }
 
 } // namespace Canal

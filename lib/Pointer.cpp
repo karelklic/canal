@@ -20,8 +20,8 @@ InclusionBased::InclusionBased(const Environment &environment,
 
 InclusionBased::InclusionBased(const InclusionBased &second)
     : Domain(second.mEnvironment),
-      mType(second.mType),
       mTargets(second.mTargets),
+      mType(second.mType),
       mTop(second.mTop)
 {
     PlaceTargetMap::iterator it = mTargets.begin();
@@ -32,8 +32,8 @@ InclusionBased::InclusionBased(const InclusionBased &second)
 InclusionBased::InclusionBased(const InclusionBased &second,
                                const llvm::Type &newType)
     : Domain(second.mEnvironment),
-      mType(newType),
       mTargets(second.mTargets),
+      mType(newType),
       mTop(second.mTop)
 {
     PlaceTargetMap::iterator it = mTargets.begin();
@@ -61,7 +61,8 @@ InclusionBased::addTarget(Target::Type type,
     if (mTop)
         return;
 
-    Target *pointerTarget = new Target(mEnvironment, type, target, offsets, numericOffset);
+    Target *pointerTarget = new Target(mEnvironment, type, target,
+                                       offsets, numericOffset);
 
     PlaceTargetMap::iterator it = mTargets.find(instruction);
     if (it != mTargets.end())
@@ -271,7 +272,7 @@ InclusionBased::toString() const
     {
         PlaceTargetMap::const_iterator it = mTargets.begin();
         for (; it != mTargets.end(); ++it)
-            ss << indent(it->second->toString(mEnvironment.mSlotTracker), 4);
+            ss << indent(it->second->toString(mEnvironment.getSlotTracker()), 4);
     }
 
     return ss.str();

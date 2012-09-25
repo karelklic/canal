@@ -6,6 +6,7 @@
 #include <string>
 
 namespace llvm {
+class Function;
 class Value;
 class raw_ostream;
 } // namespace llvm
@@ -18,8 +19,11 @@ class Domain;
 /// instance of llvm::Instruction).
 typedef std::map<const llvm::Value*, Domain*> PlaceValueMap;
 
-/// Includes global variables and heap.
-/// Includes function-level memory and variables (=stack).
+/// @brief Abstract memory state.
+///
+/// Consists of function-level variables (also called registers) and
+/// stack memory, global variables and heap, and return value.  All
+/// variables are in abstract domain.
 class State
 {
 public:
@@ -38,14 +42,24 @@ public:
     /// Clears function variables, blocks and returned value.
     void clearFunctionLevel();
 
+    /// Merge everything.
     void merge(const State &state);
 
-    /// Merge only global variables and global memory blocks of the
-    /// provided state.  This is used after a function call, where the
-    /// modifications of the global state need to be merged to the
-    /// state of the caller, but its function level state is not
-    /// relevant.
-    void mergeGlobalLevel(const State &state);
+    /// Merge global variables and blocks.
+    void mergeGlobal(const State &state);
+
+    /// Merge the returned value.
+    void mergeReturnedValue(const State &state);
+
+    /// Merge function blocks only.
+    void mergeFunctionBlocks(const State &state);
+
+    /// Merge function memory blocks external to a function.
+    /// This is used after a function call, where the modifications of
+    /// the global state need to be merged to the state of the caller,
+    /// but its local state is not relevant.
+    void mergeForeignFunctionBlocks(const State &state,
+                                    const llvm::Function &currentFunction);
 
     /// @param place
     ///   Represents a place in the program where the global variable
@@ -121,11 +135,6 @@ public:
     /// Value returned from function.
     Domain *mReturnedValue;
 };
-
-/// Support writing of operational state to output stream.  Used for
-/// logging purposes.
-llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
-			      const State &state);
 
 } // namespace Canal
 

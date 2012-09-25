@@ -33,6 +33,8 @@ public:
 public:
     /// Standard constructor.
     Domain(const Environment &environment);
+    /// Virtual destructor.
+    virtual ~Domain() {};
 
     /// Create a copy of this value.
     virtual Domain *clone() const = 0;

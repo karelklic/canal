@@ -2,7 +2,6 @@
 #include "Commands.h"
 #include "State.h"
 #include "Utils.h"
-#include "lib/Stack.h"
 #include <cstdio>
 
 CommandStart::CommandStart(Commands &commands)
@@ -29,7 +28,5 @@ CommandStart::run(const std::vector<std::string> &args)
         return;
     }
 
-    mCommands.getState()->addMainFrame();
-    printf("Temporary breakpoint: \"main\".\n");
-    print(mCommands.getState()->getStack().getCurrentInstruction());
+    mCommands.getState()->start();
 }

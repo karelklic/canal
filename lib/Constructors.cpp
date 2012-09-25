@@ -2,6 +2,7 @@
 #include "IntegerContainer.h"
 #include "Utils.h"
 #include "ArraySingleItem.h"
+#include "ArrayExactSize.h"
 #include "FloatInterval.h"
 #include "Pointer.h"
 #include "Structure.h"
@@ -83,9 +84,18 @@ Constructors::create(const llvm::Constant &value) const
         const llvm::ConstantPointerNull &nullValue =
             llvmCast<llvm::ConstantPointerNull>(value);
 
-        const llvm::Type &type = *nullValue.getType();
+        const llvm::PointerType &pointerType = *nullValue.getType();
 
-        CANAL_NOT_IMPLEMENTED();
+        Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
+            mEnvironment, *pointerType.getElementType());
+
+        constPointer->addTarget(Pointer::Target::Constant,
+                                &value,
+                                NULL,
+                                std::vector<Domain*>(),
+                                NULL);
+
+        return constPointer;
     }
 
     if (llvm::isa<llvm::ConstantExpr>(value))
@@ -93,8 +103,34 @@ Constructors::create(const llvm::Constant &value) const
         const llvm::ConstantExpr &exprValue = llvmCast<llvm::ConstantExpr>(value);
         if (exprValue.getOpcode() == llvm::Instruction::GetElementPtr)
         {
-            CANAL_NOT_IMPLEMENTED();
+            std::vector<Domain*> offsets;
+            llvm::ConstantExpr::const_op_iterator it = exprValue.op_begin() + 1;
+            for (; it != exprValue.op_end(); ++it)
+            {
+                const llvm::ConstantInt &constant =
+                    llvmCast<llvm::ConstantInt>(**it);
+
+                offsets.push_back(create(constant));
+            }
+
+            const llvm::PointerType &pointerType =
+                llvmCast<const llvm::PointerType>(*exprValue.getType());
+
+            CANAL_ASSERT(pointerType.getElementType());
+
+            Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
+                mEnvironment, *pointerType.getElementType());
+
+            constPointer->addTarget(Pointer::Target::GlobalVariable,
+                                    &value,
+                                    *exprValue.op_begin(),
+                                    offsets,
+                                    NULL);
+
+            return constPointer;
         }
+
+        CANAL_NOT_IMPLEMENTED();
     }
 
     if (llvm::isa<llvm::ConstantFP>(value))
@@ -114,7 +150,15 @@ Constructors::create(const llvm::Constant &value) const
 
     if (llvm::isa<llvm::ConstantArray>(value))
     {
-        CANAL_NOT_IMPLEMENTED();
+        const llvm::ConstantArray &arrayValue = llvmCast<llvm::ConstantArray>(value);
+        uint64_t elementCount = arrayValue.getType()->getNumElements();
+
+        Array::ExactSize *result = new Array::ExactSize(mEnvironment);
+
+        for (unsigned i = 0; i < elementCount; ++i)
+            result->mValues.push_back(create(*arrayValue.getOperand(i)));
+
+        return result;
     }
 
     if (llvm::isa<llvm::ConstantAggregateZero>(value))
