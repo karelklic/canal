@@ -15933,7 +15933,6 @@ fi
 
 
 # LaTeX packages
-if test "$PDFLATEX" != "no"; then
 
 
 { $as_echo "$as_me:$LINENO: checking for galois latex package in class book" >&5
@@ -15955,7 +15954,9 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_galois=yes; export ac_cv_latex_galois;
+if "$PDFLATEX" != "no"; then
+  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_galois=yes; export ac_cv_latex_galois;
+fi
 cd ..
 rm -rf .tmps_latex
 
@@ -16004,7 +16005,9 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_float=yes; export ac_cv_latex_float;
+if "$PDFLATEX" != "no"; then
+  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_float=yes; export ac_cv_latex_float;
+fi
 cd ..
 rm -rf .tmps_latex
 
@@ -16053,7 +16056,9 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_txfonts=yes; export ac_cv_latex_txfonts;
+if "$PDFLATEX" != "no"; then
+  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_txfonts=yes; export ac_cv_latex_txfonts;
+fi
 cd ..
 rm -rf .tmps_latex
 
@@ -16102,7 +16107,9 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_amssymb=yes; export ac_cv_latex_amssymb;
+if "$PDFLATEX" != "no"; then
+  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_amssymb=yes; export ac_cv_latex_amssymb;
+fi
 cd ..
 rm -rf .tmps_latex
 
@@ -16151,7 +16158,9 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_amsmath=yes; export ac_cv_latex_amsmath;
+if "$PDFLATEX" != "no"; then
+  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_amsmath=yes; export ac_cv_latex_amsmath;
+fi
 cd ..
 rm -rf .tmps_latex
 
@@ -16200,7 +16209,9 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_import=yes; export ac_cv_latex_import;
+if "$PDFLATEX" != "no"; then
+  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_import=yes; export ac_cv_latex_import;
+fi
 cd ..
 rm -rf .tmps_latex
 
@@ -16249,7 +16260,9 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_graphicx=yes; export ac_cv_latex_graphicx;
+if "$PDFLATEX" != "no"; then
+  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_graphicx=yes; export ac_cv_latex_graphicx;
+fi
 cd ..
 rm -rf .tmps_latex
 
@@ -16298,7 +16311,9 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_hyperref=yes; export ac_cv_latex_hyperref;
+if "$PDFLATEX" != "no"; then
+  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_hyperref=yes; export ac_cv_latex_hyperref;
+fi
 cd ..
 rm -rf .tmps_latex
 
@@ -16347,7 +16362,9 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_makeidx=yes; export ac_cv_latex_makeidx;
+if "$PDFLATEX" != "no"; then
+  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_makeidx=yes; export ac_cv_latex_makeidx;
+fi
 cd ..
 rm -rf .tmps_latex
 
@@ -16396,7 +16413,9 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_a4wide=yes; export ac_cv_latex_a4wide;
+if "$PDFLATEX" != "no"; then
+  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_a4wide=yes; export ac_cv_latex_a4wide;
+fi
 cd ..
 rm -rf .tmps_latex
 
@@ -16445,7 +16464,9 @@ cat > testconf.tex << \EOF
 \end{document}
 
 EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_inputenc=yes; export ac_cv_latex_inputenc;
+if "$PDFLATEX" != "no"; then
+  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && ac_cv_latex_inputenc=yes; export ac_cv_latex_inputenc;
+fi
 cd ..
 rm -rf .tmps_latex
 
@@ -16473,7 +16494,6 @@ if test "$LATEX_INPUTENC" = "no"; then
 fi
 
 
-fi
 
 # Doxygen
 
