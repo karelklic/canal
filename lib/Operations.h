@@ -347,7 +347,7 @@ protected:
     virtual void call(const llvm::CallInst &instruction,
                       State &state);
 
-    virtual void va_arg(const llvm::VAArgInst &instruction,
+    virtual void va_arg_(const llvm::VAArgInst &instruction,
                         State &state);
 
 #if LLVM_MAJOR >= 3

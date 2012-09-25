@@ -108,7 +108,7 @@ Operations::interpretInstruction(const llvm::Instruction &instruction,
         else if (llvm::isa<llvm::LoadInst>(instruction))
             load((const llvm::LoadInst&)instruction, state);
         else if (llvm::isa<llvm::VAArgInst>(instruction))
-            va_arg((const llvm::VAArgInst&)instruction, state);
+            va_arg_((const llvm::VAArgInst&)instruction, state);
         else
             CANAL_FATAL_ERROR("Unknown unary instruction: " << instruction);
     }
@@ -1098,7 +1098,7 @@ Operations::call(const llvm::CallInst &instruction,
 }
 
 void
-Operations::va_arg(const llvm::VAArgInst &instruction,
+Operations::va_arg_(const llvm::VAArgInst &instruction,
                    State &state)
 {
     CANAL_NOT_IMPLEMENTED();
