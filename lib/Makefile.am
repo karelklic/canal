@@ -44,7 +44,6 @@ libcanal_la_SOURCES = \
 	Pointer.h \
 	PointerTarget.cpp \
 	PointerTarget.h \
-	SELinuxModulePass.cpp \
 	SlotTracker.cpp \
 	SlotTracker.h \
 	State.cpp \

@@ -19,7 +19,6 @@ InterpreterBlockOperationsCallback.cpp
 Operations.cpp
 Pointer.cpp
 PointerTarget.cpp
-SELinuxModulePass.cpp
 SlotTracker.cpp
 State.cpp
 StringUtils.cpp

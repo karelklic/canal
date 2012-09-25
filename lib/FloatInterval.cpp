@@ -25,6 +25,7 @@ Interval::compare(const Interval &value,
 
     if (isBottom() || value.isBottom())
         return -1;
+
     switch (predicate) { //Handle ordered and false/true
     //   Opcode                        U L G E  Intuitive operation
     case llvm::CmpInst::FCMP_FALSE: // 0 0 0 0  always false (always folded)
@@ -107,7 +108,11 @@ Interval::compare(const Interval &value,
             return 2;
         else return 0;
         break;
+    default:
+        CANAL_DIE();
     }
+
+    CANAL_DIE_MSG("Unexpectedly failed to compare float intervals.");
 }
 
 const llvm::fltSemantics &
