@@ -13,6 +13,7 @@ public:
     APIntUtils::USet mValues;
     bool mTop;
     unsigned mBitWidth;
+    static const unsigned int mMaxSize = 40;
 
 public:
     /// Initializes to the lowest value.

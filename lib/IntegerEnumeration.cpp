@@ -143,6 +143,10 @@ Enumeration::merge(const Domain &value)
         CANAL_ASSERT(enumeration.getBitWidth() == getBitWidth());
         mValues.insert(enumeration.mValues.begin(),
                        enumeration.mValues.end());
+
+        if (mValues.size() > mMaxSize) {
+            this->setTop();
+        }
     }
 }
 
@@ -713,7 +717,7 @@ Enumeration::applyOperation(const Domain &a,
                 }
             }
 
-            if (mValues.size() > 40)
+            if (mValues.size() > mMaxSize)
             {
                 setTop();
                 return;
