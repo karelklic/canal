@@ -691,6 +691,8 @@ Enumeration::applyOperation(const Domain &a,
     const Enumeration &aa = dynCast<const Enumeration&>(a),
         &bb = dynCast<const Enumeration&>(b);
 
+    CANAL_ASSERT(this != &a && this != &b);
+    setBottom();
     if (aa.isTop() || bb.isTop())
     {
         setTop();
