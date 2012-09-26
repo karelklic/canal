@@ -97,13 +97,9 @@ CommandHelp::allCommandsHelp()
     puts("Running the program");
     printCommand("continue", commands);
     printCommand("finish", commands);
-    printCommand("next", commands);
     printCommand("run", commands);
     printCommand("step", commands);
     printCommand("start", commands);
-    puts("");
-    puts("Examining the stack");
-    printCommand("backtrace", commands);
     puts("");
     puts("Status inquiries");
     printCommand("info", commands);
