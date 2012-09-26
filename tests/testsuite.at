@@ -21,6 +21,10 @@ AT_SETUP([ICMP])
 AT_CHECK([../../unit/ICMPTest], 0)
 AT_CLEANUP
 
+AT_SETUP([Integer::Merge])
+AT_CHECK([../../unit/MergeTest], 0)
+AT_CLEANUP
+
 AT_BANNER([Fixpoint Computation Unit Tests])
 
 AT_BANNER([Fixpoint Computation Integration Tests])

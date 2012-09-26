@@ -10,4 +10,4 @@ m4_define([AT_PACKAGE_STRING],
 m4_define([AT_PACKAGE_BUGREPORT],
   [])
 m4_define([AT_PACKAGE_URL],
-  [@PACKAGE_URL@])
+  [])

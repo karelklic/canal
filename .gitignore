@@ -46,6 +46,7 @@ CMakeCache.txt
 /tests/unit/OperationsTest
 /tests/unit/IntegerIntervalTest
 /tests/unit/ICMPTest
+/tests/unit/MergeTest
 /tests/*.o
 
 /wrappers/config.py

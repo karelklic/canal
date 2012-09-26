@@ -9,3 +9,7 @@ add_test(IntegerIntervalTest IntegerIntervalTest)
 add_executable(ICMPTest ICMPTest.cpp)
 target_link_libraries(ICMPTest canal)
 add_test(ICMPTest ICMPTest)
+
+add_executable(MergeTest MergeTest.cpp)
+target_link_libraries(MergeTest canal)
+add_test(MergeTest MergeTest)
