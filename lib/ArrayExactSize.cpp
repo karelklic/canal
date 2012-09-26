@@ -55,7 +55,7 @@ ExactSize::operator==(const Domain &value) const
         itB = array->mValues.begin();
     for (; itA != itAend; ++itA, ++itB)
     {
-        if (*itA != *itB)
+        if (**itA != **itB)
             return false;
     }
 

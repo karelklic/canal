@@ -143,6 +143,10 @@ Enumeration::merge(const Domain &value)
         CANAL_ASSERT(enumeration.getBitWidth() == getBitWidth());
         mValues.insert(enumeration.mValues.begin(),
                        enumeration.mValues.end());
+
+        if (mValues.size() > mMaxSize) {
+            this->setTop();
+        }
     }
 }
 
@@ -687,6 +691,8 @@ Enumeration::applyOperation(const Domain &a,
     const Enumeration &aa = dynCast<const Enumeration&>(a),
         &bb = dynCast<const Enumeration&>(b);
 
+    CANAL_ASSERT(this != &a && this != &b);
+    setBottom();
     if (aa.isTop() || bb.isTop())
     {
         setTop();
@@ -713,7 +719,7 @@ Enumeration::applyOperation(const Domain &a,
                 }
             }
 
-            if (mValues.size() > 40)
+            if (mValues.size() > mMaxSize)
             {
                 setTop();
                 return;

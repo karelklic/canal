@@ -31,7 +31,9 @@ $2="no"; export $2;
 cat > testconf.tex << \EOF
 $1
 EOF
-cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && $2=yes; export $2;
+if test "$PDFLATEX" != "no"; then
+  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && $2=yes; export $2;
+fi
 cd .. 
 rm -rf .tmps_latex 
 ])

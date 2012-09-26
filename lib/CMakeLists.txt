@@ -12,6 +12,7 @@ IntegerContainer.cpp
 IntegerEnumeration.cpp
 IntegerInterval.cpp
 InterpreterBlockBasicBlock.cpp
+InterpreterBlockFunction.cpp
 InterpreterBlock.cpp
 InterpreterBlockIterator.cpp
 InterpreterBlockModule.cpp
