@@ -14,6 +14,7 @@ Iterator::Iterator(Module &module, Operations &operations)
     : mModule(module),
       mOperations(operations),
       mChanged(true),
+      mInitialized(false),
       mCallback(&emptyCallback)
 {
     mFunction = --mModule.end();
@@ -22,13 +23,43 @@ Iterator::Iterator(Module &module, Operations &operations)
 }
 
 void
+Iterator::initialize()
+{
+    mInitialized = true;
+    nextInstruction();
+}
+
+void
+Iterator::interpretInstruction()
+{
+    // Interpret the instruction.
+    mOperations.interpretInstruction(*mInstruction, mState);
+
+    // Leave the instruction.
+    mCallback->onInstructionExit(*mInstruction);
+
+    if (mInstruction == --(*mBasicBlock)->end())
+    {
+        mCallback->onBasicBlockExit(**mBasicBlock);
+
+        if (mBasicBlock == --(*mFunction)->end())
+        {
+            (*mFunction)->updateOutputState();
+            mCallback->onFunctionExit(**mFunction);
+
+            if (mFunction == --mModule.end())
+                mCallback->onModuleExit();
+        }
+    }
+
+    // Move to the next instruction.
+    nextInstruction();
+}
+
+void
 Iterator::nextInstruction()
 {
-    // 1. Call all onEnter callbacks.
-    // 2. Move to next program instruction.
-    // 3. Perform operation.
-    // 4. Call all onExit callbacks.
-
+    // Introduce the new instruction.
     ++mInstruction;
 
     if (mInstruction == (*mBasicBlock)->end())
@@ -63,7 +94,7 @@ Iterator::nextInstruction()
         // not changed, there is no point in interpreting the block's code
         // again.  The very first iteration is an exception, though.  The
         // code must be interpreted at least once.
-        (*mFunction)->updateInputState(**mBasicBlock);
+        (*mFunction)->updateBasicBlockInputState(**mBasicBlock);
 
         mState = (*mBasicBlock)->getInputState();
         mInstruction = (*mBasicBlock)->begin();
@@ -71,22 +102,6 @@ Iterator::nextInstruction()
     }
 
     mCallback->onInstructionEnter(*mInstruction);
-    mOperations.interpretInstruction(*mInstruction, mState);
-    mCallback->onInstructionExit(*mInstruction);
-
-    if (mInstruction == --(*mBasicBlock)->end())
-    {
-        mCallback->onBasicBlockExit(**mBasicBlock);
-
-        if (mBasicBlock == --(*mFunction)->end())
-        {
-            (*mFunction)->updateOutputState();
-            mCallback->onFunctionExit(**mFunction);
-
-            if (mFunction == --mModule.end())
-                mCallback->onModuleExit();
-        }
-    }
 }
 
 } // namespace InterpreterBlock

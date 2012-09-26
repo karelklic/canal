@@ -10,7 +10,7 @@ Interpreter::Interpreter(const llvm::Module *module)
     : mEnvironment(module),
       mConstructors(mEnvironment),
       mModule(*module, mConstructors),
-      mOperationsCallback(mModule),
+      mOperationsCallback(mModule, mConstructors),
       mOperations(mEnvironment, mConstructors, mOperationsCallback),
       mIterator(mModule, mOperations)
 {

@@ -22,15 +22,28 @@ State::~State()
 bool
 State::isInterpreting() const
 {
-    return !mIteratorCallback.isFixpointReached();
+    return mInterpreter.getIterator().isInitialized() &&
+        !mIteratorCallback.isFixpointReached();
+}
+
+void
+State::start()
+{
+    mInterpreter.getIterator().initialize();
+    std::printf("Entering function %s.\n",
+                mInterpreter.getCurrentFunction().getName().str().c_str());
+    std::printf("Entering basic block.\n");
+    print(mInterpreter.getCurrentInstruction());
 }
 
 void
 State::run()
 {
+    mInterpreter.getIterator().initialize();
+
     while (!mIteratorCallback.isFixpointReached())
     {
-        mInterpreter.getIterator().nextInstruction();
+        mInterpreter.getIterator().interpretInstruction();
         if (reachedBreakpoint())
             return;
     }
@@ -41,14 +54,23 @@ State::step(int count)
 {
     for (int i = 0; i < count; ++i)
     {
-        mInterpreter.getIterator().nextInstruction();
+        mInterpreter.getIterator().interpretInstruction();
         if (mIteratorCallback.isFixpointReached())
             return;
         if (reachedBreakpoint())
             return;
-    }
 
-    print(mInterpreter.getCurrentInstruction());
+        if (mIteratorCallback.isFunctionEnter())
+        {
+            std::printf("Entering function %s.\n",
+                        mInterpreter.getCurrentFunction().getName().str().c_str());
+        }
+
+        if (mIteratorCallback.isBasicBlockEnter())
+            std::printf("Entering basic block.\n");
+
+        print(mInterpreter.getCurrentInstruction());
+    }
 }
 
 void
@@ -56,13 +78,17 @@ State::finish()
 {
     while (!mIteratorCallback.isFunctionEnter())
     {
-        mInterpreter.getIterator().nextInstruction();
+        mInterpreter.getIterator().interpretInstruction();
         if (mIteratorCallback.isFixpointReached())
             return;
         if (reachedBreakpoint())
             return;
     }
 
+    std::printf("Entering function %s.\n",
+                mInterpreter.getCurrentFunction().getName().str().c_str());
+
+    std::printf("Entering basic block.\n");
     print(mInterpreter.getCurrentInstruction());
 }
 
@@ -94,6 +120,11 @@ State::reachedBreakpoint()
     std::set<std::string>::const_iterator it = mFunctionBreakpoints.find(name);
     if (it == mFunctionBreakpoints.end())
         return false;
+
+    std::printf("Entering function %s.\n",
+                mInterpreter.getCurrentFunction().getName().str().c_str());
+
+    std::printf("Entering basic block.\n");
 
     printf("Breakpoint reached: %s\n", name.str().c_str());
     print(mInterpreter.getCurrentInstruction());

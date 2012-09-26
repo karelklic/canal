@@ -171,16 +171,21 @@ Operations::variableOrConstant(const llvm::Value &place,
                                State &state,
                                llvm::OwningPtr<Domain> &constant) const
 {
+    Domain *variable = state.findVariable(place);
+    if (variable)
+        return variable;
+
     if (llvm::isa<llvm::Constant>(place))
     {
-        Domain *constValue = mConstructors.create(llvmCast<llvm::Constant>(place));
+        Domain *constValue =
+            mConstructors.create(llvmCast<llvm::Constant>(place));
+
         llvm::OwningPtr<Domain> ptr(constValue);
         constant.swap(ptr);
         return constValue;
     }
 
-    // Either NULL or existing variable.
-    return state.findVariable(place);
+    return NULL;
 }
 
 template<typename T> void
@@ -190,9 +195,19 @@ Operations::interpretCall(const T &instruction,
     llvm::Function *function = instruction.getCalledFunction();
     CANAL_ASSERT(function);
 
-    // Create the function arguments.
-    std::vector<Domain*> arguments;
-    for (unsigned i = 0; i < instruction.getNumArgOperands(); ++i)
+    // Create the calling state.
+    State callingState;
+    callingState.mergeGlobal(state);
+
+    // TODO: not all function blocks should be merged to the state.
+    // Only the function blocks accessible from the arguments and
+    // global variables should be merged.
+    callingState.mergeFunctionBlocks(state);
+
+    // Add function arguments to the calling state.
+    llvm::Function::ArgumentListType::const_iterator it =
+        function->getArgumentList().begin();
+    for (unsigned i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
     {
         llvm::Value *operand = instruction.getArgOperand(i);
 
@@ -201,19 +216,13 @@ Operations::interpretCall(const T &instruction,
         if (!value)
             return;
 
-        arguments.push_back(value->clone());
+        callingState.addFunctionVariable(*it, value->clone());
     }
 
-    Domain *result = mCallback.onFunctionCall(*function, arguments);
-
-    // Release the function arguments.
-    std::vector<Domain*>::const_iterator it = arguments.begin();
-    for (; it != arguments.end(); ++it)
-        delete *it;
-
-    // Store result.
-    if (result)
-        state.addFunctionVariable(instruction, result->clone());
+    mCallback.onFunctionCall(*function,
+                             callingState,
+                             state,
+                             instruction);
 }
 
 void
@@ -784,76 +793,20 @@ void
 Operations::store(const llvm::StoreInst &instruction,
                   State &state)
 {
-    // Find the pointer in the state.  If the pointer is not
-    // available, do nothing.
-    Domain *variable = state.findVariable(*instruction.getPointerOperand());
-    if (!variable)
+    llvm::OwningPtr<Domain> constantPointer, constantValue;
+    Domain *pointer = variableOrConstant(*instruction.getPointerOperand(),
+                                         state, constantPointer);
+
+    Domain *value = variableOrConstant(*instruction.getValueOperand(),
+                                       state, constantValue);
+
+    if (!pointer || !value)
         return;
 
-    Pointer::InclusionBased &pointer =
-        dynCast<Pointer::InclusionBased&>(*variable);
+    Pointer::InclusionBased &inclusionBased =
+        dynCast<Pointer::InclusionBased&>(*pointer);
 
-    // Find the variable in the state.  Merge the provided value into
-    // all targets.
-    Domain *value = state.findVariable(*instruction.getValueOperand());
-    bool deleteValue = false;
-    if (!value)
-    {
-        // Handle storing of constant values.
-        const llvm::Constant *constant =
-            llvm::dyn_cast<llvm::Constant>(instruction.getValueOperand());
-
-        if (!constant)
-        {
-            // Give up.  Fixpoint calculation has not yet provided us
-            // the variable.
-            return;
-        }
-
-        deleteValue = true;
-
-        const llvm::ConstantExpr *constantExpr =
-            llvm::dyn_cast<llvm::ConstantExpr>(constant);
-
-        // Handle storing of getelementptr constant.  Our abstract
-        // pointer value does not handle that.
-        if (constantExpr &&
-            constantExpr->getOpcode() == llvm::Instruction::GetElementPtr)
-        {
-            std::vector<Domain*> offsets;
-            bool allOffsetsPresent = getElementPtrOffsets(
-                offsets,
-                constantExpr->op_begin() + 1,
-                constantExpr->op_end(),
-                state);
-
-            CANAL_ASSERT_MSG(allOffsetsPresent,
-                             "All offsets are expected to be present in "
-                             "a constant expression of getelementptr.");
-
-            const llvm::PointerType &pointerType =
-                llvmCast<const llvm::PointerType>(*constantExpr->getType());
-            CANAL_ASSERT(pointerType.getElementType());
-
-            Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
-                mEnvironment, *pointerType.getElementType());
-
-            constPointer->addTarget(Pointer::Target::GlobalVariable,
-                                    &instruction,
-                                    *constantExpr->op_begin(),
-                                    offsets,
-                                    NULL);
-
-            value = constPointer;
-        }
-        else
-            value = mConstructors.create(*constant);
-    }
-
-    pointer.store(*value, state);
-
-    if (deleteValue)
-        delete value;
+    inclusionBased.store(*value, state);
 }
 
 void

@@ -13,18 +13,19 @@ IteratorCallback::onFixpointReached()
 void
 IteratorCallback::onFunctionEnter(Canal::InterpreterBlock::Function &function)
 {
-    std::printf("Entering function %s\n", function.getName().str().c_str());
-    mFunctionEnter = true;
+    if (!mFixpointReached)
+        mFunctionEnter = true;
 }
 
 void
 IteratorCallback::onBasicBlockEnter(Canal::InterpreterBlock::BasicBlock &basicBlock)
 {
-    std::printf("Entering basic block\n");
+    if (!mFixpointReached)
+        mBasicBlockEnter = true;
 }
 
 void
 IteratorCallback::onInstructionExit(const llvm::Instruction &instruction)
 {
-    mFunctionEnter = false;
+    mFunctionEnter = mBasicBlockEnter = false;
 }

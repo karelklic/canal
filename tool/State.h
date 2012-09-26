@@ -17,6 +17,8 @@ public:
     State(const llvm::Module *module);
     ~State();
 
+    Canal::InterpreterBlock::Interpreter &getInterpreter() { return mInterpreter; }
+
     const Canal::InterpreterBlock::Interpreter &getInterpreter() const { return mInterpreter; }
 
     const Canal::Environment &getEnvironment() const { return mInterpreter.getEnvironment(); }
@@ -29,6 +31,7 @@ public:
     // This is true if something is on the stack.
     bool isInterpreting() const;
 
+    void start();
     void run();
     void step(int count);
     void finish();

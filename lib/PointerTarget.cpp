@@ -37,10 +37,6 @@ Target::Target(const Environment &environment,
     CANAL_ASSERT_MSG(type != Constant || offsets.empty(),
                      "Offsets cannot be present for constant pointers "
                      "as the semantics is not defined.");
-
-    CANAL_ASSERT_MSG(type != Constant || numericOffset,
-                     "Numeric offset must be present for constant "
-                     "pointers, because it contains the constant.");
 }
 
 Target::Target(const Target &target) : mEnvironment(target.mEnvironment),

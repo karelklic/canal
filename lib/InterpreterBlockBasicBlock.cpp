@@ -12,7 +12,7 @@ BasicBlock::BasicBlock(const llvm::BasicBlock &basicBlock,
 {
     // TODO: create bottom values for every instruction.  Both input
     // and output state.
-    CANAL_NOT_IMPLEMENTED();
+    //CANAL_NOT_IMPLEMENTED();
 }
 
 } // namespace InterpreterBlock
