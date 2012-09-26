@@ -17,6 +17,10 @@ AT_SETUP([Integer::Interval])
 AT_CHECK([../../unit/IntegerIntervalTest], 0)
 AT_CLEANUP
 
+AT_SETUP([ICMP])
+AT_CHECK([../../unit/ICMPTest], 0)
+AT_CLEANUP
+
 AT_BANNER([Fixpoint Computation Unit Tests])
 
 AT_BANNER([Fixpoint Computation Integration Tests])
