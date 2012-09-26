@@ -59,20 +59,16 @@ Bitfield::setBitValue(unsigned pos, int value)
     }
 }
 
-static inline void resizeResult(llvm::APInt &result, const unsigned bitWidth)
+static inline void resizeAndClearResult(llvm::APInt &result, const unsigned bitWidth)
 {
-    if (result.getBitWidth() != bitWidth) {
-        if (result.getBitWidth() < bitWidth) result.zext(bitWidth);
-        else result.trunc(bitWidth);
-    }
+    result = llvm::APInt(bitWidth, 0, false);
 }
 
 bool
 Bitfield::signedMin(llvm::APInt &result) const
 {
 
-    resizeResult(result, getBitWidth());
-    APIntUtils::clearAllBits(result);
+    resizeAndClearResult(result, getBitWidth());
 
     for (unsigned i = 0; i < getBitWidth(); ++i)
     {
@@ -87,8 +83,9 @@ Bitfield::signedMin(llvm::APInt &result) const
             APIntUtils::setBit(result, i);
             break;
         case 2:
-            // If not sign bit...
-            if (i != getBitWidth() - 1)
+            // If sign bit, set to 1, otherwise to 0
+            // TTTTTTTTTT -> 100000000
+            if (i == getBitWidth() - 1)
                 APIntUtils::setBit(result, i);
             break;
         default:
@@ -102,8 +99,7 @@ Bitfield::signedMin(llvm::APInt &result) const
 bool
 Bitfield::signedMax(llvm::APInt &result) const
 {
-    resizeResult(result, getBitWidth());
-    APIntUtils::clearAllBits(result);
+    resizeAndClearResult(result, getBitWidth());
 
     for (unsigned i = 0; i < getBitWidth(); ++i)
     {
@@ -118,8 +114,9 @@ Bitfield::signedMax(llvm::APInt &result) const
             APIntUtils::setBit(result, i);
             break;
         case 2:
-            // If sign bit...
-            if (i == getBitWidth() - 1)
+            // If sign bit, set to 0, otherwise to 1
+            // TTTTTTTTTTT -> 01111111111
+            if (i != getBitWidth() - 1)
                 APIntUtils::setBit(result, i);
             break;
         default:
@@ -133,8 +130,7 @@ Bitfield::signedMax(llvm::APInt &result) const
 bool
 Bitfield::unsignedMin(llvm::APInt &result) const
 {
-    resizeResult(result, getBitWidth());
-    APIntUtils::clearAllBits(result);
+    resizeAndClearResult(result, getBitWidth());
 
     for (unsigned i = 0; i < getBitWidth(); ++i)
     {
@@ -160,8 +156,7 @@ Bitfield::unsignedMin(llvm::APInt &result) const
 bool
 Bitfield::unsignedMax(llvm::APInt &result) const
 {
-    resizeResult(result, getBitWidth());
-    APIntUtils::clearAllBits(result);
+    resizeAndClearResult(result, getBitWidth());
 
     for (unsigned i = 0; i < getBitWidth(); ++i)
     {

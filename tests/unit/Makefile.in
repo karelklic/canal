@@ -35,7 +35,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = OperationsTest$(EXEEXT) IntegerIntervalTest$(EXEEXT) \
-	PointerTest$(EXEEXT) ICMPTest$(EXEEXT)
+	PointerTest$(EXEEXT) ICMPTest$(EXEEXT) MergeTest$(EXEEXT)
 subdir = tests/unit
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -64,6 +64,12 @@ IntegerIntervalTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
 	$(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) \
 	$(IntegerIntervalTest_LDFLAGS) $(LDFLAGS) -o $@
+am_MergeTest_OBJECTS = MergeTest-MergeTest.$(OBJEXT)
+MergeTest_OBJECTS = $(am_MergeTest_OBJECTS)
+MergeTest_DEPENDENCIES = ../../lib/libcanal.la
+MergeTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(MergeTest_CXXFLAGS) \
+	$(CXXFLAGS) $(MergeTest_LDFLAGS) $(LDFLAGS) -o $@
 am_OperationsTest_OBJECTS = OperationsTest-OperationsTest.$(OBJEXT)
 OperationsTest_OBJECTS = $(am_OperationsTest_OBJECTS)
 OperationsTest_DEPENDENCIES = ../../lib/libcanal.la
@@ -91,9 +97,11 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(ICMPTest_SOURCES) $(IntegerIntervalTest_SOURCES) \
-	$(OperationsTest_SOURCES) $(PointerTest_SOURCES)
+	$(MergeTest_SOURCES) $(OperationsTest_SOURCES) \
+	$(PointerTest_SOURCES)
 DIST_SOURCES = $(ICMPTest_SOURCES) $(IntegerIntervalTest_SOURCES) \
-	$(OperationsTest_SOURCES) $(PointerTest_SOURCES)
+	$(MergeTest_SOURCES) $(OperationsTest_SOURCES) \
+	$(PointerTest_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -257,6 +265,11 @@ ICMPTest_SOURCES = ICMPTest.cpp
 ICMPTest_LDADD = ../../lib/libcanal.la
 ICMPTest_LIBS = $(LLVM_LIBS)
 ICMPTest_LDFLAGS = $(LLVM_LDFLAGS)
+MergeTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
+MergeTest_SOURCES = MergeTest.cpp
+MergeTest_LDADD = ../../lib/libcanal.la
+MergeTest_LIBS = $(LLVM_LIBS)
+MergeTest_LDFLAGS = $(LLVM_LDFLAGS)
 all: all-am
 
 .SUFFIXES:
@@ -306,6 +319,9 @@ ICMPTest$(EXEEXT): $(ICMPTest_OBJECTS) $(ICMPTest_DEPENDENCIES)
 IntegerIntervalTest$(EXEEXT): $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_DEPENDENCIES) 
 	@rm -f IntegerIntervalTest$(EXEEXT)
 	$(IntegerIntervalTest_LINK) $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_LDADD) $(LIBS)
+MergeTest$(EXEEXT): $(MergeTest_OBJECTS) $(MergeTest_DEPENDENCIES) 
+	@rm -f MergeTest$(EXEEXT)
+	$(MergeTest_LINK) $(MergeTest_OBJECTS) $(MergeTest_LDADD) $(LIBS)
 OperationsTest$(EXEEXT): $(OperationsTest_OBJECTS) $(OperationsTest_DEPENDENCIES) 
 	@rm -f OperationsTest$(EXEEXT)
 	$(OperationsTest_LINK) $(OperationsTest_OBJECTS) $(OperationsTest_LDADD) $(LIBS)
@@ -321,6 +337,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ICMPTest-ICMPTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MergeTest-MergeTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OperationsTest-OperationsTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PointerTest-PointerTest.Po@am__quote@
 
@@ -372,6 +389,20 @@ IntegerIntervalTest-IntegerIntervalTest.obj: IntegerIntervalTest.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerIntervalTest.cpp' object='IntegerIntervalTest-IntegerIntervalTest.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -c -o IntegerIntervalTest-IntegerIntervalTest.obj `if test -f 'IntegerIntervalTest.cpp'; then $(CYGPATH_W) 'IntegerIntervalTest.cpp'; else $(CYGPATH_W) '$(srcdir)/IntegerIntervalTest.cpp'; fi`
+
+MergeTest-MergeTest.o: MergeTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(MergeTest_CXXFLAGS) $(CXXFLAGS) -MT MergeTest-MergeTest.o -MD -MP -MF $(DEPDIR)/MergeTest-MergeTest.Tpo -c -o MergeTest-MergeTest.o `test -f 'MergeTest.cpp' || echo '$(srcdir)/'`MergeTest.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MergeTest-MergeTest.Tpo $(DEPDIR)/MergeTest-MergeTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='MergeTest.cpp' object='MergeTest-MergeTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(MergeTest_CXXFLAGS) $(CXXFLAGS) -c -o MergeTest-MergeTest.o `test -f 'MergeTest.cpp' || echo '$(srcdir)/'`MergeTest.cpp
+
+MergeTest-MergeTest.obj: MergeTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(MergeTest_CXXFLAGS) $(CXXFLAGS) -MT MergeTest-MergeTest.obj -MD -MP -MF $(DEPDIR)/MergeTest-MergeTest.Tpo -c -o MergeTest-MergeTest.obj `if test -f 'MergeTest.cpp'; then $(CYGPATH_W) 'MergeTest.cpp'; else $(CYGPATH_W) '$(srcdir)/MergeTest.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MergeTest-MergeTest.Tpo $(DEPDIR)/MergeTest-MergeTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='MergeTest.cpp' object='MergeTest-MergeTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(MergeTest_CXXFLAGS) $(CXXFLAGS) -c -o MergeTest-MergeTest.obj `if test -f 'MergeTest.cpp'; then $(CYGPATH_W) 'MergeTest.cpp'; else $(CYGPATH_W) '$(srcdir)/MergeTest.cpp'; fi`
 
 OperationsTest-OperationsTest.o: OperationsTest.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -MT OperationsTest-OperationsTest.o -MD -MP -MF $(DEPDIR)/OperationsTest-OperationsTest.Tpo -c -o OperationsTest-OperationsTest.o `test -f 'OperationsTest.cpp' || echo '$(srcdir)/'`OperationsTest.cpp
