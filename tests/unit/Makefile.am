@@ -1,7 +1,7 @@
 ## --------- ##
 ## Programs. ##
 ## --------- ##
-noinst_PROGRAMS = OperationsTest IntegerIntervalTest PointerTest
+noinst_PROGRAMS = OperationsTest IntegerIntervalTest PointerTest ICMPTest
 
 OperationsTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
 OperationsTest_SOURCES = OperationsTest.cpp
@@ -20,3 +20,9 @@ PointerTest_SOURCES = PointerTest.cpp
 PointerTest_LDADD = ../../lib/libcanal.la
 PointerTest_LIBS = $(LLVM_LIBS)
 PointerTest_LDFLAGS = $(LLVM_LDFLAGS)
+
+ICMPTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
+ICMPTest_SOURCES = ICMPTest.cpp
+ICMPTest_LDADD = ../../lib/libcanal.la
+ICMPTest_LIBS = $(LLVM_LIBS)
+ICMPTest_LDFLAGS = $(LLVM_LDFLAGS)

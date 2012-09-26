@@ -51,16 +51,16 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_canal_OBJECTS = canal-Canal.$(OBJEXT) canal-Command.$(OBJEXT) \
-	canal-CommandBacktrace.$(OBJEXT) canal-CommandBreak.$(OBJEXT) \
-	canal-CommandCd.$(OBJEXT) canal-CommandContinue.$(OBJEXT) \
-	canal-CommandFile.$(OBJEXT) canal-CommandFinish.$(OBJEXT) \
-	canal-CommandHelp.$(OBJEXT) canal-CommandInfo.$(OBJEXT) \
-	canal-CommandNext.$(OBJEXT) canal-CommandPrint.$(OBJEXT) \
+	canal-CommandBreak.$(OBJEXT) canal-CommandCd.$(OBJEXT) \
+	canal-CommandContinue.$(OBJEXT) canal-CommandFile.$(OBJEXT) \
+	canal-CommandFinish.$(OBJEXT) canal-CommandHelp.$(OBJEXT) \
+	canal-CommandInfo.$(OBJEXT) canal-CommandPrint.$(OBJEXT) \
 	canal-CommandPwd.$(OBJEXT) canal-CommandQuit.$(OBJEXT) \
 	canal-CommandRun.$(OBJEXT) canal-CommandShell.$(OBJEXT) \
 	canal-CommandShow.$(OBJEXT) canal-CommandStart.$(OBJEXT) \
 	canal-CommandStep.$(OBJEXT) canal-Commands.$(OBJEXT) \
-	canal-State.$(OBJEXT) canal-Utils.$(OBJEXT)
+	canal-IteratorCallback.$(OBJEXT) canal-State.$(OBJEXT) \
+	canal-Utils.$(OBJEXT)
 canal_OBJECTS = $(am_canal_OBJECTS)
 am__DEPENDENCIES_1 =
 canal_DEPENDENCIES = ../lib/libcanal.la $(am__DEPENDENCIES_1) \
@@ -236,8 +236,6 @@ canal_SOURCES = \
 	Canal.cpp \
 	Command.h \
 	Command.cpp \
-	CommandBacktrace.h \
-	CommandBacktrace.cpp \
 	CommandBreak.h \
 	CommandBreak.cpp \
 	CommandCd.h \
@@ -252,8 +250,6 @@ canal_SOURCES = \
 	CommandHelp.cpp \
 	CommandInfo.h \
 	CommandInfo.cpp \
-	CommandNext.h \
-	CommandNext.cpp \
 	CommandPrint.h \
 	CommandPrint.cpp \
 	CommandPwd.h \
@@ -272,6 +268,8 @@ canal_SOURCES = \
 	CommandStep.cpp \
 	Commands.h \
 	Commands.cpp \
+	IteratorCallback.h \
+	IteratorCallback.cpp \
 	State.h \
 	State.cpp \
 	Utils.h \
@@ -368,7 +366,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-Canal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-Command.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandBacktrace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandBreak.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandCd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandContinue.Po@am__quote@
@@ -376,7 +373,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandFinish.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandHelp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandInfo.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandNext.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandPrint.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandPwd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandQuit.Po@am__quote@
@@ -386,6 +382,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandStart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-CommandStep.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-Commands.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-IteratorCallback.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-State.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canal-Utils.Po@am__quote@
 
@@ -437,20 +434,6 @@ canal-Command.obj: Command.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Command.cpp' object='canal-Command.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-Command.obj `if test -f 'Command.cpp'; then $(CYGPATH_W) 'Command.cpp'; else $(CYGPATH_W) '$(srcdir)/Command.cpp'; fi`
-
-canal-CommandBacktrace.o: CommandBacktrace.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-CommandBacktrace.o -MD -MP -MF $(DEPDIR)/canal-CommandBacktrace.Tpo -c -o canal-CommandBacktrace.o `test -f 'CommandBacktrace.cpp' || echo '$(srcdir)/'`CommandBacktrace.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/canal-CommandBacktrace.Tpo $(DEPDIR)/canal-CommandBacktrace.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='CommandBacktrace.cpp' object='canal-CommandBacktrace.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-CommandBacktrace.o `test -f 'CommandBacktrace.cpp' || echo '$(srcdir)/'`CommandBacktrace.cpp
-
-canal-CommandBacktrace.obj: CommandBacktrace.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-CommandBacktrace.obj -MD -MP -MF $(DEPDIR)/canal-CommandBacktrace.Tpo -c -o canal-CommandBacktrace.obj `if test -f 'CommandBacktrace.cpp'; then $(CYGPATH_W) 'CommandBacktrace.cpp'; else $(CYGPATH_W) '$(srcdir)/CommandBacktrace.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/canal-CommandBacktrace.Tpo $(DEPDIR)/canal-CommandBacktrace.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='CommandBacktrace.cpp' object='canal-CommandBacktrace.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-CommandBacktrace.obj `if test -f 'CommandBacktrace.cpp'; then $(CYGPATH_W) 'CommandBacktrace.cpp'; else $(CYGPATH_W) '$(srcdir)/CommandBacktrace.cpp'; fi`
 
 canal-CommandBreak.o: CommandBreak.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-CommandBreak.o -MD -MP -MF $(DEPDIR)/canal-CommandBreak.Tpo -c -o canal-CommandBreak.o `test -f 'CommandBreak.cpp' || echo '$(srcdir)/'`CommandBreak.cpp
@@ -549,20 +532,6 @@ canal-CommandInfo.obj: CommandInfo.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='CommandInfo.cpp' object='canal-CommandInfo.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-CommandInfo.obj `if test -f 'CommandInfo.cpp'; then $(CYGPATH_W) 'CommandInfo.cpp'; else $(CYGPATH_W) '$(srcdir)/CommandInfo.cpp'; fi`
-
-canal-CommandNext.o: CommandNext.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-CommandNext.o -MD -MP -MF $(DEPDIR)/canal-CommandNext.Tpo -c -o canal-CommandNext.o `test -f 'CommandNext.cpp' || echo '$(srcdir)/'`CommandNext.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/canal-CommandNext.Tpo $(DEPDIR)/canal-CommandNext.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='CommandNext.cpp' object='canal-CommandNext.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-CommandNext.o `test -f 'CommandNext.cpp' || echo '$(srcdir)/'`CommandNext.cpp
-
-canal-CommandNext.obj: CommandNext.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-CommandNext.obj -MD -MP -MF $(DEPDIR)/canal-CommandNext.Tpo -c -o canal-CommandNext.obj `if test -f 'CommandNext.cpp'; then $(CYGPATH_W) 'CommandNext.cpp'; else $(CYGPATH_W) '$(srcdir)/CommandNext.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/canal-CommandNext.Tpo $(DEPDIR)/canal-CommandNext.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='CommandNext.cpp' object='canal-CommandNext.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-CommandNext.obj `if test -f 'CommandNext.cpp'; then $(CYGPATH_W) 'CommandNext.cpp'; else $(CYGPATH_W) '$(srcdir)/CommandNext.cpp'; fi`
 
 canal-CommandPrint.o: CommandPrint.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-CommandPrint.o -MD -MP -MF $(DEPDIR)/canal-CommandPrint.Tpo -c -o canal-CommandPrint.o `test -f 'CommandPrint.cpp' || echo '$(srcdir)/'`CommandPrint.cpp
@@ -689,6 +658,20 @@ canal-Commands.obj: Commands.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Commands.cpp' object='canal-Commands.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-Commands.obj `if test -f 'Commands.cpp'; then $(CYGPATH_W) 'Commands.cpp'; else $(CYGPATH_W) '$(srcdir)/Commands.cpp'; fi`
+
+canal-IteratorCallback.o: IteratorCallback.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-IteratorCallback.o -MD -MP -MF $(DEPDIR)/canal-IteratorCallback.Tpo -c -o canal-IteratorCallback.o `test -f 'IteratorCallback.cpp' || echo '$(srcdir)/'`IteratorCallback.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/canal-IteratorCallback.Tpo $(DEPDIR)/canal-IteratorCallback.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IteratorCallback.cpp' object='canal-IteratorCallback.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-IteratorCallback.o `test -f 'IteratorCallback.cpp' || echo '$(srcdir)/'`IteratorCallback.cpp
+
+canal-IteratorCallback.obj: IteratorCallback.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-IteratorCallback.obj -MD -MP -MF $(DEPDIR)/canal-IteratorCallback.Tpo -c -o canal-IteratorCallback.obj `if test -f 'IteratorCallback.cpp'; then $(CYGPATH_W) 'IteratorCallback.cpp'; else $(CYGPATH_W) '$(srcdir)/IteratorCallback.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/canal-IteratorCallback.Tpo $(DEPDIR)/canal-IteratorCallback.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IteratorCallback.cpp' object='canal-IteratorCallback.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o canal-IteratorCallback.obj `if test -f 'IteratorCallback.cpp'; then $(CYGPATH_W) 'IteratorCallback.cpp'; else $(CYGPATH_W) '$(srcdir)/IteratorCallback.cpp'; fi`
 
 canal-State.o: State.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(canal_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT canal-State.o -MD -MP -MF $(DEPDIR)/canal-State.Tpo -c -o canal-State.o `test -f 'State.cpp' || echo '$(srcdir)/'`State.cpp
