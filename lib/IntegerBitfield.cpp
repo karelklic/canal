@@ -87,8 +87,9 @@ Bitfield::signedMin(llvm::APInt &result) const
             APIntUtils::setBit(result, i);
             break;
         case 2:
-            // If not sign bit...
-            if (i != getBitWidth() - 1)
+            // If sign bit, set to 1, otherwise to 0
+            // TTTTTTTTTT -> 100000000
+            if (i == getBitWidth() - 1)
                 APIntUtils::setBit(result, i);
             break;
         default:
@@ -118,8 +119,9 @@ Bitfield::signedMax(llvm::APInt &result) const
             APIntUtils::setBit(result, i);
             break;
         case 2:
-            // If sign bit...
-            if (i == getBitWidth() - 1)
+            // If sign bit, set to 0, otherwise to 1
+            // TTTTTTTTTTT -> 01111111111
+            if (i != getBitWidth() - 1)
                 APIntUtils::setBit(result, i);
             break;
         default:
