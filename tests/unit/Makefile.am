@@ -1,7 +1,7 @@
 ## --------- ##
 ## Programs. ##
 ## --------- ##
-noinst_PROGRAMS = OperationsTest IntegerIntervalTest PointerTest ICMPTest
+noinst_PROGRAMS = OperationsTest IntegerIntervalTest PointerTest ICMPTest MergeTest
 
 OperationsTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
 OperationsTest_SOURCES = OperationsTest.cpp
@@ -26,3 +26,9 @@ ICMPTest_SOURCES = ICMPTest.cpp
 ICMPTest_LDADD = ../../lib/libcanal.la
 ICMPTest_LIBS = $(LLVM_LIBS)
 ICMPTest_LDFLAGS = $(LLVM_LDFLAGS)
+
+MergeTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I../..
+MergeTest_SOURCES = MergeTest.cpp
+MergeTest_LDADD = ../../lib/libcanal.la
+MergeTest_LIBS = $(LLVM_LIBS)
+MergeTest_LDFLAGS = $(LLVM_LDFLAGS)
