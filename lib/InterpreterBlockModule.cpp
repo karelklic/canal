@@ -24,7 +24,7 @@ Module::Module(const llvm::Module &module,
         {
             if (it->isConstant() && it->hasInitializer())
             {
-                Domain *value = constructors.create(*it->getInitializer());
+                Domain *value = constructors.create(*it->getInitializer(), NULL);
                 globalState.addGlobalVariable(*it, value);
                 continue;
             }

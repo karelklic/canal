@@ -178,7 +178,7 @@ Operations::variableOrConstant(const llvm::Value &place,
     if (llvm::isa<llvm::Constant>(place))
     {
         Domain *constValue =
-            mConstructors.create(llvmCast<llvm::Constant>(place));
+            mConstructors.create(llvmCast<llvm::Constant>(place), &state);
 
         llvm::OwningPtr<Domain> ptr(constValue);
         constant.swap(ptr);
@@ -276,7 +276,7 @@ Operations::getElementPtrOffsets(std::vector<Domain*> &result,
             const llvm::ConstantInt *constant =
                 llvmCast<llvm::ConstantInt>(it);
 
-            result.push_back(mConstructors.create(*constant));
+            result.push_back(mConstructors.create(*constant, &state));
         }
         else
         {
@@ -346,27 +346,17 @@ Operations::ret(const llvm::ReturnInst &instruction,
     if (!value)
         return;
 
-    Domain *variable = state.findVariable(*value);
-    // It might happen that the variable is not found in state,
-    // because the function has not yet reached fixpoint.
+    llvm::OwningPtr<Domain> constant;
+    Domain *variable = variableOrConstant(*value,
+                                          state,
+                                          constant);
+
     if (variable)
     {
         if (state.mReturnedValue)
             state.mReturnedValue->merge(*variable);
         else
             state.mReturnedValue = variable->clone();
-    }
-    else if (llvm::isa<llvm::Constant>(value))
-    {
-        llvm::Constant &constValue = llvmCast<llvm::Constant>(*value);
-        Domain *retValue = mConstructors.create(constValue);
-        if (state.mReturnedValue)
-        {
-            state.mReturnedValue->merge(*retValue);
-            delete retValue;
-        }
-        else
-            state.mReturnedValue = retValue;
     }
 }
 
@@ -722,35 +712,22 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
     const llvm::Type *type = instruction.getAllocatedType();
     CANAL_ASSERT(type);
     Domain *value = mConstructors.create(*type);
-
     if (instruction.isArrayAllocation())
     {
         const llvm::Value *arraySize = instruction.getArraySize();
-        Domain *abstractSize = NULL;
+        llvm::OwningPtr<Domain> constant;
+        Domain *abstractSize = variableOrConstant(
+            *arraySize, state, constant);
 
-        if (llvm::isa<llvm::Constant>(arraySize))
+        if (!abstractSize)
         {
-            const llvm::Constant &constant =
-                llvmCast<llvm::Constant>(*arraySize);
-            abstractSize = mConstructors.create(constant);
-        }
-        else
-        {
-            abstractSize = state.findVariable(*arraySize);
-            // Size is not necesarily known at each pass before
-            // reaching a fixpoint.
-            if (!abstractSize)
-            {
-                delete value;
-                return;
-            }
-
-            abstractSize = abstractSize->clone();
+            delete value;
+            return;
         }
 
         Array::SingleItem *array = new Array::SingleItem(mEnvironment);
         array->mValue = value;
-        array->mSize = abstractSize;
+        array->mSize = abstractSize->clone();
         value = array;
     }
 

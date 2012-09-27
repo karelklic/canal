@@ -1,13 +1,15 @@
 #include <stddef.h>
 
-void swap()
+static void
+swap()
 {
     int x = 0, y = 1, *px = &x, *py = &y;
     int temp;
     temp = *px; *px = *py; *py = temp;
 }
 
-void array(int i)
+static void
+array(int i)
 {
     int a[3] = {0, 1, 2};
     int *j = &a[i];
@@ -15,19 +17,22 @@ void array(int i)
     *k = 218;
 }
 
-void strcpy_simple(char *s, char *t)
+static void
+strcpy_simple(char *s, char *t)
 {
     while ((*s++ = *t++)) ;
 }
 
-void append(char *s)
+static void
+append(char *s)
 {
     *s++ = 'a';
     *s++ = 'b';
     *s++ = '\0';
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
     char s[20];
     append(s);

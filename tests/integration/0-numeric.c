@@ -15,7 +15,8 @@ function main
 */
 // clang -emit-llvm -S 0.c
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
   int a = 1, b = -4, c = 0;
 

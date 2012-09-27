@@ -12,7 +12,8 @@
 
 char *path1;
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
   char *path0 = "/etc/hosts";
   path1 = path0;

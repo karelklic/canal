@@ -6,7 +6,9 @@
 #include "FloatInterval.h"
 #include "Pointer.h"
 #include "Structure.h"
+#include "State.h"
 #include <llvm/Constants.h>
+#include <stdio.h>
 
 namespace Canal {
 
@@ -69,13 +71,13 @@ Constructors::create(const llvm::Type &type) const
 }
 
 Domain *
-Constructors::create(const llvm::Constant &value) const
+Constructors::create(const llvm::Constant &value,
+                     const State *state) const
 {
     if (llvm::isa<llvm::ConstantInt>(value))
     {
         const llvm::ConstantInt &intValue = llvmCast<llvm::ConstantInt>(value);
         const llvm::APInt &i = intValue.getValue();
-
         return new Integer::Container(mEnvironment, i);
     }
 
@@ -85,7 +87,6 @@ Constructors::create(const llvm::Constant &value) const
             llvmCast<llvm::ConstantPointerNull>(value);
 
         const llvm::PointerType &pointerType = *nullValue.getType();
-
         Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
             mEnvironment, *pointerType.getElementType());
 
@@ -101,36 +102,20 @@ Constructors::create(const llvm::Constant &value) const
     if (llvm::isa<llvm::ConstantExpr>(value))
     {
         const llvm::ConstantExpr &exprValue = llvmCast<llvm::ConstantExpr>(value);
-        if (exprValue.getOpcode() == llvm::Instruction::GetElementPtr)
+        CANAL_ASSERT_MSG(state, "State is mandatory for constant expressions.");
+        Domain *variable = state->findVariable(**value.op_begin());
+        CANAL_ASSERT_MSG(variable, "It is expected that variable used"
+                         " in constant expressions is available.");
+
+        switch (exprValue.getOpcode())
         {
-            std::vector<Domain*> offsets;
-            llvm::ConstantExpr::const_op_iterator it = exprValue.op_begin() + 1;
-            for (; it != exprValue.op_end(); ++it)
-            {
-                const llvm::ConstantInt &constant =
-                    llvmCast<llvm::ConstantInt>(**it);
-
-                offsets.push_back(create(constant));
-            }
-
-            const llvm::PointerType &pointerType =
-                llvmCast<const llvm::PointerType>(*exprValue.getType());
-
-            CANAL_ASSERT(pointerType.getElementType());
-
-            Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
-                mEnvironment, *pointerType.getElementType());
-
-            constPointer->addTarget(Pointer::Target::GlobalVariable,
-                                    &value,
-                                    *exprValue.op_begin(),
-                                    offsets,
-                                    NULL);
-
-            return constPointer;
+        case llvm::Instruction::GetElementPtr:
+            return createGetElementPtr(exprValue, *variable);
+        case llvm::Instruction::BitCast:
+            return createBitCast(exprValue, *variable);
+        default:
+            CANAL_NOT_IMPLEMENTED();
         }
-
-        CANAL_NOT_IMPLEMENTED();
     }
 
     if (llvm::isa<llvm::ConstantFP>(value))
@@ -152,11 +137,9 @@ Constructors::create(const llvm::Constant &value) const
     {
         const llvm::ConstantArray &arrayValue = llvmCast<llvm::ConstantArray>(value);
         uint64_t elementCount = arrayValue.getType()->getNumElements();
-
         Array::ExactSize *result = new Array::ExactSize(mEnvironment);
-
         for (unsigned i = 0; i < elementCount; ++i)
-            result->mValues.push_back(create(*arrayValue.getOperand(i)));
+            result->mValues.push_back(create(*arrayValue.getOperand(i), state));
 
         return result;
     }
@@ -193,6 +176,82 @@ Constructors::getFloatingPointSemantics(const llvm::Type &type)
     else
         CANAL_DIE();
     return semantics;
+}
+
+Domain *
+Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
+                                  const Domain &variable) const
+{
+    std::vector<Domain*> offsets;
+    llvm::ConstantExpr::const_op_iterator it = value.op_begin() + 1;
+    for (; it != value.op_end(); ++it)
+    {
+        const llvm::ConstantInt &constant =
+            llvmCast<llvm::ConstantInt>(**it);
+
+        offsets.push_back(create(constant, NULL));
+    }
+
+    const llvm::PointerType &pointerType =
+        llvmCast<const llvm::PointerType>(*value.getType());
+
+    // GetElementPtr on a Pointer
+    const Pointer::InclusionBased *pointer =
+        dynCast<const Pointer::InclusionBased*>(&variable);
+
+    if (pointer)
+        return pointer->getElementPtr(offsets, *pointerType.getElementType());
+
+    // GetElementPtr on anything except a pointer.  For example, it is
+    // used for arrays.
+    Pointer::InclusionBased *result =
+        new Pointer::InclusionBased(mEnvironment, *pointerType.getElementType());
+
+    result->addTarget(Pointer::Target::GlobalVariable,
+                      &value,
+                      *value.op_begin(),
+                      offsets,
+                      NULL);
+
+    return result;
+}
+
+Domain *
+Constructors::createBitCast(const llvm::ConstantExpr &value,
+                            const Domain &variable) const
+{
+    // BitCast from Pointer.  It is always a bitcast to some other
+    // pointer.
+    const Pointer::InclusionBased *pointer =
+        dynCast<const Pointer::InclusionBased*>(&variable);
+
+    const llvm::PointerType *pointerType =
+        llvmCast<const llvm::PointerType>(value.getType());
+
+    if (pointer)
+    {
+        CANAL_ASSERT(pointerType);
+        return pointer->bitcast(*pointerType->getElementType());
+    }
+
+    // BitCast from anything to a pointer.
+    if (pointerType)
+    {
+        Pointer::InclusionBased *result =
+            new Pointer::InclusionBased(mEnvironment,
+                                        *pointerType->getElementType());
+
+        result->addTarget(Pointer::Target::GlobalVariable,
+                          &value,
+                          *value.op_begin(),
+                          std::vector<Domain*>(),
+                          NULL);
+
+        return result;
+    }
+
+    // BitCast from non-pointer to another non-pointer.
+    CANAL_NOT_IMPLEMENTED();
 }
 
 } // namespace Canal
