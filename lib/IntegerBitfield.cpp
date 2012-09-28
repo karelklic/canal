@@ -649,24 +649,24 @@ void
 Bitfield::trunc(const Domain &value)
 {
     const Bitfield &bitfield = dynCast<const Bitfield&>(value);
-    mZeroes = bitfield.mZeroes.trunc(getBitWidth());
-    mOnes = bitfield.mOnes.trunc(getBitWidth());
+    mZeroes = APIntUtils::trunc(bitfield.mZeroes, getBitWidth());
+    mOnes = APIntUtils::trunc(bitfield.mOnes, getBitWidth());
 }
 
 void
 Bitfield::zext(const Domain &value)
 {
     const Bitfield &bitfield = dynCast<const Bitfield&>(value);
-    mZeroes = bitfield.mZeroes.zext(getBitWidth());
-    mOnes = bitfield.mOnes.zext(getBitWidth());
+    mZeroes = APIntUtils::zext(bitfield.mZeroes, getBitWidth());
+    mOnes = APIntUtils::zext(bitfield.mOnes, getBitWidth());
 }
 
 void
 Bitfield::sext(const Domain &value)
 {
     const Bitfield &bitfield = dynCast<const Bitfield&>(value);
-    mZeroes = bitfield.mZeroes.sext(getBitWidth());
-    mOnes = bitfield.mOnes.sext(getBitWidth());
+    mZeroes = APIntUtils::sext(bitfield.mZeroes, getBitWidth());
+    mOnes = APIntUtils::sext(bitfield.mOnes, getBitWidth());
 }
 
 void

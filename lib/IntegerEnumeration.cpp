@@ -653,7 +653,7 @@ Enumeration::trunc(const Domain &value)
     mTop = enumeration.mTop;
     APIntUtils::USet::const_iterator it = enumeration.mValues.begin();
     for (; it != enumeration.mValues.end(); ++it)
-        mValues.insert(it->trunc(getBitWidth()));
+        mValues.insert(APIntUtils::trunc(*it, getBitWidth()));
 }
 
 void
@@ -663,7 +663,7 @@ Enumeration::zext(const Domain &value)
     mTop = enumeration.mTop;
     APIntUtils::USet::const_iterator it = enumeration.mValues.begin();
     for (; it != enumeration.mValues.end(); ++it)
-        mValues.insert(it->zext(getBitWidth()));
+        mValues.insert(APIntUtils::zext(*it, getBitWidth()));
 }
 
 void
@@ -673,7 +673,7 @@ Enumeration::sext(const Domain &value)
     mTop = enumeration.mTop;
     APIntUtils::USet::const_iterator it = enumeration.mValues.begin();
     for (; it != enumeration.mValues.end(); ++it)
-        mValues.insert(it->sext(getBitWidth()));
+        mValues.insert(APIntUtils::sext(*it, getBitWidth()));
 }
 
 void
