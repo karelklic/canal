@@ -649,31 +649,43 @@ Enumeration::fcmp(const Domain &a, const Domain &b,
 void
 Enumeration::trunc(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Enumeration &enumeration = dynCast<const Enumeration&>(value);
+    mTop = enumeration.mTop;
+    APIntUtils::USet::const_iterator it = enumeration.mValues.begin();
+    for (; it != enumeration.mValues.end(); ++it)
+        mValues.insert(it->trunc(getBitWidth()));
 }
 
 void
 Enumeration::zext(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Enumeration &enumeration = dynCast<const Enumeration&>(value);
+    mTop = enumeration.mTop;
+    APIntUtils::USet::const_iterator it = enumeration.mValues.begin();
+    for (; it != enumeration.mValues.end(); ++it)
+        mValues.insert(it->zext(getBitWidth()));
 }
 
 void
 Enumeration::sext(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Enumeration &enumeration = dynCast<const Enumeration&>(value);
+    mTop = enumeration.mTop;
+    APIntUtils::USet::const_iterator it = enumeration.mValues.begin();
+    for (; it != enumeration.mValues.end(); ++it)
+        mValues.insert(it->sext(getBitWidth()));
 }
 
 void
 Enumeration::fptoui(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    setTop();
 }
 
 void
 Enumeration::fptosi(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    setTop();
 }
 
 float
@@ -728,8 +740,8 @@ Enumeration::applyOperation(const Domain &a,
         setTop();
         return;
     }
-    CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
 
+    CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
     APIntUtils::USet::const_iterator aaIt = aa.mValues.begin();
     for (; aaIt != aa.mValues.end(); ++aaIt)
     {

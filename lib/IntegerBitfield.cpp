@@ -648,31 +648,37 @@ Bitfield::fcmp(const Domain &a, const Domain &b,
 void
 Bitfield::trunc(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Bitfield &bitfield = dynCast<const Bitfield&>(value);
+    mZeroes = bitfield.mZeroes.trunc(getBitWidth());
+    mOnes = bitfield.mOnes.trunc(getBitWidth());
 }
 
 void
 Bitfield::zext(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Bitfield &bitfield = dynCast<const Bitfield&>(value);
+    mZeroes = bitfield.mZeroes.zext(getBitWidth());
+    mOnes = bitfield.mOnes.zext(getBitWidth());
 }
 
 void
 Bitfield::sext(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Bitfield &bitfield = dynCast<const Bitfield&>(value);
+    mZeroes = bitfield.mZeroes.sext(getBitWidth());
+    mOnes = bitfield.mOnes.sext(getBitWidth());
 }
 
 void
 Bitfield::fptoui(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    setTop();
 }
 
 void
 Bitfield::fptosi(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    setTop();
 }
 
 float

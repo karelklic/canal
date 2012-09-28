@@ -956,31 +956,52 @@ Interval::fcmp(const Domain &a, const Domain &b,
 void
 Interval::trunc(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Interval &interval = dynCast<const Interval&>(value);
+    mEmpty = interval.mEmpty;
+    mSignedTop = interval.mSignedTop;
+    mSignedFrom = interval.mSignedFrom.trunc(getBitWidth());
+    mSignedTo = interval.mSignedTo.trunc(getBitWidth());
+    mUnsignedTop = interval.mUnsignedTop;
+    mUnsignedFrom = interval.mUnsignedFrom.trunc(getBitWidth());
+    mUnsignedTo = interval.mUnsignedTo.trunc(getBitWidth());
 }
 
 void
 Interval::zext(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Interval &interval = dynCast<const Interval&>(value);
+    mEmpty = interval.mEmpty;
+    mSignedTop = interval.mSignedTop;
+    mSignedFrom = interval.mSignedFrom.zext(getBitWidth());
+    mSignedTo = interval.mSignedTo.zext(getBitWidth());
+    mUnsignedTop = interval.mUnsignedTop;
+    mUnsignedFrom = interval.mUnsignedFrom.zext(getBitWidth());
+    mUnsignedTo = interval.mUnsignedTo.zext(getBitWidth());
 }
 
 void
 Interval::sext(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Interval &interval = dynCast<const Interval&>(value);
+    mEmpty = interval.mEmpty;
+    mSignedTop = interval.mSignedTop;
+    mSignedFrom = interval.mSignedFrom.sext(getBitWidth());
+    mSignedTo = interval.mSignedTo.sext(getBitWidth());
+    mUnsignedTop = interval.mUnsignedTop;
+    mUnsignedFrom = interval.mUnsignedFrom.sext(getBitWidth());
+    mUnsignedTo = interval.mUnsignedTo.sext(getBitWidth());
 }
 
 void
 Interval::fptoui(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    setTop();
 }
 
 void
 Interval::fptosi(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    setTop();
 }
 
 float
