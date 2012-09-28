@@ -34,11 +34,11 @@ public:
     ///
     /// Initializes an empty interval.
     Interval(const Environment &environment,
-          unsigned bitWidth);
+             unsigned bitWidth);
 
     /// @brief Standard constructor.
     Interval(const Environment &environment,
-          const llvm::APInt &constant);
+             const llvm::APInt &constant);
 
     unsigned getBitWidth() const { return mSignedFrom.getBitWidth(); }
 
@@ -136,6 +136,14 @@ public: // Implementation of Domain.
     /// Implementation of Domain::icmp().
     virtual void icmp(const Domain &a, const Domain &b,
                       llvm::CmpInst::Predicate predicate);
+    /// Implementation of Domain::fcmp().
+    virtual void fcmp(const Domain &a, const Domain &b,
+                      llvm::CmpInst::Predicate predicate);
+    virtual void trunc(const Domain &value);
+    virtual void zext(const Domain &value);
+    virtual void sext(const Domain &value);
+    virtual void fptoui(const Domain &value);
+    virtual void fptosi(const Domain &value);
 
 public: // Implementation of AccuracyDomain.
     /// Implementation of AccuracyDomain::accuracy().

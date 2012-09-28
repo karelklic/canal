@@ -144,6 +144,11 @@ public: // Implementation of Domain.
     /// Implementation of Domain::fcmp().
     virtual void fcmp(const Domain &a, const Domain &b,
                       llvm::CmpInst::Predicate predicate);
+    virtual void trunc(const Domain &value);
+    virtual void zext(const Domain &value);
+    virtual void sext(const Domain &value);
+    virtual void fptoui(const Domain &value);
+    virtual void fptosi(const Domain &value);
 
 public: // Implementation of AccuracyDomain.
     /// Implementation of AccuracyDomain::accuracy().

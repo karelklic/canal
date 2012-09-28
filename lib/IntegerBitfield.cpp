@@ -1,6 +1,7 @@
 #include "IntegerBitfield.h"
 #include "Utils.h"
 #include "APIntUtils.h"
+#include "FloatInterval.h"
 #include <sstream>
 
 namespace Canal {
@@ -177,6 +178,12 @@ Bitfield::unsignedMax(llvm::APInt &result) const
     }
 
     return true;
+}
+
+bool
+Bitfield::isSingleValue() const
+{
+    return ~(mZeroes ^ mOnes) == 0;
 }
 
 Bitfield *
@@ -457,7 +464,7 @@ compareEqual(const Bitfield &a, const Bitfield &b) {
 
 void
 Bitfield::icmp(const Domain &a, const Domain &b,
-           llvm::CmpInst::Predicate predicate)
+               llvm::CmpInst::Predicate predicate)
 {
 
     const Bitfield &aa = dynCast<const Bitfield&>(a),
@@ -609,10 +616,63 @@ Bitfield::icmp(const Domain &a, const Domain &b,
     }
 }
 
-bool
-Bitfield::isSingleValue() const
+void
+Bitfield::fcmp(const Domain &a, const Domain &b,
+               llvm::CmpInst::Predicate predicate)
 {
-    return ~(mZeroes ^ mOnes) == 0;
+    const Float::Interval &aa = dynCast<const Float::Interval&>(a),
+        &bb = dynCast<const Float::Interval&>(b);
+
+    int result = aa.compare(bb, predicate);
+    switch (result)
+    {
+    case -1:
+        setBottom();
+        break;
+    case 0:
+        mZeroes = 1;
+        mOnes = 0;
+        break;
+    case 1:
+        mZeroes = 0;
+        mOnes = 1;
+        break;
+    case 2:
+        setTop();
+        break;
+    default:
+        CANAL_DIE();
+    }
+}
+
+void
+Bitfield::trunc(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Bitfield::zext(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Bitfield::sext(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Bitfield::fptoui(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Bitfield::fptosi(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 float

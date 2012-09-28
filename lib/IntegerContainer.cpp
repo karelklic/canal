@@ -429,6 +429,52 @@ Container::fcmp(const Domain &a, const Domain &b,
     cmpOperation(*this, a, b, predicate, &Domain::fcmp);
 }
 
+static void
+castOperation(Container &result,
+              const Domain &value,
+              Domain::CastOperation operation)
+{
+    const Container &container = dynCast<const Container&>(value);
+    std::vector<Domain*>::iterator it = result.mValues.begin();
+    std::vector<Domain*>::const_iterator itc = container.mValues.begin();
+    for (; it != result.mValues.end(); ++it, ++itc)
+        ((**it).*(operation))(**itc);
+}
+
+void
+Container::trunc(const Domain &value)
+{
+    castOperation(*this, value, &Domain::trunc);
+}
+
+void
+Container::zext(const Domain &value)
+{
+    castOperation(*this, value, &Domain::zext);
+}
+
+void
+Container::sext(const Domain &value)
+{
+    castOperation(*this, value, &Domain::sext);
+}
+
+void
+Container::fptoui(const Domain &value)
+{
+    std::vector<Domain*>::iterator it = mValues.begin();
+    for (; it != mValues.end(); ++it)
+        (**it).fptoui(value);
+}
+
+void
+Container::fptosi(const Domain &value)
+{
+    std::vector<Domain*>::iterator it = mValues.begin();
+    for (; it != mValues.end(); ++it)
+        (**it).fptosi(value);
+}
+
 float
 Container::accuracy() const
 {

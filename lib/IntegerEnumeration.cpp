@@ -98,6 +98,12 @@ Enumeration::unsignedMax(llvm::APInt &result) const
     return true;
 }
 
+bool
+Enumeration::isSingleValue() const
+{
+    return (!mTop && mValues.size() == 1);
+}
+
 Enumeration *
 Enumeration::clone() const
 {
@@ -611,12 +617,6 @@ Enumeration::icmp(const Domain &a, const Domain &b,
     }
 }
 
-bool
-Enumeration::isSingleValue() const
-{
-    return (!mTop && mValues.size() == 1);
-}
-
 void
 Enumeration::fcmp(const Domain &a, const Domain &b,
                   llvm::CmpInst::Predicate predicate)
@@ -624,8 +624,6 @@ Enumeration::fcmp(const Domain &a, const Domain &b,
     const Float::Interval &aa = dynCast<const Float::Interval&>(a),
         &bb = dynCast<const Float::Interval&>(b);
 
-    setBottom();
-    mBitWidth = 1;
     int result = aa.compare(bb, predicate);
     switch (result)
     {
@@ -633,9 +631,11 @@ Enumeration::fcmp(const Domain &a, const Domain &b,
         setBottom();
         break;
     case 0:
+        mTop = false;
         mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         break;
     case 1:
+        mTop = false;
         mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         break;
     case 2:
@@ -644,6 +644,36 @@ Enumeration::fcmp(const Domain &a, const Domain &b,
     default:
         CANAL_DIE();
     }
+}
+
+void
+Enumeration::trunc(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Enumeration::zext(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Enumeration::sext(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Enumeration::fptoui(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Enumeration::fptosi(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 float

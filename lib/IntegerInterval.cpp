@@ -1,6 +1,7 @@
 #include "IntegerInterval.h"
 #include "Utils.h"
 #include "APIntUtils.h"
+#include "FloatInterval.h"
 #include <sstream>
 #include <iostream>
 
@@ -915,11 +916,71 @@ Interval::icmp(const Domain &a, const Domain &b,
         else if (!aa.mSignedFrom.sge(bb.mSignedTo))
             setTop();
 
-
         break;
     default:
         CANAL_DIE();
     }
+}
+
+void
+Interval::fcmp(const Domain &a, const Domain &b,
+               llvm::CmpInst::Predicate predicate)
+{
+    const Float::Interval &aa = dynCast<const Float::Interval&>(a),
+        &bb = dynCast<const Float::Interval&>(b);
+
+    int result = aa.compare(bb, predicate);
+    switch (result)
+    {
+    case -1:
+        setBottom();
+        break;
+    case 0:
+        mEmpty = mSignedTop = mUnsignedTop = false;
+        mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo =
+            llvm::APInt(/*bitWidth*/1, /*val*/0);
+        break;
+    case 1:
+        mEmpty = mSignedTop = mUnsignedTop = false;
+        mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo =
+            llvm::APInt(/*bitWidth*/1, /*val*/1);
+        break;
+    case 2:
+        setTop();
+        break;
+    default:
+        CANAL_DIE();
+    }
+}
+
+void
+Interval::trunc(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Interval::zext(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Interval::sext(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Interval::fptoui(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Interval::fptosi(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 float
