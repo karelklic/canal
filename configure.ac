@@ -7,6 +7,8 @@ AC_PROG_CXX
 AC_USE_SYSTEM_EXTENSIONS
 AC_CONFIG_HEADERS([lib/Config.h])
 
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
+
 CXXFLAGS="$CXXFLAGS -Wall"
 
 # Initialize libtool.
