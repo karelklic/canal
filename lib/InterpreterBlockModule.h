@@ -35,6 +35,8 @@ public:
 
     Function *getFunction(const llvm::Function &function) const;
 
+    std::string toString() const;
+
 protected:
     const llvm::Module &mModule;
 

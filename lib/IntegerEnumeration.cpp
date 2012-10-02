@@ -146,13 +146,17 @@ Enumeration::merge(const Domain &value)
         setTop();
     else
     {
-        CANAL_ASSERT(enumeration.getBitWidth() == getBitWidth());
+        CANAL_ASSERT_MSG(enumeration.getBitWidth() == getBitWidth(),
+                         "Different bit width in merge: "
+                         << enumeration.getBitWidth()
+                         << " bit value merged to "
+                         << getBitWidth() << " bit value");
+
         mValues.insert(enumeration.mValues.begin(),
                        enumeration.mValues.end());
 
-        if (mValues.size() > mMaxSize) {
-            this->setTop();
-        }
+        if (mValues.size() > mMaxSize)
+            setTop();
     }
 }
 

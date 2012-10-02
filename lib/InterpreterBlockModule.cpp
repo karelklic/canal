@@ -5,6 +5,7 @@
 #include "Utils.h"
 #include "Constructors.h"
 #include <llvm/Module.h>
+#include <sstream>
 
 namespace Canal {
 namespace InterpreterBlock {
@@ -64,7 +65,6 @@ Module::Module(const llvm::Module &module,
     }
 }
 
-
 Module::~Module()
 {
     std::vector<Function*>::const_iterator it = mFunctions.begin();
@@ -97,6 +97,18 @@ Module::getFunction(const llvm::Function &function) const
     }
 
     return NULL;
+}
+
+std::string
+Module::toString() const
+{
+    std::stringstream ss;
+    ss << "* module " << mModule.getModuleIdentifier() << std::endl;
+    std::vector<Function*>::const_iterator it = mFunctions.begin();
+    for (; it != mFunctions.end(); ++it)
+        ss << (*it)->toString();
+
+    return ss.str();
 }
 
 } // namespace InterpreterBlock

@@ -98,6 +98,8 @@ public:
     /// returned.
     Domain *findBlock(const llvm::Value &place) const;
 
+    std::string toString() const;
+
 protected:
     /// The key (llvm::Value*) is not owned by this class.  It is not
     /// deleted.  The value (Domain*) memory is owned by this

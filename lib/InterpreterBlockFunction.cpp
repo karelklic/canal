@@ -6,6 +6,7 @@
 #include <llvm/Type.h>
 #include <llvm/Support/CFG.h>
 #include <llvm/Instructions.h>
+#include <sstream>
 
 namespace Canal {
 namespace InterpreterBlock {
@@ -110,6 +111,23 @@ Function::updateOutputState()
         mOutputState.mergeForeignFunctionBlocks((*it)->getOutputState(),
                                                 mFunction);
     }
+}
+
+std::string
+Function::toString() const
+{
+    std::stringstream ss;
+    ss << "** function " << mFunction.getName().str() << std::endl;
+    ss << "*** inputState" << std::endl;
+    ss << mInputState.toString();
+    ss << "*** outputState" << std::endl;
+    ss << mOutputState.toString();
+
+    std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
+    for (; it != mBasicBlocks.end(); ++it)
+        ss << (*it)->toString();
+
+    return ss.str();
 }
 
 } // namespace InterpreterBlock

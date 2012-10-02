@@ -34,7 +34,9 @@ CommandFile::CommandFile(Commands &commands)
 }
 
 std::vector<std::string>
-CommandFile::getCompletionMatches(const std::vector<std::string> &args, int pointArg, int pointArgOffset) const
+CommandFile::getCompletionMatches(const std::vector<std::string> &args,
+                                  int pointArg,
+                                  int pointArgOffset) const
 {
     std::vector<std::string> result;
     std::string arg = args[pointArg].substr(0, pointArgOffset);
@@ -169,8 +171,12 @@ loadAsElfFile(const std::string &path, bool &error)
                     continue;
 
                 Elf_Data *data = elf_getdata(section, NULL);
-                llvm::StringRef data_ref((const char*)data->d_buf, data->d_size);
-                llvm::MemoryBuffer *data_buffer = llvm::MemoryBuffer::getMemBufferCopy(data_ref);
+                llvm::StringRef data_ref((const char*)data->d_buf,
+                                         data->d_size);
+
+                llvm::MemoryBuffer *data_buffer =
+                    llvm::MemoryBuffer::getMemBufferCopy(data_ref);
+
                 llvm::LLVMContext &context = llvm::getGlobalContext();
                 llvm::SMDiagnostic err;
                 module = llvm::ParseIR(data_buffer, err, context);
@@ -296,6 +302,7 @@ CommandFile::run(const std::vector<std::string> &args)
         puts("Too many parameters.");
         return;
     }
+
     else if (args.size() < 2)
     {
         puts("Argument required (a file).");

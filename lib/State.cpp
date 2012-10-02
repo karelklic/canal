@@ -1,9 +1,12 @@
 #include "State.h"
 #include "Domain.h"
 #include "Utils.h"
+#include "Environment.h"
+#include "SlotTracker.h"
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Function.h>
+#include <sstream>
 
 namespace Canal {
 
@@ -300,6 +303,78 @@ State::findBlock(const llvm::Value &place) const
         return it->second;
 
     return NULL;
+}
+
+std::string
+State::toString() const
+{
+    std::stringstream ss;
+    SlotTracker *slotTracker = NULL;
+
+    // Print returned value.
+    if (mReturnedValue)
+    {
+        ss << "returnedValue = ";
+        ss << Canal::indentExceptFirstLine(mReturnedValue->toString(),
+                                           16);
+    }
+
+    // Print function variables.
+    PlaceValueMap::const_iterator it = mFunctionVariables.begin(),
+        itend = mFunctionVariables.end();
+
+    for (; it != itend; ++it)
+    {
+        const llvm::Value &value = *it->first;
+        if (!slotTracker && llvm::isa<llvm::Instruction>(value))
+        {
+            slotTracker = &it->second->getEnvironment().getSlotTracker();
+            const llvm::Instruction &instruction =
+                llvmCast<llvm::Instruction>(value);
+            slotTracker->setActiveFunction(
+                *instruction.getParent()->getParent());
+        }
+
+        std::stringstream name;
+        if (value.hasName())
+            name << "%" << value.getName().str();
+        else
+        {
+            CANAL_ASSERT(llvm::isa<llvm::Instruction>(value));
+            name << "%" << slotTracker->getLocalSlot(value);
+        }
+
+        name << " = ";
+        ss << name.str();
+        ss << Canal::indentExceptFirstLine(it->second->toString(),
+                                           name.str().length());
+    }
+
+    // Print function blocks.
+    it = mFunctionBlocks.begin(), itend = mFunctionBlocks.end();
+
+    for (; it != itend; ++it)
+    {
+        const llvm::Value &value = *it->first;
+        slotTracker = &it->second->getEnvironment().getSlotTracker();
+        const llvm::Instruction &instruction =
+            llvmCast<llvm::Instruction>(value);
+        slotTracker->setActiveFunction(
+            *instruction.getParent()->getParent());
+
+        std::stringstream name;
+        if (value.hasName())
+            name << "%^" << value.getName().str();
+        else
+            name << "%^" << slotTracker->getLocalSlot(value);
+
+        name << " = ";
+        ss << name.str();
+        ss << Canal::indentExceptFirstLine(it->second->toString(),
+                                           name.str().length());
+    }
+
+    return ss.str();
 }
 
 } // namespace Canal

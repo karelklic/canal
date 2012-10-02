@@ -1,12 +1,12 @@
-#ifndef CANAL_COMMAND_INFO_H
-#define CANAL_COMMAND_INFO_H
+#ifndef CANAL_COMMAND_DUMP_H
+#define CANAL_COMMAND_DUMP_H
 
 #include "Command.h"
 
-class CommandInfo : public Command
+class CommandDump : public Command
 {
 public:
-    CommandInfo(Commands &commands);
+    CommandDump(Commands &commands);
 
     // Implementation of Command::getCompletionMatches().
     virtual std::vector<std::string>
@@ -17,9 +17,6 @@ public:
     // Implementation of Command::run().
     virtual void
     run(const std::vector<std::string> &args);
-
-protected:
-    void infoModule();
 };
 
-#endif // CANAL_COMMAND_INFO_H
+#endif // CANAL_COMMAND_DUMP_H

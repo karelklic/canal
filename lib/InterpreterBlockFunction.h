@@ -53,6 +53,8 @@ public:
     /// Update function output state from basic block output states.
     void updateOutputState();
 
+    std::string toString() const;
+
 protected:
     const llvm::Function &mFunction;
 

@@ -13,15 +13,19 @@ CommandHelp::CommandHelp(Commands &commands)
 }
 
 std::vector<std::string>
-CommandHelp::getCompletionMatches(const std::vector<std::string> &args, int pointArg, int pointArgOffset) const
+CommandHelp::getCompletionMatches(const std::vector<std::string> &args,
+                                  int pointArg,
+                                  int pointArgOffset) const
 {
-    return mCommands.getCommandMatches(args[pointArg].substr(0, pointArgOffset));
+    return mCommands.getCommandMatches(
+        args[pointArg].substr(0, pointArgOffset));
 }
 
 static void
 printCommand(const std::string &name, std::vector<Command*> &commands)
 {
-    for (std::vector<Command*>::iterator it = commands.begin(); it != commands.end(); ++it)
+    std::vector<Command*>::iterator it = commands.begin();
+    for (; it != commands.end(); ++it)
     {
         if ((*it)->getName() == name)
         {
@@ -48,14 +52,18 @@ CommandHelp::run(const std::vector<std::string> &args)
     Command *command = mCommands.getCommand(args[1]);
     if (!command)
     {
-        std::vector<std::string> matches = mCommands.getCompletionMatches(args[1], args[1].length());
+        std::vector<std::string> matches =
+            mCommands.getCompletionMatches(args[1], args[1].length());
+
         if (matches.size() > 1)
         {
             printf("Ambiguous command \"%s\": ", args[1].c_str());
-            for (std::vector<std::string>::const_iterator it = matches.begin(); it != matches.end(); ++it)
+            std::vector<std::string>::const_iterator it = matches.begin();
+            for (; it != matches.end(); ++it)
             {
                 if (it != matches.begin())
                     printf(", ");
+
                 printf("%s", it->c_str());
             }
             puts("");
@@ -88,6 +96,7 @@ CommandHelp::allCommandsHelp()
     puts("");
     puts("Examining data");
     printCommand("print", commands);
+    printCommand("dump", commands);
     puts("");
     puts("Specifying files");
     printCommand("cd", commands);
