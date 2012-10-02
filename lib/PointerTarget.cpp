@@ -144,7 +144,11 @@ Target::merge(const Target &target)
     case GlobalVariable:
     {
         CANAL_ASSERT(mInstruction == target.mInstruction);
-        CANAL_ASSERT(mOffsets.size() == target.mOffsets.size());
+        CANAL_ASSERT_MSG(mOffsets.size() == target.mOffsets.size(),
+                         "Expected equal number of offsets, but got "
+                         << mOffsets.size() << " and "
+                         << target.mOffsets.size());
+
         std::vector<Domain*>::iterator it1 = mOffsets.begin();
         std::vector<Domain*>::const_iterator it2 = target.mOffsets.begin();
         for (; it1 != mOffsets.end(); ++it1, ++it2)
