@@ -76,7 +76,9 @@ Constructors::create(const llvm::Constant &value,
 {
     if (llvm::isa<llvm::ConstantInt>(value))
     {
-        const llvm::ConstantInt &intValue = llvmCast<llvm::ConstantInt>(value);
+        const llvm::ConstantInt &intValue =
+            llvmCast<llvm::ConstantInt>(value);
+
         const llvm::APInt &i = intValue.getValue();
         return new Integer::Container(mEnvironment, i);
     }
@@ -146,6 +148,10 @@ Constructors::create(const llvm::Constant &value,
 
     if (llvm::isa<llvm::ConstantAggregateZero>(value))
     {
+        const llvm::Type &type = value.getType();
+        Domain *result = Constructors::create(type);
+        //result->setZero();
+        //return result;
         CANAL_NOT_IMPLEMENTED();
     }
 
