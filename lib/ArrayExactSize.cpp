@@ -9,7 +9,16 @@
 namespace Canal {
 namespace Array {
 
-ExactSize::ExactSize(const Environment &environment) : Domain(environment)
+ExactSize::ExactSize(const Environment &environment, const unsigned size, const Domain *value)
+    : Domain(environment)
+{
+    for (unsigned i = 0; i < size; i ++) {
+        mValues.push_back(value->clone());
+    }
+}
+
+ExactSize::ExactSize(const Environment &environment, const std::vector<Domain*> values)
+    : Domain(environment), mValues(values)
 {
 }
 
@@ -37,7 +46,8 @@ ExactSize::clone() const
 ExactSize *
 ExactSize::cloneCleaned() const
 {
-    return new ExactSize(mEnvironment);
+    CANAL_NOT_IMPLEMENTED();
+    return new ExactSize(*this);
 }
 
 bool

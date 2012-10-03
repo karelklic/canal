@@ -141,10 +141,11 @@ Constructors::create(const llvm::Constant &value,
     {
         const llvm::ConstantArray &arrayValue = llvmCast<llvm::ConstantArray>(value);
         uint64_t elementCount = arrayValue.getType()->getNumElements();
-        Array::ExactSize *result = new Array::ExactSize(mEnvironment);
+        std::vector<Domain*> values;
         for (unsigned i = 0; i < elementCount; ++i)
-            result->mValues.push_back(create(*arrayValue.getOperand(i), state));
+            values.push_back(create(*arrayValue.getOperand(i), state));
 
+        Array::ExactSize *result = new Array::ExactSize(mEnvironment, values);
         return result;
     }
 
@@ -152,9 +153,8 @@ Constructors::create(const llvm::Constant &value,
     {
         const llvm::Type *type = value.getType();
         Domain *result = Constructors::create(*type);
-        //result->setZero();
-        //return result;
-        CANAL_NOT_IMPLEMENTED();
+        result->setZero();
+        return result;
     }
 
     CANAL_DIE_MSG("not implemented for " << typeid(value).name());

@@ -15,7 +15,8 @@ public:
     std::vector<Domain*> mValues;
 
 public:
-    ExactSize(const Environment &environment);
+    ExactSize(const Environment &environment, const unsigned size, const Domain* value);
+    ExactSize(const Environment &environment, const std::vector<Domain*> values);
     ExactSize(const ExactSize &exactSize);
     virtual ~ExactSize();
 

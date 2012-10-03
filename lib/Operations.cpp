@@ -589,7 +589,7 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
     Array::ExactSize *array1 = dynCast<Array::ExactSize*>(values[1]);
     CANAL_ASSERT_MSG(array1, "Invalid type in shufflevector.");
 
-    Array::ExactSize *result = new Array::ExactSize(mEnvironment);
+    std::vector<Domain*> newValues;
 
 #if LLVM_MAJOR == 3 && LLVM_MINOR >= 1
     llvm::SmallVector<int, 16> shuffleMask = instruction.getShuffleMask();
@@ -626,19 +626,20 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
             Domain *value = mConstructors.create(
                 *instruction.getType()->getElementType());
 
-            result->mValues.push_back(value);
+            newValues.push_back(value);
         }
         else if (offset < array0->size())
-            result->mValues.push_back(array0->mValues[offset]->clone());
+            newValues.push_back(array0->mValues[offset]->clone());
         else
         {
             CANAL_ASSERT_MSG(offset < array0->size() + array1->size(),
                              "Offset out of bounds.");
             offset -= array0->size();
-            result->mValues.push_back(array1->mValues[offset]->clone());
+            newValues.push_back(array1->mValues[offset]->clone());
         }
     }
 
+    Array::ExactSize *result = new Array::ExactSize(mEnvironment, newValues);
     state.addFunctionVariable(instruction, result);
 }
 
