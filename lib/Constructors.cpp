@@ -48,7 +48,9 @@ Constructors::create(const llvm::Type &type) const
 
     if (type.isArrayTy() || type.isVectorTy())
     {
-        return new Array::SingleItem(mEnvironment);
+        Domain* size = new Integer::Container(mEnvironment, type.getNumContainedTypes());
+        Domain* value = this->create(*type.getContainedType(0));
+        return new Array::SingleItem(mEnvironment, size, value);
     }
 
     if (type.isStructTy())
@@ -148,8 +150,8 @@ Constructors::create(const llvm::Constant &value,
 
     if (llvm::isa<llvm::ConstantAggregateZero>(value))
     {
-        const llvm::Type &type = value.getType();
-        Domain *result = Constructors::create(type);
+        const llvm::Type *type = value.getType();
+        Domain *result = Constructors::create(*type);
         //result->setZero();
         //return result;
         CANAL_NOT_IMPLEMENTED();

@@ -8,8 +8,8 @@
 namespace Canal {
 namespace Array {
 
-SingleItem::SingleItem(const Environment &environment)
-    : Domain(environment), mValue(NULL), mSize(NULL)
+SingleItem::SingleItem(const Environment &environment, Domain* size, Domain* value)
+    : Domain(environment), mValue(value), mSize(size)
 {
 }
 
@@ -40,7 +40,8 @@ SingleItem::clone() const
 SingleItem *
 SingleItem::cloneCleaned() const
 {
-    return new SingleItem(mEnvironment);
+    CANAL_NOT_IMPLEMENTED();
+    return new SingleItem(*this);
 }
 
 bool

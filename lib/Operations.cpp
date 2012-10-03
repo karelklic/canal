@@ -725,9 +725,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
             return;
         }
 
-        Array::SingleItem *array = new Array::SingleItem(mEnvironment);
-        array->mValue = value;
-        array->mSize = abstractSize->clone();
+        Array::SingleItem *array = new Array::SingleItem(mEnvironment, abstractSize->clone(), value);
         value = array;
     }
 
