@@ -317,5 +317,13 @@ InclusionBased::setTop()
     mTargets.clear();
 }
 
+void
+InclusionBased::setZero()
+{
+    mTop = false;
+    mTargets.clear();
+    CANAL_NOT_IMPLEMENTED(); //Add NULL
+}
+
 } // namespace Pointer
 } // namespace Canal

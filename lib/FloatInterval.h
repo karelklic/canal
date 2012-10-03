@@ -59,6 +59,9 @@ public: // Implementation of Domain.
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
 
+    /// Implementation of Domain::setZero()
+    virtual void setZero();
+
 public: // Implementation of AccuracyDomain.
     // Implementation of AccuracyDomain::accuracy().
     virtual float accuracy() const;

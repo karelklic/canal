@@ -408,5 +408,15 @@ ExactSize::setItem(uint64_t offset, const Domain &value)
     mValues[offset]->merge(value);
 }
 
+void
+ExactSize::setZero()
+{
+    std::vector<Domain*>::iterator it = mValues.begin(),
+            itend = mValues.end();
+    for (; it != itend; it ++) {
+        (*it)->setZero();
+    }
+}
+
 } // namespace Array
 } // namespace Canal

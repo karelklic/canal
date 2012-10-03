@@ -569,5 +569,15 @@ Container::isSingleValue() const
         && getInterval().isSingleValue();
 }
 
+void
+Container::setZero()
+{
+    std::vector<Domain*>::iterator it = mValues.begin();
+    for (; it != mValues.end(); ++it)
+    {
+        (*it)->setZero();
+    }
+}
+
 } // namespace Integer
 } // namespace Canal

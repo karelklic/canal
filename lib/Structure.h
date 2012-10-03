@@ -35,6 +35,8 @@ public: // Implementation of Domain.
     /// Implementation of Domain::matchesString().
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
+    /// Implementation of Domain::setZero().
+    virtual void setZero();
 
 public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::getItem().

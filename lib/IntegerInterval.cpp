@@ -765,8 +765,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         return;
     }
 
-    setBottom(); //Interval 0-0
-    mEmpty = false;
+    setZero(); //Interval 0-0
 
     switch (predicate)
     {
@@ -1087,7 +1086,6 @@ Interval::setBottom()
 {
     mEmpty = true;
     mUnsignedTop = mSignedTop = false;
-    mUnsignedFrom = mUnsignedTo = mSignedFrom = mSignedTo = 0;
 }
 
 bool
@@ -1101,6 +1099,14 @@ Interval::setTop()
 {
     mEmpty = false;
     mSignedTop = mUnsignedTop = true;
+}
+
+void
+Interval::setZero()
+{
+    mEmpty = false;
+    mUnsignedTop = mSignedTop = false;
+    mUnsignedFrom = mUnsignedTo = mSignedFrom = mSignedTo = llvm::APInt::getNullValue(mUnsignedFrom.getBitWidth());
 }
 
 } // namespace Integer

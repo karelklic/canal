@@ -40,6 +40,9 @@ public: // Implementation of Domain.
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
 
+    /// Implementation of Domain::setZero()
+    virtual void setZero();
+
     /// Implementation of Domain::add().
     virtual void add(const Domain &a, const Domain &b);
     /// Implementation of Domain::fadd().

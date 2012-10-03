@@ -76,6 +76,9 @@ public:
     ///   has been set from the text.  False otherwise.
     //virtual bool fromString(const std::string &text) = 0;
 
+    /// Set value of this domain to zero (needed for zeroinitializer)
+    virtual void setZero() = 0;
+
 public:
     /// Implementation of instructions operating on values.
     virtual void add(const Domain &a, const Domain &b);

@@ -193,4 +193,12 @@ Structure::setItem(uint64_t offset, const Domain &value)
     mMembers[offset]->merge(value);
 }
 
+void
+Structure::setZero()
+{
+    std::vector<Domain*>::iterator it = mMembers.begin();
+    for (; it != mMembers.end(); ++it)
+        (*it)->setZero();
+}
+
 } // namespace Canal

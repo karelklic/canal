@@ -731,5 +731,12 @@ Bitfield::setTop()
 #endif
 }
 
+void
+Bitfield::setZero()
+{
+    mZeroes = ~0;
+    mOnes = 0;
+}
+
 } // namespace Integer
 } // namespace Canal

@@ -285,5 +285,11 @@ SingleItem::setItem(uint64_t offset, const Domain &value)
     mValue->merge(value);
 }
 
+void
+SingleItem::setZero()
+{
+    mValue->setZero();
+}
+
 } // namespace Array
 } // namespace Canal

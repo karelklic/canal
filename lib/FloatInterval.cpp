@@ -298,6 +298,14 @@ Interval::setTop()
     mTop = true;
 }
 
+void
+Interval::setZero()
+{
+    mEmpty = false;
+    mFrom = llvm::APFloat::getZero(mFrom.getSemantics());
+    mTo = llvm::APFloat::getZero(mTo.getSemantics());
+}
+
 
 } // namespace Float
 } // namespace Canal
