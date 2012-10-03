@@ -126,21 +126,18 @@ Function::toString() const
     ss << std::endl;
 
     // Print function arguments.
-    bool newline = false;
     {
         SlotTracker &slotTracker = mEnvironment.getSlotTracker();
         llvm::Function::ArgumentListType::const_iterator it =
-            mFunction.getArgumentList().begin();
+            mFunction.getArgumentList().begin(),
+            itend = mFunction.getArgumentList().end();
 
-        for (; it != mFunction.getArgumentList().end(); ++it)
-        {
-            newline = true;
+        for (; it != itend; ++it)
             ss << mInputState.toString(*it, slotTracker);
-        }
-    }
 
-    if (newline)
-        ss << std::endl;
+        if (mFunction.getArgumentList().begin() != itend)
+            ss << std::endl;
+    }
 
     // Print function result.
     if (!mFunction.getReturnType()->isVoidTy())

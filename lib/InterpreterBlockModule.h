@@ -1,6 +1,7 @@
 #ifndef LIBCANAL_INTERPRETER_BLOCK_MODULE_H
 #define LIBCANAL_INTERPRETER_BLOCK_MODULE_H
 
+#include "State.h"
 #include <vector>
 #include <string>
 
@@ -12,6 +13,7 @@ class Function;
 namespace Canal {
 
 class Constructors;
+class Environment;
 
 namespace InterpreterBlock {
 
@@ -19,6 +21,16 @@ class Function;
 
 class Module
 {
+protected:
+    const llvm::Module &mModule;
+    const Environment &mEnvironment;
+
+    // State of all functions is kept here.
+    // Workers iterate on functions until the fixpoint is reached.
+    std::vector<Function*> mFunctions;
+
+    State mGlobalState;
+
 public:
     Module(const llvm::Module &module,
            const Constructors &constructors);
@@ -37,12 +49,7 @@ public:
 
     std::string toString() const;
 
-protected:
-    const llvm::Module &mModule;
-
-    // State of all functions is kept here.
-    // Workers iterate on functions until the fixpoint is reached.
-    std::vector<Function*> mFunctions;
+    void updateGlobalState();
 };
 
 } // namespace InterpreterBlock

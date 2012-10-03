@@ -48,7 +48,10 @@ Iterator::interpretInstruction()
             mCallback->onFunctionExit(**mFunction);
 
             if (mFunction == --mModule.end())
+            {
+                mModule.updateGlobalState();
                 mCallback->onModuleExit();
+            }
         }
     }
 
