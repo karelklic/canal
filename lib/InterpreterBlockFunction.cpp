@@ -1,6 +1,8 @@
 #include "InterpreterBlockFunction.h"
 #include "InterpreterBlockBasicBlock.h"
 #include "Constructors.h"
+#include "Environment.h"
+#include "Domain.h"
 #include "Utils.h"
 #include <llvm/Function.h>
 #include <llvm/Type.h>
@@ -13,7 +15,7 @@ namespace InterpreterBlock {
 
 Function::Function(const llvm::Function &function,
                    const Constructors &constructors)
-    : mFunction(function)
+    : mFunction(function), mEnvironment(constructors.getEnvironment())
 {
     // Initialize input state.
     {
@@ -117,15 +119,51 @@ std::string
 Function::toString() const
 {
     std::stringstream ss;
-    ss << "** function " << mFunction.getName().str() << std::endl;
-    ss << "*** inputState" << std::endl;
-    ss << mInputState.toString();
-    ss << "*** outputState" << std::endl;
-    ss << mOutputState.toString();
 
-    std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
-    for (; it != mBasicBlocks.end(); ++it)
-        ss << (*it)->toString();
+    ss << "*******************************************" << std::endl;
+    ss << "** function " << mFunction.getName().str() << std::endl;
+    ss << "*******************************************" << std::endl;
+    ss << std::endl;
+
+    // Print function arguments.
+    bool newline = false;
+    {
+        SlotTracker &slotTracker = mEnvironment.getSlotTracker();
+        llvm::Function::ArgumentListType::const_iterator it =
+            mFunction.getArgumentList().begin();
+
+        for (; it != mFunction.getArgumentList().end(); ++it)
+        {
+            newline = true;
+            ss << mInputState.toString(*it, slotTracker);
+        }
+    }
+
+    if (newline)
+        ss << std::endl;
+
+    // Print function result.
+    if (!mFunction.getReturnType()->isVoidTy())
+    {
+        ss << "returnedValue = ";
+        if (mOutputState.mReturnedValue)
+        {
+            ss << Canal::indentExceptFirstLine(
+                mOutputState.mReturnedValue->toString(),
+                16);
+        }
+        else
+            ss << "undefined" << std::endl;
+
+        ss << std::endl;
+    }
+
+    // Print basic blocks.
+    {
+        std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
+        for (; it != mBasicBlocks.end(); ++it)
+            ss << (*it)->toString();
+    }
 
     return ss.str();
 }

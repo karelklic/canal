@@ -106,7 +106,10 @@ Module::toString() const
     ss << "* module " << mModule.getModuleIdentifier() << std::endl;
     std::vector<Function*>::const_iterator it = mFunctions.begin();
     for (; it != mFunctions.end(); ++it)
+    {
+        ss << std::endl;
         ss << (*it)->toString();
+    }
 
     return ss.str();
 }

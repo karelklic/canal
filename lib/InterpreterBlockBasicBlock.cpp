@@ -4,6 +4,7 @@
 #include "Utils.h"
 #include <llvm/Function.h>
 #include <llvm/BasicBlock.h>
+#include <llvm/Type.h>
 #include <sstream>
 
 namespace Canal {
@@ -29,10 +30,15 @@ BasicBlock::toString() const
         ss << "<label>:" << slotTracker.getLocalSlot(mBasicBlock);
     ss << std::endl;
 
-    ss << "**** inputState" << std::endl;
-    ss << mInputState.toString();
-    ss << "**** outputState" << std::endl;
-    ss << mOutputState.toString();
+    llvm::BasicBlock::const_iterator it = mBasicBlock.begin();
+    for (; it != mBasicBlock.end(); ++it)
+    {
+        if (it->getType()->isVoidTy())
+            continue;
+
+        ss << mOutputState.toString(*it, slotTracker);
+    }
+
     return ss.str();
 }
 

@@ -306,75 +306,72 @@ State::findBlock(const llvm::Value &place) const
 }
 
 std::string
-State::toString() const
+State::toString(const llvm::Value &place,
+                SlotTracker &slotTracker) const
 {
-    std::stringstream ss;
-    SlotTracker *slotTracker = NULL;
+    std::stringstream result;
 
-    // Print returned value.
-    if (mReturnedValue)
+    std::stringstream name;
+    if (place.hasName())
+        name << place.getName().str();
+    else
     {
-        ss << "returnedValue = ";
-        ss << Canal::indentExceptFirstLine(mReturnedValue->toString(),
-                                           16);
-    }
-
-    // Print function variables.
-    PlaceValueMap::const_iterator it = mFunctionVariables.begin(),
-        itend = mFunctionVariables.end();
-
-    for (; it != itend; ++it)
-    {
-        const llvm::Value &value = *it->first;
-        if (!slotTracker && llvm::isa<llvm::Instruction>(value))
+        if (llvm::isa<llvm::Instruction>(place))
         {
-            slotTracker = &it->second->getEnvironment().getSlotTracker();
             const llvm::Instruction &instruction =
-                llvmCast<llvm::Instruction>(value);
-            slotTracker->setActiveFunction(
+                llvmCast<llvm::Instruction>(place);
+
+            slotTracker.setActiveFunction(
                 *instruction.getParent()->getParent());
-        }
 
-        std::stringstream name;
-        if (value.hasName())
-            name << "%" << value.getName().str();
+            name << slotTracker.getLocalSlot(place);
+        }
         else
-        {
-            CANAL_ASSERT(llvm::isa<llvm::Instruction>(value));
-            name << "%" << slotTracker->getLocalSlot(value);
-        }
-
-        name << " = ";
-        ss << name.str();
-        ss << Canal::indentExceptFirstLine(it->second->toString(),
-                                           name.str().length());
+            name << slotTracker.getGlobalSlot(place);
     }
 
-    // Print function blocks.
-    it = mFunctionBlocks.begin(), itend = mFunctionBlocks.end();
-
-    for (; it != itend; ++it)
+    PlaceValueMap::const_iterator it = mFunctionVariables.find(&place);
+    if (it != mFunctionVariables.end())
     {
-        const llvm::Value &value = *it->first;
-        slotTracker = &it->second->getEnvironment().getSlotTracker();
-        const llvm::Instruction &instruction =
-            llvmCast<llvm::Instruction>(value);
-        slotTracker->setActiveFunction(
-            *instruction.getParent()->getParent());
-
-        std::stringstream name;
-        if (value.hasName())
-            name << "%^" << value.getName().str();
-        else
-            name << "%^" << slotTracker->getLocalSlot(value);
-
-        name << " = ";
-        ss << name.str();
-        ss << Canal::indentExceptFirstLine(it->second->toString(),
-                                           name.str().length());
+        result << "%" << name.str() << " = "
+               << Canal::indentExceptFirstLine(it->second->toString(),
+                                               name.str().length() + 4);
     }
 
-    return ss.str();
+    it = mFunctionBlocks.find(&place);
+    if (it != mFunctionBlocks.end())
+    {
+        result << "%^" << name.str() << " = "
+               << Canal::indentExceptFirstLine(it->second->toString(),
+                                               name.str().length() + 5);
+    }
+
+    if (result.str().empty() &&
+        llvm::isa<llvm::Instruction>(place))
+    {
+        result << "%" << name.str() << " = undefined" << std::endl;
+    }
+
+    it = mGlobalVariables.find(&place);
+    if (it != mGlobalVariables.end())
+    {
+        result << "@" << name.str() << " = "
+               << Canal::indentExceptFirstLine(it->second->toString(),
+                                               name.str().length() + 4);
+    }
+
+    it = mGlobalBlocks.find(&place);
+    if (it != mGlobalBlocks.end())
+    {
+        result << "@^" << name.str() << " = "
+               << Canal::indentExceptFirstLine(it->second->toString(),
+                                               name.str().length() + 5);
+    }
+
+    if (result.str().empty())
+        result << "@" << name.str() << " = undefined" << std::endl;
+
+    return result.str();
 }
 
 } // namespace Canal

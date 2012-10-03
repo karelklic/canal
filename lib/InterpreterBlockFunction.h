@@ -13,6 +13,7 @@ namespace Canal {
 
 class Domain;
 class Constructors;
+class Environment;
 
 namespace InterpreterBlock {
 
@@ -20,6 +21,18 @@ class BasicBlock;
 
 class Function
 {
+protected:
+    const llvm::Function &mFunction;
+    const Environment &mEnvironment;
+
+    std::vector<BasicBlock*> mBasicBlocks;
+
+    // Function arguments, global variables.
+    State mInputState;
+
+    // Returned value, global variables.
+    State mOutputState;
+
 public:
     Function(const llvm::Function &function,
              const Constructors &constructors);
@@ -54,17 +67,6 @@ public:
     void updateOutputState();
 
     std::string toString() const;
-
-protected:
-    const llvm::Function &mFunction;
-
-    std::vector<BasicBlock*> mBasicBlocks;
-
-    // Function arguments, global variables.
-    State mInputState;
-
-    // Returned value, global variables.
-    State mOutputState;
 };
 
 } // namespace InterpreterBlock
