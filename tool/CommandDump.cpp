@@ -1,6 +1,7 @@
 #include "CommandDump.h"
 #include "State.h"
 #include "Commands.h"
+#include "Utils.h"
 #include <llvm/Module.h>
 #include <cstdio>
 
@@ -50,9 +51,29 @@ CommandDump::run(const std::vector<std::string> &args)
         return;
     }
 
-    FILE *fp = fopen(args[1].c_str(), "w");
-    fprintf(fp, "%s", mCommands.getState()->getInterpreter().getModule().toString().c_str());
-    fclose(fp);
+    FILE *fp = fopen(args[1].c_str(), "r");
+    if (fp)
+    {
+        fclose(fp);
+        puts("The file already exists.");
+        bool agreed = askYesNo("Replace it?");
+        if (!agreed)
+        {
+            puts("Not saved.");
+            return;
+        }
+    }
 
+    fp = fopen(args[1].c_str(), "w");
+    if (!fp)
+    {
+        puts("Failed to open the file.");
+        return;
+    }
+
+    fprintf(fp, "%s",
+            mCommands.getState()->getInterpreter().getModule().toString().c_str());
+
+    fclose(fp);
     puts("Interpretation state saved.");
 }
