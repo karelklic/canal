@@ -60,7 +60,8 @@ Bitfield::setBitValue(unsigned pos, int value)
     }
 }
 
-static inline void resizeAndClearResult(llvm::APInt &result, const unsigned bitWidth)
+static inline
+void resizeAndClearResult(llvm::APInt &result, const unsigned bitWidth)
 {
     result = llvm::APInt(bitWidth, 0, false);
 }
@@ -659,6 +660,9 @@ Bitfield::zext(const Domain &value)
     const Bitfield &bitfield = dynCast<const Bitfield&>(value);
     mZeroes = bitfield.mZeroes.zext(getBitWidth());
     mOnes = bitfield.mOnes.zext(getBitWidth());
+
+    for (unsigned i = bitfield.mZeroes.getBitWidth(); i < getBitWidth(); ++i)
+        APIntUtils::setBit(mZeroes, i);
 }
 
 void
