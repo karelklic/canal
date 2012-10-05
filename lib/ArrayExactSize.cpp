@@ -9,10 +9,10 @@
 namespace Canal {
 namespace Array {
 
-ExactSize::ExactSize(const Environment &environment, const unsigned size, const Domain *value)
+ExactSize::ExactSize(const Environment &environment, const uint64_t size, const Domain *value)
     : Domain(environment)
 {
-    for (unsigned i = 0; i < size; i ++) {
+    for (uint64_t i = 0; i < size; i ++) {
         mValues.push_back(value->clone());
     }
 }

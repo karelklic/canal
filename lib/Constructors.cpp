@@ -48,9 +48,17 @@ Constructors::create(const llvm::Type &type) const
 
     if (type.isArrayTy() || type.isVectorTy())
     {
-        Domain* size = new Integer::Container(mEnvironment, type.getNumContainedTypes());
+        uint64_t size;
+        if (type.isArrayTy()) {
+            const llvm::ArrayType &arrayType = llvm::cast<llvm::ArrayType>(type);
+            size = arrayType.getNumElements();
+        }
+        else {
+            const llvm::VectorType &vectorType = llvm::cast<llvm::VectorType>(type);
+            size = vectorType.getNumElements();
+        }
         Domain* value = this->create(*type.getContainedType(0));
-        return new Array::SingleItem(mEnvironment, size, value);
+        return new Array::ExactSize(mEnvironment, size, value);
     }
 
     if (type.isStructTy())
