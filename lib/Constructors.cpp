@@ -161,7 +161,7 @@ Constructors::create(const llvm::Constant &value,
     {
         const llvm::Type *type = value.getType();
         Domain *result = Constructors::create(*type);
-        result->setZero();
+        result->setZero(&value);
         return result;
     }
 

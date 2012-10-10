@@ -77,7 +77,7 @@ public:
     //virtual bool fromString(const std::string &text) = 0;
 
     /// Set value of this domain to zero (needed for zeroinitializer)
-    virtual void setZero() = 0;
+    virtual void setZero(const llvm::Value *instruction) = 0;
 
 public:
     /// Implementation of instructions operating on values.

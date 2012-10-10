@@ -36,7 +36,7 @@ public: // Implementation of Domain.
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
     /// Implementation of Domain::setZero().
-    virtual void setZero();
+    virtual void setZero(const llvm::Value *instruction);
 
 public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::getItem().

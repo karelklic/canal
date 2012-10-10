@@ -318,11 +318,15 @@ InclusionBased::setTop()
 }
 
 void
-InclusionBased::setZero()
+InclusionBased::setZero(const llvm::Value *instruction)
 {
     mTop = false;
     mTargets.clear();
-    CANAL_NOT_IMPLEMENTED(); //Add NULL
+    addTarget(Pointer::Target::Constant,
+                            instruction,
+                            NULL,
+                            std::vector<Domain*>(),
+                            NULL);
 }
 
 } // namespace Pointer

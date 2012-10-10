@@ -108,7 +108,7 @@ public: // Implementation of Domain.
                                std::string &rationale) const;
 
     /// Implementation of Domain::setZero().
-    virtual void setZero();
+    virtual void setZero(const llvm::Value *instruction);
 
     /// Implementation of Domain::add().
     virtual void add(const Domain &a, const Domain &b);

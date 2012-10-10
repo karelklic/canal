@@ -765,7 +765,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         return;
     }
 
-    setZero(); //Interval 0-0
+    setZero(NULL); //Interval 0-0
 
     switch (predicate)
     {
@@ -1102,7 +1102,7 @@ Interval::setTop()
 }
 
 void
-Interval::setZero()
+Interval::setZero(const llvm::Value *instruction)
 {
     mEmpty = false;
     mUnsignedTop = mSignedTop = false;

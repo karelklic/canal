@@ -60,7 +60,7 @@ public: // Implementation of Domain.
                                std::string &rationale) const;
 
     /// Implementation of Domain::setZero()
-    virtual void setZero();
+    virtual void setZero(const llvm::Value *instruction);
 
 public: // Implementation of AccuracyDomain.
     // Implementation of AccuracyDomain::accuracy().

@@ -771,7 +771,7 @@ Enumeration::applyOperation(const Domain &a,
 }
 
 void
-Enumeration::setZero()
+Enumeration::setZero(const llvm::Value *instruction)
 {
     mTop = false;
     mValues.clear();

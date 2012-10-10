@@ -570,12 +570,12 @@ Container::isSingleValue() const
 }
 
 void
-Container::setZero()
+Container::setZero(const llvm::Value *instruction)
 {
     std::vector<Domain*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
-        (*it)->setZero();
+        (*it)->setZero(instruction);
     }
 }
 
