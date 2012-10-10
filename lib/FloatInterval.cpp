@@ -16,6 +16,15 @@ Interval::Interval(const Environment &environment,
 {
 }
 
+Interval::Interval(const Environment &environment, const llvm::APFloat &number)
+    : Domain(environment),
+      mEmpty(false),
+      mTop(false),
+      mFrom(number),
+      mTo(number)
+{
+}
+
 int
 Interval::compare(const Interval &value,
                   llvm::CmpInst::Predicate predicate) const

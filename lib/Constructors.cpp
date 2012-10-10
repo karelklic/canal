@@ -129,7 +129,10 @@ Constructors::create(const llvm::Constant &value,
 
     if (llvm::isa<llvm::ConstantFP>(value))
     {
-        CANAL_NOT_IMPLEMENTED();
+        const llvm::ConstantFP &fp = llvmCast<llvm::ConstantFP>(value);
+
+        const llvm::APFloat &f = fp.getValueAPF();
+        return new Float::Interval(mEnvironment, f);
     }
 
     if (llvm::isa<llvm::ConstantStruct>(value))

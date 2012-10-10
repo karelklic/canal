@@ -19,6 +19,9 @@ public:
     Interval(const Environment &environment,
              const llvm::fltSemantics &semantics);
 
+    Interval(const Environment &environment,
+             const llvm::APFloat &number);
+
     // Compares a interval with another interval.
     // @returns
     //  -1 - one of the intervals is empty
