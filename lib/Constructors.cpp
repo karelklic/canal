@@ -134,7 +134,13 @@ Constructors::create(const llvm::Constant &value,
 
     if (llvm::isa<llvm::ConstantStruct>(value))
     {
-        CANAL_NOT_IMPLEMENTED();
+        const llvm::ConstantStruct &structValue = llvmCast<llvm::ConstantStruct>(value);
+        uint64_t elementCount = structValue.getType()->getNumElements();
+        std::vector<Domain*> members;
+        for (uint64_t i = 0; i < elementCount; ++i)
+            members.push_back(create(*structValue.getOperand(i), state));
+
+        return new Structure(mEnvironment, members);
     }
 
     if (llvm::isa<llvm::ConstantVector>(value))
@@ -147,11 +153,10 @@ Constructors::create(const llvm::Constant &value,
         const llvm::ConstantArray &arrayValue = llvmCast<llvm::ConstantArray>(value);
         uint64_t elementCount = arrayValue.getType()->getNumElements();
         std::vector<Domain*> values;
-        for (unsigned i = 0; i < elementCount; ++i)
+        for (uint64_t i = 0; i < elementCount; ++i)
             values.push_back(create(*arrayValue.getOperand(i), state));
 
-        Array::ExactSize *result = new Array::ExactSize(mEnvironment, values);
-        return result;
+        return new Array::ExactSize(mEnvironment, values);
     }
 
     if (llvm::isa<llvm::ConstantAggregateZero>(value))
