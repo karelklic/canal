@@ -7,9 +7,10 @@
 
 namespace Canal {
 
-Structure::Structure(const Environment &environment)
-    : Domain(environment)
+Structure::Structure(const Environment &environment, const std::vector<Domain*> members)
+    : Domain(environment), mMembers(members)
 {
+
 }
 
 Structure::Structure(const Structure &structure)
@@ -37,7 +38,14 @@ Structure::clone() const
 Structure *
 Structure::cloneCleaned() const
 {
-    return new Structure(mEnvironment);
+    Structure* res = new Structure(*this);
+    std::vector<Domain*>::iterator it = res->mMembers.begin();
+    for (; it != res->mMembers.end(); ++it) {
+        AccuracyDomain* dom = dynCast<AccuracyDomain*>(*it);
+        CANAL_ASSERT_MSG(dom != NULL, "Member has to be of type AccuracyDomain in order to call setBottom on it.");
+        dom->setBottom();
+    }
+    return res;
 }
 
 bool

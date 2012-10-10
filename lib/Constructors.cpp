@@ -66,14 +66,11 @@ Constructors::create(const llvm::Type &type) const
         const llvm::StructType &structType =
             llvmCast<llvm::StructType>(type);
 
-        Structure *structure = new Structure(mEnvironment);
+        std::vector<Domain*> members;
+        for (unsigned i = 0; i < structType.getNumElements(); i ++)
+            members.push_back(create(*structType.getElementType(i)));
 
-        llvm::StructType::element_iterator it = structType.element_begin(),
-            itend = structType.element_end();
-
-        for (; it != itend; ++it)
-            structure->mMembers.push_back(create(**it));
-
+        Structure *structure = new Structure(mEnvironment, members);
         return structure;
     }
 
