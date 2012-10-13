@@ -959,11 +959,11 @@ Interval::trunc(const Domain &value)
     const Interval &interval = dynCast<const Interval&>(value);
     mEmpty = interval.mEmpty;
     mSignedTop = interval.mSignedTop;
-    mSignedFrom = interval.mSignedFrom.trunc(getBitWidth());
-    mSignedTo = interval.mSignedTo.trunc(getBitWidth());
+    mSignedFrom = APIntUtils::trunc(interval.mSignedFrom, getBitWidth());
+    mSignedTo = APIntUtils::trunc(interval.mSignedTo, getBitWidth());
     mUnsignedTop = interval.mUnsignedTop;
-    mUnsignedFrom = interval.mUnsignedFrom.trunc(getBitWidth());
-    mUnsignedTo = interval.mUnsignedTo.trunc(getBitWidth());
+    mUnsignedFrom = APIntUtils::trunc(interval.mUnsignedFrom, getBitWidth());
+    mUnsignedTo = APIntUtils::trunc(interval.mUnsignedTo, getBitWidth());
 }
 
 void
@@ -972,11 +972,11 @@ Interval::zext(const Domain &value)
     const Interval &interval = dynCast<const Interval&>(value);
     mEmpty = interval.mEmpty;
     mSignedTop = interval.mSignedTop;
-    mSignedFrom = interval.mSignedFrom.zext(getBitWidth());
-    mSignedTo = interval.mSignedTo.zext(getBitWidth());
+    mSignedFrom = APIntUtils::zext(interval.mSignedFrom, getBitWidth());
+    mSignedTo = APIntUtils::zext(interval.mSignedTo, getBitWidth());
     mUnsignedTop = interval.mUnsignedTop;
-    mUnsignedFrom = interval.mUnsignedFrom.zext(getBitWidth());
-    mUnsignedTo = interval.mUnsignedTo.zext(getBitWidth());
+    mUnsignedFrom = APIntUtils::zext(interval.mUnsignedFrom, getBitWidth());
+    mUnsignedTo = APIntUtils::zext(interval.mUnsignedTo, getBitWidth());
 }
 
 void
@@ -985,11 +985,11 @@ Interval::sext(const Domain &value)
     const Interval &interval = dynCast<const Interval&>(value);
     mEmpty = interval.mEmpty;
     mSignedTop = interval.mSignedTop;
-    mSignedFrom = interval.mSignedFrom.sext(getBitWidth());
-    mSignedTo = interval.mSignedTo.sext(getBitWidth());
+    mSignedFrom = APIntUtils::sext(interval.mSignedFrom, getBitWidth());
+    mSignedTo = APIntUtils::sext(interval.mSignedTo, getBitWidth());
     mUnsignedTop = interval.mUnsignedTop;
-    mUnsignedFrom = interval.mUnsignedFrom.sext(getBitWidth());
-    mUnsignedTo = interval.mUnsignedTo.sext(getBitWidth());
+    mUnsignedFrom = APIntUtils::sext(interval.mUnsignedFrom, getBitWidth());
+    mUnsignedTo = APIntUtils::sext(interval.mUnsignedTo, getBitWidth());
 }
 
 void

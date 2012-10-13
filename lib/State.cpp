@@ -1,9 +1,12 @@
 #include "State.h"
 #include "Domain.h"
 #include "Utils.h"
+#include "Environment.h"
+#include "SlotTracker.h"
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Function.h>
+#include <sstream>
 
 namespace Canal {
 
@@ -300,6 +303,75 @@ State::findBlock(const llvm::Value &place) const
         return it->second;
 
     return NULL;
+}
+
+std::string
+State::toString(const llvm::Value &place,
+                SlotTracker &slotTracker) const
+{
+    std::stringstream result;
+
+    std::stringstream name;
+    if (place.hasName())
+        name << place.getName().str();
+    else
+    {
+        if (llvm::isa<llvm::Instruction>(place))
+        {
+            const llvm::Instruction &instruction =
+                llvmCast<llvm::Instruction>(place);
+
+            slotTracker.setActiveFunction(
+                *instruction.getParent()->getParent());
+
+            name << slotTracker.getLocalSlot(place);
+        }
+        else
+            name << slotTracker.getGlobalSlot(place);
+    }
+
+    PlaceValueMap::const_iterator it = mFunctionVariables.find(&place);
+    if (it != mFunctionVariables.end())
+    {
+        result << "%" << name.str() << " = "
+               << Canal::indentExceptFirstLine(it->second->toString(),
+                                               name.str().length() + 4);
+    }
+
+    it = mFunctionBlocks.find(&place);
+    if (it != mFunctionBlocks.end())
+    {
+        result << "%^" << name.str() << " = "
+               << Canal::indentExceptFirstLine(it->second->toString(),
+                                               name.str().length() + 5);
+    }
+
+    if (result.str().empty() &&
+        llvm::isa<llvm::Instruction>(place))
+    {
+        result << "%" << name.str() << " = undefined" << std::endl;
+    }
+
+    it = mGlobalVariables.find(&place);
+    if (it != mGlobalVariables.end())
+    {
+        result << "@" << name.str() << " = "
+               << Canal::indentExceptFirstLine(it->second->toString(),
+                                               name.str().length() + 4);
+    }
+
+    it = mGlobalBlocks.find(&place);
+    if (it != mGlobalBlocks.end())
+    {
+        result << "@^" << name.str() << " = "
+               << Canal::indentExceptFirstLine(it->second->toString(),
+                                               name.str().length() + 5);
+    }
+
+    if (result.str().empty())
+        result << "@" << name.str() << " = undefined" << std::endl;
+
+    return result.str();
 }
 
 } // namespace Canal

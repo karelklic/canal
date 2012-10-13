@@ -9,6 +9,8 @@ canal_SOURCES = \
 	CommandCd.cpp \
 	CommandContinue.h \
 	CommandContinue.cpp \
+	CommandDump.h \
+	CommandDump.cpp \
 	CommandFile.h \
 	CommandFile.cpp \
 	CommandFinish.h \

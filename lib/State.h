@@ -14,6 +14,7 @@ class raw_ostream;
 namespace Canal {
 
 class Domain;
+class SlotTracker;
 
 /// llvm::Value represents a place in the program (an instruction,
 /// instance of llvm::Instruction).
@@ -97,6 +98,9 @@ public:
     /// place is found, the block is returned.  Otherwise NULL is
     /// returned.
     Domain *findBlock(const llvm::Value &place) const;
+
+    std::string toString(const llvm::Value &place,
+                         SlotTracker &slotTracker) const;
 
 protected:
     /// The key (llvm::Value*) is not owned by this class.  It is not

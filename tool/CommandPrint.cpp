@@ -147,7 +147,7 @@ printVariable(const std::string &fullName, State &state)
             return;
         }
     }
-    slotTracker.setActiveFunction(function->getFunction());
+    slotTracker.setActiveFunction(function->getLlvmFunction());
 
     if (isNumber)
     {
@@ -159,7 +159,7 @@ printVariable(const std::string &fullName, State &state)
     else
     {
         if (fullName[0] == '%' || (isBlock && !functionName.empty()))
-            position = function->getFunction().getValueSymbolTable().lookup(name);
+            position = function->getLlvmFunction().getValueSymbolTable().lookup(name);
         else
             position = state.getModule().getValueSymbolTable().lookup(name);
     }

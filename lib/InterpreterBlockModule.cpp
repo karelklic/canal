@@ -4,18 +4,19 @@
 #include "Pointer.h"
 #include "Utils.h"
 #include "Constructors.h"
+#include "Environment.h"
 #include <llvm/Module.h>
+#include <sstream>
 
 namespace Canal {
 namespace InterpreterBlock {
 
 Module::Module(const llvm::Module &module,
                const Constructors &constructors)
-    : mModule(module)
+    : mModule(module), mEnvironment(constructors.getEnvironment())
 {
     // Prepare the state with all globals.  Global pointers are
     // allocated automatically -- they point to globals section.
-    State globalState;
     {
         llvm::Module::const_global_iterator it = module.global_begin(),
             itend = module.global_end();
@@ -25,13 +26,13 @@ Module::Module(const llvm::Module &module,
             if (it->isConstant() && it->hasInitializer())
             {
                 Domain *value = constructors.create(*it->getInitializer(), NULL);
-                globalState.addGlobalVariable(*it, value);
+                mGlobalState.addGlobalVariable(*it, value);
                 continue;
             }
 
             const llvm::Type &elementType = *it->getType()->getElementType();
             Domain *block = constructors.create(elementType);
-            globalState.addGlobalBlock(*it, block);
+            mGlobalState.addGlobalBlock(*it, block);
 
             Domain *value = constructors.create(*it->getType());
 
@@ -44,7 +45,7 @@ Module::Module(const llvm::Module &module,
                               std::vector<Domain*>(),
                               NULL);
 
-            globalState.addGlobalVariable(*it, value);
+            mGlobalState.addGlobalVariable(*it, value);
         }
     }
 
@@ -58,12 +59,11 @@ Module::Module(const llvm::Module &module,
                 continue;
 
             Function *function = new Function(*it, constructors);
-            function->getInputState().merge(globalState);
+            function->getInputState().merge(mGlobalState);
             mFunctions.push_back(function);
         }
     }
 }
-
 
 Module::~Module()
 {
@@ -92,11 +92,56 @@ Module::getFunction(const llvm::Function &function) const
     std::vector<Function*>::const_iterator it = mFunctions.begin();
     for (; it != mFunctions.end(); ++it)
     {
-        if (&(*it)->getFunction() == &function)
+        if (&(*it)->getLlvmFunction() == &function)
             return *it;
     }
 
     return NULL;
+}
+
+std::string
+Module::toString() const
+{
+    std::stringstream ss;
+    ss << "***************************************" << std::endl;
+    ss << "* module " << mModule.getModuleIdentifier() << std::endl;
+    ss << "***************************************" << std::endl;
+
+    // Print globals.
+    {
+        SlotTracker &slotTracker = mEnvironment.getSlotTracker();
+        llvm::Module::const_global_iterator it = mModule.global_begin(),
+            itend = mModule.global_end();
+
+        for (; it != itend; ++it)
+            ss << mGlobalState.toString(*it, slotTracker);
+
+        if (mModule.global_begin() != itend)
+            ss << std::endl;
+    }
+
+    // Print functions.
+    std::vector<Function*>::const_iterator it = mFunctions.begin();
+    for (; it != mFunctions.end(); ++it)
+    {
+        ss << std::endl;
+        ss << (*it)->toString();
+    }
+
+    return ss.str();
+}
+
+void
+Module::updateGlobalState()
+{
+    std::vector<Function*>::const_iterator it = mFunctions.begin();
+    for (; it != mFunctions.end(); ++it)
+    {
+        // Merge global blocks, global variables.  Merge function
+        // blocks that do not belong to this function.  Merge returned
+        // value.
+        mGlobalState.mergeGlobal((*it)->getOutputState());
+    }
 }
 
 } // namespace InterpreterBlock
