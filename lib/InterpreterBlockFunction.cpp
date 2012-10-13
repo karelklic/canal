@@ -52,7 +52,7 @@ Function::~Function()
 }
 
 const llvm::BasicBlock &
-Function::getEntryBlock() const
+Function::getLlvmEntryBlock() const
 {
     return mFunction.getEntryBlock();
 }
@@ -63,7 +63,7 @@ Function::getBasicBlock(const llvm::BasicBlock &llvmBasicBlock)
     std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
     for (; it != mBasicBlocks.end(); ++it)
     {
-        if (&(*it)->getBasicBlock() == &llvmBasicBlock)
+        if (&(*it)->getLlvmBasicBlock() == &llvmBasicBlock)
             return **it;
     }
 
@@ -79,7 +79,7 @@ Function::getName() const
 void
 Function::updateBasicBlockInputState(BasicBlock &basicBlock)
 {
-    const llvm::BasicBlock &llvmBasicBlock = basicBlock.getBasicBlock();
+    const llvm::BasicBlock &llvmBasicBlock = basicBlock.getLlvmBasicBlock();
 
     // Merge out states of predecessors to input state of
     // current block.
@@ -92,7 +92,7 @@ Function::updateBasicBlockInputState(BasicBlock &basicBlock)
         basicBlock.getInputState().merge(predBlock.getOutputState());
     }
 
-    if (&llvmBasicBlock == &getEntryBlock())
+    if (&llvmBasicBlock == &getLlvmEntryBlock())
         basicBlock.getInputState().merge(mInputState);
 }
 
@@ -102,7 +102,7 @@ Function::updateOutputState()
     std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
     for (; it != mBasicBlocks.end(); ++it)
     {
-        if (!llvm::isa<llvm::ReturnInst>((*it)->getBasicBlock().getTerminator()))
+        if (!llvm::isa<llvm::ReturnInst>((*it)->getLlvmBasicBlock().getTerminator()))
             continue;
 
         // Merge global blocks, global variables.  Merge function

@@ -92,7 +92,7 @@ Module::getFunction(const llvm::Function &function) const
     std::vector<Function*>::const_iterator it = mFunctions.begin();
     for (; it != mFunctions.end(); ++it)
     {
-        if (&(*it)->getFunction() == &function)
+        if (&(*it)->getLlvmFunction() == &function)
             return *it;
     }
 
@@ -103,7 +103,9 @@ std::string
 Module::toString() const
 {
     std::stringstream ss;
+    ss << "***************************************" << std::endl;
     ss << "* module " << mModule.getModuleIdentifier() << std::endl;
+    ss << "***************************************" << std::endl;
 
     // Print globals.
     {

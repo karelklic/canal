@@ -47,6 +47,8 @@ public:
 
     const llvm::Instruction &getCurrentInstruction() const { return mIterator.getCurrentInstruction(); }
 
+    std::string toString() const;
+
 protected:
     Environment mEnvironment;
 

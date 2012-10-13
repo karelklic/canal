@@ -71,6 +71,8 @@ public:
 
     const llvm::Instruction &getCurrentInstruction() const { return *mInstruction; }
 
+    std::string toString() const;
+
 protected:
     void nextInstruction();
 };

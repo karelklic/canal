@@ -4,6 +4,8 @@
 #include "InterpreterBlockBasicBlock.h"
 #include "InterpreterBlockIteratorCallback.h"
 #include "Operations.h"
+#include "Environment.h"
+#include <sstream>
 
 namespace Canal {
 namespace InterpreterBlock {
@@ -57,6 +59,37 @@ Iterator::interpretInstruction()
 
     // Move to the next instruction.
     nextInstruction();
+}
+
+std::string
+Iterator::toString() const
+{
+    SlotTracker &slotTracker = mOperations.getEnvironment().getSlotTracker();
+
+    std::stringstream ss;
+    ss << "***************************************" << std::endl;
+    ss << "* iterator " << std::endl;
+    ss << "***************************************" << std::endl;
+
+    ss << "** function " << (*mFunction)->getName().str() << std::endl;
+    ss << "*** basicBlock ";
+    slotTracker.setActiveFunction(*(*mBasicBlock)->getLlvmBasicBlock().getParent());
+    if ((*mBasicBlock)->getLlvmBasicBlock().hasName())
+        ss << (*mBasicBlock)->getLlvmBasicBlock().getName().str();
+    else
+        ss << "<label>:" << slotTracker.getLocalSlot((*mBasicBlock)->getLlvmBasicBlock());
+    ss << std::endl;
+
+    llvm::BasicBlock::const_iterator it = (*mBasicBlock)->begin();
+    for (; it != mInstruction; ++it)
+    {
+        if (it->getType()->isVoidTy())
+            continue;
+
+        ss << mState.toString(*it, slotTracker);
+    }
+
+    return ss.str();
 }
 
 void

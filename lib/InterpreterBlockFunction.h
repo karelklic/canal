@@ -39,9 +39,9 @@ public:
 
     virtual ~Function();
 
-    const llvm::Function &getFunction() const { return mFunction; }
+    const llvm::Function &getLlvmFunction() const { return mFunction; }
 
-    const llvm::BasicBlock &getEntryBlock() const;
+    const llvm::BasicBlock &getLlvmEntryBlock() const;
 
     BasicBlock &getBasicBlock(const llvm::BasicBlock &llvmBasicBlock);
 

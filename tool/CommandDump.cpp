@@ -72,7 +72,7 @@ CommandDump::run(const std::vector<std::string> &args)
     }
 
     fprintf(fp, "%s",
-            mCommands.getState()->getInterpreter().getModule().toString().c_str());
+            mCommands.getState()->getInterpreter().toString().c_str());
 
     fclose(fp);
     puts("Interpretation state saved.");

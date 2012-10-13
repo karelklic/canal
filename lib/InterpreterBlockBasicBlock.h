@@ -24,7 +24,7 @@ public:
     BasicBlock(const llvm::BasicBlock &basicBlock,
                const Constructors &constructors);
 
-    const llvm::BasicBlock &getBasicBlock() const { return mBasicBlock; }
+    const llvm::BasicBlock &getLlvmBasicBlock() const { return mBasicBlock; }
 
     llvm::BasicBlock::const_iterator begin() const { return mBasicBlock.begin(); }
     llvm::BasicBlock::const_iterator end() const { return mBasicBlock.end(); }
