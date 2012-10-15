@@ -39,7 +39,7 @@ Module::Module(const llvm::Module &module,
             Pointer::InclusionBased &pointer =
                 dynCast<Pointer::InclusionBased&>(*value);
 
-            pointer.addTarget(Pointer::Target::GlobalBlock,
+            pointer.addTarget(Pointer::Target::Block,
                               it,
                               it,
                               std::vector<Domain*>(),

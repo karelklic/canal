@@ -8,6 +8,7 @@
 #include "Structure.h"
 #include "State.h"
 #include <llvm/Constants.h>
+#include <llvm/Function.h>
 #include <stdio.h>
 
 namespace Canal {
@@ -149,6 +150,23 @@ Constructors::create(const llvm::Constant &value,
         CANAL_NOT_IMPLEMENTED();
     }
 
+    if (llvm::isa<llvm::Function>(value))
+    {
+        const llvm::Function &functionValue =
+            llvmCast<llvm::Function>(value);
+
+        Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
+            mEnvironment, *functionValue.getFunctionType());
+
+        constPointer->addTarget(Pointer::Target::Function,
+                                &value,
+                                &value,
+                                std::vector<Domain*>(),
+                                NULL);
+
+        return constPointer;
+    }
+
     CANAL_DIE_MSG("not implemented for " << typeid(value).name());
 }
 
@@ -207,7 +225,7 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     Pointer::InclusionBased *result =
         new Pointer::InclusionBased(mEnvironment, *pointerType.getElementType());
 
-    result->addTarget(Pointer::Target::GlobalVariable,
+    result->addTarget(Pointer::Target::Block,
                       &value,
                       *value.op_begin(),
                       offsets,
@@ -241,7 +259,7 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
             new Pointer::InclusionBased(mEnvironment,
                                         *pointerType->getElementType());
 
-        result->addTarget(Pointer::Target::GlobalVariable,
+        result->addTarget(Pointer::Target::Block,
                           &value,
                           *value.op_begin(),
                           std::vector<Domain*>(),
