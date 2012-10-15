@@ -5,6 +5,7 @@ add_executable(canal-tool Canal.cpp
 CommandBreak.cpp
 CommandCd.cpp
 CommandContinue.cpp
+CommandDump.cpp
 Command.cpp
 CommandFile.cpp
 CommandFinish.cpp
