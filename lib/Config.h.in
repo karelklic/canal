@@ -3,8 +3,17 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
+/* Define to 1 if you have the <gelf.h> header file. */
+#undef HAVE_GELF_H
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `elf' library (-lelf). */
+#undef HAVE_LIBELF
+
+/* Define to 1 if you have the <libelf.h> header file. */
+#undef HAVE_LIBELF_H
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H

@@ -36,6 +36,10 @@ CPPFLAGS+=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/-
 AC_CHECK_HEADERS([readline/readline.h], [],
 	[AC_MSG_ERROR([Please install readline development headers])])
 
+# elfutils
+AC_CHECK_HEADERS([gelf.h libelf.h])
+AC_CHECK_LIB([elf], [main])
+
 # pdfLaTeX
 AC_PATH_PROG_OPTIONAL([PDFLATEX], [pdflatex],
 		      [echo "Documentation will not be build.  If you want to build"]
@@ -61,7 +65,7 @@ AC_PATH_PROG_OPTIONAL([DOXYGEN], [doxygen],
 		      [echo "build the documentation, ensure that doxygen is installed"]
 		      [echo "and included in the search path."])
 
-# dot (part of graphviz)
+# Dot (part of graphviz)
 AC_PATH_PROG_OPTIONAL([DOT], [dot],
 		      [echo "Documentation will not be build.  If you want to"]
 		      [echo "build the documentation, ensure that dot is installed"]
