@@ -36,6 +36,8 @@ public:
     /// Virtual destructor.
     virtual ~Domain() {};
 
+    const Environment &getEnvironment() const { return mEnvironment; }
+
     /// Create a copy of this value.
     virtual Domain *clone() const = 0;
 

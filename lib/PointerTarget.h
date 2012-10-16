@@ -28,28 +28,24 @@ namespace Pointer {
 ///  - point to a heap object (global block)
 ///  - point to a stack object (alloca, function block)
 /// Pointer can point to some offset in an array.
-//
-/// TODO: Pointers to functions.
 class Target
 {
 public:
     enum Type {
         Constant,
-        FunctionBlock,
-        FunctionVariable,
-        GlobalBlock,
-        GlobalVariable,
+        Block,
+        Function
     };
 
     /// Standard constructor.
     /// @param type
     ///   Type of the referenced memory.
     /// @param target
-    ///   Represents the target memory block.  If type is Constant, it
-    ///   must be NULL.  Otherwise, it must be a valid pointer to an
-    ///   instruction.  This is a key to State::mFunctionBlocks,
-    ///   State::mFunctionVariables, State::mGlobalBlocks, or
-    ///   State::mGlobalVariables, depending on the type.
+    ///   Represents the target memory block or function.  If type is
+    ///   Constant, it must be NULL.  If type is Function, it must be
+    ///   a pointer to a function.  Otherwise, it must be a valid
+    ///   pointer to an instruction.  The instruction pointer is a key
+    ///   to State::mFunctionBlocks or State::mGlobalBlocks.
     /// @param offsets
     ///   Offsets in the getelementptr style.  The provided vector
     ///   might be empty.  The newly created pointer target becomes the
@@ -71,6 +67,7 @@ public:
     /// Copy constructor.
     Target(const Target &target);
 
+    /// Standard destructor.
     ~Target();
 
     bool operator==(const Target &target) const;
@@ -90,6 +87,8 @@ public:
     /// mOffsets (offsets might include integer intervals).  The returned
     /// pointers point to the memory owned by State and its abstract
     /// domains -- caller must not release the memory.
+    ///
+    /// Calling this function is valid only for type 
     std::vector<Domain*> dereference(const State &state) const;
 
 public:
@@ -98,11 +97,11 @@ public:
     /// Type of the target.
     Type mType;
 
-    /// Valid when the target represents an anonymous memory block.
-    /// This is a key to either State::mGlobalBlocks or
+    /// Valid when the target represents a memory block or function.
+    /// For a memory block, this is a key to either State::mGlobalBlocks or
     /// State::mFunctionBlocks.  The referenced llvm::Value instance is
     /// owned by the LLVM framework and not by this class.
-    const llvm::Value *mInstruction;
+    const llvm::Value *mTarget;
 
     /// Array or struct offsets in the GetElementPtr style.
     /// This class owns the memory.

@@ -47,9 +47,7 @@ public:
 
     const llvm::Instruction &getCurrentInstruction() const { return mIterator.getCurrentInstruction(); }
 
-protected:
-    Domain *onFunctionCall(const llvm::Function &function,
-                           const std::vector<Domain*> &arguments);
+    std::string toString() const;
 
 protected:
     Environment mEnvironment;

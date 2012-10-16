@@ -2,39 +2,54 @@
 #include "Commands.h"
 #include "State.h"
 #include "Utils.h"
+#include "lib/Config.h"
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 #include <llvm/Support/IRReader.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <cstdio>
+#include <cstdlib>
 #include <sys/types.h>
 #include <dirent.h>
-#include <libelf.h>
-#include <gelf.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <error.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sstream>
+
+#if (defined HAVE_LIBELF_H && defined HAVE_GELF_H && defined HAVE_LIBELF)
+#  define WITH_ELFUTILS
+#endif
+
+#ifdef WITH_ELFUTILS
+#include <libelf.h>
+#include <gelf.h>
+#endif // WITH_ELFUTILS
 
 CommandFile::CommandFile(Commands &commands)
     : Command("file",
               "",
               "Use FILE as program to be interpreted",
+#ifdef WITH_ELFUTILS
               "Use FILE as program to be interpreted.  FILE can be a LLVM "
               "bitcode file (both binary and textual form is allowed), an ELF "
               "binary with .note.llvm section containing the LLVM bitcode, "
               "or a standalone source file with .c or .cpp extension.",
+#else // WITH_ELFUTILS
+              "Use FILE as program to be interpreted.  FILE can be a LLVM "
+              "bitcode file (both binary and textual form is allowed), "
+              "or a standalone source file with .c or .cpp extension.",
+#endif // WITH_ELFUTILS
               commands)
 {
 }
 
 std::vector<std::string>
-CommandFile::getCompletionMatches(const std::vector<std::string> &args, int pointArg, int pointArgOffset) const
+CommandFile::getCompletionMatches(const std::vector<std::string> &args,
+                                  int pointArg,
+                                  int pointArgOffset) const
 {
     std::vector<std::string> result;
     std::string arg = args[pointArg].substr(0, pointArgOffset);
@@ -119,6 +134,7 @@ loadAsElfFile(const std::string &path, bool &error)
 {
     error = false;
 
+#ifdef WITH_ELFUTILS
     // Open the ELF file.
     int fd = open(path.c_str(), O_RDONLY, 0);
     if (fd == -1)
@@ -169,8 +185,12 @@ loadAsElfFile(const std::string &path, bool &error)
                     continue;
 
                 Elf_Data *data = elf_getdata(section, NULL);
-                llvm::StringRef data_ref((const char*)data->d_buf, data->d_size);
-                llvm::MemoryBuffer *data_buffer = llvm::MemoryBuffer::getMemBufferCopy(data_ref);
+                llvm::StringRef data_ref((const char*)data->d_buf,
+                                         data->d_size);
+
+                llvm::MemoryBuffer *data_buffer =
+                    llvm::MemoryBuffer::getMemBufferCopy(data_ref);
+
                 llvm::LLVMContext &context = llvm::getGlobalContext();
                 llvm::SMDiagnostic err;
                 module = llvm::ParseIR(data_buffer, err, context);
@@ -199,6 +219,10 @@ loadAsElfFile(const std::string &path, bool &error)
     elf_end(elf);
     close(fd);
     return module;
+#else // WITH_ELFUTILS
+    return NULL;
+#endif // WITH_ELFUTILS
+
 }
 
 static llvm::Module *
@@ -296,6 +320,7 @@ CommandFile::run(const std::vector<std::string> &args)
         puts("Too many parameters.");
         return;
     }
+
     else if (args.size() < 2)
     {
         puts("Argument required (a file).");

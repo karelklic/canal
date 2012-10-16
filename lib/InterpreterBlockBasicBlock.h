@@ -7,6 +7,7 @@
 namespace Canal {
 
 class Constructors;
+class Environment;
 
 namespace InterpreterBlock {
 
@@ -14,6 +15,7 @@ class BasicBlock
 {
 protected:
     const llvm::BasicBlock &mBasicBlock;
+    const Environment &mEnvironment;
 
     State mInputState;
     State mOutputState;
@@ -22,13 +24,15 @@ public:
     BasicBlock(const llvm::BasicBlock &basicBlock,
                const Constructors &constructors);
 
-    const llvm::BasicBlock &getBasicBlock() const { return mBasicBlock; }
+    const llvm::BasicBlock &getLlvmBasicBlock() const { return mBasicBlock; }
 
     llvm::BasicBlock::const_iterator begin() const { return mBasicBlock.begin(); }
     llvm::BasicBlock::const_iterator end() const { return mBasicBlock.end(); }
 
     State &getInputState() { return mInputState; }
     State &getOutputState() { return mOutputState; }
+
+    std::string toString() const;
 };
 
 } // namespace InterpreterBlock
