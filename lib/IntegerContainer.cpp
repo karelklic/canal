@@ -349,12 +349,9 @@ Container::xor_(const Domain &a, const Domain &b)
     binaryOperation(*this, a, b, &Domain::xor_);
 }
 
-static void
-cmpOperation(Container &result,
-             const Domain &a,
-             const Domain &b,
-             llvm::CmpInst::Predicate predicate,
-             Domain::CmpOperation operation)
+void
+Container::icmp(const Domain &a, const Domain &b,
+                llvm::CmpInst::Predicate predicate)
 {
     const Canal::Pointer::InclusionBased *aPointer =
             dynCast<const Canal::Pointer::InclusionBased*>(&a),
@@ -362,11 +359,10 @@ cmpOperation(Container &result,
 
     if (aPointer && bPointer)
     {
-        CANAL_ASSERT(operation == &Domain::icmp);
         bool cmpSingle = aPointer->isSingleTarget() && bPointer->isSingleTarget(),
             cmpeq = (*aPointer == *bPointer);
 
-        result.setBottom();
+        setBottom();
         switch (predicate)
         {
         case llvm::CmpInst::ICMP_EQ:
@@ -375,30 +371,30 @@ cmpOperation(Container &result,
         case llvm::CmpInst::ICMP_SGE:
         case llvm::CmpInst::ICMP_SLE:
             if (cmpeq && cmpSingle)
-                result.merge(Container(result.mEnvironment,
-                                       llvm::APInt(1, 1, false)));
+                merge(Container(mEnvironment,
+                                llvm::APInt(1, 1, false)));
             else
             {
                 if (predicate == llvm::CmpInst::ICMP_EQ && cmpSingle)
                 {
-                    result.merge(Container(result.mEnvironment,
-                                           llvm::APInt(1, 0, false)));
+                    merge(Container(mEnvironment,
+                                    llvm::APInt(1, 0, false)));
                 }
                 else
-                    result.setTop();
+                    setTop();
             }
             break;
         case llvm::CmpInst::ICMP_NE:
             if (cmpSingle)
             {
-                result.merge(Container(result.mEnvironment,
-                                       llvm::APInt(1, (cmpeq ? 0 : 1), false)));
+                merge(Container(mEnvironment,
+                                llvm::APInt(1, (cmpeq ? 0 : 1), false)));
             }
             else
-                result.setTop();
+                setTop();
             break;
         default:
-            result.setTop();
+            setTop();
         }
         return;
     }
@@ -406,27 +402,21 @@ cmpOperation(Container &result,
     const Container &aa = dynCast<const Container&>(a),
         &bb = dynCast<const Container&>(b);
 
-    std::vector<Domain*>::iterator it(result.mValues.begin());
+    std::vector<Domain*>::iterator it(mValues.begin());
     std::vector<Domain*>::const_iterator ita = aa.mValues.begin(),
         itb = bb.mValues.begin();
 
-    for (; it != result.mValues.end(); ++it, ++ita, ++itb)
-        ((**it).*(operation))(**ita, **itb, predicate);
-}
-
-
-void
-Container::icmp(const Domain &a, const Domain &b,
-                llvm::CmpInst::Predicate predicate)
-{
-    cmpOperation(*this, a, b, predicate, &Domain::icmp);
+    for (; it != mValues.end(); ++it, ++ita, ++itb)
+        (*it)->icmp(**ita, **itb, predicate);
 }
 
 void
 Container::fcmp(const Domain &a, const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
-    cmpOperation(*this, a, b, predicate, &Domain::fcmp);
+    std::vector<Domain*>::iterator it = mValues.begin();
+    for (; it != mValues.end(); ++it)
+        (*it)->fcmp(a, b, predicate);
 }
 
 static void
