@@ -6,6 +6,7 @@
 #include "FloatInterval.h"
 #include "Pointer.h"
 #include "Structure.h"
+#include "Environment.h"
 #include "State.h"
 #include <llvm/Constants.h>
 #include <llvm/Function.h>
@@ -116,19 +117,38 @@ Constructors::create(const llvm::Constant &value,
     {
         const llvm::ConstantExpr &exprValue = llvmCast<llvm::ConstantExpr>(value);
         CANAL_ASSERT_MSG(state, "State is mandatory for constant expressions.");
-        Domain *variable = state->findVariable(**value.op_begin());
+
+        Domain *variable = NULL;
+        bool deleteVariable = false;
+        const llvm::Value &firstValue = **value.op_begin();
+        if (llvm::isa<llvm::ConstantExpr>(firstValue))
+        {
+            variable = create(llvmCast<llvm::ConstantExpr>(firstValue), state);
+            deleteVariable = true;
+        }
+        else
+            variable = state->findVariable(**value.op_begin());
+
         CANAL_ASSERT_MSG(variable, "It is expected that variable used"
                          " in constant expressions is available.");
 
+        Domain *result = NULL;
         switch (exprValue.getOpcode())
         {
         case llvm::Instruction::GetElementPtr:
-            return createGetElementPtr(exprValue, *variable);
+            result = createGetElementPtr(exprValue, *variable);
+            break;
         case llvm::Instruction::BitCast:
-            return createBitCast(exprValue, *variable);
+            result = createBitCast(exprValue, *variable);
+            break;
         default:
             CANAL_NOT_IMPLEMENTED();
         }
+
+        if (deleteVariable)
+            delete variable;
+
+        return result;
     }
 
     if (llvm::isa<llvm::ConstantFP>(value))
