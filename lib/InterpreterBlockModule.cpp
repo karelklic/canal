@@ -6,6 +6,7 @@
 #include "Constructors.h"
 #include "Environment.h"
 #include <llvm/Module.h>
+#include <llvm/Constants.h>
 #include <sstream>
 
 namespace Canal {
@@ -18,14 +19,13 @@ Module::Module(const llvm::Module &module,
     // Prepare the state with all globals.  Global pointers are
     // allocated automatically -- they point to globals section.
     {
-        llvm::Module::const_global_iterator it = module.global_begin(),
-            itend = module.global_end();
+        tsortInit();
 
-        for (; it != itend; ++it)
+        for (const llvm::GlobalVariable* it = tsortNext(); it != NULL; it = tsortNext())
         {
             if (it->isConstant() && it->hasInitializer())
             {
-                Domain *value = constructors.create(*it->getInitializer(), NULL);
+                Domain *value = constructors.create(*it->getInitializer(), &mGlobalState);
                 mGlobalState.addGlobalVariable(*it, value);
                 continue;
             }
@@ -142,6 +142,102 @@ Module::updateGlobalState()
         // value.
         mGlobalState.mergeGlobal((*it)->getOutputState());
     }
+}
+
+//Init topological sort
+void
+Module::tsortInit()
+{
+    llvm::Module::const_global_iterator it = mModule.global_begin(),
+        itend = mModule.global_end();
+    tsortValue* dependency = new tsortValue;
+    dependency->count = 0;
+
+    //Find dependencies for all variables
+    for (; it != itend; ++it)
+    {
+        if (dependency->count) { //Lazy allocation - allocate new only if last one was used
+            dependency = new tsortValue;
+            dependency->count = 0;
+        }
+        dependency->constant = &(*it);
+        if (!tsortDepend(*it, dependency)) {
+            mTsortReady.push_back(&(*it));
+        }
+    }
+    if (dependency->count == 0) delete dependency;
+}
+
+bool
+Module::tsortDepend(const llvm::GlobalVariable& what, tsortValue* value) {
+    if (!what.isConstant() || !what.hasInitializer()) return false;
+    return tsortDepend(*what.getInitializer(), value);
+}
+
+bool
+Module::tsortDepend(const llvm::Constant& what, tsortValue* value) {
+    bool retval = false;
+    if (llvm::isa<llvm::ConstantExpr>(what))
+    {
+        mTsortDependencies[*what.op_begin()].push_back(value);
+        value->count ++;
+        return true;
+    }
+
+    if (llvm::isa<llvm::ConstantStruct>(what))
+    {
+        const llvm::ConstantStruct &structValue = llvmCast<llvm::ConstantStruct>(what);
+        uint64_t elementCount = structValue.getType()->getNumElements();
+
+        for (uint64_t i = 0; i < elementCount; ++i)
+            retval |= tsortDepend(*structValue.getOperand(i), value);
+
+        return retval;
+    }
+
+    if (llvm::isa<llvm::ConstantArray>(what))
+    {
+        const llvm::ConstantArray &arrayValue = llvmCast<llvm::ConstantArray>(what);
+        uint64_t elementCount = arrayValue.getType()->getNumElements();
+
+        for (uint64_t i = 0; i < elementCount; ++i)
+           retval |= tsortDepend(*arrayValue.getOperand(i), value);
+
+        return retval;
+    }
+    return false;
+}
+
+void
+Module::tsortDecrement(tsortValue *&value) {
+    if (value->count == 1) {
+        const llvm::GlobalVariable* constant = llvmCast<llvm::GlobalVariable>(value->constant);
+        mTsortReady.push_back(constant);
+        delete value;
+        value = NULL;
+    }
+    else value->count--;
+}
+
+const llvm::GlobalVariable*
+Module::tsortNext()
+{
+    if (!mTsortReady.size()) {
+        CANAL_ASSERT_MSG(mTsortDependencies.size() == 0, "Circular dependencies among global variables");
+        return NULL;
+    }
+
+    const llvm::GlobalVariable* ret = mTsortReady.back();
+    mTsortReady.pop_back();
+    const std::map<const llvm::Value*, std::vector<tsortValue*> >::iterator dependent = mTsortDependencies.find(ret);
+
+    if (dependent != mTsortDependencies.end()) { //Handle dependent constants
+        for (std::vector<tsortValue*>::iterator it = dependent->second.begin(); it != dependent->second.end(); it ++) {
+            tsortDecrement(*it);
+        }
+        mTsortDependencies.erase(dependent);
+    }
+    return ret;
 }
 
 } // namespace InterpreterBlock

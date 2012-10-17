@@ -4,6 +4,7 @@
 #include "State.h"
 #include <vector>
 #include <string>
+#include <llvm/GlobalVariable.h>
 
 namespace llvm {
 class Module;
@@ -30,6 +31,24 @@ protected:
     std::vector<Function*> mFunctions;
 
     State mGlobalState;
+
+private:
+    //Topological sort of global variables
+    typedef struct {
+        const llvm::Value* constant;
+        unsigned count;
+    } tsortValue;
+
+    llvm::GlobalVariable* nextGlobalVariable();
+    void tsortInit();
+    bool tsortDepend(const llvm::GlobalVariable& what, tsortValue *value);
+    bool tsortDepend(const llvm::Constant& what, tsortValue* value);
+    void tsortDecrement(tsortValue*& value);
+    const llvm::GlobalVariable* tsortNext();
+
+    std::vector<const llvm::GlobalVariable*> mTsortReady;
+    std::map<const llvm::Value*, std::vector<tsortValue*> > mTsortDependencies;
+
 
 public:
     Module(const llvm::Module &module,
