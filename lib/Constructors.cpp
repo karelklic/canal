@@ -82,6 +82,9 @@ Domain *
 Constructors::create(const llvm::Constant &value,
                      const State *state) const
 {
+    if (llvm::isa<llvm::UndefValue>(value))
+        return create(*value.getType());
+
     if (llvm::isa<llvm::ConstantInt>(value))
     {
         const llvm::ConstantInt &intValue =
