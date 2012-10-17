@@ -202,7 +202,7 @@ InclusionBased::isSingleTarget() const
     const Integer::Container *tmp =
         dynCast<const Integer::Container*>(target->mNumericOffset);
 
-    if (!tmp->isSingleValue())
+    if (tmp && !tmp->isSingleValue())
         return false;
 
     std::vector<Domain*>::const_iterator it = target->mOffsets.begin();

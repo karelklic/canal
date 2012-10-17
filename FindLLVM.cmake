@@ -7,7 +7,7 @@
 #  LLVM_MODULE_LIBS - list of llvm libs for working with modules.
 #  LLVM_FOUND       - True if llvm found.
 
-find_program(LLVM_CONFIG_EXECUTABLE NAMES llvm-config DOC "llvm-config executable")
+find_program(LLVM_CONFIG_EXECUTABLE llvm-config DOC "llvm-config executable")
 
 if (LLVM_CONFIG_EXECUTABLE)
   message(STATUS "LLVM llvm-config found at: ${LLVM_CONFIG_EXECUTABLE}")
