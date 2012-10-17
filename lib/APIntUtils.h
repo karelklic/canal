@@ -62,11 +62,23 @@ llvm::APInt umul_ov(const llvm::APInt &a,
                     const llvm::APInt &b,
                     bool &overflow);
 
-void clearAllBits(llvm::APInt &num);
+void
+clearAllBits(llvm::APInt &num);
 
-void setBit(llvm::APInt &num, int bit);
+void
+setBit(llvm::APInt &num, int bit);
 
-llvm::APInt getOneBitSet(unsigned bitWidth, int bit);
+llvm::APInt
+getOneBitSet(unsigned bitWidth, int bit);
+
+llvm::APInt
+trunc(const llvm::APInt &num, unsigned bitWidth);
+
+llvm::APInt
+zext(const llvm::APInt &num, unsigned bitWidth);
+
+llvm::APInt
+sext(const llvm::APInt &num, unsigned bitWidth);
 
 } // namespace APIntUtils
 } // namespace Canal

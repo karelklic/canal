@@ -140,6 +140,38 @@ getOneBitSet(unsigned bitWidth, int bit)
 #endif
 }
 
+llvm::APInt
+trunc(const llvm::APInt &num, unsigned bitWidth)
+{
+#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+    llvm::APInt copy(num);
+    return copy.trunc(bitWidth);
+#else
+    return num.trunc(bitWidth);
+#endif
+}
+
+llvm::APInt
+zext(const llvm::APInt &num, unsigned bitWidth)
+{
+#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+    llvm::APInt copy(num);
+    return copy.zext(bitWidth);
+#else
+    return num.zext(bitWidth);
+#endif
+}
+
+llvm::APInt
+sext(const llvm::APInt &num, unsigned bitWidth)
+{
+#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+    llvm::APInt copy(num);
+    return copy.sext(bitWidth);
+#else
+    return num.sext(bitWidth);
+#endif
+}
 
 } // namespace APIntUtils
 } // namespace Canal

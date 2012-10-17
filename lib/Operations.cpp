@@ -734,7 +734,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
     Pointer::InclusionBased *pointer =
         new Pointer::InclusionBased(mEnvironment, *type);
 
-    pointer->addTarget(Pointer::Target::FunctionBlock,
+    pointer->addTarget(Pointer::Target::Block,
                        &instruction,
                        &instruction,
                        std::vector<Domain*>(),

@@ -1,18 +1,21 @@
 #include "InterpreterBlockFunction.h"
 #include "InterpreterBlockBasicBlock.h"
 #include "Constructors.h"
+#include "Environment.h"
+#include "Domain.h"
 #include "Utils.h"
 #include <llvm/Function.h>
 #include <llvm/Type.h>
 #include <llvm/Support/CFG.h>
 #include <llvm/Instructions.h>
+#include <sstream>
 
 namespace Canal {
 namespace InterpreterBlock {
 
 Function::Function(const llvm::Function &function,
                    const Constructors &constructors)
-    : mFunction(function)
+    : mFunction(function), mEnvironment(constructors.getEnvironment())
 {
     // Initialize input state.
     {
@@ -49,7 +52,7 @@ Function::~Function()
 }
 
 const llvm::BasicBlock &
-Function::getEntryBlock() const
+Function::getLlvmEntryBlock() const
 {
     return mFunction.getEntryBlock();
 }
@@ -60,7 +63,7 @@ Function::getBasicBlock(const llvm::BasicBlock &llvmBasicBlock)
     std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
     for (; it != mBasicBlocks.end(); ++it)
     {
-        if (&(*it)->getBasicBlock() == &llvmBasicBlock)
+        if (&(*it)->getLlvmBasicBlock() == &llvmBasicBlock)
             return **it;
     }
 
@@ -76,7 +79,7 @@ Function::getName() const
 void
 Function::updateBasicBlockInputState(BasicBlock &basicBlock)
 {
-    const llvm::BasicBlock &llvmBasicBlock = basicBlock.getBasicBlock();
+    const llvm::BasicBlock &llvmBasicBlock = basicBlock.getLlvmBasicBlock();
 
     // Merge out states of predecessors to input state of
     // current block.
@@ -89,7 +92,7 @@ Function::updateBasicBlockInputState(BasicBlock &basicBlock)
         basicBlock.getInputState().merge(predBlock.getOutputState());
     }
 
-    if (&llvmBasicBlock == &getEntryBlock())
+    if (&llvmBasicBlock == &getLlvmEntryBlock())
         basicBlock.getInputState().merge(mInputState);
 }
 
@@ -99,7 +102,7 @@ Function::updateOutputState()
     std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
     for (; it != mBasicBlocks.end(); ++it)
     {
-        if (!llvm::isa<llvm::ReturnInst>((*it)->getBasicBlock().getTerminator()))
+        if (!llvm::isa<llvm::ReturnInst>((*it)->getLlvmBasicBlock().getTerminator()))
             continue;
 
         // Merge global blocks, global variables.  Merge function
@@ -110,6 +113,56 @@ Function::updateOutputState()
         mOutputState.mergeForeignFunctionBlocks((*it)->getOutputState(),
                                                 mFunction);
     }
+}
+
+std::string
+Function::toString() const
+{
+    std::stringstream ss;
+
+    ss << "*******************************************" << std::endl;
+    ss << "** function " << mFunction.getName().str() << std::endl;
+    ss << "*******************************************" << std::endl;
+    ss << std::endl;
+
+    // Print function arguments.
+    {
+        SlotTracker &slotTracker = mEnvironment.getSlotTracker();
+        llvm::Function::ArgumentListType::const_iterator it =
+            mFunction.getArgumentList().begin(),
+            itend = mFunction.getArgumentList().end();
+
+        for (; it != itend; ++it)
+            ss << mInputState.toString(*it, slotTracker);
+
+        if (mFunction.getArgumentList().begin() != itend)
+            ss << std::endl;
+    }
+
+    // Print function result.
+    if (!mFunction.getReturnType()->isVoidTy())
+    {
+        ss << "returnedValue = ";
+        if (mOutputState.mReturnedValue)
+        {
+            ss << Canal::indentExceptFirstLine(
+                mOutputState.mReturnedValue->toString(),
+                16);
+        }
+        else
+            ss << "undefined" << std::endl;
+
+        ss << std::endl;
+    }
+
+    // Print basic blocks.
+    {
+        std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
+        for (; it != mBasicBlocks.end(); ++it)
+            ss << (*it)->toString();
+    }
+
+    return ss.str();
 }
 
 } // namespace InterpreterBlock

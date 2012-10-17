@@ -9,6 +9,8 @@ canal_SOURCES = \
 	CommandCd.cpp \
 	CommandContinue.h \
 	CommandContinue.cpp \
+	CommandDump.h \
+	CommandDump.cpp \
 	CommandFile.h \
 	CommandFile.cpp \
 	CommandFinish.h \
@@ -42,5 +44,5 @@ canal_SOURCES = \
 	Utils.h \
 	Utils.cpp
 
-canal_LDADD = ../lib/libcanal.la -lreadline -lhistory -lelf $(LLVM_LDFLAGS) $(LLVM_LIBS)
+canal_LDADD = ../lib/libcanal.la -lreadline -lhistory $(LLVM_LDFLAGS) $(LLVM_LIBS)
 canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS) -I.. -DDATADIR='"$(datadir)"'

@@ -7,6 +7,7 @@
 #include "Domain.h"
 #include <sstream>
 #include <llvm/BasicBlock.h>
+#include <llvm/Function.h>
 #include <llvm/ADT/APInt.h>
 
 namespace Canal {
@@ -19,14 +20,12 @@ Target::Target(const Environment &environment,
                Domain *numericOffset)
     : mEnvironment(environment),
       mType(type),
-      mInstruction(target),
+      mTarget(target),
       mOffsets(offsets),
       mNumericOffset(numericOffset)
 {
-    CANAL_ASSERT_MSG(type == FunctionBlock ||
-                     type == FunctionVariable ||
-                     type == GlobalBlock ||
-                     type == GlobalVariable ||
+    CANAL_ASSERT_MSG(type == Block ||
+                     type == Function ||
                      type == Constant,
                      "Invalid type.");
 
@@ -41,7 +40,7 @@ Target::Target(const Environment &environment,
 
 Target::Target(const Target &target) : mEnvironment(target.mEnvironment),
                                        mType(target.mType),
-                                       mInstruction(target.mInstruction),
+                                       mTarget(target.mTarget),
                                        mOffsets(target.mOffsets),
                                        mNumericOffset(target.mNumericOffset)
 {
@@ -57,6 +56,7 @@ Target::~Target()
 {
     std::vector<Domain*>::iterator it = mOffsets.begin(),
         itend = mOffsets.end();
+
     for (; it != itend; ++it)
         delete *it;
 
@@ -81,10 +81,7 @@ Target::operator==(const Target &target) const
     case Constant:
         // We already compared numeric offsets.
         break;
-    case FunctionBlock:
-    case FunctionVariable:
-    case GlobalBlock:
-    case GlobalVariable:
+    case Block:
     {
         if (mOffsets.size() != target.mOffsets.size())
             return false;
@@ -98,8 +95,10 @@ Target::operator==(const Target &target) const
                 return false;
         }
 
-        return mInstruction == target.mInstruction;
+        return mTarget == target.mTarget;
     }
+    case Function:
+        return mTarget == target.mTarget;
     default:
         CANAL_DIE();
     }
@@ -138,12 +137,9 @@ Target::merge(const Target &target)
     case Constant:
         // We already merged numeric offsets.
         break;
-    case FunctionBlock:
-    case FunctionVariable:
-    case GlobalBlock:
-    case GlobalVariable:
+    case Block:
     {
-        CANAL_ASSERT(mInstruction == target.mInstruction);
+        CANAL_ASSERT(mTarget == target.mTarget);
         CANAL_ASSERT_MSG(mOffsets.size() == target.mOffsets.size(),
                          "Expected equal number of offsets, but got "
                          << mOffsets.size() << " and "
@@ -156,6 +152,9 @@ Target::merge(const Target &target)
 
         break;
     }
+    case Function:
+        CANAL_ASSERT(mTarget == target.mTarget);
+        break;
     default:
         CANAL_DIE();
     }
@@ -187,53 +186,32 @@ Target::toString(SlotTracker &slotTracker) const
     switch (mType)
     {
     case Constant:
+        ss << " constant";
         break;
-    case FunctionBlock:
-    case FunctionVariable:
-    {
-        const llvm::Instruction &instruction =
-            llvmCast<llvm::Instruction>(*mInstruction);
-
-        slotTracker.setActiveFunction(*instruction.getParent()->getParent());
-        std::string name(Canal::getName(instruction, slotTracker));
-        if (name.empty())
-            name = "<failed to name the location>";
-
-        switch (mType)
-        {
-        case FunctionBlock:    ss << " %^"; break;
-        case FunctionVariable: ss << " %";  break;
-        case GlobalBlock:      ss << " @^"; break;
-        default:               CANAL_DIE();
-        }
-
-        ss << name;
-        break;
-    }
-    case GlobalBlock:
+    case Block:
     {
         const llvm::Instruction *instruction =
-            llvm::dyn_cast<llvm::Instruction>(mInstruction);
+            llvmCast<llvm::Instruction>(mTarget);
 
         if (instruction)
-            slotTracker.setActiveFunction(*instruction->getParent()->getParent());
+        {
+            const llvm::Function &function =
+                *instruction->getParent()->getParent();
+
+            ss << " @" << Canal::getName(function, slotTracker);
+            ss << ":^" << Canal::getName(*instruction, slotTracker);
+        }
         else
-            CANAL_ASSERT_MSG(llvm::isa<llvm::GlobalVariable>(mInstruction),
-                             "Unexpected type of pointer assignment source");
+            ss << " ^" << Canal::getName(*mTarget, slotTracker);
 
-        std::string name(Canal::getName(*mInstruction, slotTracker));
-        if (name.empty())
-            name = "<failed to name the location>";
-
-        ss << " @^" << name;
         break;
     }
-    case GlobalVariable:
+    case Function:
     {
-        std::string name(Canal::getName(*mInstruction, slotTracker));
-        if (name.empty())
-            name = "<failed to name the location>";
-        ss << " @" << name;
+        const llvm::Function &function =
+            llvmCast<llvm::Function>(*mTarget);
+
+        ss << " @" << Canal::getName(function, slotTracker);
         break;
     }
     default:
@@ -262,43 +240,32 @@ Target::toString(SlotTracker &slotTracker) const
 std::vector<Domain*>
 Target::dereference(const State &state) const
 {
+    CANAL_ASSERT_MSG(mType == Block,
+                     "Only Block pointer targets can be dereferenced.");
+
     std::vector<Domain*> result;
+    result.push_back(state.findBlock(*mTarget));
+    CANAL_ASSERT(result[0]);
 
-    switch (mType)
+    std::vector<Domain*>::const_iterator itOffsets = mOffsets.begin();
+    for (; itOffsets != mOffsets.end(); ++itOffsets)
     {
-    case Constant:
-        CANAL_DIE();
-    case FunctionBlock:
-    case FunctionVariable:
-    case GlobalBlock:
-    case GlobalVariable:
-    {
-        result.push_back(state.findBlock(*mInstruction));
-        CANAL_ASSERT(result[0]);
-
-        std::vector<Domain*>::const_iterator itOffsets = mOffsets.begin();
-        for (; itOffsets != mOffsets.end(); ++itOffsets)
+        std::vector<Domain*> nextLevelResult;
+        std::vector<Domain*>::const_iterator itItems = result.begin();
+        for (; itItems != result.end(); ++itItems)
         {
-            std::vector<Domain*> nextLevelResult;
-            std::vector<Domain*>::const_iterator itItems = result.begin();
-            for (; itItems != result.end(); ++itItems)
-            {
-                std::vector<Domain*> items;
-                Array::Interface &array = dynCast<Array::Interface&>(**itItems);
-                items = array.getItem(**itOffsets);
-                nextLevelResult.insert(nextLevelResult.end(),
-                                       items.begin(),
-                                       items.end());
-            }
-
-            result.swap(nextLevelResult);
+            std::vector<Domain*> items;
+            Array::Interface &array = dynCast<Array::Interface&>(**itItems);
+            items = array.getItem(**itOffsets);
+            nextLevelResult.insert(nextLevelResult.end(),
+                                   items.begin(),
+                                   items.end());
         }
 
-        return result;
+        result.swap(nextLevelResult);
     }
-    default:
-        CANAL_DIE();
-    }
+
+    return result;
 }
 
 } // namespace Pointer
