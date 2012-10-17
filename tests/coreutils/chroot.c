@@ -1,20 +1,37 @@
-# 1 "true.c"
-# 1 "true.c" 1
+# 1 "chroot.c"
+# 1 "chroot.c" 1
 # 1 "<built-in>" 1
 # 1 "<built-in>" 3
 # 129 "<built-in>" 3
 # 1 "<command line>" 1
 # 1 "<built-in>" 2
-# 1 "true.c" 2
-# 17 "true.c"
+# 1 "chroot.c" 2
+# 19 "chroot.c"
 # 1 "./config.h" 1
-# 18 "true.c" 2
-# 1 "./stdio.h" 1
-# 20 "./stdio.h"
-# 20 "./stdio.h" 3
-# 42 "./stdio.h" 3
-# 1 "/usr/include/stdio.h" 1 3 4
-# 28 "/usr/include/stdio.h" 3 4
+# 20 "chroot.c" 2
+# 1 "./getopt.h" 1
+# 23 "./getopt.h"
+# 23 "./getopt.h" 3
+
+
+
+
+
+
+
+
+# 1 "/usr/include/getopt.h" 1 3 4
+# 35 "/usr/include/getopt.h" 3 4
+# 1 "./ctype.h" 1 3 4
+# 29 "./ctype.h" 3 4
+# 29 "./ctype.h" 3
+
+
+
+
+
+# 1 "/usr/include/ctype.h" 1 3 4
+# 27 "/usr/include/ctype.h" 3 4
 # 1 "/usr/include/features.h" 1 3 4
 # 324 "/usr/include/features.h" 3 4
 # 1 "/usr/include/i386-linux-gnu/bits/predefs.h" 1 3 4
@@ -37,26 +54,7 @@
 # 1 "/usr/include/i386-linux-gnu/gnu/stubs-32.h" 1 3 4
 # 8 "/usr/include/i386-linux-gnu/gnu/stubs.h" 2 3 4
 # 390 "/usr/include/features.h" 2 3 4
-# 29 "/usr/include/stdio.h" 2 3 4
-
-
-
-
-
-# 1 "/usr/include/clang/3.0/include/stddef.h" 1 3 4
-# 31 "/usr/include/clang/3.0/include/stddef.h" 3 4
-typedef __typeof__(((int*)0)-((int*)0)) ptrdiff_t;
-
-
-
-typedef __typeof__(sizeof(int)) size_t;
-
-
-
-
-typedef int wchar_t;
-# 35 "/usr/include/stdio.h" 2 3 4
-
+# 28 "/usr/include/ctype.h" 2 3 4
 # 1 "/usr/include/i386-linux-gnu/bits/types.h" 1 3 4
 # 28 "/usr/include/i386-linux-gnu/bits/types.h" 3 4
 # 1 "/usr/include/i386-linux-gnu/bits/wordsize.h" 1 3 4
@@ -154,15 +152,226 @@ __extension__ typedef int __intptr_t;
 
 
 __extension__ typedef unsigned int __socklen_t;
-# 37 "/usr/include/stdio.h" 2 3 4
+# 29 "/usr/include/ctype.h" 2 3 4
+# 41 "/usr/include/ctype.h" 3 4
+# 1 "/usr/include/endian.h" 1 3 4
+# 37 "/usr/include/endian.h" 3 4
+# 1 "/usr/include/i386-linux-gnu/bits/endian.h" 1 3 4
+# 38 "/usr/include/endian.h" 2 3 4
+# 61 "/usr/include/endian.h" 3 4
+# 1 "/usr/include/i386-linux-gnu/bits/byteswap.h" 1 3 4
+# 62 "/usr/include/endian.h" 2 3 4
+# 42 "/usr/include/ctype.h" 2 3 4
 
 
 
 
 
 
+enum
+{
+  _ISupper = ((0) < 8 ? ((1 << (0)) << 8) : ((1 << (0)) >> 8)),
+  _ISlower = ((1) < 8 ? ((1 << (1)) << 8) : ((1 << (1)) >> 8)),
+  _ISalpha = ((2) < 8 ? ((1 << (2)) << 8) : ((1 << (2)) >> 8)),
+  _ISdigit = ((3) < 8 ? ((1 << (3)) << 8) : ((1 << (3)) >> 8)),
+  _ISxdigit = ((4) < 8 ? ((1 << (4)) << 8) : ((1 << (4)) >> 8)),
+  _ISspace = ((5) < 8 ? ((1 << (5)) << 8) : ((1 << (5)) >> 8)),
+  _ISprint = ((6) < 8 ? ((1 << (6)) << 8) : ((1 << (6)) >> 8)),
+  _ISgraph = ((7) < 8 ? ((1 << (7)) << 8) : ((1 << (7)) >> 8)),
+  _ISblank = ((8) < 8 ? ((1 << (8)) << 8) : ((1 << (8)) >> 8)),
+  _IScntrl = ((9) < 8 ? ((1 << (9)) << 8) : ((1 << (9)) >> 8)),
+  _ISpunct = ((10) < 8 ? ((1 << (10)) << 8) : ((1 << (10)) >> 8)),
+  _ISalnum = ((11) < 8 ? ((1 << (11)) << 8) : ((1 << (11)) >> 8))
+};
+# 81 "/usr/include/ctype.h" 3 4
+extern __const unsigned short int **__ctype_b_loc (void)
+     __attribute__ ((__nothrow__ )) __attribute__ ((__const));
+extern __const __int32_t **__ctype_tolower_loc (void)
+     __attribute__ ((__nothrow__ )) __attribute__ ((__const));
+extern __const __int32_t **__ctype_toupper_loc (void)
+     __attribute__ ((__nothrow__ )) __attribute__ ((__const));
+# 112 "/usr/include/ctype.h" 3 4
+extern int isalnum (int) __attribute__ ((__nothrow__ ));
+extern int isalpha (int) __attribute__ ((__nothrow__ ));
+extern int iscntrl (int) __attribute__ ((__nothrow__ ));
+extern int isdigit (int) __attribute__ ((__nothrow__ ));
+extern int islower (int) __attribute__ ((__nothrow__ ));
+extern int isgraph (int) __attribute__ ((__nothrow__ ));
+extern int isprint (int) __attribute__ ((__nothrow__ ));
+extern int ispunct (int) __attribute__ ((__nothrow__ ));
+extern int isspace (int) __attribute__ ((__nothrow__ ));
+extern int isupper (int) __attribute__ ((__nothrow__ ));
+extern int isxdigit (int) __attribute__ ((__nothrow__ ));
 
 
+
+extern int tolower (int __c) __attribute__ ((__nothrow__ ));
+
+
+extern int toupper (int __c) __attribute__ ((__nothrow__ ));
+# 138 "/usr/include/ctype.h" 3 4
+extern int isblank (int) __attribute__ ((__nothrow__ ));
+
+
+
+
+
+
+extern int isctype (int __c, int __mask) __attribute__ ((__nothrow__ ));
+
+
+
+
+
+
+extern int isascii (int __c) __attribute__ ((__nothrow__ ));
+
+
+
+extern int toascii (int __c) __attribute__ ((__nothrow__ ));
+
+
+
+extern int _toupper (int) __attribute__ ((__nothrow__ ));
+extern int _tolower (int) __attribute__ ((__nothrow__ ));
+# 259 "/usr/include/ctype.h" 3 4
+# 1 "/usr/include/xlocale.h" 1 3 4
+# 28 "/usr/include/xlocale.h" 3 4
+typedef struct __locale_struct
+{
+
+  struct __locale_data *__locales[13];
+
+
+  const unsigned short int *__ctype_b;
+  const int *__ctype_tolower;
+  const int *__ctype_toupper;
+
+
+  const char *__names[13];
+} *__locale_t;
+
+
+typedef __locale_t locale_t;
+# 260 "/usr/include/ctype.h" 2 3 4
+# 273 "/usr/include/ctype.h" 3 4
+extern int isalnum_l (int, __locale_t) __attribute__ ((__nothrow__ ));
+extern int isalpha_l (int, __locale_t) __attribute__ ((__nothrow__ ));
+extern int iscntrl_l (int, __locale_t) __attribute__ ((__nothrow__ ));
+extern int isdigit_l (int, __locale_t) __attribute__ ((__nothrow__ ));
+extern int islower_l (int, __locale_t) __attribute__ ((__nothrow__ ));
+extern int isgraph_l (int, __locale_t) __attribute__ ((__nothrow__ ));
+extern int isprint_l (int, __locale_t) __attribute__ ((__nothrow__ ));
+extern int ispunct_l (int, __locale_t) __attribute__ ((__nothrow__ ));
+extern int isspace_l (int, __locale_t) __attribute__ ((__nothrow__ ));
+extern int isupper_l (int, __locale_t) __attribute__ ((__nothrow__ ));
+extern int isxdigit_l (int, __locale_t) __attribute__ ((__nothrow__ ));
+
+extern int isblank_l (int, __locale_t) __attribute__ ((__nothrow__ ));
+
+
+
+extern int __tolower_l (int __c, __locale_t __l) __attribute__ ((__nothrow__ ));
+extern int tolower_l (int __c, __locale_t __l) __attribute__ ((__nothrow__ ));
+
+
+extern int __toupper_l (int __c, __locale_t __l) __attribute__ ((__nothrow__ ));
+extern int toupper_l (int __c, __locale_t __l) __attribute__ ((__nothrow__ ));
+# 35 "./ctype.h" 2 3
+# 36 "/usr/include/getopt.h" 2 3 4
+# 59 "/usr/include/getopt.h" 3 4
+extern char *optarg;
+# 73 "/usr/include/getopt.h" 3 4
+extern int optind;
+
+
+
+
+extern int opterr;
+
+
+
+extern int optopt;
+# 106 "/usr/include/getopt.h" 3 4
+struct option
+{
+  const char *name;
+
+
+  int has_arg;
+  int *flag;
+  int val;
+};
+# 152 "/usr/include/getopt.h" 3 4
+extern int getopt (int ___argc, char *const *___argv, const char *__shortopts)
+       __attribute__ ((__nothrow__ ));
+# 175 "/usr/include/getopt.h" 3 4
+extern int getopt_long (int ___argc, char *const *___argv,
+   const char *__shortopts,
+          const struct option *__longopts, int *__longind)
+       __attribute__ ((__nothrow__ ));
+extern int getopt_long_only (int ___argc, char *const *___argv,
+        const char *__shortopts,
+               const struct option *__longopts, int *__longind)
+       __attribute__ ((__nothrow__ ));
+# 32 "./getopt.h" 2 3
+# 147 "./getopt.h" 3
+extern char *rpl_optarg;
+# 161 "./getopt.h" 3
+extern int rpl_optind;
+
+
+
+
+extern int rpl_opterr;
+
+
+
+extern int rpl_optopt;
+# 195 "./getopt.h" 3
+struct rpl_option
+{
+  const char *name;
+
+
+  int has_arg;
+  int *flag;
+  int val;
+};
+# 240 "./getopt.h" 3
+extern int rpl_getopt (int ___argc, char *const *___argv, const char *__shortopts)
+       __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (2, 3)));
+
+
+extern int rpl_getopt_long (int ___argc, char * *___argv,
+                        const char *__shortopts,
+                        const struct rpl_option *__longopts, int *__longind)
+       __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (2, 3)));
+extern int rpl_getopt_long_only (int ___argc, char * *___argv,
+                             const char *__shortopts,
+                             const struct rpl_option *__longopts, int *__longind)
+       __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (2, 3)));
+# 21 "chroot.c" 2
+# 1 "./stdio.h" 1
+# 20 "./stdio.h"
+# 20 "./stdio.h" 3
+# 42 "./stdio.h" 3
+# 1 "/usr/include/stdio.h" 1 3 4
+# 34 "/usr/include/stdio.h" 3 4
+# 1 "/usr/include/clang/3.0/include/stddef.h" 1 3 4
+# 31 "/usr/include/clang/3.0/include/stddef.h" 3 4
+typedef __typeof__(((int*)0)-((int*)0)) ptrdiff_t;
+
+
+
+typedef __typeof__(sizeof(int)) size_t;
+
+
+
+
+typedef int wchar_t;
+# 35 "/usr/include/stdio.h" 2 3 4
+# 45 "/usr/include/stdio.h" 3 4
 struct _IO_FILE;
 
 
@@ -991,17 +1200,7 @@ typedef unsigned int u_int32_t __attribute__ ((__mode__ (__SI__)));
 typedef unsigned int u_int64_t __attribute__ ((__mode__ (__DI__)));
 
 typedef int register_t __attribute__ ((__mode__ (__word__)));
-# 217 "/usr/include/i386-linux-gnu/sys/types.h" 3
-# 1 "/usr/include/endian.h" 1 3 4
-# 37 "/usr/include/endian.h" 3 4
-# 1 "/usr/include/i386-linux-gnu/bits/endian.h" 1 3 4
-# 38 "/usr/include/endian.h" 2 3 4
-# 61 "/usr/include/endian.h" 3 4
-# 1 "/usr/include/i386-linux-gnu/bits/byteswap.h" 1 3 4
-# 62 "/usr/include/endian.h" 2 3 4
-# 218 "/usr/include/i386-linux-gnu/sys/types.h" 2 3
-
-
+# 220 "/usr/include/i386-linux-gnu/sys/types.h" 3
 # 1 "/usr/include/i386-linux-gnu/sys/select.h" 1 3
 # 31 "/usr/include/i386-linux-gnu/sys/select.h" 3
 # 1 "/usr/include/i386-linux-gnu/bits/select.h" 1 3
@@ -1474,7 +1673,103 @@ extern int _gl_cxxalias_dummy;
 
 
 extern int _gl_cxxalias_dummy;
-# 19 "true.c" 2
+# 22 "chroot.c" 2
+
+# 1 "/usr/include/grp.h" 1 3 4
+# 34 "/usr/include/grp.h" 3 4
+# 1 "/usr/include/clang/3.0/include/stddef.h" 1 3 4
+# 35 "/usr/include/grp.h" 2 3 4
+# 44 "/usr/include/grp.h" 3 4
+struct group
+  {
+    char *gr_name;
+    char *gr_passwd;
+    __gid_t gr_gid;
+    char **gr_mem;
+  };
+
+
+
+
+
+# 1 "./stdio.h" 1 3 4
+# 20 "./stdio.h" 3 4
+# 20 "./stdio.h" 3
+# 56 "/usr/include/grp.h" 2 3 4
+
+
+
+
+
+
+
+
+extern void setgrent (void);
+# 73 "/usr/include/grp.h" 3 4
+extern void endgrent (void);
+
+
+
+
+
+extern struct group *getgrent (void);
+# 89 "/usr/include/grp.h" 3 4
+extern struct group *fgetgrent (FILE *__stream);
+# 99 "/usr/include/grp.h" 3 4
+extern int putgrent (__const struct group *__restrict __p,
+       FILE *__restrict __f);
+
+
+
+
+
+
+extern struct group *getgrgid (__gid_t __gid);
+
+
+
+
+
+extern struct group *getgrnam (__const char *__name);
+# 137 "/usr/include/grp.h" 3 4
+extern int getgrent_r (struct group *__restrict __resultbuf,
+         char *__restrict __buffer, size_t __buflen,
+         struct group **__restrict __result);
+
+
+
+
+
+
+extern int getgrgid_r (__gid_t __gid, struct group *__restrict __resultbuf,
+         char *__restrict __buffer, size_t __buflen,
+         struct group **__restrict __result);
+
+
+
+
+
+extern int getgrnam_r (__const char *__restrict __name,
+         struct group *__restrict __resultbuf,
+         char *__restrict __buffer, size_t __buflen,
+         struct group **__restrict __result);
+# 167 "/usr/include/grp.h" 3 4
+extern int fgetgrent_r (FILE *__restrict __stream,
+   struct group *__restrict __resultbuf,
+   char *__restrict __buffer, size_t __buflen,
+   struct group **__restrict __result);
+# 179 "/usr/include/grp.h" 3 4
+# 1 "/usr/include/clang/3.0/include/stddef.h" 1 3 4
+# 180 "/usr/include/grp.h" 2 3 4
+
+
+extern int setgroups (size_t __n, __const __gid_t *__groups) __attribute__ ((__nothrow__ ));
+# 192 "/usr/include/grp.h" 3 4
+extern int getgrouplist (__const char *__user, __gid_t __group,
+    __gid_t *__groups, int *__ngroups);
+# 203 "/usr/include/grp.h" 3 4
+extern int initgroups (__const char *__user, __gid_t __group);
+# 24 "chroot.c" 2
 
 # 1 "./system.h" 1
 # 19 "./system.h"
@@ -2909,80 +3204,7 @@ extern int getlogin_r (char *__name, size_t __name_len) __attribute__ ((__nonnul
 
 
 extern int setlogin (__const char *__name) __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (1)));
-# 894 "/usr/include/unistd.h" 3 4
-# 1 "./getopt.h" 1 3 4
-# 23 "./getopt.h" 3 4
-# 23 "./getopt.h" 3
-
-
-
-
-
-
-
-
-# 1 "/usr/include/getopt.h" 1 3 4
-# 59 "/usr/include/getopt.h" 3 4
-extern char *optarg;
-# 73 "/usr/include/getopt.h" 3 4
-extern int optind;
-
-
-
-
-extern int opterr;
-
-
-
-extern int optopt;
-# 152 "/usr/include/getopt.h" 3 4
-extern int getopt (int ___argc, char *const *___argv, const char *__shortopts)
-       __attribute__ ((__nothrow__ ));
-# 32 "./getopt.h" 2 3
-# 147 "./getopt.h" 3
-extern char *rpl_optarg;
-# 161 "./getopt.h" 3
-extern int rpl_optind;
-
-
-
-
-extern int rpl_opterr;
-
-
-
-extern int rpl_optopt;
-# 195 "./getopt.h" 3
-struct rpl_option
-{
-  const char *name;
-
-
-  int has_arg;
-  int *flag;
-  int val;
-};
-# 240 "./getopt.h" 3
-extern int rpl_getopt (int ___argc, char *const *___argv, const char *__shortopts)
-       __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (2, 3)));
-
-
-extern int rpl_getopt_long (int ___argc, char * *___argv,
-                        const char *__shortopts,
-                        const struct rpl_option *__longopts, int *__longind)
-       __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (2, 3)));
-extern int rpl_getopt_long_only (int ___argc, char * *___argv,
-                             const char *__shortopts,
-                             const struct rpl_option *__longopts, int *__longind)
-       __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (2, 3)));
-# 895 "/usr/include/unistd.h" 2 3 4
-
-
-
-
-
-
-
+# 902 "/usr/include/unistd.h" 3 4
 extern int gethostname (char *__name, size_t __len) __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (1)));
 
 
@@ -3551,25 +3773,6 @@ extern char *strptime (__const char *__restrict __s,
 
 
 
-# 1 "/usr/include/xlocale.h" 1 3 4
-# 28 "/usr/include/xlocale.h" 3 4
-typedef struct __locale_struct
-{
-
-  struct __locale_data *__locales[13];
-
-
-  const unsigned short int *__ctype_b;
-  const int *__ctype_tolower;
-  const int *__ctype_toupper;
-
-
-  const char *__names[13];
-} *__locale_t;
-
-
-typedef __locale_t locale_t;
-# 216 "/usr/include/time.h" 2 3 4
 
 extern size_t strftime_l (char *__restrict __s, size_t __maxsize,
      __const char *__restrict __format,
@@ -5564,108 +5767,6 @@ timespectod (struct timespec a)
 void gettime (struct timespec *);
 int settime (struct timespec const *);
 # 146 "./system.h" 2
-
-# 1 "./ctype.h" 1
-# 29 "./ctype.h"
-# 29 "./ctype.h" 3
-
-
-
-
-
-# 1 "/usr/include/ctype.h" 1 3 4
-# 48 "/usr/include/ctype.h" 3 4
-enum
-{
-  _ISupper = ((0) < 8 ? ((1 << (0)) << 8) : ((1 << (0)) >> 8)),
-  _ISlower = ((1) < 8 ? ((1 << (1)) << 8) : ((1 << (1)) >> 8)),
-  _ISalpha = ((2) < 8 ? ((1 << (2)) << 8) : ((1 << (2)) >> 8)),
-  _ISdigit = ((3) < 8 ? ((1 << (3)) << 8) : ((1 << (3)) >> 8)),
-  _ISxdigit = ((4) < 8 ? ((1 << (4)) << 8) : ((1 << (4)) >> 8)),
-  _ISspace = ((5) < 8 ? ((1 << (5)) << 8) : ((1 << (5)) >> 8)),
-  _ISprint = ((6) < 8 ? ((1 << (6)) << 8) : ((1 << (6)) >> 8)),
-  _ISgraph = ((7) < 8 ? ((1 << (7)) << 8) : ((1 << (7)) >> 8)),
-  _ISblank = ((8) < 8 ? ((1 << (8)) << 8) : ((1 << (8)) >> 8)),
-  _IScntrl = ((9) < 8 ? ((1 << (9)) << 8) : ((1 << (9)) >> 8)),
-  _ISpunct = ((10) < 8 ? ((1 << (10)) << 8) : ((1 << (10)) >> 8)),
-  _ISalnum = ((11) < 8 ? ((1 << (11)) << 8) : ((1 << (11)) >> 8))
-};
-# 81 "/usr/include/ctype.h" 3 4
-extern __const unsigned short int **__ctype_b_loc (void)
-     __attribute__ ((__nothrow__ )) __attribute__ ((__const));
-extern __const __int32_t **__ctype_tolower_loc (void)
-     __attribute__ ((__nothrow__ )) __attribute__ ((__const));
-extern __const __int32_t **__ctype_toupper_loc (void)
-     __attribute__ ((__nothrow__ )) __attribute__ ((__const));
-# 112 "/usr/include/ctype.h" 3 4
-extern int isalnum (int) __attribute__ ((__nothrow__ ));
-extern int isalpha (int) __attribute__ ((__nothrow__ ));
-extern int iscntrl (int) __attribute__ ((__nothrow__ ));
-extern int isdigit (int) __attribute__ ((__nothrow__ ));
-extern int islower (int) __attribute__ ((__nothrow__ ));
-extern int isgraph (int) __attribute__ ((__nothrow__ ));
-extern int isprint (int) __attribute__ ((__nothrow__ ));
-extern int ispunct (int) __attribute__ ((__nothrow__ ));
-extern int isspace (int) __attribute__ ((__nothrow__ ));
-extern int isupper (int) __attribute__ ((__nothrow__ ));
-extern int isxdigit (int) __attribute__ ((__nothrow__ ));
-
-
-
-extern int tolower (int __c) __attribute__ ((__nothrow__ ));
-
-
-extern int toupper (int __c) __attribute__ ((__nothrow__ ));
-# 138 "/usr/include/ctype.h" 3 4
-extern int isblank (int) __attribute__ ((__nothrow__ ));
-
-
-
-
-
-
-extern int isctype (int __c, int __mask) __attribute__ ((__nothrow__ ));
-
-
-
-
-
-
-extern int isascii (int __c) __attribute__ ((__nothrow__ ));
-
-
-
-extern int toascii (int __c) __attribute__ ((__nothrow__ ));
-
-
-
-extern int _toupper (int) __attribute__ ((__nothrow__ ));
-extern int _tolower (int) __attribute__ ((__nothrow__ ));
-# 273 "/usr/include/ctype.h" 3 4
-extern int isalnum_l (int, __locale_t) __attribute__ ((__nothrow__ ));
-extern int isalpha_l (int, __locale_t) __attribute__ ((__nothrow__ ));
-extern int iscntrl_l (int, __locale_t) __attribute__ ((__nothrow__ ));
-extern int isdigit_l (int, __locale_t) __attribute__ ((__nothrow__ ));
-extern int islower_l (int, __locale_t) __attribute__ ((__nothrow__ ));
-extern int isgraph_l (int, __locale_t) __attribute__ ((__nothrow__ ));
-extern int isprint_l (int, __locale_t) __attribute__ ((__nothrow__ ));
-extern int ispunct_l (int, __locale_t) __attribute__ ((__nothrow__ ));
-extern int isspace_l (int, __locale_t) __attribute__ ((__nothrow__ ));
-extern int isupper_l (int, __locale_t) __attribute__ ((__nothrow__ ));
-extern int isxdigit_l (int, __locale_t) __attribute__ ((__nothrow__ ));
-
-extern int isblank_l (int, __locale_t) __attribute__ ((__nothrow__ ));
-
-
-
-extern int __tolower_l (int __c, __locale_t __l) __attribute__ ((__nothrow__ ));
-extern int tolower_l (int __c, __locale_t __l) __attribute__ ((__nothrow__ ));
-
-
-extern int __toupper_l (int __c, __locale_t __l) __attribute__ ((__nothrow__ ));
-extern int toupper_l (int __c, __locale_t __l) __attribute__ ((__nothrow__ ));
-# 35 "./ctype.h" 2 3
-# 148 "./system.h" 2
 # 161 "./system.h"
 static inline unsigned char to_uchar (char ch) { return ch; }
 
@@ -6475,49 +6576,310 @@ stzncpy (char *__restrict dest, char const *__restrict src, size_t len)
   *dest = 0;
   return dest;
 }
-# 21 "true.c" 2
-# 35 "true.c"
+# 26 "chroot.c" 2
+# 1 "./error.h" 1
+# 42 "./error.h"
+extern void error (int __status, int __errnum, const char *__format, ...)
+     __attribute__ ((__format__ (__printf__, 3, 4)));
+
+extern void error_at_line (int __status, int __errnum, const char *__fname,
+                           unsigned int __lineno, const char *__format, ...)
+     __attribute__ ((__format__ (__printf__, 5, 6)));
+
+
+
+
+extern void (*error_print_progname) (void);
+
+
+extern unsigned int error_message_count;
+
+
+
+extern int error_one_per_line;
+# 27 "chroot.c" 2
+# 1 "./quote.h" 1
+# 23 "./quote.h"
+extern struct quoting_options quote_quoting_options;
+
+
+
+char const *quote_n (int n, char const *name);
+
+
+
+char const *quote (char const *name);
+# 28 "chroot.c" 2
+# 1 "./userspec.h" 1
+
+
+
+
+
+const char *
+parse_user_spec (const char *spec_arg, uid_t *uid, gid_t *gid,
+                 char **username_arg, char **groupname_arg);
+# 29 "chroot.c" 2
+# 1 "./xstrtol.h" 1
+# 23 "./xstrtol.h"
+# 1 "./inttypes.h" 1
+# 25 "./inttypes.h"
+# 25 "./inttypes.h" 3
+# 24 "./xstrtol.h" 2
+
+
+enum strtol_error
+  {
+    LONGINT_OK = 0,
+
+
+
+    LONGINT_OVERFLOW = 1,
+    LONGINT_INVALID_SUFFIX_CHAR = 2,
+
+    LONGINT_INVALID_SUFFIX_CHAR_WITH_OVERFLOW = (LONGINT_INVALID_SUFFIX_CHAR
+                                                 | LONGINT_OVERFLOW),
+    LONGINT_INVALID = 4
+  };
+typedef enum strtol_error strtol_error;
+
+
+
+
+strtol_error xstrtol (const char *, char **, int, long int *, const char *);
+strtol_error xstrtoul (const char *, char **, int, unsigned long int *, const char *);
+strtol_error xstrtoimax (const char *, char **, int, intmax_t *, const char *);
+strtol_error xstrtoumax (const char *, char **, int, uintmax_t *, const char *);
+
+
+strtol_error xstrtoll (const char *, char **, int, long long int *, const char *);
+strtol_error xstrtoull (const char *, char **, int, unsigned long long int *, const char *);
+# 69 "./xstrtol.h"
+void __attribute__ ((__noreturn__)) xstrtol_fatal (enum strtol_error,
+                              int, char, struct rpl_option const *,
+                              char const *);
+# 30 "chroot.c" 2
+# 40 "chroot.c"
+enum
+{
+  GROUPS = (127*2 +1) + 1,
+  USERSPEC
+};
+
+static struct rpl_option const long_opts[] =
+{
+  {"groups", 1, ((void*)0), GROUPS},
+  {"userspec", 1, ((void*)0), USERSPEC},
+  {"help", 0, ((void*)0), GETOPT_HELP_CHAR},
+  {"version", 0, ((void*)0), GETOPT_VERSION_CHAR},
+  {((void*)0), 0, ((void*)0), 0}
+};
+# 71 "chroot.c"
+static int
+set_additional_groups (char const *groups)
+{
+  gid_t *gids = ((void*)0);
+  size_t n_gids_allocated = 0;
+  size_t n_gids = 0;
+  char *buffer = xstrdup (groups);
+  char const *tmp;
+  int ret = 0;
+
+  for (tmp = strtok (buffer, ","); tmp; tmp = strtok (((void*)0), ","))
+    {
+      struct group *g;
+      unsigned long int value;
+
+      if (xstrtoul (tmp, ((void*)0), 10, &value, "") == LONGINT_OK && value <= ((gid_t) (! (! ((gid_t) 0 < (gid_t) -1)) ? (gid_t) -1 : ((((gid_t) 1 << (sizeof (gid_t) * 8 - 2)) - 1) * 2 + 1))))
+        g = getgrgid (value);
+      else
+        {
+          g = getgrnam (tmp);
+          if (g != ((void*)0))
+            value = g->gr_gid;
+        }
+
+      if (g == ((void*)0))
+        {
+          error (0, (*__errno_location ()), gettext ("invalid group %s"), quote (tmp));
+          ret = -1;
+          continue;
+        }
+
+      if (n_gids == n_gids_allocated)
+        gids = ((void) (!!sizeof (struct { unsigned int _gl_verify_error_if_negative: (sizeof *(gids) != 1) ? 1 : -1; })), x2nrealloc (gids, &n_gids_allocated, sizeof *(gids)));
+      gids[n_gids++] = value;
+    }
+
+  if (ret == 0 && n_gids == 0)
+    {
+      error (0, 0, gettext ("invalid group list %s"), quote (groups));
+      ret = -1;
+    }
+
+  if (ret == 0)
+    {
+      ret = setgroups (n_gids, gids);
+      if (ret)
+        error (0, (*__errno_location ()), gettext ("failed to set additional groups"));
+    }
+
+  free (buffer);
+  free (gids);
+  return ret;
+}
+
 void
 usage (int status)
 {
-  printf (gettext ("Usage: %s [ignored command line arguments]\n  or:  %s OPTION\n"),
+  if (status != 0)
+    emit_try_help ();
+  else
+    {
+      printf (gettext ("Usage: %s [OPTION] NEWROOT [COMMAND [ARG]...]\n  or:  %s OPTION\n"), program_name, program_name);
 
 
 
-          program_name, program_name);
-  printf ("%s\n\n",
-          gettext (0 == 0 ? "Exit with a status code indicating success." : "Exit with a status code indicating failure."));
+
+      fputs_unlocked (gettext ("Run COMMAND with root directory set to NEWROOT.\n\n"),stdout);
 
 
-  fputs_unlocked (gettext ("      --help     display this help and exit\n"),stdout);
-  fputs_unlocked (gettext ("      --version  output version information and exit\n"),stdout);
-  printf (gettext ("\n" "NOTE: your shell may have its own version of %s, which usually supersedes\n" "the version described here.  Please refer to your shell's documentation\n" "for details about the options it supports.\n"), "true");
-  emit_ancillary_info ();
+
+
+      fputs_unlocked (gettext ("  --userspec=USER:GROUP  specify user and group (ID or name) to use\n  --groups=G_LIST        specify supplementary groups as g1,g2,..,gN\n"),stdout);
+
+
+
+
+      fputs_unlocked (gettext ("      --help     display this help and exit\n"),stdout);
+      fputs_unlocked (gettext ("      --version  output version information and exit\n"),stdout);
+      fputs_unlocked (gettext ("\nIf no command is given, run '${SHELL} -i' (default: '/bin/sh -i').\n"),stdout);
+
+
+
+      emit_ancillary_info ();
+    }
   exit (status);
 }
 
 int
 main (int argc, char **argv)
 {
+  int c;
+  char const *userspec = ((void*)0);
+  char const *groups = ((void*)0);
 
+                                ;
+  set_program_name (argv[0]);
+  setlocale (__LC_ALL, "");
+  bindtextdomain ("coreutils", "/usr/local/share/locale");
+  textdomain ("coreutils");
 
-  if (argc == 2)
+  initialize_exit_failure (EXIT_CANCELED);
+  atexit (close_stdout);
+
+  while ((c = rpl_getopt_long (argc, argv, "+", long_opts, ((void*)0))) != -1)
     {
-                                    ;
-      set_program_name (argv[0]);
-      setlocale (__LC_ALL, "");
-      bindtextdomain ("coreutils", "/usr/local/share/locale");
-      textdomain ("coreutils");
+      switch (c)
+        {
+        case USERSPEC:
+          userspec = rpl_optarg;
+          break;
 
-      atexit (close_stdout);
+        case GROUPS:
+          groups = rpl_optarg;
+          break;
 
-      if ((strcmp (argv[1], "--help") == 0))
-        usage (0);
+        case GETOPT_HELP_CHAR: usage (0); break;;
 
-      if ((strcmp (argv[1], "--version") == 0))
-        version_etc (stdout, "true", "GNU coreutils", Version, ("Jim Meyering"),
-                     (char *) ((void*)0));
+        case GETOPT_VERSION_CHAR: version_etc (stdout, "chroot", "GNU coreutils", Version, ("Roland McGrath"), (char *) ((void*)0)); exit (0); break;;
+
+        default:
+          usage (EXIT_CANCELED);
+        }
     }
 
-  exit (0);
+  if (argc <= rpl_optind)
+    {
+      error (0, 0, gettext ("missing operand"));
+      usage (EXIT_CANCELED);
+    }
+
+  if (chroot (argv[rpl_optind]) != 0)
+    error (EXIT_CANCELED, (*__errno_location ()), gettext ("cannot change root directory to %s"),
+           argv[rpl_optind]);
+
+  if (chdir ("/"))
+    error (EXIT_CANCELED, (*__errno_location ()), gettext ("cannot chdir to root directory"));
+
+  if (argc == rpl_optind + 1)
+    {
+
+      char *shell = getenv ("SHELL");
+      if (shell == ((void*)0))
+        shell = bad_cast ("/bin/sh");
+      argv[0] = shell;
+      argv[1] = bad_cast ("-i");
+      argv[2] = ((void*)0);
+    }
+  else
+    {
+
+      argv += rpl_optind + 1;
+    }
+
+  _Bool fail = 0;
+
+
+
+  if (userspec)
+    {
+      uid_t uid = -1;
+      gid_t gid = -1;
+      char *user;
+      char *group;
+      char const *err = parse_user_spec (userspec, &uid, &gid, &user, &group);
+
+      if (err)
+        error (EXIT_CANCELED, (*__errno_location ()), "%s", err);
+
+      free (user);
+      free (group);
+
+      if (groups && set_additional_groups (groups))
+        fail = 1;
+
+      if (gid != (gid_t) -1 && setgid (gid))
+        {
+          error (0, (*__errno_location ()), gettext ("failed to set group-ID"));
+          fail = 1;
+        }
+
+      if (uid != (uid_t) -1 && setuid (uid))
+        {
+          error (0, (*__errno_location ()), gettext ("failed to set user-ID"));
+          fail = 1;
+        }
+    }
+  else
+    {
+
+
+
+
+      if (groups && set_additional_groups (groups))
+        fail = 1;
+    }
+
+  if (fail)
+    exit (EXIT_CANCELED);
+
+
+  execvp (argv[0], argv);
+
+  {
+    int exit_status = ((*__errno_location ()) == 2 ? EXIT_ENOENT : EXIT_CANNOT_INVOKE);
+    error (0, (*__errno_location ()), gettext ("failed to run command %s"), quote (argv[0]));
+    exit (exit_status);
+  }
 }
