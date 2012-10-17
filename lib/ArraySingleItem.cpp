@@ -8,8 +8,8 @@
 namespace Canal {
 namespace Array {
 
-SingleItem::SingleItem(const Environment &environment)
-    : Domain(environment), mValue(NULL), mSize(NULL)
+SingleItem::SingleItem(const Environment &environment, Domain* size, Domain* value)
+    : Domain(environment), mValue(value), mSize(size)
 {
 }
 
@@ -40,7 +40,19 @@ SingleItem::clone() const
 SingleItem *
 SingleItem::cloneCleaned() const
 {
-    return new SingleItem(mEnvironment);
+    SingleItem* res = new SingleItem(*this);
+
+    //setBottom on value
+    AccuracyDomain* value = dynCast<AccuracyDomain*>(res->mValue);
+    CANAL_ASSERT_MSG(value != NULL, "Value has to be of type AccuracyDomain in order to call setBottom on it.");
+    value->setBottom();
+
+    //setBottom on size
+    AccuracyDomain* size = dynCast<AccuracyDomain*>(res->mSize);
+    CANAL_ASSERT_MSG(size != NULL, "Size has to be of type AccuracyDomain in order to call setBottom on it.");
+    size->setBottom();
+
+    return res;
 }
 
 bool
@@ -282,6 +294,12 @@ SingleItem::setItem(uint64_t offset, const Domain &value)
 {
     assertOffsetFitsToArray(offset, *mSize);
     mValue->merge(value);
+}
+
+void
+SingleItem::setZero(const llvm::Value *instruction)
+{
+    mValue->setZero(instruction);
 }
 
 } // namespace Array

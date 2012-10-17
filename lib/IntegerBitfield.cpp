@@ -731,5 +731,12 @@ Bitfield::setTop()
 #endif
 }
 
+void
+Bitfield::setZero(const llvm::Value *instruction)
+{
+    mZeroes = ~0;
+    mOnes = 0;
+}
+
 } // namespace Integer
 } // namespace Canal
