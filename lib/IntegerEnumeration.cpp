@@ -774,5 +774,13 @@ Enumeration::applyOperation(const Domain &a,
     }
 }
 
+void
+Enumeration::setZero(const llvm::Value *instruction)
+{
+    mTop = false;
+    mValues.clear();
+    mValues.insert(llvm::APInt::getNullValue(mBitWidth));
+}
+
 } // namespace Integer
 } // namespace Canal

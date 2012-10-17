@@ -19,6 +19,9 @@ public:
     Interval(const Environment &environment,
              const llvm::fltSemantics &semantics);
 
+    Interval(const Environment &environment,
+             const llvm::APFloat &number);
+
     // Compares a interval with another interval.
     // @returns
     //  -1 - one of the intervals is empty
@@ -58,6 +61,9 @@ public: // Implementation of Domain.
     // Implementation of Domain::matchesString().
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
+
+    /// Implementation of Domain::setZero()
+    virtual void setZero(const llvm::Value *instruction);
 
 public: // Implementation of AccuracyDomain.
     // Implementation of AccuracyDomain::accuracy().

@@ -317,5 +317,17 @@ InclusionBased::setTop()
     mTargets.clear();
 }
 
+void
+InclusionBased::setZero(const llvm::Value *instruction)
+{
+    mTop = false;
+    mTargets.clear();
+    addTarget(Pointer::Target::Constant,
+                            instruction,
+                            NULL,
+                            std::vector<Domain*>(),
+                            NULL);
+}
+
 } // namespace Pointer
 } // namespace Canal

@@ -49,7 +49,17 @@ Constructors::create(const llvm::Type &type) const
 
     if (type.isArrayTy() || type.isVectorTy())
     {
-        return new Array::SingleItem(mEnvironment);
+        uint64_t size;
+        if (type.isArrayTy()) {
+            const llvm::ArrayType &arrayType = llvm::cast<llvm::ArrayType>(type);
+            size = arrayType.getNumElements();
+        }
+        else {
+            const llvm::VectorType &vectorType = llvm::cast<llvm::VectorType>(type);
+            size = vectorType.getNumElements();
+        }
+        Domain* value = this->create(*type.getContainedType(0));
+        return new Array::ExactSize(mEnvironment, size, value);
     }
 
     if (type.isStructTy())
@@ -57,14 +67,11 @@ Constructors::create(const llvm::Type &type) const
         const llvm::StructType &structType =
             llvmCast<llvm::StructType>(type);
 
-        Structure *structure = new Structure(mEnvironment);
+        std::vector<Domain*> members;
+        for (unsigned i = 0; i < structType.getNumElements(); i ++)
+            members.push_back(create(*structType.getElementType(i)));
 
-        llvm::StructType::element_iterator it = structType.element_begin(),
-            itend = structType.element_end();
-
-        for (; it != itend; ++it)
-            structure->mMembers.push_back(create(**it));
-
+        Structure *structure = new Structure(mEnvironment, members);
         return structure;
     }
 
@@ -77,7 +84,9 @@ Constructors::create(const llvm::Constant &value,
 {
     if (llvm::isa<llvm::ConstantInt>(value))
     {
-        const llvm::ConstantInt &intValue = llvmCast<llvm::ConstantInt>(value);
+        const llvm::ConstantInt &intValue =
+            llvmCast<llvm::ConstantInt>(value);
+
         const llvm::APInt &i = intValue.getValue();
         return new Integer::Container(mEnvironment, i);
     }
@@ -121,12 +130,21 @@ Constructors::create(const llvm::Constant &value,
 
     if (llvm::isa<llvm::ConstantFP>(value))
     {
-        CANAL_NOT_IMPLEMENTED();
+        const llvm::ConstantFP &fp = llvmCast<llvm::ConstantFP>(value);
+
+        const llvm::APFloat &f = fp.getValueAPF();
+        return new Float::Interval(mEnvironment, f);
     }
 
     if (llvm::isa<llvm::ConstantStruct>(value))
     {
-        CANAL_NOT_IMPLEMENTED();
+        const llvm::ConstantStruct &structValue = llvmCast<llvm::ConstantStruct>(value);
+        uint64_t elementCount = structValue.getType()->getNumElements();
+        std::vector<Domain*> members;
+        for (uint64_t i = 0; i < elementCount; ++i)
+            members.push_back(create(*structValue.getOperand(i), state));
+
+        return new Structure(mEnvironment, members);
     }
 
     if (llvm::isa<llvm::ConstantVector>(value))
@@ -138,16 +156,19 @@ Constructors::create(const llvm::Constant &value,
     {
         const llvm::ConstantArray &arrayValue = llvmCast<llvm::ConstantArray>(value);
         uint64_t elementCount = arrayValue.getType()->getNumElements();
-        Array::ExactSize *result = new Array::ExactSize(mEnvironment);
-        for (unsigned i = 0; i < elementCount; ++i)
-            result->mValues.push_back(create(*arrayValue.getOperand(i), state));
+        std::vector<Domain*> values;
+        for (uint64_t i = 0; i < elementCount; ++i)
+            values.push_back(create(*arrayValue.getOperand(i), state));
 
-        return result;
+        return new Array::ExactSize(mEnvironment, values);
     }
 
     if (llvm::isa<llvm::ConstantAggregateZero>(value))
     {
-        CANAL_NOT_IMPLEMENTED();
+        const llvm::Type *type = value.getType();
+        Domain *result = Constructors::create(*type);
+        result->setZero(&value);
+        return result;
     }
 
     if (llvm::isa<llvm::Function>(value))

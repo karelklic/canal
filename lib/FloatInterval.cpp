@@ -16,6 +16,15 @@ Interval::Interval(const Environment &environment,
 {
 }
 
+Interval::Interval(const Environment &environment, const llvm::APFloat &number)
+    : Domain(environment),
+      mEmpty(false),
+      mTop(false),
+      mFrom(number),
+      mTo(number)
+{
+}
+
 int
 Interval::compare(const Interval &value,
                   llvm::CmpInst::Predicate predicate) const
@@ -296,6 +305,14 @@ Interval::setTop()
 {
     mEmpty = false;
     mTop = true;
+}
+
+void
+Interval::setZero(const llvm::Value *instruction)
+{
+    mEmpty = false;
+    mFrom = llvm::APFloat::getZero(mFrom.getSemantics());
+    mTo = llvm::APFloat::getZero(mTo.getSemantics());
 }
 
 

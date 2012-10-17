@@ -22,7 +22,7 @@ public:
     Domain *mSize;
 
 public:
-    SingleItem(const Environment &environment);
+    SingleItem(const Environment &environment, Domain* size, Domain* value);
     SingleItem(const SingleItem &singleItem);
     virtual ~SingleItem();
 
@@ -44,6 +44,9 @@ public: // Implementation of Domain.
     /// Implementation of Domain::matchesString().
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
+
+    /// Implementation of Domain::setZero()
+    virtual void setZero(const llvm::Value *instruction);
 
     /// Implementation of Domain::add().
     virtual void add(const Domain &a, const Domain &b);

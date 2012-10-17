@@ -15,7 +15,8 @@ public:
     std::vector<Domain*> mValues;
 
 public:
-    ExactSize(const Environment &environment);
+    ExactSize(const Environment &environment, const uint64_t size, const Domain* value);
+    ExactSize(const Environment &environment, const std::vector<Domain*> values);
     ExactSize(const ExactSize &exactSize);
     virtual ~ExactSize();
 
@@ -39,6 +40,9 @@ public: // Implementation of Domain.
     /// Implementation of Domain::matchesString().
     virtual bool matchesString(const std::string &text,
                                std::string &rationale) const;
+
+    /// Implementation of Domain::setZero()
+    virtual void setZero(const llvm::Value *instruction);
 
     /// Implementation of Domain::add().
     virtual void add(const Domain &a, const Domain &b);
