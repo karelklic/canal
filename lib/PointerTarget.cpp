@@ -1,6 +1,7 @@
 #include "PointerTarget.h"
 #include "ArrayInterface.h"
 #include "IntegerContainer.h"
+#include "IntegerEnumeration.h"
 #include "SlotTracker.h"
 #include "State.h"
 #include "Utils.h"
@@ -258,22 +259,34 @@ Target::dereference(const State &state) const
     result.push_back(state.findBlock(*mTarget));
     CANAL_ASSERT(result[0]);
 
-    std::vector<Domain*>::const_iterator itOffsets = mOffsets.begin();
-    for (; itOffsets != mOffsets.end(); ++itOffsets)
+    if (!mOffsets.empty())
     {
-        std::vector<Domain*> nextLevelResult;
-        std::vector<Domain*>::const_iterator itItems = result.begin();
-        for (; itItems != result.end(); ++itItems)
-        {
-            std::vector<Domain*> items;
-            Array::Interface &array = dynCast<Array::Interface&>(**itItems);
-            items = array.getItem(**itOffsets);
-            nextLevelResult.insert(nextLevelResult.end(),
-                                   items.begin(),
-                                   items.end());
-        }
+        const Integer::Container &first =
+            dynCast<const Integer::Container&>(*mOffsets[0]);
 
-        result.swap(nextLevelResult);
+        CANAL_ASSERT_MSG(first.getEnumeration().mValues.size() == 1,
+                         "First offset is expected to be zero!");
+
+        CANAL_ASSERT_MSG(first.getEnumeration().mValues.begin()->isMinValue(),
+                         "First offset is expected to be zero!");
+
+        std::vector<Domain*>::const_iterator itOffsets = mOffsets.begin() + 1;
+        for (; itOffsets != mOffsets.end(); ++itOffsets)
+        {
+            std::vector<Domain*> nextLevelResult;
+            std::vector<Domain*>::const_iterator itItems = result.begin();
+            for (; itItems != result.end(); ++itItems)
+            {
+                std::vector<Domain*> items;
+                Array::Interface &array = dynCast<Array::Interface&>(**itItems);
+                items = array.getItem(**itOffsets);
+                nextLevelResult.insert(nextLevelResult.end(),
+                                       items.begin(),
+                                       items.end());
+            }
+
+            result.swap(nextLevelResult);
+        }
     }
 
     return result;

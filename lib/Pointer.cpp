@@ -109,27 +109,32 @@ InclusionBased *
 InclusionBased::getElementPtr(const std::vector<Domain*> &offsets,
                               const llvm::Type &type) const
 {
+    CANAL_ASSERT_MSG(!offsets.empty(),
+                     "getElementPtr must be called with some offsets.");
+
     InclusionBased *result = new InclusionBased(*this, type);
 
+    // Iterate over all targets, and adjust the target offsets.
     PlaceTargetMap::iterator targetIt = result->mTargets.begin();
     for (; targetIt != result->mTargets.end(); ++targetIt)
     {
+        std::vector<Domain*> &targetOffsets = targetIt->second->mOffsets;
+        if (!targetOffsets.empty())
+        {
+            delete targetOffsets.back();
+            targetOffsets.pop_back();
+        }
+
         std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
         for (; offsetIt != offsets.end(); ++offsetIt)
-        {
-            if (targetIt == result->mTargets.begin())
-                targetIt->second->mOffsets.push_back(*offsetIt);
-            else
-                targetIt->second->mOffsets.push_back((*offsetIt)->clone());
-        }
+            targetOffsets.push_back((*offsetIt)->clone());
     }
 
-    if (result->mTargets.empty())
-    {
-        std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
-        for (; offsetIt != offsets.end(); ++offsetIt)
-            delete *offsetIt;
-    }
+    // Delete the offsets, because this method takes ownership of them
+    // and it no longer needs them.
+    std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
+    for (; offsetIt != offsets.end(); ++offsetIt)
+        delete *offsetIt;
 
     return result;
 }
