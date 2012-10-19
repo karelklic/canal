@@ -1007,7 +1007,10 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
     Pointer::InclusionBased &sourcePointer =
         dynCast<Pointer::InclusionBased&>(*source);
 
-    Domain *resultPointer = sourcePointer.bitcast(*destinationType);
+    const llvm::PointerType &destPointerType =
+        llvmCast<const llvm::PointerType>(*destinationType);
+
+    Domain *resultPointer = sourcePointer.bitcast(*destPointerType.getElementType());
     state.addFunctionVariable(instruction, resultPointer);
 }
 
