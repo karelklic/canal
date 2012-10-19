@@ -65,8 +65,11 @@ InclusionBased::addTarget(Target::Type type,
     if (mTop)
         return;
 
-    Target *pointerTarget = new Target(mEnvironment, type, target,
-                                       offsets, numericOffset);
+    Target *pointerTarget = new Target(mEnvironment,
+                                       type,
+                                       target,
+                                       offsets,
+                                       numericOffset);
 
     PlaceTargetMap::iterator it = mTargets.find(place);
     if (it != mTargets.end())

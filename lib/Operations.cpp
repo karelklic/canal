@@ -734,6 +734,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
     const llvm::Type *type = instruction.getAllocatedType();
     CANAL_ASSERT(type);
     Domain *value = mConstructors.create(*type);
+    std::vector<Domain*> offsets;
     if (instruction.isArrayAllocation())
     {
         const llvm::Value *arraySize = instruction.getArraySize();
@@ -749,8 +750,16 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
             return;
         }
 
-        Array::SingleItem *array = new Array::SingleItem(mEnvironment, abstractSize->clone(), value);
+        Array::SingleItem *array = new Array::SingleItem(mEnvironment,
+                                                         abstractSize->clone(),
+                                                         value);
+
         value = array;
+
+        // Set pointer offset.
+        Domain *zero = new Integer::Container(mEnvironment, llvm::APInt(32, 0));
+        offsets.push_back(zero);
+        offsets.push_back(zero->clone());
     }
 
     state.addFunctionBlock(instruction, value);
@@ -760,7 +769,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
     pointer->addTarget(Pointer::Target::Block,
                        &instruction,
                        &instruction,
-                       std::vector<Domain*>(),
+                       offsets,
                        NULL);
 
     state.addFunctionVariable(instruction, pointer);
