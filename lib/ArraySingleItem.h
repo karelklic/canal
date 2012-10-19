@@ -22,8 +22,12 @@ public:
     Domain *mSize;
 
 public:
-    SingleItem(const Environment &environment, Domain* size, Domain* value);
+    SingleItem(const Environment &environment,
+               Domain *size,
+               Domain *value);
+
     SingleItem(const SingleItem &singleItem);
+
     virtual ~SingleItem();
 
 public: // Implementation of Domain.

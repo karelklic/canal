@@ -13,8 +13,11 @@ public:
     std::vector<Domain*> mMembers;
 
 public:
-    Structure(const Environment &environment, const std::vector<Domain*> members);
+    Structure(const Environment &environment,
+              const std::vector<Domain*> members);
+
     Structure(const Structure &structure);
+
     virtual ~Structure();
 
 public: // Implementation of Domain.

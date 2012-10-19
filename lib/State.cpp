@@ -57,9 +57,11 @@ equalMaps(const PlaceValueMap &map1, const PlaceValueMap &map2)
 	PlaceValueMap::const_iterator it1 = map1.find(it2->first);
 	if (it1 == map1.end())
             return false;
+
 	else if (*it1->second != *it2->second)
             return false;
     }
+
     return true;
 }
 
@@ -69,24 +71,31 @@ State::operator==(const State &state) const
     // Quickly compare sizes.
     if (mGlobalVariables.size() != state.mGlobalVariables.size())
         return false;
+
     if (mGlobalBlocks.size() != state.mGlobalBlocks.size())
         return false;
+
     if (mFunctionVariables.size() != state.mFunctionVariables.size())
         return false;
+
     if (mFunctionBlocks.size() != state.mFunctionBlocks.size())
         return false;
 
     if (!equalMaps(mGlobalVariables, state.mGlobalVariables))
         return false;
+
     if (!equalMaps(mGlobalBlocks, state.mGlobalBlocks))
         return false;
+
     if (!equalMaps(mFunctionVariables, state.mFunctionVariables))
         return false;
+
     if (!equalMaps(mFunctionBlocks, state.mFunctionBlocks))
         return false;
 
     if (!mReturnedValue xor !state.mReturnedValue)
         return false;
+
     if (mReturnedValue && *mReturnedValue != *state.mReturnedValue)
         return false;
 
@@ -104,8 +113,10 @@ clearMap(PlaceValueMap &map)
 {
     PlaceValueMap::const_iterator it = map.begin(),
         itend = map.end();
+
     for (; it != itend; ++it)
         delete it->second;
+
     map.clear();
 }
 

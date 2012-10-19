@@ -8,7 +8,9 @@
 namespace Canal {
 namespace Array {
 
-SingleItem::SingleItem(const Environment &environment, Domain* size, Domain* value)
+SingleItem::SingleItem(const Environment &environment,
+                       Domain* size,
+                       Domain* value)
     : Domain(environment), mValue(value), mSize(size)
 {
 }
@@ -44,12 +46,18 @@ SingleItem::cloneCleaned() const
 
     //setBottom on value
     AccuracyDomain* value = dynCast<AccuracyDomain*>(res->mValue);
-    CANAL_ASSERT_MSG(value != NULL, "Value has to be of type AccuracyDomain in order to call setBottom on it.");
+    CANAL_ASSERT_MSG(value,
+                     "Value has to be of type AccuracyDomain "
+                     "in order to call setBottom on it.");
+
     value->setBottom();
 
     //setBottom on size
     AccuracyDomain* size = dynCast<AccuracyDomain*>(res->mSize);
-    CANAL_ASSERT_MSG(size != NULL, "Size has to be of type AccuracyDomain in order to call setBottom on it.");
+    CANAL_ASSERT_MSG(size,
+                     "Size has to be of type AccuracyDomain "
+                     "in order to call setBottom on it.");
+
     size->setBottom();
 
     return res;
@@ -66,11 +74,13 @@ SingleItem::operator==(const Domain &value) const
 
     if ((mSize && !singleItem->mSize) || (!mSize && singleItem->mSize))
         return false;
+
     if ((mValue && !singleItem->mValue) || (!mValue && singleItem->mValue))
         return false;
 
     if (mValue && *mValue != *singleItem->mValue)
         return false;
+
     if (mSize && *mSize != *singleItem->mSize)
         return false;
 

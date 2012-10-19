@@ -9,20 +9,23 @@
 namespace Canal {
 namespace Array {
 
-ExactSize::ExactSize(const Environment &environment, const uint64_t size, const Domain *value)
+ExactSize::ExactSize(const Environment &environment,
+                     const uint64_t size,
+                     const Domain &value)
     : Domain(environment)
 {
-    for (uint64_t i = 0; i < size; i ++) {
-        mValues.push_back(value->clone());
-    }
+    for (uint64_t i = 0; i < size; ++i)
+        mValues.push_back(value.clone());
 }
 
-ExactSize::ExactSize(const Environment &environment, const std::vector<Domain*> values)
+ExactSize::ExactSize(const Environment &environment,
+                     const std::vector<Domain*> values)
     : Domain(environment), mValues(values)
 {
 }
 
-ExactSize::ExactSize(const ExactSize &exactSize) : Domain(exactSize.mEnvironment)
+ExactSize::ExactSize(const ExactSize &exactSize)
+    : Domain(exactSize.mEnvironment)
 {
     mValues = exactSize.mValues;
     std::vector<Domain*>::iterator it = mValues.begin();
@@ -69,6 +72,7 @@ ExactSize::operator==(const Domain &value) const
     std::vector<Domain*>::const_iterator itA = mValues.begin(),
         itAend = mValues.end(),
         itB = array->mValues.begin();
+
     for (; itA != itAend; ++itA, ++itB)
     {
         if (**itA != **itB)

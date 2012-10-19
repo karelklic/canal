@@ -15,9 +15,19 @@ public:
     std::vector<Domain*> mValues;
 
 public:
-    ExactSize(const Environment &environment, const uint64_t size, const Domain* value);
-    ExactSize(const Environment &environment, const std::vector<Domain*> values);
+    /// @param value
+    ///   This class does not take ownership of this value.
+    ExactSize(const Environment &environment,
+              const uint64_t size,
+              const Domain &value);
+
+    /// @param values
+    ///   This class takes ownership of the values.
+    ExactSize(const Environment &environment,
+              const std::vector<Domain*> values);
+
     ExactSize(const ExactSize &exactSize);
+
     virtual ~ExactSize();
 
     size_t size() const { return mValues.size(); }

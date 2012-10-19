@@ -10,7 +10,7 @@
 #include "State.h"
 #include <llvm/Constants.h>
 #include <llvm/Function.h>
-#include <stdio.h>
+#include <llvm/ADT/OwningPtr.h>
 
 namespace Canal {
 
@@ -51,16 +51,23 @@ Constructors::create(const llvm::Type &type) const
     if (type.isArrayTy() || type.isVectorTy())
     {
         uint64_t size;
-        if (type.isArrayTy()) {
-            const llvm::ArrayType &arrayType = llvm::cast<llvm::ArrayType>(type);
+        if (type.isArrayTy())
+        {
+            const llvm::ArrayType &arrayType =
+                llvm::cast<llvm::ArrayType>(type);
+
             size = arrayType.getNumElements();
         }
-        else {
-            const llvm::VectorType &vectorType = llvm::cast<llvm::VectorType>(type);
+        else
+        {
+            const llvm::VectorType &vectorType =
+                llvm::cast<llvm::VectorType>(type);
+
             size = vectorType.getNumElements();
         }
-        Domain* value = this->create(*type.getContainedType(0));
-        return new Array::ExactSize(mEnvironment, size, value);
+
+        llvm::OwningPtr<Domain> value(create(*type.getContainedType(0)));
+        return new Array::ExactSize(mEnvironment, size, *value);
     }
 
     if (type.isStructTy())
