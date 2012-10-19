@@ -50,13 +50,17 @@ InclusionBased::~InclusionBased()
 
 void
 InclusionBased::addTarget(Target::Type type,
-                          const llvm::Value *instruction,
+                          const llvm::Value *place,
                           const llvm::Value *target,
                           const std::vector<Domain*> &offsets,
                           Domain *numericOffset)
 {
-    CANAL_ASSERT_MSG(instruction,
-                     "Instruction is mandatory.");
+    CANAL_ASSERT_MSG(place,
+                     "Place is mandatory.");
+
+    CANAL_ASSERT_MSG(llvm::isa<llvm::Instruction>(place) ||
+                     llvm::isa<llvm::GlobalValue>(place),
+                     "Place must be either an instruction or a global value.");
 
     if (mTop)
         return;
@@ -64,14 +68,14 @@ InclusionBased::addTarget(Target::Type type,
     Target *pointerTarget = new Target(mEnvironment, type, target,
                                        offsets, numericOffset);
 
-    PlaceTargetMap::iterator it = mTargets.find(instruction);
+    PlaceTargetMap::iterator it = mTargets.find(place);
     if (it != mTargets.end())
     {
         it->second->merge(*pointerTarget);
         delete pointerTarget;
     }
     else
-        mTargets.insert(PlaceTargetMap::value_type(instruction, pointerTarget));
+        mTargets.insert(PlaceTargetMap::value_type(place, pointerTarget));
 }
 
 Domain *

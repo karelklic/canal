@@ -58,7 +58,7 @@ public:
     /// Add a new target to the pointer.
     /// @param type
     ///   Type of the referenced memory.
-    /// @param instruction
+    /// @param place
     ///   Place where the pointer target is added.
     /// @param target
     ///   Represents the target memory block.  If type is Constant, it
@@ -80,7 +80,7 @@ public:
     ///   This parameter is mandatory for pointers of Constant type,
     ///   because it contains the constant.
     void addTarget(Target::Type type,
-                   const llvm::Value *instruction,
+                   const llvm::Value *place,
                    const llvm::Value *target,
                    const std::vector<Domain*> &offsets,
                    Domain *numericOffset);

@@ -29,9 +29,16 @@ Target::Target(const Environment &environment,
                      type == Constant,
                      "Invalid type.");
 
-    CANAL_ASSERT_MSG((type == Constant && !target) ||
-                     (type != Constant && target),
-                     "Invalid value of target.");
+    CANAL_ASSERT_MSG(type != Constant || !target,
+                     "Target must not be present for numeric pointers.");
+
+    CANAL_ASSERT_MSG(type == Constant || target,
+                     "Target must be present for pointers to blocks/functions.");
+
+    CANAL_ASSERT_MSG(!target ||
+                     llvm::isa<llvm::Instruction>(target) ||
+                     llvm::isa<llvm::GlobalValue>(target),
+                     "Target muse be either an instruction or a global value.");
 
     CANAL_ASSERT_MSG(type != Constant || offsets.empty(),
                      "Offsets cannot be present for constant pointers "
@@ -191,15 +198,19 @@ Target::toString(SlotTracker &slotTracker) const
     case Block:
     {
         const llvm::Instruction *instruction =
-            llvmCast<llvm::Instruction>(mTarget);
+            llvm::dyn_cast<llvm::Instruction>(mTarget);
 
         if (instruction)
         {
-            const llvm::Function &function =
-                *instruction->getParent()->getParent();
+            const llvm::Function *function =
+                instruction->getParent()->getParent();
 
-            ss << " @" << Canal::getName(function, slotTracker);
-            ss << ":^" << Canal::getName(*instruction, slotTracker);
+            ss << " ";
+            if (function)
+                ss << "@" << Canal::getName(*function, slotTracker) << ":";
+
+            ss << "^" << Canal::getName(*instruction, slotTracker);
+            ss << "(DEBUG: " << instruction->getOpcodeName() << ")";
         }
         else
             ss << " ^" << Canal::getName(*mTarget, slotTracker);

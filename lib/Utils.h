@@ -132,7 +132,8 @@ template <class X, class Y> inline typename llvm::cast_retty<X, Y>::ret_type
 llvmCast(const Y &val)
 {
     CANAL_ASSERT_MSG(llvm::isa<X>(val),
-                     "cast<Ty>() argument of incompatible type!");
+                     "llvmCast<Ty>() argument of incompatible type!");
+
     return llvm::cast_convert_val<X, Y,
         typename llvm::simplify_type<Y>::SimpleType>::doit(val);
 }

@@ -21,11 +21,14 @@ Module::Module(const llvm::Module &module,
     {
         tsortInit();
 
-        for (const llvm::GlobalVariable* it = tsortNext(); it != NULL; it = tsortNext())
+        for (const llvm::GlobalVariable *it = tsortNext(); it != NULL; it = tsortNext())
         {
             if (it->isConstant() && it->hasInitializer())
             {
-                Domain *value = constructors.create(*it->getInitializer(), &mGlobalState);
+                Domain *value = constructors.create(*it->getInitializer(),
+                                                    *it,
+                                                    &mGlobalState);
+
                 mGlobalState.addGlobalVariable(*it, value);
                 continue;
             }
@@ -219,15 +222,18 @@ Module::tsortDecrement(tsortValue *&value) {
     else value->count--;
 }
 
-const llvm::GlobalVariable*
+const llvm::GlobalVariable *
 Module::tsortNext()
 {
-    if (!mTsortReady.size()) {
-        CANAL_ASSERT_MSG(mTsortDependencies.size() == 0, "Circular dependencies among global variables");
+    if (mTsortReady.empty())
+    {
+        CANAL_ASSERT_MSG(mTsortDependencies.empty(),
+                         "Circular dependencies among global variables");
+
         return NULL;
     }
 
-    const llvm::GlobalVariable* ret = mTsortReady.back();
+    const llvm::GlobalVariable *ret = mTsortReady.back();
     mTsortReady.pop_back();
     const std::map<const llvm::Value*, std::vector<tsortValue*> >::iterator dependent = mTsortDependencies.find(ret);
 
