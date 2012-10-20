@@ -211,7 +211,6 @@ Target::toString(SlotTracker &slotTracker) const
                 ss << "@" << Canal::getName(*function, slotTracker) << ":";
 
             ss << "^" << Canal::getName(*instruction, slotTracker);
-            ss << "(DEBUG: " << instruction->getOpcodeName() << ")";
         }
         else
             ss << " ^" << Canal::getName(*mTarget, slotTracker);
@@ -245,6 +244,8 @@ Target::toString(SlotTracker &slotTracker) const
         ss << "    numericOffset" << std::endl;
         ss << indent(mNumericOffset->toString(), 8);
     }
+    else if (mType == Constant)
+        ss << "    null" << std::endl;
 
     return ss.str();
 }
@@ -252,10 +253,20 @@ Target::toString(SlotTracker &slotTracker) const
 std::vector<Domain*>
 Target::dereference(const State &state) const
 {
-    CANAL_ASSERT_MSG(mType == Block,
-                     "Only Block pointer targets can be dereferenced.");
-
     std::vector<Domain*> result;
+
+    // Gracefully handle NULL dereference.
+    if (mType == Constant)
+    {
+        CANAL_ASSERT_MSG(!mNumericOffset,
+                         "Cannot dereference numeric pointers.");
+
+        return result;
+    }
+
+    CANAL_ASSERT_MSG(mType == Block,
+                     "Unxepected pointer type in pointer dereference.");
+
     result.push_back(state.findBlock(*mTarget));
     CANAL_ASSERT(result[0]);
 
