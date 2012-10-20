@@ -138,7 +138,9 @@ Interval::operator==(const Domain& value) const
 
     if (mEmpty || interval->mEmpty)
         return mEmpty == interval->mEmpty;
-    if (mSignedTop ^ interval->mSignedTop || mUnsignedTop ^ interval->mUnsignedTop)
+
+    if (mSignedTop ^ interval->mSignedTop ||
+        mUnsignedTop ^ interval->mUnsignedTop)
         return false;
 
     if (!mSignedTop && (mSignedFrom != interval->mSignedFrom ||
@@ -183,6 +185,7 @@ Interval::merge(const Domain &value)
         {
             if (!mSignedFrom.sle(interval.mSignedFrom))
                 mSignedFrom = interval.mSignedFrom;
+
             if (!mSignedTo.sge(interval.mSignedTo))
                 mSignedTo = interval.mSignedTo;
         }
@@ -196,6 +199,7 @@ Interval::merge(const Domain &value)
         {
             if (!mUnsignedFrom.ule(interval.mUnsignedFrom))
                 mUnsignedFrom = interval.mUnsignedFrom;
+
             if (!mUnsignedTo.uge(interval.mUnsignedTo))
                 mUnsignedTo = interval.mUnsignedTo;
         }
@@ -230,11 +234,13 @@ Interval::toString() const
         std::stringstream sign, unsign;
         sign << sMin.toString(10, true) << " to "
              << sMax.toString(10, true);
+
         if (mSignedTop)
             sign << " (top)";
 
         unsign << uMin.toString(10, false) << " to "
                << uMax.toString(10, false);
+
         if (mUnsignedTop)
             unsign << " (top)";
 
@@ -344,7 +350,10 @@ minMax(bool isSigned,
        const llvm::APInt &fromFrom)
 {
     typedef bool(llvm::APInt::*LessThan)(const llvm::APInt&) const;
-    LessThan lt(isSigned ? (LessThan)&llvm::APInt::slt : (LessThan)&llvm::APInt::ult);
+    LessThan lt(isSigned
+                ? (LessThan)&llvm::APInt::slt
+                : (LessThan)&llvm::APInt::ult);
+
     if ((toTo.*(lt))(toFrom))
     { // toTo < toFrom
         if ((toTo.*(lt))(fromTo))
@@ -453,21 +462,25 @@ Interval::mul(const Domain &a, const Domain &b)
         llvm::APInt toTo = APIntUtils::smul_ov(aa.mSignedTo,
                                                bb.mSignedTo,
                                                mSignedTop);
+
         if (!mSignedTop)
         {
             llvm::APInt toFrom = APIntUtils::smul_ov(aa.mSignedTo,
                                                      bb.mSignedFrom,
                                                      mSignedTop);
+
             if (!mSignedTop)
             {
                 llvm::APInt fromTo = APIntUtils::smul_ov(aa.mSignedFrom,
                                                          bb.mSignedTo,
                                                          mSignedTop);
+
                 if (!mSignedTop)
                 {
                     llvm::APInt fromFrom = APIntUtils::smul_ov(aa.mSignedFrom,
                                                                bb.mSignedFrom,
                                                                mSignedTop);
+
                     if (!mSignedTop)
                     {
                         minMax(/*signed=*/true,
@@ -489,21 +502,25 @@ Interval::mul(const Domain &a, const Domain &b)
         llvm::APInt toTo = APIntUtils::umul_ov(aa.mUnsignedTo,
                                                bb.mUnsignedTo,
                                                mUnsignedTop);
+
         if (!mUnsignedTop)
         {
             llvm::APInt toFrom = APIntUtils::umul_ov(aa.mUnsignedTo,
                                                      bb.mUnsignedFrom,
                                                      mUnsignedTop);
+
             if (!mUnsignedTop)
             {
                 llvm::APInt fromTo = APIntUtils::umul_ov(aa.mUnsignedFrom,
                                                          bb.mUnsignedTo,
                                                          mUnsignedTop);
+
                 if (!mUnsignedTop)
                 {
                     llvm::APInt fromFrom = APIntUtils::umul_ov(aa.mUnsignedFrom,
                                                                bb.mUnsignedFrom,
                                                                mUnsignedTop);
+
                     if (!mUnsignedTop)
                     {
                         minMax(/*signed=*/false,
@@ -567,21 +584,25 @@ Interval::sdiv(const Domain &a, const Domain &b)
         llvm::APInt toTo = APIntUtils::sdiv_ov(aa.mSignedTo,
                                                bb.mSignedTo,
                                                mSignedTop);
+
         if (!mSignedTop)
         {
             llvm::APInt toFrom = APIntUtils::sdiv_ov(aa.mSignedTo,
                                                      bb.mSignedFrom,
                                                      mSignedTop);
+
             if (!mSignedTop)
             {
                 llvm::APInt fromTo = APIntUtils::sdiv_ov(aa.mSignedFrom,
                                                          bb.mSignedTo,
                                                          mSignedTop);
+
                 if (!mSignedTop)
                 {
                     llvm::APInt fromFrom = APIntUtils::sdiv_ov(aa.mSignedFrom,
                                                                bb.mSignedFrom,
                                                                mSignedTop);
+
                     if (!mSignedTop)
                     {
                         minMax(/*signed=*/true,
@@ -722,10 +743,12 @@ intersects(const Interval &a,
     {
         a.signedMax(i);
         b.signedMin(j);
-        if (i.sge(j)) {
+        if (i.sge(j))
+        {
             b.signedMax(i);
             a.signedMin(j);
-            if (i.sge(j)) return true;
+            if (i.sge(j))
+                return true;
         }
     }
 
@@ -733,10 +756,12 @@ intersects(const Interval &a,
     {
         a.unsignedMax(i);
         b.unsignedMin(j);
-        if (i.uge(j)) {
+        if (i.uge(j))
+        {
             b.unsignedMax(i);
             a.unsignedMin(j);
-            if (i.uge(j)) return true;
+            if (i.uge(j))
+                return true;
         }
     }
 
@@ -773,43 +798,60 @@ Interval::icmp(const Domain &a, const Domain &b,
         // If both intervals are equal, the result is 1.  If
         // interval intersection is empty, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b) {
+        if (&a == &b)
+        {
             mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
             break;
         }
 
         //Signed equality
-        if (aa.isSignedSingleValue() && bb.isSignedSingleValue() && aa.mSignedFrom == bb.mSignedFrom) {
+        if (aa.isSignedSingleValue() &&
+            bb.isSignedSingleValue() &&
+            aa.mSignedFrom == bb.mSignedFrom)
+        {
             mSignedFrom = mSignedTo = 1;
         }
-        else if (intersects(aa, bb, true, false)) mSignedTop = true;
+        else if (intersects(aa, bb, true, false))
+            mSignedTop = true;
 
         //Unsigned equality
-        if (aa.isUnsignedSingleValue() && bb.isUnsignedSingleValue() && aa.mUnsignedFrom == bb.mUnsignedFrom) {
+        if (aa.isUnsignedSingleValue() &&
+            bb.isUnsignedSingleValue() &&
+            aa.mUnsignedFrom == bb.mUnsignedFrom)
+        {
             mUnsignedFrom = mUnsignedTo = 1;
         }
-        else if (intersects(aa, bb, false, true)) mUnsignedTop = true;
+        else if (intersects(aa, bb, false, true))
+            mUnsignedTop = true;
 
         break;
     case llvm::CmpInst::ICMP_NE:  // not equal
         // If both intervals are equal, the result is 0.  If
         // interval intersection is empty, the result is 1.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b) {
+        if (&a == &b)
             break;
-        }
 
-        //Signed inequality
-        if (intersects(aa, bb, true, false)) mSignedTop = true;
-        else if (!(aa.isSignedSingleValue() && bb.isSignedSingleValue() && aa.mSignedFrom == bb.mSignedFrom)) {
+        // Signed inequality
+        if (intersects(aa, bb, true, false))
+            mSignedTop = true;
+        else if (!(aa.isSignedSingleValue() &&
+                   bb.isSignedSingleValue() &&
+                   aa.mSignedFrom == bb.mSignedFrom))
+        {
             mSignedFrom = mSignedTo = 1;
         }
 
-        //Unsigned inequality
-        if (intersects(aa, bb, false, true)) mUnsignedTop = true;
-        else if (!(aa.isUnsignedSingleValue() && bb.isUnsignedSingleValue() && aa.mUnsignedFrom == bb.mUnsignedFrom)) {
+        // Unsigned inequality
+        if (intersects(aa, bb, false, true))
+            mUnsignedTop = true;
+        else if (!(aa.isUnsignedSingleValue() &&
+                   bb.isUnsignedSingleValue() &&
+                   aa.mUnsignedFrom == bb.mUnsignedFrom))
+        {
             mUnsignedFrom = mUnsignedTo = 1;
         }
+
         break;
     case llvm::CmpInst::ICMP_UGT: // unsigned greater than
         // If the lowest element from the first interval is
@@ -938,11 +980,13 @@ Interval::fcmp(const Domain &a, const Domain &b,
         mEmpty = mSignedTop = mUnsignedTop = false;
         mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo =
             llvm::APInt(/*bitWidth*/1, /*val*/0);
+
         break;
     case 1:
         mEmpty = mSignedTop = mUnsignedTop = false;
         mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo =
             llvm::APInt(/*bitWidth*/1, /*val*/1);
+
         break;
     case 2:
         setTop();
@@ -1024,6 +1068,7 @@ Interval::accuracy() const
             dividendInt,
             /*isSigned=*/false,
             llvm::APFloat::rmNearestTiesToEven);
+
         CANAL_ASSERT(status == llvm::APFloat::opOK);
 
         llvm::APFloat divisorFloat(llvm::APFloat::IEEEdouble);
@@ -1031,10 +1076,12 @@ Interval::accuracy() const
             llvm::APInt::getMaxValue(mUnsignedTo.getBitWidth() + 1),
             /*isSigned=*/false,
             llvm::APFloat::rmNearestTiesToEven);
+
         CANAL_ASSERT(status == llvm::APFloat::opOK);
 
         status = dividendFloat.divide(divisorFloat,
                                       llvm::APFloat::rmNearestTiesToEven);
+
         CANAL_ASSERT(status == llvm::APFloat::opOK);
 
         coverage += dividendFloat.convertToFloat();
@@ -1044,7 +1091,10 @@ Interval::accuracy() const
         coverage += 1.0f;
     else
     {
-        llvm::APInt dividendInt(mSignedTo.getBitWidth() + 1, 0, /*isSigned=*/true);
+        llvm::APInt dividendInt(mSignedTo.getBitWidth() + 1,
+                                0,
+                                /*isSigned=*/true);
+
         dividendInt = mSignedTo;
         dividendInt -= mSignedFrom;
         dividendInt = dividendInt + 1;
@@ -1054,6 +1104,7 @@ Interval::accuracy() const
             dividendInt,
             /*isSigned=*/true,
             llvm::APFloat::rmNearestTiesToEven);
+
         CANAL_ASSERT(status == llvm::APFloat::opOK);
 
         llvm::APFloat divisorFloat(llvm::APFloat::IEEEdouble);
@@ -1061,10 +1112,12 @@ Interval::accuracy() const
             llvm::APInt::getMaxValue(mSignedTo.getBitWidth() + 1),
             /*isSigned=*/false,
             llvm::APFloat::rmNearestTiesToEven);
+
         CANAL_ASSERT(status == llvm::APFloat::opOK);
 
         status = dividendFloat.divide(divisorFloat,
                                       llvm::APFloat::rmNearestTiesToEven);
+
         CANAL_ASSERT(status == llvm::APFloat::opOK);
 
         coverage += dividendFloat.convertToFloat();
@@ -1106,7 +1159,8 @@ Interval::setZero(const llvm::Value *instruction)
 {
     mEmpty = false;
     mUnsignedTop = mSignedTop = false;
-    mUnsignedFrom = mUnsignedTo = mSignedFrom = mSignedTo = llvm::APInt::getNullValue(mUnsignedFrom.getBitWidth());
+    mUnsignedFrom = mUnsignedTo = mSignedFrom = mSignedTo =
+        llvm::APInt::getNullValue(mUnsignedFrom.getBitWidth());
 }
 
 } // namespace Integer

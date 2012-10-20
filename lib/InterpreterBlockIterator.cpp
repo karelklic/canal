@@ -64,20 +64,21 @@ Iterator::interpretInstruction()
 std::string
 Iterator::toString() const
 {
-    SlotTracker &slotTracker = mOperations.getEnvironment().getSlotTracker();
-
     std::stringstream ss;
     ss << "***************************************" << std::endl;
     ss << "* iterator " << std::endl;
     ss << "***************************************" << std::endl;
-
     ss << "** function " << (*mFunction)->getName().str() << std::endl;
     ss << "*** basicBlock ";
-    slotTracker.setActiveFunction(*(*mBasicBlock)->getLlvmBasicBlock().getParent());
-    if ((*mBasicBlock)->getLlvmBasicBlock().hasName())
-        ss << (*mBasicBlock)->getLlvmBasicBlock().getName().str();
+    SlotTracker &slotTracker = mOperations.getEnvironment().getSlotTracker();
+    const llvm::BasicBlock &basicBlock = (*mBasicBlock)->getLlvmBasicBlock();
+    const llvm::Function &function = (*mFunction)->getLlvmFunction();
+    slotTracker.setActiveFunction(function);
+    if (basicBlock.hasName())
+        ss << basicBlock.getName().str();
     else
-        ss << "<label>:" << slotTracker.getLocalSlot((*mBasicBlock)->getLlvmBasicBlock());
+        ss << "<label>:" << slotTracker.getLocalSlot(basicBlock);
+
     ss << std::endl;
 
     llvm::BasicBlock::const_iterator it = (*mBasicBlock)->begin();

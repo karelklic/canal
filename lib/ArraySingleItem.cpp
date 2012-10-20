@@ -93,8 +93,10 @@ SingleItem::merge(const Domain &value)
     const SingleItem &singleItem = dynCast<const SingleItem&>(value);
     CANAL_ASSERT_MSG(mValue && singleItem.mValue,
                      "Array value must be intialized for merging");
+
     CANAL_ASSERT_MSG(mSize && singleItem.mSize,
                      "Array size must be initialized for merging");
+
     mValue->merge(*singleItem.mValue);
     mSize->merge(*singleItem.mSize);
 }
@@ -255,6 +257,7 @@ assertOffsetFitsToArray(uint64_t offset, const Domain &size)
     // Get maximum size of the array.
     const Integer::Container &integerSize =
         dynCast<const Integer::Container&>(size);
+
     llvm::APInt unsignedMaxSize(integerSize.getBitWidth(), 0);
     bool sizeIsKnown = integerSize.unsignedMax(unsignedMaxSize);
     // The following requirement can be changed if necessary.
@@ -269,6 +272,7 @@ assertOffsetFitsToArray(const Domain &offset, const Domain &size)
     // Check if the offset might point to the array.
     const Integer::Container &integerOffset =
         dynCast<const Integer::Container&>(offset);
+
     llvm::APInt unsignedMinOffset(integerOffset.getBitWidth(), 0);
     bool offsetIsKnown = integerOffset.unsignedMin(unsignedMinOffset);
     // The following requirement can be changed if necessary.

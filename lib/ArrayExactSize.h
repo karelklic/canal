@@ -24,7 +24,7 @@ public:
     /// @param values
     ///   This class takes ownership of the values.
     ExactSize(const Environment &environment,
-              const std::vector<Domain*> values);
+              const std::vector<Domain*> &values);
 
     ExactSize(const ExactSize &exactSize);
 
