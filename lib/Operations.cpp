@@ -750,21 +750,24 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
             return;
         }
 
-        Array::SingleItem *array = new Array::SingleItem(mEnvironment,
-                                                         abstractSize->clone(),
-                                                         value);
+        Array::SingleItem *array;
+        array = new Array::SingleItem(mEnvironment,
+                                      abstractSize->clone(),
+                                      value);
 
         value = array;
 
         // Set pointer offset.
-        Domain *zero = new Integer::Container(mEnvironment, llvm::APInt(32, 0));
+        Domain *zero = new Integer::Container(mEnvironment,
+                                              llvm::APInt(32, 0));
+
         offsets.push_back(zero);
         offsets.push_back(zero->clone());
     }
 
     state.addFunctionBlock(instruction, value);
-    Pointer::InclusionBased *pointer =
-        new Pointer::InclusionBased(mEnvironment, *type);
+    Pointer::InclusionBased *pointer;
+    pointer = new Pointer::InclusionBased(mEnvironment, *type);
 
     pointer->addTarget(Pointer::Target::Block,
                        &instruction,
@@ -947,7 +950,8 @@ Operations::ptrtoint(const llvm::PtrToIntInst &instruction,
     if (!operand)
         return;
 
-    Pointer::InclusionBased &source = dynCast<Pointer::InclusionBased&>(*operand);
+    Pointer::InclusionBased &source =
+        dynCast<Pointer::InclusionBased&>(*operand);
 
     Pointer::InclusionBased *result = source.clone();
 /*  This should really be handled in integer operations.
@@ -1006,7 +1010,8 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
     const llvm::Type *sourceType = instruction.getSrcTy();
     const llvm::Type *destinationType = instruction.getDestTy();
 
-    CANAL_ASSERT_MSG(sourceType->isPointerTy() && destinationType->isPointerTy(),
+    CANAL_ASSERT_MSG(sourceType->isPointerTy() &&
+                     destinationType->isPointerTy(),
                      "Bitcast for non-pointers is not implemented yet.");
 
     Domain *source = state.findVariable(*instruction.getOperand(0));

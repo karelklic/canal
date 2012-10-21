@@ -19,7 +19,7 @@ ExactSize::ExactSize(const Environment &environment,
 }
 
 ExactSize::ExactSize(const Environment &environment,
-                     const std::vector<Domain*> values)
+                     const std::vector<Domain*> &values)
     : Domain(environment), mValues(values)
 {
 }
@@ -51,9 +51,13 @@ ExactSize::cloneCleaned() const
 {
     ExactSize* res = new ExactSize(*this);
     std::vector<Domain*>::iterator it = res->mValues.begin();
-    for (; it != res->mValues.end(); ++it) {
+    for (; it != res->mValues.end(); ++it)
+    {
         AccuracyDomain* dom = dynCast<AccuracyDomain*>(*it);
-        CANAL_ASSERT_MSG(dom != NULL, "Element has to be of type AccuracyDomain in order to call setBottom on it.");
+        CANAL_ASSERT_MSG(dom,
+                         "Element has to be of type AccuracyDomain "
+                         "in order to call setBottom on it.");
+
         dom->setBottom();
     }
     return res;
@@ -90,6 +94,7 @@ ExactSize::merge(const Domain &value)
     std::vector<Domain*>::iterator itA = mValues.begin();
     std::vector<Domain*>::const_iterator itAend = mValues.end(),
         itB = array.mValues.begin();
+
     for (; itA != itAend; ++itA, ++itB)
         (*itA)->merge(**itB);
 }
@@ -114,6 +119,7 @@ ExactSize::toString() const
     std::vector<Domain*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         ss << indent((*it)->toString(), 4);
+
     return ss.str();
 }
 
@@ -302,6 +308,7 @@ ExactSize::getItem(const Domain &offset) const
     {
         APIntUtils::USet::const_iterator it = enumeration.mValues.begin(),
             itend = enumeration.mValues.end();
+
         for (; it != itend; ++it)
         {
             CANAL_ASSERT(it->getBitWidth() <= 64);
@@ -338,7 +345,11 @@ ExactSize::getItem(const Domain &offset) const
         CANAL_ASSERT(from < mValues.size());
         if (to >= mValues.size())
             to = mValues.size();
-        result.insert(result.end(), mValues.begin() + from, mValues.begin() + to);
+
+        result.insert(result.end(),
+                      mValues.begin() + from,
+                      mValues.begin() + to);
+
         return result;
     }
 

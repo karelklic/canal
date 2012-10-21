@@ -14,7 +14,7 @@ public:
 
 public:
     Structure(const Environment &environment,
-              const std::vector<Domain*> members);
+              const std::vector<Domain*> &members);
 
     Structure(const Structure &value);
 

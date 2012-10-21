@@ -8,7 +8,7 @@
 namespace Canal {
 
 Structure::Structure(const Environment &environment,
-                     const std::vector<Domain*> members)
+                     const std::vector<Domain*> &members)
     : Domain(environment), mMembers(members)
 {
 

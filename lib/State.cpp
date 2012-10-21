@@ -139,7 +139,8 @@ State::clearFunctionLevel()
 
 // Merges map2 into map1.
 static void
-mergeMaps(PlaceValueMap &map1, const PlaceValueMap &map2)
+mergeMaps(PlaceValueMap &map1,
+          const PlaceValueMap &map2)
 {
     PlaceValueMap::const_iterator it2 = map2.begin(),
         it2end = map2.end();

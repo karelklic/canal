@@ -4,7 +4,7 @@
 #include "Domain.h"
 
 namespace llvm {
-    class APInt;
+class APInt;
 }
 
 namespace Canal {
