@@ -44,8 +44,6 @@ public:
     void clearFunctionLevel();
 
     /// Merge everything.
-    /// @param wideningManager
-    ///   Optional, it can be NULL.
     void merge(const State &state);
 
     /// Merge global variables and blocks.
