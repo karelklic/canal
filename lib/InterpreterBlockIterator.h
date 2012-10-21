@@ -9,6 +9,10 @@ namespace Canal {
 
 class Operations;
 
+namespace Widening {
+class Manager;
+} // namespace Widening
+
 namespace InterpreterBlock {
 
 class Module;
@@ -23,6 +27,7 @@ class Iterator
 protected:
     Module &mModule;
     Operations &mOperations;
+    Widening::Manager &mWideningManager;
 
     /// Indication of changed abstract state during last loop through
     /// the program.
@@ -51,7 +56,8 @@ protected:
 
 public:
     Iterator(Module &module,
-             Operations &operations);
+             Operations &operations,
+             Widening::Manager &wideningManager);
 
     void initialize();
 

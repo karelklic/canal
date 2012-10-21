@@ -30,6 +30,7 @@ copyMap(PlaceValueMap &destination, const PlaceValueMap &source)
     destination = source;
     PlaceValueMap::iterator it = destination.begin(),
         itend = destination.end();
+
     for (; it != itend; ++it)
         it->second = it->second->clone();
 }

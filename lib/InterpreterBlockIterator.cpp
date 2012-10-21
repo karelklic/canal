@@ -5,6 +5,7 @@
 #include "InterpreterBlockIteratorCallback.h"
 #include "Operations.h"
 #include "Environment.h"
+#include "WideningManager.h"
 #include <sstream>
 
 namespace Canal {
@@ -12,9 +13,12 @@ namespace InterpreterBlock {
 
 static IteratorCallback emptyCallback;
 
-Iterator::Iterator(Module &module, Operations &operations)
+Iterator::Iterator(Module &module,
+                   Operations &operations,
+                   Widening::Manager &wideningManager)
     : mModule(module),
       mOperations(operations),
+      mWideningManager(wideningManager),
       mChanged(true),
       mInitialized(false),
       mCallback(&emptyCallback)
@@ -103,6 +107,10 @@ Iterator::nextInstruction()
     {
         if (mState != (*mBasicBlock)->getOutputState())
         {
+            mWideningManager.widen((*mBasicBlock)->getLlvmBasicBlock(),
+                                   (*mBasicBlock)->getOutputState(),
+                                   mState);
+
             (*mBasicBlock)->getOutputState().merge(mState);
             mChanged = true;
         }
