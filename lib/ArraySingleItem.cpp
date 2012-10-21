@@ -15,14 +15,12 @@ SingleItem::SingleItem(const Environment &environment,
 {
 }
 
-SingleItem::SingleItem(const SingleItem &singleItem)
-    : Domain(singleItem.mEnvironment)
+SingleItem::SingleItem(const SingleItem &value)
+    : Domain(value), mValue(value.mValue), mSize(value.mSize)
 {
-    mValue = singleItem.mValue;
     if (mValue)
         mValue = mValue->clone();
 
-    mSize = singleItem.mSize;
     if (mSize)
         mSize = mSize->clone();
 }
@@ -118,13 +116,6 @@ SingleItem::toString() const
     ss << "    value" << std::endl;
     ss << indent(mValue->toString(), 8);
     return ss.str();
-}
-
-bool
-SingleItem::matchesString(const std::string &text,
-                          std::string &rationale) const
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 void

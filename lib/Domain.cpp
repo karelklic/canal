@@ -1,27 +1,37 @@
 #include "Domain.h"
 #include "Utils.h"
+#include "WideningDataInterface.h"
 #include <typeinfo>
 #include <llvm/Support/raw_ostream.h>
 
 namespace Canal {
 
 Domain::Domain(const Environment &environment)
-    : mEnvironment(environment)
+    : mEnvironment(environment),
+      mWideningData(NULL)
 {
 }
 
-bool
-Domain::operator!=(const Domain &rhs) const
+Domain::Domain(const Domain &value)
+    : mEnvironment(value.mEnvironment),
+      mWideningData(value.mWideningData)
 {
-    return !operator==(rhs);
+    if (mWideningData)
+        mWideningData = mWideningData->clone();
+}
+
+Domain::~Domain()
+{
+    delete mWideningData;
 }
 
 void
-Domain::merge(const Domain &v)
+Domain::setWideningData(Widening::DataInterface *wideningData)
 {
-    CANAL_DIE_MSG("merge not implemented for "
-                  << typeid(*this).name() << " and "
-                  << typeid(v).name());
+    CANAL_ASSERT_MSG(!mWideningData,
+                     "Widening data set were already set.");
+
+    mWideningData = wideningData;
 }
 
 void
@@ -199,14 +209,6 @@ Domain::sitofp(const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
-
-llvm::raw_ostream&
-operator<<(llvm::raw_ostream& ostream, const Domain &value)
-{
-    ostream << value.toString();
-    return ostream;
-}
-
 
 float
 AccuracyDomain::accuracy() const

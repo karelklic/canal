@@ -22,7 +22,7 @@ Interval::Interval(const Environment &environment,
 }
 
 Interval::Interval(const Environment &environment,
-             const llvm::APInt &constant)
+                   const llvm::APInt &constant)
     : Domain(environment),
       mEmpty(false),
       mSignedTop(false),
@@ -31,6 +31,18 @@ Interval::Interval(const Environment &environment,
       mUnsignedTop(false),
       mUnsignedFrom(constant),
       mUnsignedTo(constant)
+{
+}
+
+Interval::Interval(const Interval &value)
+    : Domain(value),
+      mEmpty(value.mEmpty),
+      mSignedTop(value.mSignedTop),
+      mSignedFrom(value.mSignedFrom),
+      mSignedTo(value.mSignedTo),
+      mUnsignedTop(value.mUnsignedTop),
+      mUnsignedFrom(value.mUnsignedFrom),
+      mUnsignedTo(value.mUnsignedTo)
 {
 }
 
@@ -249,13 +261,6 @@ Interval::toString() const
     }
 
     return ss.str();
-}
-
-bool
-Interval::matchesString(const std::string &text,
-                     std::string &rationale) const
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 void

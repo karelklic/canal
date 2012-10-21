@@ -85,9 +85,13 @@ public:
     void addFunctionBlock(const llvm::Value &place, Domain *value);
 
     const PlaceValueMap &getGlobalVariables() const { return mGlobalVariables; }
+    PlaceValueMap &getGlobalVariables() { return mGlobalVariables; }
     const PlaceValueMap &getGlobalBlocks() const { return mGlobalBlocks; }
+    PlaceValueMap &getGlobalBlocks() { return mGlobalBlocks; }
     const PlaceValueMap &getFunctionVariables() const { return mFunctionVariables; }
+    PlaceValueMap &getFunctionVariables() { return mFunctionVariables; }
     const PlaceValueMap &getFunctionBlocks() const { return mFunctionBlocks; }
+    PlaceValueMap &getFunctionBlocks() { return mFunctionBlocks; }
 
     /// Search both global and function variables for a place.  If the
     /// place is found, the variable is returned.  Otherwise NULL is

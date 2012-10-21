@@ -53,7 +53,15 @@ libcanal_la_SOURCES = \
 	Structure.cpp \
 	Structure.h \
 	Utils.cpp \
-	Utils.h
+	Utils.h \
+	WideningDataInterface.h \
+	WideningDataIterationCount.cpp \
+	WideningDataIterationCount.h \
+	WideningInterface.h \
+	WideningManager.cpp \
+	WideningManager.h \
+	WideningNumericalInfinity.cpp \
+	WideningNumerucalInfinity.h
 
 libcanal_la_CXXFLAGS = $(LLVM_CFLAGS)
 libcanal_la_LDFLAGS = $(LLVM_LDFLAGS) $(LLVM_LIBS) -version-info 0:0:0

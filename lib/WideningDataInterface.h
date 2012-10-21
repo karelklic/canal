@@ -4,12 +4,13 @@
 namespace Canal {
 namespace Widening {
 
-class Interface
+class DataInterface
 {
 public:
-    virtual void merge(const Data &data) = 0;
-};
+    virtual ~DataInterface() {}
 
+    virtual DataInterface *clone() const = 0;
+};
 
 } // namespace Widening
 } // namespace Canal

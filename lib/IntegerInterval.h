@@ -40,6 +40,9 @@ public:
     Interval(const Environment &environment,
              const llvm::APInt &constant);
 
+    /// Copy constructor.
+    Interval(const Interval &value);
+
     unsigned getBitWidth() const { return mSignedFrom.getBitWidth(); }
 
     /// Lowest signed number represented by this abstract domain.
@@ -88,6 +91,11 @@ public:
     /// Returns true if the interval represents a unsigned single value.
     bool isUnsignedSingleValue() const;
 
+private:
+    /// Assignment operator declaration.  Prevents accidental
+    /// assignments of domains.  Do not implement!
+    Interval &operator=(const Interval &value);
+
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
@@ -103,10 +111,6 @@ public: // Implementation of Domain.
     virtual size_t memoryUsage() const;
     /// Implementation of Domain::toString().
     virtual std::string toString() const;
-    /// Implementation of Domain::matchesString().
-    virtual bool matchesString(const std::string &text,
-                               std::string &rationale) const;
-
     /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *instruction);
 

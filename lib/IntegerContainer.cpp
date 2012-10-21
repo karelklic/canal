@@ -30,10 +30,10 @@ Container::Container(const Environment &environment,
     mValues.push_back(new Interval(environment, number));
 }
 
-Container::Container(const Container &container)
-    : Domain(container.mEnvironment)
+Container::Container(const Container &value)
+    : Domain(value)
 {
-    mValues = container.mValues;
+    mValues = value.mValues;
     std::vector<Domain*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         *it = (*it)->clone();
@@ -237,21 +237,6 @@ Container::toString() const
     for (; it != mValues.end(); ++it)
         ss << indent((*it)->toString(), 4);
     return ss.str();
-}
-
-bool
-Container::matchesString(const std::string &text,
-                         std::string &rationale) const
-{
-    const char *input = text.c_str();
-    int count = StringUtils::skipString(&input, "integer");
-    if (0 == count)
-    {
-        rationale = "No 'integer' keyword.";
-        return false;
-    }
-
-    CANAL_NOT_IMPLEMENTED();
 }
 
 static void

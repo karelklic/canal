@@ -248,9 +248,9 @@ State::mergeForeignFunctionBlocks(const State &state,
 }
 
 static void
-replaceOrInsertMapItem(PlaceValueMap &map,
-                       const llvm::Value &place,
-                       Domain *value)
+mergeOrInsertMapItem(PlaceValueMap &map,
+                     const llvm::Value &place,
+                     Domain *value)
 {
     CANAL_ASSERT_MSG(value,
                      "Attempted to insert NULL variable to state.");
@@ -258,8 +258,8 @@ replaceOrInsertMapItem(PlaceValueMap &map,
     PlaceValueMap::iterator it = map.find(&place);
     if (it != map.end())
     {
-        delete it->second;
-        it->second = value;
+        // TODO: assert that we are moving up in the lattice
+        it->second->merge(*value);
     }
     else
         map.insert(std::pair<const llvm::Value*, Domain*>(&place, value));
@@ -267,25 +267,25 @@ replaceOrInsertMapItem(PlaceValueMap &map,
 
 void State::addGlobalVariable(const llvm::Value &place, Domain *value)
 {
-    replaceOrInsertMapItem(mGlobalVariables, place, value);
+    mergeOrInsertMapItem(mGlobalVariables, place, value);
 }
 
 void
 State::addFunctionVariable(const llvm::Value &place, Domain *value)
 {
-    replaceOrInsertMapItem(mFunctionVariables, place, value);
+    mergeOrInsertMapItem(mFunctionVariables, place, value);
 }
 
 void
 State::addGlobalBlock(const llvm::Value &place, Domain *value)
 {
-    replaceOrInsertMapItem(mGlobalBlocks, place, value);
+    mergeOrInsertMapItem(mGlobalBlocks, place, value);
 }
 
 void
 State::addFunctionBlock(const llvm::Value &place, Domain *value)
 {
-    replaceOrInsertMapItem(mFunctionBlocks, place, value);
+    mergeOrInsertMapItem(mFunctionBlocks, place, value);
 }
 
 Domain *

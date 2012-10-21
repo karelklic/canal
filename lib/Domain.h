@@ -14,6 +14,10 @@ namespace Canal {
 class State;
 class Environment;
 
+namespace Widening {
+class DataInterface;
+} // namespace Widening
+
 /// @brief
 /// Base class for all abstract domains.
 class Domain
@@ -30,11 +34,17 @@ public:
 
     const Environment &mEnvironment;
 
+    Widening::DataInterface *mWideningData;
+
 public:
     /// Standard constructor.
     Domain(const Environment &environment);
+
+    /// Copy constructor.
+    Domain(const Domain &value);
+
     /// Virtual destructor.
-    virtual ~Domain() {};
+    virtual ~Domain();
 
     const Environment &getEnvironment() const { return mEnvironment; }
 
@@ -48,38 +58,27 @@ public:
     /// Implementing this is mandatory.  Values are compared while
     /// computing the fixed point.
     virtual bool operator==(const Domain &value) const = 0;
+
     /// Inequality is implemented by calling the equality operator.
-    virtual bool operator!=(const Domain &value) const;
+    virtual bool operator!=(const Domain &value) const { return !operator==(value); }
 
     /// Merge another value into this one.
-    virtual void merge(const Domain &value);
+    virtual void merge(const Domain &value) = 0;
 
     /// Get memory usage (used byte count) of this abstract value.
     virtual size_t memoryUsage() const = 0;
 
-    /// An idea for different memory interpretation.
-    /// virtual Domain *castTo(const llvm::Type *itemType, int offset) const = 0;
-
     /// Create a string representation of the abstract value.
     virtual std::string toString() const = 0;
 
-    /// Checks if the abstract value internal state matches the text
-    /// description.  Full coverage of the state is not expected, the
-    /// text can contain just partial information.
-    virtual bool matchesString(const std::string &text,
-                               std::string &rationale) const = 0;
-
-    /// Load the abstract value state from a string representation.
-    /// @param text
-    ///   The textual representation.  It must not contain any text
-    ///   that does not belong to this abstract value state.
-    /// @returns
-    ///   True if the text has been successfully parsed and the state
-    ///   has been set from the text.  False otherwise.
-    //virtual bool fromString(const std::string &text) = 0;
-
-    /// Set value of this domain to zero (needed for zeroinitializer)
+    /// Set value of this domain to represent zeroed memory.  Needed
+    /// for constants with zero initializer.
     virtual void setZero(const llvm::Value *instruction) = 0;
+
+    virtual Widening::DataInterface *getWideningData() const { return mWideningData; }
+
+    /// This class takes ownership of the wideningData memory.
+    virtual void setWideningData(Widening::DataInterface *wideningData);
 
 public:
     /// Implementation of instructions operating on values.
@@ -117,12 +116,13 @@ public:
     virtual void fptosi(const Domain &value);
     virtual void uitofp(const Domain &value);
     virtual void sitofp(const Domain &value);
+
+private:
+    /// Assignment operator declaration.  Prevents accidental
+    /// assignments of domains.  Do not implement!
+    Domain &operator=(const Domain &value);
 };
 
-/// Support writing of abstract values to output stream.  Used for
-/// logging purposes.
-llvm::raw_ostream& operator<<(llvm::raw_ostream& ostream,
-                              const Domain &value);
 
 /// @brief
 /// Base class for abstract domains with the concept of value accuracy.

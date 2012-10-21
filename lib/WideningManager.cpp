@@ -1,5 +1,7 @@
 #include "WideningManager.h"
-#include "WideningNumericalInifinity.h"
+#include "WideningNumericalInfinity.h"
+#include "State.h"
+#include "Domain.h"
 
 namespace Canal {
 namespace Widening {
@@ -21,16 +23,16 @@ Manager::widen(const llvm::BasicBlock &wideningPoint,
                State &first,
                const State &second) const
 {
-    widen(first.mFunctionVariables, second.mFunctionVariables);
-    widen(first.mFunctionBlocks, second.mFunctionBlocks);
-    widen(first.mGlobalVariables, second.mGlobalVariables);
-    widen(first.mGlobalBlocks, second.mGlobalBlocks);
+    widen(wideningPoint, first.getFunctionVariables(), second.getFunctionVariables());
+    widen(wideningPoint, first.getFunctionBlocks(), second.getFunctionBlocks());
+    widen(wideningPoint, first.getGlobalVariables(), second.getGlobalVariables());
+    widen(wideningPoint, first.getGlobalBlocks(), second.getGlobalBlocks());
 }
 
 void
 Manager::widen(const llvm::BasicBlock &wideningPoint,
                PlaceValueMap &first,
-               const PlaceValueMap &second)
+               const PlaceValueMap &second) const
 {
     PlaceValueMap::const_iterator it2 = second.begin(),
         it2end = second.end();
@@ -39,7 +41,9 @@ Manager::widen(const llvm::BasicBlock &wideningPoint,
     {
 	PlaceValueMap::iterator it1 = first.find(it2->first);
 	if (it1 != first.end() && *it1->second != *it2->second)
-            widen(*it1->second, *it2->second);
+        {
+            widen(wideningPoint, *it1->second, *it2->second);
+        }
     }
 }
 

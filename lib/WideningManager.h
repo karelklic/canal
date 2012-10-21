@@ -1,8 +1,18 @@
 #ifndef LIBCANAL_WIDENING_MANAGER_H
 #define LIBCANAL_WIDENING_MANAGER_H
 
+#include <vector>
+#include "State.h"
+
+namespace llvm {
+class BasicBlock;
+} // namespace llvm
+
 namespace Canal {
+class Domain;
 namespace Widening {
+
+class Interface;
 
 class Manager
 {

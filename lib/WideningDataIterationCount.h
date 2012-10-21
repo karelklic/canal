@@ -1,21 +1,30 @@
 #ifndef LIBCANAL_WIDENING_DATA_ITERATION_COUNT_H
 #define LIBCANAL_WIDENING_DATA_ITERATION_COUNT_H
 
+#include <map>
+#include "WideningDataInterface.h"
+
+namespace llvm {
+class BasicBlock;
+} // namespace llvm
+
 namespace Canal {
 namespace Widening {
-namespace Data {
 
-class IterationCount : public Interface
+class DataIterationCount : public DataInterface
 {
+protected:
+    std::map<const llvm::BasicBlock*, int> mCounts;
+
 public:
-    IterationCount() : mCount(0) {}
+    void increase(const llvm::BasicBlock &block);
 
-    virtual void merge(const Data &data);
+    int count(const llvm::BasicBlock &block) const;
 
-...
+public:
+    virtual DataIterationCount *clone() const;
 };
 
-} // namespace Data
 } // namespace Widening
 } // namespace Canal
 
