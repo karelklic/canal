@@ -199,16 +199,25 @@ Operations::interpretCall(const T &instruction,
 
     // Create the calling state.
     State callingState;
+    puts("Merging global");
     callingState.mergeGlobal(state);
 
     // TODO: not all function blocks should be merged to the state.
     // Only the function blocks accessible from the arguments and
     // global variables should be merged.
+    puts("Merging function blocks");
     callingState.mergeFunctionBlocks(state);
 
     // Add function arguments to the calling state.
     llvm::Function::ArgumentListType::const_iterator it =
         function->getArgumentList().begin();
+
+    CANAL_ASSERT_MSG(function->getArgumentList().size() == instruction.getNumArgOperands(),
+                     "Function has "
+                     << function->getArgumentList().size()
+                     << " arguments, call instruction has "
+                     << instruction.getNumArgOperands()
+                     << " operands.");
 
     for (unsigned i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
     {
@@ -223,9 +232,11 @@ Operations::interpretCall(const T &instruction,
         if (!value)
             return;
 
+        printf("Adding function variable\n");
         callingState.addFunctionVariable(*it, value->clone());
     }
 
+    puts("On function call");
     mCallback.onFunctionCall(*function,
                              callingState,
                              state,

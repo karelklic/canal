@@ -157,7 +157,11 @@ dynCast(const Y &val)
         return dynamic_cast<X>(val);
     }
     catch (std::bad_cast exception)
-        CANAL_FATAL_ERROR(exception.what());
+    {
+        CANAL_FATAL_ERROR(exception.what()
+                          << " from " << typeid(val).name()
+                          << " to " << typeid(X).name());
+    }
 }
 
 } // namespace Canal

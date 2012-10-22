@@ -8,7 +8,6 @@
 namespace llvm {
 class Function;
 class Value;
-class raw_ostream;
 } // namespace llvm
 
 namespace Canal {
@@ -27,6 +26,41 @@ typedef std::map<const llvm::Value*, Domain*> PlaceValueMap;
 /// variables are in abstract domain.
 class State
 {
+    /// The key (llvm::Value*) is not owned by this class.  It is not
+    /// deleted.  The value (Domain*) memory is owned by this
+    /// class, so it is deleted in state destructor.
+    PlaceValueMap mGlobalVariables;
+
+    /// Nameless memory/values allocated on the heap.  It's referenced
+    /// either by a pointer somewhere on a stack, by a global variable,
+    /// or by another Block or stack Block.
+    ///
+    /// The keys are not owned by this class.  They represent the place
+    /// where the block has been allocated.  The values are owned by
+    /// this class, so they are deleted in the state destructor.
+    PlaceValueMap mGlobalBlocks;
+
+    /// The value pointer does _not_ point to mFunctionBlocks! To connect
+    /// with a mFunctionBlocks item, create a Pointer object that
+    /// contains a pointer to a StackBlocks item.
+    ///
+    /// The key (llvm::Value*) is not owned by this class.  It is not
+    /// deleted.  The value (Domain*) memory is owned by this
+    /// class, so it is deleted in state destructor.
+    PlaceValueMap mFunctionVariables;
+
+    /// Nameless memory/values allocated on the stack.  The values are
+    /// referenced either by a pointer in mFunctionVariables or
+    /// mGlobalVariables, or by another item in mFunctionBlocks or
+    /// mGlobalBlocks.
+    ///
+    /// The members of the list are owned by this class, so they are
+    /// deleted in the state destructor.
+    PlaceValueMap mFunctionBlocks;
+
+    /// Value returned from function.
+    Domain *mReturnedValue;
+
 public:
     State();
     State(const State &state);
@@ -105,43 +139,6 @@ public:
 
     std::string toString(const llvm::Value &place,
                          SlotTracker &slotTracker) const;
-
-protected:
-    /// The key (llvm::Value*) is not owned by this class.  It is not
-    /// deleted.  The value (Domain*) memory is owned by this
-    /// class, so it is deleted in state destructor.
-    PlaceValueMap mGlobalVariables;
-
-    /// Nameless memory/values allocated on the heap.  It's referenced
-    /// either by a pointer somewhere on a stack, by a global variable,
-    /// or by another Block or stack Block.
-    ///
-    /// The keys are not owned by this class.  They represent the place
-    /// where the block has been allocated.  The values are owned by
-    /// this class, so they are deleted in the state destructor.
-    PlaceValueMap mGlobalBlocks;
-
-    /// The value pointer does _not_ point to mFunctionBlocks! To connect
-    /// with a mFunctionBlocks item, create a Pointer object that
-    /// contains a pointer to a StackBlocks item.
-    ///
-    /// The key (llvm::Value*) is not owned by this class.  It is not
-    /// deleted.  The value (Domain*) memory is owned by this
-    /// class, so it is deleted in state destructor.
-    PlaceValueMap mFunctionVariables;
-
-    /// Nameless memory/values allocated on the stack.  The values are
-    /// referenced either by a pointer in mFunctionVariables or
-    /// mGlobalVariables, or by another item in mFunctionBlocks or
-    /// mGlobalBlocks.
-    ///
-    /// The members of the list are owned by this class, so they are
-    /// deleted in the state destructor.
-    PlaceValueMap mFunctionBlocks;
-
-public:
-    /// Value returned from function.
-    Domain *mReturnedValue;
 };
 
 } // namespace Canal
