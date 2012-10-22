@@ -71,10 +71,10 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
     func->getInputState().merge(callState);
     resultState.mergeGlobal(func->getOutputState());
     resultState.mergeFunctionBlocks(func->getOutputState());
-    if (func->getOutputState().mReturnedValue)
+    if (func->getOutputState().getReturnedValue())
     {
         resultState.addFunctionVariable(resultPlace,
-                                        func->getOutputState().mReturnedValue->clone());
+                                        func->getOutputState().getReturnedValue()->clone());
     }
 }
 

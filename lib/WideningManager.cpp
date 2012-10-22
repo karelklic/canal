@@ -1,6 +1,7 @@
 #include "WideningManager.h"
 #include "WideningNumericalInfinity.h"
 #include "State.h"
+#include "StateMap.h"
 #include "Domain.h"
 
 namespace Canal {
@@ -31,15 +32,15 @@ Manager::widen(const llvm::BasicBlock &wideningPoint,
 
 void
 Manager::widen(const llvm::BasicBlock &wideningPoint,
-               PlaceValueMap &first,
-               const PlaceValueMap &second) const
+               StateMap &first,
+               const StateMap &second) const
 {
-    PlaceValueMap::const_iterator it2 = second.begin(),
+    StateMap::const_iterator it2 = second.begin(),
         it2end = second.end();
 
     for (; it2 != it2end; ++it2)
     {
-	PlaceValueMap::iterator it1 = first.find(it2->first);
+	StateMap::iterator it1 = first.find(it2->first);
 	if (it1 != first.end() && *it1->second != *it2->second)
         {
             widen(wideningPoint, *it1->second, *it2->second);

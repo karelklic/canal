@@ -48,12 +48,16 @@ libcanal_la_SOURCES = \
 	SlotTracker.h \
 	State.cpp \
 	State.h \
+	StateMap.cpp \
+	StateMap.h \
 	StringUtils.cpp \
 	StringUtils.h \
 	Structure.cpp \
 	Structure.h \
 	Utils.cpp \
 	Utils.h \
+	VariableArguments.cpp \
+	VariableArguments.h \
 	WideningDataInterface.h \
 	WideningDataIterationCount.cpp \
 	WideningDataIterationCount.h \

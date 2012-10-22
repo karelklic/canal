@@ -199,13 +199,11 @@ Operations::interpretCall(const T &instruction,
 
     // Create the calling state.
     State callingState;
-    puts("Merging global");
     callingState.mergeGlobal(state);
 
     // TODO: not all function blocks should be merged to the state.
     // Only the function blocks accessible from the arguments and
     // global variables should be merged.
-    puts("Merging function blocks");
     callingState.mergeFunctionBlocks(state);
 
     // Add function arguments to the calling state.
@@ -232,11 +230,9 @@ Operations::interpretCall(const T &instruction,
         if (!value)
             return;
 
-        printf("Adding function variable\n");
         callingState.addFunctionVariable(*it, value->clone());
     }
 
-    puts("On function call");
     mCallback.onFunctionCall(*function,
                              callingState,
                              state,
@@ -375,12 +371,7 @@ Operations::ret(const llvm::ReturnInst &instruction,
                                           constant);
 
     if (variable)
-    {
-        if (state.mReturnedValue)
-            state.mReturnedValue->merge(*variable);
-        else
-            state.mReturnedValue = variable->clone();
-    }
+        state.mergeToReturnedValue(*variable);
 }
 
 void

@@ -8,6 +8,7 @@
 namespace Canal {
 
 class Operations;
+class State;
 
 namespace Widening {
 class Manager;
@@ -49,7 +50,7 @@ protected:
     llvm::BasicBlock::const_iterator mInstruction;
 
     /// Current state.
-    State mState;
+    State *mState;
 
     /// Callback functions.
     IteratorCallback *mCallback;
@@ -69,7 +70,7 @@ public:
 
     bool isInitialized() const { return mInitialized; }
 
-    const State &getCurrentState() const { return mState; }
+    const State &getCurrentState() const { return *mState; }
 
     const Function &getCurrentFunction() const { return **mFunction; }
 

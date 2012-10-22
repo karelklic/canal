@@ -4,6 +4,8 @@
 #include <map>
 #include <vector>
 #include <string>
+#include "VariableArguments.h"
+#include "StateMap.h"
 
 namespace llvm {
 class Function;
@@ -15,10 +17,6 @@ namespace Canal {
 class Domain;
 class SlotTracker;
 
-/// llvm::Value represents a place in the program (an instruction,
-/// instance of llvm::Instruction).
-typedef std::map<const llvm::Value*, Domain*> PlaceValueMap;
-
 /// @brief Abstract memory state.
 ///
 /// Consists of function-level variables (also called registers) and
@@ -29,7 +27,7 @@ class State
     /// The key (llvm::Value*) is not owned by this class.  It is not
     /// deleted.  The value (Domain*) memory is owned by this
     /// class, so it is deleted in state destructor.
-    PlaceValueMap mGlobalVariables;
+    StateMap mGlobalVariables;
 
     /// Nameless memory/values allocated on the heap.  It's referenced
     /// either by a pointer somewhere on a stack, by a global variable,
@@ -38,7 +36,7 @@ class State
     /// The keys are not owned by this class.  They represent the place
     /// where the block has been allocated.  The values are owned by
     /// this class, so they are deleted in the state destructor.
-    PlaceValueMap mGlobalBlocks;
+    StateMap mGlobalBlocks;
 
     /// The value pointer does _not_ point to mFunctionBlocks! To connect
     /// with a mFunctionBlocks item, create a Pointer object that
@@ -47,7 +45,7 @@ class State
     /// The key (llvm::Value*) is not owned by this class.  It is not
     /// deleted.  The value (Domain*) memory is owned by this
     /// class, so it is deleted in state destructor.
-    PlaceValueMap mFunctionVariables;
+    StateMap mFunctionVariables;
 
     /// Nameless memory/values allocated on the stack.  The values are
     /// referenced either by a pointer in mFunctionVariables or
@@ -56,26 +54,21 @@ class State
     ///
     /// The members of the list are owned by this class, so they are
     /// deleted in the state destructor.
-    PlaceValueMap mFunctionBlocks;
+    StateMap mFunctionBlocks;
 
     /// Value returned from function.
     Domain *mReturnedValue;
+
+    /// Variable arguments added to the function.
+    VariableArguments mVariableArguments;
 
 public:
     State();
     State(const State &state);
     virtual ~State();
 
-    State &operator=(const State &state);
-
     bool operator==(const State &state) const;
     bool operator!=(const State &state) const;
-
-    /// Clears everything.  Releases all memory.
-    void clear();
-
-    /// Clears function variables, blocks and returned value.
-    void clearFunctionLevel();
 
     /// Merge everything.
     void merge(const State &state);
@@ -118,14 +111,20 @@ public:
     /// Adds a value created by alloca to the stack.
     void addFunctionBlock(const llvm::Value &place, Domain *value);
 
-    const PlaceValueMap &getGlobalVariables() const { return mGlobalVariables; }
-    PlaceValueMap &getGlobalVariables() { return mGlobalVariables; }
-    const PlaceValueMap &getGlobalBlocks() const { return mGlobalBlocks; }
-    PlaceValueMap &getGlobalBlocks() { return mGlobalBlocks; }
-    const PlaceValueMap &getFunctionVariables() const { return mFunctionVariables; }
-    PlaceValueMap &getFunctionVariables() { return mFunctionVariables; }
-    const PlaceValueMap &getFunctionBlocks() const { return mFunctionBlocks; }
-    PlaceValueMap &getFunctionBlocks() { return mFunctionBlocks; }
+    void setReturnedValue(Domain *value);
+
+    void mergeToReturnedValue(const Domain &value);
+
+    const Domain *getReturnedValue() const { return mReturnedValue; }
+
+    const StateMap &getGlobalVariables() const { return mGlobalVariables; }
+    StateMap &getGlobalVariables() { return mGlobalVariables; }
+    const StateMap &getGlobalBlocks() const { return mGlobalBlocks; }
+    StateMap &getGlobalBlocks() { return mGlobalBlocks; }
+    const StateMap &getFunctionVariables() const { return mFunctionVariables; }
+    StateMap &getFunctionVariables() { return mFunctionVariables; }
+    const StateMap &getFunctionBlocks() const { return mFunctionBlocks; }
+    StateMap &getFunctionBlocks() { return mFunctionBlocks; }
 
     /// Search both global and function variables for a place.  If the
     /// place is found, the variable is returned.  Otherwise NULL is
@@ -139,6 +138,11 @@ public:
 
     std::string toString(const llvm::Value &place,
                          SlotTracker &slotTracker) const;
+
+private:
+    /// Assignment operator declaration.  Prevents accidental
+    /// assignments of states.  Do not implement!
+    State &operator=(const State &state);
 };
 
 } // namespace Canal

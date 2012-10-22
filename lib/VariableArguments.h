@@ -10,11 +10,13 @@ class Instruction;
 
 namespace Canal {
 
+class Domain;
+
 class VariableArguments
 {
     // llvm::Instruction represents the calling instruction providing
     // the variable arguments.
-    typedef std::map<const llvm::Instruction*, std::vector<Domain*> > CallMapl;
+    typedef std::map<const llvm::Instruction*, std::vector<Domain*> > CallMap;
 
     CallMap mCalls;
 
@@ -27,6 +29,8 @@ public:
 
     /// Standard destructor.  Deletes all arguments.
     ~VariableArguments();
+
+    bool operator==(const VariableArguments &arguments) const;
 
     /// Merges the arguments per every instruction.
     void merge(const VariableArguments &arguments);

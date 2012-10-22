@@ -2,14 +2,17 @@
 #define LIBCANAL_WIDENING_MANAGER_H
 
 #include <vector>
-#include "State.h"
 
 namespace llvm {
 class BasicBlock;
 } // namespace llvm
 
 namespace Canal {
+
 class Domain;
+class State;
+class StateMap;
+
 namespace Widening {
 
 class Interface;
@@ -26,8 +29,8 @@ public:
 
 protected:
     void widen(const llvm::BasicBlock &wideningPoint,
-               PlaceValueMap &first,
-               const PlaceValueMap &second) const;
+               StateMap &first,
+               const StateMap &second) const;
 
     void widen(const llvm::BasicBlock &wideningPoint,
                Domain &first,

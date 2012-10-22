@@ -6,6 +6,7 @@
 #include "Operations.h"
 #include "Environment.h"
 #include "WideningManager.h"
+#include "State.h"
 #include <sstream>
 
 namespace Canal {
@@ -21,6 +22,7 @@ Iterator::Iterator(Module &module,
       mWideningManager(wideningManager),
       mChanged(true),
       mInitialized(false),
+      mState(new State()),
       mCallback(&emptyCallback)
 {
     mFunction = --mModule.end();
@@ -39,7 +41,7 @@ void
 Iterator::interpretInstruction()
 {
     // Interpret the instruction.
-    mOperations.interpretInstruction(*mInstruction, mState);
+    mOperations.interpretInstruction(*mInstruction, *mState);
 
     // Leave the instruction.
     mCallback->onInstructionExit(*mInstruction);
@@ -91,7 +93,7 @@ Iterator::toString() const
         if (it->getType()->isVoidTy())
             continue;
 
-        ss << mState.toString(*it, slotTracker);
+        ss << mState->toString(*it, slotTracker);
     }
 
     return ss.str();
@@ -105,13 +107,13 @@ Iterator::nextInstruction()
 
     if (mInstruction == (*mBasicBlock)->end())
     {
-        if (mState != (*mBasicBlock)->getOutputState())
+        if (*mState != (*mBasicBlock)->getOutputState())
         {
             mWideningManager.widen((*mBasicBlock)->getLlvmBasicBlock(),
                                    (*mBasicBlock)->getOutputState(),
-                                   mState);
+                                   *mState);
 
-            (*mBasicBlock)->getOutputState().merge(mState);
+            (*mBasicBlock)->getOutputState().merge(*mState);
             mChanged = true;
         }
 
@@ -141,7 +143,8 @@ Iterator::nextInstruction()
         // code must be interpreted at least once.
         (*mFunction)->updateBasicBlockInputState(**mBasicBlock);
 
-        mState = (*mBasicBlock)->getInputState();
+        delete mState;
+        mState = new State((*mBasicBlock)->getInputState());
         mInstruction = (*mBasicBlock)->begin();
         mCallback->onBasicBlockEnter(**mBasicBlock);
     }
