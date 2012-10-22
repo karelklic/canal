@@ -40,7 +40,9 @@ public:
     /// Standard constructor.
     Domain(const Environment &environment);
 
-    /// Copy constructor.
+    /// Copy constructor.  Careful!  Copy constructor of base class is
+    /// not called by automatically generated copy constructor of
+    /// an inherited class.
     Domain(const Domain &value);
 
     /// Virtual destructor.
