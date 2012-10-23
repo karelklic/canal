@@ -14,10 +14,9 @@ Structure::Structure(const Environment &environment,
 
 }
 
-Structure::Structure(const Structure &structure)
-    : Domain(structure.mEnvironment)
+Structure::Structure(const Structure &value)
+    : Domain(value), mMembers(value.mMembers)
 {
-    mMembers = structure.mMembers;
     std::vector<Domain*>::iterator it = mMembers.begin();
     for (; it != mMembers.end(); ++it)
         *it = (*it)->clone();
@@ -111,13 +110,6 @@ Structure::toString() const
         ss << indent((*it)->toString(), 4);
 
     return ss.str();
-}
-
-bool
-Structure::matchesString(const std::string &text,
-                         std::string &rationale) const
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 std::vector<Domain*>

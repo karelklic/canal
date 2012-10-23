@@ -41,7 +41,7 @@ Function::Function(const llvm::Function &function,
     // Initialize output state.
     const llvm::Type *returnType = mFunction.getReturnType();
     if (!returnType->isVoidTy())
-        mOutputState.mReturnedValue = constructors.create(*returnType);
+        mOutputState.setReturnedValue(constructors.create(*returnType));
 }
 
 Function::~Function()
@@ -143,10 +143,10 @@ Function::toString() const
     if (!mFunction.getReturnType()->isVoidTy())
     {
         ss << "returnedValue = ";
-        if (mOutputState.mReturnedValue)
+        if (mOutputState.getReturnedValue())
         {
             ss << Canal::indentExceptFirstLine(
-                mOutputState.mReturnedValue->toString(),
+                mOutputState.getReturnedValue()->toString(),
                 16);
         }
         else

@@ -68,13 +68,17 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
     Function *func = mModule.getFunction(function);
     CANAL_ASSERT_MSG(func, "Function not found in module!");
 
+    // Extend the input so the function can be re-interpreted.
     func->getInputState().merge(callState);
+
+    // Take the current function interpretation results and use them
+    // as a result of the function call.
     resultState.mergeGlobal(func->getOutputState());
     resultState.mergeFunctionBlocks(func->getOutputState());
-    if (func->getOutputState().mReturnedValue)
+    if (func->getOutputState().getReturnedValue())
     {
-        resultState.addFunctionVariable(resultPlace,
-                                        func->getOutputState().mReturnedValue->clone());
+        Domain *result = func->getOutputState().getReturnedValue()->clone();
+        resultState.addFunctionVariable(resultPlace, result);
     }
 }
 

@@ -25,6 +25,15 @@ Interval::Interval(const Environment &environment, const llvm::APFloat &number)
 {
 }
 
+Interval::Interval(const Interval &value)
+    : Domain(value),
+      mEmpty(value.mEmpty),
+      mTop(value.mTop),
+      mFrom(value.mFrom),
+      mTo(value.mTo)
+{
+}
+
 int
 Interval::compare(const Interval &value,
                   llvm::CmpInst::Predicate predicate) const
@@ -244,13 +253,6 @@ Interval::toString() const
 
     ss << std::endl;
     return ss.str();
-}
-
-bool
-Interval::matchesString(const std::string &text,
-                     std::string &rationale) const
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 float

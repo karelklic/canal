@@ -11,8 +11,11 @@ class Enumeration : public Domain, public AccuracyDomain
 {
 public:
     APIntUtils::USet mValues;
+
     bool mTop;
+
     unsigned mBitWidth;
+
     static const unsigned int mMaxSize = 40;
 
 public:
@@ -23,6 +26,9 @@ public:
     /// Initializes to the given value.
     Enumeration(const Environment &environment,
                 const llvm::APInt &number);
+
+    /// Copy constructor.
+    Enumeration(const Enumeration &value);
 
     unsigned getBitWidth() const { return mBitWidth; }
 
@@ -65,6 +71,11 @@ public:
     /// Does this enumeration represent single value?
     bool isSingleValue() const;
 
+private:
+    /// Assignment operator declaration.  Prevents accidental
+    /// assignments of domains.  Do not implement!
+    Enumeration &operator=(const Enumeration &value);
+
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
@@ -80,21 +91,6 @@ public: // Implementation of Domain.
     virtual size_t memoryUsage() const;
     /// Implementation of Domain::toString().
     virtual std::string toString() const;
-
-    /// Implementation of Domain::matchesString().
-    /// Examples of allowed input:
-    ///   enumeration 3 -4 5
-    ///   enumeration 0xff 0xfa
-    ///   enumeration
-    ///     0x1000000F
-    ///     0xABABABAB
-    ///   enumeration top
-    ///   enumeration empty
-    ///   enumeration
-    ///     empty
-    virtual bool matchesString(const std::string &text,
-                               std::string &rationale) const;
-
     /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *instruction);
 

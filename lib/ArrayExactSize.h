@@ -26,11 +26,17 @@ public:
     ExactSize(const Environment &environment,
               const std::vector<Domain*> &values);
 
-    ExactSize(const ExactSize &exactSize);
+    /// Copy constructor.
+    ExactSize(const ExactSize &value);
 
     virtual ~ExactSize();
 
     size_t size() const { return mValues.size(); }
+
+private:
+    /// Assignment operator declaration.  Prevents accidental
+    /// assignments of domains.  Do not implement!
+    ExactSize &operator=(const ExactSize &value);
 
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
@@ -47,9 +53,6 @@ public: // Implementation of Domain.
     virtual size_t memoryUsage() const;
     /// Implementation of Domain::toString().
     virtual std::string toString() const;
-    /// Implementation of Domain::matchesString().
-    virtual bool matchesString(const std::string &text,
-                               std::string &rationale) const;
 
     /// Implementation of Domain::setZero()
     virtual void setZero(const llvm::Value *instruction);

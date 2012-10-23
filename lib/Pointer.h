@@ -45,11 +45,11 @@ public:
                    const llvm::Type &type);
 
     /// Copy constructor.
-    InclusionBased(const InclusionBased &second);
+    InclusionBased(const InclusionBased &value);
 
     /// Copy constructor which changes the pointer type.
     /// Useful for bitcast and getelementptr operations.
-    InclusionBased(const InclusionBased &second,
+    InclusionBased(const InclusionBased &value,
                    const llvm::Type &newType);
 
     /// Standard destructor.
@@ -102,6 +102,11 @@ public:
 
     void store(const Domain &value, State &state);
 
+private:
+    /// Assignment operator declaration.  Prevents accidental
+    /// assignments of domains.  Do not implement!
+    InclusionBased &operator=(const InclusionBased &value);
+
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type -- it really overrides Domain::clone().
@@ -119,9 +124,6 @@ public: // Implementation of Domain.
     virtual size_t memoryUsage() const;
     /// Implementation of Domain::toString().
     virtual std::string toString() const;
-    /// Implementation of Domain::matchesString().
-    virtual bool matchesString(const std::string &text,
-                               std::string &rationale) const;
     /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *instruction);
 

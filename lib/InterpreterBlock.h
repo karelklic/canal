@@ -7,6 +7,7 @@
 #include "InterpreterBlockModule.h"
 #include "InterpreterBlockIterator.h"
 #include "InterpreterBlockOperationsCallback.h"
+#include "WideningManager.h"
 #include <vector>
 
 namespace Canal {
@@ -59,6 +60,8 @@ protected:
     OperationsCallback mOperationsCallback;
 
     Operations mOperations;
+
+    Widening::Manager mWideningManager;
 
     Iterator mIterator;
 };
