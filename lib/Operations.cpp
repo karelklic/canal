@@ -210,16 +210,10 @@ Operations::interpretCall(const T &instruction,
     llvm::Function::ArgumentListType::const_iterator it =
         function->getArgumentList().begin();
 
-    CANAL_ASSERT_MSG(function->getArgumentList().size() == instruction.getNumArgOperands(),
-                     "Function has "
-                     << function->getArgumentList().size()
-                     << " arguments, call instruction has "
-                     << instruction.getNumArgOperands()
-                     << " operands.");
-
-    for (unsigned i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
+    unsigned arg = 0;
+    for (; arg < function->getArgumentList().size(); ++arg, ++it)
     {
-        llvm::Value *operand = instruction.getArgOperand(i);
+        llvm::Value *operand = instruction.getArgOperand(arg);
 
         llvm::OwningPtr<Domain> constant;
         Domain *value = variableOrConstant(*operand,
@@ -231,6 +225,22 @@ Operations::interpretCall(const T &instruction,
             return;
 
         callingState.addFunctionVariable(*it, value->clone());
+    }
+
+    for (; arg < instruction.getNumArgOperands(); ++arg)
+    {
+        llvm::Value *operand = instruction.getArgOperand(arg);
+
+        llvm::OwningPtr<Domain> constant;
+        Domain *value = variableOrConstant(*operand,
+                                           state,
+                                           instruction,
+                                           constant);
+
+        if (!value)
+            return;
+
+        callingState.addVariableArgument(instruction, value->clone());
     }
 
     mCallback.onFunctionCall(*function,

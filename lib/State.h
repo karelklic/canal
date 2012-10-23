@@ -117,6 +117,8 @@ public:
 
     const Domain *getReturnedValue() const { return mReturnedValue; }
 
+    void addVariableArgument(const llvm::Instruction &place, Domain *argument);
+
     const StateMap &getGlobalVariables() const { return mGlobalVariables; }
     StateMap &getGlobalVariables() { return mGlobalVariables; }
     const StateMap &getGlobalBlocks() const { return mGlobalBlocks; }

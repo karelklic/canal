@@ -62,6 +62,7 @@ State::merge(const State &state)
     mFunctionBlocks.merge(state.mFunctionBlocks);
     mergeGlobal(state);
     mergeReturnedValue(state);
+    mVariableArguments.merge(state.mVariableArguments);
 }
 
 void
@@ -178,8 +179,16 @@ State::setReturnedValue(Domain *value)
 void
 State::mergeToReturnedValue(const Domain &value)
 {
-    CANAL_ASSERT(mReturnedValue);
-    mReturnedValue->merge(value);
+    if (mReturnedValue)
+        mReturnedValue->merge(value);
+    else
+        mReturnedValue = value.clone();
+}
+
+void
+State::addVariableArgument(const llvm::Instruction &place, Domain *argument)
+{
+    mVariableArguments.addArgument(place, argument);
 }
 
 Domain *
