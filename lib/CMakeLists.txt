@@ -22,8 +22,13 @@ Pointer.cpp
 PointerTarget.cpp
 SlotTracker.cpp
 State.cpp
+StateMap.cpp
 StringUtils.cpp
 Structure.cpp
-Utils.cpp)
+Utils.cpp
+VariableArguments.cpp
+WideningDataIterationCount.cpp
+WideningManager.cpp
+WideningNumericalInfinity.cpp)
 
 target_link_libraries(canal "${LLVM_MODULE_LIBS} ${LLVM_LDFLAGS}")
