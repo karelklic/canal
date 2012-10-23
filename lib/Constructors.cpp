@@ -218,6 +218,25 @@ Constructors::create(const llvm::Constant &value,
         return new Array::ExactSize(mEnvironment, values);
     }
 
+#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
+    if (llvm::isa<llvm::ConstantDataArray>(value))
+    {
+         const llvm::ConstantDataArray &arrayValue =
+            llvmCast<llvm::ConstantDataArray>(value);
+
+        unsigned elementCount = arrayValue.getNumElements();
+        std::vector<Domain*> values;
+        for (unsigned i = 0; i < elementCount; ++i)
+        {
+            values.push_back(create(*arrayValue.getElementAsConstant(i),
+                                    place,
+                                    state));
+        }
+
+        return new Array::ExactSize(mEnvironment, values);
+   }
+#endif
+
     if (llvm::isa<llvm::ConstantAggregateZero>(value))
     {
         const llvm::Type *type = value.getType();
