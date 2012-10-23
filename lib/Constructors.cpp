@@ -219,16 +219,16 @@ Constructors::create(const llvm::Constant &value,
     }
 
 #if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
-    if (llvm::isa<llvm::ConstantDataArray>(value))
+    if (llvm::isa<llvm::ConstantDataSequential>(value))
     {
-         const llvm::ConstantDataArray &arrayValue =
-            llvmCast<llvm::ConstantDataArray>(value);
+         const llvm::ConstantDataSquential &sequentialValue =
+            llvmCast<llvm::ConstantDataSequential>(value);
 
-        unsigned elementCount = arrayValue.getNumElements();
+        unsigned elementCount = sequentialValue.getNumElements();
         std::vector<Domain*> values;
         for (unsigned i = 0; i < elementCount; ++i)
         {
-            values.push_back(create(*arrayValue.getElementAsConstant(i),
+            values.push_back(create(*sequentialValue.getElementAsConstant(i),
                                     place,
                                     state));
         }
