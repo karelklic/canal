@@ -122,7 +122,9 @@ main(int argc, char **argv)
             fprintf(stderr, "%s\n", expansion);
         else
         {
-            add_history(expansion);
+            if (strlen(expansion) > 0)
+                add_history(expansion);
+
             gCommands.executeLine(expansion);
         }
 
