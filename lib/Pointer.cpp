@@ -18,23 +18,23 @@ InclusionBased::InclusionBased(const Environment &environment,
 {
 }
 
-InclusionBased::InclusionBased(const InclusionBased &second)
-    : Domain(second.mEnvironment),
-      mTargets(second.mTargets),
-      mType(second.mType),
-      mTop(second.mTop)
+InclusionBased::InclusionBased(const InclusionBased &value)
+    : Domain(value),
+      mTargets(value.mTargets),
+      mType(value.mType),
+      mTop(value.mTop)
 {
     PlaceTargetMap::iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
         it->second = new Target(*it->second);
 }
 
-InclusionBased::InclusionBased(const InclusionBased &second,
+InclusionBased::InclusionBased(const InclusionBased &value,
                                const llvm::Type &newType)
-    : Domain(second.mEnvironment),
-      mTargets(second.mTargets),
+    : Domain(value),
+      mTargets(value.mTargets),
       mType(newType),
-      mTop(second.mTop)
+      mTop(value.mTop)
 {
     PlaceTargetMap::iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
@@ -288,13 +288,6 @@ InclusionBased::toString() const
     }
 
     return ss.str();
-}
-
-bool
-InclusionBased::matchesString(const std::string &text,
-                              std::string &rationale) const
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 float

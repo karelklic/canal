@@ -22,6 +22,9 @@ public:
     Interval(const Environment &environment,
              const llvm::APFloat &number);
 
+    /// Copy constructor.
+    Interval(const Interval &value);
+
     // Compares a interval with another interval.
     // @returns
     //  -1 - one of the intervals is empty
@@ -43,6 +46,11 @@ public:
 
     llvm::APFloat getMin() const;
 
+private:
+    /// Assignment operator declaration.  Prevents accidental
+    /// assignments of domains.  Do not implement!
+    Interval &operator=(const Interval &value);
+
 public: // Implementation of Domain.
     // Implementation of Domain::clone().
     // Covariant return type.
@@ -58,11 +66,7 @@ public: // Implementation of Domain.
     virtual size_t memoryUsage() const;
     // Implementation of Domain::toString().
     virtual std::string toString() const;
-    // Implementation of Domain::matchesString().
-    virtual bool matchesString(const std::string &text,
-                               std::string &rationale) const;
-
-    /// Implementation of Domain::setZero()
+    /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *instruction);
 
 public: // Implementation of AccuracyDomain.

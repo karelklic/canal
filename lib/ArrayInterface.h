@@ -13,7 +13,7 @@ namespace Array {
 class Interface
 {
 public:
-    virtual ~Interface() {};
+    virtual ~Interface() {}
 
     /// Gets the value representing the array item or items pointed by
     /// the provided offset.  Caller is responsible for deleting the

@@ -46,7 +46,7 @@ SlotTracker::getLocalSlot(const llvm::Value &value)
 }
 
 const llvm::Value *
-SlotTracker::getLocalSlot(int num)
+SlotTracker::getLocalSlot(unsigned num)
 {
     // Check for uninitialized state and do lazy initialization.
     initialize();
@@ -66,7 +66,7 @@ SlotTracker::getGlobalSlot(const llvm::Value &value)
 }
 
 const llvm::Value *
-SlotTracker::getGlobalSlot(int num)
+SlotTracker::getGlobalSlot(unsigned num)
 {
     // Check for uninitialized state and do lazy initialization.
     initialize();

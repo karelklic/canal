@@ -210,9 +210,10 @@ Operations::interpretCall(const T &instruction,
     llvm::Function::ArgumentListType::const_iterator it =
         function->getArgumentList().begin();
 
-    for (unsigned i = 0; i < instruction.getNumArgOperands(); ++i, ++it)
+    unsigned arg = 0;
+    for (; arg < function->getArgumentList().size(); ++arg, ++it)
     {
-        llvm::Value *operand = instruction.getArgOperand(i);
+        llvm::Value *operand = instruction.getArgOperand(arg);
 
         llvm::OwningPtr<Domain> constant;
         Domain *value = variableOrConstant(*operand,
@@ -224,6 +225,22 @@ Operations::interpretCall(const T &instruction,
             return;
 
         callingState.addFunctionVariable(*it, value->clone());
+    }
+
+    for (; arg < instruction.getNumArgOperands(); ++arg)
+    {
+        llvm::Value *operand = instruction.getArgOperand(arg);
+
+        llvm::OwningPtr<Domain> constant;
+        Domain *value = variableOrConstant(*operand,
+                                           state,
+                                           instruction,
+                                           constant);
+
+        if (!value)
+            return;
+
+        callingState.addVariableArgument(instruction, value->clone());
     }
 
     mCallback.onFunctionCall(*function,
@@ -364,12 +381,7 @@ Operations::ret(const llvm::ReturnInst &instruction,
                                           constant);
 
     if (variable)
-    {
-        if (state.mReturnedValue)
-            state.mReturnedValue->merge(*variable);
-        else
-            state.mReturnedValue = variable->clone();
-    }
+        state.mergeToReturnedValue(*variable);
 }
 
 void

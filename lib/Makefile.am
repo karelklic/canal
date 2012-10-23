@@ -48,12 +48,24 @@ libcanal_la_SOURCES = \
 	SlotTracker.h \
 	State.cpp \
 	State.h \
+	StateMap.cpp \
+	StateMap.h \
 	StringUtils.cpp \
 	StringUtils.h \
 	Structure.cpp \
 	Structure.h \
 	Utils.cpp \
-	Utils.h
+	Utils.h \
+	VariableArguments.cpp \
+	VariableArguments.h \
+	WideningDataInterface.h \
+	WideningDataIterationCount.cpp \
+	WideningDataIterationCount.h \
+	WideningInterface.h \
+	WideningManager.cpp \
+	WideningManager.h \
+	WideningNumericalInfinity.cpp \
+	WideningNumerucalInfinity.h
 
 libcanal_la_CXXFLAGS = $(LLVM_CFLAGS)
 libcanal_la_LDFLAGS = $(LLVM_LDFLAGS) $(LLVM_LIBS) -version-info 0:0:0

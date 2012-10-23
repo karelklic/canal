@@ -8,6 +8,11 @@
 namespace Canal {
 
 class Operations;
+class State;
+
+namespace Widening {
+class Manager;
+} // namespace Widening
 
 namespace InterpreterBlock {
 
@@ -23,6 +28,7 @@ class Iterator
 protected:
     Module &mModule;
     Operations &mOperations;
+    Widening::Manager &mWideningManager;
 
     /// Indication of changed abstract state during last loop through
     /// the program.
@@ -44,14 +50,15 @@ protected:
     llvm::BasicBlock::const_iterator mInstruction;
 
     /// Current state.
-    State mState;
+    State *mState;
 
     /// Callback functions.
     IteratorCallback *mCallback;
 
 public:
     Iterator(Module &module,
-             Operations &operations);
+             Operations &operations,
+             Widening::Manager &wideningManager);
 
     void initialize();
 
@@ -63,7 +70,7 @@ public:
 
     bool isInitialized() const { return mInitialized; }
 
-    const State &getCurrentState() const { return mState; }
+    const State &getCurrentState() const { return *mState; }
 
     const Function &getCurrentFunction() const { return **mFunction; }
 

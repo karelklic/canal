@@ -35,6 +35,9 @@ public:
     Bitfield(const Environment &environment,
              const llvm::APInt &number);
 
+    /// Copy constructor.
+    Bitfield(const Bitfield &value);
+
     /// Return the number of bits of the represented number.
     unsigned getBitWidth() const { return mZeroes.getBitWidth(); }
 
@@ -88,6 +91,11 @@ public:
     /// Does these bits represent single value?
     bool isSingleValue() const;
 
+private:
+    /// Assignment operator declaration.  Prevents accidental
+    /// assignments of domains.  Do not implement!
+    Bitfield &operator=(const Bitfield &value);
+
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
@@ -103,10 +111,6 @@ public: // Implementation of Domain.
     virtual size_t memoryUsage() const;
     /// Implementation of Domain::toString().
     virtual std::string toString() const;
-    /// Implementation of Domain::matchesString().
-    virtual bool matchesString(const std::string &text,
-                               std::string &rationale) const;
-
     /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *instruction);
 

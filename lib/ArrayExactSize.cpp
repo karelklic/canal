@@ -24,10 +24,10 @@ ExactSize::ExactSize(const Environment &environment,
 {
 }
 
-ExactSize::ExactSize(const ExactSize &exactSize)
-    : Domain(exactSize.mEnvironment)
+ExactSize::ExactSize(const ExactSize &value)
+    : Domain(value)
 {
-    mValues = exactSize.mValues;
+    mValues = value.mValues;
     std::vector<Domain*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         *it = (*it)->clone();
@@ -121,13 +121,6 @@ ExactSize::toString() const
         ss << indent((*it)->toString(), 4);
 
     return ss.str();
-}
-
-bool
-ExactSize::matchesString(const std::string &text,
-                         std::string &rationale) const
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 static void

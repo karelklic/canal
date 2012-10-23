@@ -26,9 +26,14 @@ public:
                Domain *size,
                Domain *value);
 
-    SingleItem(const SingleItem &singleItem);
+    SingleItem(const SingleItem &value);
 
     virtual ~SingleItem();
+
+private:
+    /// Assignment operator declaration.  Prevents accidental
+    /// assignments of domains.  Do not implement!
+    SingleItem &operator=(const SingleItem &value);
 
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
@@ -45,11 +50,7 @@ public: // Implementation of Domain.
     virtual size_t memoryUsage() const;
     /// Implementation of Domain::toString().
     virtual std::string toString() const;
-    /// Implementation of Domain::matchesString().
-    virtual bool matchesString(const std::string &text,
-                               std::string &rationale) const;
-
-    /// Implementation of Domain::setZero()
+    /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *instruction);
 
     /// Implementation of Domain::add().

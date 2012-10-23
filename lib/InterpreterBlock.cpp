@@ -13,7 +13,7 @@ Interpreter::Interpreter(const llvm::Module *module)
       mModule(*module, mConstructors),
       mOperationsCallback(mModule, mConstructors),
       mOperations(mEnvironment, mConstructors, mOperationsCallback),
-      mIterator(mModule, mOperations)
+      mIterator(mModule, mOperations, mWideningManager)
 {
 }
 

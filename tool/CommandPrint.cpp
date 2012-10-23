@@ -6,6 +6,7 @@
 #include "lib/Domain.h"
 #include "lib/Utils.h"
 #include "lib/InterpreterBlockFunction.h"
+#include "lib/StateMap.h"
 #include <llvm/ValueSymbolTable.h>
 #include <llvm/Module.h>
 #include <cstdio>
@@ -21,14 +22,14 @@ CommandPrint::CommandPrint(Commands &commands)
 }
 
 static void
-filterPlaceValueMap(const Canal::PlaceValueMap &map,
-                    Canal::SlotTracker &slotTracker,
-                    const char *prefix,
-                    const std::string &arg,
-                    bool addFunctionName,
-                    std::vector<std::string> &result)
+filterStateMap(const Canal::StateMap &map,
+               Canal::SlotTracker &slotTracker,
+               const char *prefix,
+               const std::string &arg,
+               bool addFunctionName,
+               std::vector<std::string> &result)
 {
-    Canal::PlaceValueMap::const_iterator it = map.begin();
+    Canal::StateMap::const_iterator it = map.begin();
     for (; it != map.end(); ++it)
     {
         std::stringstream name;
@@ -80,18 +81,18 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args,
         result.push_back("@^");
     }
 
-    filterPlaceValueMap(curState.getGlobalVariables(),
-                        state->getSlotTracker(),
-                        "@", arg, false, result);
-    filterPlaceValueMap(curState.getGlobalBlocks(),
-                        state->getSlotTracker(),
-                        "@^", arg, true, result);
-    filterPlaceValueMap(curState.getFunctionVariables(),
-                        state->getSlotTracker(),
-                        "%", arg, false, result);
-    filterPlaceValueMap(curState.getFunctionBlocks(),
-                        state->getSlotTracker(),
-                        "%^", arg, false, result);
+    filterStateMap(curState.getGlobalVariables(),
+                   state->getSlotTracker(),
+                   "@", arg, false, result);
+    filterStateMap(curState.getGlobalBlocks(),
+                   state->getSlotTracker(),
+                   "@^", arg, true, result);
+    filterStateMap(curState.getFunctionVariables(),
+                   state->getSlotTracker(),
+                   "%", arg, false, result);
+    filterStateMap(curState.getFunctionBlocks(),
+                   state->getSlotTracker(),
+                   "%^", arg, false, result);
 
     return result;
 }
@@ -211,7 +212,7 @@ CommandPrint::run(const std::vector<std::string> &args)
             state->getInterpreter().getCurrentState();
 
         bool addFunctionName = (args[1] == "@^");
-        const Canal::PlaceValueMap *map = NULL;
+        const Canal::StateMap *map = NULL;
         if (args[1] == "%")
             map = &curState.getFunctionVariables();
         else if (args[1] == "@")
@@ -223,9 +224,12 @@ CommandPrint::run(const std::vector<std::string> &args)
         else
             CANAL_DIE();
 
-        filterPlaceValueMap(*map, state->getSlotTracker(),
-                            args[1].c_str(), args[1],
-                            addFunctionName, variables);
+        filterStateMap(*map,
+                       state->getSlotTracker(),
+                       args[1].c_str(),
+                       args[1],
+                       addFunctionName,
+                       variables);
 
         std::vector<std::string>::const_iterator it = variables.begin();
         for (; it != variables.end(); ++it)
