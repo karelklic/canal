@@ -29,6 +29,7 @@ public:
     /// Copy constructor.
     ExactSize(const ExactSize &value);
 
+    // Standard destructor.
     virtual ~ExactSize();
 
     size_t size() const { return mValues.size(); }
