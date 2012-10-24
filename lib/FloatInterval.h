@@ -86,6 +86,8 @@ public: // Implementation of AccuracyDomain.
     virtual void fmul(const Domain &a, const Domain &b);
     virtual void fdiv(const Domain &a, const Domain &b);
     virtual void frem(const Domain &a, const Domain &b);
+    virtual void uitofp(const Domain &value);
+    virtual void sitofp(const Domain &value);
 };
 
 } // namespace Float

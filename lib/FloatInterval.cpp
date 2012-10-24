@@ -1,4 +1,6 @@
 #include "FloatInterval.h"
+#include "IntegerContainer.h"
+#include "IntegerInterval.h"
 #include "Utils.h"
 #include <sstream>
 #include <iostream>
@@ -531,6 +533,29 @@ Interval::frem(const Domain &a, const Domain &b)
 }
 
 #undef OVERFLOW_TO_TOP
+
+void
+Interval::uitofp(const Domain &value) {
+    const Canal::Integer::Container &c = dynCast<const Canal::Integer::Container&>(value);
+    llvm::APInt min, max;
+    if (!c.getInterval().unsignedMin(min) || !c.getInterval().unsignedMax(max)) {
+        return setTop();
+    }
+    mFrom = llvm::APFloat(min);
+    mTo = llvm::APFloat(max);
+}
+
+void
+Interval::sitofp(const Domain &value) {
+    const Canal::Integer::Container &c = dynCast<const Canal::Integer::Container&>(value);
+    llvm::APInt min, max;
+    if (!c.getInterval().signedMin(min) || !c.getInterval().signedMax(max)) {
+        return setTop();
+    }
+    mFrom = llvm::APFloat(min);
+    mTo = llvm::APFloat(max);
+}
+
 
 } // namespace Float
 } // namespace Canal
