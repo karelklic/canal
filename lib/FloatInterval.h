@@ -80,6 +80,12 @@ public: // Implementation of AccuracyDomain.
     virtual bool isTop() const;
     // Implementation of AccuracyDomain::setTop().
     virtual void setTop();
+
+    virtual void fadd(const Domain &a, const Domain &b);
+    virtual void fsub(const Domain &a, const Domain &b);
+    virtual void fmul(const Domain &a, const Domain &b);
+    virtual void fdiv(const Domain &a, const Domain &b);
+    virtual void frem(const Domain &a, const Domain &b);
 };
 
 } // namespace Float

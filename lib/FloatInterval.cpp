@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include <sstream>
 #include <iostream>
+#define ROUNDING_MODE llvm::APFloat::rmNearestTiesToEven
 
 namespace Canal {
 namespace Float {
@@ -317,6 +318,219 @@ Interval::setZero(const llvm::Value *instruction)
     mTo = llvm::APFloat::getZero(mTo.getSemantics());
 }
 
+//See IntegerInterval.cpp minMax
+static bool minMax(llvm::APFloat& min, llvm::APFloat &max,
+                   const llvm::APFloat& fromFrom, const llvm::APFloat& fromTo,
+                   const llvm::APFloat& toFrom, const llvm::APFloat& toTo)
+{
+    llvm::APFloat::cmpResult res;
+#define CMP(x, y) res = x.compare(y); if (res == llvm::APFloat::cmpUnordered) return true;
+#define CMPRES res == llvm::APFloat::cmpLessThan
+    CMP(toTo, toFrom);
+    if (CMPRES)
+    { // toTo < toFrom
+        CMP(toTo, fromTo);
+        if (CMPRES)
+        { // toTo < (toFrom, fromTo)
+            CMP(toTo, fromFrom);
+            if (CMPRES)
+            { // toTo < (toFrom, fromTo, fromFrom)
+                min = toTo;
+                CMP(toFrom, fromTo);
+                if (CMPRES)
+                { // toTo < (fromFrom, toFrom < fromTo)
+                    CMP(fromFrom, fromTo);
+                    if (CMPRES)
+                        max = fromTo; // toTo < (fromFrom, toFrom) < fromTo
+                    else
+                        max = fromFrom; // toTo < toFrom < fromTo <= fromFrom
+                }
+            }
+            else
+            { // fromFrom <= toTo < (toFrom, fromTo)
+                min = fromFrom;
+                CMP(toFrom, fromTo);
+                if (CMPRES)
+                    max = fromTo; // fromFrom <= toTo < toFrom < fromTo;
+                else
+                    max = toFrom; // fromFrom <= toTo < fromTo <= toFrom;
+            }
+        }
+        else
+        { // fromTo <= toTo < toFrom
+            CMP(fromTo, fromFrom);
+            if (CMPRES)
+            { // fromTo <= (fromFrom, toTo < toFrom)
+                min = fromTo;
+                CMP(fromFrom, toFrom);
+                if (CMPRES)
+                    max = toFrom; // fromTo <= (fromFrom, toTo) < toFrom
+                else
+                    max = fromFrom; // fromTo <= toTo < toFrom <= fromFrom;
+            }
+            else
+            { // fromFrom <= fromTo <= toTo < toFrom
+                min = fromFrom;
+                max = toFrom;
+            }
+        }
+    }
+    else
+    { // toFrom <= toTo
+        CMP(toFrom, fromTo);
+        if (CMPRES)
+        { // toFrom <= (toTo, fromTo)
+            CMP(toFrom, fromFrom);
+            if (CMPRES)
+            { // toFrom <= (toTo, fromTo, fromFrom)
+                min = toFrom;
+                CMP(toTo, fromTo);
+                if (CMPRES)
+                { // toFrom <= (fromFrom, toTo < fromTo)
+                    CMP(fromFrom, fromTo);
+                    if (CMPRES)
+                        max = fromTo; // toFrom <= (fromFrom, toTo) < fromTo
+                    else
+                        max = fromFrom; // toFrom <= toTo < fromTo <= fromFrom
+                }
+                else
+                { // toFrom <= (fromFrom, fromTo <= toTo)
+                    CMP(fromFrom, toTo);
+                    if (CMPRES)
+                        max = toTo; // toFrom <= (fromTo, fromFrom) <= toTo
+                    else
+                        max = fromFrom; // toFrom <= fromTo <= toTo <= fromFrom
+                }
+            }
+            else
+            { // fromFrom <= toFrom <= (toTo, fromTo)
+                min = fromFrom;
+                CMP(toTo, fromTo);
+                if (CMPRES)
+                    max = fromTo; // fromFrom <= toFrom <= toTo < fromTo
+                else
+                    max = toTo; // fromFrom <= toFrom <= fromTo <= toTo
+            }
+        }
+        else
+        { // fromTo <= toFrom <= toTo
+            CMP(fromTo, fromFrom);
+            if (CMPRES)
+            { // fromTo <= (fromFrom, toFrom <= toTo)
+                min = fromTo;
+                CMP(fromFrom, toTo);
+                if (CMPRES)
+                    max = toTo; // fromTo <= (fromFrom, toFrom) <= toTo
+                else
+                    max = fromFrom; // fromTo <= toFrom <= toTo <= fromFrom
+            }
+            else
+            { // fromFrom <= fromTo <= toFrom <= toTo
+                min = fromFrom;
+                max = toTo;
+            }
+        }
+    }
+#undef CMP
+#undef CMPRES
+    return false;
+}
+
+#define OVERFLOW_TO_TOP(op) if (op != llvm::APFloat::opOK) return setTop();
+
+void
+Interval::fadd(const Domain &a, const Domain &b)
+{
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty) return;
+
+    mTop = (aa.mTop || bb.mTop);
+    if (!mTop) {
+        mFrom = aa.mFrom;
+        OVERFLOW_TO_TOP(mFrom.add(bb.mFrom, ROUNDING_MODE));
+
+        mTo = aa.mTo;
+        OVERFLOW_TO_TOP(mTo.add(bb.mFrom, ROUNDING_MODE));
+    }
+}
+
+void
+Interval::fsub(const Domain &a, const Domain &b)
+{
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty) return;
+
+    mTop = (aa.mTop || bb.mTop);
+    if (!mTop) {
+        mFrom = aa.mFrom;
+        OVERFLOW_TO_TOP(mFrom.subtract(bb.mFrom, ROUNDING_MODE));
+
+        mTo = aa.mTo;
+        OVERFLOW_TO_TOP(mTo.subtract(bb.mFrom, ROUNDING_MODE));
+    }
+}
+
+void
+Interval::fmul(const Domain &a, const Domain &b)
+{
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty) return;
+
+    mTop = (aa.mTop || bb.mTop);
+    if (!mTop) {
+        llvm::APFloat fromFrom(aa.mFrom), fromTo(aa.mFrom),
+                toFrom(aa.mTo), toTo(aa.mTo);
+        OVERFLOW_TO_TOP(fromFrom.multiply(bb.mFrom, ROUNDING_MODE));
+        OVERFLOW_TO_TOP(fromTo.multiply(bb.mTo, ROUNDING_MODE));
+        OVERFLOW_TO_TOP(toFrom.multiply(bb.mFrom, ROUNDING_MODE));
+        OVERFLOW_TO_TOP(toTo.multiply(bb.mTo, ROUNDING_MODE));
+
+        mTop = minMax(mFrom, mTo,
+               fromFrom, fromTo, toFrom, toTo);
+    }
+}
+
+void
+Interval::fdiv(const Domain &a, const Domain &b)
+{
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty) return;
+
+    mTop = (aa.mTop || bb.mTop);
+    if (!mTop) {
+        llvm::APFloat fromFrom(aa.mFrom), fromTo(aa.mFrom),
+                toFrom(aa.mTo), toTo(aa.mTo);
+        OVERFLOW_TO_TOP(fromFrom.divide(bb.mFrom, ROUNDING_MODE));
+        OVERFLOW_TO_TOP(fromTo.divide(bb.mTo, ROUNDING_MODE));
+        OVERFLOW_TO_TOP(toFrom.divide(bb.mFrom, ROUNDING_MODE));
+        OVERFLOW_TO_TOP(toTo.divide(bb.mTo, ROUNDING_MODE));
+
+        mTop = minMax(mFrom, mTo,
+               fromFrom, fromTo, toFrom, toTo);
+    }
+}
+
+void
+Interval::frem(const Domain &a, const Domain &b)
+{
+    const Interval &aa = dynCast<const Interval&>(a),
+        &bb = dynCast<const Interval&>(b);
+    mEmpty = (aa.mEmpty || bb.mEmpty);
+    if (mEmpty) return;
+
+    mTop = (aa.mTop || bb.mTop);
+    setTop();
+}
+
+#undef OVERFLOW_TO_TOP
 
 } // namespace Float
 } // namespace Canal
