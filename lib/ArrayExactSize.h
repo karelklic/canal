@@ -15,9 +15,16 @@ public:
     std::vector<Domain*> mValues;
 
 public:
-    ExactSize(const Environment &environment, const uint64_t size, const Domain* value);
-    ExactSize(const Environment &environment, const std::vector<Domain*> values);
+    ExactSize(const Environment &environment,
+              uint64_t size,
+              const Domain &value);
+
+    ExactSize(const Environment &environment,
+              const std::vector<Domain*> &values);
+
     ExactSize(const ExactSize &exactSize);
+
+    // Standard destructor.
     virtual ~ExactSize();
 
     size_t size() const { return mValues.size(); }
