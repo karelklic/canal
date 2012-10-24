@@ -10,7 +10,7 @@
 #include "State.h"
 #include <llvm/Constants.h>
 #include <llvm/Function.h>
-#include <stdio.h>
+#include <llvm/ADT/OwningPtr.h>
 
 namespace Canal {
 
@@ -26,13 +26,18 @@ Constructors::create(const llvm::Type &type) const
 
     if (type.isIntegerTy())
     {
-        llvm::IntegerType &integerType = llvmCast<llvm::IntegerType>(type);
-        return new Integer::Container(mEnvironment, integerType.getBitWidth());
+        llvm::IntegerType &integerType =
+            llvmCast<llvm::IntegerType>(type);
+
+        return new Integer::Container(mEnvironment,
+                                      integerType.getBitWidth());
     }
 
     if (type.isFloatingPointTy())
     {
-        const llvm::fltSemantics *semantics = getFloatingPointSemantics(type);
+        const llvm::fltSemantics *semantics =
+            getFloatingPointSemantics(type);
+
         return new Float::Interval(mEnvironment, *semantics);
     }
 
@@ -51,16 +56,23 @@ Constructors::create(const llvm::Type &type) const
     if (type.isArrayTy() || type.isVectorTy())
     {
         uint64_t size;
-        if (type.isArrayTy()) {
-            const llvm::ArrayType &arrayType = llvm::cast<llvm::ArrayType>(type);
+        if (type.isArrayTy())
+        {
+            const llvm::ArrayType &arrayType =
+                llvm::cast<llvm::ArrayType>(type);
+
             size = arrayType.getNumElements();
         }
-        else {
-            const llvm::VectorType &vectorType = llvm::cast<llvm::VectorType>(type);
+        else
+        {
+            const llvm::VectorType &vectorType =
+                llvm::cast<llvm::VectorType>(type);
+
             size = vectorType.getNumElements();
         }
-        Domain* value = this->create(*type.getContainedType(0));
-        return new Array::ExactSize(mEnvironment, size, value);
+
+        llvm::OwningPtr<Domain> value(create(*type.getContainedType(0)));
+        return new Array::ExactSize(mEnvironment, size, *value);
     }
 
     if (type.isStructTy())
@@ -81,6 +93,7 @@ Constructors::create(const llvm::Type &type) const
 
 Domain *
 Constructors::create(const llvm::Constant &value,
+                     const llvm::Value &place,
                      const State *state) const
 {
     if (llvm::isa<llvm::UndefValue>(value))
@@ -101,11 +114,12 @@ Constructors::create(const llvm::Constant &value,
             llvmCast<llvm::ConstantPointerNull>(value);
 
         const llvm::PointerType &pointerType = *nullValue.getType();
-        Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
-            mEnvironment, *pointerType.getElementType());
+        Pointer::InclusionBased *constPointer;
+        constPointer = new Pointer::InclusionBased(mEnvironment,
+                                                   *pointerType.getElementType());
 
         constPointer->addTarget(Pointer::Target::Constant,
-                                &value,
+                                &place,
                                 NULL,
                                 std::vector<Domain*>(),
                                 NULL);
@@ -115,15 +129,21 @@ Constructors::create(const llvm::Constant &value,
 
     if (llvm::isa<llvm::ConstantExpr>(value))
     {
-        const llvm::ConstantExpr &exprValue = llvmCast<llvm::ConstantExpr>(value);
-        CANAL_ASSERT_MSG(state, "State is mandatory for constant expressions.");
+        CANAL_ASSERT_MSG(state,
+                         "State is mandatory for constant expressions.");
+
+        const llvm::ConstantExpr &exprValue =
+            llvmCast<llvm::ConstantExpr>(value);
 
         Domain *variable = NULL;
         bool deleteVariable = false;
         const llvm::Value &firstValue = **value.op_begin();
         if (llvm::isa<llvm::ConstantExpr>(firstValue))
         {
-            variable = create(llvmCast<llvm::ConstantExpr>(firstValue), state);
+            variable = create(llvmCast<llvm::ConstantExpr>(firstValue),
+                              place,
+                              state);
+
             deleteVariable = true;
         }
         else
@@ -136,10 +156,10 @@ Constructors::create(const llvm::Constant &value,
         switch (exprValue.getOpcode())
         {
         case llvm::Instruction::GetElementPtr:
-            result = createGetElementPtr(exprValue, *variable);
+            result = createGetElementPtr(exprValue, *variable, place);
             break;
         case llvm::Instruction::BitCast:
-            result = createBitCast(exprValue, *variable);
+            result = createBitCast(exprValue, *variable, place);
             break;
         default:
             CANAL_NOT_IMPLEMENTED();
@@ -161,30 +181,75 @@ Constructors::create(const llvm::Constant &value,
 
     if (llvm::isa<llvm::ConstantStruct>(value))
     {
-        const llvm::ConstantStruct &structValue = llvmCast<llvm::ConstantStruct>(value);
+        const llvm::ConstantStruct &structValue =
+            llvmCast<llvm::ConstantStruct>(value);
+
         uint64_t elementCount = structValue.getType()->getNumElements();
         std::vector<Domain*> members;
         for (uint64_t i = 0; i < elementCount; ++i)
-            members.push_back(create(*structValue.getOperand(i), state));
+        {
+            members.push_back(create(*structValue.getOperand(i),
+                                     place,
+                                     state));
+        }
 
         return new Structure(mEnvironment, members);
     }
 
     if (llvm::isa<llvm::ConstantVector>(value))
     {
-        CANAL_NOT_IMPLEMENTED();
+        const llvm::ConstantVector &vectorValue =
+            llvmCast<llvm::ConstantVector>(value);
+
+        // VectorType::getNumElements returns unsigned int.
+        unsigned elementCount = vectorValue.getType()->getNumElements();
+        std::vector<Domain*> values;
+        for (unsigned i = 0; i < elementCount; ++i)
+        {
+            values.push_back(create(*vectorValue.getOperand(i),
+                                    place,
+                                    state));
+        }
+
+        return new Array::ExactSize(mEnvironment, values);
     }
 
     if (llvm::isa<llvm::ConstantArray>(value))
     {
-        const llvm::ConstantArray &arrayValue = llvmCast<llvm::ConstantArray>(value);
+        const llvm::ConstantArray &arrayValue =
+            llvmCast<llvm::ConstantArray>(value);
+
+        // ArrayType::getNumElements returns uint64_t.
         uint64_t elementCount = arrayValue.getType()->getNumElements();
         std::vector<Domain*> values;
         for (uint64_t i = 0; i < elementCount; ++i)
-            values.push_back(create(*arrayValue.getOperand(i), state));
+        {
+            values.push_back(create(*arrayValue.getOperand(i),
+                                    place,
+                                    state));
+        }
 
         return new Array::ExactSize(mEnvironment, values);
     }
+
+#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
+    if (llvm::isa<llvm::ConstantDataSequential>(value))
+    {
+         const llvm::ConstantDataSquential &sequentialValue =
+            llvmCast<llvm::ConstantDataSequential>(value);
+
+        unsigned elementCount = sequentialValue.getNumElements();
+        std::vector<Domain*> values;
+        for (unsigned i = 0; i < elementCount; ++i)
+        {
+            values.push_back(create(*sequentialValue.getElementAsConstant(i),
+                                    place,
+                                    state));
+        }
+
+        return new Array::ExactSize(mEnvironment, values);
+   }
+#endif
 
     if (llvm::isa<llvm::ConstantAggregateZero>(value))
     {
@@ -199,11 +264,12 @@ Constructors::create(const llvm::Constant &value,
         const llvm::Function &functionValue =
             llvmCast<llvm::Function>(value);
 
-        Pointer::InclusionBased *constPointer = new Pointer::InclusionBased(
-            mEnvironment, *functionValue.getFunctionType());
+        Pointer::InclusionBased *constPointer;
+        constPointer = new Pointer::InclusionBased(mEnvironment,
+                                                   *functionValue.getFunctionType());
 
         constPointer->addTarget(Pointer::Target::Function,
-                                &value,
+                                &place,
                                 &value,
                                 std::vector<Domain*>(),
                                 NULL);
@@ -242,7 +308,8 @@ Constructors::getFloatingPointSemantics(const llvm::Type &type)
 
 Domain *
 Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
-                                  const Domain &variable) const
+                                  const Domain &variable,
+                                  const llvm::Value &place) const
 {
     std::vector<Domain*> offsets;
     llvm::ConstantExpr::const_op_iterator it = value.op_begin() + 1;
@@ -251,7 +318,7 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
         const llvm::ConstantInt &constant =
             llvmCast<llvm::ConstantInt>(**it);
 
-        offsets.push_back(create(constant, NULL));
+        offsets.push_back(create(constant, place, NULL));
     }
 
     const llvm::PointerType &pointerType =
@@ -262,15 +329,19 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
         dynCast<const Pointer::InclusionBased*>(&variable);
 
     if (pointer)
-        return pointer->getElementPtr(offsets, *pointerType.getElementType());
+    {
+        return pointer->getElementPtr(offsets,
+                                      *pointerType.getElementType());
+    }
 
     // GetElementPtr on anything except a pointer.  For example, it is
-    // used for arrays.
-    Pointer::InclusionBased *result =
-        new Pointer::InclusionBased(mEnvironment, *pointerType.getElementType());
+    // called on arrays and structures.
+    Pointer::InclusionBased *result;
+    result = new Pointer::InclusionBased(mEnvironment,
+                                         *pointerType.getElementType());
 
     result->addTarget(Pointer::Target::Block,
-                      &value,
+                      &place,
                       *value.op_begin(),
                       offsets,
                       NULL);
@@ -280,7 +351,8 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
 
 Domain *
 Constructors::createBitCast(const llvm::ConstantExpr &value,
-                            const Domain &variable) const
+                            const Domain &variable,
+                            const llvm::Value &place) const
 {
     // BitCast from Pointer.  It is always a bitcast to some other
     // pointer.
@@ -299,12 +371,12 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
     // BitCast from anything to a pointer.
     if (pointerType)
     {
-        Pointer::InclusionBased *result =
-            new Pointer::InclusionBased(mEnvironment,
-                                        *pointerType->getElementType());
+        Pointer::InclusionBased *result;
+        result = new Pointer::InclusionBased(mEnvironment,
+                                             *pointerType->getElementType());
 
         result->addTarget(Pointer::Target::Block,
-                          &value,
+                          &place,
                           *value.op_begin(),
                           std::vector<Domain*>(),
                           NULL);

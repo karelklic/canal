@@ -4,7 +4,7 @@
 #include "Domain.h"
 
 namespace llvm {
-    class APInt;
+class APInt;
 }
 
 namespace Canal {
@@ -29,7 +29,7 @@ public:
               const llvm::APInt &number);
 
     /// Copy constructor.  Creates independent copy of the container.
-    Container(const Container &container);
+    Container(const Container &value);
 
     /// Destructor.  Deletes the contents of the container.
     virtual ~Container();
@@ -85,6 +85,11 @@ public:
     ///   correct value.
     bool unsignedMax(llvm::APInt &result) const;
 
+private:
+    /// Assignment operator declaration.  Prevents accidental
+    /// assignments of domains.  Do not implement!
+    Container &operator=(const Container &value);
+
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
@@ -100,19 +105,7 @@ public: // Implementation of Domain.
     virtual size_t memoryUsage() const;
     /// Implementation of Domain::toString().
     virtual std::string toString() const;
-
-    /// Implementation of Domain::matchesString().
-    /// Examples:
-    ///   integer
-    ///     enumeration
-    ///       -8
-    ///   integer
-    ///     enumeration -10 2 4 6 8
-    ///     interval -10 8
-    virtual bool matchesString(const std::string &text,
-                               std::string &rationale) const;
-
-    /// Implementation of Domain::setZero()
+    /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *instruction);
 
     /// Implementation of Domain::add().

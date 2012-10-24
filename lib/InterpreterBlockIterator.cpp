@@ -5,6 +5,8 @@
 #include "InterpreterBlockIteratorCallback.h"
 #include "Operations.h"
 #include "Environment.h"
+#include "WideningManager.h"
+#include "State.h"
 #include <sstream>
 
 namespace Canal {
@@ -12,11 +14,15 @@ namespace InterpreterBlock {
 
 static IteratorCallback emptyCallback;
 
-Iterator::Iterator(Module &module, Operations &operations)
+Iterator::Iterator(Module &module,
+                   Operations &operations,
+                   Widening::Manager &wideningManager)
     : mModule(module),
       mOperations(operations),
+      mWideningManager(wideningManager),
       mChanged(true),
       mInitialized(false),
+      mState(new State()),
       mCallback(&emptyCallback)
 {
     mFunction = --mModule.end();
@@ -35,7 +41,7 @@ void
 Iterator::interpretInstruction()
 {
     // Interpret the instruction.
-    mOperations.interpretInstruction(*mInstruction, mState);
+    mOperations.interpretInstruction(*mInstruction, *mState);
 
     // Leave the instruction.
     mCallback->onInstructionExit(*mInstruction);
@@ -64,20 +70,21 @@ Iterator::interpretInstruction()
 std::string
 Iterator::toString() const
 {
-    SlotTracker &slotTracker = mOperations.getEnvironment().getSlotTracker();
-
     std::stringstream ss;
     ss << "***************************************" << std::endl;
     ss << "* iterator " << std::endl;
     ss << "***************************************" << std::endl;
-
     ss << "** function " << (*mFunction)->getName().str() << std::endl;
     ss << "*** basicBlock ";
-    slotTracker.setActiveFunction(*(*mBasicBlock)->getLlvmBasicBlock().getParent());
-    if ((*mBasicBlock)->getLlvmBasicBlock().hasName())
-        ss << (*mBasicBlock)->getLlvmBasicBlock().getName().str();
+    SlotTracker &slotTracker = mOperations.getEnvironment().getSlotTracker();
+    const llvm::BasicBlock &basicBlock = (*mBasicBlock)->getLlvmBasicBlock();
+    const llvm::Function &function = (*mFunction)->getLlvmFunction();
+    slotTracker.setActiveFunction(function);
+    if (basicBlock.hasName())
+        ss << basicBlock.getName().str();
     else
-        ss << "<label>:" << slotTracker.getLocalSlot((*mBasicBlock)->getLlvmBasicBlock());
+        ss << "<label>:" << slotTracker.getLocalSlot(basicBlock);
+
     ss << std::endl;
 
     llvm::BasicBlock::const_iterator it = (*mBasicBlock)->begin();
@@ -86,7 +93,7 @@ Iterator::toString() const
         if (it->getType()->isVoidTy())
             continue;
 
-        ss << mState.toString(*it, slotTracker);
+        ss << mState->toString(*it, slotTracker);
     }
 
     return ss.str();
@@ -100,9 +107,13 @@ Iterator::nextInstruction()
 
     if (mInstruction == (*mBasicBlock)->end())
     {
-        if (mState != (*mBasicBlock)->getOutputState())
+        if (*mState != (*mBasicBlock)->getOutputState())
         {
-            (*mBasicBlock)->getOutputState().merge(mState);
+            mWideningManager.widen((*mBasicBlock)->getLlvmBasicBlock(),
+                                   (*mBasicBlock)->getOutputState(),
+                                   *mState);
+
+            (*mBasicBlock)->getOutputState().merge(*mState);
             mChanged = true;
         }
 
@@ -132,7 +143,8 @@ Iterator::nextInstruction()
         // code must be interpreted at least once.
         (*mFunction)->updateBasicBlockInputState(**mBasicBlock);
 
-        mState = (*mBasicBlock)->getInputState();
+        delete mState;
+        mState = new State((*mBasicBlock)->getInputState());
         mInstruction = (*mBasicBlock)->begin();
         mCallback->onBasicBlockEnter(**mBasicBlock);
     }

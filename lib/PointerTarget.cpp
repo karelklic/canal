@@ -1,6 +1,7 @@
 #include "PointerTarget.h"
 #include "ArrayInterface.h"
 #include "IntegerContainer.h"
+#include "IntegerEnumeration.h"
 #include "SlotTracker.h"
 #include "State.h"
 #include "Utils.h"
@@ -29,9 +30,16 @@ Target::Target(const Environment &environment,
                      type == Constant,
                      "Invalid type.");
 
-    CANAL_ASSERT_MSG((type == Constant && !target) ||
-                     (type != Constant && target),
-                     "Invalid value of target.");
+    CANAL_ASSERT_MSG(type != Constant || !target,
+                     "Target must not be present for numeric pointers.");
+
+    CANAL_ASSERT_MSG(type == Constant || target,
+                     "Target must be present for pointers to blocks/functions.");
+
+    CANAL_ASSERT_MSG(!target ||
+                     llvm::isa<llvm::Instruction>(target) ||
+                     llvm::isa<llvm::GlobalValue>(target),
+                     "Target muse be either an instruction or a global value.");
 
     CANAL_ASSERT_MSG(type != Constant || offsets.empty(),
                      "Offsets cannot be present for constant pointers "
@@ -191,15 +199,18 @@ Target::toString(SlotTracker &slotTracker) const
     case Block:
     {
         const llvm::Instruction *instruction =
-            llvmCast<llvm::Instruction>(mTarget);
+            llvm::dyn_cast<llvm::Instruction>(mTarget);
 
         if (instruction)
         {
-            const llvm::Function &function =
-                *instruction->getParent()->getParent();
+            const llvm::Function *function =
+                instruction->getParent()->getParent();
 
-            ss << " @" << Canal::getName(function, slotTracker);
-            ss << ":^" << Canal::getName(*instruction, slotTracker);
+            ss << " ";
+            if (function)
+                ss << "@" << Canal::getName(*function, slotTracker) << ":";
+
+            ss << "^" << Canal::getName(*instruction, slotTracker);
         }
         else
             ss << " ^" << Canal::getName(*mTarget, slotTracker);
@@ -233,6 +244,8 @@ Target::toString(SlotTracker &slotTracker) const
         ss << "    numericOffset" << std::endl;
         ss << indent(mNumericOffset->toString(), 8);
     }
+    else if (mType == Constant)
+        ss << "    null" << std::endl;
 
     return ss.str();
 }
@@ -240,29 +253,51 @@ Target::toString(SlotTracker &slotTracker) const
 std::vector<Domain*>
 Target::dereference(const State &state) const
 {
-    CANAL_ASSERT_MSG(mType == Block,
-                     "Only Block pointer targets can be dereferenced.");
-
     std::vector<Domain*> result;
+
+    // Gracefully handle NULL dereference.
+    if (mType == Constant)
+    {
+        CANAL_ASSERT_MSG(!mNumericOffset,
+                         "Cannot dereference numeric pointers.");
+
+        return result;
+    }
+
+    CANAL_ASSERT_MSG(mType == Block,
+                     "Unxepected pointer type in pointer dereference.");
+
     result.push_back(state.findBlock(*mTarget));
     CANAL_ASSERT(result[0]);
 
-    std::vector<Domain*>::const_iterator itOffsets = mOffsets.begin();
-    for (; itOffsets != mOffsets.end(); ++itOffsets)
+    if (!mOffsets.empty())
     {
-        std::vector<Domain*> nextLevelResult;
-        std::vector<Domain*>::const_iterator itItems = result.begin();
-        for (; itItems != result.end(); ++itItems)
-        {
-            std::vector<Domain*> items;
-            Array::Interface &array = dynCast<Array::Interface&>(**itItems);
-            items = array.getItem(**itOffsets);
-            nextLevelResult.insert(nextLevelResult.end(),
-                                   items.begin(),
-                                   items.end());
-        }
+        const Integer::Container &first =
+            dynCast<const Integer::Container&>(*mOffsets[0]);
 
-        result.swap(nextLevelResult);
+        CANAL_ASSERT_MSG(first.getEnumeration().mValues.size() == 1,
+                         "First offset is expected to be zero!");
+
+        CANAL_ASSERT_MSG(first.getEnumeration().mValues.begin()->isMinValue(),
+                         "First offset is expected to be zero!");
+
+        std::vector<Domain*>::const_iterator itOffsets = mOffsets.begin() + 1;
+        for (; itOffsets != mOffsets.end(); ++itOffsets)
+        {
+            std::vector<Domain*> nextLevelResult;
+            std::vector<Domain*>::const_iterator itItems = result.begin();
+            for (; itItems != result.end(); ++itItems)
+            {
+                std::vector<Domain*> items;
+                Array::Interface &array = dynCast<Array::Interface&>(**itItems);
+                items = array.getItem(**itOffsets);
+                nextLevelResult.insert(nextLevelResult.end(),
+                                       items.begin(),
+                                       items.end());
+            }
+
+            result.swap(nextLevelResult);
+        }
     }
 
     return result;

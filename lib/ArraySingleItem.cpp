@@ -8,19 +8,19 @@
 namespace Canal {
 namespace Array {
 
-SingleItem::SingleItem(const Environment &environment, Domain* size, Domain* value)
+SingleItem::SingleItem(const Environment &environment,
+                       Domain* size,
+                       Domain* value)
     : Domain(environment), mValue(value), mSize(size)
 {
 }
 
-SingleItem::SingleItem(const SingleItem &singleItem)
-    : Domain(singleItem.mEnvironment)
+SingleItem::SingleItem(const SingleItem &value)
+    : Domain(value), mValue(value.mValue), mSize(value.mSize)
 {
-    mValue = singleItem.mValue;
     if (mValue)
         mValue = mValue->clone();
 
-    mSize = singleItem.mSize;
     if (mSize)
         mSize = mSize->clone();
 }
@@ -44,12 +44,18 @@ SingleItem::cloneCleaned() const
 
     //setBottom on value
     AccuracyDomain* value = dynCast<AccuracyDomain*>(res->mValue);
-    CANAL_ASSERT_MSG(value != NULL, "Value has to be of type AccuracyDomain in order to call setBottom on it.");
+    CANAL_ASSERT_MSG(value,
+                     "Value has to be of type AccuracyDomain "
+                     "in order to call setBottom on it.");
+
     value->setBottom();
 
     //setBottom on size
     AccuracyDomain* size = dynCast<AccuracyDomain*>(res->mSize);
-    CANAL_ASSERT_MSG(size != NULL, "Size has to be of type AccuracyDomain in order to call setBottom on it.");
+    CANAL_ASSERT_MSG(size,
+                     "Size has to be of type AccuracyDomain "
+                     "in order to call setBottom on it.");
+
     size->setBottom();
 
     return res;
@@ -66,11 +72,13 @@ SingleItem::operator==(const Domain &value) const
 
     if ((mSize && !singleItem->mSize) || (!mSize && singleItem->mSize))
         return false;
+
     if ((mValue && !singleItem->mValue) || (!mValue && singleItem->mValue))
         return false;
 
     if (mValue && *mValue != *singleItem->mValue)
         return false;
+
     if (mSize && *mSize != *singleItem->mSize)
         return false;
 
@@ -83,8 +91,10 @@ SingleItem::merge(const Domain &value)
     const SingleItem &singleItem = dynCast<const SingleItem&>(value);
     CANAL_ASSERT_MSG(mValue && singleItem.mValue,
                      "Array value must be intialized for merging");
+
     CANAL_ASSERT_MSG(mSize && singleItem.mSize,
                      "Array size must be initialized for merging");
+
     mValue->merge(*singleItem.mValue);
     mSize->merge(*singleItem.mSize);
 }
@@ -108,13 +118,6 @@ SingleItem::toString() const
     ss << "    value" << std::endl;
     ss << indent(mValue->toString(), 8);
     return ss.str();
-}
-
-bool
-SingleItem::matchesString(const std::string &text,
-                          std::string &rationale) const
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 void
@@ -245,6 +248,7 @@ assertOffsetFitsToArray(uint64_t offset, const Domain &size)
     // Get maximum size of the array.
     const Integer::Container &integerSize =
         dynCast<const Integer::Container&>(size);
+
     llvm::APInt unsignedMaxSize(integerSize.getBitWidth(), 0);
     bool sizeIsKnown = integerSize.unsignedMax(unsignedMaxSize);
     // The following requirement can be changed if necessary.
@@ -259,6 +263,7 @@ assertOffsetFitsToArray(const Domain &offset, const Domain &size)
     // Check if the offset might point to the array.
     const Integer::Container &integerOffset =
         dynCast<const Integer::Container&>(offset);
+
     llvm::APInt unsignedMinOffset(integerOffset.getBitWidth(), 0);
     bool offsetIsKnown = integerOffset.unsignedMin(unsignedMinOffset);
     // The following requirement can be changed if necessary.

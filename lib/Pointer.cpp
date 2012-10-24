@@ -18,23 +18,23 @@ InclusionBased::InclusionBased(const Environment &environment,
 {
 }
 
-InclusionBased::InclusionBased(const InclusionBased &second)
-    : Domain(second.mEnvironment),
-      mTargets(second.mTargets),
-      mType(second.mType),
-      mTop(second.mTop)
+InclusionBased::InclusionBased(const InclusionBased &value)
+    : Domain(value),
+      mTargets(value.mTargets),
+      mType(value.mType),
+      mTop(value.mTop)
 {
     PlaceTargetMap::iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
         it->second = new Target(*it->second);
 }
 
-InclusionBased::InclusionBased(const InclusionBased &second,
+InclusionBased::InclusionBased(const InclusionBased &value,
                                const llvm::Type &newType)
-    : Domain(second.mEnvironment),
-      mTargets(second.mTargets),
+    : Domain(value),
+      mTargets(value.mTargets),
       mType(newType),
-      mTop(second.mTop)
+      mTop(value.mTop)
 {
     PlaceTargetMap::iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
@@ -50,28 +50,35 @@ InclusionBased::~InclusionBased()
 
 void
 InclusionBased::addTarget(Target::Type type,
-                          const llvm::Value *instruction,
+                          const llvm::Value *place,
                           const llvm::Value *target,
                           const std::vector<Domain*> &offsets,
                           Domain *numericOffset)
 {
-    CANAL_ASSERT_MSG(instruction,
-                     "Instruction is mandatory.");
+    CANAL_ASSERT_MSG(place,
+                     "Place is mandatory.");
+
+    CANAL_ASSERT_MSG(llvm::isa<llvm::Instruction>(place) ||
+                     llvm::isa<llvm::GlobalValue>(place),
+                     "Place must be either an instruction or a global value.");
 
     if (mTop)
         return;
 
-    Target *pointerTarget = new Target(mEnvironment, type, target,
-                                       offsets, numericOffset);
+    Target *pointerTarget = new Target(mEnvironment,
+                                       type,
+                                       target,
+                                       offsets,
+                                       numericOffset);
 
-    PlaceTargetMap::iterator it = mTargets.find(instruction);
+    PlaceTargetMap::iterator it = mTargets.find(place);
     if (it != mTargets.end())
     {
         it->second->merge(*pointerTarget);
         delete pointerTarget;
     }
     else
-        mTargets.insert(PlaceTargetMap::value_type(instruction, pointerTarget));
+        mTargets.insert(PlaceTargetMap::value_type(place, pointerTarget));
 }
 
 Domain *
@@ -105,27 +112,32 @@ InclusionBased *
 InclusionBased::getElementPtr(const std::vector<Domain*> &offsets,
                               const llvm::Type &type) const
 {
+    CANAL_ASSERT_MSG(!offsets.empty(),
+                     "getElementPtr must be called with some offsets.");
+
     InclusionBased *result = new InclusionBased(*this, type);
 
+    // Iterate over all targets, and adjust the target offsets.
     PlaceTargetMap::iterator targetIt = result->mTargets.begin();
     for (; targetIt != result->mTargets.end(); ++targetIt)
     {
+        std::vector<Domain*> &targetOffsets = targetIt->second->mOffsets;
+        if (!targetOffsets.empty())
+        {
+            delete targetOffsets.back();
+            targetOffsets.pop_back();
+        }
+
         std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
         for (; offsetIt != offsets.end(); ++offsetIt)
-        {
-            if (targetIt == result->mTargets.begin())
-                targetIt->second->mOffsets.push_back(*offsetIt);
-            else
-                targetIt->second->mOffsets.push_back((*offsetIt)->clone());
-        }
+            targetOffsets.push_back((*offsetIt)->clone());
     }
 
-    if (result->mTargets.empty())
-    {
-        std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
-        for (; offsetIt != offsets.end(); ++offsetIt)
-            delete *offsetIt;
-    }
+    // Delete the offsets, because this method takes ownership of them
+    // and it no longer needs them.
+    std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
+    for (; offsetIt != offsets.end(); ++offsetIt)
+        delete *offsetIt;
 
     return result;
 }
@@ -276,13 +288,6 @@ InclusionBased::toString() const
     }
 
     return ss.str();
-}
-
-bool
-InclusionBased::matchesString(const std::string &text,
-                              std::string &rationale) const
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 float

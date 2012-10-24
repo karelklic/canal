@@ -132,7 +132,8 @@ template <class X, class Y> inline typename llvm::cast_retty<X, Y>::ret_type
 llvmCast(const Y &val)
 {
     CANAL_ASSERT_MSG(llvm::isa<X>(val),
-                     "cast<Ty>() argument of incompatible type!");
+                     "llvmCast<Ty>() argument of incompatible type!");
+
     return llvm::cast_convert_val<X, Y,
         typename llvm::simplify_type<Y>::SimpleType>::doit(val);
 }
@@ -156,7 +157,11 @@ dynCast(const Y &val)
         return dynamic_cast<X>(val);
     }
     catch (std::bad_cast exception)
-        CANAL_FATAL_ERROR(exception.what());
+    {
+        CANAL_FATAL_ERROR(exception.what()
+                          << " from " << typeid(val).name()
+                          << " to " << typeid(X).name());
+    }
 }
 
 } // namespace Canal

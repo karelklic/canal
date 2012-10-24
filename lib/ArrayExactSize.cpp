@@ -15,7 +15,7 @@ ExactSize::ExactSize(const Environment &environment,
     : Domain(environment)
 {
     for (uint64_t i = 0; i < size; ++i)
-        mValues.push_back(value->clone());
+        mValues.push_back(value.clone());
 }
 
 ExactSize::ExactSize(const Environment &environment,
@@ -24,10 +24,10 @@ ExactSize::ExactSize(const Environment &environment,
 {
 }
 
-ExactSize::ExactSize(const ExactSize &exactSize)
-    : Domain(exactSize.mEnvironment)
+ExactSize::ExactSize(const ExactSize &value)
+    : Domain(value)
 {
-    mValues = exactSize.mValues;
+    mValues = value.mValues;
     std::vector<Domain*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         *it = (*it)->clone();
@@ -54,7 +54,7 @@ ExactSize::cloneCleaned() const
     for (; it != res->mValues.end(); ++it)
     {
         AccuracyDomain* dom = dynCast<AccuracyDomain*>(*it);
-        CANAL_ASSERT_MSG(dom != NULL,
+        CANAL_ASSERT_MSG(dom,
                          "Element has to be of type AccuracyDomain "
                          "in order to call setBottom on it.");
 
@@ -94,6 +94,7 @@ ExactSize::merge(const Domain &value)
     std::vector<Domain*>::iterator itA = mValues.begin();
     std::vector<Domain*>::const_iterator itAend = mValues.end(),
         itB = array.mValues.begin();
+
     for (; itA != itAend; ++itA, ++itB)
         (*itA)->merge(**itB);
 }
@@ -118,14 +119,8 @@ ExactSize::toString() const
     std::vector<Domain*>::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         ss << indent((*it)->toString(), 4);
-    return ss.str();
-}
 
-bool
-ExactSize::matchesString(const std::string &text,
-                         std::string &rationale) const
-{
-    CANAL_NOT_IMPLEMENTED();
+    return ss.str();
 }
 
 static void

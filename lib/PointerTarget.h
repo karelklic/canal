@@ -37,6 +37,27 @@ public:
         Function
     };
 
+    const Environment &mEnvironment;
+
+    /// Type of the target.
+    Type mType;
+
+    /// Valid when the target represents a memory block or function.
+    /// For a memory block, this is a key to either State::mGlobalBlocks or
+    /// State::mFunctionBlocks.  The referenced llvm::Value instance is
+    /// owned by the LLVM framework and not by this class.
+    const llvm::Value *mTarget;
+
+    /// Array or struct offsets in the GetElementPtr style.
+    /// This class owns the memory.
+    std::vector<Domain*> mOffsets;
+
+    /// An additional numeric offset on the top of mOffsets.  The value
+    /// represents a number of bytes.  This class owns the memory.  It
+    /// might be NULL instead of 0.
+    Domain *mNumericOffset;
+
+public:
     /// Standard constructor.
     /// @param type
     ///   Type of the referenced memory.
@@ -87,30 +108,12 @@ public:
     /// mOffsets (offsets might include integer intervals).  The returned
     /// pointers point to the memory owned by State and its abstract
     /// domains -- caller must not release the memory.
-    ///
-    /// Calling this function is valid only for type 
     std::vector<Domain*> dereference(const State &state) const;
 
-public:
-    const Environment &mEnvironment;
-
-    /// Type of the target.
-    Type mType;
-
-    /// Valid when the target represents a memory block or function.
-    /// For a memory block, this is a key to either State::mGlobalBlocks or
-    /// State::mFunctionBlocks.  The referenced llvm::Value instance is
-    /// owned by the LLVM framework and not by this class.
-    const llvm::Value *mTarget;
-
-    /// Array or struct offsets in the GetElementPtr style.
-    /// This class owns the memory.
-    std::vector<Domain*> mOffsets;
-
-    /// An additional numeric offset on the top of mOffsets.  The value
-    /// represents a number of bytes.  This class owns the memory.  It
-    /// might be NULL instead of 0.
-    Domain *mNumericOffset;
+private:
+    /// Assignment operator declaration.  Prevents accidental
+    /// assignments of domains.  Do not implement!
+    Target &operator=(const Target &value);
 };
 
 } // namespace Pointer

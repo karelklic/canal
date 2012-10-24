@@ -5,6 +5,7 @@ namespace llvm {
 class Type;
 class Constant;
 class ConstantExpr;
+class Value;
 struct fltSemantics;
 } // namespace llvm
 
@@ -30,10 +31,11 @@ public:
     ///   State is used only for constant expressions such as
     ///   getelementptr and bitcast.  For other types of constants it
     ///   might be NULL.
-    /// @param
+    /// @returns
     ///   Returns a newly allocated value or NULL.  Caller takes
     ///   ownership of the returned value.
     Domain *create(const llvm::Constant &value,
+                   const llvm::Value &place,
                    const State *state) const;
 
     static const llvm::fltSemantics *
@@ -41,10 +43,12 @@ public:
 
 protected:
     Domain *createGetElementPtr(const llvm::ConstantExpr &value,
-                                const Domain &variable) const;
+                                const Domain &variable,
+                                const llvm::Value &place) const;
 
     Domain *createBitCast(const llvm::ConstantExpr &value,
-                          const Domain &variable) const;
+                          const Domain &variable,
+                          const llvm::Value &place) const;
 };
 
 } // namespace Canal

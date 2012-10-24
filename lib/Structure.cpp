@@ -7,16 +7,16 @@
 
 namespace Canal {
 
-Structure::Structure(const Environment &environment, const std::vector<Domain*> members)
+Structure::Structure(const Environment &environment,
+                     const std::vector<Domain*> &members)
     : Domain(environment), mMembers(members)
 {
 
 }
 
-Structure::Structure(const Structure &structure)
-    : Domain(structure.mEnvironment)
+Structure::Structure(const Structure &value)
+    : Domain(value), mMembers(value.mMembers)
 {
-    mMembers = structure.mMembers;
     std::vector<Domain*>::iterator it = mMembers.begin();
     for (; it != mMembers.end(); ++it)
         *it = (*it)->clone();
@@ -40,9 +40,13 @@ Structure::cloneCleaned() const
 {
     Structure* res = new Structure(*this);
     std::vector<Domain*>::iterator it = res->mMembers.begin();
-    for (; it != res->mMembers.end(); ++it) {
+    for (; it != res->mMembers.end(); ++it)
+    {
         AccuracyDomain* dom = dynCast<AccuracyDomain*>(*it);
-        CANAL_ASSERT_MSG(dom != NULL, "Member has to be of type AccuracyDomain in order to call setBottom on it.");
+        CANAL_ASSERT_MSG(dom,
+                         "Member has to be of type AccuracyDomain "
+                         "in order to call setBottom on it.");
+
         dom->setBottom();
     }
     return res;
@@ -61,9 +65,10 @@ Structure::operator==(const Domain &value) const
     std::vector<Domain*>::const_iterator itA = mMembers.begin(),
         itAend = mMembers.end(),
         itB = structure->mMembers.begin();
+
     for (; itA != itAend; ++itA, ++itB)
     {
-        if (*itA != *itB)
+        if (**itA != **itB)
             return false;
     }
 
@@ -78,6 +83,7 @@ Structure::merge(const Domain &value)
     std::vector<Domain*>::iterator itA = mMembers.begin();
     std::vector<Domain*>::const_iterator itAend = mMembers.end(),
         itB = structure.mMembers.begin();
+
     for (; itA != itAend; ++itA, ++itB)
         (*itA)->merge(**itB);
 }
@@ -104,13 +110,6 @@ Structure::toString() const
         ss << indent((*it)->toString(), 4);
 
     return ss.str();
-}
-
-bool
-Structure::matchesString(const std::string &text,
-                         std::string &rationale) const
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 std::vector<Domain*>
@@ -156,15 +155,18 @@ Structure::getItem(const Domain &offset) const
         uint64_t from = interval.mUnsignedFrom.getZExtValue();
         // Included in the interval!
         uint64_t to = interval.mUnsignedTo.getZExtValue();
+
         // At least part of the interval should point to the array.
         // Otherwise it might be a bug in the interpreter that
         // requires investigation.
         CANAL_ASSERT(from < mMembers.size());
         if (to >= mMembers.size())
             to = mMembers.size();
+
         result.insert(result.end(),
                       mMembers.begin() + from,
                       mMembers.begin() + to);
+
         return result;
     }
 

@@ -86,7 +86,7 @@ getName(const llvm::Value &value, SlotTracker &slotTracker)
     bool isGlobal = llvm::isa<llvm::GlobalValue>(value);
     std::stringstream ss;
     if (value.hasName())
-        ss << value.getName().data();
+        ss << value.getName().str();
     else
     {
         int id;

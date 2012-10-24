@@ -23,6 +23,13 @@ Bitfield::Bitfield(const Environment &environment,
 {
 }
 
+Bitfield::Bitfield(const Bitfield &value)
+    : Domain(value),
+      mZeroes(value.mZeroes),
+      mOnes(value.mOnes)
+{
+}
+
 int
 Bitfield::getBitValue(unsigned pos) const
 {
@@ -240,13 +247,6 @@ Bitfield::toString() const
     }
     ss << std::endl;
     return ss.str();
-}
-
-bool
-Bitfield::matchesString(const std::string &text,
-                    std::string &rationale) const
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 void

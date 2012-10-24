@@ -88,8 +88,12 @@ am_libcanal_la_OBJECTS = libcanal_la-APIntUtils.lo \
 	libcanal_la-InterpreterBlockOperationsCallback.lo \
 	libcanal_la-Operations.lo libcanal_la-Pointer.lo \
 	libcanal_la-PointerTarget.lo libcanal_la-SlotTracker.lo \
-	libcanal_la-State.lo libcanal_la-StringUtils.lo \
-	libcanal_la-Structure.lo libcanal_la-Utils.lo
+	libcanal_la-State.lo libcanal_la-StateMap.lo \
+	libcanal_la-StringUtils.lo libcanal_la-Structure.lo \
+	libcanal_la-Utils.lo libcanal_la-VariableArguments.lo \
+	libcanal_la-WideningDataIterationCount.lo \
+	libcanal_la-WideningManager.lo \
+	libcanal_la-WideningNumericalInfinity.lo
 libcanal_la_OBJECTS = $(am_libcanal_la_OBJECTS)
 libcanal_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(libcanal_la_CXXFLAGS) \
@@ -311,12 +315,24 @@ libcanal_la_SOURCES = \
 	SlotTracker.h \
 	State.cpp \
 	State.h \
+	StateMap.cpp \
+	StateMap.h \
 	StringUtils.cpp \
 	StringUtils.h \
 	Structure.cpp \
 	Structure.h \
 	Utils.cpp \
-	Utils.h
+	Utils.h \
+	VariableArguments.cpp \
+	VariableArguments.h \
+	WideningDataInterface.h \
+	WideningDataIterationCount.cpp \
+	WideningDataIterationCount.h \
+	WideningInterface.h \
+	WideningManager.cpp \
+	WideningManager.h \
+	WideningNumericalInfinity.cpp \
+	WideningNumerucalInfinity.h
 
 libcanal_la_CXXFLAGS = $(LLVM_CFLAGS)
 libcanal_la_LDFLAGS = $(LLVM_LDFLAGS) $(LLVM_LIBS) -version-info 0:0:0
@@ -435,9 +451,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-PointerTarget.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-SlotTracker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-State.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-StateMap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-StringUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Structure.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-VariableArguments.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-WideningDataIterationCount.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-WideningManager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-WideningNumericalInfinity.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -621,6 +642,13 @@ libcanal_la-State.lo: State.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-State.lo `test -f 'State.cpp' || echo '$(srcdir)/'`State.cpp
 
+libcanal_la-StateMap.lo: StateMap.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-StateMap.lo -MD -MP -MF $(DEPDIR)/libcanal_la-StateMap.Tpo -c -o libcanal_la-StateMap.lo `test -f 'StateMap.cpp' || echo '$(srcdir)/'`StateMap.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-StateMap.Tpo $(DEPDIR)/libcanal_la-StateMap.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StateMap.cpp' object='libcanal_la-StateMap.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-StateMap.lo `test -f 'StateMap.cpp' || echo '$(srcdir)/'`StateMap.cpp
+
 libcanal_la-StringUtils.lo: StringUtils.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-StringUtils.lo -MD -MP -MF $(DEPDIR)/libcanal_la-StringUtils.Tpo -c -o libcanal_la-StringUtils.lo `test -f 'StringUtils.cpp' || echo '$(srcdir)/'`StringUtils.cpp
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-StringUtils.Tpo $(DEPDIR)/libcanal_la-StringUtils.Plo
@@ -641,6 +669,34 @@ libcanal_la-Utils.lo: Utils.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Utils.cpp' object='libcanal_la-Utils.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-Utils.lo `test -f 'Utils.cpp' || echo '$(srcdir)/'`Utils.cpp
+
+libcanal_la-VariableArguments.lo: VariableArguments.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-VariableArguments.lo -MD -MP -MF $(DEPDIR)/libcanal_la-VariableArguments.Tpo -c -o libcanal_la-VariableArguments.lo `test -f 'VariableArguments.cpp' || echo '$(srcdir)/'`VariableArguments.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-VariableArguments.Tpo $(DEPDIR)/libcanal_la-VariableArguments.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='VariableArguments.cpp' object='libcanal_la-VariableArguments.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-VariableArguments.lo `test -f 'VariableArguments.cpp' || echo '$(srcdir)/'`VariableArguments.cpp
+
+libcanal_la-WideningDataIterationCount.lo: WideningDataIterationCount.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-WideningDataIterationCount.lo -MD -MP -MF $(DEPDIR)/libcanal_la-WideningDataIterationCount.Tpo -c -o libcanal_la-WideningDataIterationCount.lo `test -f 'WideningDataIterationCount.cpp' || echo '$(srcdir)/'`WideningDataIterationCount.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-WideningDataIterationCount.Tpo $(DEPDIR)/libcanal_la-WideningDataIterationCount.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WideningDataIterationCount.cpp' object='libcanal_la-WideningDataIterationCount.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-WideningDataIterationCount.lo `test -f 'WideningDataIterationCount.cpp' || echo '$(srcdir)/'`WideningDataIterationCount.cpp
+
+libcanal_la-WideningManager.lo: WideningManager.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-WideningManager.lo -MD -MP -MF $(DEPDIR)/libcanal_la-WideningManager.Tpo -c -o libcanal_la-WideningManager.lo `test -f 'WideningManager.cpp' || echo '$(srcdir)/'`WideningManager.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-WideningManager.Tpo $(DEPDIR)/libcanal_la-WideningManager.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WideningManager.cpp' object='libcanal_la-WideningManager.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-WideningManager.lo `test -f 'WideningManager.cpp' || echo '$(srcdir)/'`WideningManager.cpp
+
+libcanal_la-WideningNumericalInfinity.lo: WideningNumericalInfinity.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-WideningNumericalInfinity.lo -MD -MP -MF $(DEPDIR)/libcanal_la-WideningNumericalInfinity.Tpo -c -o libcanal_la-WideningNumericalInfinity.lo `test -f 'WideningNumericalInfinity.cpp' || echo '$(srcdir)/'`WideningNumericalInfinity.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-WideningNumericalInfinity.Tpo $(DEPDIR)/libcanal_la-WideningNumericalInfinity.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WideningNumericalInfinity.cpp' object='libcanal_la-WideningNumericalInfinity.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-WideningNumericalInfinity.lo `test -f 'WideningNumericalInfinity.cpp' || echo '$(srcdir)/'`WideningNumericalInfinity.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo

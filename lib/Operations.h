@@ -100,6 +100,7 @@ protected: // Helper functions.
     ///  constant.  Otherwise, it returns NULL.
     Domain *variableOrConstant(const llvm::Value &place,
                                State &state,
+                               const llvm::Instruction &instruction,
                                llvm::OwningPtr<Domain> &constant) const;
 
     template<typename T> void interpretCall(const T &instruction,
@@ -122,6 +123,7 @@ protected: // Helper functions.
         std::vector<Domain*> &result,
         T iteratorStart,
         T iteratorEnd,
+        const llvm::Value &place,
         const State &state);
 
     void castOperation(const llvm::CastInst &instruction,
