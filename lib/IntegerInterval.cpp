@@ -1009,9 +1009,15 @@ Interval::trunc(const Domain &value)
     mSignedTop = interval.mSignedTop;
     mSignedFrom = APIntUtils::trunc(interval.mSignedFrom, getBitWidth());
     mSignedTo = APIntUtils::trunc(interval.mSignedTo, getBitWidth());
+    if (mSignedFrom.sgt(mSignedTo)) {
+        std::swap(mSignedFrom, mSignedTo);
+    }
     mUnsignedTop = interval.mUnsignedTop;
     mUnsignedFrom = APIntUtils::trunc(interval.mUnsignedFrom, getBitWidth());
     mUnsignedTo = APIntUtils::trunc(interval.mUnsignedTo, getBitWidth());
+    if (mUnsignedFrom.ugt(mUnsignedTo)) {
+        std::swap(mUnsignedFrom, mUnsignedTo);
+    }
 }
 
 void

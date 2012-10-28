@@ -235,7 +235,7 @@ Constructors::create(const llvm::Constant &value,
 #if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
     if (llvm::isa<llvm::ConstantDataSequential>(value))
     {
-         const llvm::ConstantDataSquential &sequentialValue =
+         const llvm::ConstantDataSequential &sequentialValue =
             llvmCast<llvm::ConstantDataSequential>(value);
 
         unsigned elementCount = sequentialValue.getNumElements();
@@ -255,7 +255,7 @@ Constructors::create(const llvm::Constant &value,
     {
         const llvm::Type *type = value.getType();
         Domain *result = Constructors::create(*type);
-        result->setZero(&value);
+        result->setZero(&place);
         return result;
     }
 
