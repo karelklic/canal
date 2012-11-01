@@ -1,8 +1,31 @@
+Canal is a static analysis tool designed to analyze behaviour of
+application programs written in C. It is based on the theoretical
+framework of abstract interpretation, with focus on the scalability to
+large programs and proper handling of real-world source code.
 
+Canal comes with a versatile command line tool that can step through
+the analysis of a program like a debugger can step through the
+execution of a program, and investigate values of variables and other
+parts of the analysis.
 
+Canal is divided into three basic components, each with specific
+responsibility:
 
-Ideas
-------
+- Abstract domains. They embed the semantic choices, data structures,
+  algorithmic aspects, and implementation decisions of analysis. Canal
+  includes abstract domains representing machine integers, floating
+  point numbers, arrays, pointers, and structures.
 
-Algorithm (pre-processing pass) to determine importance of a variable
-in abstract interpretation results.  This is similar to slicing.
+- Interpreter. It iterates through the source code until the analysis
+  is finished. It manages the state of program analysis consisting of
+  abstract values.
+
+- Operations. They manage the translation of program instructions to
+  abstract operations defined as a part of abstract
+  domains. Interpreter uses operations to update abstract values
+  stored in the analysis state.
+
+LLVM framework is used as the technological foundation of the
+analysis, and CLang is used to compile C programs to the LLVM
+intermediate representation.  Canal works with LLVM 2.8 to 3.1 and any
+recent Linux distributions (Fedora 16+, RHEL 6+, Ubuntu, Gentoo).
