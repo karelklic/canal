@@ -10,7 +10,7 @@ namespace Canal {
 namespace Array {
 
 ExactSize::ExactSize(const Environment &environment,
-                     const uint64_t size,
+                     uint64_t size,
                      const Domain &value)
     : Domain(environment)
 {
@@ -413,6 +413,7 @@ ExactSize::setItem(const Domain &offset, const Domain &value)
         CANAL_ASSERT(from < mValues.size());
         for (size_t loop = from; loop < mValues.size() && loop <= to; ++loop)
             mValues[loop]->merge(value);
+
         return;
     }
 
@@ -420,6 +421,7 @@ ExactSize::setItem(const Domain &offset, const Domain &value)
     // the value to all items of the array.
     std::vector<Domain*>::const_iterator it = mValues.begin(),
         itend = mValues.end();
+
     for (; it != itend; ++it)
         (*it)->merge(value);
 }
@@ -429,6 +431,7 @@ ExactSize::setItem(uint64_t offset, const Domain &value)
 {
     CANAL_ASSERT_MSG(offset < mValues.size(),
                      "Offset out of bounds.");
+
     mValues[offset]->merge(value);
 }
 
@@ -437,9 +440,9 @@ ExactSize::setZero(const llvm::Value *instruction)
 {
     std::vector<Domain*>::iterator it = mValues.begin(),
             itend = mValues.end();
-    for (; it != itend; it ++) {
+
+    for (; it != itend; it ++)
         (*it)->setZero(instruction);
-    }
 }
 
 } // namespace Array

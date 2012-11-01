@@ -1006,12 +1006,37 @@ Interval::trunc(const Domain &value)
 {
     const Interval &interval = dynCast<const Interval&>(value);
     mEmpty = interval.mEmpty;
+
     mSignedTop = interval.mSignedTop;
-    mSignedFrom = APIntUtils::trunc(interval.mSignedFrom, getBitWidth());
-    mSignedTo = APIntUtils::trunc(interval.mSignedTo, getBitWidth());
+    if (!mSignedTop) {
+        llvm::APInt signedFrom = APIntUtils::zext(APIntUtils::trunc(interval.mSignedFrom, getBitWidth()), interval.getBitWidth()),
+                signedTo = APIntUtils::zext(APIntUtils::trunc(interval.mSignedTo, getBitWidth()), interval.getBitWidth());
+        if (signedFrom != interval.mSignedFrom || signedTo != interval.mSignedTo) {
+            mSignedTop = true;
+        }
+        else {
+            mSignedFrom = signedFrom;
+            mSignedTo = signedTo;
+            if (mSignedFrom.sgt(mSignedTo)) {
+                std::swap(mSignedFrom, mSignedTo);
+            }
+        }
+    }
     mUnsignedTop = interval.mUnsignedTop;
-    mUnsignedFrom = APIntUtils::trunc(interval.mUnsignedFrom, getBitWidth());
-    mUnsignedTo = APIntUtils::trunc(interval.mUnsignedTo, getBitWidth());
+    if (!mUnsignedTop) {
+        llvm::APInt unsignedFrom = APIntUtils::zext(APIntUtils::trunc(interval.mUnsignedFrom, getBitWidth()), interval.getBitWidth()),
+                unsignedTo = APIntUtils::zext(APIntUtils::trunc(interval.mUnsignedTo, getBitWidth()), interval.getBitWidth());
+        if (unsignedFrom != interval.mUnsignedFrom || unsignedTo != interval.mUnsignedTo) {
+            mUnsignedTop = true;
+        }
+        else {
+            mUnsignedFrom = unsignedFrom;
+            mUnsignedTo = unsignedTo;
+            if (mUnsignedFrom.ugt(mUnsignedTo)) {
+                std::swap(mUnsignedFrom, mUnsignedTo);
+            }
+        }
+    }
 }
 
 void

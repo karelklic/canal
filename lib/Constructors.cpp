@@ -198,7 +198,20 @@ Constructors::create(const llvm::Constant &value,
 
     if (llvm::isa<llvm::ConstantVector>(value))
     {
-        CANAL_NOT_IMPLEMENTED();
+        const llvm::ConstantVector &vectorValue =
+            llvmCast<llvm::ConstantVector>(value);
+
+        // VectorType::getNumElements returns unsigned int.
+        unsigned elementCount = vectorValue.getType()->getNumElements();
+        std::vector<Domain*> values;
+        for (unsigned i = 0; i < elementCount; ++i)
+        {
+            values.push_back(create(*vectorValue.getOperand(i),
+                                    place,
+                                    state));
+        }
+
+        return new Array::ExactSize(mEnvironment, values);
     }
 
     if (llvm::isa<llvm::ConstantArray>(value))
@@ -206,6 +219,7 @@ Constructors::create(const llvm::Constant &value,
         const llvm::ConstantArray &arrayValue =
             llvmCast<llvm::ConstantArray>(value);
 
+        // ArrayType::getNumElements returns uint64_t.
         uint64_t elementCount = arrayValue.getType()->getNumElements();
         std::vector<Domain*> values;
         for (uint64_t i = 0; i < elementCount; ++i)
@@ -219,16 +233,16 @@ Constructors::create(const llvm::Constant &value,
     }
 
 #if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
-    if (llvm::isa<llvm::ConstantDataArray>(value))
+    if (llvm::isa<llvm::ConstantDataSequential>(value))
     {
-         const llvm::ConstantDataArray &arrayValue =
-            llvmCast<llvm::ConstantDataArray>(value);
+         const llvm::ConstantDataSequential &sequentialValue =
+            llvmCast<llvm::ConstantDataSequential>(value);
 
-        unsigned elementCount = arrayValue.getNumElements();
+        unsigned elementCount = sequentialValue.getNumElements();
         std::vector<Domain*> values;
         for (unsigned i = 0; i < elementCount; ++i)
         {
-            values.push_back(create(*arrayValue.getElementAsConstant(i),
+            values.push_back(create(*sequentialValue.getElementAsConstant(i),
                                     place,
                                     state));
         }
@@ -241,7 +255,7 @@ Constructors::create(const llvm::Constant &value,
     {
         const llvm::Type *type = value.getType();
         Domain *result = Constructors::create(*type);
-        result->setZero(&value);
+        result->setZero(&place);
         return result;
     }
 

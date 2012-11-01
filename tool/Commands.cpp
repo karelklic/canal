@@ -116,10 +116,15 @@ std::vector<std::string>
 Commands::getCommandMatches(const std::string &command) const
 {
     std::vector<std::string> result;
-    for (std::vector<Command*>::const_iterator it = mCommandList.begin(); it != mCommandList.end(); ++it)
+    std::vector<Command*>::const_iterator it = mCommandList.begin();
+    for (; it != mCommandList.end(); ++it)
     {
-        if (0 == strncmp((*it)->getName().c_str(), command.c_str(), command.length()))
+        if (0 == strncmp((*it)->getName().c_str(),
+                         command.c_str(),
+                         command.length()))
+        {
             result.push_back((*it)->getName());
+        }
     }
     return result;
 }
@@ -135,7 +140,7 @@ Commands::executeLine(const std::string &line)
     char lineString[commandLine.length() + 1];
     strcpy(lineString, commandLine.c_str());
     char *pos = strtok(lineString, " ");
-    while (pos != NULL)
+    while (pos)
     {
         args.push_back(pos);
         pos = strtok(NULL, " ");
@@ -145,14 +150,12 @@ Commands::executeLine(const std::string &line)
     if (args.empty())
         return;
 
-    // Find the command to be run.  Run the command.
-    for (std::vector<Command*>::const_iterator it = mCommandList.begin(); it != mCommandList.end(); ++it)
+    // Find matching commands and execute if there's only one
+    std::vector<std::string> matchingCommands = getCommandMatches(args[0]);
+    if (matchingCommands.size() == 1)
     {
-        if ((*it)->getName() == args[0] || (*it)->getShortcut() == args[0])
-        {
-            (*it)->run(args);
-            return;
-        }
+        (getCommand(matchingCommands[0]))->run(args);
+        return;
     }
 
     // Failed to find a command.
