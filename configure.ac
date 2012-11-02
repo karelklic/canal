@@ -5,7 +5,7 @@ AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CXX
 AC_USE_SYSTEM_EXTENSIONS
-AC_CONFIG_HEADERS([lib/Config.h])
+AC_CONFIG_HEADERS([lib/Config.h:lib/ConfigAutotools.h.in])
 
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 

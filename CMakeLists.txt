@@ -1,4 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+INCLUDE(CheckLibraryExists)
+INCLUDE(CheckIncludeFiles)
 
 project(CANAL)
 
@@ -32,3 +34,9 @@ add_definitions( -DDATADIR="${CMAKE_CURRENT_BINARY_DIR}" )
 add_subdirectory("lib/")
 add_subdirectory("tool/")
 add_subdirectory("tests/")
+
+
+CHECK_INCLUDE_FILES(gelf.h HAVE_GELF_H)
+CHECK_INCLUDE_FILES(libelf.h HAVE_LIBELF_H)
+CHECK_LIBRARY_EXISTS(elf elf_begin "" HAVE_LIBELF)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/lib/ConfigCMake.h.in ${CMAKE_CURRENT_SOURCE_DIR}/lib/Config.h)
