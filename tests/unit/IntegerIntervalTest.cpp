@@ -61,6 +61,20 @@ testEquality(const Environment &environment)
 }
 
 static void
+testTrunc(const Environment &environment) {
+    Integer::Interval interval1(environment, 3),
+            interval2(environment, llvm::APInt(8, 10)),
+            interval3(environment, llvm::APInt(8, 4));
+    interval1.trunc(interval2);
+    CANAL_ASSERT(interval1.isTop());
+
+    interval1.setBottom();
+    interval1.trunc(interval3);
+    llvm::APInt res;
+    CANAL_ASSERT(interval1.isSingleValue() && interval1.unsignedMin(res) && res == 4);
+}
+
+static void
 testMerge(const Environment &environment)
 {
 }
@@ -216,5 +230,6 @@ main(int argc, char **argv)
     testIsTop(environment);
     testSetTop(environment);
 
+    testTrunc(environment);
     return 0;
 }
