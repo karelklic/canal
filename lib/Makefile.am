@@ -65,7 +65,9 @@ libcanal_la_SOURCES = \
 	WideningManager.cpp \
 	WideningManager.h \
 	WideningNumericalInfinity.cpp \
-	WideningNumerucalInfinity.h
+	WideningNumericalInfinity.h \
+	WideningPointers.cpp \
+	WideningPointers.h
 
 libcanal_la_CXXFLAGS = $(LLVM_CFLAGS)
 libcanal_la_LDFLAGS = $(LLVM_LDFLAGS) $(LLVM_LIBS) -version-info 0:0:0

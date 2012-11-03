@@ -14,15 +14,14 @@ namespace Pointer {
 
 InclusionBased::InclusionBased(const Environment &environment,
                                const llvm::Type &type)
-    : Domain(environment), mType(type), mTop(false)
+    : Domain(environment), mType(type)
 {
 }
 
 InclusionBased::InclusionBased(const InclusionBased &value)
     : Domain(value),
       mTargets(value.mTargets),
-      mType(value.mType),
-      mTop(value.mTop)
+      mType(value.mType)
 {
     PlaceTargetMap::iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
@@ -33,8 +32,7 @@ InclusionBased::InclusionBased(const InclusionBased &value,
                                const llvm::Type &newType)
     : Domain(value),
       mTargets(value.mTargets),
-      mType(newType),
-      mTop(value.mTop)
+      mType(newType)
 {
     PlaceTargetMap::iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
@@ -61,9 +59,6 @@ InclusionBased::addTarget(Target::Type type,
     CANAL_ASSERT_MSG(llvm::isa<llvm::Instruction>(place) ||
                      llvm::isa<llvm::GlobalValue>(place),
                      "Place must be either an instruction or a global value.");
-
-    if (mTop)
-        return;
 
     Target *pointerTarget = new Target(mEnvironment,
                                        type,
@@ -200,11 +195,6 @@ InclusionBased::operator==(const Domain &value) const
     if (&pointer->mType != &mType)
         return false;
 
-    if (pointer->mTop != mTop)
-        return false;
-
-    CANAL_ASSERT(!mTop || (pointer->mTargets.empty() && mTargets.empty()));
-
     // Check if it has the same number of targets.
     if (pointer->mTargets.size() != mTargets.size())
         return false;
@@ -224,7 +214,7 @@ InclusionBased::operator==(const Domain &value) const
 bool
 InclusionBased::isSingleTarget() const
 {
-    if (mTop || mTargets.size() != 1)
+    if (mTargets.size() != 1)
         return false;
 
     const Target *target = mTargets.begin()->second;
@@ -255,23 +245,15 @@ InclusionBased::merge(const Domain &value)
                      << Canal::toString(vv.mType) << " != "
                      << Canal::toString(mType) << ")");
 
-    if (mTop)
-        return;
-
-    if (vv.isTop())
-        setTop();
-    else
+    PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
+    for (; valueit != vv.mTargets.end(); ++valueit)
     {
-        PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
-        for (; valueit != vv.mTargets.end(); ++valueit)
-        {
-            PlaceTargetMap::iterator it = mTargets.find(valueit->first);
-            if (it == mTargets.end())
-                mTargets.insert(PlaceTargetMap::value_type(
-                                    valueit->first, new Target(*valueit->second)));
-            else
-                it->second->merge(*valueit->second);
-        }
+        PlaceTargetMap::iterator it = mTargets.find(valueit->first);
+        if (it == mTargets.end())
+            mTargets.insert(PlaceTargetMap::value_type(
+                                valueit->first, new Target(*valueit->second)));
+        else
+            it->second->merge(*valueit->second);
     }
 }
 
@@ -293,63 +275,22 @@ InclusionBased::toString() const
     std::stringstream ss;
     ss << "pointer" << std::endl;
     ss << "    type " << Canal::toString(mType) << std::endl;
-    if (mTop)
-    {
-        CANAL_ASSERT(mTargets.empty());
-        ss << "    top" << std::endl;
-    }
-    else
-    {
-        PlaceTargetMap::const_iterator it = mTargets.begin();
-        for (; it != mTargets.end(); ++it)
-            ss << indent(it->second->toString(mEnvironment.getSlotTracker()), 4);
-    }
+    PlaceTargetMap::const_iterator it = mTargets.begin();
+    for (; it != mTargets.end(); ++it)
+        ss << indent(it->second->toString(mEnvironment.getSlotTracker()), 4);
 
     return ss.str();
-}
-
-float
-InclusionBased::accuracy() const
-{
-    return mTop ? 0.0f : 1.0f;
-}
-
-bool
-InclusionBased::isBottom() const
-{
-    return !mTop && mTargets.empty();
-}
-
-void
-InclusionBased::setBottom()
-{
-    mTop = false;
-    mTargets.clear();
-}
-
-bool
-InclusionBased::isTop() const
-{
-    return mTop;
-}
-
-void
-InclusionBased::setTop()
-{
-    mTop = true;
-    mTargets.clear();
 }
 
 void
 InclusionBased::setZero(const llvm::Value *instruction)
 {
-    mTop = false;
     mTargets.clear();
     addTarget(Pointer::Target::Constant,
-                            instruction,
-                            NULL,
-                            std::vector<Domain*>(),
-                            NULL);
+              instruction,
+              NULL,
+              std::vector<Domain*>(),
+              NULL);
 }
 
 } // namespace Pointer

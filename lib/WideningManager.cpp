@@ -1,5 +1,6 @@
 #include "WideningManager.h"
 #include "WideningNumericalInfinity.h"
+#include "WideningPointers.h"
 #include "State.h"
 #include "StateMap.h"
 #include "Domain.h"
@@ -15,6 +16,7 @@ namespace Widening {
 Manager::Manager()
 {
     mWidenings.push_back(new NumericalInfinity());
+    mWidenings.push_back(new Pointers());
 }
 
 Manager::~Manager()

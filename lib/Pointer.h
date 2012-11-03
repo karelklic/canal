@@ -20,7 +20,7 @@ namespace Pointer {
 typedef std::map<const llvm::Value*, Target*> PlaceTargetMap;
 
 /// Inclusion-based flow-insensitive abstract pointer.
-class InclusionBased : public Domain, public AccuracyDomain
+class InclusionBased : public Domain
 {
 public:
     /// llvm::Value represents a position in the program.  It points to
@@ -35,9 +35,6 @@ public:
     //
     /// The type object is owned by the LLVM framework.
     const llvm::Type &mType;
-
-    /// If true, this pointer can point anywhere.
-    bool mTop;
 
 public:
     /// Standard constructor.
@@ -128,18 +125,6 @@ public: // Implementation of Domain.
     virtual std::string toString() const;
     /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *instruction);
-
-public: // Implementation of AccuracyDomain.
-    /// Implementation of AccuracyDomain::accuracy().
-    virtual float accuracy() const;
-    /// Implementation of AccuracyDomain::isBottom().
-    virtual bool isBottom() const;
-    /// Implementation of AccuracyDomain::setBottom().
-    virtual void setBottom();
-    /// Implementation of AccuracyDomain::isTop().
-    virtual bool isTop() const;
-    /// Implementation of AccuracyDomain::setTop().
-    virtual void setTop();
 };
 
 } // namespace Pointer
