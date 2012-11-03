@@ -31,10 +31,21 @@ Manager::widen(const llvm::BasicBlock &wideningPoint,
                State &first,
                const State &second) const
 {
-    widen(wideningPoint, first.getFunctionVariables(), second.getFunctionVariables());
-    widen(wideningPoint, first.getFunctionBlocks(), second.getFunctionBlocks());
-    widen(wideningPoint, first.getGlobalVariables(), second.getGlobalVariables());
-    widen(wideningPoint, first.getGlobalBlocks(), second.getGlobalBlocks());
+    widen(wideningPoint,
+          first.getFunctionVariables(),
+          second.getFunctionVariables());
+
+    widen(wideningPoint,
+          first.getFunctionBlocks(),
+          second.getFunctionBlocks());
+
+    widen(wideningPoint,
+          first.getGlobalVariables(),
+          second.getGlobalVariables());
+
+    widen(wideningPoint,
+          first.getGlobalBlocks(),
+          second.getGlobalBlocks());
 }
 
 void

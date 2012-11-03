@@ -66,7 +66,7 @@ Commands::getCompletionMatches(const std::string &text, int point) const
     char textString[text.length() + 1];
     strcpy(textString, text.c_str());
     char *pos = strtok(textString, " \n");
-    while (pos != NULL)
+    while (pos)
     {
         if (point >= (pos - textString) &&
             point <= (pos - textString + strlen(pos)))
@@ -89,8 +89,6 @@ Commands::getCompletionMatches(const std::string &text, int point) const
         pointArg = args.size();
         args.push_back("");
     }
-
-    // printf("\"%s\" %d ->  %d %d\n", text.c_str(), point, pointArg, pointArgOffset);
 
     // If the point is in the command, complete the command.
     if (pointArg == 0)
@@ -126,6 +124,7 @@ Commands::getCommandMatches(const std::string &command) const
             result.push_back((*it)->getName());
         }
     }
+
     return result;
 }
 
@@ -156,6 +155,19 @@ Commands::executeLine(const std::string &line)
     {
         (getCommand(matchingCommands[0]))->run(args);
         return;
+    }
+    else
+    {
+        // Find command with matching shortcut.
+        std::vector<Command*>::const_iterator it = mCommandList.begin();
+        for (; it != mCommandList.end(); ++it)
+        {
+            if ((*it)->getShortcut() == args[0])
+            {
+                (*it)->run(args);
+                return;
+            }
+        }
     }
 
     // Failed to find a command.

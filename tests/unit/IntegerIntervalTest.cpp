@@ -7,10 +7,12 @@
 
 using namespace Canal;
 
+static Environment *gEnvironment;
+
 static void
-testConstructors(const Environment &environment)
+testConstructors()
 {
-    Integer::Interval interval(environment, 1);
+    Integer::Interval interval(*gEnvironment, 1);
     CANAL_ASSERT(interval.mEmpty && !interval.mSignedTop && !interval.mUnsignedTop);
     CANAL_ASSERT(interval.mSignedFrom == interval.mSignedTo);
     CANAL_ASSERT(interval.mUnsignedFrom == interval.mUnsignedTo);
@@ -19,41 +21,41 @@ testConstructors(const Environment &environment)
 }
 
 static void
-testSignedMin(const Environment &environment)
+testSignedMin()
 {
 }
 
 static void
-testSignedMax(const Environment &environment)
+testSignedMax()
 {
 }
 
 static void
-testUnsignedMin(const Environment &environment)
+testUnsignedMin()
 {
 }
 
 static void
-testUnsignedMax(const Environment &environment)
+testUnsignedMax()
 {
 }
 
 static void
-testIsSingleValue(const Environment &environment)
+testIsSingleValue()
 {
 }
 
 static void
-testCloneCleaned(const Environment &environment)
+testCloneCleaned()
 {
 }
 
 static void
-testEquality(const Environment &environment)
+testEquality()
 {
-    Integer::Interval interval1(environment, 1),
-        interval2(environment, 1),
-        interval3(environment, 2);
+    Integer::Interval interval1(*gEnvironment, 1),
+        interval2(*gEnvironment, 1),
+        interval3(*gEnvironment, 2);
 
     // Test empty intervals.
     CANAL_ASSERT(interval1 == interval2);
@@ -61,131 +63,140 @@ testEquality(const Environment &environment)
 }
 
 static void
-testTrunc(const Environment &environment) {
-    Integer::Interval interval1(environment, 3),
-            interval2(environment, llvm::APInt(8, 10)),
-            interval3(environment, llvm::APInt(8, 4));
-    interval1.trunc(interval2);
+testTrunc()
+{
+    // Test truncation from i8 00001010 to i3.
+    Integer::Interval interval1(*gEnvironment, 3);
+    interval1.trunc(Integer::Interval(*gEnvironment, llvm::APInt(8, 10)));
     CANAL_ASSERT(interval1.isTop());
+    CANAL_ASSERT(interval1.getBitWidth() == 3);
 
-    interval1.setBottom();
-    interval1.trunc(interval3);
+    // Test truncation from i8 00000100 to i3.
+    Integer::Interval interval2(*gEnvironment, 3);
+    interval2.trunc(Integer::Interval(*gEnvironment, llvm::APInt(8, 4)));
     llvm::APInt res;
-    CANAL_ASSERT(interval1.isSingleValue() && interval1.unsignedMin(res) && res == 4);
+    CANAL_ASSERT(interval2.isSingleValue() && interval2.unsignedMin(res) && res == 4);
+    CANAL_ASSERT(interval2.getBitWidth() == 3);
+
+    // Test truncation from i32 00000001 to i1.
+    Integer::Interval interval3(*gEnvironment, 1);
+    interval3.trunc(Integer::Interval(*gEnvironment, llvm::APInt(32, 1)));
+    CANAL_ASSERT(interval3.isSingleValue() && interval3.unsignedMin(res) && res == 1);
+    CANAL_ASSERT(interval3.getBitWidth() == 1);
 }
 
 static void
-testMerge(const Environment &environment)
+testMerge()
 {
 }
 
 static void
-testMemoryUsage(const Environment &environment)
+testMemoryUsage()
 {
 }
 
 static void
-testToString(const Environment &environment)
+testToString()
 {
 }
 
 static void
-testMatchesString(const Environment &environment)
+testMatchesString()
 {
 }
 
 static void
-testAdd(const Environment &environment)
+testAdd()
 {
 }
 
 static void
-testSub(const Environment &environment)
+testSub()
 {
 }
 
 static void
-testMul(const Environment &environment)
+testMul()
 {
 }
 
 static void
-testUDiv(const Environment &environment)
+testUDiv()
 {
 }
 
 static void
-testSDiv(const Environment &environment)
+testSDiv()
 {
 }
 
 static void
-testURem(const Environment &environment)
+testURem()
 {
 }
 
 static void
-testSRem(const Environment &environment)
+testSRem()
 {
 }
 
 static void
-testShl(const Environment &environment)
+testShl()
 {
 }
 
 static void
-testLshr(const Environment &environment)
+testLshr()
 {
 }
 
 static void
-testAshr(const Environment &environment)
+testAshr()
 {
 }
 
 static void
-testAnd(const Environment &environment)
+testAnd()
 {
 }
 
 static void
-testOr(const Environment &environment)
+testOr()
 {
 }
 
 static void
-testXor(const Environment &environment)
+testXor()
 {
 }
 
 static void
-testIcmp(const Environment &environment)
+testIcmp()
 {
 }
 
 static void
-testAccuracy(const Environment &environment)
+testAccuracy()
 {
 }
 
 static void
-testIsBottom(const Environment &environment)
+testIsBottom()
 {
 }
 
 static void
-testSetBottom(const Environment &environment)
+testSetBottom()
 {
 }
 
 static void
-testIsTop(const Environment &environment)
+testIsTop()
 {
 }
 
 static void
-testSetTop(const Environment &environment)
+testSetTop()
 {
 }
 
@@ -196,40 +207,41 @@ main(int argc, char **argv)
     llvm::llvm_shutdown_obj y;  // Call llvm_shutdown() on exit.
 
     llvm::Module *module = new llvm::Module("testModule", context);
-    Environment environment(module);
+    gEnvironment = new Environment(module);
 
-    testConstructors(environment);
-    testSignedMin(environment);
-    testSignedMax(environment);
-    testUnsignedMin(environment);
-    testUnsignedMax(environment);
-    testIsSingleValue(environment);
-    testCloneCleaned(environment);
-    testEquality(environment);
-    testMerge(environment);
-    testMemoryUsage(environment);
-    testToString(environment);
-    testMatchesString(environment);
-    testAdd(environment);
-    testSub(environment);
-    testMul(environment);
-    testUDiv(environment);
-    testSDiv(environment);
-    testURem(environment);
-    testSRem(environment);
-    testShl(environment);
-    testLshr(environment);
-    testAshr(environment);
-    testAnd(environment);
-    testOr(environment);
-    testXor(environment);
-    testIcmp(environment);
-    testAccuracy(environment);
-    testIsBottom(environment);
-    testSetBottom(environment);
-    testIsTop(environment);
-    testSetTop(environment);
+    testConstructors();
+    testSignedMin();
+    testSignedMax();
+    testUnsignedMin();
+    testUnsignedMax();
+    testIsSingleValue();
+    testCloneCleaned();
+    testEquality();
+    testMerge();
+    testMemoryUsage();
+    testToString();
+    testMatchesString();
+    testAdd();
+    testSub();
+    testMul();
+    testUDiv();
+    testSDiv();
+    testURem();
+    testSRem();
+    testShl();
+    testLshr();
+    testAshr();
+    testAnd();
+    testOr();
+    testXor();
+    testIcmp();
+    testAccuracy();
+    testIsBottom();
+    testSetBottom();
+    testIsTop();
+    testSetTop();
+    testTrunc();
 
-    testTrunc(environment);
+    delete gEnvironment;
     return 0;
 }
