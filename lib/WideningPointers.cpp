@@ -11,8 +11,8 @@ Pointers::widen(const llvm::BasicBlock &wideningPoint,
                 Domain &first,
                 const Domain &second)
 {
-    Pointer::InclusionBased *firstPointer =
-        dynCast<Pointer::InclusionBased*>(&first);
+    Pointer::Pointer *firstPointer =
+        dynCast<Pointer::Pointer*>(&first);
 
     if (!firstPointer)
         return;

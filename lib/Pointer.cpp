@@ -12,13 +12,13 @@
 namespace Canal {
 namespace Pointer {
 
-InclusionBased::InclusionBased(const Environment &environment,
+Pointer::Pointer(const Environment &environment,
                                const llvm::Type &type)
     : Domain(environment), mType(type)
 {
 }
 
-InclusionBased::InclusionBased(const InclusionBased &value)
+Pointer::Pointer(const Pointer &value)
     : Domain(value),
       mTargets(value.mTargets),
       mType(value.mType)
@@ -28,7 +28,7 @@ InclusionBased::InclusionBased(const InclusionBased &value)
         it->second = new Target(*it->second);
 }
 
-InclusionBased::InclusionBased(const InclusionBased &value,
+Pointer::Pointer(const Pointer &value,
                                const llvm::Type &newType)
     : Domain(value),
       mTargets(value.mTargets),
@@ -39,7 +39,7 @@ InclusionBased::InclusionBased(const InclusionBased &value,
         it->second = new Target(*it->second);
 }
 
-InclusionBased::~InclusionBased()
+Pointer::~Pointer()
 {
     PlaceTargetMap::const_iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
@@ -47,7 +47,7 @@ InclusionBased::~InclusionBased()
 }
 
 void
-InclusionBased::addTarget(Target::Type type,
+Pointer::addTarget(Target::Type type,
                           const llvm::Value *place,
                           const llvm::Value *target,
                           const std::vector<Domain*> &offsets,
@@ -77,7 +77,7 @@ InclusionBased::addTarget(Target::Type type,
 }
 
 Domain *
-InclusionBased::dereferenceAndMerge(const State &state) const
+Pointer::dereferenceAndMerge(const State &state) const
 {
     Domain *mergedValue = NULL;
     PlaceTargetMap::const_iterator it = mTargets.begin();
@@ -97,14 +97,14 @@ InclusionBased::dereferenceAndMerge(const State &state) const
     return mergedValue;
 }
 
-InclusionBased *
-InclusionBased::bitcast(const llvm::Type &type) const
+Pointer *
+Pointer::bitcast(const llvm::Type &type) const
 {
-    return new InclusionBased(*this, type);
+    return new Pointer(*this, type);
 }
 
-InclusionBased *
-InclusionBased::getElementPtr(const std::vector<Domain*> &offsets,
+Pointer *
+Pointer::getElementPtr(const std::vector<Domain*> &offsets,
                               const llvm::Type &type) const
 {
     CANAL_ASSERT_MSG(!offsets.empty(),
@@ -121,7 +121,7 @@ InclusionBased::getElementPtr(const std::vector<Domain*> &offsets,
                          "GetElementPtr offsets must have 64 bits!");
     }
 
-    InclusionBased *result = new InclusionBased(*this, type);
+    Pointer *result = new Pointer(*this, type);
 
     // Iterate over all targets, and adjust the target offsets.
     PlaceTargetMap::iterator targetIt = result->mTargets.begin();
@@ -156,7 +156,7 @@ InclusionBased::getElementPtr(const std::vector<Domain*> &offsets,
 }
 
 void
-InclusionBased::store(const Domain &value, State &state)
+Pointer::store(const Domain &value, State &state)
 {
     // Go through all target memory blocks for the pointer and merge
     // them with the value being stored.
@@ -170,24 +170,24 @@ InclusionBased::store(const Domain &value, State &state)
     }
 }
 
-InclusionBased *
-InclusionBased::clone() const
+Pointer *
+Pointer::clone() const
 {
-    return new InclusionBased(*this);
+    return new Pointer(*this);
 }
 
-InclusionBased *
-InclusionBased::cloneCleaned() const
+Pointer *
+Pointer::cloneCleaned() const
 {
-    return new InclusionBased(mEnvironment, mType);
+    return new Pointer(mEnvironment, mType);
 }
 
 bool
-InclusionBased::operator==(const Domain &value) const
+Pointer::operator==(const Domain &value) const
 {
     // Check if the value has the same type.
-    const InclusionBased *pointer =
-        dynCast<const InclusionBased*>(&value);
+    const Pointer *pointer =
+        dynCast<const Pointer*>(&value);
 
     if (!pointer)
         return false;
@@ -212,7 +212,7 @@ InclusionBased::operator==(const Domain &value) const
 }
 
 bool
-InclusionBased::isSingleTarget() const
+Pointer::isSingleTarget() const
 {
     if (mTargets.size() != 1)
         return false;
@@ -237,9 +237,9 @@ InclusionBased::isSingleTarget() const
 }
 
 void
-InclusionBased::merge(const Domain &value)
+Pointer::merge(const Domain &value)
 {
-    const InclusionBased &vv = dynCast<const InclusionBased&>(value);
+    const Pointer &vv = dynCast<const Pointer&>(value);
     CANAL_ASSERT_MSG(&vv.mType == &mType,
                      "Unexpected different types in a pointer merge ("
                      << Canal::toString(vv.mType) << " != "
@@ -258,9 +258,9 @@ InclusionBased::merge(const Domain &value)
 }
 
 size_t
-InclusionBased::memoryUsage() const
+Pointer::memoryUsage() const
 {
-    size_t size = sizeof(InclusionBased);
+    size_t size = sizeof(Pointer);
 
     PlaceTargetMap::const_iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
@@ -270,7 +270,7 @@ InclusionBased::memoryUsage() const
 }
 
 std::string
-InclusionBased::toString() const
+Pointer::toString() const
 {
     std::stringstream ss;
     ss << "pointer" << std::endl;
@@ -283,10 +283,10 @@ InclusionBased::toString() const
 }
 
 void
-InclusionBased::setZero(const llvm::Value *instruction)
+Pointer::setZero(const llvm::Value *instruction)
 {
     mTargets.clear();
-    addTarget(Pointer::Target::Constant,
+    addTarget(Target::Constant,
               instruction,
               NULL,
               std::vector<Domain*>(),

@@ -20,7 +20,7 @@ namespace Pointer {
 typedef std::map<const llvm::Value*, Target*> PlaceTargetMap;
 
 /// Inclusion-based flow-insensitive abstract pointer.
-class InclusionBased : public Domain
+class Pointer : public Domain
 {
 public:
     /// llvm::Value represents a position in the program.  It points to
@@ -38,19 +38,19 @@ public:
 
 public:
     /// Standard constructor.
-    InclusionBased(const Environment &environment,
+    Pointer(const Environment &environment,
                    const llvm::Type &type);
 
     /// Copy constructor.
-    InclusionBased(const InclusionBased &value);
+    Pointer(const Pointer &value);
 
     /// Copy constructor which changes the pointer type.
     /// Useful for bitcast and getelementptr operations.
-    InclusionBased(const InclusionBased &value,
+    Pointer(const Pointer &value,
                    const llvm::Type &newType);
 
     /// Standard destructor.
-    virtual ~InclusionBased();
+    virtual ~Pointer();
 
     /// Add a new target to the pointer.
     /// @param type
@@ -89,14 +89,14 @@ public:
     Domain *dereferenceAndMerge(const State &state) const;
 
     /// Creates a copy of this object with a different pointer type.
-    InclusionBased *bitcast(const llvm::Type &type) const;
+    Pointer *bitcast(const llvm::Type &type) const;
 
     /// Creates a copy of this object pointing to subtargets.
     /// @param offsets
     ///   Pointer takes ownership of the values inside the vector.
     ///   The offsets must be converted to 64-bit integers before calling
     ///   getElementPtr!
-    InclusionBased *getElementPtr(const std::vector<Domain*> &offsets,
+    Pointer *getElementPtr(const std::vector<Domain*> &offsets,
                                   const llvm::Type &type) const;
 
     void store(const Domain &value, State &state);
@@ -104,15 +104,15 @@ public:
 private:
     /// Assignment operator declaration.  Prevents accidental
     /// assignments of domains.  Do not implement!
-    InclusionBased &operator=(const InclusionBased &value);
+    Pointer &operator=(const Pointer &value);
 
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type -- it really overrides Domain::clone().
-    virtual InclusionBased *clone() const;
+    virtual Pointer *clone() const;
     /// Implementation of Domain::cloneCleaned().
     /// Covariant return type.
-    virtual InclusionBased *cloneCleaned() const;
+    virtual Pointer *cloneCleaned() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain &value) const;
     /// Does this pointer point to single target?

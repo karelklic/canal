@@ -338,9 +338,9 @@ void
 Container::icmp(const Domain &a, const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
-    const Canal::Pointer::InclusionBased *aPointer =
-            dynCast<const Canal::Pointer::InclusionBased*>(&a),
-        *bPointer = dynCast<const Canal::Pointer::InclusionBased*>(&b);
+    const Canal::Pointer::Pointer *aPointer =
+            dynCast<const Canal::Pointer::Pointer*>(&a),
+        *bPointer = dynCast<const Canal::Pointer::Pointer*>(&b);
 
     if (aPointer && bPointer)
     {

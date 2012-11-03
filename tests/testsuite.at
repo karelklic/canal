@@ -9,7 +9,7 @@ AT_CLEANUP
 
 AT_BANNER([Abstract Domain Unit Tests])
 
-AT_SETUP([Pointer::InclusionBased])
+AT_SETUP([Pointer::Pointer])
 AT_CHECK([../../unit/PointerTest], 0)
 AT_CLEANUP
 

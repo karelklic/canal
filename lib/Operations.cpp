@@ -461,11 +461,11 @@ void Operations::add(const llvm::BinaryOperator &instruction,
         return;
 
     // Pointer arithmetic.
-    const Pointer::InclusionBased *aPointer =
-        dynCast<const Pointer::InclusionBased*>(a);
+    const Pointer::Pointer *aPointer =
+        dynCast<const Pointer::Pointer*>(a);
 
-    const Pointer::InclusionBased *bPointer =
-        dynCast<const Pointer::InclusionBased*>(b);
+    const Pointer::Pointer *bPointer =
+        dynCast<const Pointer::Pointer*>(b);
 
     CANAL_ASSERT_MSG(!aPointer || !bPointer,
                      "Unable to add two pointers.");
@@ -521,11 +521,11 @@ Operations::sub(const llvm::BinaryOperator &instruction,
         return;
 
     // Pointer arithmetic.
-    const Pointer::InclusionBased *aPointer =
-        dynCast<const Pointer::InclusionBased*>(a);
+    const Pointer::Pointer *aPointer =
+        dynCast<const Pointer::Pointer*>(a);
 
-    const Pointer::InclusionBased *bPointer =
-        dynCast<const Pointer::InclusionBased*>(b);
+    const Pointer::Pointer *bPointer =
+        dynCast<const Pointer::Pointer*>(b);
 
     CANAL_ASSERT_MSG(aPointer || !bPointer,
                      "Subtracting pointer from constant!");
@@ -897,8 +897,8 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
     }
 
     state.addFunctionBlock(instruction, value);
-    Pointer::InclusionBased *pointer;
-    pointer = new Pointer::InclusionBased(mEnvironment, *type);
+    Pointer::Pointer *pointer;
+    pointer = new Pointer::Pointer(mEnvironment, *type);
 
     pointer->addTarget(Pointer::Target::Block,
                        &instruction,
@@ -919,8 +919,8 @@ Operations::load(const llvm::LoadInst &instruction,
     if (!variable)
         return;
 
-    const Pointer::InclusionBased &pointer =
-        dynCast<const Pointer::InclusionBased&>(*variable);
+    const Pointer::Pointer &pointer =
+        dynCast<const Pointer::Pointer&>(*variable);
 
     // Pointer found. Merge all possible values and store the result
     // into the state.
@@ -949,8 +949,8 @@ Operations::store(const llvm::StoreInst &instruction,
     if (!pointer || !value)
         return;
 
-    Pointer::InclusionBased &inclusionBased =
-        dynCast<Pointer::InclusionBased&>(*pointer);
+    Pointer::Pointer &inclusionBased =
+        dynCast<Pointer::Pointer&>(*pointer);
 
     inclusionBased.store(*value, state);
 }
@@ -966,8 +966,8 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
     if (!base)
         return;
 
-    Pointer::InclusionBased &source =
-        dynCast<Pointer::InclusionBased&>(*base);
+    Pointer::Pointer &source =
+        dynCast<Pointer::Pointer&>(*base);
 
     // We get offsets. Either constants or Integer::Container.
     // Pointer points either to an array (or array offset), or to a
@@ -986,7 +986,7 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
     const llvm::PointerType *pointerType = instruction.getType();
     CANAL_ASSERT(pointerType);
     CANAL_ASSERT(pointerType->getElementType());
-    Pointer::InclusionBased *result = source.getElementPtr(
+    Pointer::Pointer *result = source.getElementPtr(
         offsets, *pointerType->getElementType());
 
     state.addFunctionVariable(instruction, result);
@@ -1081,10 +1081,10 @@ Operations::ptrtoint(const llvm::PtrToIntInst &instruction,
     if (!operand)
         return;
 
-    Pointer::InclusionBased &source =
-        dynCast<Pointer::InclusionBased&>(*operand);
+    Pointer::Pointer &source =
+        dynCast<Pointer::Pointer&>(*operand);
 
-    Pointer::InclusionBased *result = source.clone();
+    Pointer::Pointer *result = source.clone();
 /*  This should really be handled in integer operations.
     Pointer::PlaceTargetMap::iterator it = result->mTargets.begin();
     for (; it != result->mTargets.end(); ++it)
@@ -1122,13 +1122,13 @@ Operations::inttoptr(const llvm::IntToPtrInst &instruction,
     if (!operand)
         return;
 
-    Pointer::InclusionBased &source =
-        dynCast<Pointer::InclusionBased&>(*operand);
+    Pointer::Pointer &source =
+        dynCast<Pointer::Pointer&>(*operand);
 
     const llvm::PointerType &pointerType =
         llvmCast<const llvm::PointerType>(*instruction.getDestTy());
 
-    Pointer::InclusionBased *result =
+    Pointer::Pointer *result =
         source.bitcast(*pointerType.getElementType());
 
     state.addFunctionVariable(instruction, result);
@@ -1149,8 +1149,8 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
     if (!source)
         return;
 
-    Pointer::InclusionBased &sourcePointer =
-        dynCast<Pointer::InclusionBased&>(*source);
+    Pointer::Pointer &sourcePointer =
+        dynCast<Pointer::Pointer&>(*source);
 
     const llvm::PointerType &destPointerType =
         llvmCast<const llvm::PointerType>(*destinationType);

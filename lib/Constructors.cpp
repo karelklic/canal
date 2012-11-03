@@ -50,7 +50,7 @@ Constructors::create(const llvm::Type &type) const
         CANAL_ASSERT_MSG(pointerType.getElementType(),
                          "Element type must be known.");
 
-        return new Pointer::InclusionBased(mEnvironment,
+        return new Pointer::Pointer(mEnvironment,
                                            *pointerType.getElementType());
     }
 
@@ -115,8 +115,8 @@ Constructors::create(const llvm::Constant &value,
             llvmCast<llvm::ConstantPointerNull>(value);
 
         const llvm::PointerType &pointerType = *nullValue.getType();
-        Pointer::InclusionBased *constPointer;
-        constPointer = new Pointer::InclusionBased(mEnvironment,
+        Pointer::Pointer *constPointer;
+        constPointer = new Pointer::Pointer(mEnvironment,
                                                    *pointerType.getElementType());
 
         constPointer->addTarget(Pointer::Target::Constant,
@@ -265,8 +265,8 @@ Constructors::create(const llvm::Constant &value,
         const llvm::Function &functionValue =
             llvmCast<llvm::Function>(value);
 
-        Pointer::InclusionBased *constPointer;
-        constPointer = new Pointer::InclusionBased(mEnvironment,
+        Pointer::Pointer *constPointer;
+        constPointer = new Pointer::Pointer(mEnvironment,
                                                    *functionValue.getFunctionType());
 
         constPointer->addTarget(Pointer::Target::Function,
@@ -332,8 +332,8 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
         llvmCast<const llvm::PointerType>(*value.getType());
 
     // GetElementPtr on a Pointer
-    const Pointer::InclusionBased *pointer =
-        dynCast<const Pointer::InclusionBased*>(&variable);
+    const Pointer::Pointer *pointer =
+        dynCast<const Pointer::Pointer*>(&variable);
 
     if (pointer)
     {
@@ -343,8 +343,8 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
 
     // GetElementPtr on anything except a pointer.  For example, it is
     // called on arrays and structures.
-    Pointer::InclusionBased *result;
-    result = new Pointer::InclusionBased(mEnvironment,
+    Pointer::Pointer *result;
+    result = new Pointer::Pointer(mEnvironment,
                                          *pointerType.getElementType());
 
     result->addTarget(Pointer::Target::Block,
@@ -363,8 +363,8 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
 {
     // BitCast from Pointer.  It is always a bitcast to some other
     // pointer.
-    const Pointer::InclusionBased *pointer =
-        dynCast<const Pointer::InclusionBased*>(&variable);
+    const Pointer::Pointer *pointer =
+        dynCast<const Pointer::Pointer*>(&variable);
 
     const llvm::PointerType *pointerType =
         llvmCast<const llvm::PointerType>(value.getType());
@@ -378,8 +378,8 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
     // BitCast from anything to a pointer.
     if (pointerType)
     {
-        Pointer::InclusionBased *result;
-        result = new Pointer::InclusionBased(mEnvironment,
+        Pointer::Pointer *result;
+        result = new Pointer::Pointer(mEnvironment,
                                              *pointerType->getElementType());
 
         result->addTarget(Pointer::Target::Block,

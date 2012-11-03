@@ -15,7 +15,7 @@ testConstructors()
     const llvm::PointerType &type =
         *llvm::Type::getInt1PtrTy(gEnvironment->getContext());
 
-    Pointer::InclusionBased pointer(*gEnvironment, type);
+    Pointer::Pointer pointer(*gEnvironment, type);
     CANAL_ASSERT(pointer.mTargets.size() == 0);
 }
 
@@ -25,8 +25,8 @@ testEquality()
     const llvm::PointerType &type =
         *llvm::Type::getInt1PtrTy(gEnvironment->getContext());
 
-    Pointer::InclusionBased a(*gEnvironment, type);
-    Pointer::InclusionBased b(*gEnvironment, type);
+    Pointer::Pointer a(*gEnvironment, type);
+    Pointer::Pointer b(*gEnvironment, type);
 
     // Test empty abstract pointers.
     assert(a.mTargets.size() == 0);
