@@ -8,6 +8,7 @@
 #include "Structure.h"
 #include "Environment.h"
 #include "State.h"
+#include "APIntUtils.h"
 #include <llvm/Constants.h>
 #include <llvm/Function.h>
 #include <llvm/ADT/OwningPtr.h>
@@ -318,7 +319,13 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
         const llvm::ConstantInt &constant =
             llvmCast<llvm::ConstantInt>(**it);
 
-        offsets.push_back(create(constant, place, NULL));
+        CANAL_ASSERT_MSG(constant.getBitWidth() <= 64,
+                         "Cannot handle GetElementPtr offset"
+                         " with more than 64 bits.");
+
+        // Convert to 64-bit if necessary.
+        llvm::APInt extended = APIntUtils::sext(constant.getValue(), 64);
+        offsets.push_back(new Integer::Container(mEnvironment, extended));
     }
 
     const llvm::PointerType &pointerType =

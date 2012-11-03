@@ -327,7 +327,9 @@ ExactSize::getItem(const Domain &offset) const
         // At least one of the offsets in the enumeration should point
         // to the array.  Otherwise it might be a bug in the
         // interpreter that requires investigation.
-        CANAL_ASSERT(!result.empty());
+        CANAL_ASSERT_MSG(!result.empty() || enumeration.mValues.empty(),
+                         "All offsets out of bound, array size "
+                         << mValues.size());
         return result;
     }
 

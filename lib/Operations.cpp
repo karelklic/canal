@@ -312,6 +312,28 @@ Operations::getElementPtrOffsets(std::vector<Domain*> &result,
         }
     }
 
+    // Extend all values to 64 bits.
+    std::vector<Domain*>::iterator resultIt = result.begin();
+    for (; resultIt != result.end(); ++resultIt)
+    {
+        const Integer::Container &number =
+            dynCast<const Integer::Container&>(**resultIt);
+
+        CANAL_ASSERT_MSG(number.getBitWidth() <= 64,
+                         "Cannot handle GetElementPtr offset"
+                         " with more than 64 bits.");
+
+        if (number.getBitWidth() != 64)
+        {
+            Integer::Container *extended =
+                new Integer::Container(mEnvironment, 64);
+
+            extended->sext(number);
+            delete *resultIt;
+            *resultIt = extended;
+        }
+    }
+
     return true;
 }
 
@@ -422,7 +444,53 @@ Operations::unreachable(const llvm::UnreachableInst &instruction,
 void Operations::add(const llvm::BinaryOperator &instruction,
                      State &state)
 {
-    binaryOperation(instruction, state, &Domain::add);
+    // Find operands in state, and encapsulate constant operands (such
+    // as numbers).  If some operand is not known, exit.
+    llvm::OwningPtr<Domain> constants[2];
+    const Domain *a = variableOrConstant(*instruction.getOperand(0),
+                                         state,
+                                         instruction,
+                                         constants[0]);
+
+    const Domain *b = variableOrConstant(*instruction.getOperand(1),
+                                         state,
+                                         instruction,
+                                         constants[1]);
+
+    if (!a || !b)
+        return;
+
+    // Pointer arithmetic.
+    const Pointer::InclusionBased *aPointer =
+        dynCast<const Pointer::InclusionBased*>(a);
+
+    const Pointer::InclusionBased *bPointer =
+        dynCast<const Pointer::InclusionBased*>(b);
+
+    CANAL_ASSERT_MSG(!aPointer || !bPointer,
+                     "Unable to add two pointers.");
+
+    Domain *result = NULL;
+    // Pointer addition.
+    if (aPointer || bPointer)
+    {
+        if (aPointer)
+            result = aPointer->cloneCleaned();
+        else
+            result = bPointer->cloneCleaned();
+
+        result->add(*a, *b);
+    }
+    else
+    {
+        // Create result value of required type and then run the desired
+        // operation.
+        result = mConstructors.create(*instruction.getType());
+        result->add(*a, *b);
+    }
+
+    // Store the result value to the state.
+    state.addFunctionVariable(instruction, result);
 }
 
 void
@@ -436,7 +504,58 @@ void
 Operations::sub(const llvm::BinaryOperator &instruction,
                 State &state)
 {
-    binaryOperation(instruction, state, &Domain::sub);
+    // Find operands in state, and encapsulate constant operands (such
+    // as numbers).  If some operand is not known, exit.
+    llvm::OwningPtr<Domain> constants[2];
+    const Domain *a = variableOrConstant(*instruction.getOperand(0),
+                                         state,
+                                         instruction,
+                                         constants[0]);
+
+    const Domain *b = variableOrConstant(*instruction.getOperand(1),
+                                         state,
+                                         instruction,
+                                         constants[1]);
+
+    if (!a || !b)
+        return;
+
+    // Pointer arithmetic.
+    const Pointer::InclusionBased *aPointer =
+        dynCast<const Pointer::InclusionBased*>(a);
+
+    const Pointer::InclusionBased *bPointer =
+        dynCast<const Pointer::InclusionBased*>(b);
+
+    CANAL_ASSERT_MSG(aPointer || !bPointer,
+                     "Subtracting pointer from constant!");
+
+    Domain *result = NULL;
+    // Subtracting integer from pointer.
+    if (aPointer && !bPointer)
+    {
+        result = aPointer->cloneCleaned();
+        result->sub(*a, *b);
+    }
+    else if (aPointer && bPointer) // Subtracting two pointers.
+    {
+        // Create result value of required type and then run the desired
+        // operation.
+        result = mConstructors.create(*instruction.getType());
+        AccuracyDomain *accuracyDomain = dynCast<AccuracyDomain*>(result);
+        CANAL_ASSERT(accuracyDomain);
+        accuracyDomain->setTop();
+    }
+    else
+    {
+        // Create result value of required type and then run the desired
+        // operation.
+        result = mConstructors.create(*instruction.getType());
+        result->sub(*a, *b);
+    }
+
+    // Store the result value to the state.
+    state.addFunctionVariable(instruction, result);
 }
 
 void

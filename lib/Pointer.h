@@ -97,6 +97,8 @@ public:
     /// Creates a copy of this object pointing to subtargets.
     /// @param offsets
     ///   Pointer takes ownership of the values inside the vector.
+    ///   The offsets must be converted to 64-bit integers before calling
+    ///   getElementPtr!
     InclusionBased *getElementPtr(const std::vector<Domain*> &offsets,
                                   const llvm::Type &type) const;
 

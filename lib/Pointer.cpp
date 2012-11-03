@@ -115,6 +115,17 @@ InclusionBased::getElementPtr(const std::vector<Domain*> &offsets,
     CANAL_ASSERT_MSG(!offsets.empty(),
                      "getElementPtr must be called with some offsets.");
 
+    // Check that all offsets are 64-bit integers.
+    std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
+    for (; offsetIt != offsets.end(); ++offsetIt)
+    {
+        const Integer::Container &container =
+            dynCast<const Integer::Container&>(**offsetIt);
+
+        CANAL_ASSERT_MSG(container.getBitWidth() == 64,
+                         "GetElementPtr offsets must have 64 bits!");
+    }
+
     InclusionBased *result = new InclusionBased(*this, type);
 
     // Iterate over all targets, and adjust the target offsets.
@@ -122,20 +133,27 @@ InclusionBased::getElementPtr(const std::vector<Domain*> &offsets,
     for (; targetIt != result->mTargets.end(); ++targetIt)
     {
         std::vector<Domain*> &targetOffsets = targetIt->second->mOffsets;
-        if (!targetOffsets.empty())
-        {
-            delete targetOffsets.back();
-            targetOffsets.pop_back();
-        }
-
         std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
         for (; offsetIt != offsets.end(); ++offsetIt)
+        {
+            if (offsetIt == offsets.begin() && !targetOffsets.empty())
+            {
+                Domain *oldLast = targetOffsets.back();
+                Domain *newLast = oldLast->cloneCleaned();
+                newLast->add(*oldLast, **offsets.begin());
+                delete oldLast;
+                targetOffsets.pop_back();
+                targetOffsets.push_back(newLast);
+                continue;
+            }
+
             targetOffsets.push_back((*offsetIt)->clone());
+        }
     }
 
     // Delete the offsets, because this method takes ownership of them
     // and it no longer needs them.
-    std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
+    offsetIt = offsets.begin();
     for (; offsetIt != offsets.end(); ++offsetIt)
         delete *offsetIt;
 
