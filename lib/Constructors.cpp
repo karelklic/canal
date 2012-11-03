@@ -51,7 +51,7 @@ Constructors::create(const llvm::Type &type) const
                          "Element type must be known.");
 
         return new Pointer::Pointer(mEnvironment,
-                                           *pointerType.getElementType());
+                                    *pointerType.getElementType());
     }
 
     if (type.isArrayTy() || type.isVectorTy())
@@ -117,7 +117,7 @@ Constructors::create(const llvm::Constant &value,
         const llvm::PointerType &pointerType = *nullValue.getType();
         Pointer::Pointer *constPointer;
         constPointer = new Pointer::Pointer(mEnvironment,
-                                                   *pointerType.getElementType());
+                                            *pointerType.getElementType());
 
         constPointer->addTarget(Pointer::Target::Constant,
                                 &place,
@@ -267,7 +267,7 @@ Constructors::create(const llvm::Constant &value,
 
         Pointer::Pointer *constPointer;
         constPointer = new Pointer::Pointer(mEnvironment,
-                                                   *functionValue.getFunctionType());
+                                            *functionValue.getFunctionType());
 
         constPointer->addTarget(Pointer::Target::Function,
                                 &place,
@@ -345,7 +345,7 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     // called on arrays and structures.
     Pointer::Pointer *result;
     result = new Pointer::Pointer(mEnvironment,
-                                         *pointerType.getElementType());
+                                  *pointerType.getElementType());
 
     result->addTarget(Pointer::Target::Block,
                       &place,
@@ -380,7 +380,7 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
     {
         Pointer::Pointer *result;
         result = new Pointer::Pointer(mEnvironment,
-                                             *pointerType->getElementType());
+                                      *pointerType->getElementType());
 
         result->addTarget(Pointer::Target::Block,
                           &place,

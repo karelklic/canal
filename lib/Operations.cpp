@@ -890,7 +890,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
 
         // Set pointer offset.
         Domain *zero = new Integer::Container(mEnvironment,
-                                              llvm::APInt(32, 0));
+                                              llvm::APInt(64, 0));
 
         offsets.push_back(zero);
         offsets.push_back(zero->clone());

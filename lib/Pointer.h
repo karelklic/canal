@@ -97,7 +97,7 @@ public:
     ///   The offsets must be converted to 64-bit integers before calling
     ///   getElementPtr!
     Pointer *getElementPtr(const std::vector<Domain*> &offsets,
-                                  const llvm::Type &type) const;
+                           const llvm::Type &type) const;
 
     void store(const Domain &value, State &state);
 
