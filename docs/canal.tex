@@ -63,11 +63,12 @@ Canal comes with two build systems: Autotools (also known as GNU build
 system) and CMake. The systems are equivalent in terms of features,
 but they come with different advantages and disadvantages.  Autotools
 system works on Unix-like operating systems only, and CMake also works
-on Microsoft Windows.  CMake tool needs to be installed to build Canal
-via CMake, and Autotools require no tool to be present on the system.
-Supporting multiple versions of the CMake tool is not straighforward,
-but it is something that needs to be done for supporting multiple
-operating systems.
+on other operating systems such as Microsoft Windows.  CMake tool is
+required to be installed to build Canal via CMake while Autotools
+require no tool to be present on the system.  Supporting multiple
+versions of the CMake tool is not straighforward, but it is something
+that needs to be done when supporting CMake for multiple operating
+systems.
 
 \paragraph*{Building and installing Canal with Autotools}
 The first step is to configure the source code, telling Canal where
@@ -78,7 +79,12 @@ tree and run the \texttt{configure} script:
 \texttt{./configure}
 
 It prints messages telling which features it checks and which
-dependencies it found.
+dependencies it found.  With default settings, the build system is
+configured to optimize the resulting code to make Canal run faster.
+If you need to debug Canal, set compiler flags to avoid any
+optimization:
+
+\texttt{./configure CXXFLAGS=''-g -O0''}
 
 Once the \texttt{configure} script has been run, you can compile Canal
 by running \texttt{make}:
