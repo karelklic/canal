@@ -13,7 +13,7 @@ namespace Canal {
 namespace Pointer {
 
 Pointer::Pointer(const Environment &environment,
-                               const llvm::Type &type)
+                 const llvm::Type &type)
     : Domain(environment), mType(type)
 {
 }
@@ -29,7 +29,7 @@ Pointer::Pointer(const Pointer &value)
 }
 
 Pointer::Pointer(const Pointer &value,
-                               const llvm::Type &newType)
+                 const llvm::Type &newType)
     : Domain(value),
       mTargets(value.mTargets),
       mType(newType)
@@ -48,10 +48,10 @@ Pointer::~Pointer()
 
 void
 Pointer::addTarget(Target::Type type,
-                          const llvm::Value *place,
-                          const llvm::Value *target,
-                          const std::vector<Domain*> &offsets,
-                          Domain *numericOffset)
+                   const llvm::Value *place,
+                   const llvm::Value *target,
+                   const std::vector<Domain*> &offsets,
+                   Domain *numericOffset)
 {
     CANAL_ASSERT_MSG(place,
                      "Place is mandatory.");
@@ -122,6 +122,8 @@ Pointer::getElementPtr(const std::vector<Domain*> &offsets,
     }
 
     Pointer *result = new Pointer(*this, type);
+
+    // TODO: handle mNumericOffset.
 
     // Iterate over all targets, and adjust the target offsets.
     PlaceTargetMap::iterator targetIt = result->mTargets.begin();
