@@ -379,7 +379,7 @@ Operations::cmpOperation(const llvm::CmpInst &instruction,
         return;
 
     // TODO: suppot arrays
-    Domain *resultValue = new Integer::Container(mEnvironment, 1);
+    Domain *resultValue = mConstructors.createInteger(1);
     ((resultValue)->*(operation))(*values[0],
                                   *values[1],
                                   instruction.getPredicate());
@@ -889,8 +889,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
         value = array;
 
         // Set pointer offset.
-        Domain *zero = new Integer::Container(mEnvironment,
-                                              llvm::APInt(64, 0));
+        Domain *zero = mConstructors.createInteger(llvm::APInt(64, 0));
 
         offsets.push_back(zero);
         offsets.push_back(zero->clone());

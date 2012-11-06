@@ -30,8 +30,7 @@ Constructors::create(const llvm::Type &type) const
         llvm::IntegerType &integerType =
             llvmCast<llvm::IntegerType>(type);
 
-        return new Integer::Container(mEnvironment,
-                                      integerType.getBitWidth());
+        return createInteger(integerType.getBitWidth());
     }
 
     if (type.isFloatingPointTy())
@@ -106,7 +105,7 @@ Constructors::create(const llvm::Constant &value,
             llvmCast<llvm::ConstantInt>(value);
 
         const llvm::APInt &i = intValue.getValue();
-        return new Integer::Container(mEnvironment, i);
+        return createInteger(i);
     }
 
     if (llvm::isa<llvm::ConstantPointerNull>(value))
@@ -279,6 +278,17 @@ Constructors::create(const llvm::Constant &value,
     }
 
     CANAL_DIE_MSG("not implemented for " << typeid(value).name());
+}
+
+Domain *
+Constructors::createInteger(unsigned bitWidth) const
+{
+    return new Integer::Container(mEnvironment, bitWidth);
+}
+
+Domain *
+Constructors::createInteger(const llvm::APInt &number) const {
+    return new Integer::Container(mEnvironment, number);
 }
 
 const llvm::fltSemantics *
