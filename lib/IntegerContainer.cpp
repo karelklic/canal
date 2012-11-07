@@ -545,13 +545,11 @@ Container::isSingleValue() const
 }
 
 void
-Container::setZero(const llvm::Value *instruction)
+Container::setZero(const llvm::Value *place)
 {
     std::vector<Domain*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
-    {
-        (*it)->setZero(instruction);
-    }
+        (*it)->setZero(place);
 }
 
 } // namespace Integer

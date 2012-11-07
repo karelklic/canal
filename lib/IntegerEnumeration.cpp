@@ -630,7 +630,7 @@ Enumeration::applyOperation(const Domain &a,
 }
 
 void
-Enumeration::setZero(const llvm::Value *instruction)
+Enumeration::setZero(const llvm::Value *place)
 {
     mTop = false;
     mValues.clear();

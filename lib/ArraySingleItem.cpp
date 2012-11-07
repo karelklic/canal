@@ -302,9 +302,9 @@ SingleItem::setItem(uint64_t offset, const Domain &value)
 }
 
 void
-SingleItem::setZero(const llvm::Value *instruction)
+SingleItem::setZero(const llvm::Value *place)
 {
-    mValue->setZero(instruction);
+    mValue->setZero(place);
 }
 
 } // namespace Array

@@ -75,7 +75,7 @@ public:
 
     /// Set value of this domain to represent zeroed memory.  Needed
     /// for constants with zero initializer.
-    virtual void setZero(const llvm::Value *instruction) = 0;
+    virtual void setZero(const llvm::Value *place) = 0;
 
     virtual Widening::DataInterface *getWideningData() const { return mWideningData; }
 

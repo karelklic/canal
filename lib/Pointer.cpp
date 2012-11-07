@@ -323,12 +323,12 @@ InclusionBased::setTop()
 }
 
 void
-InclusionBased::setZero(const llvm::Value *instruction)
+InclusionBased::setZero(const llvm::Value *place)
 {
     mTop = false;
     mTargets.clear();
     addTarget(Pointer::Target::Constant,
-                            instruction,
+                            place,
                             NULL,
                             std::vector<Domain*>(),
                             NULL);

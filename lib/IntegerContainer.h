@@ -106,7 +106,7 @@ public: // Implementation of Domain.
     /// Implementation of Domain::toString().
     virtual std::string toString() const;
     /// Implementation of Domain::setZero().
-    virtual void setZero(const llvm::Value *instruction);
+    virtual void setZero(const llvm::Value *place);
 
     /// Implementation of Domain::add().
     virtual void add(const Domain &a, const Domain &b);
