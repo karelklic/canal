@@ -93,7 +93,8 @@ am_libcanal_la_OBJECTS = libcanal_la-APIntUtils.lo \
 	libcanal_la-Utils.lo libcanal_la-VariableArguments.lo \
 	libcanal_la-WideningDataIterationCount.lo \
 	libcanal_la-WideningManager.lo \
-	libcanal_la-WideningNumericalInfinity.lo
+	libcanal_la-WideningNumericalInfinity.lo \
+	libcanal_la-WideningPointers.lo
 libcanal_la_OBJECTS = $(am_libcanal_la_OBJECTS)
 libcanal_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(libcanal_la_CXXFLAGS) \
@@ -332,7 +333,9 @@ libcanal_la_SOURCES = \
 	WideningManager.cpp \
 	WideningManager.h \
 	WideningNumericalInfinity.cpp \
-	WideningNumerucalInfinity.h
+	WideningNumericalInfinity.h \
+	WideningPointers.cpp \
+	WideningPointers.h
 
 libcanal_la_CXXFLAGS = $(LLVM_CFLAGS)
 libcanal_la_LDFLAGS = $(LLVM_LDFLAGS) $(LLVM_LIBS) -version-info 0:0:0
@@ -459,6 +462,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-WideningDataIterationCount.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-WideningManager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-WideningNumericalInfinity.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-WideningPointers.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -697,6 +701,13 @@ libcanal_la-WideningNumericalInfinity.lo: WideningNumericalInfinity.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WideningNumericalInfinity.cpp' object='libcanal_la-WideningNumericalInfinity.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-WideningNumericalInfinity.lo `test -f 'WideningNumericalInfinity.cpp' || echo '$(srcdir)/'`WideningNumericalInfinity.cpp
+
+libcanal_la-WideningPointers.lo: WideningPointers.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-WideningPointers.lo -MD -MP -MF $(DEPDIR)/libcanal_la-WideningPointers.Tpo -c -o libcanal_la-WideningPointers.lo `test -f 'WideningPointers.cpp' || echo '$(srcdir)/'`WideningPointers.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-WideningPointers.Tpo $(DEPDIR)/libcanal_la-WideningPointers.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WideningPointers.cpp' object='libcanal_la-WideningPointers.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-WideningPointers.lo `test -f 'WideningPointers.cpp' || echo '$(srcdir)/'`WideningPointers.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo
