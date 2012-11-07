@@ -39,8 +39,8 @@ Module::Module(const llvm::Module &module,
 
             Domain *value = constructors.create(*it->getType());
 
-            Pointer::InclusionBased &pointer =
-                dynCast<Pointer::InclusionBased&>(*value);
+            Pointer::Pointer &pointer =
+                dynCast<Pointer::Pointer&>(*value);
 
             pointer.addTarget(Pointer::Target::Block,
                               it,

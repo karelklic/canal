@@ -10,9 +10,10 @@ sadd_ov(const llvm::APInt &a,
         bool &overflow)
 {
 #if LLVM_MAJOR == 2 && LLVM_MINOR < 9
-    llvm::APInt result = a+b;
+    llvm::APInt result = a + b;
     overflow = a.isNonNegative() == b.isNonNegative() &&
         result.isNonNegative() != a.isNonNegative();
+
     return result;
 #else
     return a.sadd_ov(b, overflow);
@@ -42,6 +43,7 @@ ssub_ov(const llvm::APInt &a,
     llvm::APInt result = a - b;
     overflow = a.isNonNegative() != b.isNonNegative() &&
         result.isNonNegative() != a.isNonNegative();
+
     return result;
 #else
     return a.ssub_ov(b, overflow);
@@ -87,6 +89,7 @@ smul_ov(const llvm::APInt &a,
         overflow = result.sdiv(b) != a || result.sdiv(a) != b;
     else
         overflow = false;
+
     return result;
 #else
     return a.smul_ov(b, overflow);
@@ -104,6 +107,7 @@ umul_ov(const llvm::APInt &a,
         overflow = result.udiv(b) != a || result.udiv(a) != b;
     else
         overflow = false;
+
     return result;
 #else
     return a.umul_ov(b, overflow);

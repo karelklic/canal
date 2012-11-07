@@ -7,25 +7,26 @@
 
 using namespace Canal;
 
+static Environment *gEnvironment;
+
 static void
-testConstructors(const Environment &environment)
+testConstructors()
 {
     const llvm::PointerType &type =
-        *llvm::Type::getInt1PtrTy(environment.getContext());
+        *llvm::Type::getInt1PtrTy(gEnvironment->getContext());
 
-    Pointer::InclusionBased pointer(environment, type);
+    Pointer::Pointer pointer(*gEnvironment, type);
     CANAL_ASSERT(pointer.mTargets.size() == 0);
-    CANAL_ASSERT(!pointer.isTop());
-    CANAL_ASSERT(pointer.isBottom());
 }
 
 static void
-testEquality(const Environment &environment)
+testEquality()
 {
     const llvm::PointerType &type =
-        *llvm::Type::getInt1PtrTy(environment.getContext());
+        *llvm::Type::getInt1PtrTy(gEnvironment->getContext());
 
-    Pointer::InclusionBased a(environment, type), b(environment, type);
+    Pointer::Pointer a(*gEnvironment, type);
+    Pointer::Pointer b(*gEnvironment, type);
 
     // Test empty abstract pointers.
     assert(a.mTargets.size() == 0);
@@ -41,10 +42,11 @@ main(int argc, char **argv)
     llvm::llvm_shutdown_obj y;  // Call llvm_shutdown() on exit.
 
     llvm::Module *module = new llvm::Module("testModule", context);
-    Environment environment(module);
+    gEnvironment = new Environment(module);
 
-    testConstructors(environment);
-    testEquality(environment);
+    testConstructors();
+    testEquality();
 
+    delete gEnvironment;
     return 0;
 }

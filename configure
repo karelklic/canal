@@ -5105,7 +5105,7 @@ _ACEOF
 _ACEOF
 
 
-ac_config_headers="$ac_config_headers lib/Config.h"
+ac_config_headers="$ac_config_headers lib/Config.h:lib/ConfigAutotools.h.in"
 
 
 
@@ -17978,7 +17978,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
-    "lib/Config.h") CONFIG_HEADERS="$CONFIG_HEADERS lib/Config.h" ;;
+    "lib/Config.h") CONFIG_HEADERS="$CONFIG_HEADERS lib/Config.h:lib/ConfigAutotools.h.in" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "tests/atconfig") CONFIG_COMMANDS="$CONFIG_COMMANDS tests/atconfig" ;;
     "canal.spec") CONFIG_FILES="$CONFIG_FILES canal.spec" ;;

@@ -29,6 +29,7 @@ Utils.cpp
 VariableArguments.cpp
 WideningDataIterationCount.cpp
 WideningManager.cpp
-WideningNumericalInfinity.cpp)
+WideningNumericalInfinity.cpp
+WideningPointers.cpp)
 
 target_link_libraries(canal "${LLVM_MODULE_LIBS} ${LLVM_LDFLAGS}")

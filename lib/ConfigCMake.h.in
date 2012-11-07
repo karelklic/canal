@@ -1,0 +1,10 @@
+
+/* Define to 1 if you have the <gelf.h> header file. */
+#cmakedefine HAVE_GELF_H 1
+
+/* Define to 1 if you have the `elf' library (-lelf). */
+#cmakedefine HAVE_LIBELF 1
+
+/* Define to 1 if you have the <libelf.h> header file. */
+#cmakedefine HAVE_LIBELF_H
+

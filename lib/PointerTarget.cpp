@@ -300,6 +300,8 @@ Target::dereference(const State &state) const
         }
     }
 
+    // TODO: mNumericOffset
+
     return result;
 }
 

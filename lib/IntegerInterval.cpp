@@ -9,7 +9,7 @@ namespace Canal {
 namespace Integer {
 
 Interval::Interval(const Environment &environment,
-             unsigned bitWidth)
+                   unsigned bitWidth)
     : Domain(environment),
       mEmpty(true),
       mSignedTop(false),
@@ -176,6 +176,11 @@ Interval::merge(const Domain &value)
     const Interval &interval = dynCast<const Interval&>(value);
     if (interval.mEmpty)
         return;
+
+    CANAL_ASSERT_MSG(interval.getBitWidth() == getBitWidth(),
+                     "Bit width must be the same in merge! "
+                     << getBitWidth() << " != "
+                     << interval.getBitWidth());
 
     if (mEmpty)
     {
@@ -1006,12 +1011,43 @@ Interval::trunc(const Domain &value)
 {
     const Interval &interval = dynCast<const Interval&>(value);
     mEmpty = interval.mEmpty;
-    mSignedTop = interval.mSignedTop;
-    mSignedFrom = APIntUtils::trunc(interval.mSignedFrom, getBitWidth());
-    mSignedTo = APIntUtils::trunc(interval.mSignedTo, getBitWidth());
-    mUnsignedTop = interval.mUnsignedTop;
-    mUnsignedFrom = APIntUtils::trunc(interval.mUnsignedFrom, getBitWidth());
-    mUnsignedTo = APIntUtils::trunc(interval.mUnsignedTo, getBitWidth());
+
+    mSignedTop = interval.mSignedTop
+        || !interval.mSignedFrom.isIntN(getBitWidth())
+        || !interval.mSignedTo.isIntN(getBitWidth());
+
+    if (!mSignedTop)
+    {
+        mSignedFrom = APIntUtils::trunc(interval.mSignedFrom,
+                                        getBitWidth());
+
+        mSignedTo = APIntUtils::trunc(interval.mSignedTo,
+                                      getBitWidth());
+
+        if (getBitWidth() == 1 && mSignedFrom != mSignedTo)
+            mSignedTop = true;
+        else
+        {
+            CANAL_ASSERT_MSG(mSignedFrom.sle(mSignedTo),
+                             "mSignedFrom must be lower than mSignedTo");
+        }
+    }
+
+    mUnsignedTop = interval.mUnsignedTop
+        || !interval.mUnsignedFrom.isIntN(getBitWidth())
+        || !interval.mUnsignedTo.isIntN(getBitWidth());
+
+    if (!mUnsignedTop)
+    {
+        mUnsignedFrom = APIntUtils::trunc(interval.mUnsignedFrom,
+                                          getBitWidth());
+
+        mUnsignedTo = APIntUtils::trunc(interval.mUnsignedTo,
+                                        getBitWidth());
+
+        CANAL_ASSERT_MSG(mUnsignedFrom.ule(mUnsignedTo),
+                         "mUnsignedFrom must be lower than mUnsignedTo");
+    }
 }
 
 void

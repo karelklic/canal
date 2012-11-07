@@ -48,34 +48,10 @@ on machine-dependent integers and floating point numbers, and
 cooperate with an environment with complex invariants and
 interdependencies.
 
-Canal is a framework combining existing static analysis techniques in
-order to improve the maintainability, understanding, traceability and
-correctness of imperative programs in a coherent manner.  The purpose
-of the framework is to make existing techniques accessible and
-evaluable, to support the implementation of new techniques, and to
-encourage experiments.  Currently, techniques are often presented
-without proper experiments on real-world complex systems, or just with
-a proprietary implementation that cannot be investigated.  As a
-consequence, actual applicability of many techniques for industrial
-use is unknown.
-
-\section{Use cases}
-\subsection{Analysis of program behaviour}
-You can hook on the fixpoint of function calls to inspect the
-calculated abstract values.  You can get abstract values of function
-call parameters.
-
-\subsection{Comparison with a specification}
-A set of pre- and post-conditions for functions, and variable-based or
-module-based automata.  This can be defined for certain function or
-library, and library/function users are watched to conform to the
-specification.
-
-\subsection{Conformance to environment constraints}
-Double free, memory leaks, buffer overflow and underflow, division by
-zero, invalid access to memory, locking and concurrency errors,
-uncaught exceptions.
-
+Canal is a static analysis tool designed to analyze behaviour of
+application programs. It is based on the theoretical framework of
+abstract interpretation, with focus on the scalability to large
+programs and proper handling of real-world source code.
 
 \chapter{Installation}
 
@@ -83,38 +59,32 @@ This chapter provides instructions for installing Canal on supported
 platforms.  Canal can be built and installed on most GNU/Linux
 operating systems.
 
-% Microsoft Windows 7, Mac OS X, Ubuntu 12.04
+Canal comes with two build systems: Autotools (also known as GNU build
+system) and CMake. The systems are equivalent in terms of features,
+but they come with different advantages and disadvantages.  Autotools
+system works on Unix-like operating systems only, and CMake also works
+on other operating systems such as Microsoft Windows.  CMake tool is
+required to be installed to build Canal via CMake while Autotools
+require no tool to be present on the system.  Supporting multiple
+versions of the CMake tool is not straighforward, but it is something
+that needs to be done when supporting CMake for multiple operating
+systems.
 
-\section{Installation from source code on Fedora and Red Hat Enterprise Linux}
-
-Canal can be built, installed, and developed on a computer with the
-Red Hat Enterprise Linux 6 or Fedora 17 operating systems.
-
-\paragraph*{Prerequisites}
-Specific software packages are required by the build process and
-should be installed prior to building Canal:
-\begin{itemize}
-\item The \texttt{llvm-devel} and \texttt{clang} packages.  On Red Hat
-  Enterprise Linux, these packages can be obtained from Extra Packages
-  for Enterprise Linux (EPEL) software repository.
-\item The \texttt{elfutils-devel} and \texttt{readline-devel} packages.
-  These are needed for the command-line user interface tool.
-\item The \texttt{doxygen}, \texttt{graphviz}, and
-  \texttt{texlive-latex} packages.  These are needed to build the
-  documentation.  If not present, the documentation is not built.
-\end{itemize}
-
-\paragraph*{Building and installing}
-Autotools (also known as GNU build system) are used to build Canal on
-these platforms.  The first step is to configure the source code,
-telling Canal where various dependencies are located and where various
-files will be installed.  To do so, go to the directory with the
-Canal source code tree and run the \texttt{configure} script:
+\paragraph*{Building and installing Canal with Autotools}
+The first step is to configure the source code, telling Canal where
+various dependencies are located and where various files will be
+installed.  To do so, go to the directory with the Canal source code
+tree and run the \texttt{configure} script:
 
 \texttt{./configure}
 
 It prints messages telling which features it checks and which
-dependencies it found.
+dependencies it found.  With default settings, the build system is
+configured to optimize the resulting code to make Canal run faster.
+If you need to debug Canal, set compiler flags to avoid any
+optimization:
+
+\texttt{./configure CXXFLAGS=''-g -O0''}
 
 Once the \texttt{configure} script has been run, you can compile Canal
 by running \texttt{make}:
@@ -131,6 +101,59 @@ directories, special priviledges might be needed.  To install Canal,
 run
 
 \texttt{make install}
+
+\paragraph*{Building and installing Canal with CMake}
+The first step is to configure the source code, telling Canal where
+various dependencies are located and where various files will be
+installed.  To do so, go to the directory with the Canal source code
+tree and run the \texttt{cmake} program:
+
+\texttt{cmake .}
+
+It prints messages telling which dependencies it found.
+
+Once the \texttt{cmake} tool has been run, you can compile Canal by
+running \texttt{make}:
+
+\texttt{make}
+
+After compiling Canal, you can verify your compiled program can
+operate well by running the test suite and seeing that all tests pass:
+
+\texttt{make test}
+
+%Canal can be now installed. If it is going to be installed to system
+%directories, special priviledges might be needed.  To install Canal,
+%run
+
+%\texttt{make install}
+
+
+% Microsoft Windows 7, Mac OS X, Ubuntu 12.04
+
+\paragraph*{Installation from source code on Fedora and Red Hat
+  Enterprise Linux}
+
+Canal can be built, installed, and developed on a computer with the
+Red Hat Enterprise Linux 6 or Fedora 17 operating systems.
+
+Specific software packages are required by the build process and
+should be installed prior to building Canal:
+\begin{itemize}
+\item The \texttt{llvm-devel} and \texttt{clang} packages.  On Red Hat
+  Enterprise Linux, these packages can be obtained from Extra Packages
+  for Enterprise Linux (EPEL) software repository.
+\item The \texttt{elfutils-devel} and \texttt{readline-devel}
+  packages.  These are needed for the command-line user interface
+  tool.  If \texttt{elfutils-devel} is not present, the tool is built
+  without the ELF support.
+\item The \texttt{doxygen}, \texttt{graphviz}, and
+  \texttt{texlive-latex} packages.  These are needed to build the
+  documentation.  If not present, the documentation is not built.
+\end{itemize}
+
+Both Autotools and CMake can be used to build Canal on Fedora and Red
+Hat Enterprise Linux.
 
 \part{Concepts}
 

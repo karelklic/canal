@@ -107,6 +107,7 @@ Iterator::nextInstruction()
 
     if (mInstruction == (*mBasicBlock)->end())
     {
+        mState->merge((*mBasicBlock)->getOutputState());
         if (*mState != (*mBasicBlock)->getOutputState())
         {
             mWideningManager.widen((*mBasicBlock)->getLlvmBasicBlock(),

@@ -49,9 +49,9 @@ ExactSize::clone() const
 ExactSize *
 ExactSize::cloneCleaned() const
 {
-    ExactSize* res = new ExactSize(*this);
-    std::vector<Domain*>::iterator it = res->mValues.begin();
-    for (; it != res->mValues.end(); ++it)
+    ExactSize* result = new ExactSize(*this);
+    std::vector<Domain*>::iterator it = result->mValues.begin();
+    for (; it != result->mValues.end(); ++it)
     {
         AccuracyDomain* dom = dynCast<AccuracyDomain*>(*it);
         CANAL_ASSERT_MSG(dom,
@@ -60,7 +60,7 @@ ExactSize::cloneCleaned() const
 
         dom->setBottom();
     }
-    return res;
+    return result;
 }
 
 bool
@@ -327,7 +327,9 @@ ExactSize::getItem(const Domain &offset) const
         // At least one of the offsets in the enumeration should point
         // to the array.  Otherwise it might be a bug in the
         // interpreter that requires investigation.
-        CANAL_ASSERT(!result.empty());
+        CANAL_ASSERT_MSG(!result.empty() || enumeration.mValues.empty(),
+                         "All offsets out of bound, array size "
+                         << mValues.size());
         return result;
     }
 

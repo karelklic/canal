@@ -8,6 +8,7 @@
 #include "Structure.h"
 #include "Environment.h"
 #include "State.h"
+#include "APIntUtils.h"
 #include <llvm/Constants.h>
 #include <llvm/Function.h>
 #include <llvm/ADT/OwningPtr.h>
@@ -29,8 +30,7 @@ Constructors::create(const llvm::Type &type) const
         llvm::IntegerType &integerType =
             llvmCast<llvm::IntegerType>(type);
 
-        return new Integer::Container(mEnvironment,
-                                      integerType.getBitWidth());
+        return createInteger(integerType.getBitWidth());
     }
 
     if (type.isFloatingPointTy())
@@ -49,8 +49,8 @@ Constructors::create(const llvm::Type &type) const
         CANAL_ASSERT_MSG(pointerType.getElementType(),
                          "Element type must be known.");
 
-        return new Pointer::InclusionBased(mEnvironment,
-                                           *pointerType.getElementType());
+        return new Pointer::Pointer(mEnvironment,
+                                    *pointerType.getElementType());
     }
 
     if (type.isArrayTy() || type.isVectorTy())
@@ -105,7 +105,7 @@ Constructors::create(const llvm::Constant &value,
             llvmCast<llvm::ConstantInt>(value);
 
         const llvm::APInt &i = intValue.getValue();
-        return new Integer::Container(mEnvironment, i);
+        return createInteger(i);
     }
 
     if (llvm::isa<llvm::ConstantPointerNull>(value))
@@ -114,9 +114,9 @@ Constructors::create(const llvm::Constant &value,
             llvmCast<llvm::ConstantPointerNull>(value);
 
         const llvm::PointerType &pointerType = *nullValue.getType();
-        Pointer::InclusionBased *constPointer;
-        constPointer = new Pointer::InclusionBased(mEnvironment,
-                                                   *pointerType.getElementType());
+        Pointer::Pointer *constPointer;
+        constPointer = new Pointer::Pointer(mEnvironment,
+                                            *pointerType.getElementType());
 
         constPointer->addTarget(Pointer::Target::Constant,
                                 &place,
@@ -235,7 +235,7 @@ Constructors::create(const llvm::Constant &value,
 #if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
     if (llvm::isa<llvm::ConstantDataSequential>(value))
     {
-         const llvm::ConstantDataSquential &sequentialValue =
+         const llvm::ConstantDataSequential &sequentialValue =
             llvmCast<llvm::ConstantDataSequential>(value);
 
         unsigned elementCount = sequentialValue.getNumElements();
@@ -255,7 +255,7 @@ Constructors::create(const llvm::Constant &value,
     {
         const llvm::Type *type = value.getType();
         Domain *result = Constructors::create(*type);
-        result->setZero(&value);
+        result->setZero(&place);
         return result;
     }
 
@@ -264,9 +264,9 @@ Constructors::create(const llvm::Constant &value,
         const llvm::Function &functionValue =
             llvmCast<llvm::Function>(value);
 
-        Pointer::InclusionBased *constPointer;
-        constPointer = new Pointer::InclusionBased(mEnvironment,
-                                                   *functionValue.getFunctionType());
+        Pointer::Pointer *constPointer;
+        constPointer = new Pointer::Pointer(mEnvironment,
+                                            *functionValue.getFunctionType());
 
         constPointer->addTarget(Pointer::Target::Function,
                                 &place,
@@ -278,6 +278,17 @@ Constructors::create(const llvm::Constant &value,
     }
 
     CANAL_DIE_MSG("not implemented for " << typeid(value).name());
+}
+
+Domain *
+Constructors::createInteger(unsigned bitWidth) const
+{
+    return new Integer::Container(mEnvironment, bitWidth);
+}
+
+Domain *
+Constructors::createInteger(const llvm::APInt &number) const {
+    return new Integer::Container(mEnvironment, number);
 }
 
 const llvm::fltSemantics *
@@ -318,15 +329,21 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
         const llvm::ConstantInt &constant =
             llvmCast<llvm::ConstantInt>(**it);
 
-        offsets.push_back(create(constant, place, NULL));
+        CANAL_ASSERT_MSG(constant.getBitWidth() <= 64,
+                         "Cannot handle GetElementPtr offset"
+                         " with more than 64 bits.");
+
+        // Convert to 64-bit if necessary.
+        llvm::APInt extended = APIntUtils::sext(constant.getValue(), 64);
+        offsets.push_back(new Integer::Container(mEnvironment, extended));
     }
 
     const llvm::PointerType &pointerType =
         llvmCast<const llvm::PointerType>(*value.getType());
 
     // GetElementPtr on a Pointer
-    const Pointer::InclusionBased *pointer =
-        dynCast<const Pointer::InclusionBased*>(&variable);
+    const Pointer::Pointer *pointer =
+        dynCast<const Pointer::Pointer*>(&variable);
 
     if (pointer)
     {
@@ -336,9 +353,9 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
 
     // GetElementPtr on anything except a pointer.  For example, it is
     // called on arrays and structures.
-    Pointer::InclusionBased *result;
-    result = new Pointer::InclusionBased(mEnvironment,
-                                         *pointerType.getElementType());
+    Pointer::Pointer *result;
+    result = new Pointer::Pointer(mEnvironment,
+                                  *pointerType.getElementType());
 
     result->addTarget(Pointer::Target::Block,
                       &place,
@@ -356,8 +373,8 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
 {
     // BitCast from Pointer.  It is always a bitcast to some other
     // pointer.
-    const Pointer::InclusionBased *pointer =
-        dynCast<const Pointer::InclusionBased*>(&variable);
+    const Pointer::Pointer *pointer =
+        dynCast<const Pointer::Pointer*>(&variable);
 
     const llvm::PointerType *pointerType =
         llvmCast<const llvm::PointerType>(value.getType());
@@ -371,9 +388,9 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
     // BitCast from anything to a pointer.
     if (pointerType)
     {
-        Pointer::InclusionBased *result;
-        result = new Pointer::InclusionBased(mEnvironment,
-                                             *pointerType->getElementType());
+        Pointer::Pointer *result;
+        result = new Pointer::Pointer(mEnvironment,
+                                      *pointerType->getElementType());
 
         result->addTarget(Pointer::Target::Block,
                           &place,

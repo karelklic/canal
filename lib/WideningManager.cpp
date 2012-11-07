@@ -1,8 +1,14 @@
 #include "WideningManager.h"
 #include "WideningNumericalInfinity.h"
+#include "WideningPointers.h"
 #include "State.h"
 #include "StateMap.h"
 #include "Domain.h"
+#if 0 //Debug info for fixpoint calculation
+#include <iostream>
+#include "Utils.h"
+#include "Environment.h"
+#endif
 
 namespace Canal {
 namespace Widening {
@@ -10,6 +16,7 @@ namespace Widening {
 Manager::Manager()
 {
     mWidenings.push_back(new NumericalInfinity());
+    mWidenings.push_back(new Pointers());
 }
 
 Manager::~Manager()
@@ -24,10 +31,21 @@ Manager::widen(const llvm::BasicBlock &wideningPoint,
                State &first,
                const State &second) const
 {
-    widen(wideningPoint, first.getFunctionVariables(), second.getFunctionVariables());
-    widen(wideningPoint, first.getFunctionBlocks(), second.getFunctionBlocks());
-    widen(wideningPoint, first.getGlobalVariables(), second.getGlobalVariables());
-    widen(wideningPoint, first.getGlobalBlocks(), second.getGlobalBlocks());
+    widen(wideningPoint,
+          first.getFunctionVariables(),
+          second.getFunctionVariables());
+
+    widen(wideningPoint,
+          first.getFunctionBlocks(),
+          second.getFunctionBlocks());
+
+    widen(wideningPoint,
+          first.getGlobalVariables(),
+          second.getGlobalVariables());
+
+    widen(wideningPoint,
+          first.getGlobalBlocks(),
+          second.getGlobalBlocks());
 }
 
 void
@@ -43,6 +61,11 @@ Manager::widen(const llvm::BasicBlock &wideningPoint,
 	StateMap::iterator it1 = first.find(it2->first);
 	if (it1 != first.end() && *it1->second != *it2->second)
         {
+#if 0 //Debug info for fixpoint calculation
+        std::cout << ((it1->second)->toString()) << std::endl;
+        std::cout << Canal::getName(*it1->first, it1->second->getEnvironment().getSlotTracker()) << std::endl;
+        std::cout << ((it2->second)->toString()) << std::endl;
+#endif
             widen(wideningPoint, *it1->second, *it2->second);
         }
     }
