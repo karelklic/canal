@@ -5,6 +5,7 @@
 #include "ArrayExactSize.h"
 #include "FloatInterval.h"
 #include "Pointer.h"
+#include "PointerUtils.h"
 #include "Structure.h"
 #include "Environment.h"
 #include "State.h"
@@ -49,8 +50,7 @@ Constructors::create(const llvm::Type &type) const
         CANAL_ASSERT_MSG(pointerType.getElementType(),
                          "Element type must be known.");
 
-        return new Pointer::Pointer(mEnvironment,
-                                    *pointerType.getElementType());
+        return createPointer(*pointerType.getElementType());
     }
 
     if (type.isArrayTy() || type.isVectorTy())
@@ -114,15 +114,15 @@ Constructors::create(const llvm::Constant &value,
             llvmCast<llvm::ConstantPointerNull>(value);
 
         const llvm::PointerType &pointerType = *nullValue.getType();
-        Pointer::Pointer *constPointer;
-        constPointer = new Pointer::Pointer(mEnvironment,
-                                            *pointerType.getElementType());
+        Domain *constPointer;
+        constPointer = createPointer(*pointerType.getElementType());
 
-        constPointer->addTarget(Pointer::Target::Constant,
-                                &place,
-                                NULL,
-                                std::vector<Domain*>(),
-                                NULL);
+        Pointer::Utils::addTarget(*constPointer,
+                                  Pointer::Target::Constant,
+                                  &place,
+                                  NULL,
+                                  std::vector<Domain*>(),
+                                  NULL);
 
         return constPointer;
     }
@@ -264,15 +264,15 @@ Constructors::create(const llvm::Constant &value,
         const llvm::Function &functionValue =
             llvmCast<llvm::Function>(value);
 
-        Pointer::Pointer *constPointer;
-        constPointer = new Pointer::Pointer(mEnvironment,
-                                            *functionValue.getFunctionType());
+        Domain *constPointer;
+        constPointer = createPointer(*functionValue.getFunctionType());
 
-        constPointer->addTarget(Pointer::Target::Function,
-                                &place,
-                                &value,
-                                std::vector<Domain*>(),
-                                NULL);
+        Pointer::Utils::addTarget(*constPointer,
+                                  Pointer::Target::Function,
+                                  &place,
+                                  &value,
+                                  std::vector<Domain*>(),
+                                  NULL);
 
         return constPointer;
     }
@@ -316,6 +316,10 @@ Constructors::createArray(const std::vector<Domain*> &values) const {
     return new Array::ExactSize(mEnvironment, values);
 }
 
+Domain *
+Constructors::createPointer(const llvm::Type &type) const {
+    return new Pointer::Pointer(mEnvironment, type);
+}
 
 const llvm::fltSemantics *
 Constructors::getFloatingPointSemantics(const llvm::Type &type)
@@ -379,15 +383,15 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
 
     // GetElementPtr on anything except a pointer.  For example, it is
     // called on arrays and structures.
-    Pointer::Pointer *result;
-    result = new Pointer::Pointer(mEnvironment,
-                                  *pointerType.getElementType());
+    Domain *result;
+    result = createPointer(*pointerType.getElementType());
 
-    result->addTarget(Pointer::Target::Block,
-                      &place,
-                      *value.op_begin(),
-                      offsets,
-                      NULL);
+    Pointer::Utils::addTarget(*result,
+                              Pointer::Target::Block,
+                              &place,
+                              *value.op_begin(),
+                              offsets,
+                              NULL);
 
     return result;
 }
@@ -414,15 +418,15 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
     // BitCast from anything to a pointer.
     if (pointerType)
     {
-        Pointer::Pointer *result;
-        result = new Pointer::Pointer(mEnvironment,
-                                      *pointerType->getElementType());
+        Domain *result;
+        result = createPointer(*pointerType->getElementType());
 
-        result->addTarget(Pointer::Target::Block,
-                          &place,
-                          *value.op_begin(),
-                          std::vector<Domain*>(),
-                          NULL);
+        Pointer::Utils::addTarget(*result,
+                                  Pointer::Target::Block,
+                                  &place,
+                                  *value.op_begin(),
+                                  std::vector<Domain*>(),
+                                  NULL);
 
         return result;
     }

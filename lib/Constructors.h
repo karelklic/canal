@@ -57,6 +57,8 @@ public:
 
     Domain *createArray(const std::vector<Domain*> &values) const;
 
+    Domain *createPointer(const llvm::Type &type) const;
+
     static const llvm::fltSemantics *
         getFloatingPointSemantics(const llvm::Type &type);
 
