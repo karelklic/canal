@@ -7,6 +7,7 @@ class Constant;
 class ConstantExpr;
 class Value;
 class APInt;
+class APFloat;
 struct fltSemantics;
 } // namespace llvm
 
@@ -42,6 +43,10 @@ public:
     Domain *createInteger(unsigned bitWidth) const;
 
     Domain *createInteger(const llvm::APInt &number) const;
+
+    Domain *createFloat(const llvm::fltSemantics &semantics) const;
+
+    Domain *createFloat(const llvm::APFloat &number) const;
 
     static const llvm::fltSemantics *
         getFloatingPointSemantics(const llvm::Type &type);

@@ -38,7 +38,7 @@ Constructors::create(const llvm::Type &type) const
         const llvm::fltSemantics *semantics =
             getFloatingPointSemantics(type);
 
-        return new Float::Interval(mEnvironment, *semantics);
+        return createFloat(*semantics);
     }
 
     if (type.isPointerTy())
@@ -175,8 +175,8 @@ Constructors::create(const llvm::Constant &value,
     {
         const llvm::ConstantFP &fp = llvmCast<llvm::ConstantFP>(value);
 
-        const llvm::APFloat &f = fp.getValueAPF();
-        return new Float::Interval(mEnvironment, f);
+        const llvm::APFloat &number = fp.getValueAPF();
+        return createFloat(number);
     }
 
     if (llvm::isa<llvm::ConstantStruct>(value))
@@ -289,6 +289,16 @@ Constructors::createInteger(unsigned bitWidth) const
 Domain *
 Constructors::createInteger(const llvm::APInt &number) const {
     return new Integer::Container(mEnvironment, number);
+}
+
+Domain *
+Constructors::createFloat(const llvm::fltSemantics &semantics) const {
+    return new Float::Interval(mEnvironment, semantics);
+}
+
+Domain *
+Constructors::createFloat(const llvm::APFloat &number) const {
+    return new Float::Interval(mEnvironment, number);
 }
 
 const llvm::fltSemantics *
