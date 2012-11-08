@@ -265,19 +265,18 @@ cmpOperation(ExactSize &result,
     const ExactSize &aa = dynCast<const ExactSize&>(a),
         &bb = dynCast<const ExactSize&>(b);
 
-    CANAL_ASSERT_MSG(aa.size() == bb.size(),
+    CANAL_ASSERT_MSG(result.size() == aa.size() &&
+                     aa.size() == bb.size(),
                      "Binary operations with arrays "
                      "require the array size to be equal.");
 
-    std::vector<Domain*>::const_iterator itA = aa.mValues.begin(),
+    std::vector<Domain*>::const_iterator
+        itR = result.mValues.begin(),
+        itA = aa.mValues.begin(),
         itB = bb.mValues.begin();
 
-    for (; itA != aa.mValues.end(); ++itA, ++itB)
-    {
-        Domain *resultValue = new Integer::Container(result.mEnvironment, 1);
-        ((resultValue)->*(operation))(**itA, **itB, predicate);
-        result.mValues.push_back(resultValue);
-    }
+    for (; itR != result.mValues.end(); ++itR, ++itA, ++itB)
+        ((*itR)->*(operation))(**itA, **itB, predicate);
 }
 
 void

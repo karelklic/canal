@@ -258,8 +258,14 @@ Operations::binaryOperation(const llvm::BinaryOperator &instruction,
     // as numbers).  If some operand is not known, exit.
     llvm::OwningPtr<Domain> constants[2];
     Domain *values[2] = {
-        variableOrConstant(*instruction.getOperand(0), state, instruction, constants[0]),
-        variableOrConstant(*instruction.getOperand(1), state, instruction, constants[1])
+        variableOrConstant(*instruction.getOperand(0),
+                           state,
+                           instruction,
+                           constants[0]),
+        variableOrConstant(*instruction.getOperand(1),
+                           state,
+                           instruction,
+                           constants[1])
     };
     if (!values[0] || !values[1])
         return;
@@ -371,15 +377,20 @@ Operations::cmpOperation(const llvm::CmpInst &instruction,
     // as numbers).  If some operand is not known, exit.
     llvm::OwningPtr<Domain> constants[2];
     Domain *values[2] = {
-        variableOrConstant(*instruction.getOperand(0), state, instruction, constants[0]),
-        variableOrConstant(*instruction.getOperand(1), state, instruction, constants[1])
+        variableOrConstant(*instruction.getOperand(0),
+                           state,
+                           instruction,
+                           constants[0]),
+        variableOrConstant(*instruction.getOperand(1),
+                           state,
+                           instruction,
+                           constants[1])
     };
 
     if (!values[0] || !values[1])
         return;
 
-    // TODO: suppot arrays
-    Domain *resultValue = new Integer::Container(mEnvironment, 1);
+    Domain *resultValue = mConstructors.create(*instruction.getType());
     ((resultValue)->*(operation))(*values[0],
                                   *values[1],
                                   instruction.getPredicate());
