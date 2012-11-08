@@ -8,6 +8,7 @@
 #include "IntegerContainer.h"
 #include "OperationsCallback.h"
 #include "Pointer.h"
+#include "PointerUtils.h"
 #include "Structure.h"
 #include "Utils.h"
 #include "Domain.h"
@@ -894,14 +895,15 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
     }
 
     state.addFunctionBlock(instruction, value);
-    Pointer::Pointer *pointer;
-    pointer = new Pointer::Pointer(mEnvironment, *type);
+    Domain *pointer;
+    pointer = mConstructors.createPointer(*type);
 
-    pointer->addTarget(Pointer::Target::Block,
-                       &instruction,
-                       &instruction,
-                       offsets,
-                       NULL);
+    Pointer::Utils::addTarget(*pointer,
+                              Pointer::Target::Block,
+                              &instruction,
+                              &instruction,
+                              offsets,
+                              NULL);
 
     state.addFunctionVariable(instruction, pointer);
 }
