@@ -204,11 +204,11 @@ Structure::setItem(uint64_t offset, const Domain &value)
 }
 
 void
-Structure::setZero(const llvm::Value *instruction)
+Structure::setZero(const llvm::Value *place)
 {
     std::vector<Domain*>::iterator it = mMembers.begin();
     for (; it != mMembers.end(); ++it)
-        (*it)->setZero(instruction);
+        (*it)->setZero(place);
 }
 
 } // namespace Canal

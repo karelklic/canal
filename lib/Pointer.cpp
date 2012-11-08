@@ -285,11 +285,11 @@ Pointer::toString() const
 }
 
 void
-Pointer::setZero(const llvm::Value *instruction)
+Pointer::setZero(const llvm::Value *place)
 {
     mTargets.clear();
     addTarget(Target::Constant,
-              instruction,
+              place,
               NULL,
               std::vector<Domain*>(),
               NULL);

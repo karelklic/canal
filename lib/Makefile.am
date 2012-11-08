@@ -44,6 +44,8 @@ libcanal_la_SOURCES = \
 	Pointer.h \
 	PointerTarget.cpp \
 	PointerTarget.h \
+	PointerUtils.cpp \
+	PointerUtils.h \
 	SlotTracker.cpp \
 	SlotTracker.h \
 	State.cpp \

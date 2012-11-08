@@ -732,7 +732,7 @@ Bitfield::setTop()
 }
 
 void
-Bitfield::setZero(const llvm::Value *instruction)
+Bitfield::setZero(const llvm::Value *place)
 {
     mZeroes = ~0;
     mOnes = 0;

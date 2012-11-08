@@ -437,13 +437,13 @@ ExactSize::setItem(uint64_t offset, const Domain &value)
 }
 
 void
-ExactSize::setZero(const llvm::Value *instruction)
+ExactSize::setZero(const llvm::Value *place)
 {
     std::vector<Domain*>::iterator it = mValues.begin(),
             itend = mValues.end();
 
     for (; it != itend; it ++)
-        (*it)->setZero(instruction);
+        (*it)->setZero(place);
 }
 
 } // namespace Array

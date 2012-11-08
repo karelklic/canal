@@ -313,7 +313,7 @@ Interval::setTop()
 }
 
 void
-Interval::setZero(const llvm::Value *instruction)
+Interval::setZero(const llvm::Value *place)
 {
     mEmpty = false;
     mFrom = llvm::APFloat::getZero(mFrom.getSemantics());

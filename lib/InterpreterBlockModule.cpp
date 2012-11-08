@@ -2,6 +2,7 @@
 #include "InterpreterBlockFunction.h"
 #include "State.h"
 #include "Pointer.h"
+#include "PointerUtils.h"
 #include "Utils.h"
 #include "Constructors.h"
 #include "Environment.h"
@@ -39,14 +40,12 @@ Module::Module(const llvm::Module &module,
 
             Domain *value = constructors.create(*it->getType());
 
-            Pointer::Pointer &pointer =
-                dynCast<Pointer::Pointer&>(*value);
-
-            pointer.addTarget(Pointer::Target::Block,
-                              it,
-                              it,
-                              std::vector<Domain*>(),
-                              NULL);
+            Pointer::Utils::addTarget(*value,
+                                      Pointer::Target::Block,
+                                      it,
+                                      it,
+                                      std::vector<Domain*>(),
+                                      NULL);
 
             mGlobalState.addGlobalVariable(*it, value);
         }

@@ -41,7 +41,7 @@ public: // Implementation of Domain.
     /// Implementation of Domain::toString().
     virtual std::string toString() const;
     /// Implementation of Domain::setZero().
-    virtual void setZero(const llvm::Value *instruction);
+    virtual void setZero(const llvm::Value *place);
 
 public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::getItem().

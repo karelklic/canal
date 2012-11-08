@@ -8,6 +8,7 @@
 #include "IntegerContainer.h"
 #include "OperationsCallback.h"
 #include "Pointer.h"
+#include "PointerUtils.h"
 #include "Structure.h"
 #include "Utils.h"
 #include "Domain.h"
@@ -794,8 +795,7 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
         }
     }
 
-    Array::ExactSize *result = new Array::ExactSize(mEnvironment,
-                                                    newValues);
+    Domain *result = mConstructors.createArray(newValues);
 
     state.addFunctionVariable(instruction, result);
 }
@@ -892,30 +892,29 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
             return;
         }
 
-        Array::SingleItem *array;
-        array = new Array::SingleItem(mEnvironment,
-                                      abstractSize->clone(),
-                                      value);
+        Domain *array;
+        array = mConstructors.createArray(abstractSize->clone(),
+                                          value);
 
         value = array;
 
         // Set pointer offset.
-        Domain *zero = new Integer::Container(mEnvironment,
-                                              llvm::APInt(64, 0));
+        Domain *zero = mConstructors.createInteger(llvm::APInt(64, 0));
 
         offsets.push_back(zero);
         offsets.push_back(zero->clone());
     }
 
     state.addFunctionBlock(instruction, value);
-    Pointer::Pointer *pointer;
-    pointer = new Pointer::Pointer(mEnvironment, *type);
+    Domain *pointer;
+    pointer = mConstructors.createPointer(*type);
 
-    pointer->addTarget(Pointer::Target::Block,
-                       &instruction,
-                       &instruction,
-                       offsets,
-                       NULL);
+    Pointer::Utils::addTarget(*pointer,
+                              Pointer::Target::Block,
+                              &instruction,
+                              &instruction,
+                              offsets,
+                              NULL);
 
     state.addFunctionVariable(instruction, pointer);
 }

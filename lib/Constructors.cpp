@@ -5,6 +5,7 @@
 #include "ArrayExactSize.h"
 #include "FloatInterval.h"
 #include "Pointer.h"
+#include "PointerUtils.h"
 #include "Structure.h"
 #include "Environment.h"
 #include "State.h"
@@ -30,8 +31,7 @@ Constructors::create(const llvm::Type &type) const
         llvm::IntegerType &integerType =
             llvmCast<llvm::IntegerType>(type);
 
-        return new Integer::Container(mEnvironment,
-                                      integerType.getBitWidth());
+        return createInteger(integerType.getBitWidth());
     }
 
     if (type.isFloatingPointTy())
@@ -39,7 +39,7 @@ Constructors::create(const llvm::Type &type) const
         const llvm::fltSemantics *semantics =
             getFloatingPointSemantics(type);
 
-        return new Float::Interval(mEnvironment, *semantics);
+        return createFloat(*semantics);
     }
 
     if (type.isPointerTy())
@@ -50,8 +50,7 @@ Constructors::create(const llvm::Type &type) const
         CANAL_ASSERT_MSG(pointerType.getElementType(),
                          "Element type must be known.");
 
-        return new Pointer::Pointer(mEnvironment,
-                                    *pointerType.getElementType());
+        return createPointer(*pointerType.getElementType());
     }
 
     if (type.isArrayTy() || type.isVectorTy())
@@ -73,7 +72,7 @@ Constructors::create(const llvm::Type &type) const
         }
 
         llvm::OwningPtr<Domain> value(create(*type.getContainedType(0)));
-        return new Array::ExactSize(mEnvironment, size, *value);
+        return createArray(size, *value);
     }
 
     if (type.isStructTy())
@@ -106,7 +105,7 @@ Constructors::create(const llvm::Constant &value,
             llvmCast<llvm::ConstantInt>(value);
 
         const llvm::APInt &i = intValue.getValue();
-        return new Integer::Container(mEnvironment, i);
+        return createInteger(i);
     }
 
     if (llvm::isa<llvm::ConstantPointerNull>(value))
@@ -115,15 +114,15 @@ Constructors::create(const llvm::Constant &value,
             llvmCast<llvm::ConstantPointerNull>(value);
 
         const llvm::PointerType &pointerType = *nullValue.getType();
-        Pointer::Pointer *constPointer;
-        constPointer = new Pointer::Pointer(mEnvironment,
-                                            *pointerType.getElementType());
+        Domain *constPointer;
+        constPointer = createPointer(*pointerType.getElementType());
 
-        constPointer->addTarget(Pointer::Target::Constant,
-                                &place,
-                                NULL,
-                                std::vector<Domain*>(),
-                                NULL);
+        Pointer::Utils::addTarget(*constPointer,
+                                  Pointer::Target::Constant,
+                                  &place,
+                                  NULL,
+                                  std::vector<Domain*>(),
+                                  NULL);
 
         return constPointer;
     }
@@ -176,8 +175,8 @@ Constructors::create(const llvm::Constant &value,
     {
         const llvm::ConstantFP &fp = llvmCast<llvm::ConstantFP>(value);
 
-        const llvm::APFloat &f = fp.getValueAPF();
-        return new Float::Interval(mEnvironment, f);
+        const llvm::APFloat &number = fp.getValueAPF();
+        return createFloat(number);
     }
 
     if (llvm::isa<llvm::ConstantStruct>(value))
@@ -212,7 +211,7 @@ Constructors::create(const llvm::Constant &value,
                                     state));
         }
 
-        return new Array::ExactSize(mEnvironment, values);
+        return createArray(values);
     }
 
     if (llvm::isa<llvm::ConstantArray>(value))
@@ -230,7 +229,7 @@ Constructors::create(const llvm::Constant &value,
                                     state));
         }
 
-        return new Array::ExactSize(mEnvironment, values);
+        return createArray(values);
     }
 
 #if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
@@ -248,7 +247,7 @@ Constructors::create(const llvm::Constant &value,
                                     state));
         }
 
-        return new Array::ExactSize(mEnvironment, values);
+        return createArray(values);
    }
 #endif
 
@@ -265,20 +264,61 @@ Constructors::create(const llvm::Constant &value,
         const llvm::Function &functionValue =
             llvmCast<llvm::Function>(value);
 
-        Pointer::Pointer *constPointer;
-        constPointer = new Pointer::Pointer(mEnvironment,
-                                            *functionValue.getFunctionType());
+        Domain *constPointer;
+        constPointer = createPointer(*functionValue.getFunctionType());
 
-        constPointer->addTarget(Pointer::Target::Function,
-                                &place,
-                                &value,
-                                std::vector<Domain*>(),
-                                NULL);
+        Pointer::Utils::addTarget(*constPointer,
+                                  Pointer::Target::Function,
+                                  &place,
+                                  &value,
+                                  std::vector<Domain*>(),
+                                  NULL);
 
         return constPointer;
     }
 
     CANAL_DIE_MSG("not implemented for " << typeid(value).name());
+}
+
+Domain *
+Constructors::createInteger(unsigned bitWidth) const
+{
+    return new Integer::Container(mEnvironment, bitWidth);
+}
+
+Domain *
+Constructors::createInteger(const llvm::APInt &number) const {
+    return new Integer::Container(mEnvironment, number);
+}
+
+Domain *
+Constructors::createFloat(const llvm::fltSemantics &semantics) const {
+    return new Float::Interval(mEnvironment, semantics);
+}
+
+Domain *
+Constructors::createFloat(const llvm::APFloat &number) const {
+    return new Float::Interval(mEnvironment, number);
+}
+
+Domain *
+Constructors::createArray(Domain *size, Domain *value) const {
+    return new Array::SingleItem(mEnvironment, size, value);
+}
+
+Domain *
+Constructors::createArray(uint64_t size, const Domain &value) const {
+    return new Array::ExactSize(mEnvironment, size, value);
+}
+
+Domain *
+Constructors::createArray(const std::vector<Domain*> &values) const {
+    return new Array::ExactSize(mEnvironment, values);
+}
+
+Domain *
+Constructors::createPointer(const llvm::Type &type) const {
+    return new Pointer::Pointer(mEnvironment, type);
 }
 
 const llvm::fltSemantics *
@@ -343,15 +383,15 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
 
     // GetElementPtr on anything except a pointer.  For example, it is
     // called on arrays and structures.
-    Pointer::Pointer *result;
-    result = new Pointer::Pointer(mEnvironment,
-                                  *pointerType.getElementType());
+    Domain *result;
+    result = createPointer(*pointerType.getElementType());
 
-    result->addTarget(Pointer::Target::Block,
-                      &place,
-                      *value.op_begin(),
-                      offsets,
-                      NULL);
+    Pointer::Utils::addTarget(*result,
+                              Pointer::Target::Block,
+                              &place,
+                              *value.op_begin(),
+                              offsets,
+                              NULL);
 
     return result;
 }
@@ -378,15 +418,15 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
     // BitCast from anything to a pointer.
     if (pointerType)
     {
-        Pointer::Pointer *result;
-        result = new Pointer::Pointer(mEnvironment,
-                                      *pointerType->getElementType());
+        Domain *result;
+        result = createPointer(*pointerType->getElementType());
 
-        result->addTarget(Pointer::Target::Block,
-                          &place,
-                          *value.op_begin(),
-                          std::vector<Domain*>(),
-                          NULL);
+        Pointer::Utils::addTarget(*result,
+                                  Pointer::Target::Block,
+                                  &place,
+                                  *value.op_begin(),
+                                  std::vector<Domain*>(),
+                                  NULL);
 
         return result;
     }
