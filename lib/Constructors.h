@@ -1,6 +1,9 @@
 #ifndef LIBCANAL_CONSTRUCTORS_H
 #define LIBCANAL_CONSTRUCTORS_H
 
+#include <inttypes.h>
+#include <vector>
+
 namespace llvm {
 class Type;
 class Constant;
@@ -47,6 +50,12 @@ public:
     Domain *createFloat(const llvm::fltSemantics &semantics) const;
 
     Domain *createFloat(const llvm::APFloat &number) const;
+
+    Domain *createArray(Domain *size, Domain *value) const;
+
+    Domain *createArray(uint64_t size, const Domain &value) const;
+
+    Domain *createArray(const std::vector<Domain*> &values) const;
 
     static const llvm::fltSemantics *
         getFloatingPointSemantics(const llvm::Type &type);

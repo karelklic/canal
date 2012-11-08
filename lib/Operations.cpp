@@ -783,8 +783,7 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
         }
     }
 
-    Array::ExactSize *result = new Array::ExactSize(mEnvironment,
-                                                    newValues);
+    Domain *result = mConstructors.createArray(newValues);
 
     state.addFunctionVariable(instruction, result);
 }
@@ -881,10 +880,9 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
             return;
         }
 
-        Array::SingleItem *array;
-        array = new Array::SingleItem(mEnvironment,
-                                      abstractSize->clone(),
-                                      value);
+        Domain *array;
+        array = mConstructors.createArray(abstractSize->clone(),
+                                          value);
 
         value = array;
 

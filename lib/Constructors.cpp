@@ -72,7 +72,7 @@ Constructors::create(const llvm::Type &type) const
         }
 
         llvm::OwningPtr<Domain> value(create(*type.getContainedType(0)));
-        return new Array::ExactSize(mEnvironment, size, *value);
+        return createArray(size, *value);
     }
 
     if (type.isStructTy())
@@ -211,7 +211,7 @@ Constructors::create(const llvm::Constant &value,
                                     state));
         }
 
-        return new Array::ExactSize(mEnvironment, values);
+        return createArray(values);
     }
 
     if (llvm::isa<llvm::ConstantArray>(value))
@@ -229,7 +229,7 @@ Constructors::create(const llvm::Constant &value,
                                     state));
         }
 
-        return new Array::ExactSize(mEnvironment, values);
+        return createArray(values);
     }
 
 #if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
@@ -247,7 +247,7 @@ Constructors::create(const llvm::Constant &value,
                                     state));
         }
 
-        return new Array::ExactSize(mEnvironment, values);
+        return createArray(values);
    }
 #endif
 
@@ -300,6 +300,22 @@ Domain *
 Constructors::createFloat(const llvm::APFloat &number) const {
     return new Float::Interval(mEnvironment, number);
 }
+
+Domain *
+Constructors::createArray(Domain *size, Domain *value) const {
+    return new Array::SingleItem(mEnvironment, size, value);
+}
+
+Domain *
+Constructors::createArray(uint64_t size, const Domain &value) const {
+    return new Array::ExactSize(mEnvironment, size, value);
+}
+
+Domain *
+Constructors::createArray(const std::vector<Domain*> &values) const {
+    return new Array::ExactSize(mEnvironment, values);
+}
+
 
 const llvm::fltSemantics *
 Constructors::getFloatingPointSemantics(const llvm::Type &type)
