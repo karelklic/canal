@@ -39,7 +39,6 @@ CMakeCache.txt
 
 /tests/atconfig
 /tests/atlocal
-/tests/testsuite
 /tests/testsuite.log
 /tests/testsuite.dir
 /tests/unit/PointerTest

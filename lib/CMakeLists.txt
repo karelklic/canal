@@ -20,6 +20,7 @@ InterpreterBlockOperationsCallback.cpp
 Operations.cpp
 Pointer.cpp
 PointerTarget.cpp
+PointerUtils.cpp
 SlotTracker.cpp
 State.cpp
 StateMap.cpp

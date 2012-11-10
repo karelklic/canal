@@ -8,6 +8,7 @@
 #include "IntegerContainer.h"
 #include "OperationsCallback.h"
 #include "Pointer.h"
+#include "PointerUtils.h"
 #include "Structure.h"
 #include "Utils.h"
 #include "Domain.h"
@@ -258,8 +259,14 @@ Operations::binaryOperation(const llvm::BinaryOperator &instruction,
     // as numbers).  If some operand is not known, exit.
     llvm::OwningPtr<Domain> constants[2];
     Domain *values[2] = {
-        variableOrConstant(*instruction.getOperand(0), state, instruction, constants[0]),
-        variableOrConstant(*instruction.getOperand(1), state, instruction, constants[1])
+        variableOrConstant(*instruction.getOperand(0),
+                           state,
+                           instruction,
+                           constants[0]),
+        variableOrConstant(*instruction.getOperand(1),
+                           state,
+                           instruction,
+                           constants[1])
     };
     if (!values[0] || !values[1])
         return;
@@ -371,15 +378,20 @@ Operations::cmpOperation(const llvm::CmpInst &instruction,
     // as numbers).  If some operand is not known, exit.
     llvm::OwningPtr<Domain> constants[2];
     Domain *values[2] = {
-        variableOrConstant(*instruction.getOperand(0), state, instruction, constants[0]),
-        variableOrConstant(*instruction.getOperand(1), state, instruction, constants[1])
+        variableOrConstant(*instruction.getOperand(0),
+                           state,
+                           instruction,
+                           constants[0]),
+        variableOrConstant(*instruction.getOperand(1),
+                           state,
+                           instruction,
+                           constants[1])
     };
 
     if (!values[0] || !values[1])
         return;
 
-    // TODO: suppot arrays
-    Domain *resultValue = mConstructors.createInteger(1);
+    Domain *resultValue = mConstructors.create(*instruction.getType());
     ((resultValue)->*(operation))(*values[0],
                                   *values[1],
                                   instruction.getPredicate());
@@ -783,8 +795,7 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
         }
     }
 
-    Array::ExactSize *result = new Array::ExactSize(mEnvironment,
-                                                    newValues);
+    Domain *result = mConstructors.createArray(newValues);
 
     state.addFunctionVariable(instruction, result);
 }
@@ -881,10 +892,9 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
             return;
         }
 
-        Array::SingleItem *array;
-        array = new Array::SingleItem(mEnvironment,
-                                      abstractSize->clone(),
-                                      value);
+        Domain *array;
+        array = mConstructors.createArray(abstractSize->clone(),
+                                          value);
 
         value = array;
 
@@ -896,14 +906,15 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
     }
 
     state.addFunctionBlock(instruction, value);
-    Pointer::Pointer *pointer;
-    pointer = new Pointer::Pointer(mEnvironment, *type);
+    Domain *pointer;
+    pointer = mConstructors.createPointer(*type);
 
-    pointer->addTarget(Pointer::Target::Block,
-                       &instruction,
-                       &instruction,
-                       offsets,
-                       NULL);
+    Pointer::Utils::addTarget(*pointer,
+                              Pointer::Target::Block,
+                              &instruction,
+                              &instruction,
+                              offsets,
+                              NULL);
 
     state.addFunctionVariable(instruction, pointer);
 }

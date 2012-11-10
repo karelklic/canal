@@ -87,10 +87,11 @@ am_libcanal_la_OBJECTS = libcanal_la-APIntUtils.lo \
 	libcanal_la-InterpreterBlockModule.lo \
 	libcanal_la-InterpreterBlockOperationsCallback.lo \
 	libcanal_la-Operations.lo libcanal_la-Pointer.lo \
-	libcanal_la-PointerTarget.lo libcanal_la-SlotTracker.lo \
-	libcanal_la-State.lo libcanal_la-StateMap.lo \
-	libcanal_la-StringUtils.lo libcanal_la-Structure.lo \
-	libcanal_la-Utils.lo libcanal_la-VariableArguments.lo \
+	libcanal_la-PointerTarget.lo libcanal_la-PointerUtils.lo \
+	libcanal_la-SlotTracker.lo libcanal_la-State.lo \
+	libcanal_la-StateMap.lo libcanal_la-StringUtils.lo \
+	libcanal_la-Structure.lo libcanal_la-Utils.lo \
+	libcanal_la-VariableArguments.lo \
 	libcanal_la-WideningDataIterationCount.lo \
 	libcanal_la-WideningManager.lo \
 	libcanal_la-WideningNumericalInfinity.lo \
@@ -312,6 +313,8 @@ libcanal_la_SOURCES = \
 	Pointer.h \
 	PointerTarget.cpp \
 	PointerTarget.h \
+	PointerUtils.cpp \
+	PointerUtils.h \
 	SlotTracker.cpp \
 	SlotTracker.h \
 	State.cpp \
@@ -452,6 +455,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Operations.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Pointer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-PointerTarget.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-PointerUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-SlotTracker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-State.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-StateMap.Plo@am__quote@
@@ -631,6 +635,13 @@ libcanal_la-PointerTarget.lo: PointerTarget.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PointerTarget.cpp' object='libcanal_la-PointerTarget.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-PointerTarget.lo `test -f 'PointerTarget.cpp' || echo '$(srcdir)/'`PointerTarget.cpp
+
+libcanal_la-PointerUtils.lo: PointerUtils.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-PointerUtils.lo -MD -MP -MF $(DEPDIR)/libcanal_la-PointerUtils.Tpo -c -o libcanal_la-PointerUtils.lo `test -f 'PointerUtils.cpp' || echo '$(srcdir)/'`PointerUtils.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-PointerUtils.Tpo $(DEPDIR)/libcanal_la-PointerUtils.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PointerUtils.cpp' object='libcanal_la-PointerUtils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-PointerUtils.lo `test -f 'PointerUtils.cpp' || echo '$(srcdir)/'`PointerUtils.cpp
 
 libcanal_la-SlotTracker.lo: SlotTracker.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-SlotTracker.lo -MD -MP -MF $(DEPDIR)/libcanal_la-SlotTracker.Tpo -c -o libcanal_la-SlotTracker.lo `test -f 'SlotTracker.cpp' || echo '$(srcdir)/'`SlotTracker.cpp
