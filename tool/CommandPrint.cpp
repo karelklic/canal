@@ -5,7 +5,7 @@
 #include "lib/SlotTracker.h"
 #include "lib/Domain.h"
 #include "lib/Utils.h"
-#include "lib/InterpreterBlockFunction.h"
+#include "lib/InterpreterFunction.h"
 #include "lib/StateMap.h"
 #include <llvm/ValueSymbolTable.h>
 #include <llvm/Module.h>
@@ -130,13 +130,13 @@ printVariable(const std::string &fullName, State &state)
     bool isNumber;
     unsigned pos = stringToUnsigned(name.c_str(), isNumber);
 
-    const Canal::InterpreterBlock::Interpreter &interpreter =
+    const Canal::Interpreter::Interpreter &interpreter =
         state.getInterpreter();
 
     const Canal::State &currentState = interpreter.getCurrentState();
     Canal::SlotTracker &slotTracker = interpreter.getSlotTracker();
 
-    const Canal::InterpreterBlock::Function *function =
+    const Canal::Interpreter::Function *function =
         &interpreter.getCurrentFunction();
 
     if (!functionName.empty())

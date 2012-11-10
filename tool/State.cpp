@@ -4,7 +4,7 @@
 #include "lib/State.h"
 #include "lib/IntegerContainer.h"
 #include "lib/Pointer.h"
-#include "lib/InterpreterBlockFunction.h"
+#include "lib/InterpreterFunction.h"
 #include <llvm/Function.h>
 #include <llvm/Module.h>
 #include <llvm/ADT/APInt.h>

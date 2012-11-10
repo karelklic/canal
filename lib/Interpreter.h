@@ -1,12 +1,12 @@
-#ifndef LIBCANAL_INTERPRETER_BLOCK_H
-#define LIBCANAL_INTERPRETER_BLOCK_H
+#ifndef LIBCANAL_INTERPRETER_H
+#define LIBCANAL_INTERPRETER_H
 
 #include "Constructors.h"
 #include "Environment.h"
 #include "Operations.h"
-#include "InterpreterBlockModule.h"
-#include "InterpreterBlockIterator.h"
-#include "InterpreterBlockOperationsCallback.h"
+#include "InterpreterModule.h"
+#include "InterpreterIterator.h"
+#include "InterpreterOperationsCallback.h"
 #include "WideningManager.h"
 #include <vector>
 
@@ -16,10 +16,24 @@ class SlotTracker;
 class Domain;
 class State;
 
-namespace InterpreterBlock {
+namespace Interpreter {
 
 class Interpreter
 {
+    Environment mEnvironment;
+
+    Constructors mConstructors;
+
+    Module mModule;
+
+    OperationsCallback mOperationsCallback;
+
+    Operations mOperations;
+
+    Widening::Manager mWideningManager;
+
+    Iterator mIterator;
+
 public:
     /// @param module
     ///   Interpreter takes ownership of the module.
@@ -49,24 +63,9 @@ public:
     const llvm::Instruction &getCurrentInstruction() const { return mIterator.getCurrentInstruction(); }
 
     std::string toString() const;
-
-protected:
-    Environment mEnvironment;
-
-    Constructors mConstructors;
-
-    Module mModule;
-
-    OperationsCallback mOperationsCallback;
-
-    Operations mOperations;
-
-    Widening::Manager mWideningManager;
-
-    Iterator mIterator;
 };
 
-} // namespace InterpreterBlock
+} // namespace Interpreter
 } // namespace Canal
 
-#endif // LIBCANAL_INTERPRETER_BLOCK_H
+#endif // LIBCANAL_INTERPRETER_H

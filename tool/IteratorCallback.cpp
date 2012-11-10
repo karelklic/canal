@@ -1,5 +1,5 @@
 #include "IteratorCallback.h"
-#include "lib/InterpreterBlockFunction.h"
+#include "lib/InterpreterFunction.h"
 #include <llvm/ADT/StringRef.h>
 #include <cstdio>
 
@@ -11,14 +11,14 @@ IteratorCallback::onFixpointReached()
 }
 
 void
-IteratorCallback::onFunctionEnter(Canal::InterpreterBlock::Function &function)
+IteratorCallback::onFunctionEnter(Canal::Interpreter::Function &function)
 {
     if (!mFixpointReached)
         mFunctionEnter = true;
 }
 
 void
-IteratorCallback::onBasicBlockEnter(Canal::InterpreterBlock::BasicBlock &basicBlock)
+IteratorCallback::onBasicBlockEnter(Canal::Interpreter::BasicBlock &basicBlock)
 {
     if (!mFixpointReached)
         mBasicBlockEnter = true;

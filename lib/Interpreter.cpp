@@ -1,11 +1,11 @@
-#include "InterpreterBlock.h"
+#include "Interpreter.h"
 #include "Utils.h"
 #include "Pointer.h"
 #include <llvm/Module.h>
 #include <sstream>
 
 namespace Canal {
-namespace InterpreterBlock {
+namespace Interpreter {
 
 Interpreter::Interpreter(const llvm::Module *module)
     : mEnvironment(module),
@@ -31,5 +31,5 @@ Interpreter::toString() const
     return ss.str();
 }
 
-} // namespace InterpreterBlock
+} // namespace Interpreter
 } // namespace Canal

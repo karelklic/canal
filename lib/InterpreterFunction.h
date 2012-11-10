@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_INTERPRETER_BLOCK_FUNCTION_H
-#define LIBCANAL_INTERPRETER_BLOCK_FUNCTION_H
+#ifndef LIBCANAL_INTERPRETER_FUNCTION_H
+#define LIBCANAL_INTERPRETER_FUNCTION_H
 
 #include "State.h"
 
@@ -15,7 +15,7 @@ class Domain;
 class Constructors;
 class Environment;
 
-namespace InterpreterBlock {
+namespace Interpreter {
 
 class BasicBlock;
 
@@ -69,7 +69,7 @@ public:
     std::string toString() const;
 };
 
-} // namespace InterpreterBlock
+} // namespace Interpreter
 } // namespace Canal
 
-#endif // LIBCANAL_INTERPRETER_BLOCK_FUNCTION_H
+#endif // LIBCANAL_INTERPRETER_FUNCTION_H

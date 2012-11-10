@@ -1,9 +1,9 @@
 #ifndef CANAL_ITERATOR_CALLBACK_H
 #define CANAL_ITERATOR_CALLBACK_H
 
-#include "lib/InterpreterBlockIteratorCallback.h"
+#include "lib/InterpreterIteratorCallback.h"
 
-class IteratorCallback : public Canal::InterpreterBlock::IteratorCallback
+class IteratorCallback : public Canal::Interpreter::IteratorCallback
 {
 protected:
     bool mFixpointReached;
@@ -18,9 +18,9 @@ public:
 
     virtual void onFixpointReached();
 
-    virtual void onFunctionEnter(Canal::InterpreterBlock::Function &function);
+    virtual void onFunctionEnter(Canal::Interpreter::Function &function);
 
-    virtual void onBasicBlockEnter(Canal::InterpreterBlock::BasicBlock &basicBlock);
+    virtual void onBasicBlockEnter(Canal::Interpreter::BasicBlock &basicBlock);
 
     virtual void onInstructionExit(const llvm::Instruction &instruction);
 

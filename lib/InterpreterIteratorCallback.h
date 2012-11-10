@@ -1,12 +1,12 @@
-#ifndef LIBCANAL_INTERPRETER_BLOCK_ITERATOR_CALLBACK_H
-#define LIBCANAL_INTERPRETER_BLOCK_ITERATOR_CALLBACK_H
+#ifndef LIBCANAL_INTERPRETER_ITERATOR_CALLBACK_H
+#define LIBCANAL_INTERPRETER_ITERATOR_CALLBACK_H
 
 namespace llvm {
 class Instruction;
 } // namespace llvm
 
 namespace Canal {
-namespace InterpreterBlock {
+namespace Interpreter {
 
 class BasicBlock;
 class Function;
@@ -35,7 +35,7 @@ public:
     virtual void onInstructionExit(const llvm::Instruction &instruction) {}
 };
 
-} // namespace InterpreterBlock
+} // namespace Interpreter
 } // namespace Canal
 
-#endif // LIBCANAL_INTERPRETER_BLOCK_ITERATOR_CALLBACK_H
+#endif // LIBCANAL_INTERPRETER_ITERATOR_CALLBACK_H

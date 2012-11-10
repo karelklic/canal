@@ -24,19 +24,19 @@ libcanal_la_SOURCES = \
 	IntegerEnumeration.h \
 	IntegerInterval.cpp \
 	IntegerInterval.h \
-	InterpreterBlockBasicBlock.cpp \
-	InterpreterBlockBasicBlock.h \
-	InterpreterBlockFunction.cpp \
-	InterpreterBlockFunction.h \
-	InterpreterBlock.cpp \
-	InterpreterBlock.h \
-	InterpreterBlockIterator.cpp \
-	InterpreterBlockIterator.h \
-	InterpreterBlockIteratorCallback.h \
-	InterpreterBlockModule.cpp \
-	InterpreterBlockModule.h \
-	InterpreterBlockOperationsCallback.cpp \
-	InterpreterBlockOperationsCallback.h \
+	InterpreterBasicBlock.cpp \
+	InterpreterBasicBlock.h \
+	InterpreterFunction.cpp \
+	InterpreterFunction.h \
+	Interpreter.cpp \
+	Interpreter.h \
+	InterpreterIterator.cpp \
+	InterpreterIterator.h \
+	InterpreterIteratorCallback.h \
+	InterpreterModule.cpp \
+	InterpreterModule.h \
+	InterpreterOperationsCallback.cpp \
+	InterpreterOperationsCallback.h \
 	Operations.cpp \
 	Operations.h \
 	OperationsCallback.h \
@@ -52,8 +52,6 @@ libcanal_la_SOURCES = \
 	State.h \
 	StateMap.cpp \
 	StateMap.h \
-	StringUtils.cpp \
-	StringUtils.h \
 	Structure.cpp \
 	Structure.h \
 	Utils.cpp \

@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_INTERPRETER_BLOCK_ITERATOR_H
-#define LIBCANAL_INTERPRETER_BLOCK_ITERATOR_H
+#ifndef LIBCANAL_INTERPRETER_ITERATOR_H
+#define LIBCANAL_INTERPRETER_ITERATOR_H
 
 #include "State.h"
 #include <vector>
@@ -14,7 +14,7 @@ namespace Widening {
 class Manager;
 } // namespace Widening
 
-namespace InterpreterBlock {
+namespace Interpreter {
 
 class Module;
 class BasicBlock;
@@ -25,7 +25,6 @@ class IteratorCallback;
 /// fixpoint is reached.
 class Iterator
 {
-protected:
     Module &mModule;
     Operations &mOperations;
     Widening::Manager &mWideningManager;
@@ -84,7 +83,7 @@ protected:
     void nextInstruction();
 };
 
-} // namespace InterpreterBlock
+} // namespace Interpreter
 } // namespace Canal
 
-#endif // LIBCANAL_INTERPRETER_BLOCK_ITERATOR_H
+#endif // LIBCANAL_INTERPRETER_ITERATOR_H

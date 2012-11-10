@@ -1,6 +1,6 @@
-#include "InterpreterBlockOperationsCallback.h"
-#include "InterpreterBlockFunction.h"
-#include "InterpreterBlockModule.h"
+#include "InterpreterOperationsCallback.h"
+#include "InterpreterFunction.h"
+#include "InterpreterModule.h"
 #include "Constructors.h"
 #include "Utils.h"
 #include "Domain.h"
@@ -8,7 +8,7 @@
 #include <cstdio>
 
 namespace Canal {
-namespace InterpreterBlock {
+namespace Interpreter {
 
 OperationsCallback::OperationsCallback(Module &module,
                                        Constructors &constructors)
@@ -82,5 +82,5 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
     }
 }
 
-} // namespace InterpreterBlock
+} // namespace Interpreter
 } // namespace Canal

@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_INTERPRETER_BLOCK_MODULE_H
-#define LIBCANAL_INTERPRETER_BLOCK_MODULE_H
+#ifndef LIBCANAL_INTERPRETER_MODULE_H
+#define LIBCANAL_INTERPRETER_MODULE_H
 
 #include "State.h"
 #include <vector>
@@ -16,13 +16,12 @@ namespace Canal {
 class Constructors;
 class Environment;
 
-namespace InterpreterBlock {
+namespace Interpreter {
 
 class Function;
 
 class Module
 {
-protected:
     const llvm::Module &mModule;
     const Environment &mEnvironment;
 
@@ -31,24 +30,6 @@ protected:
     std::vector<Function*> mFunctions;
 
     State mGlobalState;
-
-private:
-    //Topological sort of global variables
-    typedef struct {
-        const llvm::Value* constant;
-        unsigned count;
-    } tsortValue;
-
-    llvm::GlobalVariable* nextGlobalVariable();
-    void tsortInit();
-    bool tsortDepend(const llvm::GlobalVariable& what, tsortValue *value);
-    bool tsortDepend(const llvm::Constant& what, tsortValue* value);
-    void tsortDecrement(tsortValue*& value);
-    const llvm::GlobalVariable* tsortNext();
-
-    std::vector<const llvm::GlobalVariable*> mTsortReady;
-    std::map<const llvm::Value*, std::vector<tsortValue*> > mTsortDependencies;
-
 
 public:
     Module(const llvm::Module &module,
@@ -71,7 +52,7 @@ public:
     void updateGlobalState();
 };
 
-} // namespace InterpreterBlock
+} // namespace Interpreter
 } // namespace Canal
 
-#endif // LIBCANAL_INTERPRETER_BLOCK_FUNCTION_H
+#endif // LIBCANAL_INTERPRETER_FUNCTION_H

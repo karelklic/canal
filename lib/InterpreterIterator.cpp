@@ -1,8 +1,8 @@
-#include "InterpreterBlockIterator.h"
-#include "InterpreterBlockModule.h"
-#include "InterpreterBlockFunction.h"
-#include "InterpreterBlockBasicBlock.h"
-#include "InterpreterBlockIteratorCallback.h"
+#include "InterpreterIterator.h"
+#include "InterpreterModule.h"
+#include "InterpreterFunction.h"
+#include "InterpreterBasicBlock.h"
+#include "InterpreterIteratorCallback.h"
 #include "Operations.h"
 #include "Environment.h"
 #include "WideningManager.h"
@@ -10,7 +10,7 @@
 #include <sstream>
 
 namespace Canal {
-namespace InterpreterBlock {
+namespace Interpreter {
 
 static IteratorCallback emptyCallback;
 
@@ -153,5 +153,5 @@ Iterator::nextInstruction()
     mCallback->onInstructionEnter(*mInstruction);
 }
 
-} // namespace InterpreterBlock
+} // namespace Interpreter
 } // namespace Canal

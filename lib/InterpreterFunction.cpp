@@ -1,5 +1,5 @@
-#include "InterpreterBlockFunction.h"
-#include "InterpreterBlockBasicBlock.h"
+#include "InterpreterFunction.h"
+#include "InterpreterBasicBlock.h"
 #include "Constructors.h"
 #include "Environment.h"
 #include "Domain.h"
@@ -11,7 +11,7 @@
 #include <sstream>
 
 namespace Canal {
-namespace InterpreterBlock {
+namespace Interpreter {
 
 Function::Function(const llvm::Function &function,
                    const Constructors &constructors)
@@ -165,6 +165,6 @@ Function::toString() const
     return ss.str();
 }
 
-} // namespace InterpreterBlock
+} // namespace Interpreter
 } // namespace Canal
 

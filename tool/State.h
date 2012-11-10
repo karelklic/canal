@@ -3,7 +3,7 @@
 
 #include <set>
 #include <string>
-#include "lib/InterpreterBlock.h"
+#include "lib/Interpreter.h"
 #include "IteratorCallback.h"
 
 namespace llvm {
@@ -17,9 +17,9 @@ public:
     State(const llvm::Module *module);
     ~State();
 
-    Canal::InterpreterBlock::Interpreter &getInterpreter() { return mInterpreter; }
+    Canal::Interpreter::Interpreter &getInterpreter() { return mInterpreter; }
 
-    const Canal::InterpreterBlock::Interpreter &getInterpreter() const { return mInterpreter; }
+    const Canal::Interpreter::Interpreter &getInterpreter() const { return mInterpreter; }
 
     const Canal::Environment &getEnvironment() const { return mInterpreter.getEnvironment(); }
 
@@ -43,7 +43,7 @@ protected:
     bool reachedBreakpoint();
 
 protected:
-    Canal::InterpreterBlock::Interpreter mInterpreter;
+    Canal::Interpreter::Interpreter mInterpreter;
     std::set<std::string> mFunctionBreakpoints;
     IteratorCallback mIteratorCallback;
 };

@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_INTERPRETER_BLOCK_OPERATIONS_CALLBACK_H
-#define LIBCANAL_INTERPRETER_BLOCK_OPERATIONS_CALLBACK_H
+#ifndef LIBCANAL_INTERPRETER_OPERATIONS_CALLBACK_H
+#define LIBCANAL_INTERPRETER_OPERATIONS_CALLBACK_H
 
 #include "OperationsCallback.h"
 
@@ -7,7 +7,7 @@ namespace Canal {
 
 class Constructors;
 
-namespace InterpreterBlock {
+namespace Interpreter {
 
 class Module;
 
@@ -27,7 +27,7 @@ public:
                                 const llvm::Value &resultPlace);
 };
 
-} // namespace InterpreterBlock
+} // namespace Interpreter
 } // namespace Canal
 
-#endif // LIBCANAL_INTERPRETER_BLOCK_OPERATIONS_CALLBACK_H
+#endif // LIBCANAL_INTERPRETER_OPERATIONS_CALLBACK_H

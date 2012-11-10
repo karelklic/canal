@@ -1,4 +1,4 @@
-#include "InterpreterBlockBasicBlock.h"
+#include "InterpreterBasicBlock.h"
 #include "Constructors.h"
 #include "Environment.h"
 #include "Utils.h"
@@ -8,7 +8,7 @@
 #include <sstream>
 
 namespace Canal {
-namespace InterpreterBlock {
+namespace Interpreter {
 
 BasicBlock::BasicBlock(const llvm::BasicBlock &basicBlock,
                        const Constructors &constructors)
@@ -42,5 +42,5 @@ BasicBlock::toString() const
     return ss.str();
 }
 
-} // namespace InterpreterBlock
+} // namespace Interpreter
 } // namespace Canal
