@@ -9,6 +9,7 @@ namespace Widening {
 class NumericalInfinity : public Interface
 {
 public:
+
     virtual void widen(const llvm::BasicBlock &wideningPoint,
                        Domain &first,
                        const Domain &second);

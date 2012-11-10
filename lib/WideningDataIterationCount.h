@@ -10,7 +10,7 @@ class BasicBlock;
 
 namespace Canal {
 namespace Widening {
-
+extern unsigned count;
 class DataIterationCount : public DataInterface
 {
 protected:

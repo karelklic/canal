@@ -9,7 +9,7 @@
 
 namespace Canal {
 namespace InterpreterBlock {
-
+bool printMissing = true;
 OperationsCallback::OperationsCallback(Module &module,
                                        Constructors &constructors)
     : mModule(module), mConstructors(constructors)
@@ -43,8 +43,10 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
     // value.
     if (function.isIntrinsic())
     {
-        printf("Intrinsic function \"%s\" not available.\n",
+        if (printMissing) {
+            printf("Intrinsic function \"%s\" not available.\n",
                function.getName().str().c_str());
+        }
 
         Domain *returnValue = createTopReturnValue(function, mConstructors);
         if (returnValue)
@@ -55,8 +57,10 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
 
     if (function.isDeclaration())
     {
-        printf("External function \"%s\" not available.\n",
-               function.getName().str().c_str());
+        if (printMissing) {
+            printf("External function \"%s\" not available.\n",
+                function.getName().str().c_str());
+        }
 
         Domain *returnValue = createTopReturnValue(function, mConstructors);
         if (returnValue)
