@@ -9,4 +9,10 @@ fi
 
 ulimit -t $TIME
 $1 $2 -e run -e quit
+
+filename="${2##*/}"
+if [ ! -f $filename ]; then
+	echo "Compilation failed"
+	exit 3
+fi
 exit $?
