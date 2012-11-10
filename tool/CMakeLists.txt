@@ -24,5 +24,5 @@ IteratorCallback.cpp
 State.cpp
 Utils.cpp)
 
-target_link_libraries(canal-tool canal readline elf)
+target_link_libraries(canal-tool canal readline ${LIBELF_LIBRARIES})
 SET_TARGET_PROPERTIES(canal-tool PROPERTIES OUTPUT_NAME canal)
