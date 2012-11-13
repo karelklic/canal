@@ -3,7 +3,6 @@
 #include "Utils.h"
 #include "Environment.h"
 #include "SlotTracker.h"
-#include <llvm/Support/raw_ostream.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Function.h>
 #include <sstream>
@@ -191,7 +190,7 @@ State::addVariableArgument(const llvm::Instruction &place, Domain *argument)
     mVariableArguments.addArgument(place, argument);
 }
 
-Domain *
+const Domain *
 State::findVariable(const llvm::Value &place) const
 {
     StateMap::const_iterator it = mGlobalVariables.find(&place);
@@ -205,7 +204,7 @@ State::findVariable(const llvm::Value &place) const
     return NULL;
 }
 
-Domain *
+const Domain *
 State::findBlock(const llvm::Value &place) const
 {
     StateMap::const_iterator it = mGlobalBlocks.find(&place);
@@ -218,6 +217,13 @@ State::findBlock(const llvm::Value &place) const
 
     return NULL;
 }
+
+bool
+State::hasGlobalBlock(const llvm::Value &place) const
+{
+    return (mGlobalBlocks.find(&place) != mGlobalBlocks.end());
+}
+
 
 std::string
 State::toString(const llvm::Value &place,

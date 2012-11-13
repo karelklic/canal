@@ -172,7 +172,7 @@ printVariable(const std::string &fullName, State &state)
         return;
     }
 
-    Canal::Domain *value = NULL;
+    const Canal::Domain *value = NULL;
     if (isBlock)
         value = currentState.findBlock(*position);
     else

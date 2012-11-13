@@ -4,6 +4,7 @@
 #include "State.h"
 #include "SlotTracker.h"
 #include "IntegerContainer.h"
+#include "IntegerEnumeration.h"
 #include "Environment.h"
 #include <llvm/BasicBlock.h>
 #include <llvm/Type.h>
@@ -76,6 +77,100 @@ Pointer::addTarget(Target::Type type,
         mTargets.insert(PlaceTargetMap::value_type(place, pointerTarget));
 }
 
+/// Dereference the target in a certain block.  Dereferencing might
+/// result in multiple values being returned due to the nature of
+/// offsets (offsets might include integer intervals).  The returned
+/// pointers point to the memory owned by the block.
+static std::vector<Domain*>
+dereference(Domain *block,
+            const std::vector<Domain*> &offsets)
+{
+    std::vector<Domain*> result;
+    result.push_back(block);
+
+    if (!offsets.empty())
+    {
+        const Integer::Container &first =
+            dynCast<const Integer::Container&>(*offsets[0]);
+
+        CANAL_ASSERT_MSG(first.getEnumeration().mValues.size() == 1,
+                         "First offset is expected to be zero!");
+
+        CANAL_ASSERT_MSG(first.getEnumeration().mValues.begin()->isMinValue(),
+                         "First offset is expected to be zero!");
+
+        std::vector<Domain*>::const_iterator itOffsets = offsets.begin() + 1;
+        for (; itOffsets != offsets.end(); ++itOffsets)
+        {
+            std::vector<Domain*> nextLevelResult;
+            std::vector<Domain*>::const_iterator itItems = result.begin();
+            for (; itItems != result.end(); ++itItems)
+            {
+                std::vector<Domain*> items;
+                Array::Interface &array =
+                    dynCast<Array::Interface&>(**itItems);
+
+                items = array.getItem(**itOffsets);
+                nextLevelResult.insert(nextLevelResult.end(),
+                                       items.begin(),
+                                       items.end());
+            }
+
+            result.swap(nextLevelResult);
+        }
+    }
+
+    return result;
+}
+
+
+/// Dereference the target in a certain block.  Dereferencing might
+/// result in multiple values being returned due to the nature of
+/// offsets (offsets might include integer intervals).  The returned
+/// pointers point to the memory owned by the block.
+static std::vector<const Domain*>
+dereference(const Domain *block,
+            const std::vector<Domain*> &offsets)
+{
+    std::vector<const Domain*> result;
+    result.push_back(block);
+
+    if (!offsets.empty())
+    {
+        const Integer::Container &first =
+            dynCast<const Integer::Container&>(*offsets[0]);
+
+        CANAL_ASSERT_MSG(first.getEnumeration().mValues.size() == 1,
+                         "First offset is expected to be zero!");
+
+        CANAL_ASSERT_MSG(first.getEnumeration().mValues.begin()->isMinValue(),
+                         "First offset is expected to be zero!");
+
+        std::vector<Domain*>::const_iterator itOffsets = offsets.begin() + 1;
+        for (; itOffsets != offsets.end(); ++itOffsets)
+        {
+            std::vector<const Domain*> nextLevelResult;
+            std::vector<const Domain*>::const_iterator itItems = result.begin();
+            for (; itItems != result.end(); ++itItems)
+            {
+                std::vector<Domain*> items;
+                const Array::Interface &array =
+                    dynCast<const Array::Interface&>(**itItems);
+
+                items = array.getItem(**itOffsets);
+                nextLevelResult.insert(nextLevelResult.end(),
+                                       items.begin(),
+                                       items.end());
+            }
+
+            result.swap(nextLevelResult);
+        }
+    }
+
+    return result;
+}
+
+
 Domain *
 Pointer::dereferenceAndMerge(const State &state) const
 {
@@ -83,8 +178,16 @@ Pointer::dereferenceAndMerge(const State &state) const
     PlaceTargetMap::const_iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
     {
-        std::vector<Domain*> values = it->second->dereference(state);
-        std::vector<Domain*>::const_iterator it = values.begin();
+        if (it->second->mType != Target::Block)
+            continue;
+
+        const Domain *source = state.findBlock(*it->second->mTarget);
+        CANAL_ASSERT(source);
+
+        std::vector<const Domain*> values =
+            dereference(source, it->second->mOffsets);
+
+        std::vector<const Domain*>::const_iterator it = values.begin();
         for (; it != values.end(); ++it)
         {
             if (mergedValue)
@@ -105,7 +208,7 @@ Pointer::bitcast(const llvm::Type &type) const
 
 Pointer *
 Pointer::getElementPtr(const std::vector<Domain*> &offsets,
-                              const llvm::Type &type) const
+                       const llvm::Type &type) const
 {
     CANAL_ASSERT_MSG(!offsets.empty(),
                      "getElementPtr must be called with some offsets.");
@@ -165,10 +268,24 @@ Pointer::store(const Domain &value, State &state) const
     PlaceTargetMap::const_iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
     {
-        std::vector<Domain*> destinations = it->second->dereference(state);
-        std::vector<Domain*>::iterator it = destinations.begin();
-        for (; it != destinations.end(); ++it)
-            (*it)->merge(value);
+        if (it->second->mType != Target::Block)
+            continue;
+
+        const Domain *source = state.findBlock(*it->second->mTarget);
+        CANAL_ASSERT(source);
+        Domain *result = source->clone();
+
+        std::vector<Domain*> destinations = dereference(result,
+                                                        it->second->mOffsets);
+
+        std::vector<Domain*>::iterator itDest = destinations.begin();
+        for (; itDest != destinations.end(); ++itDest)
+            (*itDest)->merge(value);
+
+        if (state.hasGlobalBlock(*it->second->mTarget))
+            state.addGlobalBlock(*it->second->mTarget, result);
+        else
+            state.addFunctionBlock(*it->second->mTarget, result);
     }
 }
 

@@ -164,16 +164,17 @@ Operations::interpretInstruction(const llvm::Instruction &instruction,
 	}
     }
     else
-        CANAL_FATAL_ERROR("Unknown instruction: " << instruction.getOpcodeName());
+        CANAL_FATAL_ERROR("Unknown instruction: "
+                          << instruction.getOpcodeName());
 }
 
-Domain *
+const Domain *
 Operations::variableOrConstant(const llvm::Value &place,
                                State &state,
                                const llvm::Instruction &instruction,
                                llvm::OwningPtr<Domain> &constant) const
 {
-    Domain *variable = state.findVariable(place);
+    const Domain *variable = state.findVariable(place);
     if (variable)
         return variable;
 
@@ -217,10 +218,10 @@ Operations::interpretCall(const T &instruction,
         llvm::Value *operand = instruction.getArgOperand(arg);
 
         llvm::OwningPtr<Domain> constant;
-        Domain *value = variableOrConstant(*operand,
-                                           state,
-                                           instruction,
-                                           constant);
+        const Domain *value = variableOrConstant(*operand,
+                                                 state,
+                                                 instruction,
+                                                 constant);
 
         if (!value)
             return;
@@ -233,10 +234,10 @@ Operations::interpretCall(const T &instruction,
         llvm::Value *operand = instruction.getArgOperand(arg);
 
         llvm::OwningPtr<Domain> constant;
-        Domain *value = variableOrConstant(*operand,
-                                           state,
-                                           instruction,
-                                           constant);
+        const Domain *value = variableOrConstant(*operand,
+                                                 state,
+                                                 instruction,
+                                                 constant);
 
         if (!value)
             return;
@@ -258,7 +259,7 @@ Operations::binaryOperation(const llvm::BinaryOperator &instruction,
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.
     llvm::OwningPtr<Domain> constants[2];
-    Domain *values[2] = {
+    const Domain *values[2] = {
         variableOrConstant(*instruction.getOperand(0),
                            state,
                            instruction,
@@ -293,7 +294,7 @@ Operations::getElementPtrOffsets(std::vector<Domain*> &result,
         if (llvm::isa<llvm::ConstantInt>(it))
             continue;
 
-        Domain *offset = state.findVariable(*it->get());
+        const Domain *offset = state.findVariable(*it->get());
         // Not all offsets are necesarily known at each pass before
         // reaching a fixpoint.
         if (!offset)
@@ -314,7 +315,7 @@ Operations::getElementPtrOffsets(std::vector<Domain*> &result,
         }
         else
         {
-            Domain *offset = state.findVariable(*it->get());
+            const Domain *offset = state.findVariable(*it->get());
             result.push_back(offset->clone());
         }
     }
@@ -350,7 +351,7 @@ Operations::castOperation(const llvm::CastInst &instruction,
                           Domain::CastOperation operation)
 {
     llvm::OwningPtr<Domain> constant;
-    Domain *source = variableOrConstant(
+    const Domain *source = variableOrConstant(
         *instruction.getOperand(0),
         state,
         instruction,
@@ -362,7 +363,6 @@ Operations::castOperation(const llvm::CastInst &instruction,
     // Create result value of required type and then run the desired
     // operation.
     Domain *result = mConstructors.create(*instruction.getDestTy());
-
     ((result)->*(operation))(*source);
 
     // Store the result value to the state.
@@ -377,7 +377,7 @@ Operations::cmpOperation(const llvm::CmpInst &instruction,
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.
     llvm::OwningPtr<Domain> constants[2];
-    Domain *values[2] = {
+    const Domain *values[2] = {
         variableOrConstant(*instruction.getOperand(0),
                            state,
                            instruction,
@@ -409,10 +409,10 @@ Operations::ret(const llvm::ReturnInst &instruction,
         return;
 
     llvm::OwningPtr<Domain> constant;
-    Domain *variable = variableOrConstant(*value,
-                                          state,
-                                          instruction,
-                                          constant);
+    const Domain *variable = variableOrConstant(*value,
+                                                state,
+                                                instruction,
+                                                constant);
 
     if (variable)
         state.mergeToReturnedValue(*variable);
@@ -683,9 +683,15 @@ Operations::extractelement(const llvm::ExtractElementInst &instruction,
     // as numbers).  If some operand is not known, exit.  Fixpoint
     // calculation is probably not far enough.
     llvm::OwningPtr<Domain> constants[2];
-    Domain *values[2] = {
-        variableOrConstant(*instruction.getOperand(0), state, instruction, constants[0]),
-        variableOrConstant(*instruction.getOperand(1), state, instruction, constants[1])
+    const Domain *values[2] = {
+        variableOrConstant(*instruction.getOperand(0),
+                           state,
+                           instruction,
+                           constants[0]),
+        variableOrConstant(*instruction.getOperand(1),
+                           state,
+                           instruction,
+                           constants[1])
     };
     if (!values[0] || !values[1])
         return;
@@ -708,11 +714,19 @@ Operations::insertelement(const llvm::InsertElementInst &instruction,
     // as numbers).  If some operand is not known, exit.  Fixpoint
     // calculation is probably not far enough.
     llvm::OwningPtr<Domain> constants[3];
-
-    Domain *values[3] = {
-        variableOrConstant(*instruction.getOperand(0), state, instruction, constants[0]),
-        variableOrConstant(*instruction.getOperand(1), state, instruction, constants[1]),
-        variableOrConstant(*instruction.getOperand(2), state, instruction, constants[2])
+    const Domain *values[3] = {
+        variableOrConstant(*instruction.getOperand(0),
+                           state,
+                           instruction,
+                           constants[0]),
+        variableOrConstant(*instruction.getOperand(1),
+                           state,
+                           instruction,
+                           constants[1]),
+        variableOrConstant(*instruction.getOperand(2),
+                           state,
+                           instruction,
+                           constants[2])
     };
     if (!values[0] || !values[1] || !values[2])
         return;
@@ -732,22 +746,33 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
                           State &state)
 {
     llvm::OwningPtr<Domain> constants[2];
-    Domain *values[2] = {
-        variableOrConstant(*instruction.getOperand(0), state, instruction, constants[0]),
-        variableOrConstant(*instruction.getOperand(1), state, instruction, constants[1])
+    const Domain *values[2] = {
+        variableOrConstant(*instruction.getOperand(0),
+                           state,
+                           instruction,
+                           constants[0]),
+        variableOrConstant(*instruction.getOperand(1),
+                           state,
+                           instruction,
+                           constants[1])
     };
     if (!values[0] || !values[1])
         return;
 
-    Array::ExactSize *array0 = dynCast<Array::ExactSize*>(values[0]);
+    const Array::ExactSize *array0 =
+        dynCast<const Array::ExactSize*>(values[0]);
+
     CANAL_ASSERT_MSG(array0, "Invalid type in shufflevector.");
-    Array::ExactSize *array1 = dynCast<Array::ExactSize*>(values[1]);
+    const Array::ExactSize *array1 =
+        dynCast<const Array::ExactSize*>(values[1]);
+
     CANAL_ASSERT_MSG(array1, "Invalid type in shufflevector.");
 
     std::vector<Domain*> newValues;
 
 #if LLVM_MAJOR == 3 && LLVM_MINOR >= 1
-    llvm::SmallVector<int, 16> shuffleMask = instruction.getShuffleMask();
+    llvm::SmallVector<int, 16> shuffleMask =
+        instruction.getShuffleMask();
 #else
     llvm::SmallVector<int, 16> shuffleMask;
     {
@@ -821,12 +846,33 @@ getValueLocation(Domain *aggregate, const T &instruction)
     return item;
 }
 
+template <typename T> static const Domain *
+getValueLocation(const Domain *aggregate, const T &instruction)
+{
+    const Domain *item = aggregate;
+    typename T::idx_iterator it = instruction.idx_begin(),
+        itend = instruction.idx_end();
+
+    for (; it != itend; ++it)
+    {
+        const Array::Interface *array =
+            dynCast<const Array::Interface*>(item);
+
+        CANAL_ASSERT_MSG(array,
+                         "ExtractValue reached an unsupported type.");
+
+        item = array->getItem(*it);
+    }
+
+    return item;
+}
+
 void
 Operations::extractvalue(const llvm::ExtractValueInst &instruction,
                          State &state)
 {
     llvm::OwningPtr<Domain> constant;
-    Domain *aggregate = variableOrConstant(
+    const Domain *aggregate = variableOrConstant(
         *instruction.getAggregateOperand(),
         state,
         instruction,
@@ -835,7 +881,7 @@ Operations::extractvalue(const llvm::ExtractValueInst &instruction,
     if (!aggregate)
         return;
 
-    Domain *item = getValueLocation(aggregate, instruction);
+    const Domain *item = getValueLocation(aggregate, instruction);
     state.addFunctionVariable(instruction, item->clone());
 }
 
@@ -844,7 +890,7 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
                         State &state)
 {
     llvm::OwningPtr<Domain> aggregateConstant;
-    Domain *aggregate = variableOrConstant(
+    const Domain *aggregate = variableOrConstant(
         *instruction.getAggregateOperand(),
         state,
         instruction,
@@ -854,7 +900,7 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
         return;
 
     llvm::OwningPtr<Domain> insertedConstant;
-    Domain *insertedValue = variableOrConstant(
+    const Domain *insertedValue = variableOrConstant(
         *instruction.getInsertedValueOperand(),
         state,
         instruction,
@@ -881,10 +927,10 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
     {
         const llvm::Value *arraySize = instruction.getArraySize();
         llvm::OwningPtr<Domain> constant;
-        Domain *abstractSize = variableOrConstant(*arraySize,
-                                                  state,
-                                                  instruction,
-                                                  constant);
+        const Domain *abstractSize = variableOrConstant(*arraySize,
+                                                        state,
+                                                        instruction,
+                                                        constant);
 
         if (!abstractSize)
         {
@@ -925,7 +971,9 @@ Operations::load(const llvm::LoadInst &instruction,
 {
     // Find the pointer in the state.  If the pointer is not
     // available, do nothing.
-    Domain *variable = state.findVariable(*instruction.getPointerOperand());
+    const Domain *variable = state.findVariable(
+        *instruction.getPointerOperand());
+
     if (!variable)
         return;
 
@@ -946,21 +994,23 @@ Operations::store(const llvm::StoreInst &instruction,
                   State &state)
 {
     llvm::OwningPtr<Domain> constantPointer, constantValue;
-    Domain *pointer = variableOrConstant(*instruction.getPointerOperand(),
-                                         state,
-                                         instruction,
-                                         constantPointer);
+    const Domain *pointer = variableOrConstant(
+        *instruction.getPointerOperand(),
+        state,
+        instruction,
+        constantPointer);
 
-    Domain *value = variableOrConstant(*instruction.getValueOperand(),
-                                       state,
-                                       instruction,
-                                       constantValue);
+    const Domain *value = variableOrConstant(
+        *instruction.getValueOperand(),
+        state,
+        instruction,
+        constantValue);
 
     if (!pointer || !value)
         return;
 
-    Pointer::Pointer &inclusionBased =
-        dynCast<Pointer::Pointer&>(*pointer);
+    const Pointer::Pointer &inclusionBased =
+        dynCast<const Pointer::Pointer&>(*pointer);
 
     inclusionBased.store(*value, state);
 }
@@ -972,12 +1022,12 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
     CANAL_ASSERT(instruction.getNumOperands() > 1);
 
     // Find the base pointer.
-    Domain *base = state.findVariable(*instruction.getPointerOperand());
+    const Domain *base = state.findVariable(*instruction.getPointerOperand());
     if (!base)
         return;
 
-    Pointer::Pointer &source =
-        dynCast<Pointer::Pointer&>(*base);
+    const Pointer::Pointer &source =
+        dynCast<const Pointer::Pointer&>(*base);
 
     // We get offsets. Either constants or Integer::Container.
     // Pointer points either to an array (or array offset), or to a
@@ -1087,53 +1137,25 @@ void
 Operations::ptrtoint(const llvm::PtrToIntInst &instruction,
                      State &state)
 {
-    Domain *operand = state.findVariable(*instruction.getOperand(0));
+    const Domain *operand =
+        state.findVariable(*instruction.getOperand(0));
+
     if (!operand)
         return;
 
-    Pointer::Pointer &source =
-        dynCast<Pointer::Pointer&>(*operand);
-
-    Pointer::Pointer *result = source.clone();
-/*  This should really be handled in integer operations.
-    Pointer::PlaceTargetMap::iterator it = result->mTargets.begin();
-    for (; it != result->mTargets.end(); ++it)
-    {
-        // If the numeric offset exists, verify that the width
-        // matches.  Otherwise, create an empty offset.
-        if (it->second.mNumericOffset)
-        {
-            llvm::IntegerType &integerType =
-                llvmCast<llvm::IntegerType>(*instruction.getDestTy());
-
-            const Integer::Container &existingInt =
-                dynCast<const Integer::Container&>(*it->second.mNumericOffset);
-            int existingWidth = existingInt.getBitWidth();
-            CANAL_ASSERT_MSG(existingWidth == integerType.getBitWidth(),
-                             "Offset integer width adjustment is not "
-                             "implemented.  Perhaps now is the right "
-                             "time to implement it, as you have an example.");
-        }
-        else
-        {
-            it->second.mNumericOffset =
-                mConstructors.create(*instruction.getDestTy());
-        }
-    }
-*/
-    state.addFunctionVariable(instruction, result);
+    return state.addFunctionVariable(instruction, operand->clone());
 }
 
 void
 Operations::inttoptr(const llvm::IntToPtrInst &instruction,
                      State &state)
 {
-    Domain *operand = state.findVariable(*instruction.getOperand(0));
+    const Domain *operand = state.findVariable(*instruction.getOperand(0));
     if (!operand)
         return;
 
-    Pointer::Pointer &source =
-        dynCast<Pointer::Pointer&>(*operand);
+    const Pointer::Pointer &source =
+        dynCast<const Pointer::Pointer&>(*operand);
 
     const llvm::PointerType &pointerType =
         llvmCast<const llvm::PointerType>(*instruction.getDestTy());
@@ -1155,12 +1177,12 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
                      destinationType->isPointerTy(),
                      "Bitcast for non-pointers is not implemented yet.");
 
-    Domain *source = state.findVariable(*instruction.getOperand(0));
+    const Domain *source = state.findVariable(*instruction.getOperand(0));
     if (!source)
         return;
 
-    Pointer::Pointer &sourcePointer =
-        dynCast<Pointer::Pointer&>(*source);
+    const Pointer::Pointer &sourcePointer =
+        dynCast<const Pointer::Pointer&>(*source);
 
     const llvm::PointerType &destPointerType =
         llvmCast<const llvm::PointerType>(*destinationType);
@@ -1191,10 +1213,12 @@ Operations::phi(const llvm::PHINode &instruction,
     for (unsigned i = 0; i < instruction.getNumIncomingValues(); ++i)
     {
         llvm::OwningPtr<Domain> constant;
-        Domain *value = variableOrConstant(*instruction.getIncomingValue(i),
-                                           state,
-                                           instruction,
-                                           constant);
+        const Domain *value = variableOrConstant(
+            *instruction.getIncomingValue(i),
+            state,
+            instruction,
+            constant);
+
         if (!value)
             continue;
 
@@ -1214,21 +1238,23 @@ void
 Operations::select(const llvm::SelectInst &instruction,
                    State &state)
 {
-    Domain *condition = state.findVariable(*instruction.getCondition());
+    const Domain *condition = state.findVariable(*instruction.getCondition());
     if (!condition)
         return;
 
     llvm::OwningPtr<Domain> trueConstant, falseConstant;
 
-    Domain *trueValue = variableOrConstant(*instruction.getTrueValue(),
-                                           state,
-                                           instruction,
-                                           trueConstant);
+    const Domain *trueValue = variableOrConstant(
+        *instruction.getTrueValue(),
+        state,
+        instruction,
+        trueConstant);
 
-    Domain *falseValue = variableOrConstant(*instruction.getFalseValue(),
-                                            state,
-                                            instruction,
-                                            falseConstant);
+    const Domain *falseValue = variableOrConstant(
+        *instruction.getFalseValue(),
+        state,
+        instruction,
+        falseConstant);
 
     Domain *resultValue;
     const Integer::Container &conditionInt =

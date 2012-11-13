@@ -103,13 +103,6 @@ public:
     /// Get a string representation of the target.
     std::string toString(SlotTracker &slotTracker) const;
 
-    /// Dereference the target in a certain state.  Dereferencing might
-    /// result in multiple values being returned due to the nature of
-    /// mOffsets (offsets might include integer intervals).  The returned
-    /// pointers point to the memory owned by State and its abstract
-    /// domains -- caller must not release the memory.
-    std::vector<Domain*> dereference(const State &state) const;
-
 private:
     /// Assignment operator declaration.  Prevents accidental
     /// assignments of domains.  Do not implement!

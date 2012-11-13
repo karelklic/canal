@@ -1,7 +1,6 @@
 #include "PointerTarget.h"
 #include "ArrayInterface.h"
 #include "IntegerContainer.h"
-#include "IntegerEnumeration.h"
 #include "SlotTracker.h"
 #include "State.h"
 #include "Utils.h"
@@ -248,61 +247,6 @@ Target::toString(SlotTracker &slotTracker) const
         ss << "    null" << std::endl;
 
     return ss.str();
-}
-
-std::vector<Domain*>
-Target::dereference(const State &state) const
-{
-    std::vector<Domain*> result;
-
-    // Gracefully handle NULL dereference.
-    if (mType == Constant)
-    {
-        CANAL_ASSERT_MSG(!mNumericOffset,
-                         "Cannot dereference numeric pointers.");
-
-        return result;
-    }
-
-    CANAL_ASSERT_MSG(mType == Block,
-                     "Unxepected pointer type in pointer dereference.");
-
-    result.push_back(state.findBlock(*mTarget));
-    CANAL_ASSERT(result[0]);
-
-    if (!mOffsets.empty())
-    {
-        const Integer::Container &first =
-            dynCast<const Integer::Container&>(*mOffsets[0]);
-
-        CANAL_ASSERT_MSG(first.getEnumeration().mValues.size() == 1,
-                         "First offset is expected to be zero!");
-
-        CANAL_ASSERT_MSG(first.getEnumeration().mValues.begin()->isMinValue(),
-                         "First offset is expected to be zero!");
-
-        std::vector<Domain*>::const_iterator itOffsets = mOffsets.begin() + 1;
-        for (; itOffsets != mOffsets.end(); ++itOffsets)
-        {
-            std::vector<Domain*> nextLevelResult;
-            std::vector<Domain*>::const_iterator itItems = result.begin();
-            for (; itItems != result.end(); ++itItems)
-            {
-                std::vector<Domain*> items;
-                Array::Interface &array = dynCast<Array::Interface&>(**itItems);
-                items = array.getItem(**itOffsets);
-                nextLevelResult.insert(nextLevelResult.end(),
-                                       items.begin(),
-                                       items.end());
-            }
-
-            result.swap(nextLevelResult);
-        }
-    }
-
-    // TODO: mNumericOffset
-
-    return result;
 }
 
 } // namespace Pointer
