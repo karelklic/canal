@@ -1,3 +1,6 @@
+#define __STDC_CONSTANT_MACROS
+#define __STDC_LIMIT_MACROS
+
 #include "Domain.h"
 #include "Utils.h"
 #include "WideningDataInterface.h"
