@@ -4,7 +4,7 @@
 
 namespace Canal {
 
-Environment::Environment(const llvm::Module *module)
+Environment::Environment(llvm::Module *module)
     : mModule(module), mTargetData(module), mSlotTracker(*module)
 {
     CANAL_ASSERT_MSG(module, "Module cannot be NULL");

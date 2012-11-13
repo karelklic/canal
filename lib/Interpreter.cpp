@@ -7,7 +7,7 @@
 namespace Canal {
 namespace Interpreter {
 
-Interpreter::Interpreter(const llvm::Module *module)
+Interpreter::Interpreter(llvm::Module *module)
     : mEnvironment(module),
       mConstructors(mEnvironment),
       mModule(*module, mConstructors),

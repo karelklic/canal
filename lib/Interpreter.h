@@ -37,7 +37,7 @@ class Interpreter
 public:
     /// @param module
     ///   Interpreter takes ownership of the module.
-    Interpreter(const llvm::Module *module);
+    Interpreter(llvm::Module *module);
     virtual ~Interpreter();
 
     const Environment &getEnvironment() const { return mEnvironment; }

@@ -191,7 +191,7 @@ Commands::getCommand(const std::string &name) const
 }
 
 void
-Commands::createState(const llvm::Module *module)
+Commands::createState(llvm::Module *module)
 {
     CANAL_ASSERT(module && "Module cannot be NULL.");
     delete mState;

@@ -10,7 +10,7 @@
 #include <llvm/ADT/APInt.h>
 #include <cstdio>
 
-State::State(const llvm::Module *module) : mInterpreter(module)
+State::State(llvm::Module *module) : mInterpreter(module)
 {
     mInterpreter.getIterator().setCallback(mIteratorCallback);
 }

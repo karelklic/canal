@@ -13,8 +13,12 @@ class Module;
 // State of the interpreter.
 class State
 {
+    Canal::Interpreter::Interpreter mInterpreter;
+    std::set<std::string> mFunctionBreakpoints;
+    IteratorCallback mIteratorCallback;
+
 public:
-    State(const llvm::Module *module);
+    State(llvm::Module *module);
     ~State();
 
     Canal::Interpreter::Interpreter &getInterpreter() { return mInterpreter; }
@@ -24,6 +28,8 @@ public:
     const Canal::Environment &getEnvironment() const { return mInterpreter.getEnvironment(); }
 
     const llvm::Module &getModule() const { return getEnvironment().getModule(); }
+
+    llvm::Module &getModule() { return getEnvironment().getModule(); }
 
     Canal::SlotTracker &getSlotTracker() const { return getEnvironment().getSlotTracker(); }
 
@@ -41,11 +47,6 @@ public:
 
 protected:
     bool reachedBreakpoint();
-
-protected:
-    Canal::Interpreter::Interpreter mInterpreter;
-    std::set<std::string> mFunctionBreakpoints;
-    IteratorCallback mIteratorCallback;
 };
 
 #endif // CANAL_STATE_H

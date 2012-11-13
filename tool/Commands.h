@@ -15,6 +15,14 @@ namespace llvm {
 
 class Commands
 {
+    std::string mLastCommand;
+    State *mState;
+
+public:
+    std::vector<Command*> mCommandList;
+    typedef std::map<std::string, Command*> CommandMap;
+    CommandMap mCommandMap;
+
 public:
     Commands();
     ~Commands();
@@ -38,17 +46,9 @@ public:
 
     State *getState() { return mState; }
     const State *getState() const { return mState; }
+
     // The new state takes ownership of the module.
-    void createState(const llvm::Module *module);
-
-public:
-    std::vector<Command*> mCommandList;
-    typedef std::map<std::string, Command*> CommandMap;
-    CommandMap mCommandMap;
-
-protected:
-    std::string mLastCommand;
-    State *mState;
+    void createState(llvm::Module *module);
 };
 
 #endif
