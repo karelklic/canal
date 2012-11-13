@@ -135,7 +135,7 @@ Constructors::create(const llvm::Constant &value,
         const llvm::ConstantExpr &exprValue =
             llvmCast<llvm::ConstantExpr>(value);
 
-        Domain *variable = NULL;
+        const Domain *variable = NULL;
         bool deleteVariable = false;
         const llvm::Value &firstValue = **value.op_begin();
         if (llvm::isa<llvm::ConstantExpr>(firstValue))

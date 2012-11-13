@@ -58,7 +58,6 @@ StateMap::insert(const llvm::Value &place, Domain *value)
     iterator it = find(&place);
     if (it != end())
     {
-        // TODO: assert that we are moving up in the lattice
         it->second->merge(*value);
         delete value;
     }

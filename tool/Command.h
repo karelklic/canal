@@ -33,7 +33,9 @@ public:
         int pointArg,
         int pointArgOffset) const;
 
-    // Function to call to do the job
+    /// @brief Perform the command.
+    /// @param args
+    ///   First argument is the name of the command.
     virtual void run(const std::vector<std::string> &args) = 0;
 
 protected:

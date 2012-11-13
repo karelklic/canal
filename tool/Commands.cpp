@@ -101,9 +101,11 @@ Commands::getCompletionMatches(const std::string &text, int point) const
         const Command *command = getCommand(args[0]);
         if (command)
         {
-            // We know the command.  Ask the command for completion of its
-            // argumens.
-            return command->getCompletionMatches(args, pointArg, pointArgOffset);
+            // We know the command.  Ask the command for completion of
+            // its argumens.
+            return command->getCompletionMatches(args,
+                                                 pointArg,
+                                                 pointArgOffset);
         }
     }
 

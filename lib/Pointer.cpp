@@ -158,7 +158,7 @@ Pointer::getElementPtr(const std::vector<Domain*> &offsets,
 }
 
 void
-Pointer::store(const Domain &value, State &state)
+Pointer::store(const Domain &value, State &state) const
 {
     // Go through all target memory blocks for the pointer and merge
     // them with the value being stored.

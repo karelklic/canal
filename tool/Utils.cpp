@@ -26,16 +26,6 @@ askYesNo(const char *question)
     return (yes == 0 || no == 0) ? yes == 0 : askYesNo(question);
 }
 
-void
-print(const llvm::Instruction &instruction)
-{
-    std::string s;
-    llvm::raw_string_ostream os(s);
-    os << instruction;
-    os.flush();
-    puts(s.c_str());
-}
-
 unsigned
 stringToUnsigned(const char *str, bool &success)
 {

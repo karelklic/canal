@@ -1,8 +1,6 @@
 #ifndef LIBCANAL_STATE_H
 #define LIBCANAL_STATE_H
 
-#include <map>
-#include <vector>
 #include <string>
 #include "VariableArguments.h"
 #include "StateMap.h"

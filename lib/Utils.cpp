@@ -19,8 +19,15 @@ toString(const llvm::APInt &num)
     ss << "0x" << num.toString(16, /*signed=*/false);
     std::string unsignedNum = num.toString(10, false);
     std::string signedNum = num.toString(10, true);
+
+    // Print decimal number only when signed and unsigned
+    // representation differ or the representations are the same but
+    // nontrivial.
     if (unsignedNum == signedNum)
-        ss << " (" << signedNum << ")";
+    {
+        if (signedNum.length() > 1)
+            ss << " (" << signedNum << ")";
+    }
     else
     {
         ss << " (unsigned " << unsignedNum;
@@ -50,20 +57,29 @@ toString(const llvm::Constant &constant)
     return s;
 }
 
-#if LLVM_MAJOR >= 3
-llvm::raw_ostream &
-operator<<(llvm::raw_ostream& ostream,
-           const llvm::Type &type)
+std::string
+toString(const llvm::Instruction &instruction)
 {
-    ostream << const_cast<llvm::Type&>(type);
-    return ostream;
+    std::string s;
+    llvm::raw_string_ostream os(s);
+    os << instruction;
+    os.flush();
+    return s;
 }
-#endif
+
+std::string
+toString(int i)
+{
+    std::stringstream ss;
+    ss << i;
+    return ss.str();
+}
 
 std::string
 indent(const std::string &input, int spaces)
 {
-    return std::string(spaces, ' ') + indentExceptFirstLine(input, spaces);
+    return std::string(spaces, ' ') +
+        indentExceptFirstLine(input, spaces);
 }
 
 std::string
@@ -83,29 +99,37 @@ indentExceptFirstLine(const std::string &input, int spaces)
 std::string
 getName(const llvm::Value &value, SlotTracker &slotTracker)
 {
-    bool isGlobal = llvm::isa<llvm::GlobalValue>(value);
-    std::stringstream ss;
     if (value.hasName())
-        ss << value.getName().str();
+        return value.getName().str();
+
+    if (llvm::isa<llvm::GlobalValue>(value))
+    {
+        int id = slotTracker.getGlobalSlot(value);
+        return (id > 0 ? toString(id) : "");
+    }
+    else if (llvm::isa<llvm::BasicBlock>(value))
+    {
+        const llvm::BasicBlock &block =
+            llvmCast<const llvm::BasicBlock>(value);
+
+        slotTracker.setActiveFunction(*block.getParent());
+
+        std::stringstream ss;
+        ss << "<label>:" << slotTracker.getLocalSlot(value);
+        return ss.str();
+    }
     else
     {
-        int id;
-        if (isGlobal)
-            id = slotTracker.getGlobalSlot(value);
-        else
-        {
-            const llvm::Instruction &inst =
-                llvmCast<const llvm::Instruction>(value);
+        const llvm::Instruction &inst =
+            llvmCast<const llvm::Instruction>(value);
 
-            slotTracker.setActiveFunction(*inst.getParent()->getParent());
-            id = slotTracker.getLocalSlot(value);
-        }
-        if (id >= 0)
-            ss << id;
-        else
-            return "";
+        slotTracker.setActiveFunction(
+            *inst.getParent()->getParent());
+
+        std::stringstream ss;
+        ss << slotTracker.getLocalSlot(value);
+        return ss.str();
     }
-    return ss.str();
 }
 
 std::string
