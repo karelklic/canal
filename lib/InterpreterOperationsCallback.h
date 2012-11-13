@@ -9,6 +9,8 @@ class Constructors;
 
 namespace Interpreter {
 
+extern bool printMissing;
+
 class Module;
 
 class OperationsCallback : public Canal::OperationsCallback

@@ -5,6 +5,8 @@
 #include <cctype>
 #include <cstdlib>
 #include <cstdio>
+#include "lib/WideningDataIterationCount.h"
+#include "lib/InterpreterOperationsCallback.h"
 
 extern "C" {
 #include <readline/readline.h>
@@ -19,6 +21,8 @@ Commands gCommands;
 
 static struct argp_option gOptions[] = {
     {"eval", 'e', "COMMAND", 0, "Execute a single Canal command. May be used multiple times."},
+    {"widening", 'w', "NUMBER", 0, "Set number of iterations before widening to top is applied. Default: 2."},
+    {"no-missing", 'n', 0, 0, "Do not print out names of missing functions."},
     { 0 }
 };
 
@@ -48,6 +52,20 @@ parseArgument(int key, char *arg, struct argp_state *state)
             exit(EX_USAGE);
         }
         arguments->mFileName = arg;
+        break;
+    case 'w':
+        for (unsigned i = 0; i < strlen(arg); i ++) {
+            if (!isdigit(arg[i])) {
+                argp_usage(state);
+                exit(EX_USAGE);
+            }
+        }
+        printf("Widening count set to: %s.\n", arg);
+        Canal::Widening::count = atoi(arg);
+        break;
+    case 'n':
+        printf("Not printing missing functions.\n");
+        Canal::Interpreter::printMissing = false;
         break;
     default:
         return ARGP_ERR_UNKNOWN;
