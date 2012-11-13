@@ -58,7 +58,7 @@ Function::getLlvmEntryBlock() const
 }
 
 BasicBlock &
-Function::getBasicBlock(const llvm::BasicBlock &llvmBasicBlock)
+Function::getBasicBlock(const llvm::BasicBlock &llvmBasicBlock) const
 {
     std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
     for (; it != mBasicBlocks.end(); ++it)
@@ -77,9 +77,10 @@ Function::getName() const
 }
 
 void
-Function::updateBasicBlockInputState(BasicBlock &basicBlock)
+Function::initializeInputState(BasicBlock &basicBlock, State &state) const
 {
     const llvm::BasicBlock &llvmBasicBlock = basicBlock.getLlvmBasicBlock();
+    state.merge(basicBlock.getInputState());
 
     // Merge out states of predecessors to input state of
     // current block.
@@ -89,11 +90,11 @@ Function::updateBasicBlockInputState(BasicBlock &basicBlock)
     for (; it != itend; ++it)
     {
         BasicBlock &predBlock = getBasicBlock(**it);
-        basicBlock.getInputState().merge(predBlock.getOutputState());
+        state.merge(predBlock.getOutputState());
     }
 
     if (&llvmBasicBlock == &getLlvmEntryBlock())
-        basicBlock.getInputState().merge(mInputState);
+        state.merge(mInputState);
 }
 
 void

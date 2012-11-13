@@ -43,7 +43,7 @@ public:
 
     const llvm::BasicBlock &getLlvmEntryBlock() const;
 
-    BasicBlock &getBasicBlock(const llvm::BasicBlock &llvmBasicBlock);
+    BasicBlock &getBasicBlock(const llvm::BasicBlock &llvmBasicBlock) const;
 
     std::vector<BasicBlock*>::const_iterator begin() const { return mBasicBlocks.begin(); }
 
@@ -61,7 +61,7 @@ public:
     /// @param basicBlock
     ///    Must be a member of this function.
     ///    Its input state is updated.
-    void updateBasicBlockInputState(BasicBlock &basicBlock);
+    void initializeInputState(BasicBlock &basicBlock, State &state) const;
 
     /// Update function output state from basic block output states.
     void updateOutputState();

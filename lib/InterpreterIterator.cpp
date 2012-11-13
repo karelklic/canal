@@ -138,14 +138,9 @@ Iterator::nextInstruction()
             mCallback->onFunctionEnter(**mFunction);
         }
 
-        // Update basic block input state from precedessors.  If it was
-        // not changed, there is no point in interpreting the block's code
-        // again.  The very first iteration is an exception, though.  The
-        // code must be interpreted at least once.
-        (*mFunction)->updateBasicBlockInputState(**mBasicBlock);
-
         delete mState;
         mState = new State((*mBasicBlock)->getInputState());
+        (*mFunction)->initializeInputState(**mBasicBlock, *mState);
         mInstruction = (*mBasicBlock)->begin();
         mCallback->onBasicBlockEnter(**mBasicBlock);
     }
