@@ -226,7 +226,7 @@ struct FunctionInfo : public llvm::FunctionPass
                                                loopInfo.end());
 
         llvm::CallGraph &callGraph = getAnalysis<llvm::CallGraph>();
-        llvm::CallGraphNode *node = callGraph.getOrInsertFunction(&func);
+        llvm::CallGraphNode *node = callGraph[&func];
         CANAL_ASSERT(node);
         entry.mCallsCount = node->size();
         entry.mCalledCount = node->getNumReferences();
