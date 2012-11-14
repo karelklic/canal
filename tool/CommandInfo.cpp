@@ -11,6 +11,7 @@
 #endif // LLVM_MAJOR > 2 || LLVM_MINOR > 8
 #include "lib/Operations.h"
 #include "lib/Utils.h"
+#include <sstream>
 
 CommandInfo::CommandInfo(Commands &commands)
     : Command("info",
@@ -70,6 +71,15 @@ CommandInfo::run(const std::vector<std::string> &args)
         mCommands.executeLine("help info");
         return;
     }
+
+#if LLVM_MAJOR > 2 || LLVM_MINOR > 8
+    // Make sure CallGraph is added in the Pass Registry.  This is
+    // necessary for LLVM newer than 2.8.
+    llvm::PassRegistry &passRegistry =
+        *llvm::PassRegistry::getPassRegistry();
+
+    llvm::initializeBasicCallGraphPass(passRegistry);
+#endif // LLVM_MAJOR > 2 || LLVM_MINOR > 8
 
     if (args[1] == "module")
         infoModule();
@@ -189,11 +199,11 @@ CommandInfo::infoModule() const
 }
 
 static size_t
-getLoopCount(llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>::iterator begin,
-             llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>::iterator end)
+getLoopCount(llvm::LoopInfoBase<llvm::BasicBlock,llvm::Loop>::iterator begin,
+             llvm::LoopInfoBase<llvm::BasicBlock,llvm::Loop>::iterator end)
 {
     size_t count = 0;
-    llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>::iterator it = begin;
+    llvm::LoopInfoBase<llvm::BasicBlock,llvm::Loop>::iterator it = begin;
     for (; it != end; ++it)
     {
         ++count;
@@ -217,7 +227,7 @@ struct FunctionInfo : public llvm::FunctionPass
 
     FunctionInfo() : llvm::FunctionPass(ID) {}
 
-    virtual bool runOnFunction(llvm::Function &func)
+    virtual bool runOnFunction(llvm::Function &function)
     {
         struct FunctionEntry entry;
 
@@ -226,12 +236,12 @@ struct FunctionInfo : public llvm::FunctionPass
                                                loopInfo.end());
 
         llvm::CallGraph &callGraph = getAnalysis<llvm::CallGraph>();
-        llvm::CallGraphNode *node = callGraph[&func];
+        llvm::CallGraphNode *node = callGraph[&function];
         CANAL_ASSERT(node);
         entry.mCallsCount = node->size();
         entry.mCalledCount = node->getNumReferences();
 
-        mInfo[&func] = entry;
+        mInfo[&function] = entry;
         return false;
     }
 
@@ -244,9 +254,11 @@ struct FunctionInfo : public llvm::FunctionPass
 };
 
 char FunctionInfo::ID = 0;
-static llvm::RegisterPass<FunctionInfo> X("functioninfo", "FunctionInfo Pass",
-                                         true /* Only looks at CFG */,
-                                         false /* Analysis Pass */);
+
+static llvm::RegisterPass<FunctionInfo>
+FunctionInfoRegistration("functioninfo", "FunctionInfo Pass",
+                         true /* Only looks at CFG */,
+                         false /* Analysis Pass */);
 
 void
 CommandInfo::infoFunctions() const
@@ -288,13 +300,6 @@ CommandInfo::infoFunctions() const
     {
         puts("Function Definitions:");
 
-#if LLVM_MAJOR > 2 || LLVM_MINOR > 8
-        llvm::PassRegistry &passRegistry =
-            *llvm::PassRegistry::getPassRegistry();
-
-        llvm::initializeBasicCallGraphPass(passRegistry);
-#endif // LLVM_MAJOR > 2 || LLVM_MINOR > 8
-
         llvm::PassManager passManager;
         passManager.add(new llvm::LoopInfo());
         FunctionInfo *functionInfo = new FunctionInfo();
@@ -327,6 +332,94 @@ CommandInfo::infoFunctions() const
     }
 }
 
+class LoopTree
+{
+public:
+    std::vector<llvm::BasicBlock*> mLoop;
+    std::vector<LoopTree> mSubLoops;
+
+    LoopTree(llvm::Loop &loop)
+    {
+        mLoop = loop.getBlocks();
+        llvm::Loop::iterator it = loop.begin();
+        for (; it != loop.end(); ++it)
+            mSubLoops.push_back(LoopTree(**it));
+    }
+
+    std::string toString(Canal::SlotTracker &slotTracker) const
+    {
+        std::stringstream ss;
+        std::vector<llvm::BasicBlock*>::const_iterator
+            it = mLoop.begin();
+
+        ss << "loop: ";
+        for (; it != mLoop.end(); ++it)
+        {
+            if (it != mLoop.begin())
+                ss << "-";
+
+            std::string name = Canal::getName(**it, slotTracker);
+            if (0 == name.find("<label>:"))
+                name = name.substr(strlen("<label>:"));
+
+            ss << name;
+        }
+
+        ss << std::endl;
+
+        std::vector<LoopTree>::const_iterator lit = mSubLoops.begin();
+        for (; lit != mSubLoops.end(); ++lit)
+        {
+            std::string subLoop = lit->toString(slotTracker);
+            ss << Canal::indent(subLoop, 8);
+        }
+
+        return ss.str();
+    }
+};
+
+struct FunctionDetailedInfo : public llvm::FunctionPass
+{
+    static char ID;
+    llvm::Function *mFunction;
+    std::vector<LoopTree> mTopLevelLoops;
+
+    FunctionDetailedInfo() : llvm::FunctionPass(ID) {}
+
+    virtual bool runOnFunction(llvm::Function &function)
+    {
+        if (mFunction != &function)
+            return false;
+
+        llvm::LoopInfo &loopInfo = getAnalysis<llvm::LoopInfo>();
+        llvm::LoopInfo::iterator it = loopInfo.begin();
+        for (; it != loopInfo.end(); ++it)
+            mTopLevelLoops.push_back(LoopTree(**it));
+
+
+        llvm::CallGraph &callGraph = getAnalysis<llvm::CallGraph>();
+        llvm::CallGraphNode *node = callGraph[&function];
+        CANAL_ASSERT(node);
+
+        return false;
+    }
+
+    virtual void getAnalysisUsage(llvm::AnalysisUsage &analysisUsage) const
+    {
+        analysisUsage.setPreservesCFG();
+        analysisUsage.addRequired<llvm::LoopInfo>();
+        analysisUsage.addRequired<llvm::CallGraph>();
+    }
+};
+
+char FunctionDetailedInfo::ID = 0;
+
+static llvm::RegisterPass<FunctionDetailedInfo>
+FunctionDetailedInfoRegistration(
+    "functiondetailedinfo", "FunctionDetailedInfo Pass",
+    true /* Only looks at CFG */,
+    false /* Analysis Pass */);
+
 void
 CommandInfo::infoFunction(const std::string &name) const
 {
@@ -344,5 +437,31 @@ CommandInfo::infoFunction(const std::string &name) const
         return;
     }
 
-    // TODO
-}
+    Canal::SlotTracker &slotTracker =
+        mCommands.getState()->getSlotTracker();
+
+    llvm::Function::const_iterator it = func->begin(),
+        itend = func->end();
+
+    puts("Basic blocks:");
+    for (; it != itend; ++it)
+    {
+        printf("  %s: %zu instructions\n",
+               Canal::getName(*it, slotTracker).c_str(),
+               it->size());
+    }
+
+    puts("Natural Loops:");
+    llvm::PassManager passManager;
+    passManager.add(new llvm::LoopInfo());
+    FunctionDetailedInfo *functionInfo = new FunctionDetailedInfo();
+    functionInfo->mFunction = func;
+    passManager.add(functionInfo);
+    passManager.run(module);
+
+    std::vector<LoopTree>::const_iterator
+        lit = functionInfo->mTopLevelLoops.begin();
+
+    for (; lit != functionInfo->mTopLevelLoops.end(); ++lit)
+        printf("%s", Canal::indent(lit->toString(slotTracker), 2).c_str());
+ }
