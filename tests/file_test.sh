@@ -13,7 +13,7 @@ exit_status=$?
 if [ $exit_status -ne 0 ]; then
 	exit $exit_status
 fi
-filename="${2##*/}"
+filename="${2%%.c}.s"
 if [ ! -f $filename ]; then
 	echo "Compilation failed"
 	exit 3
