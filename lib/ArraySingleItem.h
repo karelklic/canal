@@ -22,6 +22,9 @@ public:
     Domain *mSize;
 
 public:
+    /// For super_ptr
+    typedef SingleItem type;
+
     SingleItem(const Environment &environment,
                Domain *size,
                Domain *value);

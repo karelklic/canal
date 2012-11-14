@@ -37,6 +37,9 @@ public:
     const llvm::Type &mType;
 
 public:
+    /// For super_ptr
+    typedef Pointer type;
+
     /// Standard constructor.
     Pointer(const Environment &environment,
                    const llvm::Type &type);

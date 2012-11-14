@@ -15,6 +15,9 @@ public:
     std::vector<Domain*> mValues;
 
 public:
+    /// For super_ptr
+    typedef ExactSize type;
+
     /// @param value
     ///   This class does not take ownership of this value.
     ExactSize(const Environment &environment,

@@ -20,6 +20,9 @@ public:
     std::vector<Domain*> mValues;
 
 public:
+    /// For super_ptr
+    typedef Container type;
+
     Container(const Environment &environment,
               unsigned bitWidth);
 

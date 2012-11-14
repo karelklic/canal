@@ -16,6 +16,9 @@ public:
     llvm::APFloat mTo;
 
 public:
+    /// For super_ptr
+    typedef Interval type;
+
     Interval(const Environment &environment,
              const llvm::fltSemantics &semantics);
 

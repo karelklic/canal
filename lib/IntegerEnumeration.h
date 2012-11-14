@@ -19,6 +19,9 @@ public:
     static const unsigned int mMaxSize = 40;
 
 public:
+    /// For super_ptr
+    typedef Enumeration type;
+
     /// Initializes to the lowest value.
     Enumeration(const Environment &environment,
                 unsigned bitWidth);

@@ -27,6 +27,9 @@ public:
     llvm::APInt mOnes;
 
 public:
+    /// For super_ptr
+    typedef Bitfield type;
+
     /// Initializes to the lowest value.
     Bitfield(const Environment &environment,
              unsigned bitWidth);

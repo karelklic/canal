@@ -30,6 +30,9 @@ public:
     llvm::APInt mUnsignedTo;
 
 public:
+    /// For super_ptr
+    typedef Interval type;
+
     /// @brief Standard constructor.
     ///
     /// Initializes an empty interval.

@@ -26,6 +26,9 @@ private:
     Structure &operator=(const Structure &value);
 
 public: // Implementation of Domain.
+    /// For super_ptr
+    typedef Structure type;
+
     /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Structure *clone() const;
