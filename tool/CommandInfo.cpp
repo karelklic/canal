@@ -6,7 +6,9 @@
 #include <llvm/Analysis/LoopInfo.h>
 #include <llvm/Analysis/CallGraph.h>
 #include <llvm/PassManager.h>
+#if LLVM_MAJOR > 2 || LLVM_MINOR > 8
 #include <llvm/InitializePasses.h>
+#endif // LLVM_MAJOR > 2 || LLVM_MINOR > 8
 #include "lib/Operations.h"
 #include "lib/Utils.h"
 
@@ -224,7 +226,7 @@ struct FunctionInfo : public llvm::FunctionPass
                                                loopInfo.end());
 
         llvm::CallGraph &callGraph = getAnalysis<llvm::CallGraph>();
-        llvm::CallGraphNode *node = callGraph.getOrInsertFunction(&func);
+        llvm::CallGraphNode *node = callGraph[&func];
         CANAL_ASSERT(node);
         entry.mCallsCount = node->size();
         entry.mCalledCount = node->getNumReferences();
@@ -286,9 +288,12 @@ CommandInfo::infoFunctions() const
     {
         puts("Function Definitions:");
 
+#if LLVM_MAJOR > 2 || LLVM_MINOR > 8
+        llvm::PassRegistry &passRegistry =
+            *llvm::PassRegistry::getPassRegistry();
 
-        llvm::PassRegistry &passRegistry = *llvm::PassRegistry::getPassRegistry();
         llvm::initializeBasicCallGraphPass(passRegistry);
+#endif // LLVM_MAJOR > 2 || LLVM_MINOR > 8
 
         llvm::PassManager passManager;
         passManager.add(new llvm::LoopInfo());
