@@ -3,7 +3,6 @@
 #include "IntegerEnumeration.h"
 #include "IntegerInterval.h"
 #include "Utils.h"
-#include "StringUtils.h"
 #include "APIntUtils.h"
 #include "Pointer.h"
 #include <sstream>

@@ -1,8 +1,6 @@
 #ifndef LIBCANAL_STATE_H
 #define LIBCANAL_STATE_H
 
-#include <map>
-#include <vector>
 #include <string>
 #include "VariableArguments.h"
 #include "StateMap.h"
@@ -131,12 +129,14 @@ public:
     /// Search both global and function variables for a place.  If the
     /// place is found, the variable is returned.  Otherwise NULL is
     /// returned.
-    Domain *findVariable(const llvm::Value &place) const;
+    const Domain *findVariable(const llvm::Value &place) const;
 
     /// Search both global and function blocks for a place.  If the
     /// place is found, the block is returned.  Otherwise NULL is
     /// returned.
-    Domain *findBlock(const llvm::Value &place) const;
+    const Domain *findBlock(const llvm::Value &place) const;
+
+    bool hasGlobalBlock(const llvm::Value &place) const;
 
     std::string toString(const llvm::Value &place,
                          SlotTracker &slotTracker) const;

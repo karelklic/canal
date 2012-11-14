@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include "lib/WideningDataIterationCount.h"
-#include "lib/InterpreterBlockOperationsCallback.h"
+#include "lib/InterpreterOperationsCallback.h"
 
 extern "C" {
 #include <readline/readline.h>
@@ -65,7 +65,7 @@ parseArgument(int key, char *arg, struct argp_state *state)
         break;
     case 'n':
         printf("Not printing missing functions.\n");
-        Canal::InterpreterBlock::printMissing = false;
+        Canal::Interpreter::printMissing = false;
         break;
     default:
         return ARGP_ERR_UNKNOWN;

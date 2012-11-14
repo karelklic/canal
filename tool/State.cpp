@@ -4,13 +4,13 @@
 #include "lib/State.h"
 #include "lib/IntegerContainer.h"
 #include "lib/Pointer.h"
-#include "lib/InterpreterBlockFunction.h"
+#include "lib/InterpreterFunction.h"
 #include <llvm/Function.h>
 #include <llvm/Module.h>
 #include <llvm/ADT/APInt.h>
 #include <cstdio>
 
-State::State(const llvm::Module *module) : mInterpreter(module)
+State::State(llvm::Module *module) : mInterpreter(module)
 {
     mInterpreter.getIterator().setCallback(mIteratorCallback);
 }
@@ -33,7 +33,7 @@ State::start()
     std::printf("Entering function %s.\n",
                 mInterpreter.getCurrentFunction().getName().str().c_str());
     std::printf("Entering basic block.\n");
-    print(mInterpreter.getCurrentInstruction());
+    puts(Canal::toString(mInterpreter.getCurrentInstruction()).c_str());
 }
 
 void
@@ -69,7 +69,7 @@ State::step(int count)
         if (mIteratorCallback.isBasicBlockEnter())
             std::printf("Entering basic block.\n");
 
-        print(mInterpreter.getCurrentInstruction());
+        puts(Canal::toString(mInterpreter.getCurrentInstruction()).c_str());
     }
 }
 
@@ -89,7 +89,7 @@ State::finish()
                 mInterpreter.getCurrentFunction().getName().str().c_str());
 
     std::printf("Entering basic block.\n");
-    print(mInterpreter.getCurrentInstruction());
+    puts(Canal::toString(mInterpreter.getCurrentInstruction()).c_str());
 }
 
 void
@@ -127,6 +127,6 @@ State::reachedBreakpoint()
     std::printf("Entering basic block.\n");
 
     printf("Breakpoint reached: %s\n", name.str().c_str());
-    print(mInterpreter.getCurrentInstruction());
+    puts(Canal::toString(mInterpreter.getCurrentInstruction()).c_str());
     return true;
 }

@@ -1,7 +1,6 @@
 #include "IntegerEnumeration.h"
 #include "Utils.h"
 #include "FloatInterval.h"
-#include "StringUtils.h"
 #include <sstream>
 #include <iostream>
 

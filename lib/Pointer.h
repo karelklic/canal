@@ -99,7 +99,7 @@ public:
     Pointer *getElementPtr(const std::vector<Domain*> &offsets,
                            const llvm::Type &type) const;
 
-    void store(const Domain &value, State &state);
+    void store(const Domain &value, State &state) const;
 
 private:
     /// Assignment operator declaration.  Prevents accidental

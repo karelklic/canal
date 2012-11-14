@@ -99,26 +99,32 @@ class APInt;
 class Constant;
 class Type;
 class Value;
+class Instruction;
 } // namespace llvm
 
 namespace Canal {
 
 class SlotTracker;
 
+/// Get human readable string representation of llvm::APInt.
 std::string toString(const llvm::APInt &num);
+
+/// Get human readable string representation of llvm::Type.
 std::string toString(const llvm::Type &type);
+
+/// Get human readable string representation of llvm::Constant.
 std::string toString(const llvm::Constant &constant);
 
-#if LLVM_MAJOR >= 3
-/// LLVM 3.0 does not allow to print const Types.
-llvm::raw_ostream &
-operator<<(llvm::raw_ostream& ostream,
-           const llvm::Type &type);
-#endif
+/// Get human readable string representation of llvm::Instruction.
+std::string toString(const llvm::Instruction &instruction);
+
+/// Get decimal representation of an integer.
+std::string toString(int i);
 
 std::string indent(const std::string &input, int spaces);
 std::string indentExceptFirstLine(const std::string &input, int spaces);
 
+/// Get human readable name of a llvm::Value.
 /// @param slotTracker
 ///   Slot Tracker with value's function assigned.
 /// @returns

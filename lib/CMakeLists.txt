@@ -11,12 +11,12 @@ IntegerBitfield.cpp
 IntegerContainer.cpp
 IntegerEnumeration.cpp
 IntegerInterval.cpp
-InterpreterBlockBasicBlock.cpp
-InterpreterBlockFunction.cpp
-InterpreterBlock.cpp
-InterpreterBlockIterator.cpp
-InterpreterBlockModule.cpp
-InterpreterBlockOperationsCallback.cpp
+InterpreterBasicBlock.cpp
+InterpreterFunction.cpp
+Interpreter.cpp
+InterpreterIterator.cpp
+InterpreterModule.cpp
+InterpreterOperationsCallback.cpp
 Operations.cpp
 Pointer.cpp
 PointerTarget.cpp
@@ -24,7 +24,6 @@ PointerUtils.cpp
 SlotTracker.cpp
 State.cpp
 StateMap.cpp
-StringUtils.cpp
 Structure.cpp
 Utils.cpp
 VariableArguments.cpp

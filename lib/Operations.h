@@ -98,10 +98,10 @@ protected: // Helper functions.
     ///  Returns a pointer to the variable if it is found in the state.
     ///  Returns a pointer to the provided constant if the place contains a
     ///  constant.  Otherwise, it returns NULL.
-    Domain *variableOrConstant(const llvm::Value &place,
-                               State &state,
-                               const llvm::Instruction &instruction,
-                               llvm::OwningPtr<Domain> &constant) const;
+    const Domain *variableOrConstant(const llvm::Value &place,
+                                     State &state,
+                                     const llvm::Instruction &instruction,
+                                     llvm::OwningPtr<Domain> &constant) const;
 
     template<typename T> void interpretCall(const T &instruction,
                                             State &state);

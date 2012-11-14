@@ -3,7 +3,7 @@
 
 #include <set>
 #include <string>
-#include "lib/InterpreterBlock.h"
+#include "lib/Interpreter.h"
 #include "IteratorCallback.h"
 
 namespace llvm {
@@ -13,17 +13,23 @@ class Module;
 // State of the interpreter.
 class State
 {
+    Canal::Interpreter::Interpreter mInterpreter;
+    std::set<std::string> mFunctionBreakpoints;
+    IteratorCallback mIteratorCallback;
+
 public:
-    State(const llvm::Module *module);
+    State(llvm::Module *module);
     ~State();
 
-    Canal::InterpreterBlock::Interpreter &getInterpreter() { return mInterpreter; }
+    Canal::Interpreter::Interpreter &getInterpreter() { return mInterpreter; }
 
-    const Canal::InterpreterBlock::Interpreter &getInterpreter() const { return mInterpreter; }
+    const Canal::Interpreter::Interpreter &getInterpreter() const { return mInterpreter; }
 
     const Canal::Environment &getEnvironment() const { return mInterpreter.getEnvironment(); }
 
     const llvm::Module &getModule() const { return getEnvironment().getModule(); }
+
+    llvm::Module &getModule() { return getEnvironment().getModule(); }
 
     Canal::SlotTracker &getSlotTracker() const { return getEnvironment().getSlotTracker(); }
 
@@ -41,11 +47,6 @@ public:
 
 protected:
     bool reachedBreakpoint();
-
-protected:
-    Canal::InterpreterBlock::Interpreter mInterpreter;
-    std::set<std::string> mFunctionBreakpoints;
-    IteratorCallback mIteratorCallback;
 };
 
 #endif // CANAL_STATE_H

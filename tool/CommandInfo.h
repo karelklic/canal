@@ -18,8 +18,10 @@ public:
     virtual void
     run(const std::vector<std::string> &args);
 
-protected:
-    void infoModule();
+private:
+    void infoModule() const;
+    void infoFunctions() const ;
+    void infoFunction(const std::string &name) const;
 };
 
 #endif // CANAL_COMMAND_INFO_H
