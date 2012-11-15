@@ -1,0 +1,52 @@
+#!/bin/bash
+mkdir canal_30
+cd canal_30
+#Download llvm
+mkdir llvm
+wget http://llvm.org/releases/3.0/llvm-3.0.tar.gz
+tar zxf llvm-3.0.tar.gz
+rm llvm-3.0.tar.gz
+cd llvm-3.0.src
+#Download clang
+cd tools
+wget http://llvm.org/releases/3.0/clang-3.0.tar.gz
+tar xzf clang-3.0.tar.gz
+rm clang-3.0.tar.gz
+mv clang-3.0.src clang
+cd ..
+#Configure and build llvm and clang
+mkdir build
+cd build
+../configure --prefix=`pwd`/../../llvm
+make -j $((`nproc` + 1))
+make install
+cd ../../
+#Install libelf
+wget http://www.mr511.de/software/libelf-0.8.9.tar.gz
+tar xzf libelf-0.8.9.tar.gz
+rm libelf-0.8.9.tar.gz
+cd libelf-0.8.9
+./configure --prefix=`pwd`/../libelf
+make -j $((`nproc` + 1))
+make install
+cd ..
+#Install readline
+#wget ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
+#tar xzf readline-6.2.tar.gz
+#cd readline-6.2
+#./configure --prefix `pwd`/../readline
+#make -j $((`nproc` + 1))
+#make install
+#cd ..
+#rm readline-6.2.tar.gz
+#Download canal
+git clone https://github.com/karelklic/canal.git
+cd canal
+mkdir build
+cd build
+#export CMAKE_PREFIX_PATH=`pwd`/../../llvm/:`pwd`/../../libelf/:`pwd`/../../readline/:$CMAKE_PREFIX_PATH
+export CMAKE_PREFIX_PATH=`pwd`/../../llvm/:`pwd`/../../libelf/:$CMAKE_PREFIX_PATH
+export PATH=`pwd`/../../llvm/bin/:$PATH
+cmake ..
+make -j $((`nproc` + 1))
+make test

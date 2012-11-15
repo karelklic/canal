@@ -1,4 +1,5 @@
 include_directories(${CANAL_SOURCE_DIR})
+include_directories(${READLINE_INCLUDE_DIR})
 link_directories(${CANAL_SOURCE_DIR}/lib)
 
 add_executable(canal-tool Canal.cpp
@@ -24,5 +25,5 @@ IteratorCallback.cpp
 State.cpp
 Utils.cpp)
 
-target_link_libraries(canal-tool canal readline ${LIBELF_LIBRARIES})
+target_link_libraries(canal-tool canal ${READLINE_LIBRARY} ${LIBELF_LIBRARIES})
 SET_TARGET_PROPERTIES(canal-tool PROPERTIES OUTPUT_NAME canal)
