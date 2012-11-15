@@ -382,7 +382,8 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     if (pointer)
     {
         return pointer->getElementPtr(offsets,
-                                      *pointerType.getElementType());
+                                      *pointerType.getElementType(),
+                                      *this);
     }
 
     // GetElementPtr on anything except a pointer.  For example, it is

@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_VALUE_H
-#define LIBCANAL_VALUE_H
+#ifndef LIBCANAL_DOMAIN_H
+#define LIBCANAL_DOMAIN_H
 
 #include <cstddef>
 #include <string>
@@ -165,4 +165,4 @@ public:
 
 } // namespace Canal
 
-#endif // LIBCANAL_VALUE_H
+#endif // LIBCANAL_DOMAIN_H

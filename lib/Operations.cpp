@@ -1047,7 +1047,7 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
     CANAL_ASSERT(pointerType);
     CANAL_ASSERT(pointerType->getElementType());
     Pointer::Pointer *result = source.getElementPtr(
-        offsets, *pointerType->getElementType());
+        offsets, *pointerType->getElementType(), mConstructors);
 
     state.addFunctionVariable(instruction, result);
 }
