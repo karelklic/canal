@@ -10,6 +10,24 @@
 
 using namespace Canal;
 
+static void intConstTest() {
+    typedef SuperPtrConst<int> type;
+    type tmp1(0);
+    const type& tmp1ref(tmp1);
+
+    CANAL_ASSERT(*tmp1ref == 0);
+    CANAL_ASSERT(*tmp1 == 0); //Should not force object copy
+    CANAL_ASSERT(tmp1ref.getCounter() == 1);
+
+    type tmp2(tmp1);
+    const type& tmp2ref(tmp2);
+    CANAL_ASSERT(*tmp1ref == 0);
+    CANAL_ASSERT(*tmp2ref == 0);
+
+    CANAL_ASSERT(tmp1ref.getCounter() == 2);
+    CANAL_ASSERT(tmp2ref.getCounter() == 2);
+}
+
 static void intTest() {
     typedef SuperPtr<int> type;
     type tmp1(0);
@@ -52,6 +70,9 @@ static void IntegerBitfieldTest(const Environment &environment) {
     CANAL_ASSERT(tmp1 == BitfieldFactory(environment, 10));
     CANAL_ASSERT(tmpBitfield1.getBitWidth() == sizeof(int)*8);
     CANAL_ASSERT(tmpBitfield2.getBitWidth() == sizeof(int)*8);
+    CANAL_ASSERT(tmp1->getBitWidth() == sizeof(int)*8); //Test of constant method call
+    CANAL_ASSERT(tmp1ref->getBitWidth() == sizeof(int) * 8);
+    //tmp1->setBit(0, 1); //Should not and does not work
     tmp1.xor_(BitfieldFactory(environment, 0), BitfieldFactory(environment, 1));
     CANAL_ASSERT(tmpBitfield2 != tmp1);
     CANAL_ASSERT(tmp1 == BitfieldFactory(environment, 1));
@@ -64,6 +85,7 @@ int main() {
     llvm::Module *module = new llvm::Module("testModule", context);
     Environment environment(module);
 
+    intConstTest();
     intTest();
     IntegerBitfieldTest(environment);
 }

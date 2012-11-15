@@ -9,7 +9,7 @@
 
 namespace Canal {
     template<typename T, typename = void>
-    class SuperPtr
+    class SuperPtrConst
     {
     protected:
         typedef std::pair<T, unsigned> instanceType;
@@ -17,7 +17,7 @@ namespace Canal {
 
         inline void remove(instanceType* what) { //Removal function
 #ifdef DEBUG
-            std::cout << "Remove" << std::endl;
+            std::cout << "SuperPtrConst: Remove" << std::endl;
 #endif
             what->second --;
             if (!what->second) {
@@ -27,29 +27,29 @@ namespace Canal {
 
         inline void write() { //Someone wants write
 #ifdef DEBUG
-            std::cout << "Write" << std::endl;
+            std::cout << "SuperPtrConst: Write" << std::endl;
 #endif
             if (mInstance->second == 1) return; //No need to copy if there is only one copy of current object
 #ifdef DEBUG
-            std::cout << "Write - copy" << std::endl;
+            std::cout << "SuperPtrConst: Write - copy" << std::endl;
 #endif
             instanceType* original = mInstance;
             mInstance = new instanceType(T(original->first), 1);
             remove(original);
         }
 
-        SuperPtr<T>& operator= (const SuperPtr<T>& other); //Private
+        SuperPtrConst<T>& operator= (const SuperPtrConst<T>& other); //Private
 
     public:
-        SuperPtr(const T& instance) : mInstance(new instanceType(instance, 1)) {
+        SuperPtrConst(const T& instance) : mInstance(new instanceType(instance, 1)) {
 #ifdef DEBUG
-            std::cout << "Instance constructor" << std::endl;
+            std::cout << "SuperPtrConst: Instance constructor" << std::endl;
 #endif
         }
 
-        SuperPtr(const SuperPtr<T> &copy): mInstance(copy.mInstance) {
+        SuperPtrConst(const SuperPtrConst<T> &copy): mInstance(copy.mInstance) {
 #ifdef DEBUG
-            std::cout << "Copy constructor" << std::endl;
+            std::cout << "SuperPtrConst: Copy constructor" << std::endl;
 #endif
             mInstance->second ++;
         }
@@ -70,39 +70,22 @@ namespace Canal {
         /// Get const reference to associated object
         const T& operator* () const {
 #ifdef DEBUG
-            std::cout << "const operator*" << std::endl;
+            std::cout << "SuperPtrConst: const operator*" << std::endl;
 #endif
             return mInstance->first;
         }
 
         const T* operator-> () const {
 #ifdef DEBUG
-            std::cout << "const operator->" << std::endl;
+            std::cout << "SuperPtrConst: const operator->" << std::endl;
 #endif
             return &mInstance->first;
         }
 
-        /// Get reference to associated object
-        T& operator* () {
-#ifdef DEBUG
-            std::cout << "operator *" << std::endl;
-#endif
-            write();
-            return mInstance->first;
-        }
-
-        T* operator-> () {
-#ifdef DEBUG
-            std::cout << "operator ->" << std::endl;
-#endif
-            write();
-            return &mInstance->first;
-        }
-    public:
         /// Comparison operator
-        bool operator== (const SuperPtr<T>& other) const {
+        bool operator== (const SuperPtrConst<T>& other) const {
 #ifdef DEBUG
-            std::cout << "comparison with SuperPtr" << std::endl;
+            std::cout << "SuperPtrConst: comparison with SuperPtrConst" << std::endl;
 #endif
             return mInstance->first == other.mInstance->first;
         }
@@ -110,25 +93,149 @@ namespace Canal {
         /// Comparison operator
         bool operator== (const T& other) const {
 #ifdef DEBUG
-            std::cout << "comparison with T" << std::endl;
+            std::cout << "SuperPtrConst: comparison with T" << std::endl;
 #endif
             return mInstance->first == other;
         }
 
-        virtual ~SuperPtr() {
+        virtual ~SuperPtrConst() {
 #ifdef DEBUG
-            std::cout << "Destructor" << std::endl;
+            std::cout << "SuperPtrConst: Destructor" << std::endl;
 #endif
             remove(mInstance);
         }
 
         const unsigned getCounter() const {
 #ifdef DEBUG
-            std::cout << "getCounter" << std::endl;
+            std::cout << "SuperPtrConst: getCounter" << std::endl;
 #endif
             return mInstance->second;
         }
     };
+
+    template<typename T, typename = void>
+    class SuperPtr
+    {
+    protected:
+        typedef std::pair<T, unsigned> instanceType;
+        instanceType* mInstance;
+
+        inline void remove(instanceType* what) { //Removal function
+#ifdef DEBUG
+            std::cout << "SuperPtr: Remove" << std::endl;
+#endif
+            what->second --;
+            if (!what->second) {
+                delete what;
+            }
+        }
+
+        inline void write() { //Someone wants write
+#ifdef DEBUG
+            std::cout << "SuperPtr: Write" << std::endl;
+#endif
+            if (mInstance->second == 1) return; //No need to copy if there is only one copy of current object
+#ifdef DEBUG
+            std::cout << "SuperPtr: Write - copy" << std::endl;
+#endif
+            instanceType* original = mInstance;
+            mInstance = new instanceType(T(original->first), 1);
+            remove(original);
+        }
+
+        SuperPtr<T>& operator= (const SuperPtr<T>& other); //Private
+
+    public:
+        SuperPtr(const T& instance) : mInstance(new instanceType(instance, 1)) {
+#ifdef DEBUG
+            std::cout << "SuperPtr: Instance constructor" << std::endl;
+#endif
+        }
+
+        SuperPtr(const SuperPtr<T> &copy): mInstance(copy.mInstance) {
+#ifdef DEBUG
+            std::cout << "SuperPtr: Copy constructor" << std::endl;
+#endif
+            mInstance->second ++;
+        }
+
+#if 0
+        /// Cast to const T*
+        operator const T*() const {
+            return mInstance->first;
+        }
+
+        /// Cast to T*
+        operator T*() {
+            write();
+            return mInstance->first;
+        }
+#endif
+
+        /// Get const reference to associated object
+        const T& operator* () const {
+#ifdef DEBUG
+            std::cout << "SuperPtr: const operator*" << std::endl;
+#endif
+            return mInstance->first;
+        }
+
+        const T* operator-> () const {
+#ifdef DEBUG
+            std::cout << "SuperPtr: const operator->" << std::endl;
+#endif
+            return &mInstance->first;
+        }
+
+        /// Comparison operator
+        bool operator== (const SuperPtr<T>& other) const {
+#ifdef DEBUG
+            std::cout << "SuperPtr: comparison with SuperPtr" << std::endl;
+#endif
+            return mInstance->first == other.mInstance->first;
+        }
+
+        /// Comparison operator
+        bool operator== (const T& other) const {
+#ifdef DEBUG
+            std::cout << "SuperPtr: comparison with T" << std::endl;
+#endif
+            return mInstance->first == other;
+        }
+
+        virtual ~SuperPtr() {
+#ifdef DEBUG
+            std::cout << "SuperPtr: Destructor" << std::endl;
+#endif
+            remove(mInstance);
+        }
+
+        const unsigned getCounter() const {
+#ifdef DEBUG
+            std::cout << "SuperPtr: getCounter" << std::endl;
+#endif
+            return mInstance->second;
+        }
+
+        /// Get reference to associated object
+        T& operator* () {
+#ifdef DEBUG
+            std::cout << "SuperPtr: operator *" << std::endl;
+#endif
+            this->write();
+            return this->mInstance->first;
+        }
+
+        /// Get pointer to associated object
+        T* operator-> () {
+#ifdef DEBUG
+            std::cout << "SuperPtr: operator ->" << std::endl;
+#endif
+            this->write();
+            return &this->mInstance->first;
+        }
+    };
+
 /// Test for base class - from http://stackoverflow.com/questions/281725/template-specialization-based-on-inherit-class/282006#282006
 namespace {
     template<bool C, typename T = void>
@@ -161,14 +268,11 @@ namespace {
 }
     /// Super ptr for Domain
     template <typename T>
-    class SuperPtr<T, typename enable_if<is_base_of<Domain, T>::value>::type> : public SuperPtr<T, T>, public Domain {
-    private:
-        T& operator *(); //Do not allow getting modifiable object
-        T& operator ->();
+    class SuperPtr<T, typename enable_if<is_base_of<Domain, T>::value>::type> : public SuperPtrConst<T, T>, public Domain {
     public:
         /// Constructors
-        SuperPtr(const T &instance) : Domain(instance), SuperPtr<T, T>(instance) {}
-        SuperPtr(const SuperPtr<T> &copy) : Domain(copy.mInstance->first), SuperPtr<T, T>(copy) {}
+        SuperPtr(const T &instance) : Domain(instance), SuperPtrConst<T, T>(instance) {}
+        SuperPtr(const SuperPtr<T> &copy) : Domain(copy.mInstance->first), SuperPtrConst<T, T>(copy) {}
 
         /// Conversion to const object reference
         operator const T& () const {
