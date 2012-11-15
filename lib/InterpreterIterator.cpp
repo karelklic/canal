@@ -7,6 +7,7 @@
 #include "Environment.h"
 #include "WideningManager.h"
 #include "State.h"
+#include "Utils.h"
 #include <sstream>
 
 namespace Canal {
@@ -74,27 +75,24 @@ Iterator::toString() const
     ss << "***************************************" << std::endl;
     ss << "* iterator " << std::endl;
     ss << "***************************************" << std::endl;
-    ss << "** function " << (*mFunction)->getName().str() << std::endl;
-    ss << "*** basicBlock ";
-    SlotTracker &slotTracker = mOperations.getEnvironment().getSlotTracker();
-    const llvm::BasicBlock &basicBlock = (*mBasicBlock)->getLlvmBasicBlock();
-    const llvm::Function &function = (*mFunction)->getLlvmFunction();
-    slotTracker.setActiveFunction(function);
-    if (basicBlock.hasName())
-        ss << basicBlock.getName().str();
-    else
-        ss << "<label>:" << slotTracker.getLocalSlot(basicBlock);
-
-    ss << std::endl;
-
-    llvm::BasicBlock::const_iterator it = (*mBasicBlock)->begin();
-    for (; it != mInstruction; ++it)
+    if (mInitialized)
     {
-        if (it->getType()->isVoidTy())
-            continue;
+        ss << "** function " << (*mFunction)->getName().str() << std::endl;
+        ss << "*** basicBlock ";
+        SlotTracker &slotTracker = mOperations.getEnvironment().getSlotTracker();
+        const llvm::BasicBlock &basicBlock = (*mBasicBlock)->getLlvmBasicBlock();
+        ss << Canal::getName(basicBlock, slotTracker) << std::endl;
+        llvm::BasicBlock::const_iterator it = (*mBasicBlock)->begin();
+        for (; it != mInstruction; ++it)
+        {
+            if (it->getType()->isVoidTy())
+                continue;
 
-        ss << mState->toString(*it, slotTracker);
+            ss << mState->toString(*it, slotTracker);
+        }
     }
+    else
+        ss << "uninitialized" << std::endl;
 
     return ss.str();
 }

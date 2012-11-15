@@ -89,7 +89,10 @@ CommandInfo::run(const std::vector<std::string> &args)
         infoFunction(args[2]);
     }
     else
-        printf("Undefined info command: \"%s\".  Try \"help info\".\n", args[1].c_str());
+    {
+        printf("Undefined info command: \"%s\".  Try \"help info\".\n",
+               args[1].c_str());
+    }
 }
 
 void
