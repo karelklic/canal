@@ -18,6 +18,13 @@ class StateMap
     typedef std::map<const llvm::Value*, Domain*> Map;
     Map mMap;
 
+ public:
+    typedef Map::iterator iterator;
+    typedef Map::const_iterator const_iterator;
+    typedef Map::value_type value_type;
+    typedef Map::size_type size_type;
+    typedef Map::key_type key_type;
+
 public:
     StateMap() {}
 
@@ -26,12 +33,6 @@ public:
     ~StateMap();
 
     bool operator==(const StateMap &map) const;
-
-    typedef Map::iterator iterator;
-    typedef Map::const_iterator const_iterator;
-    typedef Map::value_type value_type;
-    typedef Map::size_type size_type;
-    typedef Map::key_type key_type;
 
     iterator begin() { return mMap.begin(); }
 
@@ -53,6 +54,8 @@ public:
 
     void insert(const llvm::Value &place, Domain *value);
 
+    /// Get memory usage (used byte count) of this state map.
+    size_t memoryUsage() const;
 };
 
 } // namespace Canal

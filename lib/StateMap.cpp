@@ -65,4 +65,14 @@ StateMap::insert(const llvm::Value &place, Domain *value)
         insert(value_type(&place, value));
 }
 
+size_t
+StateMap::memoryUsage() const
+{
+    size_t result = sizeof(StateMap) + mMap.size() * (sizeof(const llvm::Value*) + sizeof(Domain*));
+    for (const_iterator it = begin(); it != end(); ++it)
+        result += it->second->memoryUsage();
+
+    return result;
+}
+
 } // namespace Canal

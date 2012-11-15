@@ -116,6 +116,19 @@ Function::updateOutputState()
     }
 }
 
+size_t
+Function::memoryUsage() const
+{
+    size_t result = sizeof(Function) - 2 * sizeof(State);
+    result += mInputState.memoryUsage();
+    result += mOutputState.memoryUsage();
+    std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
+    for (; it != mBasicBlocks.end(); ++it)
+        result += (*it)->memoryUsage();
+
+    return result;
+}
+
 std::string
 Function::toString() const
 {

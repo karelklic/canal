@@ -17,8 +17,9 @@ public:
     // Implementation of Command::run().
     virtual void run(const std::vector<std::string> &args);
 
- private:
+private:
     void showIterator() const;
+    void showModule() const;
 };
 
 #endif // CANAL_COMMAND_SHOW_H

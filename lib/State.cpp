@@ -224,6 +224,20 @@ State::hasGlobalBlock(const llvm::Value &place) const
     return (mGlobalBlocks.find(&place) != mGlobalBlocks.end());
 }
 
+size_t
+State::memoryUsage() const
+{
+    size_t result = sizeof(State);
+    result += mGlobalVariables.memoryUsage();
+    result += mGlobalBlocks.memoryUsage();
+    result += mFunctionVariables.memoryUsage();
+    result += mFunctionBlocks.memoryUsage();
+
+    if (mReturnedValue)
+        result += mReturnedValue->memoryUsage();
+
+    return result;
+}
 
 std::string
 State::toString(const llvm::Value &place,

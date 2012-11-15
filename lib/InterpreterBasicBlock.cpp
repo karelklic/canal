@@ -16,6 +16,15 @@ BasicBlock::BasicBlock(const llvm::BasicBlock &basicBlock,
 {
 }
 
+size_t
+BasicBlock::memoryUsage() const
+{
+    size_t result = sizeof(BasicBlock);
+    result += mInputState.memoryUsage();
+    result += mOutputState.memoryUsage();
+    return result;
+}
+
 std::string
 BasicBlock::toString() const
 {
