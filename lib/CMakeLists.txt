@@ -3,6 +3,7 @@ APIntUtils.cpp
 ArrayExactSize.cpp
 ArrayInterface.cpp
 ArraySingleItem.cpp
+ArrayStringPrefix.cpp
 Constructors.cpp
 Domain.cpp
 Environment.cpp
