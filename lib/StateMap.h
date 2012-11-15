@@ -2,6 +2,7 @@
 #define LIBCANAL_STATE_MAP_H
 
 #include <map>
+#include <cstddef>
 
 namespace llvm {
 class Value;
