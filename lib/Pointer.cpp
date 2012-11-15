@@ -296,12 +296,6 @@ Pointer::clone() const
     return new Pointer(*this);
 }
 
-Pointer *
-Pointer::cloneCleaned() const
-{
-    return new Pointer(mEnvironment, mType);
-}
-
 bool
 Pointer::operator==(const Domain &value) const
 {

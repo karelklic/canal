@@ -46,23 +46,6 @@ ExactSize::clone() const
     return new ExactSize(*this);
 }
 
-ExactSize *
-ExactSize::cloneCleaned() const
-{
-    ExactSize* result = new ExactSize(*this);
-    std::vector<Domain*>::iterator it = result->mValues.begin();
-    for (; it != result->mValues.end(); ++it)
-    {
-        AccuracyDomain* dom = dynCast<AccuracyDomain*>(*it);
-        CANAL_ASSERT_MSG(dom,
-                         "Element has to be of type AccuracyDomain "
-                         "in order to call setBottom on it.");
-
-        dom->setBottom();
-    }
-    return result;
-}
-
 bool
 ExactSize::operator==(const Domain &value) const
 {

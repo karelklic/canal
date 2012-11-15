@@ -29,9 +29,6 @@ public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Structure *clone() const;
-    /// Implementation of Domain::cloneCleaned().
-    /// Covariant return type.
-    virtual Structure *cloneCleaned() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain &value) const;
     /// Implementation of Domain::merge().

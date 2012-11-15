@@ -132,12 +132,6 @@ Interval::clone() const
     return new Interval(*this);
 }
 
-Interval *
-Interval::cloneCleaned() const
-{
-    return new Interval(mEnvironment, getBitWidth());
-}
-
 bool
 Interval::operator==(const Domain& value) const
 {

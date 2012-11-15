@@ -53,10 +53,6 @@ public:
     /// Create a copy of this value.
     virtual Domain *clone() const = 0;
 
-    /// This is used to obtain instance of the value type and to get an
-    /// empty value at the same time.
-    virtual Domain *cloneCleaned() const = 0;
-
     /// Implementing this is mandatory.  Values are compared while
     /// computing the fixed point.
     virtual bool operator==(const Domain &value) const = 0;

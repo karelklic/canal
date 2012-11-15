@@ -100,9 +100,6 @@ public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Interval *clone() const;
-    /// Implementation of Domain::cloneCleaned().
-    /// Covariant return type.
-    virtual Interval *cloneCleaned() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain& value) const;
     /// Implementation of Domain::merge().

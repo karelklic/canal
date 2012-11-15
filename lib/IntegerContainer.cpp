@@ -181,12 +181,6 @@ Container::clone() const
     return new Container(*this);
 }
 
-Container *
-Container::cloneCleaned() const
-{
-    return new Container(mEnvironment, getBitWidth());
-}
-
 bool
 Container::operator==(const Domain &value) const
 {

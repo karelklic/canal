@@ -190,12 +190,6 @@ Interval::clone() const
     return new Interval(*this);
 }
 
-Interval *
-Interval::cloneCleaned() const
-{
-    return new Interval(mEnvironment, getSemantics());
-}
-
 bool
 Interval::operator==(const Domain& value) const
 {

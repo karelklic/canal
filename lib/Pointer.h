@@ -116,9 +116,6 @@ public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type -- it really overrides Domain::clone().
     virtual Pointer *clone() const;
-    /// Implementation of Domain::cloneCleaned().
-    /// Covariant return type.
-    virtual Pointer *cloneCleaned() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain &value) const;
     /// Does this pointer point to single target?
