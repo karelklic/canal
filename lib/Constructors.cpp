@@ -84,8 +84,7 @@ Constructors::create(const llvm::Type &type) const
         for (unsigned i = 0; i < structType.getNumElements(); i ++)
             members.push_back(create(*structType.getElementType(i)));
 
-        Structure *structure = new Structure(mEnvironment, members);
-        return structure;
+        return createStructure(members);
     }
 
     CANAL_DIE_MSG("Unsupported llvm::Type::TypeID: " << type.getTypeID());
@@ -193,7 +192,7 @@ Constructors::create(const llvm::Constant &value,
                                      state));
         }
 
-        return new Structure(mEnvironment, members);
+        return createStructure(members);
     }
 
     if (llvm::isa<llvm::ConstantVector>(value))
@@ -321,6 +320,11 @@ Constructors::createPointer(const llvm::Type &type) const {
     return new Pointer::Pointer(mEnvironment, type);
 }
 
+Domain *
+Constructors::createStructure(const std::vector<Domain*> &members) const {
+    return new Structure(mEnvironment, members);
+}
+
 const llvm::fltSemantics *
 Constructors::getFloatingPointSemantics(const llvm::Type &type)
 {
@@ -378,7 +382,8 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     if (pointer)
     {
         return pointer->getElementPtr(offsets,
-                                      *pointerType.getElementType());
+                                      *pointerType.getElementType(),
+                                      *this);
     }
 
     // GetElementPtr on anything except a pointer.  For example, it is

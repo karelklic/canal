@@ -487,9 +487,9 @@ void Operations::add(const llvm::BinaryOperator &instruction,
     if (aPointer || bPointer)
     {
         if (aPointer)
-            result = aPointer->cloneCleaned();
+            result = mConstructors.createPointer(aPointer->getType());
         else
-            result = bPointer->cloneCleaned();
+            result = mConstructors.createPointer(bPointer->getType());
 
         result->add(*a, *b);
     }
@@ -546,7 +546,7 @@ Operations::sub(const llvm::BinaryOperator &instruction,
     // Subtracting integer from pointer.
     if (aPointer && !bPointer)
     {
-        result = aPointer->cloneCleaned();
+        result = mConstructors.createPointer(aPointer->getType());
         result->sub(*a, *b);
     }
     else if (aPointer && bPointer) // Subtracting two pointers.
@@ -1047,7 +1047,7 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
     CANAL_ASSERT(pointerType);
     CANAL_ASSERT(pointerType->getElementType());
     Pointer::Pointer *result = source.getElementPtr(
-        offsets, *pointerType->getElementType());
+        offsets, *pointerType->getElementType(), mConstructors);
 
     state.addFunctionVariable(instruction, result);
 }

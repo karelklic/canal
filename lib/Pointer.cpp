@@ -6,6 +6,7 @@
 #include "IntegerContainer.h"
 #include "IntegerEnumeration.h"
 #include "Environment.h"
+#include "Constructors.h"
 #include <llvm/BasicBlock.h>
 #include <llvm/Type.h>
 #include <sstream>
@@ -208,7 +209,8 @@ Pointer::bitcast(const llvm::Type &type) const
 
 Pointer *
 Pointer::getElementPtr(const std::vector<Domain*> &offsets,
-                       const llvm::Type &type) const
+                       const llvm::Type &type,
+                       const Constructors &constructors) const
 {
     CANAL_ASSERT_MSG(!offsets.empty(),
                      "getElementPtr must be called with some offsets.");
@@ -238,10 +240,9 @@ Pointer::getElementPtr(const std::vector<Domain*> &offsets,
         {
             if (offsetIt == offsets.begin() && !targetOffsets.empty())
             {
-                Domain *oldLast = targetOffsets.back();
-                Domain *newLast = oldLast->cloneCleaned();
-                newLast->add(*oldLast, **offsets.begin());
-                delete oldLast;
+                Domain *newLast = constructors.createInteger(64);
+                newLast->add(*targetOffsets.back(), **offsets.begin());
+                delete targetOffsets.back();
                 targetOffsets.pop_back();
                 targetOffsets.push_back(newLast);
                 continue;
