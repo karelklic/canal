@@ -21,3 +21,7 @@ add_test(ICMPTest ICMPTest)
 add_executable(MergeTest MergeTest.cpp)
 target_link_libraries(MergeTest canal)
 add_test(MergeTest MergeTest)
+
+add_executable(SuperPtrTest SuperPtrTest.cpp)
+target_link_libraries(SuperPtrTest canal)
+add_test(SuperPtrTest SuperPtrTest)
