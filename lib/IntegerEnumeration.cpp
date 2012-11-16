@@ -117,12 +117,6 @@ Enumeration::clone() const
     return new Enumeration(*this);
 }
 
-Enumeration *
-Enumeration::cloneCleaned() const
-{
-    return new Enumeration(mEnvironment, getBitWidth());
-}
-
 bool
 Enumeration::operator==(const Domain &value) const
 {

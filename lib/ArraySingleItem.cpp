@@ -37,30 +37,6 @@ SingleItem::clone() const
     return new SingleItem(*this);
 }
 
-SingleItem *
-SingleItem::cloneCleaned() const
-{
-    SingleItem* res = new SingleItem(*this);
-
-    //setBottom on value
-    AccuracyDomain* value = dynCast<AccuracyDomain*>(res->mValue);
-    CANAL_ASSERT_MSG(value,
-                     "Value has to be of type AccuracyDomain "
-                     "in order to call setBottom on it.");
-
-    value->setBottom();
-
-    //setBottom on size
-    AccuracyDomain* size = dynCast<AccuracyDomain*>(res->mSize);
-    CANAL_ASSERT_MSG(size,
-                     "Size has to be of type AccuracyDomain "
-                     "in order to call setBottom on it.");
-
-    size->setBottom();
-
-    return res;
-}
-
 bool
 SingleItem::operator==(const Domain &value) const
 {

@@ -46,11 +46,6 @@ testIsSingleValue()
 }
 
 static void
-testCloneCleaned()
-{
-}
-
-static void
 testEquality()
 {
     Integer::Interval interval1(*gEnvironment, 1),
@@ -215,7 +210,6 @@ main(int argc, char **argv)
     testUnsignedMin();
     testUnsignedMax();
     testIsSingleValue();
-    testCloneCleaned();
     testEquality();
     testMerge();
     testMemoryUsage();

@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_ARRAY_SINGLE_ITEM_H
-#define LIBCANAL_ARRAY_SINGLE_ITEM_H
+#ifndef LIBCANAL_ARRAY_STRING_PREFIX_H
+#define LIBCANAL_ARRAY_STRING_PREFIX_H
 
 #include "Domain.h"
 #include "ArrayInterface.h"
@@ -7,38 +7,35 @@
 namespace Canal {
 namespace Array {
 
-/// The most trivial array type.  It treats all array members as a
-/// single value.  This means all the operations on the array are
-/// merged and used to move the single value up in its lattice.
-//
-/// This array type is very imprecise.
-class SingleItem : public Domain, public Interface
+/// Array with exact size and limited length.  It keeps all array
+/// members separately, not losing precision at all.
+class StringPrefix : public Domain, public Interface, public AccuracyDomain
 {
 public:
-    Domain *mValue;
-
-    /// Number of elements in the array.
-    /// It is either a Constant or Integer::Container.
-    Domain *mSize;
+    std::string mPrefix;
+    bool mIsBottom;
 
 public:
-    SingleItem(const Environment &environment,
-               Domain *size,
-               Domain *value);
+    /// Standard constructor
+    StringPrefix(const Environment &environment);
 
-    SingleItem(const SingleItem &value);
-
-    virtual ~SingleItem();
+    /// @param value
+    ///   This class does not take ownership of this value.
+    StringPrefix(const Environment &environment,
+              const std::string &value);
 
 private:
     /// Assignment operator declaration.  Prevents accidental
     /// assignments of domains.  Do not implement!
-    SingleItem &operator=(const SingleItem &value);
+    StringPrefix &operator=(const StringPrefix &value);
 
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
-    virtual SingleItem *clone() const;
+    virtual StringPrefix *clone() const;
+    /// Implementation of Domain::cloneCleaned().
+    /// Covariant return type.
+    virtual StringPrefix *cloneCleaned() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain &value) const;
     /// Implementation of Domain::merge().
@@ -47,7 +44,8 @@ public: // Implementation of Domain.
     virtual size_t memoryUsage() const;
     /// Implementation of Domain::toString().
     virtual std::string toString() const;
-    /// Implementation of Domain::setZero().
+
+    /// Implementation of Domain::setZero()
     virtual void setZero(const llvm::Value *place);
 
     /// Implementation of Domain::add().
@@ -102,9 +100,19 @@ public: // Implementation of Array::Interface.
     virtual void setItem(const Domain &offset, const Domain &value);
     /// Implementation of Array::Interface::setItem().
     virtual void setItem(uint64_t offset, const Domain &value);
+
+public: // Implementation of AccuracyDomain
+    /// Implementation of AccuracyDomain::isBottom().
+    virtual bool isBottom() const;
+    /// Implementation of AccuracyDomain::setBottom().
+    virtual void setBottom();
+    /// Implementation of AccuracyDomain::isTop().
+    virtual bool isTop() const;
+    /// Implementation of AccuracyDomain::setTop().
+    virtual void setTop();
 };
 
 } // namespace Array
 } // namespace Canal
 
-#endif // LIBCANAL_ARRAY_SINGLE_ITEM_H
+#endif // LIBCANAL_ARRAY_STRING_PREFIX_H

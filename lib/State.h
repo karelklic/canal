@@ -62,7 +62,9 @@ class State
 
 public:
     State();
+
     State(const State &state);
+
     virtual ~State();
 
     bool operator==(const State &state) const;
@@ -118,12 +120,19 @@ public:
     void addVariableArgument(const llvm::Instruction &place, Domain *argument);
 
     const StateMap &getGlobalVariables() const { return mGlobalVariables; }
+
     StateMap &getGlobalVariables() { return mGlobalVariables; }
+
     const StateMap &getGlobalBlocks() const { return mGlobalBlocks; }
+
     StateMap &getGlobalBlocks() { return mGlobalBlocks; }
+
     const StateMap &getFunctionVariables() const { return mFunctionVariables; }
+
     StateMap &getFunctionVariables() { return mFunctionVariables; }
+
     const StateMap &getFunctionBlocks() const { return mFunctionBlocks; }
+
     StateMap &getFunctionBlocks() { return mFunctionBlocks; }
 
     /// Search both global and function variables for a place.  If the
@@ -137,6 +146,9 @@ public:
     const Domain *findBlock(const llvm::Value &place) const;
 
     bool hasGlobalBlock(const llvm::Value &place) const;
+
+    /// Get memory usage (used byte count) of this abstract state.
+    size_t memoryUsage() const;
 
     std::string toString(const llvm::Value &place,
                          SlotTracker &slotTracker) const;

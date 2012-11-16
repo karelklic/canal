@@ -46,23 +46,6 @@ ExactSize::clone() const
     return new ExactSize(*this);
 }
 
-ExactSize *
-ExactSize::cloneCleaned() const
-{
-    ExactSize* result = new ExactSize(*this);
-    std::vector<Domain*>::iterator it = result->mValues.begin();
-    for (; it != result->mValues.end(); ++it)
-    {
-        AccuracyDomain* dom = dynCast<AccuracyDomain*>(*it);
-        CANAL_ASSERT_MSG(dom,
-                         "Element has to be of type AccuracyDomain "
-                         "in order to call setBottom on it.");
-
-        dom->setBottom();
-    }
-    return result;
-}
-
 bool
 ExactSize::operator==(const Domain &value) const
 {
@@ -132,19 +115,16 @@ binaryOperation(ExactSize &result,
     const ExactSize &aa = dynCast<const ExactSize&>(a),
         &bb = dynCast<const ExactSize&>(b);
 
-    CANAL_ASSERT_MSG(aa.size() == bb.size(),
+    CANAL_ASSERT_MSG(aa.size() == bb.size() && result.size() == aa.size(),
                      "Binary operations with arrays "
                      "require the array size to be equal.");
 
     std::vector<Domain*>::const_iterator itA = aa.mValues.begin(),
         itB = bb.mValues.begin();
 
-    for (; itA != aa.mValues.end(); ++itA, ++itB)
-    {
-        Domain *resultValue = (*itA)->cloneCleaned();
-        ((*resultValue).*(operation))(**itA, **itB);
-        result.mValues.push_back(resultValue);
-    }
+    std::vector<Domain*>::iterator it = result.mValues.begin();
+    for (; it != result.mValues.end(); ++it, ++itA, ++itB)
+        ((**it).*(operation))(**itA, **itB);
 }
 
 void

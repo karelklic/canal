@@ -8,6 +8,8 @@ libcanal_la_SOURCES = \
 	ArrayInterface.h \
 	ArraySingleItem.cpp \
 	ArraySingleItem.h \
+	ArrayStringPrefix.cpp \
+	ArrayStringPrefix.h \
 	Constructors.cpp \
 	Constructors.h \
 	Domain.cpp \

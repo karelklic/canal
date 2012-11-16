@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_VALUE_H
-#define LIBCANAL_VALUE_H
+#ifndef LIBCANAL_DOMAIN_H
+#define LIBCANAL_DOMAIN_H
 
 #include <cstddef>
 #include <string>
@@ -52,10 +52,6 @@ public:
 
     /// Create a copy of this value.
     virtual Domain *clone() const = 0;
-
-    /// This is used to obtain instance of the value type and to get an
-    /// empty value at the same time.
-    virtual Domain *cloneCleaned() const = 0;
 
     /// Implementing this is mandatory.  Values are compared while
     /// computing the fixed point.
@@ -165,4 +161,4 @@ public:
 
 } // namespace Canal
 
-#endif // LIBCANAL_VALUE_H
+#endif // LIBCANAL_DOMAIN_H

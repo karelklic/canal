@@ -200,12 +200,6 @@ Bitfield::clone() const
     return new Bitfield(*this);
 }
 
-Bitfield *
-Bitfield::cloneCleaned() const
-{
-    return new Bitfield(mEnvironment, getBitWidth());
-}
-
 bool
 Bitfield::operator==(const Domain& value) const
 {

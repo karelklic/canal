@@ -1,6 +1,7 @@
 #include "CommandShow.h"
 #include "State.h"
 #include "Commands.h"
+#include "lib/InterpreterFunction.h"
 #include <cstdio>
 
 CommandShow::CommandShow(Commands &commands)
@@ -91,6 +92,25 @@ CommandShow::showIterator() const
 void
 CommandShow::showModule() const
 {
+    if (!mCommands.getState())
+    {
+        puts("No module is loaded.");
+        return;
+    }
+
+    const Canal::Interpreter::Interpreter &interpreter =
+        mCommands.getState()->getInterpreter();
+
+    const Canal::Interpreter::Module &module =
+        interpreter.getModule();
+
+    puts("Functions:");
+    std::vector<Canal::Interpreter::Function*>::const_iterator it = module.begin();
+    for (; it != module.end(); ++it)
+    {
+        printf("  %s\n", (*it)->getName().str().c_str());
+        printf("     Used Memory: %zu\n", (*it)->memoryUsage());
+    }
 }
 
 void

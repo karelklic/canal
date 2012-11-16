@@ -4,3 +4,10 @@ compiler:
   - clang
 script: ./configure && make && make check
 install: sudo apt-get install llvm-dev libelf-dev libreadline-dev
+
+matrix:
+  include:
+    - script: mkdir build/ && cd build/ && cmake .. && make
+      compiler: gcc
+    - script: mkdir build/ && cd build/ && cmake .. && make
+      compiler: clang

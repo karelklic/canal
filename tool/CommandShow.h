@@ -17,7 +17,7 @@ public:
     // Implementation of Command::run().
     virtual void run(const std::vector<std::string> &args);
 
- private:
+private:
     void showIterator() const;
     void showModule() const;
     void showFunctions() const;

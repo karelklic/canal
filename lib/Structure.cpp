@@ -35,23 +35,6 @@ Structure::clone() const
     return new Structure(*this);
 }
 
-Structure *
-Structure::cloneCleaned() const
-{
-    Structure* res = new Structure(*this);
-    std::vector<Domain*>::iterator it = res->mMembers.begin();
-    for (; it != res->mMembers.end(); ++it)
-    {
-        AccuracyDomain* dom = dynCast<AccuracyDomain*>(*it);
-        CANAL_ASSERT_MSG(dom,
-                         "Member has to be of type AccuracyDomain "
-                         "in order to call setBottom on it.");
-
-        dom->setBottom();
-    }
-    return res;
-}
-
 bool
 Structure::operator==(const Domain &value) const
 {
