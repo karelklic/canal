@@ -19,6 +19,9 @@ public:
 
  private:
     void showIterator() const;
+    void showModule() const;
+    void showFunctions() const;
+    void showFunction(const std::string &name) const;
 };
 
 #endif // CANAL_COMMAND_SHOW_H

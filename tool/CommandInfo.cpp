@@ -28,7 +28,6 @@ CommandInfo::getCompletionMatches(const std::vector<std::string> &args,
                                   int pointArgOffset) const
 {
     std::vector<std::string> result;
-
     std::string arg = args[pointArg].substr(0, pointArgOffset);
 
     if (pointArg == 1)

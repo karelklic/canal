@@ -14,7 +14,9 @@ class Module;
 class State
 {
     Canal::Interpreter::Interpreter mInterpreter;
+
     std::set<std::string> mFunctionBreakpoints;
+
     IteratorCallback mIteratorCallback;
 
 public:
@@ -32,6 +34,8 @@ public:
     llvm::Module &getModule() { return getEnvironment().getModule(); }
 
     Canal::SlotTracker &getSlotTracker() const { return getEnvironment().getSlotTracker(); }
+
+    const IteratorCallback &getIteratorCallback() const { return mIteratorCallback; }
 
     // Check if the interpreter is in the middle of interpretation.
     // This is true if something is on the stack.
