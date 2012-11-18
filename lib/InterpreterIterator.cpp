@@ -8,7 +8,6 @@
 #include "WideningManager.h"
 #include "State.h"
 #include "Utils.h"
-#include <sstream>
 
 namespace Canal {
 namespace Interpreter {
@@ -71,17 +70,18 @@ Iterator::interpretInstruction()
 std::string
 Iterator::toString() const
 {
-    std::stringstream ss;
-    ss << "***************************************" << std::endl;
-    ss << "* iterator " << std::endl;
-    ss << "***************************************" << std::endl;
+    StringStream ss;
+    ss << "***************************************\n";
+    ss << "* iterator\n";
+    ss << "***************************************\n";
     if (mInitialized)
     {
-        ss << "** function " << (*mFunction)->getName().str() << std::endl;
+        ss << "** function " << (*mFunction)->getName() << "\n";
         ss << "*** basicBlock ";
         SlotTracker &slotTracker = mOperations.getEnvironment().getSlotTracker();
         const llvm::BasicBlock &basicBlock = (*mBasicBlock)->getLlvmBasicBlock();
-        ss << Canal::getName(basicBlock, slotTracker) << std::endl;
+        ss << Canal::getName(basicBlock, slotTracker) << "\n";
+
         llvm::BasicBlock::const_iterator it = (*mBasicBlock)->begin();
         for (; it != mInstruction; ++it)
         {
@@ -92,7 +92,7 @@ Iterator::toString() const
         }
     }
     else
-        ss << "uninitialized" << std::endl;
+        ss << "uninitialized\n";
 
     return ss.str();
 }

@@ -12,8 +12,7 @@ StateMap::StateMap(const StateMap &map) : mMap(map.mMap)
 
 StateMap::~StateMap()
 {
-    for (iterator it = begin(); it != end(); ++it)
-        delete it->second;
+    llvm::DeleteContainerSeconds(*this);
 }
 
 bool

@@ -16,7 +16,7 @@ class StateMap
     typedef std::map<const llvm::Value*, Domain*> Map;
     Map mMap;
 
- public:
+public:
     typedef Map::iterator iterator;
     typedef Map::const_iterator const_iterator;
     typedef Map::value_type value_type;
@@ -41,6 +41,8 @@ public:
     const_iterator end() const { return mMap.end(); }
 
     size_type size() const { return mMap.size(); }
+
+    void clear() { mMap.clear(); }
 
     iterator find(const key_type &x) { return mMap.find(x); }
 

@@ -1,8 +1,6 @@
 #include "IntegerEnumeration.h"
 #include "Utils.h"
 #include "FloatInterval.h"
-#include <sstream>
-#include <iostream>
 
 namespace Canal {
 namespace Integer {
@@ -174,17 +172,17 @@ Enumeration::memoryUsage() const
 std::string
 Enumeration::toString() const
 {
-    std::stringstream ss;
+    StringStream ss;
     ss << "enumeration";
     if (mTop)
         ss << " top";
     else if (mValues.empty())
         ss << " empty";
-    ss << std::endl;
+    ss << "\n";
 
     APIntUtils::USet::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
-        ss << "    " << Canal::toString(*it) << std::endl;
+        ss << "    " << Canal::toString(*it) << "\n";
 
     return ss.str();
 }

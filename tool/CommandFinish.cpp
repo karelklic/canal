@@ -1,7 +1,6 @@
 #include "CommandFinish.h"
 #include "Commands.h"
 #include "State.h"
-#include <cstdio>
 
 CommandFinish::CommandFinish(Commands &commands)
     : Command("finish",
@@ -17,7 +16,7 @@ CommandFinish::run(const std::vector<std::string> &args)
 {
     if (!mCommands.getState() || !mCommands.getState()->isInterpreting())
     {
-        puts("The program is not being interpreted.");
+        llvm::outs() << "The program is not being interpreted.\n";
         return;
     }
 

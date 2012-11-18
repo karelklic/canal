@@ -2,8 +2,6 @@
 #include "IntegerContainer.h"
 #include "IntegerInterval.h"
 #include "Utils.h"
-#include <sstream>
-#include <iostream>
 
 #define ROUNDING_MODE llvm::APFloat::rmNearestTiesToEven
 
@@ -238,7 +236,7 @@ Interval::memoryUsage() const
 std::string
 Interval::toString() const
 {
-    std::stringstream ss;
+    StringStream ss;
     ss << "floatInterval ";
     if (mEmpty)
         ss << "empty";
@@ -250,7 +248,7 @@ Interval::toString() const
             mTo.convertToDouble();
     }
 
-    ss << std::endl;
+    ss << "\n";
     return ss.str();
 }
 
@@ -265,6 +263,7 @@ Interval::accuracy() const
 
     llvm::APFloat divisor = llvm::APFloat::getLargest(
         getSemantics(), /*negative=*/false);
+
     llvm::APFloat::opStatus status = divisor.subtract(
         llvm::APFloat::getLargest(getSemantics(), /*negative=*/true),
         llvm::APFloat::rmNearestTiesToEven);

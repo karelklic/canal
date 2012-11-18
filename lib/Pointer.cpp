@@ -7,7 +7,6 @@
 #include "IntegerEnumeration.h"
 #include "Environment.h"
 #include "Constructors.h"
-#include <sstream>
 
 namespace Canal {
 namespace Pointer {
@@ -23,8 +22,8 @@ Pointer::Pointer(const Pointer &value)
       mTargets(value.mTargets),
       mType(value.mType)
 {
-    PlaceTargetMap::iterator it = mTargets.begin();
-    for (; it != mTargets.end(); ++it)
+    PlaceTargetMap::iterator it = mTargets.begin(), itend = mTargets.end();
+    for (; it != itend; ++it)
         it->second = new Target(*it->second);
 }
 
@@ -34,16 +33,14 @@ Pointer::Pointer(const Pointer &value,
       mTargets(value.mTargets),
       mType(newType)
 {
-    PlaceTargetMap::iterator it = mTargets.begin();
-    for (; it != mTargets.end(); ++it)
+    PlaceTargetMap::iterator it = mTargets.begin(), itend = mTargets.end();
+    for (; it != itend; ++it)
         it->second = new Target(*it->second);
 }
 
 Pointer::~Pointer()
 {
-    PlaceTargetMap::const_iterator it = mTargets.begin();
-    for (; it != mTargets.end(); ++it)
-        delete it->second;
+    llvm::DeleteContainerSeconds(mTargets);
 }
 
 void
@@ -252,9 +249,7 @@ Pointer::getElementPtr(const std::vector<Domain*> &offsets,
 
     // Delete the offsets, because this method takes ownership of them
     // and it no longer needs them.
-    offsetIt = offsets.begin();
-    for (; offsetIt != offsets.end(); ++offsetIt)
-        delete *offsetIt;
+    std::for_each(offsets.begin(), offsets.end(), llvm::deleter<Domain>);
 
     return result;
 }
@@ -384,11 +379,14 @@ Pointer::memoryUsage() const
 std::string
 Pointer::toString() const
 {
-    std::stringstream ss;
-    ss << "pointer" << std::endl;
-    ss << "    type " << Canal::toString(mType) << std::endl;
-    PlaceTargetMap::const_iterator it = mTargets.begin();
-    for (; it != mTargets.end(); ++it)
+    StringStream ss;
+    ss << "pointer\n";
+    ss << "    type " << Canal::toString(mType) << "\n";
+
+    PlaceTargetMap::const_iterator it = mTargets.begin(),
+        itend = mTargets.end();
+
+    for (; it != itend; ++it)
         ss << indent(it->second->toString(mEnvironment.getSlotTracker()), 4);
 
     return ss.str();

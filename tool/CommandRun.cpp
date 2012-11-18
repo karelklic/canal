@@ -1,7 +1,6 @@
 #include "CommandRun.h"
 #include "Commands.h"
 #include "State.h"
-#include <cstdio>
 
 CommandRun::CommandRun(Commands &commands)
     : Command("run",
@@ -17,13 +16,13 @@ CommandRun::run(const std::vector<std::string> &args)
 {
     if (!mCommands.getState())
     {
-        puts("No program specified.  Use the \"file\" command.");
+        llvm::outs() << "No program specified.  Use the \"file\" command.\n";
         return;
     }
 
     if (mCommands.getState()->isInterpreting())
     {
-        puts("The program being interpreted has been started already.");
+        llvm::outs() << "The program being interpreted has been started already.\n";
         return;
     }
 

@@ -1,8 +1,6 @@
 #include "ArraySingleItem.h"
 #include "Utils.h"
 #include "IntegerContainer.h"
-#include <sstream>
-#include <iostream>
 
 namespace Canal {
 namespace Array {
@@ -86,11 +84,11 @@ SingleItem::memoryUsage() const
 std::string
 SingleItem::toString() const
 {
-    std::stringstream ss;
-    ss << "arraySingleItem" << std::endl;
-    ss << "    size" << std::endl;
+    StringStream ss;
+    ss << "arraySingleItem\n";
+    ss << "    size\n";
     ss << indent(mSize->toString(), 8);
-    ss << "    value" << std::endl;
+    ss << "    value\n";
     ss << indent(mValue->toString(), 8);
     return ss.str();
 }

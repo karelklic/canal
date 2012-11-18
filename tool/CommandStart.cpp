@@ -2,7 +2,6 @@
 #include "Commands.h"
 #include "State.h"
 #include "Utils.h"
-#include <cstdio>
 
 CommandStart::CommandStart(Commands &commands)
     : Command("start",
@@ -18,13 +17,13 @@ CommandStart::run(const std::vector<std::string> &args)
 {
     if (!mCommands.getState())
     {
-        puts("No program specified.  Use the \"file\" command.");
+        llvm::outs() << "No program specified.  Use the \"file\" command.\n";
         return;
     }
 
     if (mCommands.getState()->isInterpreting())
     {
-        puts("The program being interpreted has been started already.");
+        llvm::outs() << "The program being interpreted has been started already.\n";
         return;
     }
 

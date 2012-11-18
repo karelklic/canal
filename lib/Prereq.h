@@ -22,6 +22,7 @@
 #include <llvm/ADT/APInt.h>
 #include <llvm/ADT/OwningPtr.h>
 #include <llvm/ADT/SmallVector.h>
+#include <llvm/ADT/STLExtras.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Constant.h>
 #include <llvm/Constants.h>

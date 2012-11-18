@@ -7,8 +7,6 @@
 #include "lib/Utils.h"
 #include "lib/InterpreterFunction.h"
 #include "lib/StateMap.h"
-#include <cstdio>
-#include <sstream>
 
 CommandPrint::CommandPrint(Commands &commands)
     : Command("print",
@@ -30,7 +28,7 @@ filterStateMap(const Canal::StateMap &map,
     Canal::StateMap::const_iterator it = map.begin();
     for (; it != map.end(); ++it)
     {
-        std::stringstream name;
+        Canal::StringStream name;
         name << prefix;
         if (addFunctionName)
         {
@@ -105,7 +103,7 @@ printVariable(const std::string &fullName, State &state)
         fullName.size() == 1 ||
         (fullName.size() == 2 && fullName[1] == '^'))
     {
-        printf("Parameter \"%s\": invalid format.\n", fullName.c_str());
+        llvm::outs() << "Parameter \"" << fullName << "\": invalid format.\n";
         return;
     }
 
@@ -139,10 +137,10 @@ printVariable(const std::string &fullName, State &state)
 
     if (!functionName.empty())
     {
-        function = interpreter.getModule().getFunction(functionName.c_str());
+        function = interpreter.getModule().getFunction(functionName);
         if (!function)
         {
-            printf("Function %s not found.\n", functionName.c_str());
+            llvm::outs() << "Function \"" << functionName << "\" not found.\n";
             return;
         }
     }
@@ -165,8 +163,9 @@ printVariable(const std::string &fullName, State &state)
 
     if (!position)
     {
-        printf("Parameter \"%s\": does not exist in current scope.\n",
-               fullName.c_str());
+        llvm::outs() << "Parameter \"" << fullName
+                     << "\": does not exist in current scope.\n";
+
         return;
     }
 
@@ -178,13 +177,13 @@ printVariable(const std::string &fullName, State &state)
 
     if (!value)
     {
-        printf("%s = uninitialized\n", fullName.c_str());
+        llvm::outs() << fullName << " = uninitialized\n";
         return;
     }
 
-    printf("%s = %s", fullName.c_str(),
-           Canal::indentExceptFirstLine(value->toString(),
-                                        fullName.size() + 3).c_str());
+    llvm::outs() << fullName << " = "
+                 << Canal::indentExceptFirstLine(value->toString(),
+                                                 fullName.size() + 3);
 }
 
 void
@@ -193,13 +192,13 @@ CommandPrint::run(const std::vector<std::string> &args)
     State *state = mCommands.getState();
     if (!state || !state->isInterpreting())
     {
-        puts("No module is being interpreted.");
+        llvm::outs() << "No module is being interpreted.\n";
         return;
     }
 
     if (args.size() <= 1)
     {
-        puts("Provide variable or constant name as \"print\" argument.");
+        llvm::outs() << "Provide variable or constant name as \"print\" argument.\n";
         return;
     }
 

@@ -5,8 +5,6 @@
 #include "Utils.h"
 #include "APIntUtils.h"
 #include "Pointer.h"
-#include <sstream>
-#include <iostream>
 
 namespace Canal {
 namespace Integer {
@@ -40,9 +38,7 @@ Container::Container(const Container &value)
 
 Container::~Container()
 {
-    std::vector<Domain*>::const_iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
-        delete *it;
+    llvm::DeleteContainerPointers(mValues);
 }
 
 unsigned
@@ -224,11 +220,14 @@ Container::memoryUsage() const
 std::string
 Container::toString() const
 {
-    std::stringstream ss;
-    ss << "integerContainer" << std::endl;
-    std::vector<Domain*>::const_iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
+    StringStream ss;
+    ss << "integerContainer\n";
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
         ss << indent((*it)->toString(), 4);
+
     return ss.str();
 }
 

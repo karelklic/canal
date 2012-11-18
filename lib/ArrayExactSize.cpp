@@ -3,7 +3,6 @@
 #include "IntegerEnumeration.h"
 #include "IntegerInterval.h"
 #include "Utils.h"
-#include <sstream>
 
 namespace Canal {
 namespace Array {
@@ -34,9 +33,7 @@ ExactSize::ExactSize(const ExactSize &value)
 
 ExactSize::~ExactSize()
 {
-    std::vector<Domain*>::iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
-        delete (*it);
+    llvm::DeleteContainerPointers(mValues);
 }
 
 ExactSize *
@@ -96,10 +93,12 @@ ExactSize::memoryUsage() const
 std::string
 ExactSize::toString() const
 {
-    std::stringstream ss;
-    ss << "arrayExactSize" << std::endl;
-    std::vector<Domain*>::const_iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
+    StringStream ss;
+    ss << "arrayExactSize\n";
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
         ss << indent((*it)->toString(), 4);
 
     return ss.str();

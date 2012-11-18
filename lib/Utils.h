@@ -103,16 +103,8 @@ std::string toString(const llvm::APInt &num);
 /// Get human readable string representation of llvm::Type.
 std::string toString(const llvm::Type &type);
 
-/// Get human readable string representation of llvm::Constant.
-std::string toString(const llvm::Constant &constant);
-
-/// Get human readable string representation of llvm::Instruction.
-std::string toString(const llvm::Instruction &instruction);
-
-/// Get decimal representation of an integer.
-std::string toString(int i);
-
 std::string indent(const std::string &input, int spaces);
+
 std::string indentExceptFirstLine(const std::string &input, int spaces);
 
 /// Get human readable name of a llvm::Value.
@@ -160,6 +152,17 @@ dynCast(const Y &val)
                           << " to " << typeid(X).name());
     }
 }
+
+
+/// A raw_string_ostream that writes to an embedded std::string.  This
+/// is a simple adaptor class.
+class StringStream : public llvm::raw_string_ostream
+{
+    std::string mString;
+
+public:
+    StringStream() : llvm::raw_string_ostream(mString) {}
+};
 
 } // namespace Canal
 

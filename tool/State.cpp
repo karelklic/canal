@@ -5,7 +5,6 @@
 #include "lib/IntegerContainer.h"
 #include "lib/Pointer.h"
 #include "lib/InterpreterFunction.h"
-#include <cstdio>
 
 State::State(llvm::Module *module) : mInterpreter(module)
 {
@@ -27,10 +26,10 @@ void
 State::start()
 {
     mInterpreter.getIterator().initialize();
-    std::printf("Entering function %s.\n",
-                mInterpreter.getCurrentFunction().getName().str().c_str());
-    std::printf("Entering basic block.\n");
-    puts(Canal::toString(mInterpreter.getCurrentInstruction()).c_str());
+    llvm::outs() << "Entering function "
+                 << mInterpreter.getCurrentFunction().getName() << ".\n"
+                 << "Entering basic block.\n"
+                 << mInterpreter.getCurrentInstruction() << "\n";
 }
 
 void
@@ -54,19 +53,21 @@ State::step(int count)
         mInterpreter.getIterator().interpretInstruction();
         if (mIteratorCallback.isFixpointReached())
             return;
+
         if (reachedBreakpoint())
             return;
 
         if (mIteratorCallback.isFunctionEnter())
         {
-            std::printf("Entering function %s.\n",
-                        mInterpreter.getCurrentFunction().getName().str().c_str());
+            llvm::outs() << "Entering function "
+                         << mInterpreter.getCurrentFunction().getName()
+                         << ".\n";
         }
 
         if (mIteratorCallback.isBasicBlockEnter())
-            std::printf("Entering basic block.\n");
+            llvm::outs() << "Entering basic block.\n";
 
-        puts(Canal::toString(mInterpreter.getCurrentInstruction()).c_str());
+        llvm::outs() << mInterpreter.getCurrentInstruction() << "\n";
     }
 }
 
@@ -82,11 +83,10 @@ State::finish()
             return;
     }
 
-    std::printf("Entering function %s.\n",
-                mInterpreter.getCurrentFunction().getName().str().c_str());
-
-    std::printf("Entering basic block.\n");
-    puts(Canal::toString(mInterpreter.getCurrentInstruction()).c_str());
+    llvm::outs() << "Entering function "
+                 << mInterpreter.getCurrentFunction().getName() << ".\n"
+                 << "Entering basic block.\n"
+                 << mInterpreter.getCurrentInstruction() << "\n";
 }
 
 void
@@ -94,7 +94,7 @@ State::addFunctionBreakpoint(const std::string &functionName)
 {
     if (!mInterpreter.getModule().getFunction(functionName))
     {
-        printf("Function \"%s\" not found.\n", functionName.c_str());
+        llvm::outs() << "Function \"" << functionName << "\" not found.\n";
         return;
     }
 
@@ -102,9 +102,15 @@ State::addFunctionBreakpoint(const std::string &functionName)
         mFunctionBreakpoints.insert(functionName);
 
     if (result.second)
-        printf("New breakpoint on function \"%s\".\n", functionName.c_str());
+    {
+        llvm::outs() << "New breakpoint on function \"" << functionName
+                     << "\".\n";
+    }
     else
-        printf("Breakpoint on function \"%s\" already exists.\n", functionName.c_str());
+    {
+        llvm::outs() << "Breakpoint on function \"" << functionName
+                     << "\" already exists.\n";
+    }
 }
 
 bool
@@ -118,12 +124,11 @@ State::reachedBreakpoint()
     if (it == mFunctionBreakpoints.end())
         return false;
 
-    std::printf("Entering function %s.\n",
-                mInterpreter.getCurrentFunction().getName().str().c_str());
+    llvm::outs() << "Entering function "
+                 << mInterpreter.getCurrentFunction().getName() << ".\n"
+                 << "Entering basic block.\n"
+                 << "Breakpoint reached: " << name << "\n"
+                 << mInterpreter.getCurrentInstruction() << "\n";
 
-    std::printf("Entering basic block.\n");
-
-    printf("Breakpoint reached: %s\n", name.str().c_str());
-    puts(Canal::toString(mInterpreter.getCurrentInstruction()).c_str());
     return true;
 }

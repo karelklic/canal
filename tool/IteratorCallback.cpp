@@ -1,10 +1,9 @@
 #include "IteratorCallback.h"
-#include <cstdio>
 
 void
 IteratorCallback::onFixpointReached()
 {
-    puts("Program finished.");
+    llvm::outs() << "Program finished.\n";
     mFixpointReached = true;
 }
 

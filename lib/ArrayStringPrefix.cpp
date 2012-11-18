@@ -1,7 +1,6 @@
 #include "ArrayStringPrefix.h"
 #include "IntegerContainer.h"
 #include "Utils.h"
-#include <sstream>
 
 namespace Canal {
 namespace Array {
@@ -93,8 +92,8 @@ StringPrefix::memoryUsage() const
 std::string
 StringPrefix::toString() const
 {
-    std::stringstream ss;
-    ss << "arrayStringPrefix" << std::endl;
+    StringStream ss;
+    ss << "arrayStringPrefix\n";
     ss << mPrefix;
     return ss.str();
 }

@@ -34,7 +34,7 @@ CommandDump::run(const std::vector<std::string> &args)
 {
     if (args.size() > 2)
     {
-        puts("Too many parameters.");
+        llvm::outs() << "Too many parameters.\n";
         return;
     }
 
@@ -46,7 +46,7 @@ CommandDump::run(const std::vector<std::string> &args)
 
     if (!mCommands.getState())
     {
-        puts("No program is loaded.  Load a program first.");
+        llvm::outs() << "No program is loaded.  Load a program first.\n";
         return;
     }
 
@@ -54,11 +54,11 @@ CommandDump::run(const std::vector<std::string> &args)
     if (fp)
     {
         fclose(fp);
-        puts("The file already exists.");
+        llvm::outs() << "The file already exists.\n";
         bool agreed = askYesNo("Replace it?");
         if (!agreed)
         {
-            puts("Not saved.");
+            llvm::outs() << "Not saved.\n";
             return;
         }
     }
@@ -66,7 +66,7 @@ CommandDump::run(const std::vector<std::string> &args)
     fp = fopen(args[1].c_str(), "w");
     if (!fp)
     {
-        puts("Failed to open the file.");
+        llvm::outs() << "Failed to open the file.\n";
         return;
     }
 
@@ -74,5 +74,5 @@ CommandDump::run(const std::vector<std::string> &args)
             mCommands.getState()->getInterpreter().toString().c_str());
 
     fclose(fp);
-    puts("Interpretation state saved.");
+    llvm::outs() << "Interpretation state saved.\n";
 }

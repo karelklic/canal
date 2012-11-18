@@ -2,7 +2,6 @@
 #include "Utils.h"
 #include "APIntUtils.h"
 #include "FloatInterval.h"
-#include <sstream>
 
 namespace Canal {
 namespace Integer {
@@ -226,8 +225,8 @@ Bitfield::memoryUsage() const
 std::string
 Bitfield::toString() const
 {
-    std::stringstream ss;
-    ss << "bits ";
+    StringStream ss;
+    ss << "bitfield ";
     for (int pos = mZeroes.getBitWidth() - 1; pos >= 0; --pos)
     {
         switch (getBitValue(pos))
@@ -239,7 +238,7 @@ Bitfield::toString() const
         default: CANAL_DIE();
         }
     }
-    ss << std::endl;
+    ss << "\n";
     return ss.str();
 }
 

@@ -3,7 +3,6 @@
 #include "State.h"
 #include "Utils.h"
 #include <cstdlib>
-#include <cstdio>
 
 CommandQuit::CommandQuit(Commands &commands)
     : Command("quit",
@@ -20,11 +19,11 @@ CommandQuit::run(const std::vector<std::string> &args)
 {
     if (mCommands.getState() && mCommands.getState()->isInterpreting())
     {
-        puts("A program is being interpreted.");
+        llvm::outs() << "A program is being interpreted.\n";
         bool agreed = askYesNo("Quit anyway?");
         if (!agreed)
         {
-            puts("Not confirmed.");
+            llvm::outs() << "Not confirmed.\n";
             return;
         }
     }

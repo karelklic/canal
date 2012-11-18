@@ -2,7 +2,6 @@
 #include "State.h"
 #include "Commands.h"
 #include "lib/InterpreterFunction.h"
-#include <cstdio>
 
 CommandShow::CommandShow(Commands &commands)
     : Command("show",
@@ -58,12 +57,12 @@ CommandShow::run(const std::vector<std::string> &args)
     {
         if (args.size() < 3)
         {
-            printf("Missing function name.\n");
+            llvm::outs() << "Missing function name.\n";
             return;
         }
         else if (args.size() > 3)
         {
-            printf("Too many function names.\n");
+            llvm::outs() << "Too many function names.\n";
             return;
         }
 
@@ -71,8 +70,8 @@ CommandShow::run(const std::vector<std::string> &args)
     }
     else
     {
-        printf("Undefined show command: \"%s\".  Try \"help show\".\n",
-               args[1].c_str());
+        llvm::outs() << "Undefined show command: \"" << args[1] << "\".  "
+                     << "Try \"help show\".\n";
     }
 }
 
@@ -81,7 +80,7 @@ CommandShow::showIterator() const
 {
     if (!mCommands.getState())
     {
-        puts("No module is loaded.");
+        llvm::outs() << "No module is loaded.\n";
         return;
     }
 
@@ -94,7 +93,7 @@ CommandShow::showModule() const
 {
     if (!mCommands.getState())
     {
-        puts("No module is loaded.");
+        llvm::outs() << "No module is loaded.\n";
         return;
     }
 
@@ -104,12 +103,12 @@ CommandShow::showModule() const
     const Canal::Interpreter::Module &module =
         interpreter.getModule();
 
-    puts("Functions:");
+    llvm::outs() << "Functions:\n";
     std::vector<Canal::Interpreter::Function*>::const_iterator it = module.begin();
     for (; it != module.end(); ++it)
     {
-        printf("  %s\n", (*it)->getName().str().c_str());
-        printf("     Used Memory: %zu\n", (*it)->memoryUsage());
+        llvm::outs() << "  " << (*it)->getName() << "\n"
+                     << "     Used Memory: " << (*it)->memoryUsage() << "\n";
     }
 }
 

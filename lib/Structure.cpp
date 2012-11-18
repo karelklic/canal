@@ -3,7 +3,6 @@
 #include "IntegerContainer.h"
 #include "IntegerEnumeration.h"
 #include "IntegerInterval.h"
-#include <sstream>
 
 namespace Canal {
 
@@ -24,9 +23,7 @@ Structure::Structure(const Structure &value)
 
 Structure::~Structure()
 {
-    std::vector<Domain*>::iterator it = mMembers.begin();
-    for (; it != mMembers.end(); ++it)
-        delete (*it);
+    llvm::DeleteContainerPointers(mMembers);
 }
 
 Structure *
@@ -86,10 +83,12 @@ Structure::memoryUsage() const
 std::string
 Structure::toString() const
 {
-    std::stringstream ss;
-    ss << "structure" << std::endl;
-    std::vector<Domain*>::const_iterator it = mMembers.begin();
-    for (; it != mMembers.end(); ++it)
+    StringStream ss;
+    ss << "structure\n";
+    std::vector<Domain*>::const_iterator it = mMembers.begin(),
+        itend = mMembers.end();
+
+    for (; it != itend; ++it)
         ss << indent((*it)->toString(), 4);
 
     return ss.str();

@@ -5,7 +5,6 @@
 #include "State.h"
 #include "Utils.h"
 #include "Domain.h"
-#include <sstream>
 
 namespace Canal {
 namespace Pointer {
@@ -58,12 +57,7 @@ Target::Target(const Target &target) : mEnvironment(target.mEnvironment),
 
 Target::~Target()
 {
-    std::vector<Domain*>::iterator it = mOffsets.begin(),
-        itend = mOffsets.end();
-
-    for (; it != itend; ++it)
-        delete *it;
-
+    llvm::DeleteContainerPointers(mOffsets);
     delete mNumericOffset;
 }
 
@@ -184,7 +178,7 @@ Target::memoryUsage() const
 std::string
 Target::toString(SlotTracker &slotTracker) const
 {
-    std::stringstream ss;
+    StringStream ss;
     ss << "target";
 
     switch (mType)
@@ -225,11 +219,11 @@ Target::toString(SlotTracker &slotTracker) const
         CANAL_DIE();
     }
 
-    ss << std::endl;
+    ss << "\n";
 
     if (!mOffsets.empty())
     {
-        ss << "    offsets" << std::endl;
+        ss << "    offsets\n";
         std::vector<Domain*>::const_iterator it = mOffsets.begin();
         for (; it != mOffsets.end(); ++it)
             ss << indent((*it)->toString(), 8);
@@ -237,11 +231,11 @@ Target::toString(SlotTracker &slotTracker) const
 
     if (mNumericOffset)
     {
-        ss << "    numericOffset" << std::endl;
+        ss << "    numericOffset\n";
         ss << indent(mNumericOffset->toString(), 8);
     }
     else if (mType == Constant)
-        ss << "    null" << std::endl;
+        ss << "    null\n";
 
     return ss.str();
 }

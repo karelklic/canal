@@ -1,11 +1,10 @@
 #include "CommandShell.h"
 #include "Utils.h"
+#include "lib/Utils.h"
 #include <unistd.h>
 #include <errno.h>
 #include <cstdlib>
-#include <cstdio>
 #include <cstring>
-#include <sstream>
 
 CommandShell::CommandShell(Commands &commands)
     : Command("shell",
@@ -36,14 +35,18 @@ CommandShell::run(const std::vector<std::string> &args)
     }
     else
     {
-        std::stringstream ss;
-        std::vector<std::string>::const_iterator it = args.begin() + 1;
-        for (; it != args.end(); ++it)
+        Canal::StringStream ss;
+        std::vector<std::string>::const_iterator it = args.begin() + 1,
+            itend = args.end();
+
+        for (; it != itend; ++it)
         {
             if (it != args.begin() + 1)
                 ss << " ";
+
             ss << *it;
         }
+
         shell_command = ss.str();
 
         argv = (char**)malloc(4 * sizeof(char*));
@@ -56,14 +59,14 @@ CommandShell::run(const std::vector<std::string> &args)
     pid_t pid = fork();
     if (pid < 0)
     {
-        printf("Failed to fork: %s\n", strerror(errno));
+        llvm::outs() << "Failed to fork: " << strerror(errno) << "\n";
         free(argv);
         return;
     }
 
     if (pid == 0)
     {
-        std::stringstream newPath;
+        Canal::StringStream newPath;
         newPath << DATADIR << "/canal/wrappers";
 
         char *oldPath = getenv("PATH");
@@ -72,7 +75,7 @@ CommandShell::run(const std::vector<std::string> &args)
 
         int result = setenv("PATH", newPath.str().c_str(), /*overwrite=*/1);
         if (result != 0)
-            printf("Failed to set PATH: %s\n", strerror(errno));
+            llvm::outs() << "Failed to set PATH: " << strerror(errno) << "\n";
 
         execvp(argv[0], argv);
         _exit(127);

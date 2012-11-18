@@ -1,7 +1,6 @@
 #include "Interpreter.h"
 #include "Utils.h"
 #include "Pointer.h"
-#include <sstream>
 
 namespace Canal {
 namespace Interpreter {
@@ -23,9 +22,9 @@ Interpreter::~Interpreter()
 std::string
 Interpreter::toString() const
 {
-    std::stringstream ss;
+    StringStream ss;
     ss << mIterator.toString();
-    ss << std::endl;
+    ss << "\n";
     ss << mModule.toString();
     return ss.str();
 }

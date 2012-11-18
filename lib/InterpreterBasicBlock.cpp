@@ -2,7 +2,6 @@
 #include "Constructors.h"
 #include "Environment.h"
 #include "Utils.h"
-#include <sstream>
 
 namespace Canal {
 namespace Interpreter {
@@ -28,13 +27,14 @@ BasicBlock::toString() const
     SlotTracker &slotTracker = mEnvironment.getSlotTracker();
     slotTracker.setActiveFunction(*mBasicBlock.getParent());
 
-    std::stringstream ss;
+    StringStream ss;
     ss << "*** basicBlock ";
     if (mBasicBlock.hasName())
-        ss << mBasicBlock.getName().str();
+        ss << mBasicBlock.getName();
     else
         ss << "<label>:" << slotTracker.getLocalSlot(mBasicBlock);
-    ss << std::endl;
+
+    ss << "\n";
 
     llvm::BasicBlock::const_iterator it = mBasicBlock.begin();
     for (; it != mBasicBlock.end(); ++it)

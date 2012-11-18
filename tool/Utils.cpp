@@ -10,8 +10,8 @@
 bool
 askYesNo(const char *question)
 {
-    printf("%s [y/n]: ", question);
-    fflush(NULL);
+    llvm::outs() << question << " [y/n]: ";
+    llvm::outs().flush();
 
     char answer[16];
     if (!fgets(answer, sizeof(answer), stdin))

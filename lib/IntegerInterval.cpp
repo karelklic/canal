@@ -2,8 +2,6 @@
 #include "Utils.h"
 #include "APIntUtils.h"
 #include "FloatInterval.h"
-#include <sstream>
-#include <iostream>
 
 namespace Canal {
 namespace Integer {
@@ -226,10 +224,10 @@ Interval::memoryUsage() const
 std::string
 Interval::toString() const
 {
-    std::stringstream ss;
+    StringStream ss;
     ss << "interval";
     if (mEmpty)
-        ss << " empty" << std::endl;
+        ss << " empty\n";
     else
     {
         llvm::APInt sMin, sMax, uMin, uMax;
@@ -242,7 +240,7 @@ Interval::toString() const
         success = unsignedMax(uMax);
         CANAL_ASSERT(success);
 
-        std::stringstream sign, unsign;
+        StringStream sign, unsign;
         sign << sMin.toString(10, true) << " to "
              << sMax.toString(10, true);
 
@@ -257,12 +255,12 @@ Interval::toString() const
 
         if (sign.str() != unsign.str())
         {
-            ss << std::endl;
-            ss << "    signed " << sign.str() << std::endl;
-            ss << "    unsigned " << unsign.str() << std::endl;
+            ss << "\n"
+               << "    signed " << sign.str() << "\n"
+               << "    unsigned " << unsign.str() << "\n";
         }
         else
-            ss << " " << sign.str() << std::endl;
+            ss << " " << sign.str() << "\n";
     }
 
     return ss.str();

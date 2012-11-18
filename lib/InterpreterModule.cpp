@@ -6,7 +6,6 @@
 #include "Utils.h"
 #include "Constructors.h"
 #include "Environment.h"
-#include <sstream>
 #include <set>
 
 namespace Canal {
@@ -126,9 +125,7 @@ Module::Module(const llvm::Module &module,
 
 Module::~Module()
 {
-    std::vector<Function*>::const_iterator it = mFunctions.begin();
-    for (; it != mFunctions.end(); ++it)
-        delete *it;
+    llvm::DeleteContainerPointers(mFunctions);
 }
 
 Function *
@@ -161,31 +158,28 @@ Module::getFunction(const llvm::Function &function) const
 std::string
 Module::toString() const
 {
-    std::stringstream ss;
-    ss << "***************************************" << std::endl;
-    ss << "* module " << mModule.getModuleIdentifier() << std::endl;
-    ss << "***************************************" << std::endl;
+    StringStream ss;
+    ss << "***************************************\n";
+    ss << "* module " << mModule.getModuleIdentifier() << "\n";
+    ss << "***************************************\n";
 
     // Print globals.
-    {
-        SlotTracker &slotTracker = mEnvironment.getSlotTracker();
-        llvm::Module::const_global_iterator it = mModule.global_begin(),
-            itend = mModule.global_end();
+    SlotTracker &slotTracker = mEnvironment.getSlotTracker();
+    llvm::Module::const_global_iterator git = mModule.global_begin(),
+        gitend = mModule.global_end();
 
-        for (; it != itend; ++it)
-            ss << mGlobalState.toString(*it, slotTracker);
+    for (; git != gitend; ++git)
+        ss << mGlobalState.toString(*git, slotTracker);
 
-        if (mModule.global_begin() != itend)
-            ss << std::endl;
-    }
+    if (mModule.global_begin() != gitend)
+        ss << "\n";
 
     // Print functions.
-    std::vector<Function*>::const_iterator it = mFunctions.begin();
-    for (; it != mFunctions.end(); ++it)
-    {
-        ss << std::endl;
-        ss << (*it)->toString();
-    }
+    std::vector<Function*>::const_iterator fit = mFunctions.begin(),
+        fitend = mFunctions.end();
+
+    for (; fit != fitend; ++fit)
+        ss << "\n" << (*fit)->toString();
 
     return ss.str();
 }
@@ -193,8 +187,10 @@ Module::toString() const
 void
 Module::updateGlobalState()
 {
-    std::vector<Function*>::const_iterator it = mFunctions.begin();
-    for (; it != mFunctions.end(); ++it)
+    std::vector<Function*>::const_iterator it = mFunctions.begin(),
+        itend = mFunctions.end();
+
+    for (; it != itend; ++it)
     {
         // Merge global blocks, global variables.  Merge function
         // blocks that do not belong to this function.  Merge returned

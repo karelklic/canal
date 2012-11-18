@@ -1,6 +1,5 @@
 #include "Utils.h"
 #include "SlotTracker.h"
-#include <sstream>
 #include <execinfo.h>
 #include <cxxabi.h>
 
@@ -9,7 +8,7 @@ namespace Canal {
 std::string
 toString(const llvm::APInt &num)
 {
-    std::stringstream ss;
+    StringStream ss;
     ss << "0x" << num.toString(16, /*signed=*/false);
     std::string unsignedNum = num.toString(10, false);
     std::string signedNum = num.toString(10, true);
@@ -28,44 +27,15 @@ toString(const llvm::APInt &num)
         ss << ", signed " << signedNum;
         ss << ")";
     }
+
     return ss.str();
 }
 
 std::string
 toString(const llvm::Type &type)
 {
-    std::string s;
-    llvm::raw_string_ostream os(s);
-    os << const_cast<llvm::Type&>(type);
-    os.flush();
-    return s;
-}
-
-std::string
-toString(const llvm::Constant &constant)
-{
-    std::string s;
-    llvm::raw_string_ostream os(s);
-    os << constant;
-    os.flush();
-    return s;
-}
-
-std::string
-toString(const llvm::Instruction &instruction)
-{
-    std::string s;
-    llvm::raw_string_ostream os(s);
-    os << instruction;
-    os.flush();
-    return s;
-}
-
-std::string
-toString(int i)
-{
-    std::stringstream ss;
-    ss << i;
+    StringStream ss;
+    ss << const_cast<llvm::Type&>(type);
     return ss.str();
 }
 
@@ -93,13 +63,15 @@ indentExceptFirstLine(const std::string &input, int spaces)
 std::string
 getName(const llvm::Value &value, SlotTracker &slotTracker)
 {
-    if (value.hasName())
-        return value.getName().str();
+    StringStream ss;
 
-    if (llvm::isa<llvm::GlobalValue>(value))
+    if (value.hasName())
+        ss << value.getName();
+    else if (llvm::isa<llvm::GlobalValue>(value))
     {
         int id = slotTracker.getGlobalSlot(value);
-        return (id > 0 ? toString(id) : "");
+        if (id > 0)
+            ss << id;
     }
     else if (llvm::isa<llvm::BasicBlock>(value))
     {
@@ -107,10 +79,7 @@ getName(const llvm::Value &value, SlotTracker &slotTracker)
             llvmCast<const llvm::BasicBlock>(value);
 
         slotTracker.setActiveFunction(*block.getParent());
-
-        std::stringstream ss;
         ss << "<label>:" << slotTracker.getLocalSlot(value);
-        return ss.str();
     }
     else
     {
@@ -120,17 +89,17 @@ getName(const llvm::Value &value, SlotTracker &slotTracker)
         slotTracker.setActiveFunction(
             *inst.getParent()->getParent());
 
-        std::stringstream ss;
         ss << slotTracker.getLocalSlot(value);
-        return ss.str();
     }
+
+    return ss.str();
 }
 
 std::string
 getCurrentBacktrace()
 {
     // http://stackoverflow.com/questions/77005/how-to-generate-a-stacktrace-when-my-gcc-c-app-crashes
-    std::stringstream result;
+    StringStream ss;
     void *array[1024];
     int size = backtrace(array, 1024);
     char **messages = backtrace_symbols(array, size);
@@ -171,24 +140,25 @@ getCurrentBacktrace()
             // name.
             if (status == 0)
             {
-                result << "[bt]: (" << i << ") " << messages[i] << " : "
-                       << real_name << "+" << offset_begin << offset_end
-                       << std::endl;
+                ss << "[bt]: (" << i << ") " << messages[i] << " : "
+                   << real_name << "+" << offset_begin << offset_end
+                   << "\n";
             }
             else
             {
-                result << "[bt]: (" << i << ") " << messages[i] << " : "
-                       << mangled_name << "+" << offset_begin << offset_end
-                       << std::endl;
+                ss << "[bt]: (" << i << ") " << messages[i] << " : "
+                   << mangled_name << "+" << offset_begin << offset_end
+                   << "\n";
             }
+
             free(real_name);
         }
         else
-            result << "[bt]: (" << i << ") " << messages[i] << std::endl;
+            ss << "[bt]: (" << i << ") " << messages[i] << "\n";
     }
 
     free(messages);
-    return result.str();
+    return ss.str();
 }
 
 } // namespace Canal

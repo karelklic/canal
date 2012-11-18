@@ -2,7 +2,7 @@
 #include "Commands.h"
 #include "State.h"
 #include "Utils.h"
-#include <cstdio>
+#include "lib/Utils.h"
 #include <cstdlib>
 #include <sys/types.h>
 #include <dirent.h>
@@ -11,7 +11,6 @@
 #include <error.h>
 #include <errno.h>
 #include <unistd.h>
-#include <sstream>
 
 #if (defined HAVE_LIBELF_H && defined HAVE_GELF_H && defined HAVE_LIBELF)
 #  define WITH_ELFUTILS
@@ -73,9 +72,10 @@ CommandFile::getCompletionMatches(const std::vector<std::string> &args,
 
         if (0 == strncmp(dirent->d_name, arg.c_str(), arg.length()))
         {
-            std::stringstream ss;
+            Canal::StringStream ss;
             if (!defaultDirPath)
                 ss << dirPath;
+
             ss << dirent->d_name;
             if (dirent->d_type == DT_DIR)
             {
@@ -100,7 +100,7 @@ CommandFile::getCompletionMatches(const std::vector<std::string> &args,
             if (!dirent || !dirent->d_name)
                 continue;
 
-            std::stringstream ss;
+            Canal::StringStream ss;
             ss << dirPath << dirent->d_name;
             result.push_back(ss.str());
         }
@@ -112,15 +112,13 @@ CommandFile::getCompletionMatches(const std::vector<std::string> &args,
 static void
 printError(const llvm::SMDiagnostic &err)
 {
-    std::string s;
-    llvm::raw_string_ostream os(s);
+    Canal::StringStream ss;
 #if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
-    err.print(NULL, os, false);
+    err.print(NULL, ss, false);
 #else
-    err.Print(NULL, os);
+    err.Print(NULL, ss);
 #endif
-    os.flush();
-    printf("%s", s.c_str());
+    llvm::outs() << ss.str();
 }
 
 static llvm::Module *
@@ -133,7 +131,9 @@ loadAsElfFile(const std::string &path, bool &error)
     int fd = open(path.c_str(), O_RDONLY, 0);
     if (fd == -1)
     {
-        printf("Cannot open `%s': %s\n", path.c_str(), strerror(errno));
+        llvm::outs() << "Cannot open `" << path << "': "
+                     << strerror(errno) << "\n";
+
         error = true;
         return NULL;
     }
@@ -144,7 +144,9 @@ loadAsElfFile(const std::string &path, bool &error)
 
     if (!elf)
     {
-        printf("Cannot create ELF descriptor: %s\n", elf_errmsg(-1));
+        llvm::outs() << "Cannot create ELF descriptor: "
+                     << elf_errmsg(-1) << "\n";
+
         close(fd);
         error = true;
         return NULL;
@@ -190,7 +192,7 @@ loadAsElfFile(const std::string &path, bool &error)
                 module = llvm::ParseIR(data_buffer, err, context);
                 if (!module)
                 {
-                    puts("Failed to load the module.");
+                    llvm::outs() << "Failed to load the module.\n";
                     printError(err);
                     error = true;
                 }
@@ -199,13 +201,13 @@ loadAsElfFile(const std::string &path, bool &error)
 
             if (!module)
             {
-                puts("Failed to find .note.llvm section in the ELF file.");
+                llvm::outs() << "Failed to find .note.llvm section in the ELF file.\n";
                 error = true;
             }
         }
         else
         {
-            printf("Cannot get ELF header: %s\n", elf_errmsg (-1));
+            llvm::outs() << "Cannot get ELF header: " << elf_errmsg(-1) << "\n";
             error = true;
         }
     }
@@ -229,7 +231,7 @@ loadAsBitcodeFile(const std::string &path, bool &error)
     if (!module)
     {
         error = true;
-        puts("Failed to load the module.");
+        llvm::outs() << "Failed to load the module.\n";
         printError(err);
     }
 
@@ -280,15 +282,17 @@ loadAsSourceFile(const std::string &path, bool &error)
     for (int i = 0; argv[i]; ++i)
     {
         if (i > 0)
-            printf(" ");
-        printf("%s", argv[i]);
+            llvm::outs() << " ";
+
+        llvm::outs() << argv[i];
     }
-    puts("");
+
+    llvm::outs() << "\n";
 
     pid_t pid = fork();
     if (pid < 0)
     {
-        printf("Failed to fork: %s\n", strerror(errno));
+        llvm::outs() << "Failed to fork: " << strerror(errno) << "\n";
         free(argv);
         error = true;
         return NULL;
@@ -311,13 +315,13 @@ CommandFile::run(const std::vector<std::string> &args)
 {
     if (args.size() > 2)
     {
-        puts("Too many parameters.");
+        llvm::outs() << "Too many parameters.\n";
         return;
     }
 
     else if (args.size() < 2)
     {
-        puts("Argument required (a file).");
+        llvm::outs() << "Argument required (a file).\n";
         return;
     }
 
@@ -342,16 +346,16 @@ CommandFile::run(const std::vector<std::string> &args)
 
     if (mCommands.getState() && mCommands.getState()->isInterpreting())
     {
-        puts("A program is being interpreted already.");
+        llvm::outs() << "A program is being interpreted already.\n";
         bool agreed = askYesNo("Are you sure you want to change the file?");
         if (!agreed)
         {
-            puts("File not changed.");
+            llvm::outs() << "File not changed.\n";
             delete module;
             return;
         }
     }
 
     mCommands.createState(module);
-    puts("Module loaded.");
+    llvm::outs() << "Module loaded.\n";
 }

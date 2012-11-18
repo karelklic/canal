@@ -3,8 +3,6 @@
 #include "Commands.h"
 #include "lib/Operations.h"
 #include "lib/Utils.h"
-#include <cstdio>
-#include <sstream>
 
 CommandInfo::CommandInfo(Commands &commands)
     : Command("info",
@@ -82,12 +80,12 @@ CommandInfo::run(const std::vector<std::string> &args)
     {
         if (args.size() < 3)
         {
-            printf("Missing function name.\n");
+            llvm::outs() << "Missing function name.\n";
             return;
         }
         else if (args.size() > 3)
         {
-            printf("Too many function names.\n");
+            llvm::outs() << "Too many function names.\n";
             return;
         }
 
@@ -95,8 +93,8 @@ CommandInfo::run(const std::vector<std::string> &args)
     }
     else
     {
-        printf("Undefined info command: \"%s\".  Try \"help info\".\n",
-               args[1].c_str());
+        llvm::outs() << "Undefined info command: \"" << args[1] << "\".  "
+                     << "Try \"help info\".\n";
     }
 }
 
@@ -105,26 +103,26 @@ CommandInfo::infoModule() const
 {
     if (!mCommands.getState())
     {
-        puts("No module is loaded.");
+        llvm::outs() << "No module is loaded.\n";
         return;
     }
 
     const llvm::Module &module = mCommands.getState()->getModule();
-    printf("Identifier: %s\n", module.getModuleIdentifier().c_str());
-    printf("Data layout: %s\n", module.getDataLayout().c_str());
-    printf("Target: %s\n", module.getTargetTriple().c_str());
+    llvm::outs() << "Identifier: " << module.getModuleIdentifier() << "\n"
+                 << "Data layout: " << module.getDataLayout() << "\n"
+                 << "Target: " << module.getTargetTriple() << "\n";
 
     // Endianess
     switch (module.getEndianness())
     {
     case llvm::Module::AnyEndianness:
-        puts("Endianness: Any");
+        llvm::outs() << "Endianness: Any\n";
         break;
     case llvm::Module::LittleEndian:
-        puts("Endianness: Little");
+        llvm::outs() << "Endianness: Little\n";
         break;
     case llvm::Module::BigEndian:
-        puts("Endianness: Big");
+        llvm::outs() << "Endianness: Big\n";
         break;
     default:
         CANAL_DIE();
@@ -134,13 +132,13 @@ CommandInfo::infoModule() const
     switch (module.getPointerSize())
     {
     case llvm::Module::AnyPointerSize:
-        puts("Pointer size: Any");
+        llvm::outs() << "Pointer size: Any\n";
         break;
     case llvm::Module::Pointer32:
-        puts("Pointer size: 32 bit");
+        llvm::outs() << "Pointer size: 32 bit\n";
         break;
     case llvm::Module::Pointer64:
-        puts("Pointer size: 64 bit");
+        llvm::outs() << "Pointer size: 64 bit\n";
         break;
     default:
         CANAL_DIE();
@@ -149,13 +147,13 @@ CommandInfo::infoModule() const
     // Dependent libraries
     if (module.lib_size() > 0)
     {
-        puts("Dependent Libraries:");
+        llvm::outs() << "Dependent Libraries:\n";
         llvm::Module::lib_iterator it = module.lib_begin();
         for (; it != module.lib_end(); ++it)
-            printf("  %s\n", it->c_str());
+            llvm::outs() << "  " << *it << "\n";
     }
     else
-        puts("Dependent Libraries: none");
+        llvm::outs() << "Dependent Libraries: none\n";
 
     // Functions
     unsigned functionDeclarations = 0, functionDefinitions = 0;
@@ -170,8 +168,8 @@ CommandInfo::infoModule() const
             ++functionDefinitions;
     }
 
-    printf("Function Declaration Count: %u\n", functionDeclarations);
-    printf("Function Definition Count: %u\n", functionDefinitions);
+    llvm::outs() << "Function Declaration Count: " << functionDeclarations << "\n"
+                 << "Function Definition Count: " << functionDefinitions << "\n";
 
     // Global variables
     unsigned globalVariables = 0;
@@ -181,7 +179,7 @@ CommandInfo::infoModule() const
     for (; git != gitend; ++git)
         ++globalVariables;
 
-    printf("Global Variable Count: %u\n", globalVariables);
+    llvm::outs() << "Global Variable Count: " << globalVariables << "\n";
 
     // Global aliases
     unsigned globalAliases = 0;
@@ -191,7 +189,7 @@ CommandInfo::infoModule() const
     for (; ait != aitend; ++ait)
         ++globalAliases;
 
-    printf("Global Alias Count: %u\n", globalAliases);
+    llvm::outs() << "Global Alias Count: " << globalAliases << "\n";
 }
 
 static size_t
@@ -271,7 +269,7 @@ CommandInfo::infoFunctions() const
 {
     if (!mCommands.getState())
     {
-        puts("No module is loaded.");
+        llvm::outs() << "No module is loaded.\n";
         return;
     }
 
@@ -290,21 +288,21 @@ CommandInfo::infoFunctions() const
     }
 
     if (declarations.empty())
-        puts("Function Declarations: none");
+        llvm::outs() << "Function Declarations: none\n";
     else
     {
-        puts("Function Declarations:");
+        llvm::outs() << "Function Declarations:\n";
         std::sort(declarations.begin(), declarations.end());
         std::vector<std::string>::const_iterator it = declarations.begin();
         for (; it != declarations.end(); ++it)
-            printf("  %s\n", it->c_str());
+            llvm::outs() << "  " << *it << "\n";
     }
 
     if (definitions.empty())
-        puts("Function Definitions: none");
+        llvm::outs() << "Function Definitions: none\n";
     else
     {
-        puts("Function Definitions:");
+        llvm::outs() << "Function Definitions:\n";
 
         llvm::PassManager passManager;
         FunctionInfo *functionInfo = new FunctionInfo();
@@ -316,23 +314,21 @@ CommandInfo::infoFunctions() const
 
         for (; it != definitions.end(); ++it)
         {
-            printf("  %s\n", it->c_str());
+            llvm::outs() << "  " << *it << "\n";
             llvm::Function *fun = module.getFunction(it->c_str());
             if (!fun)
                 continue;
 
-            printf("    Argument Count: %zu\n", fun->arg_size());
-            printf("    Basic Block Count: %zu\n",
-                   fun->getBasicBlockList().size());
-
-            printf("    Natural Loop Count: %zu\n",
-                   functionInfo->mInfo[fun].mNaturalLoopCount);
-
-            printf("    Function Calls Count: %u\n",
-                   functionInfo->mInfo[fun].mCallsCount);
-
-            printf("    Function Referenced Count: %u\n",
-                   functionInfo->mInfo[fun].mCalledCount);
+            llvm::outs() << "    Argument Count: "
+                         << fun->arg_size() << "\n"
+                         << "    Basic Block Count: "
+                         << fun->getBasicBlockList().size() << "\n"
+                         << "    Natural Loop Count: "
+                         << functionInfo->mInfo[fun].mNaturalLoopCount << "\n"
+                         << "    Function Calls Count: "
+                         << functionInfo->mInfo[fun].mCallsCount << "\n"
+                         << "    Function Referenced Count: "
+                         << functionInfo->mInfo[fun].mCalledCount << "\n";
         }
     }
 }
@@ -346,19 +342,19 @@ public:
     LoopTree(llvm::Loop &loop)
     {
         mLoop = loop.getBlocks();
-        llvm::Loop::iterator it = loop.begin();
-        for (; it != loop.end(); ++it)
+        llvm::Loop::iterator it = loop.begin(), itend = loop.end();
+        for (; it != itend; ++it)
             mSubLoops.push_back(LoopTree(**it));
     }
 
     std::string toString(Canal::SlotTracker &slotTracker) const
     {
-        std::stringstream ss;
+        Canal::StringStream ss;
         std::vector<llvm::BasicBlock*>::const_iterator
-            it = mLoop.begin();
+            it = mLoop.begin(), itend = mLoop.end();
 
         ss << "loop: ";
-        for (; it != mLoop.end(); ++it)
+        for (; it != itend; ++it)
         {
             if (it != mLoop.begin())
                 ss << "-";
@@ -370,7 +366,7 @@ public:
             ss << name;
         }
 
-        ss << std::endl;
+        ss << "\n";
 
         std::vector<LoopTree>::const_iterator lit = mSubLoops.begin();
         for (; lit != mSubLoops.end(); ++lit)
@@ -430,7 +426,7 @@ CommandInfo::infoFunction(const std::string &name) const
 {
     if (!mCommands.getState())
     {
-        puts("No module is loaded.");
+        llvm::outs() << "No module is loaded.\n";
         return;
     }
 
@@ -438,7 +434,7 @@ CommandInfo::infoFunction(const std::string &name) const
     llvm::Function *func = module.getFunction(name.c_str());
     if (!func)
     {
-        printf("Unknown function: \"%s\".\n", name.c_str());
+        llvm::outs() << "Unknown function: \"" << name << "\".\n";
         return;
     }
 
@@ -448,15 +444,15 @@ CommandInfo::infoFunction(const std::string &name) const
     llvm::Function::const_iterator it = func->begin(),
         itend = func->end();
 
-    puts("Basic blocks:");
+    llvm::outs() << "Basic blocks:\n";
     for (; it != itend; ++it)
     {
-        printf("  %s: %zu instructions\n",
-               Canal::getName(*it, slotTracker).c_str(),
-               it->size());
+        llvm::outs() << "  "
+                     << Canal::getName(*it, slotTracker) << ": "
+                     << it->size() << " instructions\n";
     }
 
-    puts("Natural Loops:");
+    llvm::outs() << "Natural Loops:\n";
     llvm::PassManager passManager;
     FunctionDetailedInfo *functionInfo = new FunctionDetailedInfo();
     functionInfo->mFunction = func;
@@ -467,5 +463,5 @@ CommandInfo::infoFunction(const std::string &name) const
         lit = functionInfo->mTopLevelLoops.begin();
 
     for (; lit != functionInfo->mTopLevelLoops.end(); ++lit)
-        printf("%s", Canal::indent(lit->toString(slotTracker), 2).c_str());
+        llvm::outs() << Canal::indent(lit->toString(slotTracker), 2);
 }
