@@ -111,8 +111,6 @@ AC_CONFIG_FILES([
     lib/Makefile
     tests/Makefile
     tests/atlocal
-    tests/integration/Makefile
-    tests/unit/Makefile
     tool/Makefile
     wrappers/config.py
     wrappers/Makefile

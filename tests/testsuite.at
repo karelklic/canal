@@ -4,25 +4,25 @@
 AT_BANNER([Operations Unit Tests])
 
 AT_SETUP([Operations])
-AT_CHECK([../../unit/OperationsTest], 0)
+AT_CHECK([../../OperationsTest], 0)
 AT_CLEANUP
 
 AT_BANNER([Abstract Domain Unit Tests])
 
 AT_SETUP([Pointer::Pointer])
-AT_CHECK([../../unit/PointerTest], 0)
+AT_CHECK([../../PointerTest], 0)
 AT_CLEANUP
 
 AT_SETUP([Integer::Interval])
-AT_CHECK([../../unit/IntegerIntervalTest], 0)
+AT_CHECK([../../IntegerIntervalTest], 0)
 AT_CLEANUP
 
 AT_SETUP([ICMP])
-AT_CHECK([../../unit/ICMPTest], 0)
+AT_CHECK([../../ICMPTest], 0)
 AT_CLEANUP
 
 AT_SETUP([Integer::Merge])
-AT_CHECK([../../unit/MergeTest], 0)
+AT_CHECK([../../MergeTest], 0)
 AT_CLEANUP
 
 AT_BANNER([Fixpoint Computation Unit Tests])
