@@ -15718,8 +15718,24 @@ LLVM_LIBS=`$LLVM_CONFIG --libs`
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 
 
+# See Canal bug #101.
 # Quadrigraphs are used here: [ gives you [ and ] gives you ].
 CPPFLAGS+=`$LLVM_CONFIG --version | sed 's/\([0-9]*\).\([0-9]*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
+
+# Capture compile-time LLVM NDEBUG status.
+#
+# Including the LLVM headers without the NDEBUG macro defined and then
+# linking to LLVM dynamic libraries compiled with NDEBUG leads to
+# runtime errors that are extremely difficult to analyze.
+$LLVM_CONFIG --cppflags | grep \\-DNDEBUG > /dev/null
+LLVM_DEBUG=$?
+if test "x$LLVM_DEBUG" = "x0"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define LLVM_WITH_NDEBUG 1
+_ACEOF
+
+fi
 
 # readline
 
