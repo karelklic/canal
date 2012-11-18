@@ -1,7 +1,5 @@
 #include "ArrayStringPrefix.h"
 #include "IntegerContainer.h"
-#include "IntegerEnumeration.h"
-#include "IntegerInterval.h"
 #include "Utils.h"
 #include <sstream>
 
