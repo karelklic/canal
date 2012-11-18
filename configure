@@ -16886,7 +16886,7 @@ AUTOM4TE=${AUTOM4TE-"${am_missing_run}autom4te"}
 O0CFLAGS=`echo $CFLAGS | sed 's/-O[0-9] *//g'`
 
 
-ac_config_files="$ac_config_files canal.spec Makefile docs/Makefile lib/Makefile tests/Makefile tests/atlocal tests/integration/Makefile tests/unit/Makefile tool/Makefile wrappers/config.py wrappers/Makefile"
+ac_config_files="$ac_config_files canal.spec Makefile docs/Makefile lib/Makefile tests/Makefile tests/atlocal tool/Makefile wrappers/config.py wrappers/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -18003,8 +18003,6 @@ do
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tests/atlocal") CONFIG_FILES="$CONFIG_FILES tests/atlocal" ;;
-    "tests/integration/Makefile") CONFIG_FILES="$CONFIG_FILES tests/integration/Makefile" ;;
-    "tests/unit/Makefile") CONFIG_FILES="$CONFIG_FILES tests/unit/Makefile" ;;
     "tool/Makefile") CONFIG_FILES="$CONFIG_FILES tool/Makefile" ;;
     "wrappers/config.py") CONFIG_FILES="$CONFIG_FILES wrappers/config.py" ;;
     "wrappers/Makefile") CONFIG_FILES="$CONFIG_FILES wrappers/Makefile" ;;
