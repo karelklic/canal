@@ -2,7 +2,6 @@
 #define LIBCANAL_FLOAT_INTERVAL_H
 
 #include "Domain.h"
-#include <llvm/ADT/APFloat.h>
 
 namespace Canal {
 namespace Float {

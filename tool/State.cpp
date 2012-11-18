@@ -5,9 +5,6 @@
 #include "lib/IntegerContainer.h"
 #include "lib/Pointer.h"
 #include "lib/InterpreterFunction.h"
-#include <llvm/Function.h>
-#include <llvm/Module.h>
-#include <llvm/ADT/APInt.h>
 #include <cstdio>
 
 State::State(llvm::Module *module) : mInterpreter(module)

@@ -3,8 +3,6 @@
 #include "Utils.h"
 #include "Environment.h"
 #include "SlotTracker.h"
-#include <llvm/BasicBlock.h>
-#include <llvm/Function.h>
 #include <sstream>
 
 namespace Canal {

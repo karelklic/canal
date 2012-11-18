@@ -6,8 +6,6 @@
 #include "Utils.h"
 #include "Constructors.h"
 #include "Environment.h"
-#include <llvm/Module.h>
-#include <llvm/Constants.h>
 #include <sstream>
 #include <set>
 

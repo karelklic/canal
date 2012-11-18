@@ -1,11 +1,5 @@
 #include "Utils.h"
 #include "SlotTracker.h"
-#include <llvm/ADT/APInt.h>
-#include <llvm/Value.h>
-#include <llvm/Instruction.h>
-#include <llvm/BasicBlock.h>
-#include <llvm/Type.h>
-#include <llvm/Constant.h>
 #include <sstream>
 #include <execinfo.h>
 #include <cxxabi.h>

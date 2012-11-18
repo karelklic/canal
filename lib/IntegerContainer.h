@@ -3,10 +3,6 @@
 
 #include "Domain.h"
 
-namespace llvm {
-class APInt;
-}
-
 namespace Canal {
 namespace Integer {
 

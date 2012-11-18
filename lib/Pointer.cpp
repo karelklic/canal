@@ -7,8 +7,6 @@
 #include "IntegerEnumeration.h"
 #include "Environment.h"
 #include "Constructors.h"
-#include <llvm/BasicBlock.h>
-#include <llvm/Type.h>
 #include <sstream>
 
 namespace Canal {

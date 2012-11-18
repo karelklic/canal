@@ -1,5 +1,4 @@
 #include "IteratorCallback.h"
-#include <llvm/ADT/StringRef.h>
 #include <cstdio>
 
 void

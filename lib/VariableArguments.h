@@ -1,12 +1,9 @@
 #ifndef LIBCANAL_VARIABLE_ARGUMENTS_H
 #define LIBCANAL_VARIABLE_ARGUMENTS_H
 
+#include "Prereq.h"
 #include <map>
 #include <vector>
-
-namespace llvm {
-class Instruction;
-} // namespace llvm
 
 namespace Canal {
 

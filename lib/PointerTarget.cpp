@@ -6,9 +6,6 @@
 #include "Utils.h"
 #include "Domain.h"
 #include <sstream>
-#include <llvm/BasicBlock.h>
-#include <llvm/Function.h>
-#include <llvm/ADT/APInt.h>
 
 namespace Canal {
 namespace Pointer {

@@ -1,6 +1,7 @@
 #ifndef LIBCANAL_ARRAY_INTERFACE_H
 #define LIBCANAL_ARRAY_INTERFACE_H
 
+#include "Prereq.h"
 #include <vector>
 #include <inttypes.h>
 

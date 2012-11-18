@@ -1,16 +1,9 @@
 #include "CommandInfo.h"
 #include "State.h"
 #include "Commands.h"
-#include <cstdio>
-#include <llvm/Module.h>
-#include <llvm/Analysis/LoopInfo.h>
-#include <llvm/Analysis/CallGraph.h>
-#include <llvm/PassManager.h>
-#if LLVM_MAJOR > 2 || LLVM_MINOR > 8
-#include <llvm/InitializePasses.h>
-#endif // LLVM_MAJOR > 2 || LLVM_MINOR > 8
 #include "lib/Operations.h"
 #include "lib/Utils.h"
+#include <cstdio>
 #include <sstream>
 
 CommandInfo::CommandInfo(Commands &commands)
@@ -72,12 +65,13 @@ CommandInfo::run(const std::vector<std::string> &args)
     }
 
 #if LLVM_MAJOR > 2 || LLVM_MINOR > 8
-    // Make sure CallGraph is added in the Pass Registry.  This is
-    // necessary for LLVM newer than 2.8.
+    // Initialize passes
     llvm::PassRegistry &passRegistry =
         *llvm::PassRegistry::getPassRegistry();
 
-    llvm::initializeBasicCallGraphPass(passRegistry);
+    llvm::initializeCore(passRegistry);
+    llvm::initializeAnalysis(passRegistry);
+    llvm::initializeIPA(passRegistry);
 #endif // LLVM_MAJOR > 2 || LLVM_MINOR > 8
 
     if (args[1] == "module")
@@ -220,10 +214,15 @@ struct FunctionEntry
     size_t mNaturalLoopCount;
     unsigned mCallsCount;
     unsigned mCalledCount;
+
+    FunctionEntry() : mNaturalLoopCount(0), mCallsCount(0), mCalledCount(0)
+    {
+    }
 };
 
-struct FunctionInfo : public llvm::FunctionPass
+class FunctionInfo : public llvm::FunctionPass
 {
+public:
     static char ID;
     std::map<llvm::Function*,struct FunctionEntry> mInfo;
 
@@ -231,15 +230,19 @@ struct FunctionInfo : public llvm::FunctionPass
 
     virtual bool runOnFunction(llvm::Function &function)
     {
+        if (function.isDeclaration())
+            return false;
+
         struct FunctionEntry entry;
 
         llvm::LoopInfo &loopInfo = getAnalysis<llvm::LoopInfo>();
         entry.mNaturalLoopCount = getLoopCount(loopInfo.begin(),
                                                loopInfo.end());
 
-        llvm::CallGraph &callGraph = getAnalysis<llvm::CallGraph>();
-        llvm::CallGraphNode *node = callGraph[&function];
+        const llvm::CallGraph &callGraph = getAnalysis<llvm::CallGraph>();
+        const llvm::CallGraphNode *node = callGraph[&function];
         CANAL_ASSERT(node);
+
         entry.mCallsCount = node->size();
         entry.mCalledCount = node->getNumReferences();
 
@@ -249,18 +252,19 @@ struct FunctionInfo : public llvm::FunctionPass
 
     virtual void getAnalysisUsage(llvm::AnalysisUsage &analysisUsage) const
     {
-        analysisUsage.setPreservesCFG();
-        analysisUsage.addRequired<llvm::LoopInfo>();
+        analysisUsage.setPreservesAll();
         analysisUsage.addRequired<llvm::CallGraph>();
+        analysisUsage.addRequired<llvm::LoopInfo>();
     }
 };
 
 char FunctionInfo::ID = 0;
 
 static llvm::RegisterPass<FunctionInfo>
-FunctionInfoRegistration("functioninfo", "FunctionInfo Pass",
-                         true /* Only looks at CFG */,
-                         false /* Analysis Pass */);
+FunctionInfoRegistration("functioninfo",
+                         "FunctionInfo Pass",
+                         false /* Only looks at CFG */,
+                         true /* Analysis Pass */);
 
 void
 CommandInfo::infoFunctions() const
@@ -303,7 +307,6 @@ CommandInfo::infoFunctions() const
         puts("Function Definitions:");
 
         llvm::PassManager passManager;
-        passManager.add(new llvm::LoopInfo());
         FunctionInfo *functionInfo = new FunctionInfo();
         passManager.add(functionInfo);
         passManager.run(module);
@@ -408,7 +411,7 @@ struct FunctionDetailedInfo : public llvm::FunctionPass
 
     virtual void getAnalysisUsage(llvm::AnalysisUsage &analysisUsage) const
     {
-        analysisUsage.setPreservesCFG();
+        analysisUsage.setPreservesAll();
         analysisUsage.addRequired<llvm::LoopInfo>();
         analysisUsage.addRequired<llvm::CallGraph>();
     }
@@ -419,7 +422,7 @@ char FunctionDetailedInfo::ID = 0;
 static llvm::RegisterPass<FunctionDetailedInfo>
 FunctionDetailedInfoRegistration(
     "functiondetailedinfo", "FunctionDetailedInfo Pass",
-    true /* Only looks at CFG */,
+    false /* Only looks at CFG */,
     false /* Analysis Pass */);
 
 void
@@ -455,7 +458,6 @@ CommandInfo::infoFunction(const std::string &name) const
 
     puts("Natural Loops:");
     llvm::PassManager passManager;
-    passManager.add(new llvm::LoopInfo());
     FunctionDetailedInfo *functionInfo = new FunctionDetailedInfo();
     functionInfo->mFunction = func;
     passManager.add(functionInfo);
@@ -466,4 +468,4 @@ CommandInfo::infoFunction(const std::string &name) const
 
     for (; lit != functionInfo->mTopLevelLoops.end(); ++lit)
         printf("%s", Canal::indent(lit->toString(slotTracker), 2).c_str());
- }
+}

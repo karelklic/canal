@@ -1,11 +1,8 @@
 #ifndef LIBCANAL_WIDENING_MANAGER_H
 #define LIBCANAL_WIDENING_MANAGER_H
 
+#include "Prereq.h"
 #include <vector>
-
-namespace llvm {
-class BasicBlock;
-} // namespace llvm
 
 namespace Canal {
 

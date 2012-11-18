@@ -1,8 +1,7 @@
-#ifndef LIBCANAL_INTEGER_BITS_H
-#define LIBCANAL_INTEGER_BITS_H
+#ifndef LIBCANAL_INTEGER_BITFIELD_H
+#define LIBCANAL_INTEGER_BITFIELD_H
 
 #include "Domain.h"
-#include <llvm/ADT/APInt.h>
 
 namespace Canal {
 namespace Integer {
@@ -165,4 +164,4 @@ public: // Implementation of AccuracyDomain.
 } // namespace Integer
 } // namespace Canal
 
-#endif // LIBCANAL_INTEGER_BITS_H
+#endif // LIBCANAL_INTEGER_BITFIELD_H

@@ -2,7 +2,6 @@
 #define LIBCANAL_INTEGER_INTERVAL_H
 
 #include "Domain.h"
-#include <llvm/Constants.h>
 
 namespace Canal {
 namespace Integer {

@@ -4,7 +4,6 @@
 #include "Constructors.h"
 #include "Utils.h"
 #include "Domain.h"
-#include <llvm/Function.h>
 #include <cstdio>
 
 namespace Canal {

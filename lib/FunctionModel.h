@@ -1,6 +1,8 @@
 #ifndef LIBCANAL_FUNCTION_MODEL_H
 #define LIBCANAL_FUNCTION_MODEL_H
 
+#include "Prereq.h"
+
 namespace Canal {
 
 class FunctionModel

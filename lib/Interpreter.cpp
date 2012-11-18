@@ -1,7 +1,6 @@
 #include "Interpreter.h"
 #include "Utils.h"
 #include "Pointer.h"
-#include <llvm/Module.h>
 #include <sstream>
 
 namespace Canal {

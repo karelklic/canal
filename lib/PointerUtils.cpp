@@ -2,7 +2,6 @@
 #include "Pointer.h"
 
 namespace Canal {
-
 namespace Pointer {
 
 void
@@ -20,6 +19,5 @@ Utils::addTarget(Canal::Domain &pointer,
                                               numericOffset);
 }
 
-}
-
-}
+} // namespace Pointer
+} // namespace Canal

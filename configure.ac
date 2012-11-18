@@ -29,8 +29,20 @@ AC_SUBST([LLVM_LIBS])
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 AC_SUBST([LLVM_LDFLAGS])
 
+# See Canal bug #101.
 # Quadrigraphs are used here: @<:@ gives you [ and @:>@ gives you ].
 CPPFLAGS+=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
+
+# Capture compile-time LLVM NDEBUG status.
+#
+# Including the LLVM headers without the NDEBUG macro defined and then
+# linking to LLVM dynamic libraries compiled with NDEBUG leads to
+# runtime errors that are extremely difficult to analyze.
+$LLVM_CONFIG --cppflags | grep \\-DNDEBUG > /dev/null
+LLVM_DEBUG=$?
+if test "x$LLVM_DEBUG" = "x0"; then
+   AC_DEFINE([LLVM_WITH_NDEBUG], [1], [LLVM has been compiled with NDEBUG])
+fi
 
 # readline
 AC_CHECK_HEADERS([readline/readline.h], [],

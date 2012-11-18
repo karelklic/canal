@@ -1,19 +1,16 @@
 #ifndef LIBCANAL_WIDENING_DATA_ITERATION_COUNT_H
 #define LIBCANAL_WIDENING_DATA_ITERATION_COUNT_H
 
-#include <map>
 #include "WideningDataInterface.h"
-
-namespace llvm {
-class BasicBlock;
-} // namespace llvm
+#include <map>
 
 namespace Canal {
 namespace Widening {
+
 extern unsigned count;
+
 class DataIterationCount : public DataInterface
 {
-protected:
     std::map<const llvm::BasicBlock*, int> mCounts;
 
 public:
@@ -21,7 +18,6 @@ public:
 
     int count(const llvm::BasicBlock &block) const;
 
-public:
     virtual DataIterationCount *clone() const;
 };
 

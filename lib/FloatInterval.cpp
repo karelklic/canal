@@ -4,6 +4,7 @@
 #include "Utils.h"
 #include <sstream>
 #include <iostream>
+
 #define ROUNDING_MODE llvm::APFloat::rmNearestTiesToEven
 
 namespace Canal {
@@ -19,7 +20,8 @@ Interval::Interval(const Environment &environment,
 {
 }
 
-Interval::Interval(const Environment &environment, const llvm::APFloat &number)
+Interval::Interval(const Environment &environment,
+                   const llvm::APFloat &number)
     : Domain(environment),
       mEmpty(false),
       mTop(false),

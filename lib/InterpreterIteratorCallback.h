@@ -1,9 +1,7 @@
 #ifndef LIBCANAL_INTERPRETER_ITERATOR_CALLBACK_H
 #define LIBCANAL_INTERPRETER_ITERATOR_CALLBACK_H
 
-namespace llvm {
-class Instruction;
-} // namespace llvm
+#include "Prereq.h"
 
 namespace Canal {
 namespace Interpreter {

@@ -1,6 +1,8 @@
 #ifndef LIBCANAL_WIDENING_DATA_INTERFACE_H
 #define LIBCANAL_WIDENING_DATA_INTERFACE_H
 
+#include "Prereq.h"
+
 namespace Canal {
 namespace Widening {
 

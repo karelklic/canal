@@ -1,8 +1,7 @@
 #ifndef LIBCANAL_UTILS_H
 #define LIBCANAL_UTILS_H
 
-#include <llvm/Support/raw_ostream.h>
-#include <llvm/Support/Casting.h>
+#include "Prereq.h"
 #include <cstdlib>
 #include <string>
 #include <typeinfo>
@@ -93,14 +92,6 @@
                      << Canal::getCurrentBacktrace();                   \
         abort();                                                        \
     }
-
-namespace llvm {
-class APInt;
-class Constant;
-class Type;
-class Value;
-class Instruction;
-} // namespace llvm
 
 namespace Canal {
 

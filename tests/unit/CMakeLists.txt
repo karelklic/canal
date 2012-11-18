@@ -1,7 +1,6 @@
 include_directories(${CANAL_SOURCE_DIR})
 link_directories(${CANAL_SOURCE_DIR}/lib)
 
-#Here will be separate executables
 add_executable(OperationsTest OperationsTest.cpp)
 target_link_libraries(OperationsTest canal)
 add_test(OperationsTest OperationsTest)

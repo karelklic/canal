@@ -10,9 +10,6 @@
 #include "Environment.h"
 #include "State.h"
 #include "APIntUtils.h"
-#include <llvm/Constants.h>
-#include <llvm/Function.h>
-#include <llvm/ADT/OwningPtr.h>
 
 namespace Canal {
 
@@ -232,7 +229,10 @@ Constructors::create(const llvm::Constant &value,
     }
 
 #if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
-    if (llvm::isa<llvm::ConstantDataSequential>(value))
+    // llvm::isa<llvm::ConstantDataSequential> returns false for an
+    // llvm::ConstantDataArray/Vector instance at least on on LLVM
+    // 3.1.
+    if (llvm::isa<llvm::ConstantDataVector>(value) || llvm::isa<llvm::ConstantDataArray>(value))
     {
          const llvm::ConstantDataSequential &sequentialValue =
             llvmCast<llvm::ConstantDataSequential>(value);
@@ -247,7 +247,7 @@ Constructors::create(const llvm::Constant &value,
         }
 
         return createArray(values);
-   }
+    }
 #endif
 
     if (llvm::isa<llvm::ConstantAggregateZero>(value))

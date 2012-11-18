@@ -1,6 +1,7 @@
 #ifndef CANAL_ITERATOR_CALLBACK_H
 #define CANAL_ITERATOR_CALLBACK_H
 
+#include "Prereq.h"
 #include "lib/InterpreterIteratorCallback.h"
 
 class IteratorCallback : public Canal::Interpreter::IteratorCallback

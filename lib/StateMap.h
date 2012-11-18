@@ -1,12 +1,9 @@
 #ifndef LIBCANAL_STATE_MAP_H
 #define LIBCANAL_STATE_MAP_H
 
+#include "Prereq.h"
 #include <map>
 #include <cstddef>
-
-namespace llvm {
-class Value;
-} // namespace llvm
 
 namespace Canal {
 

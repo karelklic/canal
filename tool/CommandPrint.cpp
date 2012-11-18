@@ -7,8 +7,6 @@
 #include "lib/Utils.h"
 #include "lib/InterpreterFunction.h"
 #include "lib/StateMap.h"
-#include <llvm/ValueSymbolTable.h>
-#include <llvm/Module.h>
 #include <cstdio>
 #include <sstream>
 

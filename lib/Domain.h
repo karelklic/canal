@@ -1,13 +1,9 @@
 #ifndef LIBCANAL_DOMAIN_H
 #define LIBCANAL_DOMAIN_H
 
+#include "Prereq.h"
 #include <cstddef>
 #include <string>
-#include <llvm/Instructions.h>
-
-namespace llvm {
-class raw_ostream;
-} // namespace llvm
 
 namespace Canal {
 

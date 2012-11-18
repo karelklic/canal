@@ -2,9 +2,6 @@
 #include "Constructors.h"
 #include "Environment.h"
 #include "Utils.h"
-#include <llvm/Function.h>
-#include <llvm/BasicBlock.h>
-#include <llvm/Type.h>
 #include <sstream>
 
 namespace Canal {

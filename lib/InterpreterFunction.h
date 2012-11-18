@@ -3,12 +3,6 @@
 
 #include "State.h"
 
-namespace llvm {
-class Function;
-class BasicBlock;
-class StringRef;
-} // namespace llvm
-
 namespace Canal {
 
 class Domain;

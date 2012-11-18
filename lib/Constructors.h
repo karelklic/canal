@@ -1,18 +1,9 @@
 #ifndef LIBCANAL_CONSTRUCTORS_H
 #define LIBCANAL_CONSTRUCTORS_H
 
+#include "Prereq.h"
 #include <inttypes.h>
 #include <vector>
-
-namespace llvm {
-class Type;
-class Constant;
-class ConstantExpr;
-class Value;
-class APInt;
-class APFloat;
-struct fltSemantics;
-} // namespace llvm
 
 namespace Canal {
 

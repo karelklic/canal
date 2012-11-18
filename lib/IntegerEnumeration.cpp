@@ -41,7 +41,9 @@ Enumeration::signedMin(llvm::APInt &result) const
             return false;
 
         //Find lowest negative number
-        APIntUtils::USet::const_iterator bound = mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
+        APIntUtils::USet::const_iterator bound =
+            mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
+
         if (bound == mValues.end())
         {
             // If there is no negative number in this enumeration then

@@ -2,8 +2,6 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
-#include <llvm/Support/raw_ostream.h>
-#include <llvm/Instruction.h>
 #include <errno.h>
 #include <cstdlib>
 #include <climits>

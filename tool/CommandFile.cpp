@@ -2,12 +2,6 @@
 #include "Commands.h"
 #include "State.h"
 #include "Utils.h"
-#include "lib/Config.h"
-#include <llvm/LLVMContext.h>
-#include <llvm/Module.h>
-#include <llvm/Support/IRReader.h>
-#include <llvm/Support/raw_ostream.h>
-#include <llvm/Support/MemoryBuffer.h>
 #include <cstdio>
 #include <cstdlib>
 #include <sys/types.h>

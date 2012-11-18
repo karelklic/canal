@@ -13,12 +13,6 @@
 #include "Utils.h"
 #include "Domain.h"
 #include "State.h"
-#include <llvm/Function.h>
-#include <llvm/Module.h>
-#include <llvm/BasicBlock.h>
-#include <llvm/Instructions.h>
-#include <llvm/Constants.h>
-#include <llvm/Support/CFG.h>
 #include <map>
 #include <cassert>
 #include <cstdio>

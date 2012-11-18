@@ -5,10 +5,6 @@
 #include "PointerTarget.h"
 #include <map>
 
-namespace llvm {
-class Domain;
-}
-
 namespace Canal {
 
 class Constructors;

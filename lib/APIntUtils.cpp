@@ -1,5 +1,4 @@
 #include "APIntUtils.h"
-#include <llvm/Constants.h>
 
 namespace Canal {
 namespace APIntUtils {

@@ -2,7 +2,6 @@
 #define LIBCANAL_INTERPRETER_BASIC_BLOCK_H
 
 #include "State.h"
-#include <llvm/BasicBlock.h>
 
 namespace Canal {
 

@@ -9,7 +9,8 @@ CommandQuit::CommandQuit(Commands &commands)
     : Command("quit",
               "",
               "Exit Canal",
-              "Exit Canal.  If a program is being interpreted, it asks for confirmation before terminating the interpretation.",
+              "Exit Canal.  If a program is being interpreted, it "
+              "asks for confirmation before terminating the interpretation.",
               commands)
 {
 }

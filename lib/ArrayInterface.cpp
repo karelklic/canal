@@ -4,7 +4,8 @@
 namespace Canal {
 namespace Array {
 
-Domain *Interface::getValue(const Domain &offset) const
+Domain *
+Interface::getValue(const Domain &offset) const
 {
     Domain *result = NULL;
     std::vector<Domain*> items(getItem(offset));

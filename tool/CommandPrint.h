@@ -3,7 +3,6 @@
 
 #include "Command.h"
 
-
 class CommandPrint : public Command
 {
 public:

@@ -1,7 +1,6 @@
 #include "ArraySingleItem.h"
 #include "Utils.h"
 #include "IntegerContainer.h"
-#include <llvm/ADT/APInt.h>
 #include <sstream>
 #include <iostream>
 

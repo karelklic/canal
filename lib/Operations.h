@@ -4,57 +4,6 @@
 #include "Domain.h"
 #include <map>
 #include <vector>
-#include <llvm/Function.h>
-#include <llvm/ADT/OwningPtr.h>
-
-namespace llvm {
-class AllocaInst;
-class BasicBlock;
-class BinaryOperator;
-class BitCastInst;
-class BranchInst;
-class CallInst;
-class ExtractElementInst;
-class ExtractValueInst;
-class FCmpInst;
-class FPExtInst;
-class FPToSIInst;
-class FPToUIInst;
-class FPTruncInst;
-class Function;
-class GetElementPtrInst;
-class ICmpInst;
-class IndirectBrInst;
-class InsertElementInst;
-class InsertValueInst;
-class Instruction;
-class IntToPtrInst;
-class InvokeInst;
-class LoadInst;
-class Module;
-class PHINode;
-class PtrToIntInst;
-class ReturnInst;
-class SExtInst;
-class SIToFPInst;
-class SelectInst;
-class ShuffleVectorInst;
-class StoreInst;
-class SwitchInst;
-class TruncInst;
-class UIToFPInst;
-class UnreachableInst;
-class VAArgInst;
-class ZExtInst;
-#if LLVM_MAJOR >= 3
-// Instructions available since LLVM 3.0
-class AtomicCmpXchgInst;
-class AtomicRMWInst;
-class FenceInst;
-class LandingPadInst;
-class ResumeInst;
-#endif
-}
 
 namespace Canal {
 

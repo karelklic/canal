@@ -8,3 +8,8 @@
 /* Define to 1 if you have the <libelf.h> header file. */
 #cmakedefine HAVE_LIBELF_H
 
+/* Define to 1 if you have the <readline/readline.h> header file. */
+#cmakedefine HAVE_READLINE_READLINE_H
+
+/* LLVM has been compiled with NDEBUG */
+#cmakedefine LLVM_WITH_NDEBUG

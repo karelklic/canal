@@ -4,12 +4,6 @@
 #include "State.h"
 #include <vector>
 #include <string>
-#include <llvm/GlobalVariable.h>
-
-namespace llvm {
-class Module;
-class Function;
-} // namespace llvm
 
 namespace Canal {
 

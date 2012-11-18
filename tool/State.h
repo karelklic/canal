@@ -1,14 +1,10 @@
 #ifndef CANAL_STATE_H
 #define CANAL_STATE_H
 
+#include "IteratorCallback.h"
+#include "lib/Interpreter.h"
 #include <set>
 #include <string>
-#include "lib/Interpreter.h"
-#include "IteratorCallback.h"
-
-namespace llvm {
-class Module;
-} // namespace llvm
 
 // State of the interpreter.
 class State

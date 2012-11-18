@@ -1,14 +1,9 @@
 #ifndef LIBCANAL_STATE_H
 #define LIBCANAL_STATE_H
 
-#include <string>
 #include "VariableArguments.h"
 #include "StateMap.h"
-
-namespace llvm {
-class Function;
-class Value;
-} // namespace llvm
+#include <string>
 
 namespace Canal {
 

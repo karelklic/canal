@@ -2,7 +2,6 @@
 #include "Utils.h"
 #include "WideningDataInterface.h"
 #include <typeinfo>
-#include <llvm/Support/raw_ostream.h>
 
 namespace Canal {
 

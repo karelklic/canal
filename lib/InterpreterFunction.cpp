@@ -4,10 +4,6 @@
 #include "Environment.h"
 #include "Domain.h"
 #include "Utils.h"
-#include <llvm/Function.h>
-#include <llvm/Type.h>
-#include <llvm/Support/CFG.h>
-#include <llvm/Instructions.h>
 #include <sstream>
 
 namespace Canal {

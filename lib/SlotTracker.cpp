@@ -1,10 +1,5 @@
 #include "SlotTracker.h"
 #include "Utils.h"
-#include <llvm/Module.h>
-#include <llvm/Function.h>
-#include <llvm/Type.h>
-#include <llvm/Instructions.h>
-#include <llvm/ADT/SmallVector.h>
 
 namespace Canal {
 
