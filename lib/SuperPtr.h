@@ -265,14 +265,31 @@ namespace {
                                   !is_same<B    volatile const,
                                            void volatile const>::value;
     };
-}
-    /// Super ptr for Domain
+
+    //Negation of enable_if
+    template <bool C, typename T = void>
+    struct enable_if_not {
+        typedef T type;
+    };
+
     template <typename T>
-    class SuperPtr<T, typename enable_if<is_base_of<Domain, T>::value>::type> : public SuperPtrConst<T, T>, public Domain {
+    struct enable_if_not<true, T> { };
+
+    //Static and - type is defined if both provided arguments are true
+    template <bool A, bool B>
+    struct static_and {};
+
+    template <>
+    struct static_and<true, true> {
+        typedef bool type;
+    };
+
+    template <typename T> //Contains T
+    class SuperPtrDomain : public SuperPtrConst<T>, public Domain {
     public:
         /// Constructors
-        SuperPtr(const T &instance) : Domain(instance), SuperPtrConst<T, T>(instance) {}
-        SuperPtr(const SuperPtr<T> &copy) : Domain(copy.mInstance->first), SuperPtrConst<T, T>(copy) {}
+        SuperPtrDomain(const T &instance) : Domain(instance), SuperPtrConst<T>(instance) {}
+        SuperPtrDomain(const SuperPtr<T> &copy) : Domain(copy.mInstance->first), SuperPtrConst<T>(copy) {}
 
         /// Conversion to const object reference
         operator const T& () const {
@@ -287,17 +304,18 @@ namespace {
             return this->mInstance->first;
         }
 
-        virtual SuperPtr<T>* clone() const {
-            return new SuperPtr<T>(*this);
+#define CLONE_METHODS(type) \
+        virtual type* clone() const { \
+            return new type(*this); \
+        } \
+        virtual SuperPtrDomain<T>* cloneCleaned() const { \
+            T* cloned = this->mInstance->first.cloneCleaned(); \
+            type* ret = new type(*cloned); \
+            delete cloned; \
+            return ret; \
         }
 
-        virtual SuperPtr<T>* cloneCleaned() const {
-            T* cloned = this->mInstance->first.cloneCleaned();
-            SuperPtr<T>* ret = new SuperPtr<T>(*cloned);
-            delete cloned;
-            return ret;
-        }
-
+        CLONE_METHODS(SuperPtrDomain<T>)
         virtual bool operator==(const Canal::Domain& other) const {
             return this->mInstance->first == other;
         }
@@ -370,6 +388,70 @@ namespace {
         UOP(sitofp)
 #undef UOP
     };
+}
+    /// Super ptr for Domain
+    template <typename T>
+    class SuperPtr<T, typename static_and< enable_if<is_base_of<Domain, T>::value>::type, //Is descendant of Domain
+            enable_if_not<is_base_of<AccuracyDomain, T>::value>::type>::type //but NOT descedant of AccuracyDomain
+            > : public SuperPtrDomain<T> {
+    public:
+        /// Constructors
+        SuperPtr(const T &instance) : SuperPtrDomain<T>(instance) {}
+        SuperPtr(const SuperPtr<T> &copy) : SuperPtrDomain<T>(copy) {}
+        CLONE_METHODS(SuperPtr<T>)
+    };
+
+    /// Super ptr for Accuracy Domain
+    template <typename T>
+    class SuperPtr<T, typename enable_if<is_base_of<AccuracyDomain, T>::value>::type>
+            : public SuperPtrDomain<T>, public AccuracyDomain {
+    public:
+        SuperPtr(const T &instance) : SuperPtrDomain<T>(instance) {}
+        SuperPtr(const SuperPtr<T> &copy) : SuperPtrDomain<T>(copy) {}
+        CLONE_METHODS(SuperPtr<T>)
+
+        virtual float accuracy() const {
+#ifdef DEBUG
+            std::cout << "accuracy" << std::endl;
+#endif
+            return this->mInstance->first.accuracy();
+        }
+
+        /// Is it the lowest value.
+        virtual bool isBottom() const {
+#ifdef DEBUG
+            std::cout << "isBottom" << std::endl;
+#endif
+            return this->mInstance->first.isBottom();
+        }
+
+        /// Set to the lowest value.
+        virtual void setBottom() {
+#ifdef DEBUG
+            std::cout << "setBottom" << std::endl;
+#endif
+            this->write();
+            this->mInstance->first.setBottom();
+        }
+
+        /// Is it the highest value.
+        virtual bool isTop() const {
+#ifdef DEBUG
+            std::cout << "isTop" << std::endl;
+#endif
+            return this->mInstance->first.isTop();
+        }
+
+        /// Set it to the top value of lattice.
+        virtual void setTop() {
+#ifdef DEBUG
+            std::cout << "setTop" << std::endl;
+#endif
+            this->write();
+            this->mInstance->first.setTop();
+        }
+    };
+#undef CLONE_METHODS
 } // namespace Canal
 
 #endif // LIBCANAL_SUPERPTR_H

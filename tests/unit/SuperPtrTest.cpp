@@ -79,6 +79,10 @@ static void IntegerBitfieldTest(const Environment &environment) {
     tmp1.xor_(BitfieldFactory(environment, 0), BitfieldFactory(environment, 1));
     CANAL_ASSERT(tmpBitfield2 != tmp1);
     CANAL_ASSERT(tmp1 == BitfieldFactory(environment, 1));
+    //Test isTop, setTop
+    CANAL_ASSERT(tmp1.isTop() == false);
+    tmp1.setTop();
+    CANAL_ASSERT(tmp1.isTop() == true);
 }
 
 int main() {
