@@ -714,7 +714,7 @@ Bitfield::isTop() const
 void
 Bitfield::setTop()
 {
-#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
+#if (LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9)
     // Old interface replaced in LLVM 2.9.
     mZeroes.set();
     mOnes.set();

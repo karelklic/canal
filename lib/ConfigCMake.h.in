@@ -13,3 +13,7 @@
 
 /* LLVM has been compiled with NDEBUG */
 #cmakedefine LLVM_WITH_NDEBUG
+
+#define LLVM_VERSION_MAJOR @LLVM_VERSION_MAJOR@
+
+#define LLVM_VERSION_MINOR @LLVM_VERSION_MINOR@

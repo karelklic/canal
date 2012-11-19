@@ -228,7 +228,7 @@ Constructors::create(const llvm::Constant &value,
         return createArray(values);
     }
 
-#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
+#if (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1) || LLVM_VERSION_MAJOR > 3
     // llvm::isa<llvm::ConstantDataSequential> returns false for an
     // llvm::ConstantDataArray/Vector instance at least on on LLVM
     // 3.1.
@@ -331,7 +331,7 @@ Constructors::getFloatingPointSemantics(const llvm::Type &type)
     CANAL_ASSERT(type.isFloatingPointTy());
 
     const llvm::fltSemantics *semantics;
-#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
+#if (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1) || LLVM_VERSION_MAJOR > 3
     if (type.isHalfTy())
         semantics = &llvm::APFloat::IEEEhalf;
     else

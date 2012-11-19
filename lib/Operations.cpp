@@ -46,7 +46,7 @@ Operations::interpretInstruction(const llvm::Instruction &instruction,
         insertelement((const llvm::InsertElementInst&)instruction, state);
     else if (llvm::isa<llvm::InsertValueInst>(instruction))
         insertvalue((const llvm::InsertValueInst&)instruction, state);
-#if LLVM_MAJOR >= 3
+#if LLVM_VERSION_MAJOR >= 3
     // Instructions available since LLVM 3.0
     else if (llvm::isa<llvm::LandingPadInst>(instruction))
         landingpad((const llvm::LandingPadInst&)instruction, state);
@@ -115,7 +115,7 @@ Operations::interpretInstruction(const llvm::Instruction &instruction,
             indirectbr((const llvm::IndirectBrInst&)instruction, state);
         else if (llvm::isa<llvm::InvokeInst>(instruction))
             invoke((const llvm::InvokeInst&)instruction, state);
-#if LLVM_MAJOR >= 3
+#if LLVM_VERSION_MAJOR >= 3
         // Resume instruction is available since LLVM 3.0
         else if (llvm::isa<llvm::ResumeInst>(instruction))
             resume((const llvm::ResumeInst&)instruction, state);
@@ -764,7 +764,7 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
 
     std::vector<Domain*> newValues;
 
-#if LLVM_MAJOR == 3 && LLVM_MINOR >= 1
+#if LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1
     llvm::SmallVector<int, 16> shuffleMask =
         instruction.getShuffleMask();
 #else
@@ -1293,7 +1293,7 @@ Operations::va_arg_(const llvm::VAArgInst &instruction,
     CANAL_NOT_IMPLEMENTED();
 }
 
-#if LLVM_MAJOR >= 3
+#if LLVM_VERSION_MAJOR >= 3
 // Instructions available since LLVM 3.0
 
 void

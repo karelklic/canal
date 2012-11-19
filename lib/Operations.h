@@ -303,7 +303,7 @@ protected:
     virtual void va_arg_(const llvm::VAArgInst &instruction,
                         State &state);
 
-#if LLVM_MAJOR >= 3
+#if LLVM_VERSION_MAJOR >= 3
     // Instructions available since LLVM 3.0
     virtual void landingpad(const llvm::LandingPadInst &instruction,
                             State &state);

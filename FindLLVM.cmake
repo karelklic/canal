@@ -22,10 +22,10 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)" "\\1" LLVM_MAJOR
+string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)" "\\1" LLVM_VERSION_MAJOR
 	     "${LLVM_VERSION}")
 
-string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)" "\\2" LLVM_MINOR
+string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)" "\\2" LLVM_VERSION_MINOR
 	     "${LLVM_VERSION}")
 
 execute_process(

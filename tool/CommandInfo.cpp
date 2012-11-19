@@ -62,7 +62,7 @@ CommandInfo::run(const std::vector<std::string> &args)
         return;
     }
 
-#if LLVM_MAJOR > 2 || LLVM_MINOR > 8
+#if LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
     // Initialize passes
     llvm::PassRegistry &passRegistry =
         *llvm::PassRegistry::getPassRegistry();
@@ -70,7 +70,7 @@ CommandInfo::run(const std::vector<std::string> &args)
     llvm::initializeCore(passRegistry);
     llvm::initializeAnalysis(passRegistry);
     llvm::initializeIPA(passRegistry);
-#endif // LLVM_MAJOR > 2 || LLVM_MINOR > 8
+#endif // LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
 
     if (args[1] == "module")
         infoModule();

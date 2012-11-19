@@ -16,7 +16,6 @@ find_package(LLVM REQUIRED)
 include_directories(${LLVM_INCLUDE_DIRS})
 link_directories(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_CFLAGS})
-add_definitions(-DLLVM_MAJOR=${LLVM_MAJOR} -DLLVM_MINOR=${LLVM_MINOR})
 add_definitions(-DDATADIR="${CMAKE_CURRENT_BINARY_DIR}")
 
 add_subdirectory("lib/")

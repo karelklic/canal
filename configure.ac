@@ -28,10 +28,12 @@ LLVM_LIBS=`$LLVM_CONFIG --libs`
 AC_SUBST([LLVM_LIBS])
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 AC_SUBST([LLVM_LDFLAGS])
-
-# See Canal bug #101.
 # Quadrigraphs are used here: @<:@ gives you [ and @:>@ gives you ].
-CPPFLAGS+=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
+LLVM_VERSION_MAJOR=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/\1/'`
+AC_DEFINE_UNQUOTED([LLVM_VERSION_MAJOR], [$LLVM_VERSION_MAJOR], [LLVM major version])
+LLVM_VERSION_MINOR=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/\2/'`
+AC_DEFINE_UNQUOTED([LLVM_VERSION_MINOR], [$LLVM_VERSION_MINOR], [LLVM minor version])
+
 
 # Capture compile-time LLVM NDEBUG status.
 #

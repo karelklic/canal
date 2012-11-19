@@ -202,7 +202,7 @@ Enumeration::sub(const Domain &a, const Domain &b)
 void
 Enumeration::mul(const Domain &a, const Domain &b)
 {
-#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
+#if (LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9)
     applyOperation(a, b, &llvm::APInt::operator*, NULL);
 #else
     applyOperation(a, b, NULL, &llvm::APInt::smul_ov);

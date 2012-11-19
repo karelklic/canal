@@ -18,9 +18,9 @@
 #include <llvm/ADT/StringRef.h>
 #include <llvm/Analysis/CallGraph.h>
 #include <llvm/Analysis/LoopInfo.h>
-#if LLVM_MAJOR > 2 || LLVM_MINOR > 8
+#if LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
 #include <llvm/InitializePasses.h>
-#endif // LLVM_MAJOR > 2 || LLVM_MINOR > 8
+#endif // LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
 #include <llvm/LLVMContext.h>
 #include <llvm/PassManager.h>
 #include <llvm/Support/IRReader.h>

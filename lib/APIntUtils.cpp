@@ -8,7 +8,7 @@ sadd_ov(const llvm::APInt &a,
         const llvm::APInt &b,
         bool &overflow)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9
     llvm::APInt result = a + b;
     overflow = a.isNonNegative() == b.isNonNegative() &&
         result.isNonNegative() != a.isNonNegative();
@@ -24,7 +24,7 @@ uadd_ov(const llvm::APInt &a,
         const llvm::APInt &b,
         bool &overflow)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9
     llvm::APInt result = a+b;
     overflow = result.ult(b);
     return result;
@@ -38,7 +38,7 @@ ssub_ov(const llvm::APInt &a,
         const llvm::APInt &b,
         bool &overflow)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9
     llvm::APInt result = a - b;
     overflow = a.isNonNegative() != b.isNonNegative() &&
         result.isNonNegative() != a.isNonNegative();
@@ -54,7 +54,7 @@ usub_ov(const llvm::APInt &a,
         const llvm::APInt &b,
         bool &overflow)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9
     llvm::APInt result = a-b;
     overflow = result.ugt(a);
     return result;
@@ -68,7 +68,7 @@ sdiv_ov(const llvm::APInt &a,
         const llvm::APInt &b,
         bool &overflow)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9
     // MININT/-1  -->  overflow.
     overflow = a.isMinSignedValue() && b.isAllOnesValue();
     return a.sdiv(b);
@@ -82,7 +82,7 @@ smul_ov(const llvm::APInt &a,
         const llvm::APInt &b,
         bool &overflow)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9
     llvm::APInt result = a * b;
     if (a != 0 && b != 0)
         overflow = result.sdiv(b) != a || result.sdiv(a) != b;
@@ -100,7 +100,7 @@ umul_ov(const llvm::APInt &a,
         const llvm::APInt &b,
         bool &overflow)
 {
-#if LLVM_MAJOR == 2
+#if LLVM_VERSION_MAJOR == 2
     llvm::APInt result = a * b;
     if (a != 0 && b != 0)
         overflow = result.udiv(b) != a || result.udiv(a) != b;
@@ -116,7 +116,7 @@ umul_ov(const llvm::APInt &a,
 void
 clearAllBits(llvm::APInt &num)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9
     num.clear(num.getBitWidth());
 #else
     num.clearAllBits();
@@ -126,7 +126,7 @@ clearAllBits(llvm::APInt &num)
 void
 setBit(llvm::APInt &num, int bit)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9
     num.set(bit);
 #else
     num.setBit(bit);
@@ -136,7 +136,7 @@ setBit(llvm::APInt &num, int bit)
 llvm::APInt
 getOneBitSet(unsigned bitWidth, int bit)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9
     return llvm::APInt::getBitsSet(bitWidth, bit, bit + 1);
 #else
     return llvm::APInt::getOneBitSet(bitWidth, bit);
@@ -146,7 +146,7 @@ getOneBitSet(unsigned bitWidth, int bit)
 llvm::APInt
 trunc(const llvm::APInt &num, unsigned bitWidth)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9
     llvm::APInt copy(num);
     return copy.trunc(bitWidth);
 #else
@@ -157,7 +157,7 @@ trunc(const llvm::APInt &num, unsigned bitWidth)
 llvm::APInt
 zext(const llvm::APInt &num, unsigned bitWidth)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9
     llvm::APInt copy(num);
     return copy.zext(bitWidth);
 #else
@@ -168,7 +168,7 @@ zext(const llvm::APInt &num, unsigned bitWidth)
 llvm::APInt
 sext(const llvm::APInt &num, unsigned bitWidth)
 {
-#if LLVM_MAJOR == 2 && LLVM_MINOR < 9
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9
     llvm::APInt copy(num);
     return copy.sext(bitWidth);
 #else

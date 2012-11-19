@@ -113,7 +113,7 @@ static void
 printError(const llvm::SMDiagnostic &err)
 {
     Canal::StringStream ss;
-#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
+#if (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1) || LLVM_VERSION_MAJOR > 3
     err.print(NULL, ss, false);
 #else
     err.Print(NULL, ss);
