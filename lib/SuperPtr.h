@@ -282,6 +282,11 @@ namespace {
             return this->mInstance->first;
         }
 
+        T& modifiable() {
+            this->write();
+            return this->mInstance->first;
+        }
+
         virtual SuperPtr<T>* clone() const {
             return new SuperPtr<T>(*this);
         }

@@ -72,7 +72,10 @@ static void IntegerBitfieldTest(const Environment &environment) {
     CANAL_ASSERT(tmpBitfield2.getBitWidth() == sizeof(int)*8);
     CANAL_ASSERT(tmp1->getBitWidth() == sizeof(int)*8); //Test of constant method call
     CANAL_ASSERT(tmp1ref->getBitWidth() == sizeof(int) * 8);
-    //tmp1->setBit(0, 1); //Should not and does not work
+    //tmp1->setBitValue(0, 1); //Should not and does not work
+    tmp1.modifiable().setBitValue(0, 1); //This does work
+    CANAL_ASSERT(tmp1 == BitfieldFactory(environment, 11));
+    //Test XOR - Domain method
     tmp1.xor_(BitfieldFactory(environment, 0), BitfieldFactory(environment, 1));
     CANAL_ASSERT(tmpBitfield2 != tmp1);
     CANAL_ASSERT(tmp1 == BitfieldFactory(environment, 1));
