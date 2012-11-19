@@ -3,6 +3,7 @@
 #include "lib/Utils.h"
 #include <iostream>
 #include "lib/IntegerBitfield.h"
+#include "lib/Pointer.h"
 #include "lib/Environment.h"
 #include <llvm/Module.h>
 #include <llvm/LLVMContext.h>
@@ -85,6 +86,34 @@ static void IntegerBitfieldTest(const Environment &environment) {
     CANAL_ASSERT(tmp1.isTop() == true);
 }
 
+static void PointerTest(const Environment &environment) {
+    const llvm::PointerType &ptrType =
+        *llvm::Type::getInt1PtrTy(environment.getContext());
+    typedef SuperPtr<Pointer::Pointer> type;
+    type tmp1(Pointer::Pointer(environment, ptrType));
+    const type& tmp1ref = tmp1;
+    const Pointer::Pointer& tmpPointer1 = tmp1;
+    const Pointer::Pointer* ptrPointer1 = tmp1;
+    //const Pointer::Pointer& tmpRef1 = dynCast<Pointer::Pointer&>(tmp1); FAIL
+    Pointer::Pointer tmpPointer2 = tmp1ref;
+    CANAL_ASSERT(tmp1 == Pointer::Pointer(environment, ptrType));
+    CANAL_ASSERT(ptrPointer1->isSingleTarget() == false);
+    CANAL_ASSERT(tmpPointer1.isSingleTarget() == false);
+    CANAL_ASSERT(tmpPointer2.isSingleTarget() == false);
+    CANAL_ASSERT(tmp1->isSingleTarget() == false); //Test of constant method call
+    CANAL_ASSERT(tmp1ref->isSingleTarget() == false);
+    llvm::Value* val = new llvm::GlobalVariable(llvm::Type::getInt1PtrTy(environment.getContext()), true, llvm::GlobalValue::ExternalLinkage);
+    //tmp1->setZero(); //Should not and does not work
+    tmp1.modifiable().setZero(val); //This does work
+    CANAL_ASSERT(tmpPointer1.isSingleTarget() == true);
+    CANAL_ASSERT(tmpPointer2 != tmp1);
+    //const Pointer::Pointer& tmpPointer3 = tmp1;
+    //Test merge - Domain method
+    tmp1.merge(tmpPointer2);
+    //CANAL_ASSERT(tmpPointer3 == tmp1); WILL FAIL because dynCast<Pointer::Pointer*>(tmp1) = NULL
+    delete val;
+}
+
 int main() {
     llvm::LLVMContext &context = llvm::getGlobalContext();
     llvm::llvm_shutdown_obj y;  // Call llvm_shutdown() on exit.
@@ -95,4 +124,5 @@ int main() {
     intConstTest();
     intTest();
     IntegerBitfieldTest(environment);
+    PointerTest(environment);
 }

@@ -266,22 +266,12 @@ namespace {
                                            void volatile const>::value;
     };
 
-    //Negation of enable_if
-    template <bool C, typename T = void>
-    struct enable_if_not {
+    template <bool A, bool B, typename T = void> //must be a && !b
+    struct domain_check {};
+
+    template<typename T>
+    struct domain_check<true, false, T>{
         typedef T type;
-    };
-
-    template <typename T>
-    struct enable_if_not<true, T> { };
-
-    //Static and - type is defined if both provided arguments are true
-    template <bool A, bool B>
-    struct static_and {};
-
-    template <>
-    struct static_and<true, true> {
-        typedef bool type;
     };
 
     template <typename T> //Contains T
@@ -297,6 +287,14 @@ namespace {
             std::cout << "Conversion to const object reference" << std::endl;
 #endif
             return this->mInstance->first;
+        }
+
+        /// Conversion to const object pointer
+        operator const T* () const {
+#ifdef DEBUG
+            std::cout << "Conversion to const object pointer" << std::endl;
+#endif
+            return &this->mInstance->first;
         }
 
         T& modifiable() {
@@ -316,6 +314,7 @@ namespace {
         }
 
         CLONE_METHODS(SuperPtrDomain<T>)
+
         virtual bool operator==(const Canal::Domain& other) const {
             return this->mInstance->first == other;
         }
@@ -391,8 +390,8 @@ namespace {
 }
     /// Super ptr for Domain
     template <typename T>
-    class SuperPtr<T, typename static_and< enable_if<is_base_of<Domain, T>::value>::type, //Is descendant of Domain
-            enable_if_not<is_base_of<AccuracyDomain, T>::value>::type>::type //but NOT descedant of AccuracyDomain
+    class SuperPtr<T, typename domain_check< is_base_of<Domain, T>::value, //Is descendant of Domain
+            is_base_of<AccuracyDomain, T>::value>::type //but NOT descedant of AccuracyDomain
             > : public SuperPtrDomain<T> {
     public:
         /// Constructors
