@@ -313,9 +313,6 @@ namespace Canal {
             delete cloned; \
             return ret; \
         }\
-        static bool classof(const Domain* val) {\
-            return typeid(*val) == typeid(T);\
-        }
 
         CLONE_METHODS(SuperPtrDomain<T>)
 
