@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <string>
 #include <typeinfo>
+#include "SuperPtr.h"
+#include <iostream>
 
 /// Fatal error.  Writes a message to stderr and terminates the
 /// application.
@@ -144,30 +146,248 @@ llvmCast(const Y &val)
         typename llvm::simplify_type<Y>::SimpleType>::doit(val);
 }
 
+template <typename X>
+struct bare_type {
+    typedef X type;
+    static const bool constant = false;
+    static const bool reference = false;
+    static const bool pointer = false;
+};
+
+template <typename X>
+struct bare_type<X&> {
+    typedef X type;
+    static const bool constant = false;
+    static const bool reference = true;
+    static const bool pointer = false;
+};
+
+template <typename X>
+struct bare_type<X*> {
+    typedef X type;
+    static const bool constant = false;
+    static const bool reference = false;
+    static const bool pointer = true;
+};
+
+template <typename X>
+struct bare_type<const X&> {
+    typedef X type;
+    static const bool constant = true;
+    static const bool reference = true;
+    static const bool pointer = false;
+};
+
+template <typename X>
+struct bare_type<const X> {
+    typedef X type;
+    static const bool constant = true;
+    static const bool reference = false;
+    static const bool pointer = false;
+};
+
+template <typename X>
+struct bare_type<const X*> {
+    typedef X type;
+    static const bool constant = true;
+    static const bool reference = false;
+    static const bool pointer = true;
+};
+
+/// Try dynamic cast to SuperPtr<X>&
+template<typename X, typename Y>
+struct SuperPtrCast {
+    /// Try to do dynamic cast and return modifiable reference to element
+    static inline X
+    modifiable(Y &val) {
+        typedef typename bare_type<X>::type type;
+        SuperPtr<type>& type_check = dynamic_cast<SuperPtr<type>& >(val);
+        return type_check.modifiable();
+    }
+    /// Try to do dynamic cast and return const reference to element
+    static inline X
+    constant(const Y &val) {
+        typedef typename bare_type<X>::type type;
+        const SuperPtr<type>& type_check = dynamic_cast<const SuperPtr<type>& >(val);
+        return (X) type_check;
+    }
+};
+/// Try dynamic cast to SuperPtr<X>*
+template<typename X, typename Y>
+struct SuperPtrCast<X*, Y> {
+    /// Try to do dynamic cast and return modifiable pointer to element
+    static inline X*
+    modifiable(Y* val) {
+        typedef typename bare_type<X>::type type;
+        SuperPtr<type>* type_check = dynamic_cast<SuperPtr<type>* >(val);
+        return (type_check == NULL ? NULL : &type_check->modifiable());
+    }
+    /// Try to do dynamic cast and return const pointer to element
+    static inline X*
+    constant(const Y* val) {
+        typedef typename bare_type<X>::type type;
+        const SuperPtr<type>* type_check = dynamic_cast<const SuperPtr<type>* >(val);
+        return (type_check == NULL ? NULL : (X*) *type_check);;
+    }
+};
+/// Static if - if X is not const, call modifable (which takes X)
+template<typename X, typename Y, typename = void>
+struct static_if_cast {
+    /// Takes reference
+    static inline X static_if(Y& val) {
+        return SuperPtrCast<X, Y>::modifiable(val);
+    }
+    /// Takes pointer
+    static inline X static_if(Y* val) {
+        return SuperPtrCast<X, Y>::modifiable(val);
+    }
+};
+/// Static if - if X is ot const, call constant (which takes const X)
+template<typename X, typename Y>
+struct static_if_cast<X, Y, typename enable_if<bare_type<X>::constant>::type > {
+    /// Takes reference
+    static inline X static_if(Y& val) {
+        return SuperPtrCast<X, Y>::constant(val);
+    }
+    /// Takes pointer
+    static inline X static_if(Y* val) {
+        return SuperPtrCast<X, Y>::constant(val);
+    }
+};
+/// dynCastStruct - auxiliary class for dynCast; X is NOT subclass of Domain -> no need to try SuperPtr<X>
+template<typename X, typename Y, typename = void>
+struct dynCastStruct {
+    /// Cast for reference
+    static inline X cast(Y &val)
+    {
+        try
+        {
+            return dynamic_cast<X>(val);
+        }
+        catch (std::bad_cast exception) {
+            CANAL_FATAL_ERROR(exception.what());
+        }
+    }
+    /// Cast for constant reference
+    static inline X cast_const(const Y &val)
+    {
+        try
+        {
+            return dynamic_cast<X>(val);
+        }
+        catch (std::bad_cast exception)
+        {
+            CANAL_FATAL_ERROR(exception.what()
+                              << " from " << typeid(val).name()
+                              << " to " << typeid(X).name());
+        }
+    }
+    /// Cast for pointer
+    static inline X cast(Y *val)
+    {
+        try
+        {
+            return dynamic_cast<X>(val);
+        }
+        catch (std::bad_cast exception) {
+            CANAL_FATAL_ERROR(exception.what());
+        }
+    }
+    /// Cast for constant pointer
+    static inline X cast_const(const Y *val)
+    {
+        try
+        {
+            return dynamic_cast<X>(val);
+        }
+        catch (std::bad_cast exception)
+        {
+            CANAL_FATAL_ERROR(exception.what()
+                              << " from " << typeid(val).name()
+                              << " to " << typeid(X).name());
+        }
+    }
+};
+/// dynCastStruct - auxiliary class for dynCast; X is subclass of Domain -> try SuperPtr<X> if cast for X fails
+template<typename X, typename Y>
+struct dynCastStruct<X, Y,
+        typename enable_if<is_base_of<Domain, typename bare_type<X>::type>::value>::type
+       > {
+    /// Cast for reference -> try SuperPtr<X> if X is not const, const SuperPtr<X> if X is const
+    static inline X cast(Y &val)
+    {
+        try
+        {
+            return dynamic_cast<X>(val);
+        }
+        catch (std::bad_cast exception) {
+            try { //Try SuperPtr - if fails, do nothing
+                return static_if_cast<X, Y>::static_if(val);
+            }
+            catch (...) {}
+            CANAL_FATAL_ERROR(exception.what());
+        }
+    }
+    /// Cast for const reference -> try const SuperPtr<X>
+    static inline X cast_const(const Y &val)
+    {
+        try
+        {
+            return dynamic_cast<X>(val);
+        }
+        catch (std::bad_cast exception)
+        {
+            try { //Try SuperPtr - if fails, do nothing
+                return SuperPtrCast<X, Y>::constant(val);
+            }
+            catch (...) {}
+            CANAL_FATAL_ERROR(exception.what()
+                              << " from " << typeid(val).name()
+                              << " to " << typeid(X).name());
+        }
+    }
+    /// Cast for pointer -> try SuperPtr<X>* if X is not const, const SuperPtr<X>* if X is const
+    static inline X cast(Y *val)
+    {
+        X x = dynamic_cast<X>(val);
+        if (x == NULL) { //Try SuperPtr - if fails, do nothing -> returns NULL either way
+            return static_if_cast<X, Y>::static_if(val);
+        }
+        return x;
+    }
+    /// Cast for const pointer -> try const SuperPtr<X>*
+    static inline X cast_const(const Y *val)
+    {
+        X x = dynamic_cast<X>(val);
+        if (x == NULL) { //Try SuperPtr - if fails, do nothing -> returns NULL either way
+            return SuperPtrCast<X, Y>::constant(val);
+        }
+        return x;
+    }
+};
+/// dynCast for reference
 template <typename X, typename Y> inline X
 dynCast(Y &val)
 {
-    try
-    {
-        return dynamic_cast<X>(val);
-    }
-    catch (std::bad_cast exception)
-        CANAL_FATAL_ERROR(exception.what());
+    return dynCastStruct<X, Y>::cast(val);
 }
-
+/// dynCast for const reference
 template <typename X, typename Y> inline X
 dynCast(const Y &val)
 {
-    try
-    {
-        return dynamic_cast<X>(val);
-    }
-    catch (std::bad_cast exception)
-    {
-        CANAL_FATAL_ERROR(exception.what()
-                          << " from " << typeid(val).name()
-                          << " to " << typeid(X).name());
-    }
+    return dynCastStruct<X, Y>::cast_const(val);
+}
+/// dynCast for pointer
+template <typename X, typename Y> inline X
+dynCast(Y *val)
+{
+    return dynCastStruct<X, Y>::cast(val);
+}
+/// dynCast for const pointer
+template <typename X, typename Y> inline X
+dynCast(const Y *val)
+{
+    return dynCastStruct<X, Y>::cast_const(val);
 }
 
 } // namespace Canal

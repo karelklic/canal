@@ -238,7 +238,6 @@ namespace Canal {
     };
 
 /// Test for base class - from http://stackoverflow.com/questions/281725/template-specialization-based-on-inherit-class/282006#282006
-//namespace {
     template<bool C, typename T = void>
     struct enable_if {
       typedef T type;
@@ -246,6 +245,14 @@ namespace Canal {
 
     template<typename T>
     struct enable_if<false, T> { };
+
+    template<bool C, typename T = void>
+    struct enable_if_not {
+      typedef T type;
+    };
+
+    template<typename T>
+    struct enable_if_not<true, T> { };
 
     template<typename, typename>
     struct is_same {
@@ -388,7 +395,7 @@ namespace Canal {
         UOP(sitofp)
 #undef UOP
     };
-//}
+
     /// Super ptr for Domain
     template <typename T>
     class SuperPtr<T, typename domain_check< is_base_of<Domain, T>::value, //Is descendant of Domain
