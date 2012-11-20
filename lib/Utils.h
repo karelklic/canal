@@ -7,7 +7,6 @@
 #include <string>
 #include <typeinfo>
 #include "SuperPtr.h"
-#include <iostream>
 
 /// Fatal error.  Writes a message to stderr and terminates the
 /// application.
@@ -145,7 +144,7 @@ llvmCast(const Y &val)
     return llvm::cast_convert_val<X, Y,
         typename llvm::simplify_type<Y>::SimpleType>::doit(val);
 }
-
+/// Detect bare type - type without constness, reference nor pointer
 template <typename X>
 struct bare_type {
     typedef X type;
