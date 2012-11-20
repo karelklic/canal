@@ -4,7 +4,6 @@
 #include "Constructors.h"
 #include "Utils.h"
 #include "Domain.h"
-#include <cstdio>
 
 namespace Canal {
 namespace Interpreter {
@@ -25,13 +24,17 @@ createTopReturnValue(const llvm::Function &function,
     if (type->isVoidTy())
         return NULL;
 
-    Domain *result = constructors.create(*type);
-
-    AccuracyDomain *accuracyValue = dynCast<AccuracyDomain*>(result);
-    if (accuracyValue)
-        accuracyValue->setTop();
-
-    return result;
+    if (type->isPointerTy())
+    {
+        // We return empty pointer for now.  This is unsafe.
+        return constructors.create(*type);
+    }
+    else
+    {
+        Domain *result = constructors.create(*type);
+        result->setTop();
+        return result;
+    }
 }
 
 void
@@ -44,9 +47,11 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
     // value.
     if (function.isIntrinsic())
     {
-        if (printMissing) {
-            printf("Intrinsic function \"%s\" not available.\n",
-               function.getName().str().c_str());
+        if (printMissing)
+        {
+            llvm::outs() << "Intrinsic function \""
+                         << function.getName()
+                         << "\" not available.\n";
         }
 
         Domain *returnValue = createTopReturnValue(function, mConstructors);
@@ -58,9 +63,11 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
 
     if (function.isDeclaration())
     {
-        if (printMissing) {
-            printf("External function \"%s\" not available.\n",
-                function.getName().str().c_str());
+        if (printMissing)
+        {
+            llvm::outs() << "External function \""
+                         << function.getName()
+                         << "\" not available.\n";
         }
 
         Domain *returnValue = createTopReturnValue(function, mConstructors);

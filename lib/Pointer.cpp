@@ -267,8 +267,8 @@ Pointer::store(const Domain &value, State &state) const
 
         const Domain *source = state.findBlock(*it->second->mTarget);
         CANAL_ASSERT(source);
-        Domain *result = source->clone();
 
+        Domain *result = source->clone();
         std::vector<Domain*> destinations = dereference(result,
                                                         it->second->mOffsets);
 
@@ -281,6 +281,30 @@ Pointer::store(const Domain &value, State &state) const
         else
             state.addFunctionBlock(*it->second->mTarget, result);
     }
+}
+
+bool
+Pointer::isSingleTarget() const
+{
+    if (mTargets.size() != 1)
+        return false;
+
+    const Target *target = mTargets.begin()->second;
+    const Integer::Container *tmp =
+        dynCast<const Integer::Container*>(target->mNumericOffset);
+
+    if (tmp && !tmp->isSingleValue())
+        return false;
+
+    std::vector<Domain*>::const_iterator it = target->mOffsets.begin();
+    for (; it != target->mOffsets.end(); ++it)
+    {
+        tmp = dynCast<const Integer::Container*>(*it);
+        if (!tmp->isSingleValue())
+            return false;
+    }
+
+    return true;
 }
 
 Pointer *
@@ -312,31 +336,6 @@ Pointer::operator==(const Domain &value) const
     for (; it2 != mTargets.end(); ++it1, ++it2)
     {
         if (it1->first != it2->first || *it1->second != *it2->second)
-            return false;
-    }
-
-    return true;
-}
-
-bool
-Pointer::isSingleTarget() const
-{
-    if (mTargets.size() != 1)
-        return false;
-
-    const Target *target = mTargets.begin()->second;
-
-    const Integer::Container *tmp =
-        dynCast<const Integer::Container*>(target->mNumericOffset);
-
-    if (tmp && !tmp->isSingleValue())
-        return false;
-
-    std::vector<Domain*>::const_iterator it = target->mOffsets.begin();
-    for (; it != target->mOffsets.end(); ++it)
-    {
-        tmp = dynCast<const Integer::Container*>(*it);
-        if (!tmp->isSingleValue())
             return false;
     }
 

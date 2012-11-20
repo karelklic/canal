@@ -103,6 +103,9 @@ public:
 
     void store(const Domain &value, State &state) const;
 
+    /// Does this pointer point to single target?
+    bool isSingleTarget() const;
+
 private:
     /// Assignment operator declaration.  Prevents accidental
     /// assignments of domains.  Do not implement!
@@ -114,8 +117,6 @@ public: // Implementation of Domain.
     virtual Pointer *clone() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain &value) const;
-    /// Does this pointer point to single target?
-    bool isSingleTarget() const;
     /// Implementation of Domain::merge().
     virtual void merge(const Domain &value);
     /// Implementation of Domain::memoryUsage().

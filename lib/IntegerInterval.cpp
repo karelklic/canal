@@ -267,6 +267,15 @@ Interval::toString() const
 }
 
 void
+Interval::setZero(const llvm::Value *place)
+{
+    mEmpty = false;
+    mUnsignedTop = mSignedTop = false;
+    mUnsignedFrom = mUnsignedTo = mSignedFrom = mSignedTo =
+        llvm::APInt::getNullValue(mUnsignedFrom.getBitWidth());
+}
+
+void
 Interval::add(const Domain &a, const Domain &b)
 {
     const Interval &aa = dynCast<const Interval&>(a),
@@ -797,8 +806,8 @@ Interval::icmp(const Domain &a, const Domain &b,
     switch (predicate)
     {
     case llvm::CmpInst::ICMP_EQ:  // equal
-        // If both intervals are equal, the result is 1.  If
-        // interval intersection is empty, the result is 0.
+        // If both intervals are an equal constant, the result is 1.
+        // If interval intersection is empty, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (&a == &b)
         {
@@ -806,7 +815,7 @@ Interval::icmp(const Domain &a, const Domain &b,
             break;
         }
 
-        //Signed equality
+        // Signed equality
         if (aa.isSignedSingleValue() &&
             bb.isSignedSingleValue() &&
             aa.mSignedFrom == bb.mSignedFrom)
@@ -816,7 +825,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         else if (intersects(aa, bb, true, false))
             mSignedTop = true;
 
-        //Unsigned equality
+        // Unsigned equality
         if (aa.isUnsignedSingleValue() &&
             bb.isUnsignedSingleValue() &&
             aa.mUnsignedFrom == bb.mUnsignedFrom)
@@ -866,7 +875,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         if (aa.mUnsignedFrom.ugt(bb.mUnsignedTo))
             mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
         else if (intersects(aa, bb, false, true))
-            this->setTop();
+            setTop();
 
         break;
     case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
@@ -1185,15 +1194,6 @@ Interval::setTop()
 {
     mEmpty = false;
     mSignedTop = mUnsignedTop = true;
-}
-
-void
-Interval::setZero(const llvm::Value *place)
-{
-    mEmpty = false;
-    mUnsignedTop = mSignedTop = false;
-    mUnsignedFrom = mUnsignedTo = mSignedFrom = mSignedTo =
-        llvm::APInt::getNullValue(mUnsignedFrom.getBitWidth());
 }
 
 } // namespace Integer

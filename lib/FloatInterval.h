@@ -6,7 +6,7 @@
 namespace Canal {
 namespace Float {
 
-class Interval : public Domain, public AccuracyDomain
+class Interval : public Domain
 {
 public:
     bool mEmpty;
@@ -65,18 +65,6 @@ public: // Implementation of Domain.
     /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *place);
 
-public: // Implementation of AccuracyDomain.
-    // Implementation of AccuracyDomain::accuracy().
-    virtual float accuracy() const;
-    // Implementation of AccuracyDomain::isBottom().
-    virtual bool isBottom() const;
-    // Implementation of AccuracyDomain::setBottom().
-    virtual void setBottom();
-    // Implementation of AccuracyDomain::isTop().
-    virtual bool isTop() const;
-    // Implementation of AccuracyDomain::setTop().
-    virtual void setTop();
-
     virtual void fadd(const Domain &a, const Domain &b);
     virtual void fsub(const Domain &a, const Domain &b);
     virtual void fmul(const Domain &a, const Domain &b);
@@ -84,6 +72,16 @@ public: // Implementation of AccuracyDomain.
     virtual void frem(const Domain &a, const Domain &b);
     virtual void uitofp(const Domain &value);
     virtual void sitofp(const Domain &value);
+
+    virtual float accuracy() const;
+
+    virtual bool isBottom() const;
+
+    virtual void setBottom();
+
+    virtual bool isTop() const;
+
+    virtual void setTop();
 };
 
 } // namespace Float

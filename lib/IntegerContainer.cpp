@@ -171,6 +171,14 @@ Container::unsignedMax(llvm::APInt &result) const
     return true;
 }
 
+bool
+Container::isSingleValue() const
+{
+    return getBitfield().isSingleValue()
+        && getEnumeration().isSingleValue()
+        && getInterval().isSingleValue();
+}
+
 Container *
 Container::clone() const
 {
@@ -229,6 +237,16 @@ Container::toString() const
         ss << indent((*it)->toString(), 4);
 
     return ss.str();
+}
+
+void
+Container::setZero(const llvm::Value *place)
+{
+    std::vector<Domain*>::iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+        (*it)->setZero(place);
 }
 
 static void
@@ -445,103 +463,69 @@ Container::fptosi(const Domain &value)
 float
 Container::accuracy() const
 {
-    float accuracy = 0;
-    std::vector<Domain*>::const_iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
+    float maxAccuracy = 0;
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    // Find maximum accuracy and return it.
+    for (; it != itend; ++it)
     {
-        const AccuracyDomain *accuracyValue =
-            dynCast<const AccuracyDomain*>(*it);
-
-        if (!accuracyValue)
-            continue;
-
-        float localAccuracy = accuracyValue->accuracy();
-        if (localAccuracy > accuracy)
-            accuracy = localAccuracy;
+        float accuracy = (*it)->accuracy();
+        if (accuracy > maxAccuracy)
+            maxAccuracy = accuracy;
     }
-    return accuracy;
+
+    return maxAccuracy;
 }
 
 bool
 Container::isBottom() const
 {
-    std::vector<Domain*>::const_iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
     {
-        const AccuracyDomain *accuracyValue =
-            dynCast<const AccuracyDomain*>(*it);
-
-        if (!accuracyValue)
-            continue;
-
-        if (!accuracyValue->isBottom())
+        if (!(*it)->isBottom())
             return false;
     }
+
     return true;
 }
 
 void
 Container::setBottom()
 {
-    std::vector<Domain*>::iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
-    {
-        AccuracyDomain *accuracyValue =
-            dynCast<AccuracyDomain*>(*it);
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
 
-        if (!accuracyValue)
-            continue;
-
-        accuracyValue->setBottom();
-    }
+    for (; it != itend; ++it)
+        (*it)->setBottom();
 }
 
 bool
 Container::isTop() const
 {
-    std::vector<Domain*>::const_iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
     {
-        const AccuracyDomain *accuracyValue =
-            dynCast<const AccuracyDomain*>(*it);
-
-        if (!accuracyValue)
-            continue;
-
-        if (!accuracyValue->isTop())
+        if (!(*it)->isTop())
             return false;
     }
+
     return true;
 }
 
 void
 Container::setTop()
 {
-    std::vector<Domain*>::iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
-    {
-        AccuracyDomain *accuracyValue = dynCast<AccuracyDomain*>(*it);
-        if (!accuracyValue)
-            continue;
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
 
-        accuracyValue->setTop();
-    }
-}
-
-bool
-Container::isSingleValue() const
-{
-    return getBitfield().isSingleValue()
-        && getEnumeration().isSingleValue()
-        && getInterval().isSingleValue();
-}
-
-void
-Container::setZero(const llvm::Value *place)
-{
-    std::vector<Domain*>::iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
-        (*it)->setZero(place);
+    for (; it != itend; ++it)
+        (*it)->setTop();
 }
 
 } // namespace Integer

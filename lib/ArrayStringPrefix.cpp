@@ -99,6 +99,12 @@ StringPrefix::toString() const
 }
 
 void
+StringPrefix::setZero(const llvm::Value *place)
+{
+    setTop();
+}
+
+void
 StringPrefix::add(const Domain &a, const Domain &b)
 {
     setTop();
@@ -220,36 +226,6 @@ StringPrefix::fcmp(const Domain &a, const Domain &b,
     setTop();
 }
 
-std::vector<Domain*>
-StringPrefix::getItem(const Domain &offset) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-Domain *
-StringPrefix::getItem(uint64_t offset) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-StringPrefix::setItem(const Domain &offset, const Domain &value)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-StringPrefix::setItem(uint64_t offset, const Domain &value)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-StringPrefix::setZero(const llvm::Value *place)
-{
-    setTop();
-}
-
 bool
 StringPrefix::isBottom() const
 {
@@ -274,6 +250,30 @@ StringPrefix::setTop()
 {
     mIsBottom = false;
     mPrefix = "";
+}
+
+std::vector<Domain*>
+StringPrefix::getItem(const Domain &offset) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain *
+StringPrefix::getItem(uint64_t offset) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+StringPrefix::setItem(const Domain &offset, const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+StringPrefix::setItem(uint64_t offset, const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 } // namespace Array

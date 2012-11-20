@@ -537,6 +537,7 @@ Operations::sub(const llvm::BinaryOperator &instruction,
                      "Subtracting pointer from constant!");
 
     Domain *result = NULL;
+
     // Subtracting integer from pointer.
     if (aPointer && !bPointer)
     {
@@ -545,12 +546,9 @@ Operations::sub(const llvm::BinaryOperator &instruction,
     }
     else if (aPointer && bPointer) // Subtracting two pointers.
     {
-        // Create result value of required type and then run the desired
-        // operation.
+        // We set to top for now.
         result = mConstructors.create(*instruction.getType());
-        AccuracyDomain *accuracyDomain = dynCast<AccuracyDomain*>(result);
-        CANAL_ASSERT(accuracyDomain);
-        accuracyDomain->setTop();
+        result->setTop();
     }
     else
     {

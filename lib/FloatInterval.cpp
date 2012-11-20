@@ -47,7 +47,9 @@ Interval::compare(const Interval &value,
     if (isBottom() || value.isBottom())
         return -1;
 
-    switch (predicate) { //Handle ordered and false/true
+    // Handle ordered and false/true
+    switch (predicate)
+    {
     //   Opcode                        U L G E  Intuitive operation
     case llvm::CmpInst::FCMP_FALSE: // 0 0 0 0  always false (always folded)
         return 0;
@@ -57,23 +59,26 @@ Interval::compare(const Interval &value,
     case llvm::CmpInst::FCMP_OLT:   // 0 1 0 0  ordered and less than
     case llvm::CmpInst::FCMP_OLE:   // 0 1 0 1  ordered and less than or equal
     case llvm::CmpInst::FCMP_ONE:   // 0 1 1 0  ordered and operands are unequal
-        if (this->isNaN() || value.isNaN()) return 0; //Is unordered
+        if (isNaN() || value.isNaN())
+            return 0; // Is unordered
+
         break;
     case llvm::CmpInst::FCMP_ORD:   // 0 1 1 1  ordered (no nans)
-        return (this->isNaN() || value.isNaN() ? 0 : 1);
+        return (isNaN() || value.isNaN() ? 0 : 1);
     case llvm::CmpInst::FCMP_UNO:   // 1 0 0 0  unordered: isnan(X) | isnan(Y)
-        return (this->isNaN() || value.isNaN() ? 1 : 0);
+        return (isNaN() || value.isNaN() ? 1 : 0);
     case llvm::CmpInst::FCMP_UEQ:   // 1 0 0 1  unordered or equal
     case llvm::CmpInst::FCMP_UGT:   // 1 0 1 0  unordered or greater than
     case llvm::CmpInst::FCMP_UGE:   // 1 0 1 1  unordered, greater than, or equal
     case llvm::CmpInst::FCMP_ULT:   // 1 1 0 0  unordered or less than
     case llvm::CmpInst::FCMP_ULE:   // 1 1 0 1  unordered, less than, or equal
     case llvm::CmpInst::FCMP_UNE:   // 1 1 1 0  unordered or not equal
-        if (this->isNaN() || value.isNaN()) return 1; //Is unordered
+        if (isNaN() || value.isNaN())
+            return 1; // Is unordered
+
         break;
     case llvm::CmpInst::FCMP_TRUE:  // 1 1 1 1  always true (always folded)
         return 1;
-        break;
     default:
         CANAL_DIE();
     }
@@ -89,45 +94,73 @@ Interval::compare(const Interval &value,
     //   Opcode                        U L G E  Intuitive operation
     case llvm::CmpInst::FCMP_OEQ:   // 0 0 0 1  ordered and equal
     case llvm::CmpInst::FCMP_UEQ:   // 1 0 0 1  unordered or equal
-        if (this == &value || (this->isSingleValue() && this->operator ==(value)))
+        if (this == &value || (isSingleValue() && *this == value))
             return 1;
-        else if (this->intersects(value)) return 2;
-        else return 0;
+        else if (intersects(value))
+            return 2;
+        else
+            return 0;
+
         break;
     case llvm::CmpInst::FCMP_OGT:   // 0 0 1 0  ordered and greater than
     case llvm::CmpInst::FCMP_UGT:   // 1 0 1 0  unordered or greater than
-        res = this->mFrom.compare(value.mTo);
-        if (res == llvm::APFloat::cmpGreaterThan) return 1;
-        else if (this->intersects(value)) return 2;
-        else return 0;
+        res = mFrom.compare(value.mTo);
+        if (res == llvm::APFloat::cmpGreaterThan)
+            return 1;
+        else if (intersects(value))
+            return 2;
+        else
+            return 0;
+
         break;
     case llvm::CmpInst::FCMP_OGE:   // 0 0 1 1  ordered and greater than or equal
     case llvm::CmpInst::FCMP_UGE:   // 1 0 1 1  unordered, greater than, or equal
-        res = this->mFrom.compare(value.mTo);
-        if (res == llvm::APFloat::cmpGreaterThan || res == llvm::APFloat::cmpEqual) return 1;
-        else if (this->intersects(value)) return 2;
-        else return 0;
+        res = mFrom.compare(value.mTo);
+        if (res == llvm::APFloat::cmpGreaterThan ||
+            res == llvm::APFloat::cmpEqual)
+        {
+            return 1;
+        }
+        else if (intersects(value))
+            return 2;
+        else
+            return 0;
+
         break;
     case llvm::CmpInst::FCMP_OLT:   // 0 1 0 0  ordered and less than
     case llvm::CmpInst::FCMP_ULT:   // 1 1 0 0  unordered or less than
-        res = this->mTo.compare(value.mFrom);
-        if (res == llvm::APFloat::cmpLessThan) return 1;
-        else if (this->intersects(value)) return 2;
-        else return 0;
+        res = mTo.compare(value.mFrom);
+        if (res == llvm::APFloat::cmpLessThan)
+            return 1;
+        else if (intersects(value))
+            return 2;
+        else
+            return 0;
+
         break;
     case llvm::CmpInst::FCMP_OLE:   // 0 1 0 1  ordered and less than or equal
     case llvm::CmpInst::FCMP_ULE:   // 1 1 0 1  unordered, less than, or equal
-        res = this->mTo.compare(value.mFrom);
-        if (res == llvm::APFloat::cmpLessThan || res == llvm::APFloat::cmpEqual) return 1;
-        else if (this->intersects(value)) return 2;
-        else return 0;
+        res = mTo.compare(value.mFrom);
+        if (res == llvm::APFloat::cmpLessThan ||
+            res == llvm::APFloat::cmpEqual)
+        {
+            return 1;
+        }
+        else if (intersects(value))
+            return 2;
+        else
+            return 0;
+
         break;
     case llvm::CmpInst::FCMP_ONE:   // 0 1 1 0  ordered and operands are unequal
     case llvm::CmpInst::FCMP_UNE:   // 1 1 1 0  unordered or not equal
-        if (!this->intersects(value)) return 1;
-        else if (!(this == &value || (this->isSingleValue() && this->operator ==(value))))
+        if (!intersects(value))
+            return 1;
+        else if (!(this == &value || (isSingleValue() && *this == value)))
             return 2;
-        else return 0;
+        else
+            return 0;
+
         break;
     default:
         CANAL_DIE();
@@ -155,13 +188,18 @@ bool
 Interval::intersects(const Interval &value) const
 {
     llvm::APFloat::cmpResult res;
-    res = this->getMax().compare(value.getMin());
-    if (res == llvm::APFloat::cmpEqual || res == llvm::APFloat::cmpGreaterThan) {
-        res = this->getMin().compare(value.getMax());
-        if (res == llvm::APFloat::cmpEqual || res == llvm::APFloat::cmpLessThan) {
+    res = getMax().compare(value.getMin());
+    if (res == llvm::APFloat::cmpEqual ||
+        res == llvm::APFloat::cmpGreaterThan)
+    {
+        res = getMin().compare(value.getMax());
+        if (res == llvm::APFloat::cmpEqual ||
+            res == llvm::APFloat::cmpLessThan)
+        {
             return true;
         }
     }
+
     return false;
 }
 
@@ -177,11 +215,10 @@ Interval::getMin() const
     return (mTop ? llvm::APFloat::getLargest(getSemantics(), true) : mFrom);
 }
 
-
 bool
 Interval::isNaN() const
 {
-    return this->mFrom.isNaN() || this->mTo.isNaN();
+    return mFrom.isNaN() || mTo.isNaN();
 }
 
 Interval *
@@ -252,61 +289,6 @@ Interval::toString() const
     return ss.str();
 }
 
-float
-Interval::accuracy() const
-{
-    if (mEmpty)
-        return 1.0f;
-
-    if (mTop)
-        return 0.0f;
-
-    llvm::APFloat divisor = llvm::APFloat::getLargest(
-        getSemantics(), /*negative=*/false);
-
-    llvm::APFloat::opStatus status = divisor.subtract(
-        llvm::APFloat::getLargest(getSemantics(), /*negative=*/true),
-        llvm::APFloat::rmNearestTiesToEven);
-
-    CANAL_ASSERT(status == llvm::APFloat::opOK);
-
-    llvm::APFloat dividend = mTo;
-    status = dividend.subtract(mFrom, llvm::APFloat::rmNearestTiesToEven);
-    CANAL_ASSERT(status == llvm::APFloat::opOK);
-
-    llvm::APFloat coverage = dividend;
-    status = coverage.divide(divisor, llvm::APFloat::rmNearestTiesToEven);
-    CANAL_ASSERT(status == llvm::APFloat::opOK);
-
-    float result = 1.0f - coverage.convertToFloat();
-    return result > 1.0f ? 1.0f : (result < 0.0f ? 0.0f : result);
-}
-
-bool
-Interval::isBottom() const
-{
-    return mEmpty;
-}
-
-void
-Interval::setBottom()
-{
-    mEmpty = true;
-}
-
-bool
-Interval::isTop() const
-{
-    return !mEmpty && mTop;
-}
-
-void
-Interval::setTop()
-{
-    mEmpty = false;
-    mTop = true;
-}
-
 void
 Interval::setZero(const llvm::Value *place)
 {
@@ -315,14 +297,24 @@ Interval::setZero(const llvm::Value *place)
     mTo = llvm::APFloat::getZero(mTo.getSemantics());
 }
 
-//See IntegerInterval.cpp minMax
-static bool minMax(llvm::APFloat& min, llvm::APFloat &max,
-                   const llvm::APFloat& fromFrom, const llvm::APFloat& fromTo,
-                   const llvm::APFloat& toFrom, const llvm::APFloat& toTo)
+// See IntegerInterval.cpp minMax
+static bool
+minMax(llvm::APFloat& min,
+       llvm::APFloat &max,
+       const llvm::APFloat& fromFrom,
+       const llvm::APFloat& fromTo,
+       const llvm::APFloat& toFrom,
+       const llvm::APFloat& toTo)
 {
     llvm::APFloat::cmpResult res;
-#define CMP(x, y) res = x.compare(y); if (res == llvm::APFloat::cmpUnordered) return true;
+
+#define CMP(x, y)                           \
+    res = x.compare(y);                     \
+    if (res == llvm::APFloat::cmpUnordered) \
+        return true;
+
 #define CMPRES res == llvm::APFloat::cmpLessThan
+
     CMP(toTo, toFrom);
     if (CMPRES)
     { // toTo < toFrom
@@ -433,18 +425,23 @@ static bool minMax(llvm::APFloat& min, llvm::APFloat &max,
     return false;
 }
 
-#define OVERFLOW_TO_TOP(op) if (op != llvm::APFloat::opOK) return setTop();
+#define OVERFLOW_TO_TOP(op)        \
+    if (op != llvm::APFloat::opOK) \
+        return setTop();
 
 void
 Interval::fadd(const Domain &a, const Domain &b)
 {
     const Interval &aa = dynCast<const Interval&>(a),
         &bb = dynCast<const Interval&>(b);
+
     mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty) return;
+    if (mEmpty)
+        return;
 
     mTop = (aa.mTop || bb.mTop);
-    if (!mTop) {
+    if (!mTop)
+    {
         mFrom = aa.mFrom;
         OVERFLOW_TO_TOP(mFrom.add(bb.mFrom, ROUNDING_MODE));
 
@@ -458,11 +455,14 @@ Interval::fsub(const Domain &a, const Domain &b)
 {
     const Interval &aa = dynCast<const Interval&>(a),
         &bb = dynCast<const Interval&>(b);
+
     mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty) return;
+    if (mEmpty)
+        return;
 
     mTop = (aa.mTop || bb.mTop);
-    if (!mTop) {
+    if (!mTop)
+    {
         mFrom = aa.mFrom;
         OVERFLOW_TO_TOP(mFrom.subtract(bb.mFrom, ROUNDING_MODE));
 
@@ -476,18 +476,21 @@ Interval::fmul(const Domain &a, const Domain &b)
 {
     const Interval &aa = dynCast<const Interval&>(a),
         &bb = dynCast<const Interval&>(b);
+
     mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty) return;
+    if (mEmpty)
+        return;
 
     mTop = (aa.mTop || bb.mTop);
-    if (!mTop) {
+    if (!mTop)
+    {
         llvm::APFloat fromFrom(aa.mFrom), fromTo(aa.mFrom),
                 toFrom(aa.mTo), toTo(aa.mTo);
+
         OVERFLOW_TO_TOP(fromFrom.multiply(bb.mFrom, ROUNDING_MODE));
         OVERFLOW_TO_TOP(fromTo.multiply(bb.mTo, ROUNDING_MODE));
         OVERFLOW_TO_TOP(toFrom.multiply(bb.mFrom, ROUNDING_MODE));
         OVERFLOW_TO_TOP(toTo.multiply(bb.mTo, ROUNDING_MODE));
-
         mTop = minMax(mFrom, mTo,
                fromFrom, fromTo, toFrom, toTo);
     }
@@ -498,18 +501,21 @@ Interval::fdiv(const Domain &a, const Domain &b)
 {
     const Interval &aa = dynCast<const Interval&>(a),
         &bb = dynCast<const Interval&>(b);
+
     mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty) return;
+    if (mEmpty)
+        return;
 
     mTop = (aa.mTop || bb.mTop);
-    if (!mTop) {
+    if (!mTop)
+    {
         llvm::APFloat fromFrom(aa.mFrom), fromTo(aa.mFrom),
                 toFrom(aa.mTo), toTo(aa.mTo);
+
         OVERFLOW_TO_TOP(fromFrom.divide(bb.mFrom, ROUNDING_MODE));
         OVERFLOW_TO_TOP(fromTo.divide(bb.mTo, ROUNDING_MODE));
         OVERFLOW_TO_TOP(toFrom.divide(bb.mFrom, ROUNDING_MODE));
         OVERFLOW_TO_TOP(toTo.divide(bb.mTo, ROUNDING_MODE));
-
         mTop = minMax(mFrom, mTo,
                fromFrom, fromTo, toFrom, toTo);
     }
@@ -520,8 +526,10 @@ Interval::frem(const Domain &a, const Domain &b)
 {
     const Interval &aa = dynCast<const Interval&>(a),
         &bb = dynCast<const Interval&>(b);
+
     mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty) return;
+    if (mEmpty)
+        return;
 
     mTop = (aa.mTop || bb.mTop);
     setTop();
@@ -530,27 +538,95 @@ Interval::frem(const Domain &a, const Domain &b)
 #undef OVERFLOW_TO_TOP
 
 void
-Interval::uitofp(const Domain &value) {
-    const Canal::Integer::Container &c = dynCast<const Canal::Integer::Container&>(value);
+Interval::uitofp(const Domain &value)
+{
+    const Integer::Container &c =
+        dynCast<const Integer::Container&>(value);
+
     llvm::APInt min, max;
-    if (!c.getInterval().unsignedMin(min) || !c.getInterval().unsignedMax(max)) {
-        return setTop();
+    if (!c.getInterval().unsignedMin(min) ||
+        !c.getInterval().unsignedMax(max))
+    {
+        setTop();
+        return;
     }
+
     mFrom = llvm::APFloat(min);
     mTo = llvm::APFloat(max);
 }
 
 void
-Interval::sitofp(const Domain &value) {
-    const Canal::Integer::Container &c = dynCast<const Canal::Integer::Container&>(value);
+Interval::sitofp(const Domain &value)
+{
+    const Integer::Container &c =
+        dynCast<const Integer::Container&>(value);
+
     llvm::APInt min, max;
-    if (!c.getInterval().signedMin(min) || !c.getInterval().signedMax(max)) {
-        return setTop();
+    if (!c.getInterval().signedMin(min) ||
+        !c.getInterval().signedMax(max))
+    {
+        setTop();
+        return;
     }
+
     mFrom = llvm::APFloat(min);
     mTo = llvm::APFloat(max);
 }
 
+float
+Interval::accuracy() const
+{
+    if (mEmpty)
+        return 1.0f;
+
+    if (mTop)
+        return 0.0f;
+
+    llvm::APFloat divisor = llvm::APFloat::getLargest(
+        getSemantics(), /*negative=*/false);
+
+    llvm::APFloat::opStatus status = divisor.subtract(
+        llvm::APFloat::getLargest(getSemantics(), /*negative=*/true),
+        llvm::APFloat::rmNearestTiesToEven);
+
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+    llvm::APFloat dividend = mTo;
+    status = dividend.subtract(mFrom, llvm::APFloat::rmNearestTiesToEven);
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+    llvm::APFloat coverage = dividend;
+    status = coverage.divide(divisor, llvm::APFloat::rmNearestTiesToEven);
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+    float result = 1.0f - coverage.convertToFloat();
+    return result > 1.0f ? 1.0f : (result < 0.0f ? 0.0f : result);
+}
+
+bool
+Interval::isBottom() const
+{
+    return mEmpty;
+}
+
+void
+Interval::setBottom()
+{
+    mEmpty = true;
+}
+
+bool
+Interval::isTop() const
+{
+    return !mEmpty && mTop;
+}
+
+void
+Interval::setTop()
+{
+    mEmpty = false;
+    mTop = true;
+}
 
 } // namespace Float
 } // namespace Canal

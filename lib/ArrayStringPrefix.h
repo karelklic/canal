@@ -9,7 +9,7 @@ namespace Array {
 
 /// Array with exact size and limited length.  It keeps all array
 /// members separately, not losing precision at all.
-class StringPrefix : public Domain, public Interface, public AccuracyDomain
+class StringPrefix : public Domain, public Interface
 {
 public:
     std::string mPrefix;
@@ -91,6 +91,14 @@ public: // Implementation of Domain.
     virtual void fcmp(const Domain &a, const Domain &b,
                       llvm::CmpInst::Predicate predicate);
 
+    virtual bool isBottom() const;
+
+    virtual void setBottom();
+
+    virtual bool isTop() const;
+
+    virtual void setTop();
+
 public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::getItem().
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
@@ -100,16 +108,6 @@ public: // Implementation of Array::Interface.
     virtual void setItem(const Domain &offset, const Domain &value);
     /// Implementation of Array::Interface::setItem().
     virtual void setItem(uint64_t offset, const Domain &value);
-
-public: // Implementation of AccuracyDomain
-    /// Implementation of AccuracyDomain::isBottom().
-    virtual bool isBottom() const;
-    /// Implementation of AccuracyDomain::setBottom().
-    virtual void setBottom();
-    /// Implementation of AccuracyDomain::isTop().
-    virtual bool isTop() const;
-    /// Implementation of AccuracyDomain::setTop().
-    virtual void setTop();
 };
 
 } // namespace Array

@@ -7,7 +7,7 @@
 namespace Canal {
 namespace Integer {
 
-class Enumeration : public Domain, public AccuracyDomain
+class Enumeration : public Domain
 {
 public:
     APIntUtils::USet mValues;
@@ -129,16 +129,14 @@ public: // Implementation of Domain.
     virtual void fptoui(const Domain &value);
     virtual void fptosi(const Domain &value);
 
-public: // Implementation of AccuracyDomain.
-    /// Implementation of AccuracyDomain::accuracy().
     virtual float accuracy() const;
-    /// Implementation of AccuracyDomain::isBottom().
+
     virtual bool isBottom() const;
-    /// Implementation of AccuracyDomain::setBottom().
+
     virtual void setBottom();
-    /// Implementation of AccuracyDomain::isTop().
+
     virtual bool isTop() const;
-    /// Implementation of AccuracyDomain::setTop().
+
     virtual void setTop();
 
 protected:
