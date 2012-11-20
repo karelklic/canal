@@ -4,6 +4,8 @@
 #include "Domain.h"
 #include "PointerTarget.h"
 #include <map>
+#include <typeinfo>
+#include "SuperPtr.h"
 
 namespace llvm {
 class Domain;
@@ -128,6 +130,10 @@ public: // Implementation of Domain.
     virtual std::string toString() const;
     /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *place);
+
+    static bool classof(const Domain* dom) {
+        return typeid(*dom) == typeid(Pointer) || typeid(*dom) == typeid(SuperPtr<Pointer>);
+    }
 };
 
 } // namespace Pointer

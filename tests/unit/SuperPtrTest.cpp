@@ -90,27 +90,38 @@ static void PointerTest(const Environment &environment) {
     const llvm::PointerType &ptrType =
         *llvm::Type::getInt1PtrTy(environment.getContext());
     typedef SuperPtr<Pointer::Pointer> type;
+    typedef const Pointer::Pointer type_const;
     type tmp1(Pointer::Pointer(environment, ptrType));
-    const type& tmp1ref = tmp1;
+    const type& tmp1ref = llvm::cast<type&>(tmp1);
+    const type_const& tmp1ref_consts = llvm::cast<type_const&>(tmp1);
     const Pointer::Pointer& tmpPointer1 = tmp1;
     const Pointer::Pointer* ptrPointer1 = tmp1;
-    //const Pointer::Pointer& tmpRef1 = dynCast<Pointer::Pointer&>(tmp1); FAIL
+    const Pointer::Pointer& tmpRef1 = llvm::cast<const Pointer::Pointer&>(tmp1);
+    type& tmpRef2 = llvm::cast<type&>(tmp1); //Returns invalid object
+    llvm::Value* val = new llvm::GlobalVariable(llvm::Type::getInt1PtrTy(environment.getContext()), true, llvm::GlobalValue::ExternalLinkage);
+    //tmpRef2.setZero(val);
     Pointer::Pointer tmpPointer2 = tmp1ref;
+    std::cout << llvm::isa<Pointer::Pointer>(tmpPointer1) << std::endl;
+    std::cout << llvm::isa<Pointer::Pointer>(ptrPointer1) << std::endl;
+    std::cout << llvm::isa<Pointer::Pointer>(tmpPointer2) << std::endl;
+    std::cout << llvm::isa<Pointer::Pointer>(tmp1ref) << std::endl;
+    CANAL_ASSERT(tmp1ref_consts == tmpPointer1);
+    CANAL_ASSERT(tmpRef1.isSingleTarget() == false);
     CANAL_ASSERT(tmp1 == Pointer::Pointer(environment, ptrType));
     CANAL_ASSERT(ptrPointer1->isSingleTarget() == false);
     CANAL_ASSERT(tmpPointer1.isSingleTarget() == false);
     CANAL_ASSERT(tmpPointer2.isSingleTarget() == false);
     CANAL_ASSERT(tmp1->isSingleTarget() == false); //Test of constant method call
     CANAL_ASSERT(tmp1ref->isSingleTarget() == false);
-    llvm::Value* val = new llvm::GlobalVariable(llvm::Type::getInt1PtrTy(environment.getContext()), true, llvm::GlobalValue::ExternalLinkage);
-    //tmp1->setZero(); //Should not and does not work
+
+    //tmp1.setZero(val); //Should not and does not work
     tmp1.modifiable().setZero(val); //This does work
     CANAL_ASSERT(tmpPointer1.isSingleTarget() == true);
     CANAL_ASSERT(tmpPointer2 != tmp1);
-    //const Pointer::Pointer& tmpPointer3 = tmp1;
+    const Pointer::Pointer& tmpPointer3 = tmp1;
     //Test merge - Domain method
     tmp1.merge(tmpPointer2);
-    //CANAL_ASSERT(tmpPointer3 == tmp1); WILL FAIL because dynCast<Pointer::Pointer*>(tmp1) = NULL
+    //CANAL_ASSERT(tmpPointer3 == tmp1); //WILL FAIL because dynCast<Pointer::Pointer*>(tmp1) = NULL
     delete val;
 }
 

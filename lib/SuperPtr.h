@@ -3,6 +3,7 @@
 
 #include "Domain.h"
 #include <utility>
+#include <typeinfo>
 #ifdef DEBUG
 #include <iostream>
 #endif
@@ -237,7 +238,7 @@ namespace Canal {
     };
 
 /// Test for base class - from http://stackoverflow.com/questions/281725/template-specialization-based-on-inherit-class/282006#282006
-namespace {
+//namespace {
     template<bool C, typename T = void>
     struct enable_if {
       typedef T type;
@@ -311,6 +312,9 @@ namespace {
             type* ret = new type(*cloned); \
             delete cloned; \
             return ret; \
+        }\
+        static bool classof(const Domain* val) {\
+            return typeid(*val) == typeid(T);\
         }
 
         CLONE_METHODS(SuperPtrDomain<T>)
@@ -387,7 +391,7 @@ namespace {
         UOP(sitofp)
 #undef UOP
     };
-}
+//}
     /// Super ptr for Domain
     template <typename T>
     class SuperPtr<T, typename domain_check< is_base_of<Domain, T>::value, //Is descendant of Domain
