@@ -18,6 +18,7 @@ StateMap::~StateMap()
 bool
 StateMap::operator==(const StateMap &map) const
 {
+    if (&map == this) return true;
     if (size() != map.size())
         return false;
 

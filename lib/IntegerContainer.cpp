@@ -188,6 +188,7 @@ Container::clone() const
 bool
 Container::operator==(const Domain &value) const
 {
+    if (&value == this) return true;
     const Container *container = dynCast<const Container*>(&value);
     if (!container)
         return false;

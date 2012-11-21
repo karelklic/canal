@@ -202,6 +202,7 @@ Bitfield::clone() const
 bool
 Bitfield::operator==(const Domain& value) const
 {
+    if (&value == this) return true;
     const Bitfield *other = dynCast<const Bitfield*>(&value);
     if (!other)
         return false;
