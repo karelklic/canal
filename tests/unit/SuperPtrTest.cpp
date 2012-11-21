@@ -103,7 +103,7 @@ static void PointerTest(const Environment &environment) {
     typedef SuperPtr<Pointer::Pointer> type;
     typedef const Pointer::Pointer type_const;
     type tmp1(Pointer::Pointer(environment, ptrType));
-    const type& tmp1ref = llvm::cast<type&>(tmp1);
+    const type& tmp1ref = dynCast<type&>(tmp1);
     const Pointer::Pointer& tmpPointer1 = tmp1;
     const Pointer::Pointer* ptrPointer1 = tmp1;
     CANAL_ASSERT(tmp1 == Pointer::Pointer(environment, ptrType));
@@ -118,7 +118,7 @@ static void PointerTest(const Environment &environment) {
     const Pointer::Pointer& tmpPointer3 = tmp1;
     //Test merge - Domain method
     tmp1.merge(tmpPointer1);
-    CANAL_ASSERT(tmpPointer3 == tmp1); //WILL FAIL because dynCast<Pointer::Pointer*>(tmp1) = NULL
+    CANAL_ASSERT(tmpPointer3 == tmp1);
     delete val;
 }
 
