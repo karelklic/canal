@@ -88,11 +88,12 @@ dereference(Domain *block,
     {
         const Integer::Container &first =
             dynCast<const Integer::Container&>(*offsets[0]);
+        const Integer::Enumeration &firstEnumeration = first.getEnumeration();
 
-        CANAL_ASSERT_MSG(first.getEnumeration().mValues.size() == 1,
+        CANAL_ASSERT_MSG(firstEnumeration.mValues.size() == 1,
                          "First offset is expected to be zero!");
 
-        CANAL_ASSERT_MSG(first.getEnumeration().mValues.begin()->isMinValue(),
+        CANAL_ASSERT_MSG(firstEnumeration.mValues.begin()->isMinValue(),
                          "First offset is expected to be zero!");
 
         std::vector<Domain*>::const_iterator itOffsets = offsets.begin() + 1;
@@ -135,11 +136,12 @@ dereference(const Domain *block,
     {
         const Integer::Container &first =
             dynCast<const Integer::Container&>(*offsets[0]);
+        const Integer::Enumeration &firstEnumeration = first.getEnumeration();
 
-        CANAL_ASSERT_MSG(first.getEnumeration().mValues.size() == 1,
+        CANAL_ASSERT_MSG(firstEnumeration.mValues.size() == 1,
                          "First offset is expected to be zero!");
 
-        CANAL_ASSERT_MSG(first.getEnumeration().mValues.begin()->isMinValue(),
+        CANAL_ASSERT_MSG(firstEnumeration.mValues.begin()->isMinValue(),
                          "First offset is expected to be zero!");
 
         std::vector<Domain*>::const_iterator itOffsets = offsets.begin() + 1;

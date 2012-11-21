@@ -2,12 +2,12 @@
 #define LIBCANAL_COW_H
 
 #include "Domain.h"
+#include "ArrayInterface.h"
 #include <utility>
 #include <typeinfo>
 #ifdef DEBUG
 #include <iostream>
 #endif
-#include <iostream>
 
 namespace Canal {
     template<typename T, typename = void>
@@ -277,14 +277,30 @@ namespace Canal {
                                            void volatile const>::value;
     };
 
-    /// Super ptr for Domain
+    template <bool>
+    struct static_not {
+        static const bool value = true;
+    };
+    template <>
+    struct static_not<true> {
+        static const bool value = false;
+    };
+
+    template <bool, bool>
+    struct static_and {
+        static const bool value = false;
+    };
+    template<>
+    struct static_and<true, true> {
+        static const bool value = true;
+    };
+
     template <typename T>
-    class COW<T, typename enable_if<is_base_of<Domain, T>::value>::type > //T is descendant of Domain
-        : public COWConst<T>, public Domain {
+    class COWDomain : public COWConst<T>, public Domain {
     public:
         /// Constructors
-        COW(const T &instance) : Domain(instance), COWConst<T>(instance) {}
-        COW(const COW<T> &copy) : Domain(copy.mInstance->first), COWConst<T>(copy) {}
+        COWDomain(const T &instance) : Domain(instance), COWConst<T>(instance) {}
+        COWDomain(const COWDomain<T> &copy) : Domain(copy.mInstance->first), COWConst<T>(copy) {}
 
         /// Conversion to const object reference
         operator const T& () const {
@@ -303,7 +319,6 @@ namespace Canal {
         }
 
         T& modifiable() {
-            std::cout << "COW modifiable" << std::endl;
 #ifdef DEBUG
             std::cout << "Conversion to modifiable reference" << std::endl;
 #endif
@@ -311,12 +326,19 @@ namespace Canal {
             return this->mInstance->first;
         }
 
-        virtual COW<T>* clone() const {
 #ifdef DEBUG
-            std::cout << "clone" << std::endl;
-#endif
-            return new COW<T>(*this);
+#define CLONE(TYPE) \
+        virtual TYPE* clone() const { \
+            std::cout << "clone for " #TYPE << std::endl; \
+            return new TYPE(*this); \
         }
+#else
+#define CLONE(TYPE) \
+        virtual TYPE* clone() const { \
+            return new TYPE(*this); \
+        }
+#endif
+        CLONE(COWDomain<T>)
 
         virtual bool operator==(const Canal::Domain& other) const {
 #ifdef DEBUG
@@ -452,6 +474,81 @@ namespace Canal {
             this->mInstance->first.setTop();
         }
     };
+
+    /// COW for Domain, which is not Array::Interface
+    template <typename T>
+    class COW<T, typename enable_if<
+            static_and<
+                is_base_of<Domain, T>::value, //T is descendant of Domain
+                static_not<is_base_of<Array::Interface, T>::value>::value //T is NOT descendat of Array::Interface
+            >::value
+        >::type > : public COWDomain<T> {
+    public:
+        COW(const T &instance) : COWDomain<T>(instance) {}
+        COW(const COW<T> &copy) : COWDomain<T>(copy) {}
+        CLONE(COW<T>)
+    };
+
+    /// COW for Domain, which is Array::Interface
+    template <typename T>
+    class COW<T, typename enable_if<
+            static_and<
+                is_base_of<Domain, T>::value, //T is descendant of Domain
+                is_base_of<Array::Interface, T>::value //T is also descendat of Array::Interface
+            >::value
+        >::type > : public COWDomain<T>, public Array::Interface {
+    public:
+        COW(const T &instance) : COWDomain<T>(instance) {}
+        COW(const COW<T> &copy) : COWDomain<T>(copy) {}
+        CLONE(COW<T>)
+
+        // Implement Array::Interface
+
+        Domain* getValue(const Domain& offset) const {
+#ifdef DEBUG
+            std::cout << "getValue(Domain)" << std::endl;
+#endif
+            return this->mInstance->first.getValue(offset);
+        }
+
+        Domain* getValue(uint64_t offset) const {
+#ifdef DEBUG
+            std::cout << "getValue(uint64_t)" << std::endl;
+#endif
+            return this->mInstance->first.getValue(offset);
+        }
+
+        virtual std::vector<Domain*> getItem(const Domain &offset) const {
+#ifdef DEBUG
+            std::cout << "getItem(Domain)" << std::endl;
+#endif
+            return this->mInstance->first.getItem(offset);
+        }
+
+        virtual Domain* getItem(uint64_t offset) const {
+#ifdef DEBUG
+            std::cout << "getItem(uint64_t)" << std::endl;
+#endif
+            return this->mInstance->first.getItem(offset);
+        }
+
+        virtual void setItem(const Domain &offset, const Domain &value) {
+#ifdef DEBUG
+            std::cout << "setItem(Domain)" << std::endl;
+#endif
+            this->write();
+            return this->mInstance->first.setItem(offset, value);
+        }
+
+        virtual void setItem(uint64_t offset, const Domain &value) {
+#ifdef DEBUG
+            std::cout << "setItem(uint64_t)" << std::endl;
+#endif
+            this->write();
+            return this->mInstance->first.setItem(offset, value);
+        }
+    };
+#undef CLONE
 } // namespace Canal
 //Allow domain class to use COW
 //Defines T_type as COW<T>

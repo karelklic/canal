@@ -3,6 +3,7 @@
 
 #include "Domain.h"
 #include "ArrayInterface.h"
+#include "COW.h"
 
 namespace Canal {
 namespace Array {
@@ -108,7 +109,7 @@ public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::setItem().
     virtual void setItem(uint64_t offset, const Domain &value);
 };
-DONT_USE_COW(ExactSize);
+USE_COW(ExactSize);
 } // namespace Array
 } // namespace Canal
 

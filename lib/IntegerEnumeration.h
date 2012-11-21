@@ -3,6 +3,7 @@
 
 #include "Domain.h"
 #include "APIntUtils.h"
+#include "COW.h"
 
 namespace Canal {
 namespace Integer {
@@ -145,7 +146,7 @@ protected:
                         APIntUtils::Operation operation1,
                         APIntUtils::OperationWithOverflow operation2);
 };
-DONT_USE_COW(Enumeration);
+USE_COW(Enumeration);
 } // namespace Integer
 } // namespace Canal
 #endif // LIBCANAL_INTEGER_ENUMERATION_H

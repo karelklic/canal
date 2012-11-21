@@ -14,8 +14,8 @@ Container::Container(const Environment &environment,
     : Domain(environment)
 {
     mValues.push_back(new Bitfield_type(Bitfield(environment, bitWidth)));
-    mValues.push_back(new Enumeration(environment, bitWidth));
-    mValues.push_back(new Interval(environment, bitWidth));
+    mValues.push_back(new Enumeration_type(Enumeration(environment, bitWidth)));
+    mValues.push_back(new Interval_type(Interval(environment, bitWidth)));
 }
 
 Container::Container(const Environment &environment,
@@ -23,8 +23,8 @@ Container::Container(const Environment &environment,
     : Domain(environment)
 {
     mValues.push_back(new Bitfield_type(Bitfield(environment, number)));
-    mValues.push_back(new Enumeration(environment, number));
-    mValues.push_back(new Interval(environment, number));
+    mValues.push_back(new Enumeration_type(Enumeration(environment, number)));
+    mValues.push_back(new Interval_type(Interval(environment, number)));
 }
 
 Container::Container(const Container &value)
@@ -47,16 +47,16 @@ Container::getBitWidth() const
     return getEnumeration().getBitWidth();
 }
 
-Bitfield_type &
+Bitfield &
 Container::getBitfield()
 {
-    return dynCast<Bitfield_type&>(*mValues[0]);
+    return dynCast<Bitfield&>(*mValues[0]);
 }
 
-const Canal::Integer::Bitfield_type &
+const Canal::Integer::Bitfield &
 Container::getBitfield () const
 {
-    return dynCast<const Bitfield_type&>(*mValues[0]);
+    return dynCast<const Bitfield&>(*mValues[0]);
 }
 
 Enumeration &
@@ -96,7 +96,7 @@ Container::signedMin(llvm::APInt &result) const
     if (result.sgt(temp))
         result = temp;
 
-    if (!((const Bitfield&) getBitfield()).signedMin(temp))
+    if (!getBitfield().signedMin(temp))
         return false;
 
     if (result.sgt(temp))
@@ -118,7 +118,7 @@ Container::signedMax(llvm::APInt &result) const
     if (result.slt(temp))
         result = temp;
 
-    if (!((const Bitfield&) getBitfield()).signedMax(temp))
+    if (!getBitfield().signedMax(temp))
         return false;
 
     if (result.slt(temp))
@@ -140,7 +140,7 @@ Container::unsignedMin(llvm::APInt &result) const
     if (result.ugt(temp))
         result = temp;
 
-    if (!((const Bitfield&) getBitfield()).unsignedMin(temp))
+    if (!getBitfield().unsignedMin(temp))
         return false;
 
     if (result.ugt(temp))
@@ -162,7 +162,7 @@ Container::unsignedMax(llvm::APInt &result) const
     if (result.ult(temp))
         result = temp;
 
-    if (!((const Bitfield&) getBitfield()).unsignedMax(temp))
+    if (!getBitfield().unsignedMax(temp))
         return false;
 
     if (result.ult(temp))
@@ -174,7 +174,7 @@ Container::unsignedMax(llvm::APInt &result) const
 bool
 Container::isSingleValue() const
 {
-    return ((const Bitfield&) getBitfield()).isSingleValue()
+    return getBitfield().isSingleValue()
         && getEnumeration().isSingleValue()
         && getInterval().isSingleValue();
 }

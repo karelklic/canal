@@ -314,17 +314,6 @@ struct dynCastStruct<X, Y,
                               << " to " << typeid(X).name());
         }
         return *r;
-        /*try
-        {
-            return dynamic_cast<X>(val);
-        }
-        catch (std::bad_cast exception) {
-            try { //Try COW - if fails, do nothing
-                return static_if_cast<X, Y>::static_if(val);
-            }
-            catch (...) {}
-            CANAL_FATAL_ERROR(exception.what());
-        }*/
     }
     /// Cast for const reference -> try const COW<X>
     static inline X cast_const(const Y &val)
@@ -339,20 +328,6 @@ struct dynCastStruct<X, Y,
                               << " to " << typeid(X).name());
         }
         return *r;
-        /*try
-        {
-            return dynamic_cast<X>(val);
-        }
-        catch (std::bad_cast exception)
-        {
-            try { //Try COW - if fails, do nothing
-                return COWCast<X, Y>::constant(val);
-            }
-            catch (...) {}
-            CANAL_FATAL_ERROR(exception.what()
-                              << " from " << typeid(val).name()
-                              << " to " << typeid(X).name());
-        }*/
     }
     /// Cast for pointer -> try COW<X>* if X is not const, const COW<X>* if X is const
     static inline X cast(Y *val)

@@ -31,8 +31,8 @@ public:
 
     unsigned getBitWidth() const;
 
-    Canal::Integer::Bitfield_type &getBitfield();
-    const Bitfield_type &getBitfield() const;
+    Canal::Integer::Bitfield &getBitfield();
+    const Bitfield &getBitfield() const;
 
     Enumeration &getEnumeration();
     const Enumeration &getEnumeration() const;
@@ -151,7 +151,7 @@ public: // Implementation of Domain.
 
     virtual void setTop();
 };
-DONT_USE_COW(Container);
+USE_COW(Container);
 } // namespace Integer
 } // namespace Canal
 

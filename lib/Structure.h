@@ -3,6 +3,7 @@
 
 #include "Domain.h"
 #include "ArrayInterface.h"
+#include "COW.h"
 #include <vector>
 
 namespace Canal {
@@ -50,7 +51,7 @@ public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::set().
     virtual void setItem(uint64_t offset, const Domain &value);
 };
-DONT_USE_COW(Structure);
+USE_COW(Structure);
 } // namespace Canal
 
 #endif // LIBCANAL_STRUCTURE_H

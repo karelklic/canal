@@ -2,6 +2,7 @@
 #define LIBCANAL_FLOAT_INTERVAL_H
 
 #include "Domain.h"
+#include "COW.h"
 
 namespace Canal {
 namespace Float {
@@ -83,7 +84,7 @@ public: // Implementation of Domain.
 
     virtual void setTop();
 };
-DONT_USE_COW(Interval);
+USE_COW(Interval);
 } // namespace Float
 } // namespace Canal
 

@@ -282,47 +282,47 @@ Constructors::create(const llvm::Constant &value,
 Domain *
 Constructors::createInteger(unsigned bitWidth) const
 {
-    return new Integer::Container(mEnvironment, bitWidth);
+    return new Integer::Container_type(Integer::Container(mEnvironment, bitWidth));
 }
 
 Domain *
 Constructors::createInteger(const llvm::APInt &number) const {
-    return new Integer::Container(mEnvironment, number);
+    return new Integer::Container_type(Integer::Container(mEnvironment, number));
 }
 
 Domain *
 Constructors::createFloat(const llvm::fltSemantics &semantics) const {
-    return new Float::Interval(mEnvironment, semantics);
+    return new Float::Interval_type(Float::Interval(mEnvironment, semantics));
 }
 
 Domain *
 Constructors::createFloat(const llvm::APFloat &number) const {
-    return new Float::Interval(mEnvironment, number);
+    return new Float::Interval_type(Float::Interval(mEnvironment, number));
 }
 
 Domain *
 Constructors::createArray(Domain *size, Domain *value) const {
-    return new Array::SingleItem(mEnvironment, size, value);
+    return new Array::SingleItem_type(Array::SingleItem(mEnvironment, size, value));
 }
 
 Domain *
 Constructors::createArray(uint64_t size, const Domain &value) const {
-    return new Array::ExactSize(mEnvironment, size, value);
+    return new Array::ExactSize_type(Array::ExactSize(mEnvironment, size, value));
 }
 
 Domain *
 Constructors::createArray(const std::vector<Domain*> &values) const {
-    return new Array::ExactSize(mEnvironment, values);
+    return new Array::ExactSize_type(Array::ExactSize(mEnvironment, values));
 }
 
 Domain *
 Constructors::createPointer(const llvm::Type &type) const {
-    return new Pointer::Pointer(mEnvironment, type);
+    return new Pointer::Pointer_type(Pointer::Pointer(mEnvironment, type));
 }
 
 Domain *
 Constructors::createStructure(const std::vector<Domain*> &members) const {
-    return new Structure(mEnvironment, members);
+    return new Structure_type(Structure(mEnvironment, members));
 }
 
 const llvm::fltSemantics *

@@ -2,6 +2,7 @@
 #define LIBCANAL_INTEGER_INTERVAL_H
 
 #include "Domain.h"
+#include "COW.h"
 
 namespace Canal {
 namespace Integer {
@@ -159,7 +160,7 @@ public: // Implementation of Domain.
 
     virtual void setTop();
 };
-DONT_USE_COW(Interval);
+USE_COW(Interval);
 } // namespace Integer
 } // namespace Canal
 
