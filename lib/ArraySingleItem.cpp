@@ -37,6 +37,9 @@ SingleItem::clone() const
 bool
 SingleItem::operator==(const Domain &value) const
 {
+    if (this == &value)
+        return true;
+
     const SingleItem *singleItem =
         dynCast<const SingleItem*>(&value);
 

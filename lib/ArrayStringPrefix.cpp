@@ -34,6 +34,9 @@ StringPrefix::cloneCleaned() const
 bool
 StringPrefix::operator==(const Domain &value) const
 {
+    if (this == &value)
+        return true;
+
     const StringPrefix *array = dynCast<const StringPrefix*>(&value);
     if (!array)
         return false;
