@@ -39,7 +39,7 @@ StateMap::merge(const StateMap &map)
 	iterator it1 = find(it2->first);
 	if (it1 == end())
             insert(*it2);
-	else if (*it1->second != *it2->second)
+	else if (*const_cast<const SharedDataPointer<Domain>&>(it1->second) != *it2->second)
             it1->second->merge(*it2->second);
     }
 }
