@@ -1,18 +1,9 @@
 #ifndef LIBCANAL_CONSTRUCTORS_H
 #define LIBCANAL_CONSTRUCTORS_H
 
+#include "Prereq.h"
 #include <inttypes.h>
 #include <vector>
-
-namespace llvm {
-class Type;
-class Constant;
-class ConstantExpr;
-class Value;
-class APInt;
-class APFloat;
-struct fltSemantics;
-} // namespace llvm
 
 namespace Canal {
 
@@ -58,6 +49,8 @@ public:
     Domain *createArray(const std::vector<Domain*> &values) const;
 
     Domain *createPointer(const llvm::Type &type) const;
+
+    Domain *createStructure(const std::vector<Domain*> &members) const;
 
     static const llvm::fltSemantics *
         getFloatingPointSemantics(const llvm::Type &type);

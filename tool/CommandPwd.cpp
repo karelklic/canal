@@ -1,7 +1,6 @@
 #include "CommandPwd.h"
 #include <unistd.h>
 #include <errno.h>
-#include <cstdio>
 #include <cstring>
 #include <cstdlib>
 
@@ -19,7 +18,7 @@ CommandPwd::run(const std::vector<std::string> &args)
 {
     if (args.size() > 1)
     {
-        puts("Too many arguments.");
+        llvm::outs() << "Too many arguments.\n";
         return;
     }
 
@@ -27,10 +26,10 @@ CommandPwd::run(const std::vector<std::string> &args)
     char *cwd = get_current_dir_name();
     if (!cwd)
     {
-        printf("Failed to get working directory: %s\n", strerror(errno));
+        llvm::outs() << "Failed to get working directory: " << strerror(errno) << "\n";
         errno = save_errno;
     }
 
-    printf("Working directory %s.\n", cwd);
+    llvm::outs() << "Working directory " << cwd << ".\n";
     free(cwd);
 }

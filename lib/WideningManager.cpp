@@ -5,7 +5,6 @@
 #include "StateMap.h"
 #include "Domain.h"
 #if 0 //Debug info for fixpoint calculation
-#include <iostream>
 #include "Utils.h"
 #include "Environment.h"
 #endif
@@ -21,9 +20,7 @@ Manager::Manager()
 
 Manager::~Manager()
 {
-    std::vector<Interface*>::const_iterator it = mWidenings.begin();
-    for (; it != mWidenings.end(); ++it)
-        delete *it;
+    llvm::DeleteContainerPointers(mWidenings);
 }
 
 void
@@ -62,10 +59,14 @@ Manager::widen(const llvm::BasicBlock &wideningPoint,
 	if (it1 != first.end() && *it1->second != *it2->second)
         {
 #if 0 //Debug info for fixpoint calculation
-        std::cout << ((it1->second)->toString()) << std::endl;
-        std::cout << Canal::getName(*it1->first, it1->second->getEnvironment().getSlotTracker()) << std::endl;
-        std::cout << ((it2->second)->toString()) << std::endl;
+            std::cout << ((it1->second)->toString()) << "\n";
+            std::cout << Canal::getName(*it1->first,
+                                        it1->second->getEnvironment().getSlotTracker())
+                      << "\n";
+
+            std::cout << ((it2->second)->toString()) << "\n";
 #endif
+
             widen(wideningPoint, *it1->second, *it2->second);
         }
     }

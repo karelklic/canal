@@ -4,22 +4,20 @@
 #include "PointerTarget.h"
 
 namespace Canal {
-
 namespace Pointer {
 
 class Utils
 {
-    public:
-        static void addTarget(Domain &pointer,
-                              Target::Type type,
-                              const llvm::Value *place,
-                              const llvm::Value *target,
-                              const std::vector<Domain*> &offsets,
-                              Domain *numericOffset);
+public:
+    static void addTarget(Domain &pointer,
+                          Target::Type type,
+                          const llvm::Value *place,
+                          const llvm::Value *target,
+                          const std::vector<Domain*> &offsets,
+                          Domain *numericOffset);
 };
 
-}
+} // namespace Pointer
+} // namespace Canal
 
-}
-
-#endif
+#endif // LIBCANAL_POINTER_UTILS_H

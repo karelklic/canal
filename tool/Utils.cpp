@@ -2,8 +2,6 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
-#include <llvm/Support/raw_ostream.h>
-#include <llvm/Instruction.h>
 #include <errno.h>
 #include <cstdlib>
 #include <climits>
@@ -12,8 +10,8 @@
 bool
 askYesNo(const char *question)
 {
-    printf("%s [y/n]: ", question);
-    fflush(NULL);
+    llvm::outs() << question << " [y/n]: ";
+    llvm::outs().flush();
 
     char answer[16];
     if (!fgets(answer, sizeof(answer), stdin))

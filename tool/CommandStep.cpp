@@ -2,7 +2,6 @@
 #include "Commands.h"
 #include "State.h"
 #include "Utils.h"
-#include <cstdio>
 
 CommandStep::CommandStep(Commands &commands)
     : Command("step",
@@ -18,7 +17,7 @@ CommandStep::run(const std::vector<std::string> &args)
 {
     if (!mCommands.getState() || !mCommands.getState()->isInterpreting())
     {
-        puts("The program is not being interpreted.");
+        llvm::outs() << "The program is not being interpreted.\n";
         return;
     }
 
@@ -31,8 +30,8 @@ CommandStep::run(const std::vector<std::string> &args)
         if (success)
             mCommands.getState()->step(count);
         else
-            printf("Not a positive number: %s\n", args[1].c_str());
+            llvm::outs() << "Not a positive number: " << args[1] << "\n";
     }
     else
-        puts("Invalid syntax.");
+        llvm::outs() << "Invalid syntax.\n";
 }

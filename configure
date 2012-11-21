@@ -15717,9 +15717,35 @@ LLVM_LIBS=`$LLVM_CONFIG --libs`
 
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 
-
 # Quadrigraphs are used here: [ gives you [ and ] gives you ].
-CPPFLAGS+=`$LLVM_CONFIG --version | sed 's/\([0-9]*\).\([0-9]*\).*/-DLLVM_MAJOR=\1 -DLLVM_MINOR=\2/'`
+LLVM_VERSION_MAJOR=`$LLVM_CONFIG --version | sed 's/\([0-9]*\).\([0-9]*\).*/\1/'`
+
+cat >>confdefs.h <<_ACEOF
+#define LLVM_VERSION_MAJOR $LLVM_VERSION_MAJOR
+_ACEOF
+
+LLVM_VERSION_MINOR=`$LLVM_CONFIG --version | sed 's/\([0-9]*\).\([0-9]*\).*/\2/'`
+
+cat >>confdefs.h <<_ACEOF
+#define LLVM_VERSION_MINOR $LLVM_VERSION_MINOR
+_ACEOF
+
+
+
+# Capture compile-time LLVM NDEBUG status.
+#
+# Including the LLVM headers without the NDEBUG macro defined and then
+# linking to LLVM dynamic libraries compiled with NDEBUG leads to
+# runtime errors that are extremely difficult to analyze.
+$LLVM_CONFIG --cppflags | grep \\-DNDEBUG > /dev/null
+LLVM_DEBUG=$?
+if test "x$LLVM_DEBUG" = "x0"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define LLVM_WITH_NDEBUG 1
+_ACEOF
+
+fi
 
 # readline
 
@@ -16870,7 +16896,7 @@ AUTOM4TE=${AUTOM4TE-"${am_missing_run}autom4te"}
 O0CFLAGS=`echo $CFLAGS | sed 's/-O[0-9] *//g'`
 
 
-ac_config_files="$ac_config_files canal.spec Makefile docs/Makefile lib/Makefile tests/Makefile tests/atlocal tests/integration/Makefile tests/unit/Makefile tool/Makefile wrappers/config.py wrappers/Makefile"
+ac_config_files="$ac_config_files canal.spec Makefile docs/Makefile lib/Makefile tests/Makefile tests/atlocal tool/Makefile wrappers/config.py wrappers/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -17987,8 +18013,6 @@ do
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tests/atlocal") CONFIG_FILES="$CONFIG_FILES tests/atlocal" ;;
-    "tests/integration/Makefile") CONFIG_FILES="$CONFIG_FILES tests/integration/Makefile" ;;
-    "tests/unit/Makefile") CONFIG_FILES="$CONFIG_FILES tests/unit/Makefile" ;;
     "tool/Makefile") CONFIG_FILES="$CONFIG_FILES tool/Makefile" ;;
     "wrappers/config.py") CONFIG_FILES="$CONFIG_FILES wrappers/config.py" ;;
     "wrappers/Makefile") CONFIG_FILES="$CONFIG_FILES wrappers/Makefile" ;;

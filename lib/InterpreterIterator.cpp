@@ -7,7 +7,7 @@
 #include "Environment.h"
 #include "WideningManager.h"
 #include "State.h"
-#include <sstream>
+#include "Utils.h"
 
 namespace Canal {
 namespace Interpreter {
@@ -70,31 +70,29 @@ Iterator::interpretInstruction()
 std::string
 Iterator::toString() const
 {
-    std::stringstream ss;
-    ss << "***************************************" << std::endl;
-    ss << "* iterator " << std::endl;
-    ss << "***************************************" << std::endl;
-    ss << "** function " << (*mFunction)->getName().str() << std::endl;
-    ss << "*** basicBlock ";
-    SlotTracker &slotTracker = mOperations.getEnvironment().getSlotTracker();
-    const llvm::BasicBlock &basicBlock = (*mBasicBlock)->getLlvmBasicBlock();
-    const llvm::Function &function = (*mFunction)->getLlvmFunction();
-    slotTracker.setActiveFunction(function);
-    if (basicBlock.hasName())
-        ss << basicBlock.getName().str();
-    else
-        ss << "<label>:" << slotTracker.getLocalSlot(basicBlock);
-
-    ss << std::endl;
-
-    llvm::BasicBlock::const_iterator it = (*mBasicBlock)->begin();
-    for (; it != mInstruction; ++it)
+    StringStream ss;
+    ss << "***************************************\n";
+    ss << "* iterator\n";
+    ss << "***************************************\n";
+    if (mInitialized)
     {
-        if (it->getType()->isVoidTy())
-            continue;
+        ss << "** function " << (*mFunction)->getName() << "\n";
+        ss << "*** basicBlock ";
+        SlotTracker &slotTracker = mOperations.getEnvironment().getSlotTracker();
+        const llvm::BasicBlock &basicBlock = (*mBasicBlock)->getLlvmBasicBlock();
+        ss << Canal::getName(basicBlock, slotTracker) << "\n";
 
-        ss << mState->toString(*it, slotTracker);
+        llvm::BasicBlock::const_iterator it = (*mBasicBlock)->begin();
+        for (; it != mInstruction; ++it)
+        {
+            if (it->getType()->isVoidTy())
+                continue;
+
+            ss << mState->toString(*it, slotTracker);
+        }
     }
+    else
+        ss << "uninitialized\n";
 
     return ss.str();
 }

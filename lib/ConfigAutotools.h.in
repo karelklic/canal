@@ -42,6 +42,15 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* LLVM major version */
+#undef LLVM_VERSION_MAJOR
+
+/* LLVM minor version */
+#undef LLVM_VERSION_MINOR
+
+/* LLVM has been compiled with NDEBUG */
+#undef LLVM_WITH_NDEBUG
+
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR

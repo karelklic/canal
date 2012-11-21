@@ -6,9 +6,7 @@
 #include "IntegerContainer.h"
 #include "IntegerEnumeration.h"
 #include "Environment.h"
-#include <llvm/BasicBlock.h>
-#include <llvm/Type.h>
-#include <sstream>
+#include "Constructors.h"
 
 namespace Canal {
 namespace Pointer {
@@ -24,8 +22,8 @@ Pointer::Pointer(const Pointer &value)
       mTargets(value.mTargets),
       mType(value.mType)
 {
-    PlaceTargetMap::iterator it = mTargets.begin();
-    for (; it != mTargets.end(); ++it)
+    PlaceTargetMap::iterator it = mTargets.begin(), itend = mTargets.end();
+    for (; it != itend; ++it)
         it->second = new Target(*it->second);
 }
 
@@ -35,16 +33,14 @@ Pointer::Pointer(const Pointer &value,
       mTargets(value.mTargets),
       mType(newType)
 {
-    PlaceTargetMap::iterator it = mTargets.begin();
-    for (; it != mTargets.end(); ++it)
+    PlaceTargetMap::iterator it = mTargets.begin(), itend = mTargets.end();
+    for (; it != itend; ++it)
         it->second = new Target(*it->second);
 }
 
 Pointer::~Pointer()
 {
-    PlaceTargetMap::const_iterator it = mTargets.begin();
-    for (; it != mTargets.end(); ++it)
-        delete it->second;
+    llvm::DeleteContainerSeconds(mTargets);
 }
 
 void
@@ -208,7 +204,8 @@ Pointer::bitcast(const llvm::Type &type) const
 
 Pointer *
 Pointer::getElementPtr(const std::vector<Domain*> &offsets,
-                       const llvm::Type &type) const
+                       const llvm::Type &type,
+                       const Constructors &constructors) const
 {
     CANAL_ASSERT_MSG(!offsets.empty(),
                      "getElementPtr must be called with some offsets.");
@@ -238,10 +235,9 @@ Pointer::getElementPtr(const std::vector<Domain*> &offsets,
         {
             if (offsetIt == offsets.begin() && !targetOffsets.empty())
             {
-                Domain *oldLast = targetOffsets.back();
-                Domain *newLast = oldLast->cloneCleaned();
-                newLast->add(*oldLast, **offsets.begin());
-                delete oldLast;
+                Domain *newLast = constructors.createInteger(64);
+                newLast->add(*targetOffsets.back(), **offsets.begin());
+                delete targetOffsets.back();
                 targetOffsets.pop_back();
                 targetOffsets.push_back(newLast);
                 continue;
@@ -253,9 +249,7 @@ Pointer::getElementPtr(const std::vector<Domain*> &offsets,
 
     // Delete the offsets, because this method takes ownership of them
     // and it no longer needs them.
-    offsetIt = offsets.begin();
-    for (; offsetIt != offsets.end(); ++offsetIt)
-        delete *offsetIt;
+    std::for_each(offsets.begin(), offsets.end(), llvm::deleter<Domain>);
 
     return result;
 }
@@ -273,8 +267,8 @@ Pointer::store(const Domain &value, State &state) const
 
         const Domain *source = state.findBlock(*it->second->mTarget);
         CANAL_ASSERT(source);
-        Domain *result = source->clone();
 
+        Domain *result = source->clone();
         std::vector<Domain*> destinations = dereference(result,
                                                         it->second->mOffsets);
 
@@ -289,16 +283,34 @@ Pointer::store(const Domain &value, State &state) const
     }
 }
 
+bool
+Pointer::isSingleTarget() const
+{
+    if (mTargets.size() != 1)
+        return false;
+
+    const Target *target = mTargets.begin()->second;
+    const Integer::Container *tmp =
+        dynCast<const Integer::Container*>(target->mNumericOffset);
+
+    if (tmp && !tmp->isSingleValue())
+        return false;
+
+    std::vector<Domain*>::const_iterator it = target->mOffsets.begin();
+    for (; it != target->mOffsets.end(); ++it)
+    {
+        tmp = dynCast<const Integer::Container*>(*it);
+        if (!tmp->isSingleValue())
+            return false;
+    }
+
+    return true;
+}
+
 Pointer *
 Pointer::clone() const
 {
     return new Pointer(*this);
-}
-
-Pointer *
-Pointer::cloneCleaned() const
-{
-    return new Pointer(mEnvironment, mType);
 }
 
 bool
@@ -324,31 +336,6 @@ Pointer::operator==(const Domain &value) const
     for (; it2 != mTargets.end(); ++it1, ++it2)
     {
         if (it1->first != it2->first || *it1->second != *it2->second)
-            return false;
-    }
-
-    return true;
-}
-
-bool
-Pointer::isSingleTarget() const
-{
-    if (mTargets.size() != 1)
-        return false;
-
-    const Target *target = mTargets.begin()->second;
-
-    const Integer::Container *tmp =
-        dynCast<const Integer::Container*>(target->mNumericOffset);
-
-    if (tmp && !tmp->isSingleValue())
-        return false;
-
-    std::vector<Domain*>::const_iterator it = target->mOffsets.begin();
-    for (; it != target->mOffsets.end(); ++it)
-    {
-        tmp = dynCast<const Integer::Container*>(*it);
-        if (!tmp->isSingleValue())
             return false;
     }
 
@@ -391,11 +378,14 @@ Pointer::memoryUsage() const
 std::string
 Pointer::toString() const
 {
-    std::stringstream ss;
-    ss << "pointer" << std::endl;
-    ss << "    type " << Canal::toString(mType) << std::endl;
-    PlaceTargetMap::const_iterator it = mTargets.begin();
-    for (; it != mTargets.end(); ++it)
+    StringStream ss;
+    ss << "pointer\n";
+    ss << "    type " << Canal::toString(mType) << "\n";
+
+    PlaceTargetMap::const_iterator it = mTargets.begin(),
+        itend = mTargets.end();
+
+    for (; it != itend; ++it)
         ss << indent(it->second->toString(mEnvironment.getSlotTracker()), 4);
 
     return ss.str();

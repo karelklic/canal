@@ -74,7 +74,8 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libcanal_la_LIBADD =
 am_libcanal_la_OBJECTS = libcanal_la-APIntUtils.lo \
 	libcanal_la-ArrayExactSize.lo libcanal_la-ArrayInterface.lo \
-	libcanal_la-ArraySingleItem.lo libcanal_la-Constructors.lo \
+	libcanal_la-ArraySingleItem.lo \
+	libcanal_la-ArrayStringPrefix.lo libcanal_la-Constructors.lo \
 	libcanal_la-Domain.lo libcanal_la-Environment.lo \
 	libcanal_la-FloatInterval.lo libcanal_la-IntegerBitfield.lo \
 	libcanal_la-IntegerContainer.lo \
@@ -275,6 +276,8 @@ libcanal_la_SOURCES = \
 	ArrayInterface.h \
 	ArraySingleItem.cpp \
 	ArraySingleItem.h \
+	ArrayStringPrefix.cpp \
+	ArrayStringPrefix.h \
 	Constructors.cpp \
 	Constructors.h \
 	Domain.cpp \
@@ -313,6 +316,7 @@ libcanal_la_SOURCES = \
 	PointerTarget.h \
 	PointerUtils.cpp \
 	PointerUtils.h \
+	Prereq.h \
 	SlotTracker.cpp \
 	SlotTracker.h \
 	State.cpp \
@@ -434,6 +438,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-ArrayExactSize.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-ArrayInterface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-ArraySingleItem.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-ArrayStringPrefix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Constructors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Domain.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Environment.Plo@am__quote@
@@ -511,6 +516,13 @@ libcanal_la-ArraySingleItem.lo: ArraySingleItem.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ArraySingleItem.cpp' object='libcanal_la-ArraySingleItem.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-ArraySingleItem.lo `test -f 'ArraySingleItem.cpp' || echo '$(srcdir)/'`ArraySingleItem.cpp
+
+libcanal_la-ArrayStringPrefix.lo: ArrayStringPrefix.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-ArrayStringPrefix.lo -MD -MP -MF $(DEPDIR)/libcanal_la-ArrayStringPrefix.Tpo -c -o libcanal_la-ArrayStringPrefix.lo `test -f 'ArrayStringPrefix.cpp' || echo '$(srcdir)/'`ArrayStringPrefix.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-ArrayStringPrefix.Tpo $(DEPDIR)/libcanal_la-ArrayStringPrefix.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ArrayStringPrefix.cpp' object='libcanal_la-ArrayStringPrefix.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-ArrayStringPrefix.lo `test -f 'ArrayStringPrefix.cpp' || echo '$(srcdir)/'`ArrayStringPrefix.cpp
 
 libcanal_la-Constructors.lo: Constructors.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-Constructors.lo -MD -MP -MF $(DEPDIR)/libcanal_la-Constructors.Tpo -c -o libcanal_la-Constructors.lo `test -f 'Constructors.cpp' || echo '$(srcdir)/'`Constructors.cpp

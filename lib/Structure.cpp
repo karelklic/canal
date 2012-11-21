@@ -3,7 +3,6 @@
 #include "IntegerContainer.h"
 #include "IntegerEnumeration.h"
 #include "IntegerInterval.h"
-#include <sstream>
 
 namespace Canal {
 
@@ -24,32 +23,13 @@ Structure::Structure(const Structure &value)
 
 Structure::~Structure()
 {
-    std::vector<Domain*>::iterator it = mMembers.begin();
-    for (; it != mMembers.end(); ++it)
-        delete (*it);
+    llvm::DeleteContainerPointers(mMembers);
 }
 
 Structure *
 Structure::clone() const
 {
     return new Structure(*this);
-}
-
-Structure *
-Structure::cloneCleaned() const
-{
-    Structure* res = new Structure(*this);
-    std::vector<Domain*>::iterator it = res->mMembers.begin();
-    for (; it != res->mMembers.end(); ++it)
-    {
-        AccuracyDomain* dom = dynCast<AccuracyDomain*>(*it);
-        CANAL_ASSERT_MSG(dom,
-                         "Member has to be of type AccuracyDomain "
-                         "in order to call setBottom on it.");
-
-        dom->setBottom();
-    }
-    return res;
 }
 
 bool
@@ -103,10 +83,12 @@ Structure::memoryUsage() const
 std::string
 Structure::toString() const
 {
-    std::stringstream ss;
-    ss << "structure" << std::endl;
-    std::vector<Domain*>::const_iterator it = mMembers.begin();
-    for (; it != mMembers.end(); ++it)
+    StringStream ss;
+    ss << "structure\n";
+    std::vector<Domain*>::const_iterator it = mMembers.begin(),
+        itend = mMembers.end();
+
+    for (; it != itend; ++it)
         ss << indent((*it)->toString(), 4);
 
     return ss.str();

@@ -1,6 +1,7 @@
 #ifndef CANAL_COMMANDS_H
 #define CANAL_COMMANDS_H
 
+#include "Prereq.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -8,10 +9,6 @@
 class Command;
 class CommandFile;
 class State;
-
-namespace llvm {
-    class Module;
-}
 
 class Commands
 {

@@ -2,7 +2,6 @@
 #include "Utils.h"
 #include "APIntUtils.h"
 #include "FloatInterval.h"
-#include <sstream>
 
 namespace Canal {
 namespace Integer {
@@ -200,12 +199,6 @@ Bitfield::clone() const
     return new Bitfield(*this);
 }
 
-Bitfield *
-Bitfield::cloneCleaned() const
-{
-    return new Bitfield(mEnvironment, getBitWidth());
-}
-
 bool
 Bitfield::operator==(const Domain& value) const
 {
@@ -232,8 +225,8 @@ Bitfield::memoryUsage() const
 std::string
 Bitfield::toString() const
 {
-    std::stringstream ss;
-    ss << "bits ";
+    StringStream ss;
+    ss << "bitfield ";
     for (int pos = mZeroes.getBitWidth() - 1; pos >= 0; --pos)
     {
         switch (getBitValue(pos))
@@ -245,8 +238,15 @@ Bitfield::toString() const
         default: CANAL_DIE();
         }
     }
-    ss << std::endl;
+    ss << "\n";
     return ss.str();
+}
+
+void
+Bitfield::setZero(const llvm::Value *place)
+{
+    mZeroes = ~0;
+    mOnes = 0;
 }
 
 void
@@ -317,8 +317,10 @@ bitOperation(Bitfield &result,
 {
     const Bitfield &aa = dynCast<const Bitfield&>(a),
         &bb = dynCast<const Bitfield&>(b);
+
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth() &&
                  result.getBitWidth() == aa.getBitWidth());
+
     for (unsigned pos = 0; pos < aa.getBitWidth(); ++pos)
     {
         result.setBitValue(pos, operation(aa.getBitValue(pos),
@@ -412,7 +414,10 @@ Bitfield::xor_(const Domain &a, const Domain &b)
 
 // -1 if a < b, 0 if a == b, 1 if a > b, 2 if unknown
 static int
-compare(const Bitfield &a, const Bitfield &b, bool signed_, bool equality = false)
+compare(const Bitfield &a,
+        const Bitfield &b,
+        bool signed_,
+        bool equality = false)
 {
     //Possible todo - TT >= 10 if signed
     bool first = true;
@@ -420,14 +425,23 @@ compare(const Bitfield &a, const Bitfield &b, bool signed_, bool equality = fals
     {
         int i = a.getBitValue(pos);
         int j = b.getBitValue(pos);
-        if (i == -1 || i == 2 || j == -1 || j == 2) {
-            if (equality && !first) {
-                //If comparing with equality, then if one value is set and the other one is TOP:
-                //0<=TOP and 1>=TOP -> return 0<TOP and 1>TOP, and comparison operator will handle the result correctly
-                if ((i == -1 || i == 2) && (j == -1 || j == 2)) return 2; //If both values are top
-                if (i == 0 || i == 1) return (i ? -1 : 1); //If first value is set
-                else return (j ? -1 : 1); //If second value is set
+        if (i == -1 || i == 2 || j == -1 || j == 2)
+        {
+            if (equality && !first)
+            {
+                // If comparing with equality, then if one value is
+                // set and the other one is TOP: 0<=TOP and 1>=TOP ->
+                // return 0<TOP and 1>TOP, and comparison operator
+                // will handle the result correctly.
+                if ((i == -1 || i == 2) && (j == -1 || j == 2))
+                    return 2; // If both values are top
+
+                if (i == 0 || i == 1)
+                    return (i ? -1 : 1); // If first value is set
+                else
+                    return (j ? -1 : 1); // If second value is set
             }
+
             return 2;
         }
 
@@ -448,18 +462,24 @@ compare(const Bitfield &a, const Bitfield &b, bool signed_, bool equality = fals
 
 //0 if equal, 1 if not equal, -1 if unknown
 static int
-compareEqual(const Bitfield &a, const Bitfield &b) {
+compareEqual(const Bitfield &a, const Bitfield &b)
+{
     bool wasTop = false;
     for (int pos = a.getBitWidth() - 1; pos >= 0; --pos)
     {
         int i = a.getBitValue(pos);
         int j = b.getBitValue(pos);
-        if (i == -1 || i == 2 || j == -1 || j == 2) {
-            wasTop = true; //You found unknown value -> the bitfields are not equal
+        if (i == -1 || i == 2 || j == -1 || j == 2)
+        {
+            // You found unknown value -> the bitfields are not equal
+            wasTop = true;
             continue;
         }
-        if (i != j) return 1;
+
+        if (i != j)
+            return 1;
     }
+
     return (wasTop ? -1 : 0);
 }
 
@@ -492,11 +512,13 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         // If there is at least one known bit in both Bitfields,
         // that differs, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b) { //Same object
+        if (&a == &b)
+        { // Same object
             mZeroes = ~1;
             mOnes = 1;
             break;
         }
+
         switch (compareEqual(aa, bb))
         {
         case 0:  mZeroes = ~1; mOnes = 1; break;
@@ -511,11 +533,13 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         // If there is at least one known bit in both Bitfields,
         // that differs, the result is 1.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b) { //Same object
+        if (&a == &b)
+        { //Same object
             mZeroes = ~0;
             mOnes = 0;
             break;
         }
+
         switch (compareEqual(aa, bb))
         {
         case 0:  mZeroes = ~0; mOnes = 0; break;
@@ -531,13 +555,16 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         case 2:  setTop(); break;
         default: mZeroes = ~0; mOnes = 0;
         }
+
         break;
     case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
-        if (&a == &b) { //Same object
+        if (&a == &b)
+        { //Same object
             mZeroes = ~1;
             mOnes = 1;
             break;
         }
+
         switch (compare(aa, bb, false, true))
         {
         case 0:
@@ -545,6 +572,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         case 2:  setTop(); break;
         default: mZeroes = ~0; mOnes = 0;
         }
+
         break;
     case llvm::CmpInst::ICMP_ULT: // unsigned less than
         switch (compare(aa, bb, false))
@@ -553,13 +581,16 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         case 2:  setTop(); break;
         default: mZeroes = ~0; mOnes = 0;
         }
+
         break;
     case llvm::CmpInst::ICMP_ULE: // unsigned less or equal
-        if (&a == &b) { //Same object
+        if (&a == &b)
+        { //Same object
             mZeroes = ~1;
             mOnes = 1;
             break;
         }
+
         switch (compare(aa, bb, false, true))
         {
         case 0:
@@ -567,6 +598,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         case 2:  setTop(); break;
         default: mZeroes = ~0; mOnes = 0;
         }
+
         break;
     case llvm::CmpInst::ICMP_SGT: // signed greater than
         switch (compare(aa, bb, true))
@@ -575,13 +607,16 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         case 2:  setTop(); break;
         default: mZeroes = ~0; mOnes = 0;
         }
+
         break;
     case llvm::CmpInst::ICMP_SGE: // signed greater or equal
-        if (&a == &b) { //Same object
+        if (&a == &b)
+        { //Same object
             mZeroes = ~1;
             mOnes = 1;
             break;
         }
+
         switch (compare(aa, bb, true, true))
         {
         case 0:
@@ -589,6 +624,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         case 2:  setTop(); break;
         default: mZeroes = ~0; mOnes = 0;
         }
+
         break;
     case llvm::CmpInst::ICMP_SLT: // signed less than
         switch (compare(aa, bb, true))
@@ -597,13 +633,16 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         case 2:  setTop(); break;
         default: mZeroes = ~0; mOnes = 0;
         }
+
         break;
     case llvm::CmpInst::ICMP_SLE: // signed less or equal
-        if (&a == &b) { //Same object
+        if (&a == &b)
+        { //Same object
             mZeroes = ~1;
             mOnes = 1;
             break;
         }
+
         switch (compare(aa, bb, true, true))
         {
         case 0:
@@ -611,6 +650,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         case 2:  setTop(); break;
         default: mZeroes = ~0; mOnes = 0;
         }
+
         break;
     default:
         CANAL_DIE();
@@ -721,7 +761,7 @@ Bitfield::isTop() const
 void
 Bitfield::setTop()
 {
-#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
+#if (LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9)
     // Old interface replaced in LLVM 2.9.
     mZeroes.set();
     mOnes.set();
@@ -729,13 +769,6 @@ Bitfield::setTop()
     mZeroes.setAllBits();
     mOnes.setAllBits();
 #endif
-}
-
-void
-Bitfield::setZero(const llvm::Value *place)
-{
-    mZeroes = ~0;
-    mOnes = 0;
 }
 
 } // namespace Integer

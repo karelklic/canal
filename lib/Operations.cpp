@@ -13,12 +13,6 @@
 #include "Utils.h"
 #include "Domain.h"
 #include "State.h"
-#include <llvm/Function.h>
-#include <llvm/Module.h>
-#include <llvm/BasicBlock.h>
-#include <llvm/Instructions.h>
-#include <llvm/Constants.h>
-#include <llvm/Support/CFG.h>
 #include <map>
 #include <cassert>
 #include <cstdio>
@@ -52,7 +46,7 @@ Operations::interpretInstruction(const llvm::Instruction &instruction,
         insertelement((const llvm::InsertElementInst&)instruction, state);
     else if (llvm::isa<llvm::InsertValueInst>(instruction))
         insertvalue((const llvm::InsertValueInst&)instruction, state);
-#if LLVM_MAJOR >= 3
+#if LLVM_VERSION_MAJOR >= 3
     // Instructions available since LLVM 3.0
     else if (llvm::isa<llvm::LandingPadInst>(instruction))
         landingpad((const llvm::LandingPadInst&)instruction, state);
@@ -121,7 +115,7 @@ Operations::interpretInstruction(const llvm::Instruction &instruction,
             indirectbr((const llvm::IndirectBrInst&)instruction, state);
         else if (llvm::isa<llvm::InvokeInst>(instruction))
             invoke((const llvm::InvokeInst&)instruction, state);
-#if LLVM_MAJOR >= 3
+#if LLVM_VERSION_MAJOR >= 3
         // Resume instruction is available since LLVM 3.0
         else if (llvm::isa<llvm::ResumeInst>(instruction))
             resume((const llvm::ResumeInst&)instruction, state);
@@ -487,9 +481,9 @@ void Operations::add(const llvm::BinaryOperator &instruction,
     if (aPointer || bPointer)
     {
         if (aPointer)
-            result = aPointer->cloneCleaned();
+            result = mConstructors.createPointer(aPointer->getType());
         else
-            result = bPointer->cloneCleaned();
+            result = mConstructors.createPointer(bPointer->getType());
 
         result->add(*a, *b);
     }
@@ -543,20 +537,18 @@ Operations::sub(const llvm::BinaryOperator &instruction,
                      "Subtracting pointer from constant!");
 
     Domain *result = NULL;
+
     // Subtracting integer from pointer.
     if (aPointer && !bPointer)
     {
-        result = aPointer->cloneCleaned();
+        result = mConstructors.createPointer(aPointer->getType());
         result->sub(*a, *b);
     }
     else if (aPointer && bPointer) // Subtracting two pointers.
     {
-        // Create result value of required type and then run the desired
-        // operation.
+        // We set to top for now.
         result = mConstructors.create(*instruction.getType());
-        AccuracyDomain *accuracyDomain = dynCast<AccuracyDomain*>(result);
-        CANAL_ASSERT(accuracyDomain);
-        accuracyDomain->setTop();
+        result->setTop();
     }
     else
     {
@@ -770,7 +762,7 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
 
     std::vector<Domain*> newValues;
 
-#if LLVM_MAJOR == 3 && LLVM_MINOR >= 1
+#if LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1
     llvm::SmallVector<int, 16> shuffleMask =
         instruction.getShuffleMask();
 #else
@@ -1047,7 +1039,7 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
     CANAL_ASSERT(pointerType);
     CANAL_ASSERT(pointerType->getElementType());
     Pointer::Pointer *result = source.getElementPtr(
-        offsets, *pointerType->getElementType());
+        offsets, *pointerType->getElementType(), mConstructors);
 
     state.addFunctionVariable(instruction, result);
 }
@@ -1299,7 +1291,7 @@ Operations::va_arg_(const llvm::VAArgInst &instruction,
     CANAL_NOT_IMPLEMENTED();
 }
 
-#if LLVM_MAJOR >= 3
+#if LLVM_VERSION_MAJOR >= 3
 // Instructions available since LLVM 3.0
 
 void

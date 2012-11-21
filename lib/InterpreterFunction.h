@@ -3,12 +3,6 @@
 
 #include "State.h"
 
-namespace llvm {
-class Function;
-class BasicBlock;
-class StringRef;
-} // namespace llvm
-
 namespace Canal {
 
 class Domain;
@@ -21,7 +15,6 @@ class BasicBlock;
 
 class Function
 {
-protected:
     const llvm::Function &mFunction;
     const Environment &mEnvironment;
 
@@ -50,6 +43,7 @@ public:
     std::vector<BasicBlock*>::const_iterator end() const { return mBasicBlocks.end(); }
 
     State &getInputState() { return mInputState; }
+
     const State &getInputState() const { return mInputState; }
 
     const State &getOutputState() const { return mOutputState; }
@@ -65,6 +59,9 @@ public:
 
     /// Update function output state from basic block output states.
     void updateOutputState();
+
+    /// Get memory usage (used byte count) of this function interpretation.
+    size_t memoryUsage() const;
 
     std::string toString() const;
 };

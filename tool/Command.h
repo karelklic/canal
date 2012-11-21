@@ -1,6 +1,7 @@
 #ifndef CANAL_COMMAND_H
 #define CANAL_COMMAND_H
 
+#include "Prereq.h"
 #include <string>
 #include <vector>
 
@@ -8,6 +9,13 @@ class Commands;
 
 class Command
 {
+protected:
+    std::string mName;
+    std::string mShortcut;
+    std::string mHelpLine;
+    std::string mHelp;
+    Commands &mCommands;
+
 public:
     Command(const std::string &name,
             const std::string &shortcut,
@@ -37,13 +45,6 @@ public:
     /// @param args
     ///   First argument is the name of the command.
     virtual void run(const std::vector<std::string> &args) = 0;
-
-protected:
-    std::string mName;
-    std::string mShortcut;
-    std::string mHelpLine;
-    std::string mHelp;
-    Commands &mCommands;
 };
 
 #endif

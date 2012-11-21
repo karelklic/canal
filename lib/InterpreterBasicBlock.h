@@ -2,7 +2,6 @@
 #define LIBCANAL_INTERPRETER_BASIC_BLOCK_H
 
 #include "State.h"
-#include <llvm/BasicBlock.h>
 
 namespace Canal {
 
@@ -13,7 +12,6 @@ namespace Interpreter {
 
 class BasicBlock
 {
-protected:
     const llvm::BasicBlock &mBasicBlock;
     const Environment &mEnvironment;
 
@@ -31,6 +29,9 @@ public:
 
     State &getInputState() { return mInputState; }
     State &getOutputState() { return mOutputState; }
+
+    /// Get memory usage (used byte count) of this basic block interpretation.
+    size_t memoryUsage() const;
 
     std::string toString() const;
 };

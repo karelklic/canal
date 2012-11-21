@@ -3,8 +3,6 @@
 #include "IntegerEnumeration.h"
 #include "IntegerInterval.h"
 #include "Utils.h"
-#include <sstream>
-#include <llvm/Constants.h>
 
 namespace Canal {
 namespace Array {
@@ -35,32 +33,13 @@ ExactSize::ExactSize(const ExactSize &value)
 
 ExactSize::~ExactSize()
 {
-    std::vector<Domain*>::iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
-        delete (*it);
+    llvm::DeleteContainerPointers(mValues);
 }
 
 ExactSize *
 ExactSize::clone() const
 {
     return new ExactSize(*this);
-}
-
-ExactSize *
-ExactSize::cloneCleaned() const
-{
-    ExactSize* result = new ExactSize(*this);
-    std::vector<Domain*>::iterator it = result->mValues.begin();
-    for (; it != result->mValues.end(); ++it)
-    {
-        AccuracyDomain* dom = dynCast<AccuracyDomain*>(*it);
-        CANAL_ASSERT_MSG(dom,
-                         "Element has to be of type AccuracyDomain "
-                         "in order to call setBottom on it.");
-
-        dom->setBottom();
-    }
-    return result;
 }
 
 bool
@@ -114,10 +93,12 @@ ExactSize::memoryUsage() const
 std::string
 ExactSize::toString() const
 {
-    std::stringstream ss;
-    ss << "arrayExactSize" << std::endl;
-    std::vector<Domain*>::const_iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
+    StringStream ss;
+    ss << "arrayExactSize\n";
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
         ss << indent((*it)->toString(), 4);
 
     return ss.str();
@@ -132,19 +113,16 @@ binaryOperation(ExactSize &result,
     const ExactSize &aa = dynCast<const ExactSize&>(a),
         &bb = dynCast<const ExactSize&>(b);
 
-    CANAL_ASSERT_MSG(aa.size() == bb.size(),
+    CANAL_ASSERT_MSG(aa.size() == bb.size() && result.size() == aa.size(),
                      "Binary operations with arrays "
                      "require the array size to be equal.");
 
     std::vector<Domain*>::const_iterator itA = aa.mValues.begin(),
         itB = bb.mValues.begin();
 
-    for (; itA != aa.mValues.end(); ++itA, ++itB)
-    {
-        Domain *resultValue = (*itA)->cloneCleaned();
-        ((*resultValue).*(operation))(**itA, **itB);
-        result.mValues.push_back(resultValue);
-    }
+    std::vector<Domain*>::iterator it = result.mValues.begin();
+    for (; it != result.mValues.end(); ++it, ++itA, ++itB)
+        ((**it).*(operation))(**itA, **itB);
 }
 
 void

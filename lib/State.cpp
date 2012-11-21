@@ -3,9 +3,6 @@
 #include "Utils.h"
 #include "Environment.h"
 #include "SlotTracker.h"
-#include <llvm/BasicBlock.h>
-#include <llvm/Function.h>
-#include <sstream>
 
 namespace Canal {
 
@@ -224,16 +221,28 @@ State::hasGlobalBlock(const llvm::Value &place) const
     return (mGlobalBlocks.find(&place) != mGlobalBlocks.end());
 }
 
+size_t
+State::memoryUsage() const
+{
+    size_t result = sizeof(State);
+    result += mGlobalVariables.memoryUsage();
+    result += mGlobalBlocks.memoryUsage();
+    result += mFunctionVariables.memoryUsage();
+    result += mFunctionBlocks.memoryUsage();
+
+    if (mReturnedValue)
+        result += mReturnedValue->memoryUsage();
+
+    return result;
+}
 
 std::string
 State::toString(const llvm::Value &place,
                 SlotTracker &slotTracker) const
 {
-    std::stringstream result;
-
-    std::stringstream name;
+    StringStream ss, name;
     if (place.hasName())
-        name << place.getName().str();
+        name << place.getName();
     else
     {
         if (llvm::isa<llvm::Instruction>(place))
@@ -253,45 +262,45 @@ State::toString(const llvm::Value &place,
     StateMap::const_iterator it = mFunctionVariables.find(&place);
     if (it != mFunctionVariables.end())
     {
-        result << "%" << name.str() << " = "
-               << Canal::indentExceptFirstLine(it->second->toString(),
-                                               name.str().length() + 4);
+        ss << "%" << name.str() << " = "
+           << Canal::indentExceptFirstLine(it->second->toString(),
+                                           name.str().length() + 4);
     }
 
     it = mFunctionBlocks.find(&place);
     if (it != mFunctionBlocks.end())
     {
-        result << "%^" << name.str() << " = "
-               << Canal::indentExceptFirstLine(it->second->toString(),
-                                               name.str().length() + 5);
+        ss << "%^" << name.str() << " = "
+           << Canal::indentExceptFirstLine(it->second->toString(),
+                                           name.str().length() + 5);
     }
 
-    if (result.str().empty() &&
+    if (ss.str().empty() &&
         llvm::isa<llvm::Instruction>(place))
     {
-        result << "%" << name.str() << " = undefined" << std::endl;
+        ss << "%" << name.str() << " = undefined\n";
     }
 
     it = mGlobalVariables.find(&place);
     if (it != mGlobalVariables.end())
     {
-        result << "@" << name.str() << " = "
-               << Canal::indentExceptFirstLine(it->second->toString(),
-                                               name.str().length() + 4);
+        ss << "@" << name.str() << " = "
+           << Canal::indentExceptFirstLine(it->second->toString(),
+                                           name.str().length() + 4);
     }
 
     it = mGlobalBlocks.find(&place);
     if (it != mGlobalBlocks.end())
     {
-        result << "@^" << name.str() << " = "
-               << Canal::indentExceptFirstLine(it->second->toString(),
-                                               name.str().length() + 5);
+        ss << "@^" << name.str() << " = "
+           << Canal::indentExceptFirstLine(it->second->toString(),
+                                           name.str().length() + 5);
     }
 
-    if (result.str().empty())
-        result << "@" << name.str() << " = undefined" << std::endl;
+    if (ss.str().empty())
+        ss << "@" << name.str() << " = undefined\n";
 
-    return result.str();
+    return ss.str();
 }
 
 } // namespace Canal

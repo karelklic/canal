@@ -1,11 +1,9 @@
 #ifndef LIBCANAL_STATE_MAP_H
 #define LIBCANAL_STATE_MAP_H
 
+#include "Prereq.h"
 #include <map>
-
-namespace llvm {
-class Value;
-} // namespace llvm
+#include <cstddef>
 
 namespace Canal {
 
@@ -19,6 +17,13 @@ class StateMap
     Map mMap;
 
 public:
+    typedef Map::iterator iterator;
+    typedef Map::const_iterator const_iterator;
+    typedef Map::value_type value_type;
+    typedef Map::size_type size_type;
+    typedef Map::key_type key_type;
+
+public:
     StateMap() {}
 
     StateMap(const StateMap &map);
@@ -26,12 +31,6 @@ public:
     ~StateMap();
 
     bool operator==(const StateMap &map) const;
-
-    typedef Map::iterator iterator;
-    typedef Map::const_iterator const_iterator;
-    typedef Map::value_type value_type;
-    typedef Map::size_type size_type;
-    typedef Map::key_type key_type;
 
     iterator begin() { return mMap.begin(); }
 
@@ -43,6 +42,8 @@ public:
 
     size_type size() const { return mMap.size(); }
 
+    void clear() { mMap.clear(); }
+
     iterator find(const key_type &x) { return mMap.find(x); }
 
     const_iterator find(const key_type &x) const { return mMap.find(x); }
@@ -53,6 +54,8 @@ public:
 
     void insert(const llvm::Value &place, Domain *value);
 
+    /// Get memory usage (used byte count) of this state map.
+    size_t memoryUsage() const;
 };
 
 } // namespace Canal

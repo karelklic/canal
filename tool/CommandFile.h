@@ -3,12 +3,6 @@
 
 #include "Command.h"
 
-namespace Canal
-{
-    class Operations;
-    class Stack;
-}
-
 class CommandFile : public Command
 {
 public:

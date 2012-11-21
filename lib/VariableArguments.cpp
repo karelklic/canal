@@ -21,20 +21,12 @@ VariableArguments::VariableArguments(const VariableArguments &arguments)
         cloneDomains(it->second);
 }
 
-static void
-deleteDomains(const std::vector<Domain*> &domains)
-{
-    std::vector<Domain*>::const_iterator it = domains.begin();
-    for (; it != domains.end(); ++it)
-        delete *it;
-}
-
 VariableArguments::~VariableArguments()
 {
     // Delete all values.
-    CallMap::const_iterator it = mCalls.begin();
+    CallMap::iterator it = mCalls.begin();
     for (; it != mCalls.end(); ++it)
-        deleteDomains(it->second);
+        llvm::DeleteContainerPointers(it->second);
 }
 
 static bool

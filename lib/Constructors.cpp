@@ -10,9 +10,6 @@
 #include "Environment.h"
 #include "State.h"
 #include "APIntUtils.h"
-#include <llvm/Constants.h>
-#include <llvm/Function.h>
-#include <llvm/ADT/OwningPtr.h>
 
 namespace Canal {
 
@@ -84,8 +81,7 @@ Constructors::create(const llvm::Type &type) const
         for (unsigned i = 0; i < structType.getNumElements(); i ++)
             members.push_back(create(*structType.getElementType(i)));
 
-        Structure *structure = new Structure(mEnvironment, members);
-        return structure;
+        return createStructure(members);
     }
 
     CANAL_DIE_MSG("Unsupported llvm::Type::TypeID: " << type.getTypeID());
@@ -193,7 +189,7 @@ Constructors::create(const llvm::Constant &value,
                                      state));
         }
 
-        return new Structure(mEnvironment, members);
+        return createStructure(members);
     }
 
     if (llvm::isa<llvm::ConstantVector>(value))
@@ -232,8 +228,11 @@ Constructors::create(const llvm::Constant &value,
         return createArray(values);
     }
 
-#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
-    if (llvm::isa<llvm::ConstantDataSequential>(value))
+#if (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1) || LLVM_VERSION_MAJOR > 3
+    // llvm::isa<llvm::ConstantDataSequential> returns false for an
+    // llvm::ConstantDataArray/Vector instance at least on on LLVM
+    // 3.1.
+    if (llvm::isa<llvm::ConstantDataVector>(value) || llvm::isa<llvm::ConstantDataArray>(value))
     {
          const llvm::ConstantDataSequential &sequentialValue =
             llvmCast<llvm::ConstantDataSequential>(value);
@@ -248,7 +247,7 @@ Constructors::create(const llvm::Constant &value,
         }
 
         return createArray(values);
-   }
+    }
 #endif
 
     if (llvm::isa<llvm::ConstantAggregateZero>(value))
@@ -321,13 +320,18 @@ Constructors::createPointer(const llvm::Type &type) const {
     return new Pointer::Pointer(mEnvironment, type);
 }
 
+Domain *
+Constructors::createStructure(const std::vector<Domain*> &members) const {
+    return new Structure(mEnvironment, members);
+}
+
 const llvm::fltSemantics *
 Constructors::getFloatingPointSemantics(const llvm::Type &type)
 {
     CANAL_ASSERT(type.isFloatingPointTy());
 
     const llvm::fltSemantics *semantics;
-#if (LLVM_MAJOR == 3 && LLVM_MINOR >= 1) || LLVM_MAJOR > 3
+#if (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1) || LLVM_VERSION_MAJOR > 3
     if (type.isHalfTy())
         semantics = &llvm::APFloat::IEEEhalf;
     else
@@ -378,7 +382,8 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     if (pointer)
     {
         return pointer->getElementPtr(offsets,
-                                      *pointerType.getElementType());
+                                      *pointerType.getElementType(),
+                                      *this);
     }
 
     // GetElementPtr on anything except a pointer.  For example, it is

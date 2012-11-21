@@ -1,55 +1,23 @@
-# - Try to find libelf
-# Once done this will define
+# Find libelf from elfutils
 #
-#  LIBELF_FOUND - system has libelf
-#  LIBELF_INCLUDE_DIRS - the libelf include directory
-#  LIBELF_LIBRARIES - Link these to use libelf
-#  LIBELF_DEFINITIONS - Compiler switches required for using libelf
-#
-#  Copyright (c) 2008 Bernhard Walle <bernhard.walle@gmx.de>
-#
-#  Redistribution and use is allowed according to the terms of the New
-#  BSD license.
-#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
-#
+# It defines the following variables
+#  LIBELF_FOUND - If false, do not compile with libelf.
+#  LIBELF_INCLUDE_DIRS - Where to find headers.
+#  LIBELF_LIBRARIES - The libraries to link against.
 
+find_path(LIBELF_H_INCLUDE_DIR libelf.h)
+find_path(GELF_H_INCLUDE_DIR gelf.h)
+set(LIBELF_INCLUDE_DIRS ${LIBELF_H_INCLUDE_DIR} ${GELF_H_INCLUDE_DIR})
+find_library(LIBELF_LIBRARIES elf)
 
-if (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
-  set (LibElf_FIND_QUIETLY TRUE)
-endif (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
+include(FindPackageHandleStandardArgs)
 
-find_path (LIBELF_INCLUDE_DIRS
-    NAMES
-      libelf.h
-    PATHS
-      /usr/include
-      /usr/include/libelf
-      /usr/local/include
-      /usr/local/include/libelf
-      /opt/local/include
-      /opt/local/include/libelf
-      /sw/include
-      /sw/include/libelf
-      ENV CPATH)
-
-find_library (LIBELF_LIBRARIES
-    NAMES
-      elf
-    PATHS
-      /usr/lib
-      /usr/local/lib
-      /opt/local/lib
-      /sw/lib
-      ENV LIBRARY_PATH
-      ENV LD_LIBRARY_PATH)
-
-include (FindPackageHandleStandardArgs)
-
-
-# handle the QUIETLY and REQUIRED arguments and set LIBELF_FOUND to TRUE if all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibElf DEFAULT_MSG
+find_package_handle_standard_args(
+    LibElf
+    DEFAULT_MSG
     LIBELF_LIBRARIES
-    LIBELF_INCLUDE_DIRS)
-
+    LIBELF_INCLUDE_DIRS
+    LIBELF_H_INCLUDE_DIR
+    GELF_H_INCLUDE_DIR)
 
 mark_as_advanced(LIBELF_INCLUDE_DIRS LIBELF_LIBRARIES)

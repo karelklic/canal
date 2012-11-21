@@ -2,12 +2,6 @@
 #define LIBCANAL_ENVIRONMENT_H
 
 #include "SlotTracker.h"
-#include <llvm/Target/TargetData.h>
-
-namespace llvm {
-class Module;
-class LLVMContext;
-} // namespace llvm
 
 namespace Canal {
 

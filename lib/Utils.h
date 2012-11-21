@@ -1,8 +1,7 @@
 #ifndef LIBCANAL_UTILS_H
 #define LIBCANAL_UTILS_H
 
-#include <llvm/Support/raw_ostream.h>
-#include <llvm/Support/Casting.h>
+#include "Prereq.h"
 #include <cstdlib>
 #include <string>
 #include <typeinfo>
@@ -95,14 +94,6 @@
         abort();                                                        \
     }
 
-namespace llvm {
-class APInt;
-class Constant;
-class Type;
-class Value;
-class Instruction;
-} // namespace llvm
-
 namespace Canal {
 
 class SlotTracker;
@@ -113,16 +104,8 @@ std::string toString(const llvm::APInt &num);
 /// Get human readable string representation of llvm::Type.
 std::string toString(const llvm::Type &type);
 
-/// Get human readable string representation of llvm::Constant.
-std::string toString(const llvm::Constant &constant);
-
-/// Get human readable string representation of llvm::Instruction.
-std::string toString(const llvm::Instruction &instruction);
-
-/// Get decimal representation of an integer.
-std::string toString(int i);
-
 std::string indent(const std::string &input, int spaces);
+
 std::string indentExceptFirstLine(const std::string &input, int spaces);
 
 /// Get human readable name of a llvm::Value.
@@ -388,6 +371,17 @@ dynCast(const Y *val)
 {
     return dynCastStruct<X, Y>::cast_const(val);
 }
+
+
+/// A raw_string_ostream that writes to an embedded std::string.  This
+/// is a simple adaptor class.
+class StringStream : public llvm::raw_string_ostream
+{
+    std::string mString;
+
+public:
+    StringStream() : llvm::raw_string_ostream(mString) {}
+};
 
 } // namespace Canal
 

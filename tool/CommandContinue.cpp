@@ -1,7 +1,6 @@
 #include "CommandContinue.h"
 #include "Commands.h"
 #include "State.h"
-#include <cstdio>
 
 CommandContinue::CommandContinue(Commands &commands)
     : Command("continue",
@@ -17,7 +16,7 @@ CommandContinue::run(const std::vector<std::string> &args)
 {
     if (!mCommands.getState() || !mCommands.getState()->isInterpreting())
     {
-        puts("The program is not being interpreted.");
+        llvm::outs() << "The program is not being interpreted.\n";
         return;
     }
 

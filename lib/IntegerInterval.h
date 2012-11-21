@@ -2,13 +2,12 @@
 #define LIBCANAL_INTEGER_INTERVAL_H
 
 #include "Domain.h"
-#include <llvm/Constants.h>
 
 namespace Canal {
 namespace Integer {
 
 /// Abstracts integer values as a interval min - max.
-class Interval : public Domain, public AccuracyDomain
+class Interval : public Domain
 {
 public:
     /// @brief Indicates an empty interval.
@@ -103,9 +102,6 @@ public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Interval *clone() const;
-    /// Implementation of Domain::cloneCleaned().
-    /// Covariant return type.
-    virtual Interval *cloneCleaned() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain& value) const;
     /// Implementation of Domain::merge().
@@ -155,16 +151,14 @@ public: // Implementation of Domain.
     virtual void fptoui(const Domain &value);
     virtual void fptosi(const Domain &value);
 
-public: // Implementation of AccuracyDomain.
-    /// Implementation of AccuracyDomain::accuracy().
     virtual float accuracy() const;
-    /// Implementation of AccuracyDomain::isBottom().
+
     virtual bool isBottom() const;
-    /// Implementation of AccuracyDomain::setBottom().
+
     virtual void setBottom();
-    /// Implementation of AccuracyDomain::isTop().
+
     virtual bool isTop() const;
-    /// Implementation of AccuracyDomain::setTop().
+
     virtual void setTop();
 };
 

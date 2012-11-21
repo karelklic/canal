@@ -1,12 +1,8 @@
 #ifndef LIBCANAL_OPERATIONS_CALLBACK_H
 #define LIBCANAL_OPERATIONS_CALLBACK_H
 
+#include "Prereq.h"
 #include <vector>
-
-namespace llvm {
-class Function;
-class Value;
-} // namespace llvm
 
 namespace Canal {
 

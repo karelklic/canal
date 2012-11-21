@@ -1,8 +1,6 @@
 #include "IntegerEnumeration.h"
 #include "Utils.h"
 #include "FloatInterval.h"
-#include <sstream>
-#include <iostream>
 
 namespace Canal {
 namespace Integer {
@@ -41,7 +39,9 @@ Enumeration::signedMin(llvm::APInt &result) const
             return false;
 
         //Find lowest negative number
-        APIntUtils::USet::const_iterator bound = mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
+        APIntUtils::USet::const_iterator bound =
+            mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
+
         if (bound == mValues.end())
         {
             // If there is no negative number in this enumeration then
@@ -117,12 +117,6 @@ Enumeration::clone() const
     return new Enumeration(*this);
 }
 
-Enumeration *
-Enumeration::cloneCleaned() const
-{
-    return new Enumeration(mEnvironment, getBitWidth());
-}
-
 bool
 Enumeration::operator==(const Domain &value) const
 {
@@ -178,17 +172,17 @@ Enumeration::memoryUsage() const
 std::string
 Enumeration::toString() const
 {
-    std::stringstream ss;
+    StringStream ss;
     ss << "enumeration";
     if (mTop)
         ss << " top";
     else if (mValues.empty())
         ss << " empty";
-    ss << std::endl;
+    ss << "\n";
 
     APIntUtils::USet::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
-        ss << "    " << Canal::toString(*it) << std::endl;
+        ss << "    " << Canal::toString(*it) << "\n";
 
     return ss.str();
 }
@@ -208,7 +202,7 @@ Enumeration::sub(const Domain &a, const Domain &b)
 void
 Enumeration::mul(const Domain &a, const Domain &b)
 {
-#if (LLVM_MAJOR == 2 && LLVM_MINOR < 9)
+#if (LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9)
     applyOperation(a, b, &llvm::APInt::operator*, NULL);
 #else
     applyOperation(a, b, NULL, &llvm::APInt::smul_ov);

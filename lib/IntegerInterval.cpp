@@ -2,8 +2,6 @@
 #include "Utils.h"
 #include "APIntUtils.h"
 #include "FloatInterval.h"
-#include <sstream>
-#include <iostream>
 
 namespace Canal {
 namespace Integer {
@@ -132,12 +130,6 @@ Interval::clone() const
     return new Interval(*this);
 }
 
-Interval *
-Interval::cloneCleaned() const
-{
-    return new Interval(mEnvironment, getBitWidth());
-}
-
 bool
 Interval::operator==(const Domain& value) const
 {
@@ -232,10 +224,10 @@ Interval::memoryUsage() const
 std::string
 Interval::toString() const
 {
-    std::stringstream ss;
+    StringStream ss;
     ss << "interval";
     if (mEmpty)
-        ss << " empty" << std::endl;
+        ss << " empty\n";
     else
     {
         llvm::APInt sMin, sMax, uMin, uMax;
@@ -248,7 +240,7 @@ Interval::toString() const
         success = unsignedMax(uMax);
         CANAL_ASSERT(success);
 
-        std::stringstream sign, unsign;
+        StringStream sign, unsign;
         sign << sMin.toString(10, true) << " to "
              << sMax.toString(10, true);
 
@@ -263,15 +255,24 @@ Interval::toString() const
 
         if (sign.str() != unsign.str())
         {
-            ss << std::endl;
-            ss << "    signed " << sign.str() << std::endl;
-            ss << "    unsigned " << unsign.str() << std::endl;
+            ss << "\n"
+               << "    signed " << sign.str() << "\n"
+               << "    unsigned " << unsign.str() << "\n";
         }
         else
-            ss << " " << sign.str() << std::endl;
+            ss << " " << sign.str() << "\n";
     }
 
     return ss.str();
+}
+
+void
+Interval::setZero(const llvm::Value *place)
+{
+    mEmpty = false;
+    mUnsignedTop = mSignedTop = false;
+    mUnsignedFrom = mUnsignedTo = mSignedFrom = mSignedTo =
+        llvm::APInt::getNullValue(mUnsignedFrom.getBitWidth());
 }
 
 void
@@ -805,8 +806,8 @@ Interval::icmp(const Domain &a, const Domain &b,
     switch (predicate)
     {
     case llvm::CmpInst::ICMP_EQ:  // equal
-        // If both intervals are equal, the result is 1.  If
-        // interval intersection is empty, the result is 0.
+        // If both intervals are an equal constant, the result is 1.
+        // If interval intersection is empty, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (&a == &b)
         {
@@ -814,7 +815,7 @@ Interval::icmp(const Domain &a, const Domain &b,
             break;
         }
 
-        //Signed equality
+        // Signed equality
         if (aa.isSignedSingleValue() &&
             bb.isSignedSingleValue() &&
             aa.mSignedFrom == bb.mSignedFrom)
@@ -824,7 +825,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         else if (intersects(aa, bb, true, false))
             mSignedTop = true;
 
-        //Unsigned equality
+        // Unsigned equality
         if (aa.isUnsignedSingleValue() &&
             bb.isUnsignedSingleValue() &&
             aa.mUnsignedFrom == bb.mUnsignedFrom)
@@ -874,7 +875,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         if (aa.mUnsignedFrom.ugt(bb.mUnsignedTo))
             mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
         else if (intersects(aa, bb, false, true))
-            this->setTop();
+            setTop();
 
         break;
     case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
@@ -1193,15 +1194,6 @@ Interval::setTop()
 {
     mEmpty = false;
     mSignedTop = mUnsignedTop = true;
-}
-
-void
-Interval::setZero(const llvm::Value *place)
-{
-    mEmpty = false;
-    mUnsignedTop = mSignedTop = false;
-    mUnsignedFrom = mUnsignedTo = mSignedFrom = mSignedTo =
-        llvm::APInt::getNullValue(mUnsignedFrom.getBitWidth());
 }
 
 } // namespace Integer

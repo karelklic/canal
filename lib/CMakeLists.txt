@@ -1,35 +1,38 @@
 add_library(canal SHARED
-APIntUtils.cpp
-ArrayExactSize.cpp
-ArrayInterface.cpp
-ArraySingleItem.cpp
-Constructors.cpp
-Domain.cpp
-Environment.cpp
-FloatInterval.cpp
-IntegerBitfield.cpp
-IntegerContainer.cpp
-IntegerEnumeration.cpp
-IntegerInterval.cpp
-InterpreterBasicBlock.cpp
-InterpreterFunction.cpp
-Interpreter.cpp
-InterpreterIterator.cpp
-InterpreterModule.cpp
-InterpreterOperationsCallback.cpp
-Operations.cpp
-Pointer.cpp
-PointerTarget.cpp
-PointerUtils.cpp
-SlotTracker.cpp
-State.cpp
-StateMap.cpp
-Structure.cpp
-Utils.cpp
-VariableArguments.cpp
-WideningDataIterationCount.cpp
-WideningManager.cpp
-WideningNumericalInfinity.cpp
-WideningPointers.cpp)
+    APIntUtils.cpp
+    ArrayExactSize.cpp
+    ArrayInterface.cpp
+    ArraySingleItem.cpp
+    ArrayStringPrefix.cpp
+    Constructors.cpp
+    Domain.cpp
+    Environment.cpp
+    FloatInterval.cpp
+    IntegerBitfield.cpp
+    IntegerContainer.cpp
+    IntegerEnumeration.cpp
+    IntegerInterval.cpp
+    InterpreterBasicBlock.cpp
+    InterpreterFunction.cpp
+    Interpreter.cpp
+    InterpreterIterator.cpp
+    InterpreterModule.cpp
+    InterpreterOperationsCallback.cpp
+    Operations.cpp
+    Pointer.cpp
+    PointerTarget.cpp
+    PointerUtils.cpp
+    SlotTracker.cpp
+    State.cpp
+    StateMap.cpp
+    Structure.cpp
+    Utils.cpp
+    VariableArguments.cpp
+    WideningDataIterationCount.cpp
+    WideningManager.cpp
+    WideningNumericalInfinity.cpp
+    WideningPointers.cpp)
 
-target_link_libraries(canal "${LLVM_MODULE_LIBS} ${LLVM_LDFLAGS}")
+target_link_libraries(canal
+    ${LLVM_MODULE_LIBS}
+    ${LLVM_LDFLAGS})

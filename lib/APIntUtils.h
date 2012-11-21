@@ -1,8 +1,8 @@
 #ifndef LIBCANAL_APINT_UTILS_H
 #define LIBCANAL_APINT_UTILS_H
 
+#include "Prereq.h"
 #include <set>
-#include <llvm/ADT/APInt.h>
 
 namespace Canal {
 namespace APIntUtils {
@@ -28,6 +28,7 @@ struct SCompare
 typedef std::set<llvm::APInt, UCompare> USet;
 
 typedef llvm::APInt(llvm::APInt::*Operation)(const llvm::APInt&) const;
+
 typedef llvm::APInt(llvm::APInt::*OperationWithOverflow)(const llvm::APInt&,
                                                          bool&) const;
 

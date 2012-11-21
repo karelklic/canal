@@ -2,7 +2,6 @@
 #include "Utils.h"
 #include "WideningDataInterface.h"
 #include <typeinfo>
-#include <llvm/Support/raw_ostream.h>
 
 namespace Canal {
 
@@ -211,37 +210,31 @@ Domain::sitofp(const Domain &value)
 }
 
 float
-AccuracyDomain::accuracy() const
+Domain::accuracy() const
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 bool
-AccuracyDomain::isBottom() const
+Domain::isBottom() const
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-AccuracyDomain::setBottom()
+Domain::setBottom()
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 bool
-AccuracyDomain::isTop() const
+Domain::isTop() const
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
-AccuracyDomain::setTop()
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-bool
-VariablePrecisionDomain::limitMemoryUsage(size_t size)
+Domain::setTop()
 {
     CANAL_NOT_IMPLEMENTED();
 }

@@ -1,16 +1,9 @@
 #ifndef LIBCANAL_SLOT_TRACKER_H
 #define LIBCANAL_SLOT_TRACKER_H
 
+#include "Prereq.h"
 #include <map>
 #include <vector>
-
-namespace llvm {
-class Value;
-class GlobalValue;
-class Module;
-class Function;
-class MDNode;
-}
 
 namespace Canal {
 

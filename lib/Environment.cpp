@@ -1,6 +1,5 @@
 #include "Environment.h"
 #include "Utils.h"
-#include <llvm/Module.h>
 
 namespace Canal {
 

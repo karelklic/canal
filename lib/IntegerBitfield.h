@@ -1,8 +1,7 @@
-#ifndef LIBCANAL_INTEGER_BITS_H
-#define LIBCANAL_INTEGER_BITS_H
+#ifndef LIBCANAL_INTEGER_BITFIELD_H
+#define LIBCANAL_INTEGER_BITFIELD_H
 
 #include "Domain.h"
-#include <llvm/ADT/APInt.h>
 
 namespace Canal {
 namespace Integer {
@@ -16,7 +15,7 @@ namespace Integer {
 ///    1        0    The bit is set to 0
 ///    0        1    The bit is set to 1
 ///    1        1    The bit can be both 0 and 1 (highest lattice value - top)
-class Bitfield : public Domain, public AccuracyDomain
+class Bitfield : public Domain
 {
 public:
     /// When a bit in mZeroes is 1, the value is known to contain zero
@@ -103,9 +102,6 @@ public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Bitfield *clone() const;
-    /// Implementation of Domain::cloneCleaned().
-    /// Covariant return type.
-    virtual Bitfield *cloneCleaned() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain& value) const;
     /// Implementation of Domain::merge().
@@ -155,20 +151,18 @@ public: // Implementation of Domain.
     virtual void fptoui(const Domain &value);
     virtual void fptosi(const Domain &value);
 
-public: // Implementation of AccuracyDomain.
-    /// Implementation of AccuracyDomain::accuracy().
     virtual float accuracy() const;
-    /// Implementation of AccuracyDomain::isBottom().
+
     virtual bool isBottom() const;
-    /// Implementation of AccuracyDomain::setBottom().
+
     virtual void setBottom();
-    /// Implementation of AccuracyDomain::isTop().
+
     virtual bool isTop() const;
-    /// Implementation of AccuracyDomain::setTop().
+
     virtual void setTop();
 };
 
 } // namespace Integer
 } // namespace Canal
 
-#endif // LIBCANAL_INTEGER_BITS_H
+#endif // LIBCANAL_INTEGER_BITFIELD_H

@@ -1,9 +1,6 @@
 #include "ArraySingleItem.h"
 #include "Utils.h"
 #include "IntegerContainer.h"
-#include <llvm/ADT/APInt.h>
-#include <sstream>
-#include <iostream>
 
 namespace Canal {
 namespace Array {
@@ -35,30 +32,6 @@ SingleItem *
 SingleItem::clone() const
 {
     return new SingleItem(*this);
-}
-
-SingleItem *
-SingleItem::cloneCleaned() const
-{
-    SingleItem* res = new SingleItem(*this);
-
-    //setBottom on value
-    AccuracyDomain* value = dynCast<AccuracyDomain*>(res->mValue);
-    CANAL_ASSERT_MSG(value,
-                     "Value has to be of type AccuracyDomain "
-                     "in order to call setBottom on it.");
-
-    value->setBottom();
-
-    //setBottom on size
-    AccuracyDomain* size = dynCast<AccuracyDomain*>(res->mSize);
-    CANAL_ASSERT_MSG(size,
-                     "Size has to be of type AccuracyDomain "
-                     "in order to call setBottom on it.");
-
-    size->setBottom();
-
-    return res;
 }
 
 bool
@@ -111,11 +84,11 @@ SingleItem::memoryUsage() const
 std::string
 SingleItem::toString() const
 {
-    std::stringstream ss;
-    ss << "arraySingleItem" << std::endl;
-    ss << "    size" << std::endl;
+    StringStream ss;
+    ss << "arraySingleItem\n";
+    ss << "    size\n";
     ss << indent(mSize->toString(), 8);
-    ss << "    value" << std::endl;
+    ss << "    value\n";
     ss << indent(mValue->toString(), 8);
     return ss.str();
 }

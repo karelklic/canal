@@ -2,10 +2,6 @@
 #include "Constructors.h"
 #include "Environment.h"
 #include "Utils.h"
-#include <llvm/Function.h>
-#include <llvm/BasicBlock.h>
-#include <llvm/Type.h>
-#include <sstream>
 
 namespace Canal {
 namespace Interpreter {
@@ -16,19 +12,29 @@ BasicBlock::BasicBlock(const llvm::BasicBlock &basicBlock,
 {
 }
 
+size_t
+BasicBlock::memoryUsage() const
+{
+    size_t result = sizeof(BasicBlock);
+    result += mInputState.memoryUsage();
+    result += mOutputState.memoryUsage();
+    return result;
+}
+
 std::string
 BasicBlock::toString() const
 {
     SlotTracker &slotTracker = mEnvironment.getSlotTracker();
     slotTracker.setActiveFunction(*mBasicBlock.getParent());
 
-    std::stringstream ss;
+    StringStream ss;
     ss << "*** basicBlock ";
     if (mBasicBlock.hasName())
-        ss << mBasicBlock.getName().str();
+        ss << mBasicBlock.getName();
     else
         ss << "<label>:" << slotTracker.getLocalSlot(mBasicBlock);
-    ss << std::endl;
+
+    ss << "\n";
 
     llvm::BasicBlock::const_iterator it = mBasicBlock.begin();
     for (; it != mBasicBlock.end(); ++it)

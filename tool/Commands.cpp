@@ -51,9 +51,7 @@ Commands::Commands()
 
 Commands::~Commands()
 {
-    std::vector<Command*>::const_iterator it = mCommandList.begin();
-    for (; it != mCommandList.end(); ++it)
-        delete *it;
+    llvm::DeleteContainerPointers(mCommandList);
 }
 
 std::vector<std::string>
@@ -173,7 +171,8 @@ Commands::executeLine(const std::string &line)
     }
 
     // Failed to find a command.
-    printf("Undefined command: \"%s\".  Try \"help\".\n", args[0].c_str());
+    llvm::outs() << "Undefined command: \"" << args[0] << "\".  "
+                 << "Try \"help\".\n";
 }
 
 Command *
@@ -193,7 +192,7 @@ Commands::getCommand(const std::string &name) const
 void
 Commands::createState(llvm::Module *module)
 {
-    CANAL_ASSERT(module && "Module cannot be NULL.");
+    CANAL_ASSERT_MSG(module, "Module cannot be NULL.");
     delete mState;
     mState = new State(module);
 }

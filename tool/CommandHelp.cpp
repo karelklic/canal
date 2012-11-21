@@ -1,7 +1,6 @@
 #include "CommandHelp.h"
 #include "Commands.h"
 #include "lib/Utils.h"
-#include <cstdio>
 
 CommandHelp::CommandHelp(Commands &commands)
     : Command("help",
@@ -19,23 +18,6 @@ CommandHelp::getCompletionMatches(const std::vector<std::string> &args,
 {
     return mCommands.getCommandMatches(
         args[pointArg].substr(0, pointArgOffset));
-}
-
-static void
-printCommand(const std::string &name, std::vector<Command*> &commands)
-{
-    std::vector<Command*>::iterator it = commands.begin();
-    for (; it != commands.end(); ++it)
-    {
-        if ((*it)->getName() == name)
-        {
-            printf("%s -- %s\n", name.c_str(), (*it)->getHelpLine().c_str());
-            commands.erase(it);
-            return;
-        }
-    }
-
-    CANAL_DIE();
 }
 
 void
@@ -57,16 +39,17 @@ CommandHelp::run(const std::vector<std::string> &args)
 
         if (matches.size() > 1)
         {
-            printf("Ambiguous command \"%s\": ", args[1].c_str());
+            llvm::outs() << "Ambiguous command \"" << args[1] << "\": ";
             std::vector<std::string>::const_iterator it = matches.begin();
             for (; it != matches.end(); ++it)
             {
                 if (it != matches.begin())
-                    printf(", ");
+                    llvm::outs() << ", ";
 
-                printf("%s", it->c_str());
+                llvm::outs() << *it;
             }
-            puts("");
+
+            llvm::outs() << "\n";
             return;
         }
         else if (matches.size() == 1)
@@ -77,49 +60,70 @@ CommandHelp::run(const std::vector<std::string> &args)
         else
         {
             // Failed to find a command.
-            printf("Undefined command: \"%s\".  Try \"help\".\n", args[1].c_str());
+            llvm::outs() << "Undefined command: \"" << args[1] << "\".  "
+                         << "Try \"help\".\n";
+
             return;
         }
     }
 
-    puts(command->getHelp().c_str());
+    llvm::outs() << command->getHelp() << "\n";
+}
+
+static std::string
+commandGetStringAndRemove(const std::string &name, std::vector<Command*> &commands)
+{
+    Canal::StringStream ss;
+    std::vector<Command*>::iterator it = commands.begin();
+    for (; it != commands.end(); ++it)
+    {
+        if ((*it)->getName() == name)
+        {
+            ss << name << " -- " << (*it)->getHelpLine() << "\n";
+            commands.erase(it);
+            return ss.str();
+        }
+    }
+
+    CANAL_DIE();
 }
 
 void
 CommandHelp::allCommandsHelp()
 {
     std::vector<Command*> commands = mCommands.mCommandList;
-    puts("List of commands:");
-    puts("");
-    puts("Making program stop at certain points");
-    printCommand("break", commands);
-    puts("");
-    puts("Examining data");
-    printCommand("print", commands);
-    printCommand("dump", commands);
-    puts("");
-    puts("Specifying files");
-    printCommand("cd", commands);
-    printCommand("file", commands);
-    printCommand("pwd", commands);
-    puts("");
-    puts("Running the program");
-    printCommand("continue", commands);
-    printCommand("finish", commands);
-    printCommand("run", commands);
-    printCommand("step", commands);
-    printCommand("start", commands);
-    puts("");
-    puts("Status inquiries");
-    printCommand("info", commands);
-    printCommand("show", commands);
-    puts("");
-    puts("Support facilities");
-    printCommand("help", commands);
-    printCommand("quit", commands);
-    printCommand("shell", commands);
-    puts("");
-    puts("Type \"help\" followed by command name for full documentation.");
-    puts("Command name abbreviations are allowed if unambiguous.");
+    llvm::outs() << "List of commands:\n"
+                 << "\n"
+                 << "Making program stop at certain points\n"
+                 << commandGetStringAndRemove("break", commands)
+                 << "\n"
+                 << "Examining data\n"
+                 << commandGetStringAndRemove("print", commands)
+                 << commandGetStringAndRemove("dump", commands)
+                 << "\n"
+                 << "Specifying files\n"
+                 << commandGetStringAndRemove("cd", commands)
+                 << commandGetStringAndRemove("file", commands)
+                 << commandGetStringAndRemove("pwd", commands)
+                 << "\n"
+                 << "Running the program\n"
+                 << commandGetStringAndRemove("continue", commands)
+                 << commandGetStringAndRemove("finish", commands)
+                 << commandGetStringAndRemove("run", commands)
+                 << commandGetStringAndRemove("step", commands)
+                 << commandGetStringAndRemove("start", commands)
+                 << "\n"
+                 << "Status inquiries\n"
+                 << commandGetStringAndRemove("info", commands)
+                 << commandGetStringAndRemove("show", commands)
+                 << "\n"
+                 << "Support facilities\n"
+                 << commandGetStringAndRemove("help", commands)
+                 << commandGetStringAndRemove("quit", commands)
+                 << commandGetStringAndRemove("shell", commands)
+                 << "\n"
+                 << "Type \"help\" followed by command name for full documentation.\n"
+                 << "Command name abbreviations are allowed if unambiguous.\n";
+
     CANAL_ASSERT(commands.empty());
 }

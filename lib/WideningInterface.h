@@ -1,11 +1,10 @@
 #ifndef LIBCANAL_WIDENING_INTERFACE_H
 #define LIBCANAL_WIDENING_INTERFACE_H
 
-namespace llvm {
-class BasicBlock;
-} // namespace llvm
+#include "Prereq.h"
 
 namespace Canal {
+
 class Domain;
 
 namespace Widening {

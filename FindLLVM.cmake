@@ -1,11 +1,12 @@
-# Find the native LLVM includes and library
+# Find LLVM
 #
-#  LLVM_INCLUDE_DIR - where to find llvm include files
-#  LLVM_LIBRARY_DIR - where to find llvm libs
-#  LLVM_CFLAGS      - llvm compiler flags
-#  LLVM_LFLAGS      - llvm linker flags
-#  LLVM_MODULE_LIBS - list of llvm libs for working with modules.
-#  LLVM_FOUND       - True if llvm found.
+# It defines the following variables
+#  LLVM_FOUND        - True if llvm found.
+#  LLVM_INCLUDE_DIRS - where to find llvm include files
+#  LLVM_LIBRARY_DIRS - where to find llvm libs
+#  LLVM_CFLAGS       - llvm compiler flags
+#  LLVM_LDFLAGS      - llvm linker flags
+#  LLVM_MODULE_LIBS  - list of llvm libs for working with modules.
 
 find_program(LLVM_CONFIG_EXECUTABLE llvm-config DOC "llvm-config executable")
 
@@ -21,21 +22,21 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-STRING(REGEX REPLACE "^([0-9]+)\\.([0-9]+)" "\\1" LLVM_MAJOR
+string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)" "\\1" LLVM_VERSION_MAJOR
 	     "${LLVM_VERSION}")
 
-STRING(REGEX REPLACE "^([0-9]+)\\.([0-9]+)" "\\2" LLVM_MINOR
+string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)" "\\2" LLVM_VERSION_MINOR
 	     "${LLVM_VERSION}")
 
 execute_process(
   COMMAND ${LLVM_CONFIG_EXECUTABLE} --includedir
-  OUTPUT_VARIABLE LLVM_INCLUDE_DIR
+  OUTPUT_VARIABLE LLVM_INCLUDE_DIRS
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 execute_process(
   COMMAND ${LLVM_CONFIG_EXECUTABLE} --libdir
-  OUTPUT_VARIABLE LLVM_LIBRARY_DIR
+  OUTPUT_VARIABLE LLVM_LIBRARY_DIRS
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
@@ -45,15 +46,21 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-execute_process(
-  COMMAND ${LLVM_CONFIG_EXECUTABLE} --ldflags
-  OUTPUT_VARIABLE LLVM_LDFLAGS
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+if (LLVM_CFLAGS MATCHES "\\-DNDEBUG")
+    set(LLVM_WITH_NDEBUG TRUE)
+else (LLVM_CFLAGS MATCHES "\\-DNDEBUG")
+    set(LLVM_WITH_NDEBUG FALSE)
+endif (LLVM_CFLAGS MATCHES "\\-DNDEBUG")
 
 execute_process(
   COMMAND ${LLVM_CONFIG_EXECUTABLE} --libs core bitreader asmparser target analysis transformutils
   OUTPUT_VARIABLE LLVM_MODULE_LIBS
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+  COMMAND ${LLVM_CONFIG_EXECUTABLE} --ldflags
+  OUTPUT_VARIABLE LLVM_LDFLAGS
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 

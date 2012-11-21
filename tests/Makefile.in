@@ -14,6 +14,7 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -33,6 +34,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+noinst_PROGRAMS = OperationsTest$(EXEEXT) IntegerIntervalTest$(EXEEXT) \
+	PointerTest$(EXEEXT) ICMPTest$(EXEEXT) MergeTest$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/atlocal.in
@@ -47,49 +50,62 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/lib/Config.h
 CONFIG_CLEAN_FILES = atlocal
 CONFIG_CLEAN_VPATH_FILES =
-SOURCES =
-DIST_SOURCES =
-RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
-	html-recursive info-recursive install-data-recursive \
-	install-dvi-recursive install-exec-recursive \
-	install-html-recursive install-info-recursive \
-	install-pdf-recursive install-ps-recursive install-recursive \
-	installcheck-recursive installdirs-recursive pdf-recursive \
-	ps-recursive uninstall-recursive
-RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
-  distclean-recursive maintainer-clean-recursive
-AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
-	$(RECURSIVE_CLEAN_TARGETS:-recursive=) tags TAGS ctags CTAGS \
-	distdir
+PROGRAMS = $(noinst_PROGRAMS)
+am_ICMPTest_OBJECTS = ICMPTest-ICMPTest.$(OBJEXT)
+ICMPTest_OBJECTS = $(am_ICMPTest_OBJECTS)
+ICMPTest_DEPENDENCIES = ../lib/libcanal.la
+ICMPTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(ICMPTest_CXXFLAGS) \
+	$(CXXFLAGS) $(ICMPTest_LDFLAGS) $(LDFLAGS) -o $@
+am_IntegerIntervalTest_OBJECTS =  \
+	IntegerIntervalTest-IntegerIntervalTest.$(OBJEXT)
+IntegerIntervalTest_OBJECTS = $(am_IntegerIntervalTest_OBJECTS)
+IntegerIntervalTest_DEPENDENCIES = ../lib/libcanal.la
+IntegerIntervalTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) \
+	$(IntegerIntervalTest_LDFLAGS) $(LDFLAGS) -o $@
+am_MergeTest_OBJECTS = MergeTest-MergeTest.$(OBJEXT)
+MergeTest_OBJECTS = $(am_MergeTest_OBJECTS)
+MergeTest_DEPENDENCIES = ../lib/libcanal.la
+MergeTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(MergeTest_CXXFLAGS) \
+	$(CXXFLAGS) $(MergeTest_LDFLAGS) $(LDFLAGS) -o $@
+am_OperationsTest_OBJECTS = OperationsTest-OperationsTest.$(OBJEXT)
+OperationsTest_OBJECTS = $(am_OperationsTest_OBJECTS)
+OperationsTest_DEPENDENCIES = ../lib/libcanal.la
+OperationsTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(OperationsTest_CXXFLAGS) $(CXXFLAGS) \
+	$(OperationsTest_LDFLAGS) $(LDFLAGS) -o $@
+am_PointerTest_OBJECTS = PointerTest-PointerTest.$(OBJEXT)
+PointerTest_OBJECTS = $(am_PointerTest_OBJECTS)
+PointerTest_DEPENDENCIES = ../lib/libcanal.la
+PointerTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(PointerTest_CXXFLAGS) \
+	$(CXXFLAGS) $(PointerTest_LDFLAGS) $(LDFLAGS) -o $@
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/lib
+depcomp = $(SHELL) $(top_srcdir)/depcomp
+am__depfiles_maybe = depfiles
+am__mv = mv -f
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+SOURCES = $(ICMPTest_SOURCES) $(IntegerIntervalTest_SOURCES) \
+	$(MergeTest_SOURCES) $(OperationsTest_SOURCES) \
+	$(PointerTest_SOURCES)
+DIST_SOURCES = $(ICMPTest_SOURCES) $(IntegerIntervalTest_SOURCES) \
+	$(MergeTest_SOURCES) $(OperationsTest_SOURCES) \
+	$(PointerTest_SOURCES)
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-am__relativize = \
-  dir0=`pwd`; \
-  sed_first='s,^\([^/]*\)/.*$$,\1,'; \
-  sed_rest='s,^[^/]*/*,,'; \
-  sed_last='s,^.*/\([^/]*\)$$,\1,'; \
-  sed_butlast='s,/*[^/]*$$,,'; \
-  while test -n "$$dir1"; do \
-    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
-    if test "$$first" != "."; then \
-      if test "$$first" = ".."; then \
-        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
-        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
-      else \
-        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
-        if test "$$first2" = "$$first"; then \
-          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
-        else \
-          dir2="../$$dir2"; \
-        fi; \
-        dir0="$$dir0"/"$$first"; \
-      fi; \
-    fi; \
-    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
-  done; \
-  reldir="$$dir2"
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AR = @AR@
@@ -230,8 +246,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = integration unit
-EXTRA_DIST = package.m4 $(TESTSUITE_AT) $(TESTSUITE) atlocal.in
+EXTRA_DIST = package.m4 $(TESTSUITE_AT) $(TESTSUITE) atlocal.in \
+	0-numeric.c 1-pointer.c 2-string.c
 TESTSUITE_AT = \
   local.at \
   testsuite.at
@@ -241,9 +257,35 @@ MAINTAINERCLEANFILES = Makefile.in $(TESTSUITE)
 check_DATA = atconfig atlocal $(TESTSUITE)
 DISTCLEANFILES = atconfig
 AUTOTEST = $(AUTOM4TE) --language=autotest
-all: all-recursive
+OperationsTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+OperationsTest_SOURCES = OperationsTest.cpp
+OperationsTest_LDADD = ../lib/libcanal.la
+OperationsTest_LIBS = $(LLVM_LIBS)
+OperationsTest_LDFLAGS = $(LLVM_LDFLAGS)
+IntegerIntervalTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+IntegerIntervalTest_SOURCES = IntegerIntervalTest.cpp
+IntegerIntervalTest_LDADD = ../lib/libcanal.la
+IntegerIntervalTest_LIBS = $(LLVM_LIBS)
+IntegerIntervalTest_LDFLAGS = $(LLVM_LDFLAGS)
+PointerTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+PointerTest_SOURCES = PointerTest.cpp
+PointerTest_LDADD = ../lib/libcanal.la
+PointerTest_LIBS = $(LLVM_LIBS)
+PointerTest_LDFLAGS = $(LLVM_LDFLAGS)
+ICMPTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+ICMPTest_SOURCES = ICMPTest.cpp
+ICMPTest_LDADD = ../lib/libcanal.la
+ICMPTest_LIBS = $(LLVM_LIBS)
+ICMPTest_LDFLAGS = $(LLVM_LDFLAGS)
+MergeTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+MergeTest_SOURCES = MergeTest.cpp
+MergeTest_LDADD = ../lib/libcanal.la
+MergeTest_LIBS = $(LLVM_LIBS)
+MergeTest_LDFLAGS = $(LLVM_LDFLAGS)
+all: all-am
 
 .SUFFIXES:
+.SUFFIXES: .cpp .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -277,81 +319,138 @@ $(am__aclocal_m4_deps):
 atlocal: $(top_builddir)/config.status $(srcdir)/atlocal.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
+clean-noinstPROGRAMS:
+	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+ICMPTest$(EXEEXT): $(ICMPTest_OBJECTS) $(ICMPTest_DEPENDENCIES) 
+	@rm -f ICMPTest$(EXEEXT)
+	$(ICMPTest_LINK) $(ICMPTest_OBJECTS) $(ICMPTest_LDADD) $(LIBS)
+IntegerIntervalTest$(EXEEXT): $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_DEPENDENCIES) 
+	@rm -f IntegerIntervalTest$(EXEEXT)
+	$(IntegerIntervalTest_LINK) $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_LDADD) $(LIBS)
+MergeTest$(EXEEXT): $(MergeTest_OBJECTS) $(MergeTest_DEPENDENCIES) 
+	@rm -f MergeTest$(EXEEXT)
+	$(MergeTest_LINK) $(MergeTest_OBJECTS) $(MergeTest_LDADD) $(LIBS)
+OperationsTest$(EXEEXT): $(OperationsTest_OBJECTS) $(OperationsTest_DEPENDENCIES) 
+	@rm -f OperationsTest$(EXEEXT)
+	$(OperationsTest_LINK) $(OperationsTest_OBJECTS) $(OperationsTest_LDADD) $(LIBS)
+PointerTest$(EXEEXT): $(PointerTest_OBJECTS) $(PointerTest_DEPENDENCIES) 
+	@rm -f PointerTest$(EXEEXT)
+	$(PointerTest_LINK) $(PointerTest_OBJECTS) $(PointerTest_LDADD) $(LIBS)
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT)
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ICMPTest-ICMPTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MergeTest-MergeTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OperationsTest-OperationsTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PointerTest-PointerTest.Po@am__quote@
+
+.cpp.o:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+
+.cpp.obj:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cpp.lo:
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+ICMPTest-ICMPTest.o: ICMPTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ICMPTest_CXXFLAGS) $(CXXFLAGS) -MT ICMPTest-ICMPTest.o -MD -MP -MF $(DEPDIR)/ICMPTest-ICMPTest.Tpo -c -o ICMPTest-ICMPTest.o `test -f 'ICMPTest.cpp' || echo '$(srcdir)/'`ICMPTest.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ICMPTest-ICMPTest.Tpo $(DEPDIR)/ICMPTest-ICMPTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ICMPTest.cpp' object='ICMPTest-ICMPTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ICMPTest_CXXFLAGS) $(CXXFLAGS) -c -o ICMPTest-ICMPTest.o `test -f 'ICMPTest.cpp' || echo '$(srcdir)/'`ICMPTest.cpp
+
+ICMPTest-ICMPTest.obj: ICMPTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ICMPTest_CXXFLAGS) $(CXXFLAGS) -MT ICMPTest-ICMPTest.obj -MD -MP -MF $(DEPDIR)/ICMPTest-ICMPTest.Tpo -c -o ICMPTest-ICMPTest.obj `if test -f 'ICMPTest.cpp'; then $(CYGPATH_W) 'ICMPTest.cpp'; else $(CYGPATH_W) '$(srcdir)/ICMPTest.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ICMPTest-ICMPTest.Tpo $(DEPDIR)/ICMPTest-ICMPTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ICMPTest.cpp' object='ICMPTest-ICMPTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ICMPTest_CXXFLAGS) $(CXXFLAGS) -c -o ICMPTest-ICMPTest.obj `if test -f 'ICMPTest.cpp'; then $(CYGPATH_W) 'ICMPTest.cpp'; else $(CYGPATH_W) '$(srcdir)/ICMPTest.cpp'; fi`
+
+IntegerIntervalTest-IntegerIntervalTest.o: IntegerIntervalTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -MT IntegerIntervalTest-IntegerIntervalTest.o -MD -MP -MF $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Tpo -c -o IntegerIntervalTest-IntegerIntervalTest.o `test -f 'IntegerIntervalTest.cpp' || echo '$(srcdir)/'`IntegerIntervalTest.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Tpo $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerIntervalTest.cpp' object='IntegerIntervalTest-IntegerIntervalTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -c -o IntegerIntervalTest-IntegerIntervalTest.o `test -f 'IntegerIntervalTest.cpp' || echo '$(srcdir)/'`IntegerIntervalTest.cpp
+
+IntegerIntervalTest-IntegerIntervalTest.obj: IntegerIntervalTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -MT IntegerIntervalTest-IntegerIntervalTest.obj -MD -MP -MF $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Tpo -c -o IntegerIntervalTest-IntegerIntervalTest.obj `if test -f 'IntegerIntervalTest.cpp'; then $(CYGPATH_W) 'IntegerIntervalTest.cpp'; else $(CYGPATH_W) '$(srcdir)/IntegerIntervalTest.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Tpo $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerIntervalTest.cpp' object='IntegerIntervalTest-IntegerIntervalTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -c -o IntegerIntervalTest-IntegerIntervalTest.obj `if test -f 'IntegerIntervalTest.cpp'; then $(CYGPATH_W) 'IntegerIntervalTest.cpp'; else $(CYGPATH_W) '$(srcdir)/IntegerIntervalTest.cpp'; fi`
+
+MergeTest-MergeTest.o: MergeTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(MergeTest_CXXFLAGS) $(CXXFLAGS) -MT MergeTest-MergeTest.o -MD -MP -MF $(DEPDIR)/MergeTest-MergeTest.Tpo -c -o MergeTest-MergeTest.o `test -f 'MergeTest.cpp' || echo '$(srcdir)/'`MergeTest.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MergeTest-MergeTest.Tpo $(DEPDIR)/MergeTest-MergeTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='MergeTest.cpp' object='MergeTest-MergeTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(MergeTest_CXXFLAGS) $(CXXFLAGS) -c -o MergeTest-MergeTest.o `test -f 'MergeTest.cpp' || echo '$(srcdir)/'`MergeTest.cpp
+
+MergeTest-MergeTest.obj: MergeTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(MergeTest_CXXFLAGS) $(CXXFLAGS) -MT MergeTest-MergeTest.obj -MD -MP -MF $(DEPDIR)/MergeTest-MergeTest.Tpo -c -o MergeTest-MergeTest.obj `if test -f 'MergeTest.cpp'; then $(CYGPATH_W) 'MergeTest.cpp'; else $(CYGPATH_W) '$(srcdir)/MergeTest.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MergeTest-MergeTest.Tpo $(DEPDIR)/MergeTest-MergeTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='MergeTest.cpp' object='MergeTest-MergeTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(MergeTest_CXXFLAGS) $(CXXFLAGS) -c -o MergeTest-MergeTest.obj `if test -f 'MergeTest.cpp'; then $(CYGPATH_W) 'MergeTest.cpp'; else $(CYGPATH_W) '$(srcdir)/MergeTest.cpp'; fi`
+
+OperationsTest-OperationsTest.o: OperationsTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -MT OperationsTest-OperationsTest.o -MD -MP -MF $(DEPDIR)/OperationsTest-OperationsTest.Tpo -c -o OperationsTest-OperationsTest.o `test -f 'OperationsTest.cpp' || echo '$(srcdir)/'`OperationsTest.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/OperationsTest-OperationsTest.Tpo $(DEPDIR)/OperationsTest-OperationsTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='OperationsTest.cpp' object='OperationsTest-OperationsTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -c -o OperationsTest-OperationsTest.o `test -f 'OperationsTest.cpp' || echo '$(srcdir)/'`OperationsTest.cpp
+
+OperationsTest-OperationsTest.obj: OperationsTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -MT OperationsTest-OperationsTest.obj -MD -MP -MF $(DEPDIR)/OperationsTest-OperationsTest.Tpo -c -o OperationsTest-OperationsTest.obj `if test -f 'OperationsTest.cpp'; then $(CYGPATH_W) 'OperationsTest.cpp'; else $(CYGPATH_W) '$(srcdir)/OperationsTest.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/OperationsTest-OperationsTest.Tpo $(DEPDIR)/OperationsTest-OperationsTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='OperationsTest.cpp' object='OperationsTest-OperationsTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -c -o OperationsTest-OperationsTest.obj `if test -f 'OperationsTest.cpp'; then $(CYGPATH_W) 'OperationsTest.cpp'; else $(CYGPATH_W) '$(srcdir)/OperationsTest.cpp'; fi`
+
+PointerTest-PointerTest.o: PointerTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(PointerTest_CXXFLAGS) $(CXXFLAGS) -MT PointerTest-PointerTest.o -MD -MP -MF $(DEPDIR)/PointerTest-PointerTest.Tpo -c -o PointerTest-PointerTest.o `test -f 'PointerTest.cpp' || echo '$(srcdir)/'`PointerTest.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/PointerTest-PointerTest.Tpo $(DEPDIR)/PointerTest-PointerTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PointerTest.cpp' object='PointerTest-PointerTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(PointerTest_CXXFLAGS) $(CXXFLAGS) -c -o PointerTest-PointerTest.o `test -f 'PointerTest.cpp' || echo '$(srcdir)/'`PointerTest.cpp
+
+PointerTest-PointerTest.obj: PointerTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(PointerTest_CXXFLAGS) $(CXXFLAGS) -MT PointerTest-PointerTest.obj -MD -MP -MF $(DEPDIR)/PointerTest-PointerTest.Tpo -c -o PointerTest-PointerTest.obj `if test -f 'PointerTest.cpp'; then $(CYGPATH_W) 'PointerTest.cpp'; else $(CYGPATH_W) '$(srcdir)/PointerTest.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/PointerTest-PointerTest.Tpo $(DEPDIR)/PointerTest-PointerTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PointerTest.cpp' object='PointerTest-PointerTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(PointerTest_CXXFLAGS) $(CXXFLAGS) -c -o PointerTest-PointerTest.obj `if test -f 'PointerTest.cpp'; then $(CYGPATH_W) 'PointerTest.cpp'; else $(CYGPATH_W) '$(srcdir)/PointerTest.cpp'; fi`
+
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-
-# This directory's subdirectories are mostly independent; you can cd
-# into them and run `make' without going through this Makefile.
-# To change the values of `make' variables: instead of editing Makefiles,
-# (1) if the variable is set in `config.status', edit `config.status'
-#     (which will cause the Makefiles to be regenerated when you run `make');
-# (2) otherwise, pass the desired values on the `make' command line.
-$(RECURSIVE_TARGETS):
-	@fail= failcom='exit 1'; \
-	for f in x $$MAKEFLAGS; do \
-	  case $$f in \
-	    *=* | --[!k]*);; \
-	    *k*) failcom='fail=yes';; \
-	  esac; \
-	done; \
-	dot_seen=no; \
-	target=`echo $@ | sed s/-recursive//`; \
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  echo "Making $$target in $$subdir"; \
-	  if test "$$subdir" = "."; then \
-	    dot_seen=yes; \
-	    local_target="$$target-am"; \
-	  else \
-	    local_target="$$target"; \
-	  fi; \
-	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
-	  || eval $$failcom; \
-	done; \
-	if test "$$dot_seen" = "no"; then \
-	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
-	fi; test -z "$$fail"
-
-$(RECURSIVE_CLEAN_TARGETS):
-	@fail= failcom='exit 1'; \
-	for f in x $$MAKEFLAGS; do \
-	  case $$f in \
-	    *=* | --[!k]*);; \
-	    *k*) failcom='fail=yes';; \
-	  esac; \
-	done; \
-	dot_seen=no; \
-	case "$@" in \
-	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
-	  *) list='$(SUBDIRS)' ;; \
-	esac; \
-	rev=''; for subdir in $$list; do \
-	  if test "$$subdir" = "."; then :; else \
-	    rev="$$subdir $$rev"; \
-	  fi; \
-	done; \
-	rev="$$rev ."; \
-	target=`echo $@ | sed s/-recursive//`; \
-	for subdir in $$rev; do \
-	  echo "Making $$target in $$subdir"; \
-	  if test "$$subdir" = "."; then \
-	    local_target="$$target-am"; \
-	  else \
-	    local_target="$$target"; \
-	  fi; \
-	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
-	  || eval $$failcom; \
-	done && test -z "$$fail"
-tags-recursive:
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
-	done
-ctags-recursive:
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) ctags); \
-	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -363,23 +462,10 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	mkid -fID $$unique
 tags: TAGS
 
-TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	set x; \
 	here=`pwd`; \
-	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
-	  include_option=--etags-include; \
-	  empty_fix=.; \
-	else \
-	  include_option=--include; \
-	  empty_fix=; \
-	fi; \
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    test ! -f $$subdir/TAGS || \
-	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
-	  fi; \
-	done; \
 	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
 	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
@@ -398,7 +484,7 @@ TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 	  fi; \
 	fi
 ctags: CTAGS
-CTAGS: ctags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
@@ -448,50 +534,21 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    test -d "$(distdir)/$$subdir" \
-	    || $(MKDIR_P) "$(distdir)/$$subdir" \
-	    || exit 1; \
-	  fi; \
-	done
-	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
-	    $(am__relativize); \
-	    new_distdir=$$reldir; \
-	    dir1=$$subdir; dir2="$(top_distdir)"; \
-	    $(am__relativize); \
-	    new_top_distdir=$$reldir; \
-	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
-	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
-	    ($(am__cd) $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$new_top_distdir" \
-	        distdir="$$new_distdir" \
-		am__remove_distdir=: \
-		am__skip_length_check=: \
-		am__skip_mode_fix=: \
-	        distdir) \
-	      || exit 1; \
-	  fi; \
-	done
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_DATA)
 	$(MAKE) $(AM_MAKEFLAGS) check-local
-check: check-recursive
-all-am: Makefile
-installdirs: installdirs-recursive
-installdirs-am:
-install: install-recursive
-install-exec: install-exec-recursive
-install-data: install-data-recursive
-uninstall: uninstall-recursive
+check: check-am
+all-am: Makefile $(PROGRAMS)
+installdirs:
+install: install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-recursive
+installcheck: installcheck-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
 	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
@@ -510,88 +567,92 @@ maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-clean: clean-recursive
+clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-local mostlyclean-am
+clean-am: clean-generic clean-libtool clean-local clean-noinstPROGRAMS \
+	mostlyclean-am
 
-distclean: distclean-recursive
+distclean: distclean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
-distclean-am: clean-am distclean-generic distclean-tags
+distclean-am: clean-am distclean-compile distclean-generic \
+	distclean-tags
 
-dvi: dvi-recursive
+dvi: dvi-am
 
 dvi-am:
 
-html: html-recursive
+html: html-am
 
 html-am:
 
-info: info-recursive
+info: info-am
 
 info-am:
 
 install-data-am:
 
-install-dvi: install-dvi-recursive
+install-dvi: install-dvi-am
 
 install-dvi-am:
 
 install-exec-am:
 
-install-html: install-html-recursive
+install-html: install-html-am
 
 install-html-am:
 
-install-info: install-info-recursive
+install-info: install-info-am
 
 install-info-am:
 
 install-man:
 
-install-pdf: install-pdf-recursive
+install-pdf: install-pdf-am
 
 install-pdf-am:
 
-install-ps: install-ps-recursive
+install-ps: install-ps-am
 
 install-ps-am:
 
 installcheck-am: installcheck-local
 
-maintainer-clean: maintainer-clean-recursive
+maintainer-clean: maintainer-clean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-recursive
+mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-generic mostlyclean-libtool
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
-pdf: pdf-recursive
+pdf: pdf-am
 
 pdf-am:
 
-ps: ps-recursive
+ps: ps-am
 
 ps-am:
 
 uninstall-am:
 
-.MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) check-am \
-	ctags-recursive install-am install-strip tags-recursive
+.MAKE: check-am install-am install-strip
 
-.PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
-	all all-am check check-am check-local clean clean-generic \
-	clean-libtool clean-local ctags ctags-recursive distclean \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installcheck-local installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am tags tags-recursive uninstall uninstall-am
+.PHONY: CTAGS GTAGS all all-am check check-am check-local clean \
+	clean-generic clean-libtool clean-local clean-noinstPROGRAMS \
+	ctags distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installcheck-local installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am
 
 
 package.m4: Makefile.in

@@ -1,14 +1,13 @@
 #include "CommandCd.h"
+#include "lib/Utils.h"
 #include <unistd.h>
 #include <errno.h>
-#include <cstdio>
 #include <cstring>
 #include <wordexp.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <fcntl.h>
-#include <sstream>
 
 CommandCd::CommandCd(Commands &commands)
     : Command("cd",
@@ -55,9 +54,10 @@ CommandCd::getCompletionMatches(const std::vector<std::string> &args,
 
         if (0 == strncmp(dirent->d_name, arg.c_str(), arg.length()))
         {
-            std::stringstream ss;
+            Canal::StringStream ss;
             if (!defaultDirPath)
                 ss << dirPath;
+
             ss << dirent->d_name;
             result.push_back(ss.str());
         }
@@ -78,7 +78,7 @@ CommandCd::getCompletionMatches(const std::vector<std::string> &args,
             if (dirent->d_type != DT_DIR)
                 continue;
 
-            std::stringstream ss;
+            Canal::StringStream ss;
             ss << dirPath << "/" << dirent->d_name;
             result.push_back(ss.str());
         }
@@ -92,12 +92,12 @@ CommandCd::run(const std::vector<std::string> &args)
 {
     if (args.size() > 2)
     {
-        puts("Too many parameters.");
+        llvm::outs() << "Too many parameters.\n";
         return;
     }
     else if (args.size() < 2)
     {
-        puts("Argument required (new working directory).");
+        llvm::outs() << "Argument required (new working directory).\n";
         return;
     }
 
@@ -107,7 +107,9 @@ CommandCd::run(const std::vector<std::string> &args)
     int save_errno = errno;
     if (-1 == chdir(exp_result.we_wordv[0]))
     {
-        printf("Failed to change directory: %s\n", strerror(errno));
+        llvm::outs() << "Failed to change directory: "
+                     << strerror(errno) << "\n";
+
         errno = save_errno;
     }
 

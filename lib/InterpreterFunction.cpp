@@ -4,11 +4,6 @@
 #include "Environment.h"
 #include "Domain.h"
 #include "Utils.h"
-#include <llvm/Function.h>
-#include <llvm/Type.h>
-#include <llvm/Support/CFG.h>
-#include <llvm/Instructions.h>
-#include <sstream>
 
 namespace Canal {
 namespace Interpreter {
@@ -46,9 +41,7 @@ Function::Function(const llvm::Function &function,
 
 Function::~Function()
 {
-    std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
-    for (; it != mBasicBlocks.end(); ++it)
-        delete *it;
+    llvm::DeleteContainerPointers(mBasicBlocks);
 }
 
 const llvm::BasicBlock &
@@ -116,29 +109,39 @@ Function::updateOutputState()
     }
 }
 
+size_t
+Function::memoryUsage() const
+{
+    size_t result = sizeof(Function) - 2 * sizeof(State);
+    result += mInputState.memoryUsage();
+    result += mOutputState.memoryUsage();
+    std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
+    for (; it != mBasicBlocks.end(); ++it)
+        result += (*it)->memoryUsage();
+
+    return result;
+}
+
 std::string
 Function::toString() const
 {
-    std::stringstream ss;
-
-    ss << "*******************************************" << std::endl;
-    ss << "** function " << mFunction.getName().str() << std::endl;
-    ss << "*******************************************" << std::endl;
-    ss << std::endl;
+    StringStream ss;
+    ss << "*******************************************\n";
+    ss << "** function " << mFunction.getName() << "\n";
+    ss << "*******************************************\n";
+    ss << "\n";
 
     // Print function arguments.
-    {
-        SlotTracker &slotTracker = mEnvironment.getSlotTracker();
-        llvm::Function::ArgumentListType::const_iterator it =
-            mFunction.getArgumentList().begin(),
-            itend = mFunction.getArgumentList().end();
+    SlotTracker &slotTracker = mEnvironment.getSlotTracker();
+    llvm::Function::ArgumentListType::const_iterator
+        ait = mFunction.getArgumentList().begin(),
+        aitend = mFunction.getArgumentList().end();
 
-        for (; it != itend; ++it)
-            ss << mInputState.toString(*it, slotTracker);
+    for (; ait != aitend; ++ait)
+        ss << mInputState.toString(*ait, slotTracker);
 
-        if (mFunction.getArgumentList().begin() != itend)
-            ss << std::endl;
-    }
+    if (mFunction.getArgumentList().begin() != aitend)
+        ss << "\n";
 
     // Print function result.
     if (!mFunction.getReturnType()->isVoidTy())
@@ -151,17 +154,17 @@ Function::toString() const
                 16);
         }
         else
-            ss << "undefined" << std::endl;
+            ss << "undefined\n";
 
-        ss << std::endl;
+        ss << "\n";
     }
 
     // Print basic blocks.
-    {
-        std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();
-        for (; it != mBasicBlocks.end(); ++it)
-            ss << (*it)->toString();
-    }
+    std::vector<BasicBlock*>::const_iterator bit = mBasicBlocks.begin(),
+        bitend = mBasicBlocks.end();
+
+    for (; bit != bitend; ++bit)
+        ss << (*bit)->toString();
 
     return ss.str();
 }

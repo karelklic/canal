@@ -1,13 +1,10 @@
 #ifndef LIBCANAL_POINTER_TARGET_H
 #define LIBCANAL_POINTER_TARGET_H
 
+#include "Prereq.h"
 #include <string>
 #include <cstring>
 #include <vector>
-
-namespace llvm {
-class Value;
-} // namespace llvm
 
 namespace Canal {
 

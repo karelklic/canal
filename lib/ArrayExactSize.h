@@ -46,9 +46,6 @@ public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual ExactSize *clone() const;
-    /// Implementation of Domain::cloneCleaned().
-    /// Covariant return type.
-    virtual ExactSize *cloneCleaned() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain &value) const;
     /// Implementation of Domain::merge().

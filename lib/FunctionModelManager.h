@@ -1,5 +1,7 @@
 #ifndef LIBCANAL_FUNCTION_MODEL_MANAGER_H
-#define LIBCANAL_FUNCTION_MODEL_MAANGER_H
+#define LIBCANAL_FUNCTION_MODEL_MANAGER_H
+
+#include "Prereq.h"
 
 namespace Canal {
 
@@ -15,4 +17,4 @@ public:
 
 } // namespace Canal
 
-#endif // LIBCANAL_CALLBACKS_H
+#endif // LIBCANAL_FUNCTION_MODEL_MANAGER_H

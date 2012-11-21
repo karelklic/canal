@@ -3,10 +3,6 @@
 
 #include "Domain.h"
 
-namespace llvm {
-class APInt;
-}
-
 namespace Canal {
 namespace Integer {
 
@@ -14,7 +10,7 @@ class Bitfield;
 class Enumeration;
 class Interval;
 
-class Container : public Domain, public AccuracyDomain
+class Container : public Domain
 {
 public:
     std::vector<Domain*> mValues;
@@ -88,6 +84,9 @@ public:
     ///   correct value.
     bool unsignedMax(llvm::APInt &result) const;
 
+    /// Find out whether all representations contain only single value
+    bool isSingleValue() const;
+
 private:
     /// Assignment operator declaration.  Prevents accidental
     /// assignments of domains.  Do not implement!
@@ -97,9 +96,6 @@ public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Container *clone() const;
-    /// Implementation of Domain::cloneCleaned().
-    /// Covariant return type.
-    virtual Container *cloneCleaned() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain &value) const;
     /// Implementation of Domain::merge().
@@ -149,19 +145,15 @@ public: // Implementation of Domain.
     virtual void fptoui(const Domain &value);
     virtual void fptosi(const Domain &value);
 
-public: // Implementation of AccuracyDomain.
-    /// Implementation of AccuracyDomain::accuracy().
     virtual float accuracy() const;
-    /// Implementation of AccuracyDomain::isBottom().
+
     virtual bool isBottom() const;
-    /// Implementation of AccuracyDomain::setBottom().
+
     virtual void setBottom();
-    /// Implementation of AccuracyDomain::isTop().
+
     virtual bool isTop() const;
-    /// Implementation of AccuracyDomain::setTop().
+
     virtual void setTop();
-    /// Find out whether all representations contain only single value
-    bool isSingleValue() const;
 };
 
 } // namespace Integer

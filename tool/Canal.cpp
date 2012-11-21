@@ -1,12 +1,11 @@
 #include "Commands.h"
-#include <sstream>
 #include <string>
 #include <cstring>
 #include <cctype>
 #include <cstdlib>
-#include <cstdio>
 #include "lib/WideningDataIterationCount.h"
 #include "lib/InterpreterOperationsCallback.h"
+#include "lib/Utils.h"
 
 extern "C" {
 #include <readline/readline.h>
@@ -54,17 +53,20 @@ parseArgument(int key, char *arg, struct argp_state *state)
         arguments->mFileName = arg;
         break;
     case 'w':
-        for (unsigned i = 0; i < strlen(arg); i ++) {
-            if (!isdigit(arg[i])) {
+        for (unsigned i = 0; i < strlen(arg); ++i)
+        {
+            if (!isdigit(arg[i]))
+            {
                 argp_usage(state);
                 exit(EX_USAGE);
             }
         }
-        printf("Widening count set to: %s.\n", arg);
+
+        llvm::outs() << "Widening count set to: " << arg << ".\n";
         Canal::Widening::count = atoi(arg);
         break;
     case 'n':
-        printf("Not printing missing functions.\n");
+        llvm::outs() << "Not printing missing functions.\n";
         Canal::Interpreter::printMissing = false;
         break;
     default:
@@ -90,6 +92,7 @@ completeEntry(const char *text, int state)
         std::string buf(rl_line_buffer);
         if (rl_point >= buf.size())
             buf += std::string(text);
+
         matches = gCommands.getCompletionMatches(buf, rl_point);
     }
 
@@ -118,7 +121,7 @@ main(int argc, char **argv)
 
     if (!arguments.mFileName.empty())
     {
-        std::stringstream ss;
+        Canal::StringStream ss;
         ss << "file " << arguments.mFileName;
         gCommands.executeLine(ss.str());
     }

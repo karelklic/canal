@@ -38,30 +38,24 @@ Pointers::widen(const llvm::BasicBlock &wideningPoint,
     if (iterationCount->count(wideningPoint) < count)
         return;
 
-    Pointer::PlaceTargetMap::const_iterator it = firstPointer->mTargets.begin();
-    for (; it != firstPointer->mTargets.end(); ++it)
+    Pointer::PlaceTargetMap::const_iterator
+        it = firstPointer->mTargets.begin(),
+        itend = firstPointer->mTargets.end();
+
+    for (; it != itend; ++it)
     {
         if (it->second->mNumericOffset)
-        {
-            AccuracyDomain *domain =
-                dynCast<AccuracyDomain*>(it->second->mNumericOffset);
-
-            if (domain)
-                domain->setTop();
-        }
+            it->second->mNumericOffset->setTop();
 
         if (!it->second->mOffsets.empty())
         {
             // Keep the first offset untouched, it must be set to zero.
-            std::vector<Domain*>::iterator itOffset =
-                it->second->mOffsets.begin() + 1;
+            std::vector<Domain*>::const_iterator
+                itOffset = it->second->mOffsets.begin() + 1,
+                itendOffset = it->second->mOffsets.end();
 
-            for (; itOffset != it->second->mOffsets.end(); ++itOffset)
-            {
-                AccuracyDomain *domain = dynCast<AccuracyDomain*>(*itOffset);
-                if (domain)
-                    domain->setTop();
-            }
+            for (; itOffset != itendOffset; ++itOffset)
+                (*itOffset)->setTop();
         }
     }
 

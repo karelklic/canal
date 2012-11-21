@@ -276,20 +276,14 @@ namespace Canal {
                                            void volatile const>::value;
     };
 
-    template <bool A, bool B, typename T = void> //must be a && !b
-    struct domain_check {};
-
-    template<typename T>
-    struct domain_check<true, false, T>{
-        typedef T type;
-    };
-
-    template <typename T> //Contains T
-    class SuperPtrDomain : public SuperPtrConst<T>, public Domain {
+    /// Super ptr for Domain
+    template <typename T>
+    class SuperPtr<T, typename enable_if<is_base_of<Domain, T>::value>::type > //T is descendant of Domain
+        : public SuperPtrConst<T>, public Domain {
     public:
         /// Constructors
-        SuperPtrDomain(const T &instance) : Domain(instance), SuperPtrConst<T>(instance) {}
-        SuperPtrDomain(const SuperPtr<T> &copy) : Domain(copy.mInstance->first), SuperPtrConst<T>(copy) {}
+        SuperPtr(const T &instance) : Domain(instance), SuperPtrConst<T>(instance) {}
+        SuperPtr(const SuperPtr<T> &copy) : Domain(copy.mInstance->first), SuperPtrConst<T>(copy) {}
 
         /// Conversion to const object reference
         operator const T& () const {
@@ -308,45 +302,58 @@ namespace Canal {
         }
 
         T& modifiable() {
+#ifdef DEBUG
+            std::cout << "Conversion to modifiable reference" << std::endl;
+#endif
             this->write();
             return this->mInstance->first;
         }
 
-#define CLONE_METHODS(type) \
-        virtual type* clone() const { \
-            return new type(*this); \
-        } \
-        virtual SuperPtrDomain<T>* cloneCleaned() const { \
-            T* cloned = this->mInstance->first.cloneCleaned(); \
-            type* ret = new type(*cloned); \
-            delete cloned; \
-            return ret; \
-        }\
-
-        CLONE_METHODS(SuperPtrDomain<T>)
+        virtual SuperPtr<T>* clone() const {
+#ifdef DEBUG
+            std::cout << "clone" << std::endl;
+#endif
+            return new SuperPtr<T>(*this);
+        }
 
         virtual bool operator==(const Canal::Domain& other) const {
+#ifdef DEBUG
+            std::cout << "operator== with Domain" << std::endl;
+#endif
             return this->mInstance->first == other;
         }
 
         virtual void merge(const Canal::Domain& other) {
+#ifdef DEBUG
+            std::cout << "merge" << std::endl;
+#endif
             this->write();
             this->mInstance->first.merge(other);
         }
 
         virtual size_t memoryUsage() const {
+#ifdef DEBUG
+            std::cout << "memoryUsage" << std::endl;
+#endif
             return this->mInstance->first.memoryUsage();
         }
 
         virtual std::string toString() const {
+#ifdef DEBUG
+            std::cout << "toString" << std::endl;
+#endif
             return this->mInstance->first.toString();
         }
 
         virtual void setZero(const llvm::Value* v) {
+#ifdef DEBUG
+            std::cout << "setZero" << std::endl;
+#endif
             this->write();
             this->mInstance->first.setZero(v);
         }
 
+        // OP(x) macro - defines binary operator with name x, which takes 2 domains
 #ifdef DEBUG
 #define OP(x) virtual void x(const Domain &a, const Domain &b) { std::cout << #x << std::endl; this->write(); this->mInstance->first.x(a, b); }
 #else
@@ -371,6 +378,7 @@ namespace Canal {
         OP(or_)
         OP(xor_)
 #undef OP
+        //CMP(x) macro - defines compare operator with name x, which takes 2 domains and LLVM predicate
 #ifdef DEBUG
 #define CMP(x) virtual void x(const Domain& a, const Domain &b, llvm::CmpInst::Predicate predicate) { \
     std::cout << #x << std::endl; this->write(); this->mInstance->first.x(a, b, predicate); }
@@ -381,6 +389,7 @@ namespace Canal {
         CMP(icmp)
         CMP(fcmp)
 #undef CMP
+        //UOP(x) macro - defines unary operator with name x, which takes 1 domain
 #ifdef DEBUG
 #define UOP(x) virtual void x(const Domain& value) { std::cout << #x << std::endl; this->write(); this->mInstance->first.x(value); }
 #else
@@ -396,29 +405,10 @@ namespace Canal {
         UOP(uitofp)
         UOP(sitofp)
 #undef UOP
-    };
 
-    /// Super ptr for Domain
-    template <typename T>
-    class SuperPtr<T, typename domain_check< is_base_of<Domain, T>::value, //Is descendant of Domain
-            is_base_of<AccuracyDomain, T>::value>::type //but NOT descedant of AccuracyDomain
-            > : public SuperPtrDomain<T> {
-    public:
-        /// Constructors
-        SuperPtr(const T &instance) : SuperPtrDomain<T>(instance) {}
-        SuperPtr(const SuperPtr<T> &copy) : SuperPtrDomain<T>(copy) {}
-        CLONE_METHODS(SuperPtr<T>)
-    };
+        // Former AccuracyDomain methods.
 
-    /// Super ptr for Accuracy Domain
-    template <typename T>
-    class SuperPtr<T, typename enable_if<is_base_of<AccuracyDomain, T>::value>::type>
-            : public SuperPtrDomain<T>, public AccuracyDomain {
-    public:
-        SuperPtr(const T &instance) : SuperPtrDomain<T>(instance) {}
-        SuperPtr(const SuperPtr<T> &copy) : SuperPtrDomain<T>(copy) {}
-        CLONE_METHODS(SuperPtr<T>)
-
+        /// Get accuracy of domain
         virtual float accuracy() const {
 #ifdef DEBUG
             std::cout << "accuracy" << std::endl;
@@ -460,7 +450,6 @@ namespace Canal {
             this->mInstance->first.setTop();
         }
     };
-#undef CLONE_METHODS
 } // namespace Canal
 
 #endif // LIBCANAL_SUPERPTR_H

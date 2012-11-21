@@ -1,20 +1,18 @@
 #ifndef CANAL_STATE_H
 #define CANAL_STATE_H
 
+#include "IteratorCallback.h"
+#include "lib/Interpreter.h"
 #include <set>
 #include <string>
-#include "lib/Interpreter.h"
-#include "IteratorCallback.h"
-
-namespace llvm {
-class Module;
-} // namespace llvm
 
 // State of the interpreter.
 class State
 {
     Canal::Interpreter::Interpreter mInterpreter;
+
     std::set<std::string> mFunctionBreakpoints;
+
     IteratorCallback mIteratorCallback;
 
 public:
@@ -32,6 +30,8 @@ public:
     llvm::Module &getModule() { return getEnvironment().getModule(); }
 
     Canal::SlotTracker &getSlotTracker() const { return getEnvironment().getSlotTracker(); }
+
+    const IteratorCallback &getIteratorCallback() const { return mIteratorCallback; }
 
     // Check if the interpreter is in the middle of interpretation.
     // This is true if something is on the stack.

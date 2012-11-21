@@ -6,11 +6,10 @@
 #include <map>
 #include <typeinfo>
 
-namespace llvm {
-class Domain;
-}
-
 namespace Canal {
+
+class Constructors;
+
 namespace Pointer {
 
 /// llvm::Value represents a position in the program.  It points to the
@@ -43,7 +42,7 @@ public:
 
     /// Standard constructor.
     Pointer(const Environment &environment,
-                   const llvm::Type &type);
+            const llvm::Type &type);
 
     /// Copy constructor.
     Pointer(const Pointer &value);
@@ -51,10 +50,12 @@ public:
     /// Copy constructor which changes the pointer type.
     /// Useful for bitcast and getelementptr operations.
     Pointer(const Pointer &value,
-                   const llvm::Type &newType);
+            const llvm::Type &newType);
 
     /// Standard destructor.
     virtual ~Pointer();
+
+    const llvm::Type &getType() const { return mType; }
 
     /// Add a new target to the pointer.
     /// @param type
@@ -101,9 +102,13 @@ public:
     ///   The offsets must be converted to 64-bit integers before calling
     ///   getElementPtr!
     Pointer *getElementPtr(const std::vector<Domain*> &offsets,
-                           const llvm::Type &type) const;
+                           const llvm::Type &type,
+                           const Constructors &constructors) const;
 
     void store(const Domain &value, State &state) const;
+
+    /// Does this pointer point to single target?
+    bool isSingleTarget() const;
 
 private:
     /// Assignment operator declaration.  Prevents accidental
@@ -114,13 +119,8 @@ public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type -- it really overrides Domain::clone().
     virtual Pointer *clone() const;
-    /// Implementation of Domain::cloneCleaned().
-    /// Covariant return type.
-    virtual Pointer *cloneCleaned() const;
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain &value) const;
-    /// Does this pointer point to single target?
-    bool isSingleTarget() const;
     /// Implementation of Domain::merge().
     virtual void merge(const Domain &value);
     /// Implementation of Domain::memoryUsage().

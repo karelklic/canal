@@ -1872,14 +1872,14 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:7: ../../unit/OperationsTest"
+$as_echo "$at_srcdir/testsuite.at:7: ../../OperationsTest"
 echo testsuite.at:7 >"$at_check_line_file"
 
 if test -n "$at_traceon"; then
-  ( $at_traceon; ../../unit/OperationsTest ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; ../../OperationsTest ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; ../../unit/OperationsTest ) >"$at_stdout" 2>"$at_stderr"
+  ( :; ../../OperationsTest ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -1908,14 +1908,14 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:13: ../../unit/PointerTest"
+$as_echo "$at_srcdir/testsuite.at:13: ../../PointerTest"
 echo testsuite.at:13 >"$at_check_line_file"
 
 if test -n "$at_traceon"; then
-  ( $at_traceon; ../../unit/PointerTest ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; ../../PointerTest ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; ../../unit/PointerTest ) >"$at_stdout" 2>"$at_stderr"
+  ( :; ../../PointerTest ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -1944,14 +1944,14 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:17: ../../unit/IntegerIntervalTest"
+$as_echo "$at_srcdir/testsuite.at:17: ../../IntegerIntervalTest"
 echo testsuite.at:17 >"$at_check_line_file"
 
 if test -n "$at_traceon"; then
-  ( $at_traceon; ../../unit/IntegerIntervalTest ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; ../../IntegerIntervalTest ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; ../../unit/IntegerIntervalTest ) >"$at_stdout" 2>"$at_stderr"
+  ( :; ../../IntegerIntervalTest ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -1980,14 +1980,14 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:21: ../../unit/ICMPTest"
+$as_echo "$at_srcdir/testsuite.at:21: ../../ICMPTest"
 echo testsuite.at:21 >"$at_check_line_file"
 
 if test -n "$at_traceon"; then
-  ( $at_traceon; ../../unit/ICMPTest ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; ../../ICMPTest ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; ../../unit/ICMPTest ) >"$at_stdout" 2>"$at_stderr"
+  ( :; ../../ICMPTest ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -2016,14 +2016,14 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:25: ../../unit/MergeTest"
+$as_echo "$at_srcdir/testsuite.at:25: ../../MergeTest"
 echo testsuite.at:25 >"$at_check_line_file"
 
 if test -n "$at_traceon"; then
-  ( $at_traceon; ../../unit/MergeTest ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; ../../MergeTest ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; ../../unit/MergeTest ) >"$at_stdout" 2>"$at_stderr"
+  ( :; ../../MergeTest ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
