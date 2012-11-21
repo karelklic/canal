@@ -318,6 +318,7 @@ Pointer::clone() const
 bool
 Pointer::operator==(const Domain &value) const
 {
+    if (&value == this) return true;
     // Check if the value has the same type.
     const Pointer *pointer =
         dynCast<const Pointer*>(&value);

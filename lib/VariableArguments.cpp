@@ -49,6 +49,7 @@ equal(const std::vector<Domain*> &first, const std::vector<Domain*> &second)
 bool
 VariableArguments::operator==(const VariableArguments &arguments) const
 {
+    if (&arguments == this) return true;
     if (mCalls.size() != arguments.mCalls.size())
         return false;
 

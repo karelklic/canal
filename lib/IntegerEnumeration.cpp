@@ -120,6 +120,7 @@ Enumeration::clone() const
 bool
 Enumeration::operator==(const Domain &value) const
 {
+    if (&value == this) return true;
     const Enumeration *enumeration =
         dynCast<const Enumeration*>(&value);
 

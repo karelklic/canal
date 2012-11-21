@@ -45,6 +45,7 @@ ExactSize::clone() const
 bool
 ExactSize::operator==(const Domain &value) const
 {
+    if (&value == this) return true;
     const ExactSize *array = dynCast<const ExactSize*>(&value);
     if (!array)
         return false;

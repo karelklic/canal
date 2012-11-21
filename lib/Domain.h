@@ -59,7 +59,7 @@ public:
     virtual bool operator==(const Domain &value) const = 0;
 
     /// Inequality is implemented by calling the equality operator.
-    virtual bool operator!=(const Domain &value) const
+    inline bool operator!=(const Domain &value) const
     {
         return !operator==(value);
     }
