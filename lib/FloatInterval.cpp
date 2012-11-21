@@ -230,11 +230,16 @@ Interval::clone() const
 bool
 Interval::operator==(const Domain& value) const
 {
+    if (this == &value)
+        return true;
+
     const Interval *interval = dynCast<const Interval*>(&value);
     if (!interval)
         return false;
+
     if (mEmpty)
         return interval->mEmpty;
+
     if (isTop())
         return interval->isTop();
 
