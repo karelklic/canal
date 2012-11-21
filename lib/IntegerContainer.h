@@ -15,9 +15,6 @@ public:
     std::vector<Domain*> mValues;
 
 public:
-    /// For super_ptr
-    typedef Container type;
-
     Container(const Environment &environment,
               unsigned bitWidth);
 
@@ -154,7 +151,7 @@ public: // Implementation of Domain.
 
     virtual void setTop();
 };
-
+DONT_USE_COW(Container);
 } // namespace Integer
 } // namespace Canal
 

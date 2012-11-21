@@ -15,9 +15,6 @@ public:
     std::vector<Domain*> mValues;
 
 public:
-    /// For super_ptr
-    typedef ExactSize type;
-
     /// @param value
     ///   This class does not take ownership of this value.
     ExactSize(const Environment &environment,
@@ -111,7 +108,7 @@ public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::setItem().
     virtual void setItem(uint64_t offset, const Domain &value);
 };
-
+DONT_USE_COW(ExactSize);
 } // namespace Array
 } // namespace Canal
 

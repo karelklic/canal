@@ -26,9 +26,6 @@ private:
     Structure &operator=(const Structure &value);
 
 public: // Implementation of Domain.
-    /// For super_ptr
-    typedef Structure type;
-
     /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Structure *clone() const;
@@ -53,7 +50,7 @@ public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::set().
     virtual void setItem(uint64_t offset, const Domain &value);
 };
-
+DONT_USE_COW(Structure);
 } // namespace Canal
 
 #endif // LIBCANAL_STRUCTURE_H

@@ -453,5 +453,8 @@ namespace Canal {
         }
     };
 } // namespace Canal
-
+//Allow domain class to use COW
+//Defines T_type as COW<T>
+#define USE_COW(T) typedef COW<T> T##_type
+//DONT_USE_COW is in Domain.h
 #endif // LIBCANAL_COW_H

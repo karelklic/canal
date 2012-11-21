@@ -27,8 +27,6 @@ public:
     llvm::APInt mOnes;
 
 public:
-    /// For super_ptr
-
     /// Initializes to the lowest value.
     Bitfield(const Environment &environment,
              unsigned bitWidth);
@@ -161,8 +159,7 @@ public: // Implementation of Domain.
 
     virtual void setTop();
 };
-typedef Canal::COW<Canal::Integer::Bitfield> Bitfield_type;
-//typedef Canal::Integer::Bitfield Bitfield_type;
+USE_COW(Bitfield);
 } // namespace Integer
 } // namespace Canal
 

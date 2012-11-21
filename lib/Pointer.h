@@ -37,9 +37,6 @@ public:
     const llvm::Type &mType;
 
 public:
-    /// For super_ptr
-    typedef Pointer type;
-
     /// Standard constructor.
     Pointer(const Environment &environment,
             const llvm::Type &type);
@@ -130,7 +127,7 @@ public: // Implementation of Domain.
     /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *place);
 };
-
+DONT_USE_COW(Pointer);
 } // namespace Pointer
 } // namespace Canal
 

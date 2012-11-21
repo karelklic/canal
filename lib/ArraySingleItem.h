@@ -22,9 +22,6 @@ public:
     Domain *mSize;
 
 public:
-    /// For super_ptr
-    typedef SingleItem type;
-
     SingleItem(const Environment &environment,
                Domain *size,
                Domain *value);
@@ -106,7 +103,7 @@ public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::setItem().
     virtual void setItem(uint64_t offset, const Domain &value);
 };
-
+DONT_USE_COW(SingleItem);
 } // namespace Array
 } // namespace Canal
 

@@ -29,8 +29,6 @@ public:
     llvm::APInt mUnsignedTo;
 
 public:
-    /// For super_ptr
-    typedef Interval type;
 
     /// @brief Standard constructor.
     ///
@@ -161,7 +159,7 @@ public: // Implementation of Domain.
 
     virtual void setTop();
 };
-
+DONT_USE_COW(Interval);
 } // namespace Integer
 } // namespace Canal
 

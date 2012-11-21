@@ -19,9 +19,6 @@ public:
     static const unsigned int mMaxSize = 40;
 
 public:
-    /// For super_ptr
-    typedef Enumeration type;
-
     /// Initializes to the lowest value.
     Enumeration(const Environment &environment,
                 unsigned bitWidth);
@@ -148,8 +145,7 @@ protected:
                         APIntUtils::Operation operation1,
                         APIntUtils::OperationWithOverflow operation2);
 };
-
+DONT_USE_COW(Enumeration);
 } // namespace Integer
 } // namespace Canal
-
 #endif // LIBCANAL_INTEGER_ENUMERATION_H

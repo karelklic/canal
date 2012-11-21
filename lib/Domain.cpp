@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "WideningDataInterface.h"
 #include <typeinfo>
+#include "COW.h"
 
 namespace Canal {
 

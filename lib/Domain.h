@@ -181,4 +181,9 @@ private:
 
 } // namespace Canal
 
+//Class does not want to use COW (default)
+//Defines T_type as T
+#define DONT_USE_COW(T) typedef T T##_type
+
+
 #endif // LIBCANAL_DOMAIN_H

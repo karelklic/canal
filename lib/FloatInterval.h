@@ -15,9 +15,6 @@ public:
     llvm::APFloat mTo;
 
 public:
-    /// For super_ptr
-    typedef Interval type;
-
     Interval(const Environment &environment,
              const llvm::fltSemantics &semantics);
 
@@ -86,7 +83,7 @@ public: // Implementation of Domain.
 
     virtual void setTop();
 };
-
+DONT_USE_COW(Interval);
 } // namespace Float
 } // namespace Canal
 
