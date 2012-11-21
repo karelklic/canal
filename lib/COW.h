@@ -91,7 +91,8 @@ namespace Canal {
 #ifdef DEBUG
             std::cout << "COWConst: comparison with COWConst" << std::endl;
 #endif
-            return mInstance->first == other.mInstance->first;
+            //Check if pointer to instance is same, if not, check instance
+            return mInstance == other.mInstance || mInstance->first == other.mInstance->first;
         }
 
         /// Comparison operator
@@ -196,7 +197,8 @@ namespace Canal {
 #ifdef DEBUG
             std::cout << "COW: comparison with COW" << std::endl;
 #endif
-            return mInstance->first == other.mInstance->first;
+            //Check if pointer to instance is same, if not, check instance
+            return mInstance == other.mInstance || mInstance->first == other.mInstance->first;
         }
 
         /// Comparison operator
