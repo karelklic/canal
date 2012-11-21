@@ -127,10 +127,11 @@ llvmCast(const Y &val)
     return llvm::cast_convert_val<X, Y,
         typename llvm::simplify_type<Y>::SimpleType>::doit(val);
 }
-/// Detect bare type - type without constness, reference nor pointer
+/// Detect bare type - type without constness, reference nor pointer and type with const used
 template <typename X>
 struct bare_type {
     typedef X type;
+    typedef X const_type;
     static const bool constant = false;
     static const bool reference = false;
     static const bool pointer = false;
@@ -139,6 +140,7 @@ struct bare_type {
 template <typename X>
 struct bare_type<X&> {
     typedef X type;
+    typedef X const_type;
     static const bool constant = false;
     static const bool reference = true;
     static const bool pointer = false;
@@ -147,6 +149,7 @@ struct bare_type<X&> {
 template <typename X>
 struct bare_type<X*> {
     typedef X type;
+    typedef X const_type;
     static const bool constant = false;
     static const bool reference = false;
     static const bool pointer = true;
@@ -155,6 +158,7 @@ struct bare_type<X*> {
 template <typename X>
 struct bare_type<const X&> {
     typedef X type;
+    typedef const X const_type;
     static const bool constant = true;
     static const bool reference = true;
     static const bool pointer = false;
@@ -163,6 +167,7 @@ struct bare_type<const X&> {
 template <typename X>
 struct bare_type<const X> {
     typedef X type;
+    typedef const X const_type;
     static const bool constant = true;
     static const bool reference = false;
     static const bool pointer = false;
@@ -171,6 +176,7 @@ struct bare_type<const X> {
 template <typename X>
 struct bare_type<const X*> {
     typedef X type;
+    typedef const X const_type;
     static const bool constant = true;
     static const bool reference = false;
     static const bool pointer = true;
@@ -298,7 +304,17 @@ struct dynCastStruct<X, Y,
     /// Cast for reference -> try COW<X> if X is not const, const COW<X> if X is const
     static inline X cast(Y &val)
     {
-        try
+        typedef typename bare_type<X>::const_type bareX;
+        typedef typename bare_type<Y>::const_type bareY;
+        bareX* r = dynamic_cast<bareX*>(&val);
+        if (r == NULL) {
+            bareX* cow = static_if_cast<bareX*, bareY>::static_if(&val);
+            if (cow) return *cow;
+            CANAL_FATAL_ERROR("Could not dynCast from " << typeid(val).name()
+                              << " to " << typeid(X).name());
+        }
+        return *r;
+        /*try
         {
             return dynamic_cast<X>(val);
         }
@@ -308,12 +324,22 @@ struct dynCastStruct<X, Y,
             }
             catch (...) {}
             CANAL_FATAL_ERROR(exception.what());
-        }
+        }*/
     }
     /// Cast for const reference -> try const COW<X>
     static inline X cast_const(const Y &val)
     {
-        try
+        typedef typename bare_type<X>::const_type bareX;
+        typedef typename bare_type<Y>::const_type bareY;
+        bareX* r = dynamic_cast<bareX*>(&val);
+        if (r == NULL) {
+            bareX* cow = COWCast<bareX*, bareY>::constant(&val);
+            if (cow) return *cow;
+            CANAL_FATAL_ERROR("Could not dynCast from " << typeid(val).name()
+                              << " to " << typeid(X).name());
+        }
+        return *r;
+        /*try
         {
             return dynamic_cast<X>(val);
         }
@@ -326,7 +352,7 @@ struct dynCastStruct<X, Y,
             CANAL_FATAL_ERROR(exception.what()
                               << " from " << typeid(val).name()
                               << " to " << typeid(X).name());
-        }
+        }*/
     }
     /// Cast for pointer -> try COW<X>* if X is not const, const COW<X>* if X is const
     static inline X cast(Y *val)
