@@ -1252,8 +1252,10 @@ Operations::select(const llvm::SelectInst &instruction,
     const Integer::Container &conditionInt =
         dynCast<const Integer::Container&>(*condition);
 
-    CANAL_ASSERT(conditionInt.getBitfield().getBitWidth() == 1);
-    switch (conditionInt.getBitfield().getBitValue(0))
+    const Integer::Bitfield &conditionBitfield =
+            dynCast<const Integer::Bitfield&>(conditionInt.getBitfield());
+    CANAL_ASSERT(conditionBitfield.getBitWidth() == 1);
+    switch (conditionBitfield.getBitValue(0))
     {
     case -1:
         // The condition result is undefined.  Let's wait for

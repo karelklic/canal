@@ -2,13 +2,12 @@
 #define LIBCANAL_INTEGER_CONTAINER_H
 
 #include "Domain.h"
+#include "IntegerBitfield.h"
+#include "IntegerEnumeration.h"
+#include "IntegerInterval.h"
 
 namespace Canal {
 namespace Integer {
-
-class Bitfield;
-class Enumeration;
-class Interval;
 
 class Container : public Domain
 {
@@ -35,8 +34,8 @@ public:
 
     unsigned getBitWidth() const;
 
-    Bitfield &getBitfield();
-    const Bitfield &getBitfield() const;
+    Canal::Integer::Bitfield_type &getBitfield();
+    const Bitfield_type &getBitfield() const;
 
     Enumeration &getEnumeration();
     const Enumeration &getEnumeration() const;

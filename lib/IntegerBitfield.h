@@ -2,6 +2,7 @@
 #define LIBCANAL_INTEGER_BITFIELD_H
 
 #include "Domain.h"
+#include "COW.h"
 
 namespace Canal {
 namespace Integer {
@@ -27,7 +28,6 @@ public:
 
 public:
     /// For super_ptr
-    typedef Bitfield type;
 
     /// Initializes to the lowest value.
     Bitfield(const Environment &environment,
@@ -161,7 +161,8 @@ public: // Implementation of Domain.
 
     virtual void setTop();
 };
-
+typedef Canal::COW<Canal::Integer::Bitfield> Bitfield_type;
+//typedef Canal::Integer::Bitfield Bitfield_type;
 } // namespace Integer
 } // namespace Canal
 

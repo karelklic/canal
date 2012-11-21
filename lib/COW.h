@@ -7,6 +7,7 @@
 #ifdef DEBUG
 #include <iostream>
 #endif
+#include <iostream>
 
 namespace Canal {
     template<typename T, typename = void>
@@ -302,6 +303,7 @@ namespace Canal {
         }
 
         T& modifiable() {
+            std::cout << "COW modifiable" << std::endl;
 #ifdef DEBUG
             std::cout << "Conversion to modifiable reference" << std::endl;
 #endif
