@@ -1,4 +1,4 @@
-include_directories(${CANAL_SOURCE_DIR} ${READLINE_INCLUDE_DIRS})
+include_directories(${CANAL_SOURCE_DIR} ${READLINE_INCLUDE_DIRS} ${LIBELF_INCLUDE_DIRS})
 link_directories(${CANAL_SOURCE_DIR}/lib)
 
 add_executable(canal-tool
