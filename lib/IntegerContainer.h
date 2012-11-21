@@ -151,7 +151,7 @@ public: // Implementation of Domain.
 
     virtual void setTop();
 };
-USE_COW(Container);
+DONT_USE_COW(Container);
 } // namespace Integer
 } // namespace Canal
 

@@ -160,7 +160,7 @@ public: // Implementation of Domain.
 
     virtual void setTop();
 };
-USE_COW(Interval);
+DONT_USE_COW(Interval);
 } // namespace Integer
 } // namespace Canal
 

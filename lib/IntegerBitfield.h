@@ -159,7 +159,7 @@ public: // Implementation of Domain.
 
     virtual void setTop();
 };
-USE_COW(Bitfield);
+DONT_USE_COW(Bitfield);
 } // namespace Integer
 } // namespace Canal
 

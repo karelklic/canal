@@ -104,7 +104,7 @@ public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::setItem().
     virtual void setItem(uint64_t offset, const Domain &value);
 };
-USE_COW(SingleItem);
+DONT_USE_COW(SingleItem);
 } // namespace Array
 } // namespace Canal
 
