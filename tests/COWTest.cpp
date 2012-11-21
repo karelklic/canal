@@ -1,5 +1,5 @@
 #define DEBUG
-#include "lib/SuperPtr.h"
+#include "lib/COW.h"
 #include "lib/Utils.h"
 #include <iostream>
 #include "lib/IntegerBitfield.h"
@@ -12,7 +12,7 @@
 using namespace Canal;
 
 static void intConstTest() {
-    typedef SuperPtrConst<int> type;
+    typedef COWConst<int> type;
     type tmp1(0);
     const type& tmp1ref(tmp1);
 #if 0 //No ptr functionality
@@ -33,7 +33,7 @@ static void intConstTest() {
 }
 
 static void intTest() {
-    typedef SuperPtr<int> type;
+    typedef COW<int> type;
     type tmp1(0);
     const type& tmp1ref(tmp1);
 
@@ -69,7 +69,7 @@ BitfieldFactory(const Environment &environment, int number)
 }
 
 static void IntegerBitfieldTest(const Environment &environment) {
-    typedef SuperPtr<Integer::Bitfield> type;
+    typedef COW<Integer::Bitfield> type;
     type tmp1(BitfieldFactory(environment, 10));
     const type& tmp1ref = tmp1;
     const Integer::Bitfield& tmpBitfield1 = tmp1;
@@ -105,7 +105,7 @@ static void IntegerBitfieldTest(const Environment &environment) {
 static void PointerTest(const Environment &environment) {
     const llvm::PointerType &ptrType =
         *llvm::Type::getInt1PtrTy(environment.getContext());
-    typedef SuperPtr<Pointer::Pointer> type;
+    typedef COW<Pointer::Pointer> type;
     typedef const Pointer::Pointer type_const;
     type tmp1(Pointer::Pointer(environment, ptrType));
     const type& tmp1ref = dynCast<type&>(tmp1);

@@ -21,9 +21,9 @@ add_executable(MergeTest MergeTest.cpp)
 target_link_libraries(MergeTest canal)
 add_test(MergeTest MergeTest)
 
-add_executable(SuperPtrTest SuperPtrTest.cpp)
-target_link_libraries(SuperPtrTest canal)
-add_test(SuperPtrTest SuperPtrTest)
+add_executable(COWTest COWTest.cpp)
+target_link_libraries(COWTest canal)
+add_test(COWTest COWTest)
 
 file(GLOB files "*.c")
 foreach(file ${files})

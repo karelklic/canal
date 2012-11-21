@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <string>
 #include <typeinfo>
-#include "SuperPtr.h"
+#include "COW.h"
 
 /// Fatal error.  Writes a message to stderr and terminates the
 /// application.
@@ -176,39 +176,39 @@ struct bare_type<const X*> {
     static const bool pointer = true;
 };
 
-/// Try dynamic cast to SuperPtr<X>&
+/// Try dynamic cast to COW<X>&
 template<typename X, typename Y>
-struct SuperPtrCast {
+struct COWCast {
     /// Try to do dynamic cast and return modifiable reference to element
     static inline X
     modifiable(Y &val) {
         typedef typename bare_type<X>::type type;
-        SuperPtr<type>& type_check = dynamic_cast<SuperPtr<type>& >(val);
+        COW<type>& type_check = dynamic_cast<COW<type>& >(val);
         return type_check.modifiable();
     }
     /// Try to do dynamic cast and return const reference to element
     static inline X
     constant(const Y &val) {
         typedef typename bare_type<X>::type type;
-        const SuperPtr<type>& type_check = dynamic_cast<const SuperPtr<type>& >(val);
+        const COW<type>& type_check = dynamic_cast<const COW<type>& >(val);
         return (X) type_check;
     }
 };
-/// Try dynamic cast to SuperPtr<X>*
+/// Try dynamic cast to COW<X>*
 template<typename X, typename Y>
-struct SuperPtrCast<X*, Y> {
+struct COWCast<X*, Y> {
     /// Try to do dynamic cast and return modifiable pointer to element
     static inline X*
     modifiable(Y* val) {
         typedef typename bare_type<X>::type type;
-        SuperPtr<type>* type_check = dynamic_cast<SuperPtr<type>* >(val);
+        COW<type>* type_check = dynamic_cast<COW<type>* >(val);
         return (type_check == NULL ? NULL : &type_check->modifiable());
     }
     /// Try to do dynamic cast and return const pointer to element
     static inline X*
     constant(const Y* val) {
         typedef typename bare_type<X>::type type;
-        const SuperPtr<type>* type_check = dynamic_cast<const SuperPtr<type>* >(val);
+        const COW<type>* type_check = dynamic_cast<const COW<type>* >(val);
         return (type_check == NULL ? NULL : (X*) *type_check);;
     }
 };
@@ -217,11 +217,11 @@ template<typename X, typename Y, typename = void>
 struct static_if_cast {
     /// Takes reference
     static inline X static_if(Y& val) {
-        return SuperPtrCast<X, Y>::modifiable(val);
+        return COWCast<X, Y>::modifiable(val);
     }
     /// Takes pointer
     static inline X static_if(Y* val) {
-        return SuperPtrCast<X, Y>::modifiable(val);
+        return COWCast<X, Y>::modifiable(val);
     }
 };
 /// Static if - if X is ot const, call constant (which takes const X)
@@ -229,14 +229,14 @@ template<typename X, typename Y>
 struct static_if_cast<X, Y, typename enable_if<bare_type<X>::constant>::type > {
     /// Takes reference
     static inline X static_if(Y& val) {
-        return SuperPtrCast<X, Y>::constant(val);
+        return COWCast<X, Y>::constant(val);
     }
     /// Takes pointer
     static inline X static_if(Y* val) {
-        return SuperPtrCast<X, Y>::constant(val);
+        return COWCast<X, Y>::constant(val);
     }
 };
-/// dynCastStruct - auxiliary class for dynCast; X is NOT subclass of Domain -> no need to try SuperPtr<X>
+/// dynCastStruct - auxiliary class for dynCast; X is NOT subclass of Domain -> no need to try COW<X>
 template<typename X, typename Y, typename = void>
 struct dynCastStruct {
     /// Cast for reference
@@ -290,12 +290,12 @@ struct dynCastStruct {
         }
     }
 };
-/// dynCastStruct - auxiliary class for dynCast; X is subclass of Domain -> try SuperPtr<X> if cast for X fails
+/// dynCastStruct - auxiliary class for dynCast; X is subclass of Domain -> try COW<X> if cast for X fails
 template<typename X, typename Y>
 struct dynCastStruct<X, Y,
         typename enable_if<is_base_of<Domain, typename bare_type<X>::type>::value>::type
        > {
-    /// Cast for reference -> try SuperPtr<X> if X is not const, const SuperPtr<X> if X is const
+    /// Cast for reference -> try COW<X> if X is not const, const COW<X> if X is const
     static inline X cast(Y &val)
     {
         try
@@ -303,14 +303,14 @@ struct dynCastStruct<X, Y,
             return dynamic_cast<X>(val);
         }
         catch (std::bad_cast exception) {
-            try { //Try SuperPtr - if fails, do nothing
+            try { //Try COW - if fails, do nothing
                 return static_if_cast<X, Y>::static_if(val);
             }
             catch (...) {}
             CANAL_FATAL_ERROR(exception.what());
         }
     }
-    /// Cast for const reference -> try const SuperPtr<X>
+    /// Cast for const reference -> try const COW<X>
     static inline X cast_const(const Y &val)
     {
         try
@@ -319,8 +319,8 @@ struct dynCastStruct<X, Y,
         }
         catch (std::bad_cast exception)
         {
-            try { //Try SuperPtr - if fails, do nothing
-                return SuperPtrCast<X, Y>::constant(val);
+            try { //Try COW - if fails, do nothing
+                return COWCast<X, Y>::constant(val);
             }
             catch (...) {}
             CANAL_FATAL_ERROR(exception.what()
@@ -328,21 +328,21 @@ struct dynCastStruct<X, Y,
                               << " to " << typeid(X).name());
         }
     }
-    /// Cast for pointer -> try SuperPtr<X>* if X is not const, const SuperPtr<X>* if X is const
+    /// Cast for pointer -> try COW<X>* if X is not const, const COW<X>* if X is const
     static inline X cast(Y *val)
     {
         X x = dynamic_cast<X>(val);
-        if (x == NULL) { //Try SuperPtr - if fails, do nothing -> returns NULL either way
+        if (x == NULL) { //Try COW - if fails, do nothing -> returns NULL either way
             return static_if_cast<X, Y>::static_if(val);
         }
         return x;
     }
-    /// Cast for const pointer -> try const SuperPtr<X>*
+    /// Cast for const pointer -> try const COW<X>*
     static inline X cast_const(const Y *val)
     {
         X x = dynamic_cast<X>(val);
-        if (x == NULL) { //Try SuperPtr - if fails, do nothing -> returns NULL either way
-            return SuperPtrCast<X, Y>::constant(val);
+        if (x == NULL) { //Try COW - if fails, do nothing -> returns NULL either way
+            return COWCast<X, Y>::constant(val);
         }
         return x;
     }
