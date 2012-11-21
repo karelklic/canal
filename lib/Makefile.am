@@ -49,6 +49,7 @@ libcanal_la_SOURCES = \
 	PointerUtils.cpp \
 	PointerUtils.h \
 	Prereq.h \
+	SharedDataPointer.h \
 	SlotTracker.cpp \
 	SlotTracker.h \
 	State.cpp \

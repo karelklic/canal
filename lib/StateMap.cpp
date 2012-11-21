@@ -12,7 +12,6 @@ StateMap::StateMap(const StateMap &map) : mMap(map.mMap)
 
 StateMap::~StateMap()
 {
-    llvm::DeleteContainerSeconds(*this);
 }
 
 bool
@@ -39,11 +38,8 @@ StateMap::merge(const StateMap &map)
     {
 	iterator it1 = find(it2->first);
 	if (it1 == end())
-        {
-            insert(value_type(it2->first,
-                              it2->second->clone()));
-        }
-	else
+            insert(*it2);
+	else if (*it1->second != *it2->second)
             it1->second->merge(*it2->second);
     }
 }
@@ -61,7 +57,7 @@ StateMap::insert(const llvm::Value &place, Domain *value)
         delete value;
     }
     else
-        insert(value_type(&place, value));
+        insert(value_type(&place, SharedDataPointer<Domain>(value)));
 }
 
 size_t

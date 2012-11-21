@@ -12,7 +12,8 @@ Domain::Domain(const Environment &environment)
 }
 
 Domain::Domain(const Domain &value)
-    : mEnvironment(value.mEnvironment),
+    : SharedData(value),
+      mEnvironment(value.mEnvironment),
       mWideningData(value.mWideningData)
 {
     if (mWideningData)
