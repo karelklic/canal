@@ -68,6 +68,7 @@ namespace Canal {
         }
 #endif
 
+#if 0
         /// Get const reference to associated object
         const T& operator* () const {
 #ifdef DEBUG
@@ -82,6 +83,7 @@ namespace Canal {
 #endif
             return &mInstance->first;
         }
+#endif
 
         /// Comparison operator
         bool operator== (const SuperPtrConst<T>& other) const {

@@ -15,15 +15,18 @@ static void intConstTest() {
     typedef SuperPtrConst<int> type;
     type tmp1(0);
     const type& tmp1ref(tmp1);
-
+#if 0 //No ptr functionality
     CANAL_ASSERT(*tmp1ref == 0);
     CANAL_ASSERT(*tmp1 == 0); //Should not force object copy
+#endif
     CANAL_ASSERT(tmp1ref.getCounter() == 1);
 
     type tmp2(tmp1);
     const type& tmp2ref(tmp2);
+#if 0
     CANAL_ASSERT(*tmp1ref == 0);
     CANAL_ASSERT(*tmp2ref == 0);
+#endif
 
     CANAL_ASSERT(tmp1ref.getCounter() == 2);
     CANAL_ASSERT(tmp2ref.getCounter() == 2);
@@ -76,8 +79,10 @@ static void IntegerBitfieldTest(const Environment &environment) {
     CANAL_ASSERT(tmp1 == BitfieldFactory(environment, 10));
     CANAL_ASSERT(tmpBitfield1.getBitWidth() == sizeof(int)*8);
     CANAL_ASSERT(tmpBitfield2.getBitWidth() == sizeof(int)*8);
+#if 0
     CANAL_ASSERT(tmp1->getBitWidth() == sizeof(int)*8); //Test of constant method call
     CANAL_ASSERT(tmp1ref->getBitWidth() == sizeof(int) * 8);
+#endif
     //tmp1->setBitValue(0, 1); //Should not and does not work
     tmp1.modifiable().setBitValue(0, 1); //This does work
     CANAL_ASSERT(tmp1 == BitfieldFactory(environment, 11));
@@ -109,8 +114,10 @@ static void PointerTest(const Environment &environment) {
     CANAL_ASSERT(tmp1 == Pointer::Pointer(environment, ptrType));
     CANAL_ASSERT(ptrPointer1->isSingleTarget() == false);
     CANAL_ASSERT(tmpPointer1.isSingleTarget() == false);
+#if 0
     CANAL_ASSERT(tmp1->isSingleTarget() == false); //Test of constant method call
     CANAL_ASSERT(tmp1ref->isSingleTarget() == false);
+#endif
     llvm::Value* val = new llvm::GlobalVariable(llvm::Type::getInt1PtrTy(environment.getContext()), true, llvm::GlobalValue::ExternalLinkage);
     //tmp1.setZero(val); //Should not and does not work
     tmp1.modifiable().setZero(val); //This does work
