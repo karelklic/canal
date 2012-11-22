@@ -32,23 +32,50 @@ public:
 
     bool operator==(const StateMap &map) const;
 
-    iterator begin() { return mMap.begin(); }
+    iterator begin()
+    {
+        return mMap.begin();
+    }
 
-    const_iterator begin() const { return mMap.begin(); }
+    const_iterator begin() const
+    {
+        return mMap.begin();
+    }
 
-    iterator end() { return mMap.end(); }
+    iterator end()
+    {
+        return mMap.end();
+    }
 
-    const_iterator end() const { return mMap.end(); }
+    const_iterator end() const
+    {
+        return mMap.end();
+    }
 
-    size_type size() const { return mMap.size(); }
+    size_type size() const
+    {
+        return mMap.size();
+    }
 
-    void clear() { mMap.clear(); }
+    void clear()
+    {
+        mMap.clear();
+    }
 
-    iterator find(const key_type &x) { return mMap.find(x); }
+    iterator find(const key_type &x)
+    {
+        return mMap.find(x);
+    }
 
-    const_iterator find(const key_type &x) const { return mMap.find(x); }
+    const_iterator find(const key_type &x) const
+    {
+        return mMap.find(x);
+    }
 
-    std::pair<iterator,bool> insert(const value_type &x) { return mMap.insert(x); }
+    std::pair<iterator,bool> insert(const value_type &x)
+    {
+        return mMap.insert(x);
+    }
 
     void merge(const StateMap &map);
 

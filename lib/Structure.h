@@ -20,11 +20,6 @@ public:
 
     virtual ~Structure();
 
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    Structure &operator=(const Structure &value);
-
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
