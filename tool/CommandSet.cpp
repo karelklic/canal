@@ -1,4 +1,5 @@
 #include "CommandSet.h"
+#include "lib/InterpreterOperationsCallback.h"
 #include "lib/WideningDataIterationCount.h"
 
 CommandSet::CommandSet(Commands &commands)
@@ -8,7 +9,8 @@ CommandSet::CommandSet(Commands &commands)
               "Set one of the canal options",
               commands)
 {
-    mOptions["widening-iterations"] = WideningIterations;
+    mOptions["widening-iterations"] = CommandSet::WideningIterations;
+    mOptions["no-missing"] = CommandSet::NoMissing;
 }
 
 std::vector<std::string>
@@ -49,12 +51,19 @@ setWideningIterations(const std::vector<std::string> &args)
     llvm::outs() << "Widening count set to " << args[2] << ".\n";
 }
 
+static void
+setNoMissing()
+{
+    Canal::Interpreter::printMissing = false;
+    llvm::outs() << "Not printing missing functions.\n";
+}
+
 void
 CommandSet::run(const std::vector<std::string> &args)
 {
     if (args.size() < 2)
     {
-        llvm::outs() << "Arguments required (option name)\n";
+        llvm::outs() << "Arguments required (option name).\n";
         return;
     }
 
@@ -71,6 +80,9 @@ CommandSet::run(const std::vector<std::string> &args)
     {
         case WideningIterations:
             setWideningIterations(args);
+            break;
+        case NoMissing:
+            setNoMissing();
             break;
         default:
             llvm::outs() << "No action defined for the command.\n";

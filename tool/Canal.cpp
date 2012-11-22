@@ -20,7 +20,6 @@ Commands gCommands;
 
 static struct argp_option gOptions[] = {
     {"eval", 'e', "COMMAND", 0, "Execute a single Canal command. May be used multiple times."},
-    {"no-missing", 'n', 0, 0, "Do not print out names of missing functions."},
     { 0 }
 };
 
@@ -50,10 +49,6 @@ parseArgument(int key, char *arg, struct argp_state *state)
             exit(EX_USAGE);
         }
         arguments->mFileName = arg;
-        break;
-    case 'n':
-        llvm::outs() << "Not printing missing functions.\n";
-        Canal::Interpreter::printMissing = false;
         break;
     default:
         return ARGP_ERR_UNKNOWN;

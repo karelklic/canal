@@ -7,7 +7,8 @@ class CommandSet : public Command
 {
     enum Option
     {
-        WideningIterations = 1
+        WideningIterations = 1,
+        NoMissing
     };
 
     typedef std::map<std::string, Option> OptionMap;
