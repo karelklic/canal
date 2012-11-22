@@ -9,14 +9,8 @@
 namespace Canal {
 namespace Integer {
 
-Container::Container(const Environment &environment,
-                     unsigned bitWidth)
-    : Domain(environment)
-{
-    mValues.push_back(new Bitfield(environment, bitWidth));
-    mValues.push_back(new Enumeration(environment, bitWidth));
-    mValues.push_back(new Interval(environment, bitWidth));
-}
+Container::Container(const Environment &environment)
+    : Domain(environment) {}
 
 Container::Container(const Environment &environment,
                      const llvm::APInt &number)
