@@ -61,6 +61,8 @@ ExactSize::operator==(const Domain &value) const
 
     for (; itA != itAend; ++itA, ++itB)
     {
+        if (*itA == *itB) //If iterators point to the same object
+            continue; //skip casting and comparison of object
         if (**itA != **itB)
             return false;
     }

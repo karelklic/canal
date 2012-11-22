@@ -30,6 +30,9 @@ State::~State()
 bool
 State::operator==(const State &state) const
 {
+    if (&state == this)
+        return true;
+
     // Quickly compare sizes.
     return mGlobalVariables.size() == state.mGlobalVariables.size() &&
         mGlobalBlocks.size() == state.mGlobalBlocks.size() &&

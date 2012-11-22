@@ -327,8 +327,7 @@ Operations::getElementPtrOffsets(std::vector<Domain*> &result,
 
         if (number.getBitWidth() != 64)
         {
-            Integer::Container *extended =
-                new Integer::Container(mEnvironment, 64);
+            Domain *extended = mConstructors.createInteger(64);
 
             extended->sext(number);
             delete *resultIt;
