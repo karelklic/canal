@@ -18,10 +18,6 @@ public:
 public:
     Container(const Environment &environment);
 
-    Container(const Environment &environment,
-              const llvm::APInt &number);
-
-
     /// Copy constructor.  Creates independent copy of the container.
     Container(const Container &value);
 

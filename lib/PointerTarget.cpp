@@ -4,6 +4,8 @@
 #include "SlotTracker.h"
 #include "State.h"
 #include "Utils.h"
+#include "Environment.h"
+#include "Constructors.h"
 #include "Domain.h"
 
 namespace Canal {
@@ -126,8 +128,9 @@ Target::merge(const Target &target)
 
         llvm::APInt zero = llvm::APInt::getNullValue(
             numericOffsetInt.getBitWidth());
-        Integer::Container zeroContainer(mEnvironment, zero);
-        mNumericOffset->merge(zeroContainer);
+        Domain *zeroContainer = mEnvironment.getConstructors().createInteger(zero);
+        mNumericOffset->merge(*zeroContainer);
+        delete zeroContainer;
     }
     else if (mNumericOffset)
         mNumericOffset->merge(*target.mNumericOffset);
