@@ -13,9 +13,10 @@
 
 namespace Canal {
 
-Constructors::Constructors(const Environment &environment)
+Constructors::Constructors(Environment &environment)
     : mEnvironment(environment)
 {
+    environment.setConstructors(this);
 }
 
 Domain *
