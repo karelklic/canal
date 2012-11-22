@@ -30,11 +30,6 @@ public:
 
     virtual ~SingleItem();
 
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    SingleItem &operator=(const SingleItem &value);
-
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
