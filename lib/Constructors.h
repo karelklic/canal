@@ -19,7 +19,10 @@ protected:
 public:
     Constructors(const Environment &environment);
 
-    const Environment &getEnvironment() const { return mEnvironment; }
+    const Environment &getEnvironment() const
+    {
+        return mEnvironment;
+    }
 
     Domain *create(const llvm::Type &type) const;
 

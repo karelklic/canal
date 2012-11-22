@@ -45,11 +45,6 @@ public:
 
     llvm::APFloat getMin() const;
 
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    Interval &operator=(const Interval &value);
-
 public: // Implementation of Domain.
     // Implementation of Domain::clone().
     // Covariant return type.
@@ -87,4 +82,4 @@ public: // Implementation of Domain.
 } // namespace Float
 } // namespace Canal
 
-#endif // LIBCANAL_FLOAT_H
+#endif // LIBCANAL_FLOAT_INTERVAL_H
