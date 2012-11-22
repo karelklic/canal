@@ -201,6 +201,8 @@ Container::operator==(const Domain &value) const
 
     for (; ita != mValues.end(); ++ita, ++itb)
     {
+        if (*ita == *itb) //If iterators point to the same object
+            continue; //skip casting and comparison of object
         if (**ita != **itb)
             return false;
     }
