@@ -2,6 +2,8 @@
 #include "IntegerBitfield.h"
 #include "IntegerEnumeration.h"
 #include "IntegerInterval.h"
+#include "Environment.h"
+#include "Constructors.h"
 #include "Utils.h"
 #include "APIntUtils.h"
 #include "Pointer.h"
@@ -11,15 +13,6 @@ namespace Integer {
 
 Container::Container(const Environment &environment)
     : Domain(environment) {}
-
-Container::Container(const Environment &environment,
-                     const llvm::APInt &number)
-    : Domain(environment)
-{
-    mValues.push_back(new Bitfield(environment, number));
-    mValues.push_back(new Enumeration(environment, number));
-    mValues.push_back(new Interval(environment, number));
-}
 
 Container::Container(const Container &value)
     : Domain(value)
@@ -365,15 +358,18 @@ Container::icmp(const Domain &a, const Domain &b,
         case llvm::CmpInst::ICMP_ULE:
         case llvm::CmpInst::ICMP_SGE:
         case llvm::CmpInst::ICMP_SLE:
-            if (cmpeq && cmpSingle)
-                merge(Container(mEnvironment,
-                                llvm::APInt(1, 1, false)));
+            if (cmpeq && cmpSingle) {
+                Domain *one = mEnvironment.getConstructors().createInteger(llvm::APInt(1, 1, false));
+                merge(*one);
+                delete one;
+            }
             else
             {
                 if (predicate == llvm::CmpInst::ICMP_EQ && cmpSingle)
                 {
-                    merge(Container(mEnvironment,
-                                    llvm::APInt(1, 0, false)));
+                    Domain *zero = mEnvironment.getConstructors().createInteger(llvm::APInt(1, 0, false));
+                    merge(*zero);
+                    delete zero;
                 }
                 else
                     setTop();
@@ -382,8 +378,10 @@ Container::icmp(const Domain &a, const Domain &b,
         case llvm::CmpInst::ICMP_NE:
             if (cmpSingle)
             {
-                merge(Container(mEnvironment,
-                                llvm::APInt(1, (cmpeq ? 0 : 1), false)));
+                llvm::APInt boolean(1, (cmpeq ? 0 : 1), false);
+                Domain *result = mEnvironment.getConstructors().createInteger(boolean);
+                merge(*result);
+                delete result;
             }
             else
                 setTop();
