@@ -35,7 +35,7 @@ Pointers::widen(const llvm::BasicBlock &wideningPoint,
 
     iterationCount->increase(wideningPoint);
 
-    if (iterationCount->count(wideningPoint) < count)
+    if (iterationCount->count(wideningPoint) < DataIterationCount::ITERATION_COUNT)
         return;
 
     Pointer::PlaceTargetMap::const_iterator

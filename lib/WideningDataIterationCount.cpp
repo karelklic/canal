@@ -2,7 +2,9 @@
 
 namespace Canal {
 namespace Widening {
-unsigned count = 2;
+
+int DataIterationCount::ITERATION_COUNT = 2;
+
 void
 DataIterationCount::increase(const llvm::BasicBlock &block)
 {

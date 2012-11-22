@@ -41,8 +41,15 @@ public:
     Command *getCommand(const std::string &name);
     const Command *getCommand(const std::string &name) const;
 
-    State *getState() { return mState; }
-    const State *getState() const { return mState; }
+    State *getState()
+    {
+        return mState;
+    }
+
+    const State *getState() const
+    {
+        return mState;
+    }
 
     // The new state takes ownership of the module.
     void createState(llvm::Module *module);

@@ -63,7 +63,7 @@ parseArgument(int key, char *arg, struct argp_state *state)
         }
 
         llvm::outs() << "Widening count set to: " << arg << ".\n";
-        Canal::Widening::count = atoi(arg);
+        Canal::Widening::DataIterationCount::ITERATION_COUNT = atoi(arg);
         break;
     case 'n':
         llvm::outs() << "Not printing missing functions.\n";
