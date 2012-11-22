@@ -62,10 +62,26 @@ public:
 
     /// MDNode map iterators.
     typedef std::map<const llvm::MDNode*, unsigned>::iterator mdn_iterator;
-    mdn_iterator mdn_begin() { return mMetadataMap.begin(); }
-    mdn_iterator mdn_end() { return mMetadataMap.end(); }
-    unsigned mdn_size() const { return mMetadataMap.size(); }
-    bool mdn_empty() const { return mMetadataMap.empty(); }
+
+    mdn_iterator mdn_begin()
+    {
+        return mMetadataMap.begin();
+    }
+
+    mdn_iterator mdn_end()
+    {
+        return mMetadataMap.end();
+    }
+
+    unsigned mdn_size() const
+    {
+        return mMetadataMap.size();
+    }
+
+    bool mdn_empty() const
+    {
+        return mMetadataMap.empty();
+    }
 
 protected:
     /// This function does the actual initialization.

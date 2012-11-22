@@ -102,7 +102,7 @@ public:
 
 private:
     /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
+    /// assignments.  Do not implement!
     Target &operator=(const Target &value);
 };
 
