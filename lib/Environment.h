@@ -20,11 +20,20 @@ public:
 
     llvm::LLVMContext &getContext() const;
 
-    llvm::Module &getModule() const { return *mModule; }
+    llvm::Module &getModule() const
+    {
+        return *mModule;
+    }
 
-    const llvm::TargetData &getTargetData() const { return mTargetData; }
+    const llvm::TargetData &getTargetData() const
+    {
+        return mTargetData;
+    }
 
-    SlotTracker &getSlotTracker() const { return mSlotTracker; }
+    SlotTracker &getSlotTracker() const
+    {
+        return mSlotTracker;
+    }
 };
 
 } // namespace Canal
