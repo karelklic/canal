@@ -64,17 +64,35 @@ public:
     /// and moves to the next one.
     void interpretInstruction();
 
-    void setCallback(IteratorCallback &callback) { mCallback = &callback; }
+    void setCallback(IteratorCallback &callback)
+    {
+        mCallback = &callback;
+    }
 
-    bool isInitialized() const { return mInitialized; }
+    bool isInitialized() const
+    {
+        return mInitialized;
+    }
 
-    const State &getCurrentState() const { return *mState; }
+    const State &getCurrentState() const
+    {
+        return *mState;
+    }
 
-    const Function &getCurrentFunction() const { return **mFunction; }
+    const Function &getCurrentFunction() const
+    {
+        return **mFunction;
+    }
 
-    const BasicBlock &getCurrentBasicBlock() const { return **mBasicBlock; }
+    const BasicBlock &getCurrentBasicBlock() const
+    {
+        return **mBasicBlock;
+    }
 
-    const llvm::Instruction &getCurrentInstruction() const { return *mInstruction; }
+    const llvm::Instruction &getCurrentInstruction() const
+    {
+        return *mInstruction;
+    }
 
     std::string toString() const;
 

@@ -32,21 +32,39 @@ public:
 
     virtual ~Function();
 
-    const llvm::Function &getLlvmFunction() const { return mFunction; }
+    const llvm::Function &getLlvmFunction() const
+    {
+        return mFunction;
+    }
 
     const llvm::BasicBlock &getLlvmEntryBlock() const;
 
     BasicBlock &getBasicBlock(const llvm::BasicBlock &llvmBasicBlock) const;
 
-    std::vector<BasicBlock*>::const_iterator begin() const { return mBasicBlocks.begin(); }
+    std::vector<BasicBlock*>::const_iterator begin() const
+    {
+        return mBasicBlocks.begin();
+    }
 
-    std::vector<BasicBlock*>::const_iterator end() const { return mBasicBlocks.end(); }
+    std::vector<BasicBlock*>::const_iterator end() const
+    {
+        return mBasicBlocks.end();
+    }
 
-    State &getInputState() { return mInputState; }
+    State &getInputState()
+    {
+        return mInputState;
+    }
 
-    const State &getInputState() const { return mInputState; }
+    const State &getInputState() const
+    {
+        return mInputState;
+    }
 
-    const State &getOutputState() const { return mOutputState; }
+    const State &getOutputState() const
+    {
+        return mOutputState;
+    }
 
     llvm::StringRef getName() const;
 

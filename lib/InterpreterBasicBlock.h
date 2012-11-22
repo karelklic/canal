@@ -22,13 +22,30 @@ public:
     BasicBlock(const llvm::BasicBlock &basicBlock,
                const Constructors &constructors);
 
-    const llvm::BasicBlock &getLlvmBasicBlock() const { return mBasicBlock; }
+    const llvm::BasicBlock &getLlvmBasicBlock() const
+    {
+        return mBasicBlock;
+    }
 
-    llvm::BasicBlock::const_iterator begin() const { return mBasicBlock.begin(); }
-    llvm::BasicBlock::const_iterator end() const { return mBasicBlock.end(); }
+    llvm::BasicBlock::const_iterator begin() const
+    {
+        return mBasicBlock.begin();
+    }
 
-    State &getInputState() { return mInputState; }
-    State &getOutputState() { return mOutputState; }
+    llvm::BasicBlock::const_iterator end() const
+    {
+        return mBasicBlock.end();
+    }
+
+    State &getInputState()
+    {
+        return mInputState;
+    }
+
+    State &getOutputState()
+    {
+        return mOutputState;
+    }
 
     /// Get memory usage (used byte count) of this basic block interpretation.
     size_t memoryUsage() const;

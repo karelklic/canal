@@ -40,27 +40,60 @@ public:
     Interpreter(llvm::Module *module);
     virtual ~Interpreter();
 
-    const Environment &getEnvironment() const { return mEnvironment; }
+    const Environment &getEnvironment() const
+    {
+        return mEnvironment;
+    }
 
-    SlotTracker &getSlotTracker() const { return mEnvironment.getSlotTracker(); }
+    SlotTracker &getSlotTracker() const
+    {
+        return mEnvironment.getSlotTracker();
+    }
 
-    const Constructors &getConstructors() const { return mConstructors; }
+    const Constructors &getConstructors() const
+    {
+        return mConstructors;
+    }
 
-    const Module &getModule() const { return mModule; }
+    const Module &getModule() const
+    {
+        return mModule;
+    }
 
-    const Operations &getOperations() const { return mOperations; }
+    const Operations &getOperations() const
+    {
+        return mOperations;
+    }
 
-    Iterator &getIterator() { return mIterator; }
+    Iterator &getIterator()
+    {
+        return mIterator;
+    }
 
-    const Iterator &getIterator() const { return mIterator; }
+    const Iterator &getIterator() const
+    {
+        return mIterator;
+    }
 
-    const State &getCurrentState() const { return mIterator.getCurrentState(); }
+    const State &getCurrentState() const
+    {
+        return mIterator.getCurrentState();
+    }
 
-    const Function &getCurrentFunction() const { return mIterator.getCurrentFunction(); }
+    const Function &getCurrentFunction() const
+    {
+        return mIterator.getCurrentFunction();
+    }
 
-    const BasicBlock &getCurrentBasicBlock() const { return mIterator.getCurrentBasicBlock(); }
+    const BasicBlock &getCurrentBasicBlock() const
+    {
+        return mIterator.getCurrentBasicBlock();
+    }
 
-    const llvm::Instruction &getCurrentInstruction() const { return mIterator.getCurrentInstruction(); }
+    const llvm::Instruction &getCurrentInstruction() const
+    {
+        return mIterator.getCurrentInstruction();
+    }
 
     std::string toString() const;
 };
