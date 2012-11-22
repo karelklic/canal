@@ -128,7 +128,7 @@ public: // Implementation of Domain.
     /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *place);
 };
-DONT_USE_COW(Pointer);
+USE_COW(Pointer);
 } // namespace Pointer
 } // namespace Canal
 
