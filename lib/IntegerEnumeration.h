@@ -30,7 +30,10 @@ public:
     /// Copy constructor.
     Enumeration(const Enumeration &value);
 
-    unsigned getBitWidth() const { return mBitWidth; }
+    unsigned getBitWidth() const
+    {
+        return mBitWidth;
+    }
 
     /// Lowest signed number represented by this abstract domain.
     /// @param result
@@ -70,11 +73,6 @@ public:
 
     /// Does this enumeration represent single value?
     bool isSingleValue() const;
-
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    Enumeration &operator=(const Enumeration &value);
 
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().

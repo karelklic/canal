@@ -42,7 +42,10 @@ public:
     /// Copy constructor.
     Interval(const Interval &value);
 
-    unsigned getBitWidth() const { return mSignedFrom.getBitWidth(); }
+    unsigned getBitWidth() const
+    {
+        return mSignedFrom.getBitWidth();
+    }
 
     /// Lowest signed number represented by this abstract domain.
     /// @param result
@@ -89,11 +92,6 @@ public:
 
     /// Returns true if the interval represents a unsigned single value.
     bool isUnsignedSingleValue() const;
-
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    Interval &operator=(const Interval &value);
 
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().

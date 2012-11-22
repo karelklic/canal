@@ -38,7 +38,10 @@ public:
     Bitfield(const Bitfield &value);
 
     /// Return the number of bits of the represented number.
-    unsigned getBitWidth() const { return mZeroes.getBitWidth(); }
+    unsigned getBitWidth() const
+    {
+        return mZeroes.getBitWidth();
+    }
 
     /// Returns 0 if the bit is known to be 0.  Returns 1 if the bit is
     /// known to be 1.  Returns -1 if the bit value is unknown.
@@ -89,11 +92,6 @@ public:
 
     /// Does these bits represent single value?
     bool isSingleValue() const;
-
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    Bitfield &operator=(const Bitfield &value);
 
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().

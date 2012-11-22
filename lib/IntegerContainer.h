@@ -84,11 +84,6 @@ public:
     /// Find out whether all representations contain only single value
     bool isSingleValue() const;
 
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    Container &operator=(const Container &value);
-
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
