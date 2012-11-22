@@ -45,7 +45,9 @@ ExactSize::clone() const
 bool
 ExactSize::operator==(const Domain &value) const
 {
-    if (&value == this) return true;
+    if (this == &value)
+        return true;
+
     const ExactSize *array = dynCast<const ExactSize*>(&value);
     if (!array)
         return false;
@@ -59,6 +61,8 @@ ExactSize::operator==(const Domain &value) const
 
     for (; itA != itAend; ++itA, ++itB)
     {
+        if (*itA == *itB) //If iterators point to the same object
+            continue; //skip casting and comparison of object
         if (**itA != **itB)
             return false;
     }

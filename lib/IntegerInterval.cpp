@@ -133,7 +133,9 @@ Interval::clone() const
 bool
 Interval::operator==(const Domain& value) const
 {
-    if (&value == this) return true;
+    if (this == &value)
+        return true;
+
     const Interval *interval = dynCast<const Interval*>(&value);
     if (!interval)
         return false;

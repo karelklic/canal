@@ -188,7 +188,9 @@ Container::clone() const
 bool
 Container::operator==(const Domain &value) const
 {
-    if (&value == this) return true;
+    if (this == &value)
+        return true;
+
     const Container *container = dynCast<const Container*>(&value);
     if (!container)
         return false;
@@ -196,8 +198,11 @@ Container::operator==(const Domain &value) const
     CANAL_ASSERT(mValues.size() == container->mValues.size());
     std::vector<Domain*>::const_iterator ita(mValues.begin()),
         itb(container->mValues.begin());
+
     for (; ita != mValues.end(); ++ita, ++itb)
     {
+        if (*ita == *itb) //If iterators point to the same object
+            continue; //skip casting and comparison of object
         if (**ita != **itb)
             return false;
     }

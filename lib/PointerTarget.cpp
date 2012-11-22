@@ -64,7 +64,9 @@ Target::~Target()
 bool
 Target::operator==(const Target &target) const
 {
-    if (&target == this) return true;
+    if (&target == this)
+        return true;
+
     if (mType != target.mType)
         return false;
 

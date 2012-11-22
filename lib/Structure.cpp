@@ -35,7 +35,9 @@ Structure::clone() const
 bool
 Structure::operator==(const Domain &value) const
 {
-    if (&value == this) return true;
+    if (this == &value)
+        return true;
+
     const Structure *structure = dynCast<const Structure*>(&value);
     if (!structure)
         return false;
