@@ -9,14 +9,8 @@
 namespace Canal {
 namespace Integer {
 
-Container::Container(const Environment &environment,
-                     unsigned bitWidth)
-    : Domain(environment)
-{
-    mValues.push_back(new Bitfield(environment, bitWidth));
-    mValues.push_back(new Enumeration(environment, bitWidth));
-    mValues.push_back(new Interval(environment, bitWidth));
-}
+Container::Container(const Environment &environment)
+    : Domain(environment) {}
 
 Container::Container(const Environment &environment,
                      const llvm::APInt &number)
@@ -201,6 +195,8 @@ Container::operator==(const Domain &value) const
 
     for (; ita != mValues.end(); ++ita, ++itb)
     {
+        if (*ita == *itb) //If iterators point to the same object
+            continue; //skip casting and comparison of object
         if (**ita != **itb)
             return false;
     }

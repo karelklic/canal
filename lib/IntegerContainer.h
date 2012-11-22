@@ -16,13 +16,11 @@ public:
     std::vector<Domain*> mValues;
 
 public:
-    Container(const Environment &environment,
-              unsigned bitWidth);
+    Container(const Environment &environment);
 
-    /// Creates a new container with an initial value.  Signedness,
-    /// number of bits is taken from the provided number.
     Container(const Environment &environment,
               const llvm::APInt &number);
+
 
     /// Copy constructor.  Creates independent copy of the container.
     Container(const Container &value);
