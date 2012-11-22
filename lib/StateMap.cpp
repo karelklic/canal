@@ -18,6 +18,9 @@ StateMap::~StateMap()
 bool
 StateMap::operator==(const StateMap &map) const
 {
+    if (&map == this)
+        return true;
+
     if (size() != map.size())
         return false;
 
@@ -43,7 +46,7 @@ StateMap::merge(const StateMap &map)
             insert(value_type(it2->first,
                               it2->second->clone()));
         }
-	else
+    else if (*it1->second != *it2->second)
             it1->second->merge(*it2->second);
     }
 }

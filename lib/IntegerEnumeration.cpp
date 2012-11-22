@@ -120,15 +120,21 @@ Enumeration::clone() const
 bool
 Enumeration::operator==(const Domain &value) const
 {
+    if (this == &value)
+        return true;
+
     const Enumeration *enumeration =
         dynCast<const Enumeration*>(&value);
 
     if (!enumeration)
         return false;
+
     if (mTop != enumeration->mTop)
         return false;
+
     if (mTop)
         return true;
+
     // Compare values only if the top is not set, otherwise we would
     // get false inequality.
     return mValues == enumeration->mValues;

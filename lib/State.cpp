@@ -30,6 +30,9 @@ State::~State()
 bool
 State::operator==(const State &state) const
 {
+    if (&state == this)
+        return true;
+
     // Quickly compare sizes.
     return mGlobalVariables.size() == state.mGlobalVariables.size() &&
         mGlobalBlocks.size() == state.mGlobalBlocks.size() &&
@@ -137,7 +140,7 @@ State::mergeForeignFunctionBlocks(const State &state,
             mFunctionBlocks.insert(StateMap::value_type(it2->first,
                                                         it2->second->clone()));
         }
-	else
+	else if (*it1->second != *it2->second)
             it1->second->merge(*it2->second);
     }
 }
