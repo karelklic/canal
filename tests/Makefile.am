@@ -67,32 +67,32 @@ EXTRA_DIST += \
 ## --------- ##
 noinst_PROGRAMS = OperationsTest IntegerIntervalTest PointerTest ICMPTest MergeTest
 
-OperationsTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+OperationsTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
 OperationsTest_SOURCES = OperationsTest.cpp
-OperationsTest_LDADD = ../lib/libcanal.la
+OperationsTest_LDADD = $(top_builddir)/lib/libcanal.la
 OperationsTest_LIBS = $(LLVM_LIBS)
 OperationsTest_LDFLAGS = $(LLVM_LDFLAGS)
 
-IntegerIntervalTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+IntegerIntervalTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
 IntegerIntervalTest_SOURCES = IntegerIntervalTest.cpp
-IntegerIntervalTest_LDADD = ../lib/libcanal.la
+IntegerIntervalTest_LDADD = $(top_builddir)/lib/libcanal.la
 IntegerIntervalTest_LIBS = $(LLVM_LIBS)
 IntegerIntervalTest_LDFLAGS = $(LLVM_LDFLAGS)
 
-PointerTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+PointerTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
 PointerTest_SOURCES = PointerTest.cpp
-PointerTest_LDADD = ../lib/libcanal.la
+PointerTest_LDADD = $(top_builddir)/lib/libcanal.la
 PointerTest_LIBS = $(LLVM_LIBS)
 PointerTest_LDFLAGS = $(LLVM_LDFLAGS)
 
-ICMPTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+ICMPTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
 ICMPTest_SOURCES = ICMPTest.cpp
-ICMPTest_LDADD = ../lib/libcanal.la
+ICMPTest_LDADD = $(top_builddir)/lib/libcanal.la
 ICMPTest_LIBS = $(LLVM_LIBS)
 ICMPTest_LDFLAGS = $(LLVM_LDFLAGS)
 
-MergeTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I..
+MergeTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
 MergeTest_SOURCES = MergeTest.cpp
-MergeTest_LDADD = ../lib/libcanal.la
+MergeTest_LDADD = $(top_builddir)/lib/libcanal.la
 MergeTest_LIBS = $(LLVM_LIBS)
 MergeTest_LDFLAGS = $(LLVM_LDFLAGS)
