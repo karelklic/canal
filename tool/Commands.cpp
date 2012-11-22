@@ -11,6 +11,7 @@
 #include "CommandPwd.h"
 #include "CommandQuit.h"
 #include "CommandRun.h"
+#include "CommandSet.h"
 #include "CommandShell.h"
 #include "CommandShow.h"
 #include "CommandStart.h"
@@ -34,6 +35,7 @@ Commands::Commands()
     mCommandList.push_back(new CommandPwd(*this));
     mCommandList.push_back(new CommandQuit(*this));
     mCommandList.push_back(new CommandRun(*this));
+    mCommandList.push_back(new CommandSet(*this));
     mCommandList.push_back(new CommandShell(*this));
     mCommandList.push_back(new CommandShow(*this));
     mCommandList.push_back(new CommandStart(*this));

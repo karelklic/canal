@@ -20,7 +20,6 @@ Commands gCommands;
 
 static struct argp_option gOptions[] = {
     {"eval", 'e', "COMMAND", 0, "Execute a single Canal command. May be used multiple times."},
-    {"widening", 'w', "NUMBER", 0, "Set number of iterations before widening to top is applied. Default: 2."},
     {"no-missing", 'n', 0, 0, "Do not print out names of missing functions."},
     { 0 }
 };
@@ -51,19 +50,6 @@ parseArgument(int key, char *arg, struct argp_state *state)
             exit(EX_USAGE);
         }
         arguments->mFileName = arg;
-        break;
-    case 'w':
-        for (unsigned i = 0; i < strlen(arg); ++i)
-        {
-            if (!isdigit(arg[i]))
-            {
-                argp_usage(state);
-                exit(EX_USAGE);
-            }
-        }
-
-        llvm::outs() << "Widening count set to: " << arg << ".\n";
-        Canal::Widening::count = atoi(arg);
         break;
     case 'n':
         llvm::outs() << "Not printing missing functions.\n";

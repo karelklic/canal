@@ -27,6 +27,8 @@ canal_SOURCES = \
 	CommandQuit.cpp \
 	CommandRun.h \
 	CommandRun.cpp \
+	CommandSet.h \
+	CommandSet.cpp \
 	CommandShell.h \
 	CommandShell.cpp \
 	CommandShow.h \
