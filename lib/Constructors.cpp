@@ -147,10 +147,13 @@ Constructors::create(const llvm::Constant &value,
             deleteVariable = true;
         }
         else
-            variable = state->findVariable(**value.op_begin());
+            variable = state->findVariable(firstValue);
 
         CANAL_ASSERT_MSG(variable, "It is expected that variable used"
-                         " in constant expressions is available.");
+                         " in constant expressions is available.\n"
+                         "Missing: \"" << firstValue << "\"\n"
+                         << "In \"" << value << "\"\n"
+                         << "On line \"" << place << "\"");
 
         Domain *result = NULL;
         switch (exprValue.getOpcode())
