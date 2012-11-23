@@ -16,37 +16,45 @@ namespace Interpreter {
 static void
 processValue(const llvm::Value *value,
              std::vector<const llvm::GlobalVariable*> &sorted,
-             std::set<const llvm::GlobalVariable*> &inserted,
-             std::set<const llvm::GlobalVariable*> &visited)
+             const llvm::GlobalVariable *currentVariable)
 {
     const llvm::GlobalVariable *variable =
         dynCast<const llvm::GlobalVariable*>(value);
 
-    if (!variable)
-        return;
-
-    if (!variable->isConstant() ||
-        !variable->hasInitializer())
+    if (variable)
     {
-        inserted.insert(variable);
-        sorted.push_back(variable);
-        return;
+        if (!variable->isConstant() ||
+            !variable->hasInitializer())
+        {
+            sorted.push_back(variable);
+        }
+        else
+        {
+            CANAL_ASSERT_MSG(variable != currentVariable,
+                             "Circular dependencies among global variables: " << *variable);
+
+            const llvm::Constant *initializer = variable->getInitializer();
+            llvm::Constant::const_op_iterator it = initializer->op_begin(),
+                itend = initializer->op_end();
+
+            for (; it != itend; ++it)
+                processValue(it->get(), sorted, variable);
+
+            sorted.push_back(variable);
+        }
     }
+    else
+    {
+        const llvm::Constant *constant = dynCast<const llvm::Constant*>(value);
+        if (!constant)
+            return;
 
-    CANAL_ASSERT_MSG(visited.find(variable) == visited.end(),
-                     "Circular dependencies among global variables");
+        llvm::Constant::const_op_iterator it = constant->op_begin(),
+            itend = constant->op_end();
 
-    visited.insert(variable);
-
-    const llvm::Constant *initializer = variable->getInitializer();
-    llvm::Constant::const_op_iterator it = initializer->op_begin(),
-        itend = initializer->op_end();
-
-    for (; it != itend; ++it)
-        processValue(it->get(), sorted, inserted, visited);
-
-    inserted.insert(variable);
-    sorted.push_back(variable);
+        for (; it != itend; ++it)
+            processValue(it->get(), sorted, currentVariable);
+    }
 }
 
 static std::vector<const llvm::GlobalVariable*>
@@ -57,9 +65,9 @@ getSortedGlobalVariables(const llvm::Module &module)
         itend = module.global_end();
 
     std::vector<const llvm::GlobalVariable*> sorted;
-    std::set<const llvm::GlobalVariable*> inserted, visited;
+    std::set<const llvm::GlobalVariable*> processed;
     for (; it != itend; ++it)
-        processValue(it, sorted, inserted, visited);
+        processValue(it, sorted, NULL);
 
     return sorted;
 }

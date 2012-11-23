@@ -94,9 +94,22 @@ public: // Implementation of Domain.
     /// Implementation of Domain::icmp().
     virtual void icmp(const Domain &a, const Domain &b,
                       llvm::CmpInst::Predicate predicate);
+
     /// Implementation of Domain::fcmp().
     virtual void fcmp(const Domain &a, const Domain &b,
                       llvm::CmpInst::Predicate predicate);
+
+    /// Check if all items in the array are bottom.
+    virtual bool isBottom() const;
+
+    /// Set all items in the array to bottom.
+    virtual void setBottom();
+
+    /// Check if all items in the array are top.
+    virtual bool isTop() const;
+
+    /// Set all items in the array to top.
+    virtual void setTop();
 
 public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::getItem().

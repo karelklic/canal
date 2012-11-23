@@ -1,5 +1,8 @@
 #include "Constructors.h"
 #include "IntegerContainer.h"
+#include "IntegerBitfield.h"
+#include "IntegerEnumeration.h"
+#include "IntegerInterval.h"
 #include "Utils.h"
 #include "ArraySingleItem.h"
 #include "ArrayExactSize.h"
@@ -13,9 +16,10 @@
 
 namespace Canal {
 
-Constructors::Constructors(const Environment &environment)
+Constructors::Constructors(Environment &environment)
     : mEnvironment(environment)
 {
+    environment.setConstructors(this);
 }
 
 Domain *
@@ -143,10 +147,13 @@ Constructors::create(const llvm::Constant &value,
             deleteVariable = true;
         }
         else
-            variable = state->findVariable(**value.op_begin());
+            variable = state->findVariable(firstValue);
 
         CANAL_ASSERT_MSG(variable, "It is expected that variable used"
-                         " in constant expressions is available.");
+                         " in constant expressions is available.\n"
+                         "Missing: \"" << firstValue << "\"\n"
+                         << "In \"" << value << "\"\n"
+                         << "On line \"" << place << "\"");
 
         Domain *result = NULL;
         switch (exprValue.getOpcode())
@@ -282,12 +289,20 @@ Constructors::create(const llvm::Constant &value,
 Domain *
 Constructors::createInteger(unsigned bitWidth) const
 {
-    return new Integer::Container(mEnvironment, bitWidth);
+    Integer::Container* container = new Integer::Container(mEnvironment);
+    container->mValues.push_back(new Integer::Bitfield(mEnvironment, bitWidth));
+    container->mValues.push_back(new Integer::Enumeration(mEnvironment, bitWidth));
+    container->mValues.push_back(new Integer::Interval(mEnvironment, bitWidth));
+    return container;
 }
 
 Domain *
 Constructors::createInteger(const llvm::APInt &number) const {
-    return new Integer::Container(mEnvironment, number);
+    Integer::Container* container = new Integer::Container(mEnvironment);
+    container->mValues.push_back(new Integer::Bitfield(mEnvironment, number));
+    container->mValues.push_back(new Integer::Enumeration(mEnvironment, number));
+    container->mValues.push_back(new Integer::Interval(mEnvironment, number));
+    return container;
 }
 
 Domain *
@@ -369,7 +384,7 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
 
         // Convert to 64-bit if necessary.
         llvm::APInt extended = APIntUtils::sext(constant.getValue(), 64);
-        offsets.push_back(new Integer::Container(mEnvironment, extended));
+        offsets.push_back(createInteger(extended));
     }
 
     const llvm::PointerType &pointerType =

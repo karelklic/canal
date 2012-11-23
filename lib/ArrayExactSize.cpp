@@ -61,6 +61,8 @@ ExactSize::operator==(const Domain &value) const
 
     for (; itA != itAend; ++itA, ++itB)
     {
+        if (*itA == *itB) //If iterators point to the same object
+            continue; //skip casting and comparison of object
         if (**itA != **itB)
             return false;
     }
@@ -86,8 +88,10 @@ ExactSize::memoryUsage() const
 {
     size_t size = sizeof(ExactSize);
     size += mValues.capacity() * sizeof(Domain*);
-    std::vector<Domain*>::const_iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
         size += (*it)->memoryUsage();
 
     return size;
@@ -272,6 +276,56 @@ ExactSize::fcmp(const Domain &a, const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
     cmpOperation(*this, a, b, predicate, &Domain::fcmp);
+}
+
+bool
+ExactSize::isBottom() const
+{
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+    {
+        if (!(*it)->isBottom())
+            return false;
+    }
+
+    return true;
+}
+
+void
+ExactSize::setBottom()
+{
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+        (*it)->setBottom();
+}
+
+bool
+ExactSize::isTop() const
+{
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+    {
+        if (!(*it)->isTop())
+            return false;
+    }
+
+    return true;
+}
+
+void
+ExactSize::setTop()
+{
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+        (*it)->setTop();
 }
 
 std::vector<Domain*>

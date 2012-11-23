@@ -4,6 +4,8 @@
 #include "SlotTracker.h"
 #include "State.h"
 #include "Utils.h"
+#include "Environment.h"
+#include "Constructors.h"
 #include "Domain.h"
 
 namespace Canal {
@@ -90,6 +92,7 @@ Target::operator==(const Target &target) const
         // Check the targets.
         std::vector<Domain*>::const_iterator it1 = mOffsets.begin(),
             it2 = target.mOffsets.begin();
+
         for (; it1 != mOffsets.end(); ++it1, ++it2)
         {
             if (**it1 != **it2)
@@ -126,8 +129,10 @@ Target::merge(const Target &target)
 
         llvm::APInt zero = llvm::APInt::getNullValue(
             numericOffsetInt.getBitWidth());
-        Integer::Container zeroContainer(mEnvironment, zero);
-        mNumericOffset->merge(zeroContainer);
+
+        Domain *zeroContainer = mEnvironment.getConstructors().createInteger(zero);
+        mNumericOffset->merge(*zeroContainer);
+        delete zeroContainer;
     }
     else if (mNumericOffset)
         mNumericOffset->merge(*target.mNumericOffset);

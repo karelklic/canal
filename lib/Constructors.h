@@ -17,7 +17,7 @@ protected:
     const Environment &mEnvironment;
 
 public:
-    Constructors(const Environment &environment);
+    Constructors(Environment &environment);
 
     const Environment &getEnvironment() const
     {
