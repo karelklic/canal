@@ -218,6 +218,30 @@ SingleItem::fcmp(const Domain &a, const Domain &b,
     CANAL_NOT_IMPLEMENTED();
 }
 
+bool
+SingleItem::isBottom() const
+{
+    return mValue->isBottom();
+}
+
+void
+SingleItem::setBottom()
+{
+    mValue->setBottom();
+}
+
+bool
+SingleItem::isTop() const
+{
+    return mValue->isTop();
+}
+
+void
+SingleItem::setTop()
+{
+    mValue->setTop();
+}
+
 static void
 assertOffsetFitsToArray(uint64_t offset, const Domain &size)
 {

@@ -115,16 +115,27 @@ public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type -- it really overrides Domain::clone().
     virtual Pointer *clone() const;
+
     /// Implementation of Domain::operator==().
     virtual bool operator==(const Domain &value) const;
+
     /// Implementation of Domain::merge().
     virtual void merge(const Domain &value);
+
     /// Implementation of Domain::memoryUsage().
     virtual size_t memoryUsage() const;
+
     /// Implementation of Domain::toString().
     virtual std::string toString() const;
+
     /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *place);
+
+    /// Check if pointer has no targets.
+    virtual bool isBottom() const;
+
+    /// Remove all targets from the pointer.
+    virtual void setBottom();
 };
 
 } // namespace Pointer
