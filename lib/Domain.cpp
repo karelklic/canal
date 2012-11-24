@@ -245,6 +245,12 @@ Domain::isValue() const
     CANAL_NOT_IMPLEMENTED();
 }
 
+const llvm::Type &
+Domain::getValueType() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 bool
 Domain::hasValueExactSize() const
 {
@@ -254,7 +260,8 @@ Domain::hasValueExactSize() const
 uint64_t
 Domain::getValueExactSize()
 {
-    CANAL_NOT_IMPLEMENTED();
+    CANAL_ASSERT(hasValueExactSize());
+    return mEnvironment.getTypeStoreSize(getValueType());
 }
 
 Domain *

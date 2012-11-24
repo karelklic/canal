@@ -94,7 +94,6 @@ public:
     bool isSingleValue() const;
 
 public: // Implementation of Domain.
-    /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Bitfield *clone() const;
     /// Implementation of Domain::operator==().
@@ -155,6 +154,23 @@ public: // Implementation of Domain.
     virtual bool isTop() const;
 
     virtual void setTop();
+
+    virtual bool isValue() const
+    {
+        return true;
+    }
+
+    /// Covariant return type.
+    virtual const llvm::IntegerType &getValueType() const;
+
+    virtual bool hasValueExactSize() const
+    {
+        return true;
+    }
+
+    virtual Domain *getValueCell(uint64_t offset) const;
+
+    virtual void mergeValueCell(uint64_t offset, const Domain &value);
 };
 
 } // namespace Integer

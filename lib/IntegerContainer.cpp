@@ -188,8 +188,11 @@ Container::operator==(const Domain &value) const
 
     for (; ita != mValues.end(); ++ita, ++itb)
     {
-        if (*ita == *itb) //If iterators point to the same object
-            continue; //skip casting and comparison of object
+        // If iterators point to the same object skip casting and
+        // comparison of object.
+        if (*ita == *itb)
+            continue;
+
         if (**ita != **itb)
             return false;
     }
@@ -212,9 +215,12 @@ size_t
 Container::memoryUsage() const
 {
     size_t size(0);
-    std::vector<Domain*>::const_iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
         size += (*it)->memoryUsage();
+
     return size;
 }
 
@@ -251,11 +257,13 @@ binaryOperation(Container &result,
     const Container &aa = dynCast<const Container&>(a),
         &bb = dynCast<const Container&>(b);
 
-    std::vector<Domain*>::iterator it(result.mValues.begin());
+    std::vector<Domain*>::iterator it = result.mValues.begin(),
+        itend = result.mValues.end();
+
     std::vector<Domain*>::const_iterator ita = aa.mValues.begin(),
         itb = bb.mValues.begin();
 
-    for (; it != result.mValues.end(); ++it, ++ita, ++itb)
+    for (; it != itend; ++it, ++ita, ++itb)
         ((**it).*(operation))(**ita, **itb);
 }
 
@@ -395,11 +403,13 @@ Container::icmp(const Domain &a, const Domain &b,
     const Container &aa = dynCast<const Container&>(a),
         &bb = dynCast<const Container&>(b);
 
-    std::vector<Domain*>::iterator it(mValues.begin());
+    std::vector<Domain*>::iterator it = mValues.begin(),
+        itend = mValues.end();
+
     std::vector<Domain*>::const_iterator ita = aa.mValues.begin(),
         itb = bb.mValues.begin();
 
-    for (; it != mValues.end(); ++it, ++ita, ++itb)
+    for (; it != itend; ++it, ++ita, ++itb)
         (*it)->icmp(**ita, **itb, predicate);
 }
 
@@ -418,9 +428,11 @@ castOperation(Container &result,
               Domain::CastOperation operation)
 {
     const Container &container = dynCast<const Container&>(value);
-    std::vector<Domain*>::iterator it = result.mValues.begin();
+    std::vector<Domain*>::iterator it = result.mValues.begin(),
+        itend = result.mValues.end();
+
     std::vector<Domain*>::const_iterator itc = container.mValues.begin();
-    for (; it != result.mValues.end(); ++it, ++itc)
+    for (; it != itend; ++it, ++itc)
         ((**it).*(operation))(**itc);
 }
 
@@ -445,16 +457,20 @@ Container::sext(const Domain &value)
 void
 Container::fptoui(const Domain &value)
 {
-    std::vector<Domain*>::iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
+    std::vector<Domain*>::iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
         (**it).fptoui(value);
 }
 
 void
 Container::fptosi(const Domain &value)
 {
-    std::vector<Domain*>::iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
+    std::vector<Domain*>::iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
         (**it).fptosi(value);
 }
 
@@ -524,6 +540,90 @@ Container::setTop()
 
     for (; it != itend; ++it)
         (*it)->setTop();
+}
+
+bool
+Container::isValue() const
+{
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+    {
+        if ((*it)->isValue())
+            return true;
+    }
+
+    return false;
+}
+
+const llvm::Type &
+Container::getValueType() const
+{
+    const llmv::Type *type = NULL;
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+    {
+        if ((*it)->isValue())
+            return (*it)->getValueType();
+    }
+
+    CANAL_FATAL_ERROR();
+}
+
+bool
+Container::hasValueExactSize() const
+{
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+    {
+        if ((*it)->isValue() && (*it)->hasValueExactSize())
+            return true;
+    }
+
+    return false;
+}
+
+Domain *
+Container::getValueAbstractSize() const
+{
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+    {
+        if ((*it)->isValue())
+            return (*it)->getValueAbstractSize();
+    }
+
+    CANAL_FATAL_ERROR();
+}
+
+Domain *
+Container::getValueCell(uint64_t offset) const
+{
+    Domain *cell = NULL;
+
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+    {
+        if ((*it)->isValue())
+            continue;
+    }
+
+    CANAL_ASSERT(cell);
+    return cell;
+}
+
+void
+Container::mergeValueCell(uint64_t offset, const Domain &value)
+{
 }
 
 } // namespace Integer

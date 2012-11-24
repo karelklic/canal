@@ -140,6 +140,18 @@ public: // Implementation of Domain.
     virtual bool isTop() const;
 
     virtual void setTop();
+
+    virtual bool isValue() const;
+
+    virtual const llvm::Type &getValueType() const;
+
+    virtual bool hasValueExactSize() const;
+
+    virtual Domain *getValueAbstractSize() const;
+
+    virtual Domain *getValueCell(uint64_t offset) const;
+
+    virtual void mergeValueCell(uint64_t offset, const Domain &value);
 };
 
 } // namespace Integer

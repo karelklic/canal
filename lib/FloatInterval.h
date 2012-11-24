@@ -88,16 +88,16 @@ public: // Implementation of Domain.
         return true;
     }
 
+    virtual const llvm::Type &getValueType() const;
+
     virtual bool hasValueExactSize() const
     {
         return true;
     }
 
-    virtual uint64_t getValueExactSize();
-
     virtual Domain *getValueCell(uint64_t offset) const;
 
-    virtual void setValueCell(uint64_t offset, const Domain &value);
+    virtual void mergeValueCell(uint64_t offset, const Domain &value);
 };
 
 } // namespace Float

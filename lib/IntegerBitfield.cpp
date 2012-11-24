@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "APIntUtils.h"
 #include "FloatInterval.h"
+#include "Environment.h"
 
 namespace Canal {
 namespace Integer {
@@ -773,6 +774,26 @@ Bitfield::setTop()
     mZeroes.setAllBits();
     mOnes.setAllBits();
 #endif
+}
+
+const llvm::IntegerType &
+Bitfield::getValueType() const
+{
+    return *llvm::Type::getIntNTy(mEnvironment.getContext(), getBitWidth());
+}
+
+Domain *
+Bitfield::getValueCell(uint64_t offset) const
+{
+    Domain *cell = mEnvironment.getConstructors().createInteger(8);
+    cell->setTop();
+    return cell;
+}
+
+void
+Bitfield::mergeValueCell(uint64_t offset, const Domain &value)
+{
+    setTop();
 }
 
 } // namespace Integer

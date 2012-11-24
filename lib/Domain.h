@@ -31,9 +31,6 @@ public:
 
     Widening::DataInterface *mWideningData;
 
-    /// Can be NULL for domains which are not representing a value.
-    const llvm::Type *mType;
-
 public:
     /// Standard constructor.
     Domain(const Environment &environment);
@@ -176,6 +173,8 @@ public: // Lattice
 public: // Memory layout
     virtual bool isValue() const;
 
+    virtual const llvm::Type &getValueType() const;
+
     virtual bool hasValueExactSize() const;
 
     virtual uint64_t getValueExactSize();
@@ -184,7 +183,7 @@ public: // Memory layout
 
     virtual Domain *getValueCell(uint64_t offset) const;
 
-    virtual void setValueCell(uint64_t offset, const Domain &value);
+    virtual void mergeValueCell(uint64_t offset, const Domain &value);
 
 private: // Domains are non-copyable.
     /// Assignment operator declaration.  Prevents accidental

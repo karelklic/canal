@@ -636,13 +636,11 @@ Interval::setTop()
     mTop = true;
 }
 
-uint64_t
-Interval::getValueExactSize()
+const llvm::Type &
+Interval::getValueType() const
 {
-    const llvm::Type &type = Utils::getType(mFrom.getSemantics(),
-                                            mEnvironment.getContext());
-
-    return mEnvironment.getTypeStoreSize(type);
+    return Utils::getType(mFrom.getSemantics(),
+                          mEnvironment.getContext());
 }
 
 Domain *
@@ -654,7 +652,7 @@ Interval::getValueCell(size_t offset) const
 }
 
 void
-Interval::setValueCell(size_t offset, const Domain &value)
+Interval::mergeValueCell(size_t offset, const Domain &value)
 {
     setTop();
 }
