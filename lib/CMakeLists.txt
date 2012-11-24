@@ -8,6 +8,7 @@ add_library(canal SHARED
     Domain.cpp
     Environment.cpp
     FloatInterval.cpp
+    FloatUtils.cpp
     IntegerBitfield.cpp
     IntegerContainer.cpp
     IntegerEnumeration.cpp

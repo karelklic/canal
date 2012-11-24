@@ -11,6 +11,7 @@ class Environment
 {
     llvm::Module *mModule;
 
+    // Renamed to DataLayout in LLVM 3.2.
     llvm::TargetData mTargetData;
 
     mutable SlotTracker mSlotTracker;
@@ -31,11 +32,6 @@ public:
         return *mModule;
     }
 
-    const llvm::TargetData &getTargetData() const
-    {
-        return mTargetData;
-    }
-
     SlotTracker &getSlotTracker() const
     {
         return mSlotTracker;
@@ -50,6 +46,8 @@ public:
     {
         mConstructors = constructors;
     }
+
+    uint64_t getTypeStoreSize(const llvm::Type &type) const;
 };
 
 } // namespace Canal

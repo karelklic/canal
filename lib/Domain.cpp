@@ -239,4 +239,40 @@ Domain::setTop()
     CANAL_NOT_IMPLEMENTED();
 }
 
+bool
+Domain::isValue() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Domain::hasValueExactSize() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+uint64_t
+Domain::getValueExactSize()
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain *
+Domain::getValueAbstractSize() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain *
+Domain::getValueCell(uint64_t offset) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Domain::setValueCell(uint64_t offset, const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 } // namespace Canal

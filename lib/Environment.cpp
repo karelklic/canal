@@ -20,4 +20,15 @@ Environment::getContext() const
     return mModule->getContext();
 }
 
+uint64_t
+Environment::getTypeStoreSize(const llvm::Type &type) const
+{
+    llvm::Type &modifiableType = const_cast<llvm::Type&>(type);
+    uint64_t size = mTargetData.getTypeStoreSize(&modifiableType);
+    CANAL_ASSERT_MSG(mTargetData.getTypeAllocSize(&modifiableType) == size,
+                     "TODO: handle different alloc and store size");
+
+    return size;
+}
+
 } // namespace Canal

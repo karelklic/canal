@@ -49,14 +49,19 @@ public: // Implementation of Domain.
     // Implementation of Domain::clone().
     // Covariant return type.
     virtual Interval *clone() const;
+
     // Implementation of Domain::operator==().
     virtual bool operator==(const Domain& value) const;
+
     // Implementation of Domain::merge().
     virtual void merge(const Domain &value);
+
     // Implementation of Domain::memoryUsage().
     virtual size_t memoryUsage() const;
+
     // Implementation of Domain::toString().
     virtual std::string toString() const;
+
     /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *place);
 
@@ -77,6 +82,22 @@ public: // Implementation of Domain.
     virtual bool isTop() const;
 
     virtual void setTop();
+
+    virtual bool isValue() const
+    {
+        return true;
+    }
+
+    virtual bool hasValueExactSize() const
+    {
+        return true;
+    }
+
+    virtual uint64_t getValueExactSize();
+
+    virtual Domain *getValueCell(uint64_t offset) const;
+
+    virtual void setValueCell(uint64_t offset, const Domain &value);
 };
 
 } // namespace Float

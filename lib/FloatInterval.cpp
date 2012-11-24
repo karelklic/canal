@@ -2,6 +2,9 @@
 #include "IntegerContainer.h"
 #include "IntegerInterval.h"
 #include "Utils.h"
+#include "FloatUtils.h"
+#include "Environment.h"
+#include "Constructors.h"
 
 #define ROUNDING_MODE llvm::APFloat::rmNearestTiesToEven
 
@@ -631,6 +634,29 @@ Interval::setTop()
 {
     mEmpty = false;
     mTop = true;
+}
+
+uint64_t
+Interval::getValueExactSize()
+{
+    const llvm::Type &type = Utils::getType(mFrom.getSemantics(),
+                                            mEnvironment.getContext());
+
+    return mEnvironment.getTypeStoreSize(type);
+}
+
+Domain *
+Interval::getValueCell(size_t offset) const
+{
+    Domain *cell = mEnvironment.getConstructors().createInteger(8);
+    cell->setTop();
+    return cell;
+}
+
+void
+Interval::setValueCell(size_t offset, const Domain &value)
+{
+    setTop();
 }
 
 } // namespace Float

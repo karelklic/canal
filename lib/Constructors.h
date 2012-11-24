@@ -55,9 +55,6 @@ public:
 
     Domain *createStructure(const std::vector<Domain*> &members) const;
 
-    static const llvm::fltSemantics *
-        getFloatingPointSemantics(const llvm::Type &type);
-
 protected:
     Domain *createGetElementPtr(const llvm::ConstantExpr &value,
                                 const Domain &variable,

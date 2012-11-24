@@ -173,6 +173,19 @@ public: // Lattice
     /// Set it to the top value of lattice.
     virtual void setTop();
 
+public: // Memory layout
+    virtual bool isValue() const;
+
+    virtual bool hasValueExactSize() const;
+
+    virtual uint64_t getValueExactSize();
+
+    virtual Domain *getValueAbstractSize() const;
+
+    virtual Domain *getValueCell(uint64_t offset) const;
+
+    virtual void setValueCell(uint64_t offset, const Domain &value);
+
 private: // Domains are non-copyable.
     /// Assignment operator declaration.  Prevents accidental
     /// assignments of domains.  Do not implement!

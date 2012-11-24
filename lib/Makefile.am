@@ -18,6 +18,8 @@ libcanal_la_SOURCES = \
 	Environment.h \
 	FloatInterval.cpp \
 	FloatInterval.h \
+	FloatUtils.cpp \
+	FloatUtils.h \
 	IntegerBitfield.cpp \
 	IntegerBitfield.h \
 	IntegerContainer.cpp \
