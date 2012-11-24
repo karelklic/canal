@@ -346,6 +346,7 @@ namespace Canal {
 #ifdef DEBUG
             std::cout << "operator== with Domain" << std::endl;
 #endif
+            if (typeid(other) == typeid(*this)) return COWConst<T>::operator ==((const COWDomain<T>&) other);
             return this->mInstance->first == other;
         }
 
