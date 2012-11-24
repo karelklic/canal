@@ -19,7 +19,17 @@ CommandSet::getCompletionMatches(const std::vector<std::string> &args,
                                  int pointArgOffset) const
 {
     std::vector<std::string> result;
-    // TODO: implement set command completion
+    std::string arg = args[pointArg].substr(0, pointArgOffset);
+    OptionMap::const_iterator it = mOptions.begin(),
+        itend = mOptions.end();
+
+    for (; it != itend; ++it)
+    {
+        std::string optionName = it->first;
+        if (optionName.substr(0, arg.length()) == arg)
+            result.push_back(optionName);
+    }
+    
     return result;
 }
 
