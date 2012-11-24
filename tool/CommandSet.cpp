@@ -23,9 +23,10 @@ CommandSet::getCompletionMatches(const std::vector<std::string> &args,
     OptionMap::const_iterator it = mOptions.begin(),
         itend = mOptions.end();
 
+    std::string optionName;
     for (; it != itend; ++it)
     {
-        std::string optionName = it->first;
+        optionName = it->first;
         if (optionName.substr(0, arg.length()) == arg)
             result.push_back(optionName);
     }
