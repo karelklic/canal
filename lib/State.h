@@ -110,25 +110,52 @@ public:
 
     void mergeToReturnedValue(const Domain &value);
 
-    const Domain *getReturnedValue() const { return mReturnedValue; }
+    const Domain *getReturnedValue() const
+    {
+        return mReturnedValue;
+    }
 
     void addVariableArgument(const llvm::Instruction &place, Domain *argument);
 
-    const StateMap &getGlobalVariables() const { return mGlobalVariables; }
+    const StateMap &getGlobalVariables() const
+    {
+        return mGlobalVariables;
+    }
 
-    StateMap &getGlobalVariables() { return mGlobalVariables; }
+    StateMap &getGlobalVariables()
+    {
+        return mGlobalVariables;
+    }
 
-    const StateMap &getGlobalBlocks() const { return mGlobalBlocks; }
+    const StateMap &getGlobalBlocks() const
+    {
+        return mGlobalBlocks;
+    }
 
-    StateMap &getGlobalBlocks() { return mGlobalBlocks; }
+    StateMap &getGlobalBlocks()
+    {
+        return mGlobalBlocks;
+    }
 
-    const StateMap &getFunctionVariables() const { return mFunctionVariables; }
+    const StateMap &getFunctionVariables() const
+    {
+        return mFunctionVariables;
+    }
 
-    StateMap &getFunctionVariables() { return mFunctionVariables; }
+    StateMap &getFunctionVariables()
+    {
+        return mFunctionVariables;
+    }
 
-    const StateMap &getFunctionBlocks() const { return mFunctionBlocks; }
+    const StateMap &getFunctionBlocks() const
+    {
+        return mFunctionBlocks;
+    }
 
-    StateMap &getFunctionBlocks() { return mFunctionBlocks; }
+    StateMap &getFunctionBlocks()
+    {
+        return mFunctionBlocks;
+    }
 
     /// Search both global and function variables for a place.  If the
     /// place is found, the variable is returned.  Otherwise NULL is

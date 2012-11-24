@@ -7,8 +7,6 @@
 namespace Canal {
 namespace Widening {
 
-extern unsigned count;
-
 class DataIterationCount : public DataInterface
 {
     std::map<const llvm::BasicBlock*, int> mCounts;
@@ -19,6 +17,8 @@ public:
     int count(const llvm::BasicBlock &block) const;
 
     virtual DataIterationCount *clone() const;
+
+    static int ITERATION_COUNT;
 };
 
 } // namespace Widening

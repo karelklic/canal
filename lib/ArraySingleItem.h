@@ -31,11 +31,6 @@ public:
 
     virtual ~SingleItem();
 
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    SingleItem &operator=(const SingleItem &value);
-
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.
@@ -94,7 +89,19 @@ public: // Implementation of Domain.
     virtual void fcmp(const Domain &a, const Domain &b,
                       llvm::CmpInst::Predicate predicate);
 
-public: // Implementation of Array::Interface.
+    /// Check if all items in the array are bottom.
+    virtual bool isBottom() const;
+
+    /// Set all items in the array to bottom.
+    virtual void setBottom();
+
+    /// Check if all items in the array are top.
+    virtual bool isTop() const;
+
+    /// Set all items in the array to top.
+    virtual void setTop();
+
+ public: // Implementation of Array::Interface.
     /// Implementation of Array::Interface::getItem().
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
     /// Implementation of Array::Interface::getItem().

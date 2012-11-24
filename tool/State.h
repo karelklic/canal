@@ -19,19 +19,40 @@ public:
     State(llvm::Module *module);
     ~State();
 
-    Canal::Interpreter::Interpreter &getInterpreter() { return mInterpreter; }
+    Canal::Interpreter::Interpreter &getInterpreter()
+    {
+        return mInterpreter;
+    }
 
-    const Canal::Interpreter::Interpreter &getInterpreter() const { return mInterpreter; }
+    const Canal::Interpreter::Interpreter &getInterpreter() const
+    {
+        return mInterpreter;
+    }
 
-    const Canal::Environment &getEnvironment() const { return mInterpreter.getEnvironment(); }
+    const Canal::Environment &getEnvironment() const
+    {
+        return mInterpreter.getEnvironment();
+    }
 
-    const llvm::Module &getModule() const { return getEnvironment().getModule(); }
+    const llvm::Module &getModule() const
+    {
+        return getEnvironment().getModule();
+    }
 
-    llvm::Module &getModule() { return getEnvironment().getModule(); }
+    llvm::Module &getModule()
+    {
+        return getEnvironment().getModule();
+    }
 
-    Canal::SlotTracker &getSlotTracker() const { return getEnvironment().getSlotTracker(); }
+    Canal::SlotTracker &getSlotTracker() const
+    {
+        return getEnvironment().getSlotTracker();
+    }
 
-    const IteratorCallback &getIteratorCallback() const { return mIteratorCallback; }
+    const IteratorCallback &getIteratorCallback() const
+    {
+        return mIteratorCallback;
+    }
 
     // Check if the interpreter is in the middle of interpretation.
     // This is true if something is on the stack.

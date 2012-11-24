@@ -15,13 +15,7 @@ public:
     std::vector<Domain*> mValues;
 
 public:
-    Container(const Environment &environment,
-              unsigned bitWidth);
-
-    /// Creates a new container with an initial value.  Signedness,
-    /// number of bits is taken from the provided number.
-    Container(const Environment &environment,
-              const llvm::APInt &number);
+    Container(const Environment &environment);
 
     /// Copy constructor.  Creates independent copy of the container.
     Container(const Container &value);
@@ -82,11 +76,6 @@ public:
 
     /// Find out whether all representations contain only single value
     bool isSingleValue() const;
-
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    Container &operator=(const Container &value);
 
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().

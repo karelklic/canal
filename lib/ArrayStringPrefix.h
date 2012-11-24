@@ -25,11 +25,6 @@ public:
     StringPrefix(const Environment &environment,
               const std::string &value);
 
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    StringPrefix &operator=(const StringPrefix &value);
-
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().
     /// Covariant return type.

@@ -8,7 +8,7 @@ if [ $# -ne 2 ]; then
 fi
 
 ulimit -t $TIME
-$1 $2 --no-missing -e run -e quit
+$1 $2 -e "set no-missing" -e run -e quit
 exit_status=$?
 if [ $exit_status -ne 0 ]; then
 	exit $exit_status

@@ -173,7 +173,7 @@ public: // Lattice
     /// Set it to the top value of lattice.
     virtual void setTop();
 
-private:
+private: // Domains are non-copyable.
     /// Assignment operator declaration.  Prevents accidental
     /// assignments of domains.  Do not implement!
     Domain &operator=(const Domain &value);
