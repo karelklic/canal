@@ -910,9 +910,8 @@ void
 Operations::alloca_(const llvm::AllocaInst &instruction,
                     State &state)
 {
-    const llvm::Type *type = instruction.getAllocatedType();
-    CANAL_ASSERT(type);
-    Domain *value = mConstructors.create(*type);
+    const llvm::Type &allocatedType = *instruction.getAllocatedType();
+    Domain *value = mConstructors.create(allocatedType);
     std::vector<Domain*> offsets;
     if (instruction.isArrayAllocation())
     {
@@ -944,7 +943,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
 
     state.addFunctionBlock(instruction, value);
     Domain *pointer;
-    pointer = mConstructors.createPointer(*type);
+    pointer = mConstructors.createPointer(allocatedType);
 
     Pointer::Utils::addTarget(*pointer,
                               Pointer::Target::Block,
@@ -958,7 +957,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
 
 void
 Operations::load(const llvm::LoadInst &instruction,
-                  State &state)
+                 State &state)
 {
     // Find the pointer in the state.  If the pointer is not
     // available, do nothing.
@@ -973,7 +972,7 @@ Operations::load(const llvm::LoadInst &instruction,
 
     // Pointer found. Merge all possible values and store the result
     // into the state.
-    Domain *mergedValue = pointer.dereferenceAndMerge(state);
+    Domain *mergedValue = pointer.load(state);
     if (!mergedValue)
         return;
 
@@ -1038,7 +1037,7 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
     CANAL_ASSERT(pointerType);
     CANAL_ASSERT(pointerType->getElementType());
     Pointer::Pointer *result = source.getElementPtr(
-        offsets, *pointerType->getElementType(), mConstructors);
+        offsets, *pointerType->getElementType());
 
     state.addFunctionVariable(instruction, result);
 }
@@ -1151,8 +1150,8 @@ Operations::inttoptr(const llvm::IntToPtrInst &instruction,
     const llvm::PointerType &pointerType =
         llvmCast<const llvm::PointerType>(*instruction.getDestTy());
 
-    Pointer::Pointer *result =
-        source.bitcast(*pointerType.getElementType());
+    Domain *result = new Pointer::Pointer(source,
+                                          *pointerType.getElementType());
 
     state.addFunctionVariable(instruction, result);
 }
@@ -1178,8 +1177,10 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
     const llvm::PointerType &destPointerType =
         llvmCast<const llvm::PointerType>(*destinationType);
 
-    Domain *resultPointer = sourcePointer.bitcast(*destPointerType.getElementType());
-    state.addFunctionVariable(instruction, resultPointer);
+    Domain *result = new Pointer::Pointer(sourcePointer,
+                                          *destPointerType.getElementType());
+
+    state.addFunctionVariable(instruction, result);
 }
 
 void

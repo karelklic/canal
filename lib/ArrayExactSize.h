@@ -15,11 +15,11 @@ public:
     std::vector<Domain*> mValues;
 
 public:
-    /// @param value
+    /// @param elementValue
     ///   This class does not take ownership of this value.
     ExactSize(const Environment &environment,
               const uint64_t size,
-              const Domain &value);
+              const Domain &elementValue);
 
     /// @param values
     ///   This class takes ownership of the values.
@@ -33,11 +33,6 @@ public:
     virtual ~ExactSize();
 
     size_t size() const { return mValues.size(); }
-
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    ExactSize &operator=(const ExactSize &value);
 
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().

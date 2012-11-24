@@ -157,7 +157,8 @@ dereference(const Domain *block,
             for (; iti != itiend; ++iti)
             {
                 std::vector<Domain*> items;
-                const Array::Interface &array = dynCast<const Array::Interface&>(**iti);
+                const Array::Interface &array =
+                    dynCast<const Array::Interface&>(**iti);
 
                 items = array.getItem(**ito);
                 nextLevelResult.insert(nextLevelResult.end(),
@@ -172,9 +173,8 @@ dereference(const Domain *block,
     return result;
 }
 
-
 Domain *
-Pointer::dereferenceAndMerge(const State &state) const
+Pointer::load(const State &state) const
 {
     Domain *mergedValue = NULL;
     PlaceTargetMap::const_iterator it = mTargets.begin();
@@ -187,7 +187,7 @@ Pointer::dereferenceAndMerge(const State &state) const
         CANAL_ASSERT(source);
 
         std::vector<const Domain*> values =
-            dereference(source, it->second->mOffsets);
+            dereference(source, it->second->mElementOffsets);
 
         std::vector<const Domain*>::const_iterator it = values.begin();
         for (; it != values.end(); ++it)
@@ -200,64 +200,6 @@ Pointer::dereferenceAndMerge(const State &state) const
     }
 
     return mergedValue;
-}
-
-Pointer *
-Pointer::bitcast(const llvm::Type &type) const
-{
-    return new Pointer(*this, type);
-}
-
-Pointer *
-Pointer::getElementPtr(const std::vector<Domain*> &offsets,
-                       const llvm::Type &type,
-                       const Constructors &constructors) const
-{
-    CANAL_ASSERT_MSG(!offsets.empty(),
-                     "getElementPtr must be called with some offsets.");
-
-    // Check that all offsets are 64-bit integers.
-    std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
-    for (; offsetIt != offsets.end(); ++offsetIt)
-    {
-        const Integer::Container &container =
-            dynCast<const Integer::Container&>(**offsetIt);
-
-        CANAL_ASSERT_MSG(container.getBitWidth() == 64,
-                         "GetElementPtr offsets must have 64 bits!");
-    }
-
-    Pointer *result = new Pointer(*this, type);
-
-    // TODO: handle mNumericOffset.
-
-    // Iterate over all targets, and adjust the target offsets.
-    PlaceTargetMap::iterator targetIt = result->mTargets.begin();
-    for (; targetIt != result->mTargets.end(); ++targetIt)
-    {
-        std::vector<Domain*> &targetOffsets = targetIt->second->mOffsets;
-        std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
-        for (; offsetIt != offsets.end(); ++offsetIt)
-        {
-            if (offsetIt == offsets.begin() && !targetOffsets.empty())
-            {
-                Domain *newLast = constructors.createInteger(64);
-                newLast->add(*targetOffsets.back(), **offsets.begin());
-                delete targetOffsets.back();
-                targetOffsets.pop_back();
-                targetOffsets.push_back(newLast);
-                continue;
-            }
-
-            targetOffsets.push_back((*offsetIt)->clone());
-        }
-    }
-
-    // Delete the offsets, because this method takes ownership of them
-    // and it no longer needs them.
-    std::for_each(offsets.begin(), offsets.end(), llvm::deleter<Domain>);
-
-    return result;
 }
 
 void
@@ -277,8 +219,8 @@ Pointer::store(const Domain &value, State &state) const
         CANAL_ASSERT(source);
 
         Domain *result = source->clone();
-        std::vector<Domain*> destinations = dereference(result,
-                                                        it->second->mOffsets);
+        std::vector<Domain*> destinations =
+            dereference(result, it->second->mElementOffsets);
 
         // When a pointer points to a single memory target, the old
         // value can be rewritten instead of merging with it to
@@ -309,6 +251,54 @@ Pointer::store(const Domain &value, State &state) const
     }
 }
 
+Pointer *
+Pointer::getElementPtr(const std::vector<Domain*> &offsets,
+                       const llvm::Type &type) const
+{
+    CANAL_ASSERT_MSG(!offsets.empty(),
+                     "getElementPtr must be called with some offsets.");
+
+    // Check that all offsets are 64-bit integers.
+    std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
+    for (; offsetIt != offsets.end(); ++offsetIt)
+    {
+        const Integer::Container &container =
+            dynCast<const Integer::Container&>(**offsetIt);
+
+        CANAL_ASSERT_MSG(container.getBitWidth() == 64,
+                         "GetElementPtr offsets must have 64 bits!");
+    }
+
+    Pointer *result = new Pointer(*this, type);
+
+    // Iterate over all targets, and adjust the target offsets.
+    PlaceTargetMap::iterator targetIt = result->mTargets.begin();
+    for (; targetIt != result->mTargets.end(); ++targetIt)
+    {
+        std::vector<Domain*> &targetOffsets = targetIt->second->mElementOffsets;
+        std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
+        for (; offsetIt != offsets.end(); ++offsetIt)
+        {
+            if (offsetIt == offsets.begin() && !targetOffsets.empty())
+            {
+                Domain *newLast = mEnvironment.getConstructors().createInteger(64);
+                newLast->add(*targetOffsets.back(), **offsets.begin());
+                delete targetOffsets.back();
+                targetOffsets.pop_back();
+                targetOffsets.push_back(newLast);
+                continue;
+            }
+
+            targetOffsets.push_back((*offsetIt)->clone());
+        }
+    }
+
+    // Delete the offsets, because this method takes ownership of them
+    // and it no longer needs them.
+    std::for_each(offsets.begin(), offsets.end(), llvm::deleter<Domain>);
+    return result;
+}
+
 bool
 Pointer::isSingleTarget() const
 {
@@ -322,8 +312,8 @@ Pointer::isSingleTarget() const
     if (tmp && !tmp->isSingleValue())
         return false;
 
-    std::vector<Domain*>::const_iterator it = target->mOffsets.begin();
-    for (; it != target->mOffsets.end(); ++it)
+    std::vector<Domain*>::const_iterator it = target->mElementOffsets.begin();
+    for (; it != target->mElementOffsets.end(); ++it)
     {
         tmp = dynCast<const Integer::Container*>(*it);
         if (!tmp->isSingleValue())

@@ -87,29 +87,21 @@ public:
     /// abstract value.  The returned value is owned by the caller.
     /// @returns
     ///   It might return NULL.
-    Domain *dereferenceAndMerge(const State &state) const;
+    Domain *load(const State &state) const;
 
-    /// Creates a copy of this object with a different pointer type.
-    Pointer *bitcast(const llvm::Type &type) const;
+    void store(const Domain &value, State &state) const;
 
-    /// Creates a copy of this object pointing to subtargets.
+    /// Creates a copy of this pointer, but pointing to subtargets.
+    ///
     /// @param offsets
     ///   Pointer takes ownership of the values inside the vector.
     ///   The offsets must be converted to 64-bit integers before calling
     ///   getElementPtr!
     Pointer *getElementPtr(const std::vector<Domain*> &offsets,
-                           const llvm::Type &type,
-                           const Constructors &constructors) const;
-
-    void store(const Domain &value, State &state) const;
+                           const llvm::Type &type) const;
 
     /// Does this pointer point to single target?
     bool isSingleTarget() const;
-
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    Pointer &operator=(const Pointer &value);
 
 public: // Implementation of Domain.
     /// Implementation of Domain::clone().

@@ -45,13 +45,15 @@ public:
     /// owned by the LLVM framework and not by this class.
     const llvm::Value *mTarget;
 
-    /// Array or struct offsets in the GetElementPtr style.
-    /// This class owns the memory.
-    std::vector<Domain*> mOffsets;
+    /// Array or struct offsets in the GetElementPtr style.  This
+    /// class owns the memory.  If the vector is empty, mNumericOffset
+    /// is considered.  mElementOffsets and mNumericOffset are never
+    /// used together.
+    std::vector<Domain*> mElementOffsets;
 
-    /// An additional numeric offset on the top of mOffsets.  The value
-    /// represents a number of bytes.  This class owns the memory.  It
-    /// might be NULL instead of 0.
+    /// A numeric offset.  The value represents a number of bytes from
+    /// the beginning of the object block.  This class owns the
+    /// memory.  It might be NULL instead of 0.
     Domain *mNumericOffset;
 
 public:
@@ -79,7 +81,7 @@ public:
     Target(const Environment &environment,
            Type type,
            const llvm::Value *target,
-           const std::vector<Domain*> &offsets,
+           const std::vector<Domain*> &elementOffsets,
            Domain *numericOffset);
 
     /// Copy constructor.

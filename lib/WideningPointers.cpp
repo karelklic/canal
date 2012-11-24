@@ -47,12 +47,12 @@ Pointers::widen(const llvm::BasicBlock &wideningPoint,
         if (it->second->mNumericOffset)
             it->second->mNumericOffset->setTop();
 
-        if (!it->second->mOffsets.empty())
+        if (!it->second->mElementOffsets.empty())
         {
             // Keep the first offset untouched, it must be set to zero.
             std::vector<Domain*>::const_iterator
-                itOffset = it->second->mOffsets.begin() + 1,
-                itendOffset = it->second->mOffsets.end();
+                itOffset = it->second->mElementOffsets.begin() + 1,
+                itendOffset = it->second->mElementOffsets.end();
 
             for (; itOffset != itendOffset; ++itOffset)
                 (*itOffset)->setTop();

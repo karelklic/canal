@@ -14,12 +14,12 @@ namespace Pointer {
 Target::Target(const Environment &environment,
                Type type,
                const llvm::Value *target,
-               const std::vector<Domain*> &offsets,
+               const std::vector<Domain*> &elementOffsets,
                Domain *numericOffset)
     : mEnvironment(environment),
       mType(type),
       mTarget(target),
-      mOffsets(offsets),
+      mElementOffsets(elementOffsets),
       mNumericOffset(numericOffset)
 {
     CANAL_ASSERT_MSG(type == Block ||
@@ -38,7 +38,7 @@ Target::Target(const Environment &environment,
                      llvm::isa<llvm::GlobalValue>(target),
                      "Target muse be either an instruction or a global value.");
 
-    CANAL_ASSERT_MSG(type != Constant || offsets.empty(),
+    CANAL_ASSERT_MSG(type != Constant || elementOffsets.empty(),
                      "Offsets cannot be present for constant pointers "
                      "as the semantics is not defined.");
 }
@@ -46,11 +46,13 @@ Target::Target(const Environment &environment,
 Target::Target(const Target &target) : mEnvironment(target.mEnvironment),
                                        mType(target.mType),
                                        mTarget(target.mTarget),
-                                       mOffsets(target.mOffsets),
+                                       mElementOffsets(target.mElementOffsets),
                                        mNumericOffset(target.mNumericOffset)
 {
-    std::vector<Domain*>::iterator it = mOffsets.begin();
-    for (; it != mOffsets.end(); ++it)
+    std::vector<Domain*>::iterator it = mElementOffsets.begin(),
+        itend = mElementOffsets.end();
+
+    for (; it != itend; ++it)
         *it = (*it)->clone();
 
     if (mNumericOffset)
@@ -59,7 +61,7 @@ Target::Target(const Target &target) : mEnvironment(target.mEnvironment),
 
 Target::~Target()
 {
-    llvm::DeleteContainerPointers(mOffsets);
+    llvm::DeleteContainerPointers(mElementOffsets);
     delete mNumericOffset;
 }
 
@@ -86,14 +88,16 @@ Target::operator==(const Target &target) const
         break;
     case Block:
     {
-        if (mOffsets.size() != target.mOffsets.size())
+        if (mElementOffsets.size() != target.mElementOffsets.size())
             return false;
 
         // Check the targets.
-        std::vector<Domain*>::const_iterator it1 = mOffsets.begin(),
-            it2 = target.mOffsets.begin();
+        std::vector<Domain*>::const_iterator
+            it1 = mElementOffsets.begin(),
+            it1end = mElementOffsets.end(),
+            it2 = target.mElementOffsets.begin();
 
-        for (; it1 != mOffsets.end(); ++it1, ++it2)
+        for (; it1 != it1end; ++it1, ++it2)
         {
             if (**it1 != **it2)
                 return false;
@@ -146,14 +150,16 @@ Target::merge(const Target &target)
     case Block:
     {
         CANAL_ASSERT(mTarget == target.mTarget);
-        CANAL_ASSERT_MSG(mOffsets.size() == target.mOffsets.size(),
+        CANAL_ASSERT_MSG(mElementOffsets.size() == target.mElementOffsets.size(),
                          "Expected equal number of offsets, but got "
-                         << mOffsets.size() << " and "
-                         << target.mOffsets.size());
+                         << mElementOffsets.size() << " and "
+                         << target.mElementOffsets.size());
 
-        std::vector<Domain*>::iterator it1 = mOffsets.begin();
-        std::vector<Domain*>::const_iterator it2 = target.mOffsets.begin();
-        for (; it1 != mOffsets.end(); ++it1, ++it2)
+        std::vector<Domain*>::iterator it1 = mElementOffsets.begin(),
+            it1end = mElementOffsets.end();
+
+        std::vector<Domain*>::const_iterator it2 = target.mElementOffsets.begin();
+        for (; it1 != it1end; ++it1, ++it2)
             (*it1)->merge(**it2);
 
         break;
@@ -172,8 +178,10 @@ Target::memoryUsage() const
     size_t size = sizeof(Target);
 
     // Add the size of the offsets.
-    std::vector<Domain*>::const_iterator it = mOffsets.begin();
-    for (; it != mOffsets.end(); ++it)
+    std::vector<Domain*>::const_iterator it = mElementOffsets.begin(),
+        itend = mElementOffsets.end();
+
+    for (; it != itend; ++it)
         size += (*it)->memoryUsage();
 
     // Add the size of the numeric offset.
@@ -229,11 +237,13 @@ Target::toString(SlotTracker &slotTracker) const
 
     ss << "\n";
 
-    if (!mOffsets.empty())
+    if (!mElementOffsets.empty())
     {
         ss << "    offsets\n";
-        std::vector<Domain*>::const_iterator it = mOffsets.begin();
-        for (; it != mOffsets.end(); ++it)
+        std::vector<Domain*>::const_iterator it = mElementOffsets.begin(),
+            itend = mElementOffsets.end();
+
+        for (; it != itend; ++it)
             ss << indent((*it)->toString(), 8);
     }
 

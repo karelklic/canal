@@ -367,8 +367,7 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     if (pointer)
     {
         return pointer->getElementPtr(offsets,
-                                      *pointerType.getElementType(),
-                                      *this);
+                                      *pointerType.getElementType());
     }
 
     // GetElementPtr on anything except a pointer.  For example, it is
@@ -402,7 +401,7 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
     if (pointer)
     {
         CANAL_ASSERT(pointerType);
-        return pointer->bitcast(*pointerType->getElementType());
+        return new Pointer::Pointer(*pointer, *pointerType->getElementType());
     }
 
     // BitCast from anything to a pointer.

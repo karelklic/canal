@@ -9,11 +9,11 @@ namespace Array {
 
 ExactSize::ExactSize(const Environment &environment,
                      uint64_t size,
-                     const Domain &value)
+                     const Domain &elementValue)
     : Domain(environment)
 {
     for (uint64_t i = 0; i < size; ++i)
-        mValues.push_back(value.clone());
+        mValues.push_back(elementValue.clone());
 }
 
 ExactSize::ExactSize(const Environment &environment,
