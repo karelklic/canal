@@ -56,7 +56,6 @@ $(TESTSUITE): $(TESTSUITE_AT) $(srcdir)/package.m4
 ## ----------- ##
 ## Test files. ##
 ## ----------- ##
-
 EXTRA_DIST += \
 	0-numeric.c \
 	1-pointer.c \
@@ -65,34 +64,18 @@ EXTRA_DIST += \
 ## --------- ##
 ## Programs. ##
 ## --------- ##
-noinst_PROGRAMS = OperationsTest IntegerIntervalTest PointerTest ICMPTest MergeTest
+AM_DEFAULT_SOURCE_EXT = .cpp
+AM_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
+LDADD = $(top_builddir)/lib/libcanal.la
+AM_LIBS = $(LLVM_LIBS)
+AM_LDFLAGS = $(LLVM_LDFLAGS)
 
-OperationsTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
-OperationsTest_SOURCES = OperationsTest.cpp
-OperationsTest_LDADD = $(top_builddir)/lib/libcanal.la
-OperationsTest_LIBS = $(LLVM_LIBS)
-OperationsTest_LDFLAGS = $(LLVM_LDFLAGS)
-
-IntegerIntervalTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
-IntegerIntervalTest_SOURCES = IntegerIntervalTest.cpp
-IntegerIntervalTest_LDADD = $(top_builddir)/lib/libcanal.la
-IntegerIntervalTest_LIBS = $(LLVM_LIBS)
-IntegerIntervalTest_LDFLAGS = $(LLVM_LDFLAGS)
-
-PointerTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
-PointerTest_SOURCES = PointerTest.cpp
-PointerTest_LDADD = $(top_builddir)/lib/libcanal.la
-PointerTest_LIBS = $(LLVM_LIBS)
-PointerTest_LDFLAGS = $(LLVM_LDFLAGS)
-
-ICMPTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
-ICMPTest_SOURCES = ICMPTest.cpp
-ICMPTest_LDADD = $(top_builddir)/lib/libcanal.la
-ICMPTest_LIBS = $(LLVM_LIBS)
-ICMPTest_LDFLAGS = $(LLVM_LDFLAGS)
-
-MergeTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
-MergeTest_SOURCES = MergeTest.cpp
-MergeTest_LDADD = $(top_builddir)/lib/libcanal.la
-MergeTest_LIBS = $(LLVM_LIBS)
-MergeTest_LDFLAGS = $(LLVM_LDFLAGS)
+noinst_PROGRAMS = \
+	ArrayExactSizeTest \
+	ArraySingleItemTest \
+	FloatIntervalTest \
+	IntegerBitfieldTest \
+	IntegerEnumerationTest \
+	IntegerIntervalTest \
+	OperationsTest \
+	PointerTest

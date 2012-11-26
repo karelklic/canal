@@ -78,7 +78,7 @@ mergeDomains(std::vector<Domain*> &first, const std::vector<Domain*> &second)
     std::vector<Domain*>::iterator it1 = first.begin();
     std::vector<Domain*>::const_iterator it2 = second.begin();
     for (; it1 != first.end(); ++it1, ++it2)
-        (*it1)->merge(**it2);
+        (*it1)->join(**it2);
 }
 
 void

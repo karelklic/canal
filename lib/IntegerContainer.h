@@ -79,59 +79,24 @@ public:
     bool isSingleValue() const;
 
 public: // Implementation of Domain.
-    /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Container *clone() const;
-    /// Implementation of Domain::operator==().
-    virtual bool operator==(const Domain &value) const;
-    /// Implementation of Domain::merge().
-    virtual void merge(const Domain &value);
-    /// Implementation of Domain::memoryUsage().
+
     virtual size_t memoryUsage() const;
-    /// Implementation of Domain::toString().
+
     virtual std::string toString() const;
-    /// Implementation of Domain::setZero().
+
     virtual void setZero(const llvm::Value *place);
 
-    /// Implementation of Domain::add().
-    virtual void add(const Domain &a, const Domain &b);
-    /// Implementation of Domain::sub().
-    virtual void sub(const Domain &a, const Domain &b);
-    /// Implementation of Domain::mul().
-    virtual void mul(const Domain &a, const Domain &b);
-    /// Implementation of Domain::udiv().
-    virtual void udiv(const Domain &a, const Domain &b);
-    /// Implementation of Domain::sdiv().
-    virtual void sdiv(const Domain &a, const Domain &b);
-    /// Implementation of Domain::urem().
-    virtual void urem(const Domain &a, const Domain &b);
-    /// Implementation of Domain::srem().
-    virtual void srem(const Domain &a, const Domain &b);
-    /// Implementation of Domain::shl().
-    virtual void shl(const Domain &a, const Domain &b);
-    /// Implementation of Domain::lshr().
-    virtual void lshr(const Domain &a, const Domain &b);
-    /// Implementation of Domain::ashr().
-    virtual void ashr(const Domain &a, const Domain &b);
-    /// Implementation of Domain::and_().
-    virtual void and_(const Domain &a, const Domain &b);
-    /// Implementation of Domain::or_().
-    virtual void or_(const Domain &a, const Domain &b);
-    /// Implementation of Domain::xor_().
-    virtual void xor_(const Domain &a, const Domain &b);
-    /// Implementation of Domain::icmp().
-    virtual void icmp(const Domain &a, const Domain &b,
-                      llvm::CmpInst::Predicate predicate);
-    /// Implementation of Domain::fcmp().
-    virtual void fcmp(const Domain &a, const Domain &b,
-                      llvm::CmpInst::Predicate predicate);
-    virtual void trunc(const Domain &value);
-    virtual void zext(const Domain &value);
-    virtual void sext(const Domain &value);
-    virtual void fptoui(const Domain &value);
-    virtual void fptosi(const Domain &value);
+    virtual bool operator==(const Domain &value) const;
 
-    virtual float accuracy() const;
+    virtual bool operator<(const Domain &value) const;
+
+    virtual bool operator>(const Domain &value) const;
+
+    virtual Container &join(const Domain &value);
+
+    virtual Container &meet(const Domain &value);
 
     virtual bool isBottom() const;
 
@@ -140,6 +105,50 @@ public: // Implementation of Domain.
     virtual bool isTop() const;
 
     virtual void setTop();
+
+    virtual float accuracy() const;
+
+    virtual Container &add(const Domain &a, const Domain &b);
+
+    virtual Container &sub(const Domain &a, const Domain &b);
+
+    virtual Container &mul(const Domain &a, const Domain &b);
+
+    virtual Container &udiv(const Domain &a, const Domain &b);
+
+    virtual Container &sdiv(const Domain &a, const Domain &b);
+
+    virtual Container &urem(const Domain &a, const Domain &b);
+
+    virtual Container &srem(const Domain &a, const Domain &b);
+
+    virtual Container &shl(const Domain &a, const Domain &b);
+
+    virtual Container &lshr(const Domain &a, const Domain &b);
+
+    virtual Container &ashr(const Domain &a, const Domain &b);
+
+    virtual Container &and_(const Domain &a, const Domain &b);
+
+    virtual Container &or_(const Domain &a, const Domain &b);
+
+    virtual Container &xor_(const Domain &a, const Domain &b);
+
+    virtual Container &icmp(const Domain &a, const Domain &b,
+                            llvm::CmpInst::Predicate predicate);
+
+    virtual Container &fcmp(const Domain &a, const Domain &b,
+                            llvm::CmpInst::Predicate predicate);
+
+    virtual Container &trunc(const Domain &value);
+
+    virtual Container &zext(const Domain &value);
+
+    virtual Container &sext(const Domain &value);
+
+    virtual Container &fptoui(const Domain &value);
+
+    virtual Container &fptosi(const Domain &value);
 };
 
 } // namespace Integer

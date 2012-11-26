@@ -17,6 +17,7 @@ testConstructors()
 
     Pointer::Pointer pointer(*gEnvironment, type);
     CANAL_ASSERT(pointer.mTargets.size() == 0);
+    CANAL_ASSERT(pointer.isBottom());
 }
 
 static void
@@ -31,7 +32,7 @@ testEquality()
     // Test empty abstract pointers.
     assert(a.mTargets.size() == 0);
     assert(a == b);
-    a.merge(b);
+    a.join(b);
     assert(a.mTargets.size() == 0);
 }
 

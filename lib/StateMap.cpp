@@ -46,8 +46,8 @@ StateMap::merge(const StateMap &map)
             insert(value_type(it2->first,
                               it2->second->clone()));
         }
-    else if (*it1->second != *it2->second)
-            it1->second->merge(*it2->second);
+        else if (*it1->second != *it2->second)
+            it1->second->join(*it2->second);
     }
 }
 
@@ -60,7 +60,7 @@ StateMap::insert(const llvm::Value &place, Domain *value)
     iterator it = find(&place);
     if (it != end())
     {
-        it->second->merge(*value);
+        it->second->join(*value);
         delete value;
     }
     else

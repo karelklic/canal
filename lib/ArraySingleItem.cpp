@@ -34,6 +34,27 @@ SingleItem::clone() const
     return new SingleItem(*this);
 }
 
+size_t
+SingleItem::memoryUsage() const
+{
+    size_t size = sizeof(SingleItem);
+    size += (mValue ? mValue->memoryUsage() : 0);
+    size += (mSize ? mSize->memoryUsage() : 0);
+    return size;
+}
+
+std::string
+SingleItem::toString() const
+{
+    StringStream ss;
+    ss << "arraySingleItem\n";
+    ss << "    size\n";
+    ss << indent(mSize->toString(), 8);
+    ss << "    value\n";
+    ss << indent(mValue->toString(), 8);
+    return ss.str();
+}
+
 bool
 SingleItem::operator==(const Domain &value) const
 {
@@ -61,161 +82,34 @@ SingleItem::operator==(const Domain &value) const
     return true;
 }
 
-void
-SingleItem::merge(const Domain &value)
-{
-    const SingleItem &singleItem = dynCast<const SingleItem&>(value);
-    CANAL_ASSERT_MSG(mValue && singleItem.mValue,
-                     "Array value must be intialized for merging");
-
-    CANAL_ASSERT_MSG(mSize && singleItem.mSize,
-                     "Array size must be initialized for merging");
-
-    mValue->merge(*singleItem.mValue);
-    mSize->merge(*singleItem.mSize);
-}
-
-size_t
-SingleItem::memoryUsage() const
-{
-    size_t size = sizeof(SingleItem);
-    size += (mValue ? mValue->memoryUsage() : 0);
-    size += (mSize ? mSize->memoryUsage() : 0);
-    return size;
-}
-
-std::string
-SingleItem::toString() const
-{
-    StringStream ss;
-    ss << "arraySingleItem\n";
-    ss << "    size\n";
-    ss << indent(mSize->toString(), 8);
-    ss << "    value\n";
-    ss << indent(mValue->toString(), 8);
-    return ss.str();
-}
-
-void
-SingleItem::add(const Domain &a, const Domain &b)
+bool
+SingleItem::operator<(const Domain& value) const
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
-void
-SingleItem::fadd(const Domain &a, const Domain &b)
+bool
+SingleItem::operator>(const Domain& value) const
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
-void
-SingleItem::sub(const Domain &a, const Domain &b)
+SingleItem &
+SingleItem::join(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const SingleItem &array = dynCast<const SingleItem&>(value);
+    mValue->join(*array.mValue);
+    mSize->join(*array.mSize);
+    return *this;
 }
 
-void
-SingleItem::fsub(const Domain &a, const Domain &b)
+SingleItem &
+SingleItem::meet(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::mul(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::fmul(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::udiv(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::sdiv(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::fdiv(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::urem(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::srem(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::frem(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::shl(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::lshr(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::ashr(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::and_(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::or_(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::xor_(const Domain &a, const Domain &b)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::icmp(const Domain &a, const Domain &b,
-                llvm::CmpInst::Predicate predicate)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-SingleItem::fcmp(const Domain &a, const Domain &b,
-                llvm::CmpInst::Predicate predicate)
-{
-    CANAL_NOT_IMPLEMENTED();
+    const SingleItem &array = dynCast<const SingleItem&>(value);
+    mValue->meet(*array.mValue);
+    mSize->meet(*array.mSize);
+    return *this;
 }
 
 bool
@@ -240,6 +134,147 @@ void
 SingleItem::setTop()
 {
     mValue->setTop();
+}
+
+float
+SingleItem::accuracy() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+static SingleItem &
+binaryOperation(SingleItem &result,
+                const Domain &a,
+                const Domain &b,
+                Domain::BinaryOperation operation)
+{
+    const SingleItem &aa = dynCast<const SingleItem&>(a),
+        &bb = dynCast<const SingleItem&>(b);
+
+    ((result.mValue)->*(operation))(*aa.mValue, *bb.mValue);
+    return result;
+}
+
+SingleItem &
+SingleItem::add(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::add);
+}
+
+SingleItem &
+SingleItem::fadd(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::fadd);
+}
+
+SingleItem &
+SingleItem::sub(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::sub);
+}
+
+SingleItem &
+SingleItem::fsub(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::fsub);
+}
+
+SingleItem &
+SingleItem::mul(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::mul);
+}
+
+SingleItem &
+SingleItem::fmul(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::fmul);
+}
+
+SingleItem &
+SingleItem::udiv(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::udiv);
+}
+
+SingleItem &
+SingleItem::sdiv(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::sdiv);
+}
+
+SingleItem &
+SingleItem::fdiv(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::fdiv);
+}
+
+SingleItem &
+SingleItem::urem(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::urem);
+}
+
+SingleItem &
+SingleItem::srem(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::srem);
+}
+
+SingleItem &
+SingleItem::frem(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::frem);
+}
+
+SingleItem &
+SingleItem::shl(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::shl);
+}
+
+SingleItem &
+SingleItem::lshr(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::lshr);
+}
+
+SingleItem &
+SingleItem::ashr(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::ashr);
+}
+
+SingleItem &
+SingleItem::and_(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::and_);
+}
+
+SingleItem &
+SingleItem::or_(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::or_);
+}
+
+SingleItem &
+SingleItem::xor_(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::xor_);
+}
+
+SingleItem &
+SingleItem::icmp(const Domain &a, const Domain &b,
+                llvm::CmpInst::Predicate predicate)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+SingleItem &
+SingleItem::fcmp(const Domain &a, const Domain &b,
+                llvm::CmpInst::Predicate predicate)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 static void
@@ -291,14 +326,14 @@ void
 SingleItem::setItem(const Domain &offset, const Domain &value)
 {
     assertOffsetFitsToArray(offset, *mSize);
-    mValue->merge(value);
+    mValue->join(value);
 }
 
 void
 SingleItem::setItem(uint64_t offset, const Domain &value)
 {
     assertOffsetFitsToArray(offset, *mSize);
-    mValue->merge(value);
+    mValue->join(value);
 }
 
 void
