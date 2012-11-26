@@ -34,8 +34,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = OperationsTest$(EXEEXT) IntegerIntervalTest$(EXEEXT) \
-	PointerTest$(EXEEXT) ICMPTest$(EXEEXT) MergeTest$(EXEEXT)
+noinst_PROGRAMS = ArrayExactSizeTest$(EXEEXT) \
+	ArraySingleItemTest$(EXEEXT) FloatIntervalTest$(EXEEXT) \
+	IntegerBitfieldTest$(EXEEXT) IntegerEnumerationTest$(EXEEXT) \
+	IntegerIntervalTest$(EXEEXT) OperationsTest$(EXEEXT) \
+	PointerTest$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/atlocal.in
@@ -51,39 +54,38 @@ CONFIG_HEADER = $(top_builddir)/lib/Config.h
 CONFIG_CLEAN_FILES = atlocal
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-am_ICMPTest_OBJECTS = ICMPTest-ICMPTest.$(OBJEXT)
-ICMPTest_OBJECTS = $(am_ICMPTest_OBJECTS)
-ICMPTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
-ICMPTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(ICMPTest_CXXFLAGS) \
-	$(CXXFLAGS) $(ICMPTest_LDFLAGS) $(LDFLAGS) -o $@
-am_IntegerIntervalTest_OBJECTS =  \
-	IntegerIntervalTest-IntegerIntervalTest.$(OBJEXT)
-IntegerIntervalTest_OBJECTS = $(am_IntegerIntervalTest_OBJECTS)
+ArrayExactSizeTest_SOURCES = ArrayExactSizeTest.cpp
+ArrayExactSizeTest_OBJECTS = ArrayExactSizeTest.$(OBJEXT)
+ArrayExactSizeTest_LDADD = $(LDADD)
+ArrayExactSizeTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
+ArraySingleItemTest_SOURCES = ArraySingleItemTest.cpp
+ArraySingleItemTest_OBJECTS = ArraySingleItemTest.$(OBJEXT)
+ArraySingleItemTest_LDADD = $(LDADD)
+ArraySingleItemTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
+FloatIntervalTest_SOURCES = FloatIntervalTest.cpp
+FloatIntervalTest_OBJECTS = FloatIntervalTest.$(OBJEXT)
+FloatIntervalTest_LDADD = $(LDADD)
+FloatIntervalTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
+IntegerBitfieldTest_SOURCES = IntegerBitfieldTest.cpp
+IntegerBitfieldTest_OBJECTS = IntegerBitfieldTest.$(OBJEXT)
+IntegerBitfieldTest_LDADD = $(LDADD)
+IntegerBitfieldTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
+IntegerEnumerationTest_SOURCES = IntegerEnumerationTest.cpp
+IntegerEnumerationTest_OBJECTS = IntegerEnumerationTest.$(OBJEXT)
+IntegerEnumerationTest_LDADD = $(LDADD)
+IntegerEnumerationTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
+IntegerIntervalTest_SOURCES = IntegerIntervalTest.cpp
+IntegerIntervalTest_OBJECTS = IntegerIntervalTest.$(OBJEXT)
+IntegerIntervalTest_LDADD = $(LDADD)
 IntegerIntervalTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
-IntegerIntervalTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
-	$(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) \
-	$(IntegerIntervalTest_LDFLAGS) $(LDFLAGS) -o $@
-am_MergeTest_OBJECTS = MergeTest-MergeTest.$(OBJEXT)
-MergeTest_OBJECTS = $(am_MergeTest_OBJECTS)
-MergeTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
-MergeTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(MergeTest_CXXFLAGS) \
-	$(CXXFLAGS) $(MergeTest_LDFLAGS) $(LDFLAGS) -o $@
-am_OperationsTest_OBJECTS = OperationsTest-OperationsTest.$(OBJEXT)
-OperationsTest_OBJECTS = $(am_OperationsTest_OBJECTS)
+OperationsTest_SOURCES = OperationsTest.cpp
+OperationsTest_OBJECTS = OperationsTest.$(OBJEXT)
+OperationsTest_LDADD = $(LDADD)
 OperationsTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
-OperationsTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
-	$(OperationsTest_CXXFLAGS) $(CXXFLAGS) \
-	$(OperationsTest_LDFLAGS) $(LDFLAGS) -o $@
-am_PointerTest_OBJECTS = PointerTest-PointerTest.$(OBJEXT)
-PointerTest_OBJECTS = $(am_PointerTest_OBJECTS)
+PointerTest_SOURCES = PointerTest.cpp
+PointerTest_OBJECTS = PointerTest.$(OBJEXT)
+PointerTest_LDADD = $(LDADD)
 PointerTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
-PointerTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(PointerTest_CXXFLAGS) \
-	$(CXXFLAGS) $(PointerTest_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/lib
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -97,12 +99,14 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(ICMPTest_SOURCES) $(IntegerIntervalTest_SOURCES) \
-	$(MergeTest_SOURCES) $(OperationsTest_SOURCES) \
-	$(PointerTest_SOURCES)
-DIST_SOURCES = $(ICMPTest_SOURCES) $(IntegerIntervalTest_SOURCES) \
-	$(MergeTest_SOURCES) $(OperationsTest_SOURCES) \
-	$(PointerTest_SOURCES)
+SOURCES = ArrayExactSizeTest.cpp ArraySingleItemTest.cpp \
+	FloatIntervalTest.cpp IntegerBitfieldTest.cpp \
+	IntegerEnumerationTest.cpp IntegerIntervalTest.cpp \
+	OperationsTest.cpp PointerTest.cpp
+DIST_SOURCES = ArrayExactSizeTest.cpp ArraySingleItemTest.cpp \
+	FloatIntervalTest.cpp IntegerBitfieldTest.cpp \
+	IntegerEnumerationTest.cpp IntegerIntervalTest.cpp \
+	OperationsTest.cpp PointerTest.cpp
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -257,31 +261,11 @@ MAINTAINERCLEANFILES = Makefile.in $(TESTSUITE)
 check_DATA = atconfig atlocal $(TESTSUITE)
 DISTCLEANFILES = atconfig
 AUTOTEST = $(AUTOM4TE) --language=autotest
-OperationsTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
-OperationsTest_SOURCES = OperationsTest.cpp
-OperationsTest_LDADD = $(top_builddir)/lib/libcanal.la
-OperationsTest_LIBS = $(LLVM_LIBS)
-OperationsTest_LDFLAGS = $(LLVM_LDFLAGS)
-IntegerIntervalTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
-IntegerIntervalTest_SOURCES = IntegerIntervalTest.cpp
-IntegerIntervalTest_LDADD = $(top_builddir)/lib/libcanal.la
-IntegerIntervalTest_LIBS = $(LLVM_LIBS)
-IntegerIntervalTest_LDFLAGS = $(LLVM_LDFLAGS)
-PointerTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
-PointerTest_SOURCES = PointerTest.cpp
-PointerTest_LDADD = $(top_builddir)/lib/libcanal.la
-PointerTest_LIBS = $(LLVM_LIBS)
-PointerTest_LDFLAGS = $(LLVM_LDFLAGS)
-ICMPTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
-ICMPTest_SOURCES = ICMPTest.cpp
-ICMPTest_LDADD = $(top_builddir)/lib/libcanal.la
-ICMPTest_LIBS = $(LLVM_LIBS)
-ICMPTest_LDFLAGS = $(LLVM_LDFLAGS)
-MergeTest_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
-MergeTest_SOURCES = MergeTest.cpp
-MergeTest_LDADD = $(top_builddir)/lib/libcanal.la
-MergeTest_LIBS = $(LLVM_LIBS)
-MergeTest_LDFLAGS = $(LLVM_LDFLAGS)
+AM_DEFAULT_SOURCE_EXT = .cpp
+AM_CXXFLAGS = -Wall $(LLVM_CFLAGS) -I$(top_srcdir)
+LDADD = $(top_builddir)/lib/libcanal.la
+AM_LIBS = $(LLVM_LIBS)
+AM_LDFLAGS = $(LLVM_LDFLAGS)
 all: all-am
 
 .SUFFIXES:
@@ -327,21 +311,30 @@ clean-noinstPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-ICMPTest$(EXEEXT): $(ICMPTest_OBJECTS) $(ICMPTest_DEPENDENCIES) 
-	@rm -f ICMPTest$(EXEEXT)
-	$(ICMPTest_LINK) $(ICMPTest_OBJECTS) $(ICMPTest_LDADD) $(LIBS)
+ArrayExactSizeTest$(EXEEXT): $(ArrayExactSizeTest_OBJECTS) $(ArrayExactSizeTest_DEPENDENCIES) 
+	@rm -f ArrayExactSizeTest$(EXEEXT)
+	$(CXXLINK) $(ArrayExactSizeTest_OBJECTS) $(ArrayExactSizeTest_LDADD) $(LIBS)
+ArraySingleItemTest$(EXEEXT): $(ArraySingleItemTest_OBJECTS) $(ArraySingleItemTest_DEPENDENCIES) 
+	@rm -f ArraySingleItemTest$(EXEEXT)
+	$(CXXLINK) $(ArraySingleItemTest_OBJECTS) $(ArraySingleItemTest_LDADD) $(LIBS)
+FloatIntervalTest$(EXEEXT): $(FloatIntervalTest_OBJECTS) $(FloatIntervalTest_DEPENDENCIES) 
+	@rm -f FloatIntervalTest$(EXEEXT)
+	$(CXXLINK) $(FloatIntervalTest_OBJECTS) $(FloatIntervalTest_LDADD) $(LIBS)
+IntegerBitfieldTest$(EXEEXT): $(IntegerBitfieldTest_OBJECTS) $(IntegerBitfieldTest_DEPENDENCIES) 
+	@rm -f IntegerBitfieldTest$(EXEEXT)
+	$(CXXLINK) $(IntegerBitfieldTest_OBJECTS) $(IntegerBitfieldTest_LDADD) $(LIBS)
+IntegerEnumerationTest$(EXEEXT): $(IntegerEnumerationTest_OBJECTS) $(IntegerEnumerationTest_DEPENDENCIES) 
+	@rm -f IntegerEnumerationTest$(EXEEXT)
+	$(CXXLINK) $(IntegerEnumerationTest_OBJECTS) $(IntegerEnumerationTest_LDADD) $(LIBS)
 IntegerIntervalTest$(EXEEXT): $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_DEPENDENCIES) 
 	@rm -f IntegerIntervalTest$(EXEEXT)
-	$(IntegerIntervalTest_LINK) $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_LDADD) $(LIBS)
-MergeTest$(EXEEXT): $(MergeTest_OBJECTS) $(MergeTest_DEPENDENCIES) 
-	@rm -f MergeTest$(EXEEXT)
-	$(MergeTest_LINK) $(MergeTest_OBJECTS) $(MergeTest_LDADD) $(LIBS)
+	$(CXXLINK) $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_LDADD) $(LIBS)
 OperationsTest$(EXEEXT): $(OperationsTest_OBJECTS) $(OperationsTest_DEPENDENCIES) 
 	@rm -f OperationsTest$(EXEEXT)
-	$(OperationsTest_LINK) $(OperationsTest_OBJECTS) $(OperationsTest_LDADD) $(LIBS)
+	$(CXXLINK) $(OperationsTest_OBJECTS) $(OperationsTest_LDADD) $(LIBS)
 PointerTest$(EXEEXT): $(PointerTest_OBJECTS) $(PointerTest_DEPENDENCIES) 
 	@rm -f PointerTest$(EXEEXT)
-	$(PointerTest_LINK) $(PointerTest_OBJECTS) $(PointerTest_LDADD) $(LIBS)
+	$(CXXLINK) $(PointerTest_OBJECTS) $(PointerTest_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -349,11 +342,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ICMPTest-ICMPTest.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MergeTest-MergeTest.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OperationsTest-OperationsTest.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PointerTest-PointerTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ArrayExactSizeTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ArraySingleItemTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FloatIntervalTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerBitfieldTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerEnumerationTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerIntervalTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OperationsTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PointerTest.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -375,76 +371,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
-
-ICMPTest-ICMPTest.o: ICMPTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ICMPTest_CXXFLAGS) $(CXXFLAGS) -MT ICMPTest-ICMPTest.o -MD -MP -MF $(DEPDIR)/ICMPTest-ICMPTest.Tpo -c -o ICMPTest-ICMPTest.o `test -f 'ICMPTest.cpp' || echo '$(srcdir)/'`ICMPTest.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ICMPTest-ICMPTest.Tpo $(DEPDIR)/ICMPTest-ICMPTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ICMPTest.cpp' object='ICMPTest-ICMPTest.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ICMPTest_CXXFLAGS) $(CXXFLAGS) -c -o ICMPTest-ICMPTest.o `test -f 'ICMPTest.cpp' || echo '$(srcdir)/'`ICMPTest.cpp
-
-ICMPTest-ICMPTest.obj: ICMPTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ICMPTest_CXXFLAGS) $(CXXFLAGS) -MT ICMPTest-ICMPTest.obj -MD -MP -MF $(DEPDIR)/ICMPTest-ICMPTest.Tpo -c -o ICMPTest-ICMPTest.obj `if test -f 'ICMPTest.cpp'; then $(CYGPATH_W) 'ICMPTest.cpp'; else $(CYGPATH_W) '$(srcdir)/ICMPTest.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ICMPTest-ICMPTest.Tpo $(DEPDIR)/ICMPTest-ICMPTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ICMPTest.cpp' object='ICMPTest-ICMPTest.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ICMPTest_CXXFLAGS) $(CXXFLAGS) -c -o ICMPTest-ICMPTest.obj `if test -f 'ICMPTest.cpp'; then $(CYGPATH_W) 'ICMPTest.cpp'; else $(CYGPATH_W) '$(srcdir)/ICMPTest.cpp'; fi`
-
-IntegerIntervalTest-IntegerIntervalTest.o: IntegerIntervalTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -MT IntegerIntervalTest-IntegerIntervalTest.o -MD -MP -MF $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Tpo -c -o IntegerIntervalTest-IntegerIntervalTest.o `test -f 'IntegerIntervalTest.cpp' || echo '$(srcdir)/'`IntegerIntervalTest.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Tpo $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerIntervalTest.cpp' object='IntegerIntervalTest-IntegerIntervalTest.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -c -o IntegerIntervalTest-IntegerIntervalTest.o `test -f 'IntegerIntervalTest.cpp' || echo '$(srcdir)/'`IntegerIntervalTest.cpp
-
-IntegerIntervalTest-IntegerIntervalTest.obj: IntegerIntervalTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -MT IntegerIntervalTest-IntegerIntervalTest.obj -MD -MP -MF $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Tpo -c -o IntegerIntervalTest-IntegerIntervalTest.obj `if test -f 'IntegerIntervalTest.cpp'; then $(CYGPATH_W) 'IntegerIntervalTest.cpp'; else $(CYGPATH_W) '$(srcdir)/IntegerIntervalTest.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Tpo $(DEPDIR)/IntegerIntervalTest-IntegerIntervalTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerIntervalTest.cpp' object='IntegerIntervalTest-IntegerIntervalTest.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(IntegerIntervalTest_CXXFLAGS) $(CXXFLAGS) -c -o IntegerIntervalTest-IntegerIntervalTest.obj `if test -f 'IntegerIntervalTest.cpp'; then $(CYGPATH_W) 'IntegerIntervalTest.cpp'; else $(CYGPATH_W) '$(srcdir)/IntegerIntervalTest.cpp'; fi`
-
-MergeTest-MergeTest.o: MergeTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(MergeTest_CXXFLAGS) $(CXXFLAGS) -MT MergeTest-MergeTest.o -MD -MP -MF $(DEPDIR)/MergeTest-MergeTest.Tpo -c -o MergeTest-MergeTest.o `test -f 'MergeTest.cpp' || echo '$(srcdir)/'`MergeTest.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MergeTest-MergeTest.Tpo $(DEPDIR)/MergeTest-MergeTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='MergeTest.cpp' object='MergeTest-MergeTest.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(MergeTest_CXXFLAGS) $(CXXFLAGS) -c -o MergeTest-MergeTest.o `test -f 'MergeTest.cpp' || echo '$(srcdir)/'`MergeTest.cpp
-
-MergeTest-MergeTest.obj: MergeTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(MergeTest_CXXFLAGS) $(CXXFLAGS) -MT MergeTest-MergeTest.obj -MD -MP -MF $(DEPDIR)/MergeTest-MergeTest.Tpo -c -o MergeTest-MergeTest.obj `if test -f 'MergeTest.cpp'; then $(CYGPATH_W) 'MergeTest.cpp'; else $(CYGPATH_W) '$(srcdir)/MergeTest.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MergeTest-MergeTest.Tpo $(DEPDIR)/MergeTest-MergeTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='MergeTest.cpp' object='MergeTest-MergeTest.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(MergeTest_CXXFLAGS) $(CXXFLAGS) -c -o MergeTest-MergeTest.obj `if test -f 'MergeTest.cpp'; then $(CYGPATH_W) 'MergeTest.cpp'; else $(CYGPATH_W) '$(srcdir)/MergeTest.cpp'; fi`
-
-OperationsTest-OperationsTest.o: OperationsTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -MT OperationsTest-OperationsTest.o -MD -MP -MF $(DEPDIR)/OperationsTest-OperationsTest.Tpo -c -o OperationsTest-OperationsTest.o `test -f 'OperationsTest.cpp' || echo '$(srcdir)/'`OperationsTest.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/OperationsTest-OperationsTest.Tpo $(DEPDIR)/OperationsTest-OperationsTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='OperationsTest.cpp' object='OperationsTest-OperationsTest.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -c -o OperationsTest-OperationsTest.o `test -f 'OperationsTest.cpp' || echo '$(srcdir)/'`OperationsTest.cpp
-
-OperationsTest-OperationsTest.obj: OperationsTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -MT OperationsTest-OperationsTest.obj -MD -MP -MF $(DEPDIR)/OperationsTest-OperationsTest.Tpo -c -o OperationsTest-OperationsTest.obj `if test -f 'OperationsTest.cpp'; then $(CYGPATH_W) 'OperationsTest.cpp'; else $(CYGPATH_W) '$(srcdir)/OperationsTest.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/OperationsTest-OperationsTest.Tpo $(DEPDIR)/OperationsTest-OperationsTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='OperationsTest.cpp' object='OperationsTest-OperationsTest.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(OperationsTest_CXXFLAGS) $(CXXFLAGS) -c -o OperationsTest-OperationsTest.obj `if test -f 'OperationsTest.cpp'; then $(CYGPATH_W) 'OperationsTest.cpp'; else $(CYGPATH_W) '$(srcdir)/OperationsTest.cpp'; fi`
-
-PointerTest-PointerTest.o: PointerTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(PointerTest_CXXFLAGS) $(CXXFLAGS) -MT PointerTest-PointerTest.o -MD -MP -MF $(DEPDIR)/PointerTest-PointerTest.Tpo -c -o PointerTest-PointerTest.o `test -f 'PointerTest.cpp' || echo '$(srcdir)/'`PointerTest.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/PointerTest-PointerTest.Tpo $(DEPDIR)/PointerTest-PointerTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PointerTest.cpp' object='PointerTest-PointerTest.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(PointerTest_CXXFLAGS) $(CXXFLAGS) -c -o PointerTest-PointerTest.o `test -f 'PointerTest.cpp' || echo '$(srcdir)/'`PointerTest.cpp
-
-PointerTest-PointerTest.obj: PointerTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(PointerTest_CXXFLAGS) $(CXXFLAGS) -MT PointerTest-PointerTest.obj -MD -MP -MF $(DEPDIR)/PointerTest-PointerTest.Tpo -c -o PointerTest-PointerTest.obj `if test -f 'PointerTest.cpp'; then $(CYGPATH_W) 'PointerTest.cpp'; else $(CYGPATH_W) '$(srcdir)/PointerTest.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/PointerTest-PointerTest.Tpo $(DEPDIR)/PointerTest-PointerTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PointerTest.cpp' object='PointerTest-PointerTest.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(PointerTest_CXXFLAGS) $(CXXFLAGS) -c -o PointerTest-PointerTest.obj `if test -f 'PointerTest.cpp'; then $(CYGPATH_W) 'PointerTest.cpp'; else $(CYGPATH_W) '$(srcdir)/PointerTest.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

@@ -135,11 +135,11 @@ Target::merge(const Target &target)
             numericOffsetInt.getBitWidth());
 
         Domain *zeroContainer = mEnvironment.getConstructors().createInteger(zero);
-        mNumericOffset->merge(*zeroContainer);
+        mNumericOffset->join(*zeroContainer);
         delete zeroContainer;
     }
     else if (mNumericOffset)
-        mNumericOffset->merge(*target.mNumericOffset);
+        mNumericOffset->join(*target.mNumericOffset);
 
     CANAL_ASSERT(mType == target.mType);
     switch (mType)

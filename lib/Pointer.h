@@ -104,29 +104,27 @@ public:
     bool isSingleTarget() const;
 
 public: // Implementation of Domain.
-    /// Implementation of Domain::clone().
-    /// Covariant return type -- it really overrides Domain::clone().
+    /// Covariant return type.
     virtual Pointer *clone() const;
 
-    /// Implementation of Domain::operator==().
-    virtual bool operator==(const Domain &value) const;
-
-    /// Implementation of Domain::merge().
-    virtual void merge(const Domain &value);
-
-    /// Implementation of Domain::memoryUsage().
     virtual size_t memoryUsage() const;
 
-    /// Implementation of Domain::toString().
     virtual std::string toString() const;
 
-    /// Implementation of Domain::setZero().
     virtual void setZero(const llvm::Value *place);
 
-    /// Check if pointer has no targets.
+    virtual bool operator==(const Domain &value) const;
+
+    virtual bool operator<(const Domain &value) const;
+
+    virtual bool operator>(const Domain &value) const;
+
+    virtual Pointer &join(const Domain &value);
+
+    virtual Pointer &meet(const Domain &value);
+
     virtual bool isBottom() const;
 
-    /// Remove all targets from the pointer.
     virtual void setBottom();
 };
 

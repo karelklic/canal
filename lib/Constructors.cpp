@@ -353,7 +353,10 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
                          " with more than 64 bits.");
 
         // Convert to 64-bit if necessary.
-        llvm::APInt extended = APIntUtils::sext(constant.getValue(), 64);
+        llvm::APInt extended = constant.getValue();
+        if (extended.getBitWidth() < 64)
+            extended = APIntUtils::sext(extended, 64);
+
         offsets.push_back(createInteger(extended));
     }
 

@@ -193,7 +193,7 @@ Pointer::load(const State &state) const
         for (; it != values.end(); ++it)
         {
             if (mergedValue)
-                mergedValue->merge(**it);
+                mergedValue->join(**it);
             else
                 mergedValue = (*it)->clone();
         }
@@ -329,59 +329,6 @@ Pointer::clone() const
     return new Pointer(*this);
 }
 
-bool
-Pointer::operator==(const Domain &value) const
-{
-    if (this == &value)
-        return true;
-
-    // Check if the value has the same type.
-    const Pointer *pointer =
-        dynCast<const Pointer*>(&value);
-
-    if (!pointer)
-        return false;
-
-    if (&pointer->mType != &mType)
-        return false;
-
-    // Check if it has the same number of targets.
-    if (pointer->mTargets.size() != mTargets.size())
-        return false;
-
-    // Check the targets.
-    PlaceTargetMap::const_iterator it1 = pointer->mTargets.begin(),
-        it2 = mTargets.begin();
-    for (; it2 != mTargets.end(); ++it1, ++it2)
-    {
-        if (it1->first != it2->first || *it1->second != *it2->second)
-            return false;
-    }
-
-    return true;
-}
-
-void
-Pointer::merge(const Domain &value)
-{
-    const Pointer &vv = dynCast<const Pointer&>(value);
-    CANAL_ASSERT_MSG(&vv.mType == &mType,
-                     "Unexpected different types in a pointer merge ("
-                     << Canal::toString(vv.mType) << " != "
-                     << Canal::toString(mType) << ")");
-
-    PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
-    for (; valueit != vv.mTargets.end(); ++valueit)
-    {
-        PlaceTargetMap::iterator it = mTargets.find(valueit->first);
-        if (it == mTargets.end())
-            mTargets.insert(PlaceTargetMap::value_type(
-                                valueit->first, new Target(*valueit->second)));
-        else
-            it->second->merge(*valueit->second);
-    }
-}
-
 size_t
 Pointer::memoryUsage() const
 {
@@ -419,6 +366,80 @@ Pointer::setZero(const llvm::Value *place)
               NULL,
               std::vector<Domain*>(),
               NULL);
+}
+
+bool
+Pointer::operator==(const Domain &value) const
+{
+    if (this == &value)
+        return true;
+
+    // Check if the value has the same type.
+    const Pointer *pointer =
+        dynCast<const Pointer*>(&value);
+
+    if (!pointer)
+        return false;
+
+    if (&pointer->mType != &mType)
+        return false;
+
+    // Check if it has the same number of targets.
+    if (pointer->mTargets.size() != mTargets.size())
+        return false;
+
+    // Check the targets.
+    PlaceTargetMap::const_iterator it1 = pointer->mTargets.begin(),
+        it2 = mTargets.begin();
+
+    for (; it2 != mTargets.end(); ++it1, ++it2)
+    {
+        if (it1->first != it2->first || *it1->second != *it2->second)
+            return false;
+    }
+
+    return true;
+}
+
+bool
+Pointer::operator<(const Domain &value) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Pointer::operator>(const Domain &value) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Pointer &
+Pointer::join(const Domain &value)
+{
+    const Pointer &vv = dynCast<const Pointer&>(value);
+    CANAL_ASSERT_MSG(&vv.mType == &mType,
+                     "Unexpected different types in a pointer merge ("
+                     << Canal::toString(vv.mType) << " != "
+                     << Canal::toString(mType) << ")");
+
+    PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
+    for (; valueit != vv.mTargets.end(); ++valueit)
+    {
+        PlaceTargetMap::iterator it = mTargets.find(valueit->first);
+        if (it == mTargets.end())
+            mTargets.insert(PlaceTargetMap::value_type(
+                                valueit->first, new Target(*valueit->second)));
+        else
+            it->second->merge(*valueit->second);
+    }
+
+    return *this;
+}
+
+Pointer &
+Pointer::meet(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 bool

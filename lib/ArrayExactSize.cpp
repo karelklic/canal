@@ -42,47 +42,6 @@ ExactSize::clone() const
     return new ExactSize(*this);
 }
 
-bool
-ExactSize::operator==(const Domain &value) const
-{
-    if (this == &value)
-        return true;
-
-    const ExactSize *array = dynCast<const ExactSize*>(&value);
-    if (!array)
-        return false;
-
-    if (mValues.size() != array->mValues.size())
-        return false;
-
-    std::vector<Domain*>::const_iterator itA = mValues.begin(),
-        itAend = mValues.end(),
-        itB = array->mValues.begin();
-
-    for (; itA != itAend; ++itA, ++itB)
-    {
-        if (*itA == *itB) //If iterators point to the same object
-            continue; //skip casting and comparison of object
-        if (**itA != **itB)
-            return false;
-    }
-
-    return true;
-}
-
-void
-ExactSize::merge(const Domain &value)
-{
-    const ExactSize &array = dynCast<const ExactSize&>(value);
-    CANAL_ASSERT(mValues.size() == array.mValues.size());
-    std::vector<Domain*>::iterator itA = mValues.begin();
-    std::vector<Domain*>::const_iterator itAend = mValues.end(),
-        itB = array.mValues.begin();
-
-    for (; itA != itAend; ++itA, ++itB)
-        (*itA)->merge(**itB);
-}
-
 size_t
 ExactSize::memoryUsage() const
 {
@@ -111,171 +70,92 @@ ExactSize::toString() const
     return ss.str();
 }
 
-static void
-binaryOperation(ExactSize &result,
-                const Domain &a,
-                const Domain &b,
-                void(Domain::*operation)(const Domain&, const Domain&))
+void
+ExactSize::setZero(const llvm::Value *place)
 {
-    const ExactSize &aa = dynCast<const ExactSize&>(a),
-        &bb = dynCast<const ExactSize&>(b);
+    std::vector<Domain*>::iterator it = mValues.begin(),
+            itend = mValues.end();
 
-    CANAL_ASSERT_MSG(aa.size() == bb.size() && result.size() == aa.size(),
-                     "Binary operations with arrays "
+    for (; it != itend; it ++)
+        (*it)->setZero(place);
+}
+
+bool
+ExactSize::operator==(const Domain &value) const
+{
+    if (this == &value)
+        return true;
+
+    const ExactSize *array = dynCast<const ExactSize*>(&value);
+    if (!array)
+        return false;
+
+    if (mValues.size() != array->mValues.size())
+        return false;
+
+    std::vector<Domain*>::const_iterator itA = mValues.begin(),
+        itAend = mValues.end(),
+        itB = array->mValues.begin();
+
+    for (; itA != itAend; ++itA, ++itB)
+    {
+        if (*itA == *itB) //If iterators point to the same object
+            continue; //skip casting and comparison of object
+        if (**itA != **itB)
+            return false;
+    }
+
+    return true;
+}
+
+bool
+ExactSize::operator<(const Domain& value) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+ExactSize::operator>(const Domain& value) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+ExactSize &
+ExactSize::join(const Domain &value)
+{
+    const ExactSize &val = dynCast<const ExactSize&>(value);
+
+    CANAL_ASSERT_MSG(val.size() == size(),
+                     "Operations with arrays "
                      "require the array size to be equal.");
 
-    std::vector<Domain*>::const_iterator itA = aa.mValues.begin(),
-        itB = bb.mValues.begin();
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end(),
+        itv = val.mValues.begin();
 
-    std::vector<Domain*>::iterator it = result.mValues.begin();
-    for (; it != result.mValues.end(); ++it, ++itA, ++itB)
-        ((**it).*(operation))(**itA, **itB);
+    for (; it != itend; ++it, ++itv)
+        (*it)->join(**itv);
+
+    return *this;
 }
 
-void
-ExactSize::add(const Domain &a, const Domain &b)
+ExactSize &
+ExactSize::meet(const Domain &value)
 {
-    binaryOperation(*this, a, b, &Domain::add);
-}
+    const ExactSize &val = dynCast<const ExactSize&>(value);
 
-void
-ExactSize::fadd(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::fadd);
-}
-
-void
-ExactSize::sub(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::sub);
-}
-
-void
-ExactSize::fsub(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::fsub);
-}
-
-void
-ExactSize::mul(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::mul);
-}
-
-void
-ExactSize::fmul(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::fmul);
-}
-
-void
-ExactSize::udiv(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::udiv);
-}
-
-void
-ExactSize::sdiv(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::sdiv);
-}
-
-void
-ExactSize::fdiv(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::fdiv);
-}
-
-void
-ExactSize::urem(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::urem);
-}
-
-void
-ExactSize::srem(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::srem);
-}
-
-void
-ExactSize::frem(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::frem);
-}
-
-void
-ExactSize::shl(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::shl);
-}
-
-void
-ExactSize::lshr(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::lshr);
-}
-
-void
-ExactSize::ashr(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::ashr);
-}
-
-void
-ExactSize::and_(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::and_);
-}
-
-void
-ExactSize::or_(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::or_);
-}
-
-void
-ExactSize::xor_(const Domain &a, const Domain &b)
-{
-    binaryOperation(*this, a, b, &Domain::xor_);
-}
-
-static void
-cmpOperation(ExactSize &result,
-             const Domain &a,
-             const Domain &b,
-             llvm::CmpInst::Predicate predicate,
-             Domain::CmpOperation operation)
-{
-    const ExactSize &aa = dynCast<const ExactSize&>(a),
-        &bb = dynCast<const ExactSize&>(b);
-
-    CANAL_ASSERT_MSG(result.size() == aa.size() &&
-                     aa.size() == bb.size(),
-                     "Binary operations with arrays "
+    CANAL_ASSERT_MSG(val.size() == size(),
+                     "Operations with arrays "
                      "require the array size to be equal.");
 
-    std::vector<Domain*>::const_iterator
-        itR = result.mValues.begin(),
-        itA = aa.mValues.begin(),
-        itB = bb.mValues.begin();
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end(),
+        itv = val.mValues.begin();
 
-    for (; itR != result.mValues.end(); ++itR, ++itA, ++itB)
-        ((*itR)->*(operation))(**itA, **itB, predicate);
-}
+    for (; it != itend; ++it, ++itv)
+        (*it)->meet(**itv);
 
-void
-ExactSize::icmp(const Domain &a, const Domain &b,
-                llvm::CmpInst::Predicate predicate)
-{
-    cmpOperation(*this, a, b, predicate, &Domain::icmp);
-}
-
-void
-ExactSize::fcmp(const Domain &a, const Domain &b,
-                llvm::CmpInst::Predicate predicate)
-{
-    cmpOperation(*this, a, b, predicate, &Domain::fcmp);
+    return *this;
 }
 
 bool
@@ -326,6 +206,186 @@ ExactSize::setTop()
 
     for (; it != itend; ++it)
         (*it)->setTop();
+}
+
+float
+ExactSize::accuracy() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+static ExactSize &
+binaryOperation(ExactSize &result,
+                const Domain &a,
+                const Domain &b,
+                Domain::BinaryOperation operation)
+{
+    const ExactSize &aa = dynCast<const ExactSize&>(a),
+        &bb = dynCast<const ExactSize&>(b);
+
+    CANAL_ASSERT_MSG(aa.size() == bb.size() && result.size() == aa.size(),
+                     "Binary operations with arrays "
+                     "require the array size to be equal.");
+
+    std::vector<Domain*>::const_iterator ita = aa.mValues.begin(),
+        itb = bb.mValues.begin();
+
+    std::vector<Domain*>::iterator it = result.mValues.begin(),
+        itend = result.mValues.begin();
+
+    for (; it != itend; ++it, ++ita, ++itb)
+        ((**it).*(operation))(**ita, **itb);
+
+    return result;
+}
+
+ExactSize &
+ExactSize::add(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::add);
+}
+
+ExactSize &
+ExactSize::fadd(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::fadd);
+}
+
+ExactSize &
+ExactSize::sub(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::sub);
+}
+
+ExactSize &
+ExactSize::fsub(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::fsub);
+}
+
+ExactSize &
+ExactSize::mul(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::mul);
+}
+
+ExactSize &
+ExactSize::fmul(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::fmul);
+}
+
+ExactSize &
+ExactSize::udiv(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::udiv);
+}
+
+ExactSize &
+ExactSize::sdiv(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::sdiv);
+}
+
+ExactSize &
+ExactSize::fdiv(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::fdiv);
+}
+
+ExactSize &
+ExactSize::urem(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::urem);
+}
+
+ExactSize &
+ExactSize::srem(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::srem);
+}
+
+ExactSize &
+ExactSize::frem(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::frem);
+}
+
+ExactSize &
+ExactSize::shl(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::shl);
+}
+
+ExactSize &
+ExactSize::lshr(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::lshr);
+}
+
+ExactSize &
+ExactSize::ashr(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::ashr);
+}
+
+ExactSize &
+ExactSize::and_(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::and_);
+}
+
+ExactSize &
+ExactSize::or_(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::or_);
+}
+
+ExactSize &
+ExactSize::xor_(const Domain &a, const Domain &b)
+{
+    return binaryOperation(*this, a, b, &Domain::xor_);
+}
+
+static ExactSize &
+cmpOperation(ExactSize &result,
+             const Domain &a,
+             const Domain &b,
+             llvm::CmpInst::Predicate predicate,
+             Domain::CmpOperation operation)
+{
+    const ExactSize &aa = dynCast<const ExactSize&>(a),
+        &bb = dynCast<const ExactSize&>(b);
+
+    CANAL_ASSERT_MSG(result.size() == aa.size() &&
+                     aa.size() == bb.size(),
+                     "Binary operations with arrays "
+                     "require the array size to be equal.");
+
+    std::vector<Domain*>::const_iterator
+        it = result.mValues.begin(),
+        itend = result.mValues.end(),
+        ita = aa.mValues.begin(),
+        itb = bb.mValues.begin();
+
+    for (; it != itend; ++it, ++ita, ++itb)
+        ((*it)->*(operation))(**ita, **itb, predicate);
+
+    return result;
+}
+
+ExactSize &
+ExactSize::icmp(const Domain &a, const Domain &b,
+                llvm::CmpInst::Predicate predicate)
+{
+    return cmpOperation(*this, a, b, predicate, &Domain::icmp);
+}
+
+ExactSize &
+ExactSize::fcmp(const Domain &a, const Domain &b,
+                llvm::CmpInst::Predicate predicate)
+{
+    return cmpOperation(*this, a, b, predicate, &Domain::fcmp);
 }
 
 std::vector<Domain*>
@@ -418,6 +478,7 @@ ExactSize::setItem(const Domain &offset, const Domain &value)
     {
         APIntUtils::USet::const_iterator it = enumeration.mValues.begin(),
             itend = enumeration.mValues.end();
+
         for (; it != itend; ++it)
         {
             CANAL_ASSERT(it->getBitWidth() <= 64);
@@ -430,8 +491,9 @@ ExactSize::setItem(const Domain &offset, const Domain &value)
             if (numOffset >= mValues.size())
                 continue;
 
-            mValues[numOffset]->merge(value);
+            mValues[numOffset]->join(value);
         }
+
         return;
     }
 
@@ -448,7 +510,7 @@ ExactSize::setItem(const Domain &offset, const Domain &value)
         // requires investigation.
         CANAL_ASSERT(from < mValues.size());
         for (size_t loop = from; loop < mValues.size() && loop <= to; ++loop)
-            mValues[loop]->merge(value);
+            mValues[loop]->join(value);
 
         return;
     }
@@ -459,7 +521,7 @@ ExactSize::setItem(const Domain &offset, const Domain &value)
         itend = mValues.end();
 
     for (; it != itend; ++it)
-        (*it)->merge(value);
+        (*it)->join(value);
 }
 
 void
@@ -468,17 +530,7 @@ ExactSize::setItem(uint64_t offset, const Domain &value)
     CANAL_ASSERT_MSG(offset < mValues.size(),
                      "Offset out of bounds.");
 
-    mValues[offset]->merge(value);
-}
-
-void
-ExactSize::setZero(const llvm::Value *place)
-{
-    std::vector<Domain*>::iterator it = mValues.begin(),
-            itend = mValues.end();
-
-    for (; it != itend; it ++)
-        (*it)->setZero(place);
+    mValues[offset]->join(value);
 }
 
 } // namespace Array

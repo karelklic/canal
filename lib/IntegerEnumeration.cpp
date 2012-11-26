@@ -13,10 +13,10 @@ Enumeration::Enumeration(const Environment &environment,
 }
 
 Enumeration::Enumeration(const Environment &environment,
-                         const llvm::APInt &number)
-    : Domain(environment), mTop(false), mBitWidth(number.getBitWidth())
+                         const llvm::APInt &constant)
+    : Domain(environment), mTop(false), mBitWidth(constant.getBitWidth())
 {
-    mValues.insert(number);
+    mValues.insert(constant);
     CANAL_ASSERT(mBitWidth > 0);
 }
 
@@ -68,7 +68,8 @@ Enumeration::signedMax(llvm::APInt &result) const
         //Find lowest negative number
         APIntUtils::USet::const_iterator bound = mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
         if (bound == mValues.end() || //If there is no negative number in this enumeration
-                bound == mValues.begin()) { //or first element in this enumeration is negative
+                bound == mValues.begin())
+        { //or first element in this enumeration is negative
             result = *mValues.rbegin(); //then the last element in this enumeration is highest
         }
         else { //There are some positive numbers as well
@@ -84,8 +85,11 @@ Enumeration::unsignedMin(llvm::APInt &result) const
 {
     if (mTop)
         result = llvm::APInt::getMinValue(mBitWidth);
-    else {
-        if (mValues.empty()) return false;
+    else
+    {
+        if (mValues.empty())
+            return false;
+
         // We assume the set is sorted by unsigned comparison.
         result = *mValues.begin();
     }
@@ -97,8 +101,11 @@ Enumeration::unsignedMax(llvm::APInt &result) const
 {
     if (mTop)
         result = llvm::APInt::getMaxValue(mBitWidth);
-    else {
-        if (mValues.empty()) return false;
+    else
+    {
+        if (mValues.empty())
+            return false;
+
         // We assume the set is sorted by unsigned comparison.
         result = *mValues.rbegin();
     }
@@ -111,60 +118,24 @@ Enumeration::isSingleValue() const
     return (!mTop && mValues.size() == 1);
 }
 
+bool
+Enumeration::isTrue() const
+{
+    return isSingleValue() &&
+        *mValues.begin() == llvm::APInt(1, 1);
+}
+
+bool
+Enumeration::isFalse() const
+{
+    return isSingleValue() &&
+        *mValues.begin() == llvm::APInt(1, 0);
+}
+
 Enumeration *
 Enumeration::clone() const
 {
     return new Enumeration(*this);
-}
-
-bool
-Enumeration::operator==(const Domain &value) const
-{
-    if (this == &value)
-        return true;
-
-    const Enumeration *enumeration =
-        dynCast<const Enumeration*>(&value);
-
-    if (!enumeration)
-        return false;
-
-    if (mTop != enumeration->mTop)
-        return false;
-
-    if (mTop)
-        return true;
-
-    // Compare values only if the top is not set, otherwise we would
-    // get false inequality.
-    return mValues == enumeration->mValues;
-}
-
-void
-Enumeration::merge(const Domain &value)
-{
-    if (mTop)
-        return;
-
-    const Enumeration &enumeration =
-        dynCast<const Enumeration&>(value);
-
-    if (enumeration.isTop())
-        setTop();
-    else
-    {
-        CANAL_ASSERT_MSG(enumeration.getBitWidth() == getBitWidth(),
-                         "Different bit width in merge: "
-                         << enumeration.getBitWidth()
-                         << " bit value merged to "
-                         << getBitWidth() << " bit value");
-
-        mValues.insert(enumeration.mValues.begin(),
-                       enumeration.mValues.end());
-
-        if (mValues.size() > mMaxSize)
-            setTop();
-    }
 }
 
 size_t
@@ -194,85 +165,199 @@ Enumeration::toString() const
 }
 
 void
+Enumeration::setZero(const llvm::Value *place)
+{
+    mTop = false;
+    mValues.clear();
+    mValues.insert(llvm::APInt::getNullValue(mBitWidth));
+}
+
+bool
+Enumeration::operator==(const Domain &value) const
+{
+    if (this == &value)
+        return true;
+
+    const Enumeration *enumeration =
+        dynCast<const Enumeration*>(&value);
+
+    if (!enumeration)
+        return false;
+
+    if (mTop != enumeration->mTop)
+        return false;
+
+    if (mTop)
+        return true;
+
+    // Compare values only if the top is not set, otherwise we would
+    // get false inequality.
+    return mValues == enumeration->mValues;
+}
+
+bool
+Enumeration::operator<(const Domain &value) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Enumeration::operator>(const Domain &value) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Enumeration &
+Enumeration::join(const Domain &value)
+{
+    if (mTop)
+        return *this;
+
+    const Enumeration &enumeration =
+        dynCast<const Enumeration&>(value);
+
+    if (enumeration.isTop())
+        setTop();
+    else
+    {
+        CANAL_ASSERT_MSG(enumeration.getBitWidth() == getBitWidth(),
+                         "Different bit width in merge: "
+                         << enumeration.getBitWidth()
+                         << " bit value merged to "
+                         << getBitWidth() << " bit value");
+
+        mValues.insert(enumeration.mValues.begin(),
+                       enumeration.mValues.end());
+
+        if (mValues.size() > mMaxSize)
+            setTop();
+    }
+
+    return *this;
+}
+
+Enumeration &
+Enumeration::meet(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Enumeration::isBottom() const
+{
+    return mValues.empty() && !mTop;
+}
+
+void
+Enumeration::setBottom()
+{
+    mValues.clear();
+    mTop = false;
+}
+
+bool
+Enumeration::isTop() const
+{
+    return mTop;
+}
+
+void
+Enumeration::setTop()
+{
+    mValues.clear();
+    mTop = true;
+}
+
+float
+Enumeration::accuracy() const
+{
+    if (mTop)
+        return 0;
+    // Perfectly accurate.  TODO: consider lowering the accuracy
+    // depending on the number of elements.
+    return 1;
+}
+
+Enumeration &
 Enumeration::add(const Domain &a, const Domain &b)
 {
-    applyOperation(a, b, &llvm::APInt::operator+, NULL);
+    return applyOperation(a, b, &llvm::APInt::operator+, NULL);
 }
 
-void
+Enumeration &
 Enumeration::sub(const Domain &a, const Domain &b)
 {
-    applyOperation(a, b, &llvm::APInt::operator-, NULL);
+    return applyOperation(a, b, &llvm::APInt::operator-, NULL);
 }
 
-void
+Enumeration &
 Enumeration::mul(const Domain &a, const Domain &b)
 {
 #if (LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9)
-    applyOperation(a, b, &llvm::APInt::operator*, NULL);
+    return applyOperation(a, b, &llvm::APInt::operator*, NULL);
 #else
-    applyOperation(a, b, NULL, &llvm::APInt::smul_ov);
+    return applyOperation(a, b, NULL, &llvm::APInt::smul_ov);
 #endif
 }
 
-void
+Enumeration &
 Enumeration::udiv(const Domain &a, const Domain &b)
 {
-    applyOperation(a, b, &llvm::APInt::udiv, NULL);
+    return applyOperation(a, b, &llvm::APInt::udiv, NULL);
 }
 
-void
+Enumeration &
 Enumeration::sdiv(const Domain &a, const Domain &b)
 {
-    applyOperation(a, b, &llvm::APInt::sdiv, NULL);
+    return applyOperation(a, b, &llvm::APInt::sdiv, NULL);
 }
 
-void
+Enumeration &
 Enumeration::urem(const Domain &a, const Domain &b)
 {
-    applyOperation(a, b, &llvm::APInt::urem, NULL);
+    return applyOperation(a, b, &llvm::APInt::urem, NULL);
 }
 
-void
+Enumeration &
 Enumeration::srem(const Domain &a, const Domain &b)
 {
-    applyOperation(a, b, &llvm::APInt::srem, NULL);
+    return applyOperation(a, b, &llvm::APInt::srem, NULL);
 }
 
-void
+Enumeration &
 Enumeration::shl(const Domain &a, const Domain &b)
 {
-    applyOperation(a, b, &llvm::APInt::shl, NULL);
+    return applyOperation(a, b, &llvm::APInt::shl, NULL);
 }
 
-void
+Enumeration &
 Enumeration::lshr(const Domain &a, const Domain &b)
 {
-    applyOperation(a, b, &llvm::APInt::lshr, NULL);
+    return applyOperation(a, b, &llvm::APInt::lshr, NULL);
 }
 
-void
+Enumeration &
 Enumeration::ashr(const Domain &a, const Domain &b)
 {
-    applyOperation(a, b, &llvm::APInt::ashr, NULL);
+    return applyOperation(a, b, &llvm::APInt::ashr, NULL);
 }
 
-void
+Enumeration &
 Enumeration::and_(const Domain &a, const Domain &b)
 {
-    applyOperation(a, b, &llvm::APInt::operator&, NULL);
+    return applyOperation(a, b, &llvm::APInt::operator&, NULL);
 }
 
-void
+Enumeration &
 Enumeration::or_(const Domain &a, const Domain &b)
 {
-    applyOperation(a, b, &llvm::APInt::operator|, NULL);
+    return applyOperation(a, b, &llvm::APInt::operator|, NULL);
 }
 
-void
+Enumeration &
 Enumeration::xor_(const Domain &a, const Domain &b)
 {
-    applyOperation(a, b, &llvm::APInt::operator^, NULL);
+    return applyOperation(a, b, &llvm::APInt::operator^, NULL);
 }
 
 static bool
@@ -297,7 +382,7 @@ intersects(const Enumeration &a,
     return false;
 }
 
-void
+Enumeration &
 Enumeration::icmp(const Domain &a, const Domain &b,
                   llvm::CmpInst::Predicate predicate)
 {
@@ -307,13 +392,13 @@ Enumeration::icmp(const Domain &a, const Domain &b,
     if (aa.isTop() || bb.isTop())
     {
         setTop(); // Could be both
-        return;
+        return *this;
     }
 
     if (aa.isBottom() || bb.isBottom())
     {
         setBottom(); // Undefined
-        return;
+        return *this;
     }
 
     setBottom();
@@ -473,9 +558,11 @@ Enumeration::icmp(const Domain &a, const Domain &b,
     default:
         CANAL_DIE();
     }
+
+    return *this;
 }
 
-void
+Enumeration &
 Enumeration::fcmp(const Domain &a, const Domain &b,
                   llvm::CmpInst::Predicate predicate)
 {
@@ -502,9 +589,11 @@ Enumeration::fcmp(const Domain &a, const Domain &b,
     default:
         CANAL_DIE();
     }
+
+    return *this;
 }
 
-void
+Enumeration &
 Enumeration::trunc(const Domain &value)
 {
     const Enumeration &enumeration = dynCast<const Enumeration&>(value);
@@ -512,9 +601,11 @@ Enumeration::trunc(const Domain &value)
     APIntUtils::USet::const_iterator it = enumeration.mValues.begin();
     for (; it != enumeration.mValues.end(); ++it)
         mValues.insert(APIntUtils::trunc(*it, getBitWidth()));
+
+    return *this;
 }
 
-void
+Enumeration &
 Enumeration::zext(const Domain &value)
 {
     const Enumeration &enumeration = dynCast<const Enumeration&>(value);
@@ -522,9 +613,11 @@ Enumeration::zext(const Domain &value)
     APIntUtils::USet::const_iterator it = enumeration.mValues.begin();
     for (; it != enumeration.mValues.end(); ++it)
         mValues.insert(APIntUtils::zext(*it, getBitWidth()));
+
+    return *this;
 }
 
-void
+Enumeration &
 Enumeration::sext(const Domain &value)
 {
     const Enumeration &enumeration = dynCast<const Enumeration&>(value);
@@ -532,57 +625,25 @@ Enumeration::sext(const Domain &value)
     APIntUtils::USet::const_iterator it = enumeration.mValues.begin();
     for (; it != enumeration.mValues.end(); ++it)
         mValues.insert(APIntUtils::sext(*it, getBitWidth()));
+
+    return *this;
 }
 
-void
+Enumeration &
 Enumeration::fptoui(const Domain &value)
 {
     setTop();
+    return *this;
 }
 
-void
+Enumeration &
 Enumeration::fptosi(const Domain &value)
 {
     setTop();
+    return *this;
 }
 
-float
-Enumeration::accuracy() const
-{
-    if (mTop)
-        return 0;
-    // Perfectly accurate.  TODO: consider lowering the accuracy
-    // depending on the number of elements.
-    return 1;
-}
-
-bool
-Enumeration::isBottom() const
-{
-    return mValues.empty() && !mTop;
-}
-
-void
-Enumeration::setBottom()
-{
-    mValues.clear();
-    mTop = false;
-}
-
-bool
-Enumeration::isTop() const
-{
-    return mTop;
-}
-
-void
-Enumeration::setTop()
-{
-    mValues.clear();
-    mTop = true;
-}
-
-void
+Enumeration &
 Enumeration::applyOperation(const Domain &a,
                             const Domain &b,
                             APIntUtils::Operation operation1,
@@ -596,7 +657,7 @@ Enumeration::applyOperation(const Domain &a,
     if (aa.isTop() || bb.isTop())
     {
         setTop();
-        return;
+        return *this;
     }
 
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
@@ -615,25 +676,19 @@ Enumeration::applyOperation(const Domain &a,
                 if (overflow)
                 {
                     setTop();
-                    return;
+                    return *this;
                 }
             }
 
             if (mValues.size() > mMaxSize)
             {
                 setTop();
-                return;
+                return *this;
             }
         }
     }
-}
 
-void
-Enumeration::setZero(const llvm::Value *place)
-{
-    mTop = false;
-    mValues.clear();
-    mValues.insert(llvm::APInt::getNullValue(mBitWidth));
+    return *this;
 }
 
 } // namespace Integer

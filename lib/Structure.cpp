@@ -16,8 +16,10 @@ Structure::Structure(const Environment &environment,
 Structure::Structure(const Structure &value)
     : Domain(value), mMembers(value.mMembers)
 {
-    std::vector<Domain*>::iterator it = mMembers.begin();
-    for (; it != mMembers.end(); ++it)
+    std::vector<Domain*>::iterator it = mMembers.begin(),
+        itend = mMembers.end();
+
+    for (; it != itend; ++it)
         *it = (*it)->clone();
 }
 
@@ -30,45 +32,6 @@ Structure *
 Structure::clone() const
 {
     return new Structure(*this);
-}
-
-bool
-Structure::operator==(const Domain &value) const
-{
-    if (this == &value)
-        return true;
-
-    const Structure *structure = dynCast<const Structure*>(&value);
-    if (!structure)
-        return false;
-
-    if (mMembers.size() != structure->mMembers.size())
-        return false;
-
-    std::vector<Domain*>::const_iterator itA = mMembers.begin(),
-        itAend = mMembers.end(),
-        itB = structure->mMembers.begin();
-
-    for (; itA != itAend; ++itA, ++itB)
-    {
-        if (**itA != **itB)
-            return false;
-    }
-
-    return true;
-}
-
-void
-Structure::merge(const Domain &value)
-{
-    const Structure &structure = dynCast<const Structure&>(value);
-    CANAL_ASSERT(mMembers.size() == structure.mMembers.size());
-    std::vector<Domain*>::iterator itA = mMembers.begin();
-    std::vector<Domain*>::const_iterator itAend = mMembers.end(),
-        itB = structure.mMembers.begin();
-
-    for (; itA != itAend; ++itA, ++itB)
-        (*itA)->merge(**itB);
 }
 
 size_t
@@ -97,6 +60,160 @@ Structure::toString() const
     return ss.str();
 }
 
+void
+Structure::setZero(const llvm::Value *place)
+{
+    std::vector<Domain*>::iterator it = mMembers.begin(),
+        itend = mMembers.end();
+
+    for (; it != itend; ++it)
+        (*it)->setZero(place);
+}
+
+typedef bool(Domain::*CmpOperation)(const Domain&)const;
+
+static bool
+compareMembers(const Structure &a, const Domain &b, CmpOperation operation)
+{
+    const Structure *bb = dynCast<const Structure*>(&b);
+    if (!bb)
+        return false;
+
+    if (a.mMembers.size() != bb->mMembers.size())
+        return false;
+
+    std::vector<Domain*>::const_iterator ita = a.mMembers.begin(),
+        itaend = a.mMembers.end(),
+        itb = bb->mMembers.begin();
+
+    for (; ita != itaend; ++ita, ++itb)
+    {
+        if (!((**ita).*(operation))(**itb))
+            return false;
+    }
+
+    return true;
+}
+
+bool
+Structure::operator==(const Domain &value) const
+{
+    if (this == &value)
+        return true;
+
+    return compareMembers(*this, value, &Domain::operator==);
+}
+
+bool
+Structure::operator<(const Domain &value) const
+{
+    if (this == &value)
+        return false;
+
+    return compareMembers(*this, value, &Domain::operator<);
+}
+
+bool
+Structure::operator>(const Domain &value) const
+{
+    if (this == &value)
+        return false;
+
+    return compareMembers(*this, value, &Domain::operator>);
+}
+
+typedef Domain&(Domain::*JoinOrMeetOperation)(const Domain&);
+
+static Structure &
+joinOrMeet(Structure &a, const Domain &b, JoinOrMeetOperation op)
+{
+    const Structure &bb = dynCast<const Structure&>(b);
+    CANAL_ASSERT(a.mMembers.size() == bb.mMembers.size());
+    std::vector<Domain*>::iterator ita = a.mMembers.begin(),
+        itaend = a.mMembers.end();
+
+    std::vector<Domain*>::const_iterator itb = bb.mMembers.begin();
+    for (; ita != itaend; ++ita, ++itb)
+        ((*ita)->*(op))(**itb);
+
+    return a;
+}
+
+Structure &
+Structure::join(const Domain &value)
+{
+    return joinOrMeet(*this, value, &Domain::join);
+}
+
+Structure &
+Structure::meet(const Domain &value)
+{
+    return joinOrMeet(*this, value, &Domain::meet);
+}
+
+bool
+Structure::isBottom() const
+{
+    std::vector<Domain*>::const_iterator it = mMembers.begin(),
+        itend = mMembers.end();
+
+    for (; it != itend; ++it)
+    {
+        if (!(*it)->isBottom())
+            return false;
+    }
+
+    return true;
+}
+
+void
+Structure::setBottom()
+{
+    std::vector<Domain*>::iterator it = mMembers.begin(),
+        itend = mMembers.end();
+
+    for (; it != itend; ++it)
+        (*it)->setBottom();
+}
+
+bool
+Structure::isTop() const
+{
+    std::vector<Domain*>::const_iterator it = mMembers.begin(),
+        itend = mMembers.end();
+
+    for (; it != itend; ++it)
+    {
+        if (!(*it)->isTop())
+            return false;
+    }
+
+    return true;
+}
+
+void
+Structure::setTop()
+{
+    std::vector<Domain*>::iterator it = mMembers.begin(),
+        itend = mMembers.end();
+
+    for (; it != itend; ++it)
+        (*it)->setTop();
+}
+
+float
+Structure::accuracy() const
+{
+    std::vector<Domain*>::const_iterator it = mMembers.begin(),
+        itend = mMembers.end();
+
+    float result = 0;
+    for (; it != itend; ++it)
+        result += (*it)->accuracy();
+
+    return result / mMembers.size();
+}
+
 std::vector<Domain*>
 Structure::getItem(const Domain &offset) const
 {
@@ -110,6 +227,7 @@ Structure::getItem(const Domain &offset) const
     {
         APIntUtils::USet::const_iterator it = enumeration.mValues.begin(),
             itend = enumeration.mValues.end();
+
         for (; it != itend; ++it)
         {
             CANAL_ASSERT(it->getBitWidth() <= 64);
@@ -185,15 +303,7 @@ Structure::setItem(uint64_t offset, const Domain &value)
     CANAL_ASSERT_MSG(offset < mMembers.size(),
                      "Offset out of bounds.");
 
-    mMembers[offset]->merge(value);
-}
-
-void
-Structure::setZero(const llvm::Value *place)
-{
-    std::vector<Domain*>::iterator it = mMembers.begin();
-    for (; it != mMembers.end(); ++it)
-        (*it)->setZero(place);
+    mMembers[offset]->join(value);
 }
 
 } // namespace Canal

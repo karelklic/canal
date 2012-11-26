@@ -1,5 +1,5 @@
 Name: canal
-Version: 0
+Version: 2
 Release: 1%{?dist}
 Summary: LLVM static analysis framework
 Group: Development/Libraries
@@ -27,5 +27,5 @@ make check
 %files
 
 %changelog
-* Thu Mar  8 2012 Karel Klíč <kklic@redhat.com> - 0-1
+* Thu Mar  8 2012 Karel Klíč <kklic@redhat.com> - 2-1
 - Upstream package spec file

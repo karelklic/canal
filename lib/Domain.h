@@ -18,14 +18,14 @@ class DataInterface;
 class Domain
 {
 public:
-    typedef void(Domain::*CastOperation)(const Domain&);
+    typedef Domain&(Domain::*CastOperation)(const Domain&);
 
-    typedef void(Domain::*BinaryOperation)(const Domain&,
-                                          const Domain&);
+    typedef Domain&(Domain::*BinaryOperation)(const Domain&,
+                                              const Domain&);
 
-    typedef void(Domain::*CmpOperation)(const Domain&,
-                                       const Domain&,
-                                       llvm::CmpInst::Predicate predicate);
+    typedef Domain&(Domain::*CmpOperation)(const Domain&,
+                                           const Domain&,
+                                           llvm::CmpInst::Predicate predicate);
 
     const Environment &mEnvironment;
 
@@ -51,19 +51,6 @@ public:
     /// Create a copy of this value.
     virtual Domain *clone() const = 0;
 
-    /// Implementing this is mandatory.  Values are compared while
-    /// computing the fixed point.
-    virtual bool operator==(const Domain &value) const = 0;
-
-    /// Inequality is implemented by calling the equality operator.
-    virtual bool operator!=(const Domain &value) const
-    {
-        return !operator==(value);
-    }
-
-    /// Merge another value into this one.
-    virtual void merge(const Domain &value) = 0;
-
     /// Get memory usage (used byte count) of this abstract value.
     virtual size_t memoryUsage() const = 0;
 
@@ -75,88 +62,35 @@ public:
     /// right after creating a domain.
     virtual void setZero(const llvm::Value *place) = 0;
 
-public: // Widening interface.
-    Widening::DataInterface *getWideningData() const
+public: // Lattice
+    /// Implementing this is mandatory.  Values are compared while
+    /// computing the fixed point.
+    virtual bool operator==(const Domain &value) const = 0;
+
+    /// Inequality is implemented by calling the equality operator.
+    virtual bool operator!=(const Domain &value) const
     {
-        return mWideningData;
+        return !operator==(value);
     }
 
-    /// This class takes ownership of the wideningData memory.
-    void setWideningData(Widening::DataInterface *wideningData);
+    virtual bool operator<(const Domain &value) const = 0;
 
-public: // Instructions operating on values.
-    virtual void add(const Domain &a, const Domain &b);
+    virtual bool operator<=(const Domain &value) const
+    {
+        return operator==(value) || operator<(value);
+    }
 
-    virtual void fadd(const Domain &a, const Domain &b);
+    virtual bool operator>(const Domain &value) const = 0;
 
-    virtual void sub(const Domain &a, const Domain &b);
+    virtual bool operator>=(const Domain &value) const
+    {
+        return operator>(value) || operator==(value);
+    }
 
-    virtual void fsub(const Domain &a, const Domain &b);
+    /// Merge another value into this one.
+    virtual Domain &join(const Domain &value) = 0;
 
-    virtual void mul(const Domain &a, const Domain &b);
-
-    virtual void fmul(const Domain &a, const Domain &b);
-
-    /// Unsigned division
-    virtual void udiv(const Domain &a, const Domain &b);
-
-    /// Signed division.
-    virtual void sdiv(const Domain &a, const Domain &b);
-
-    /// Floating point division.
-    virtual void fdiv(const Domain &a, const Domain &b);
-
-    virtual void urem(const Domain &a, const Domain &b);
-
-    virtual void srem(const Domain &a, const Domain &b);
-
-    virtual void frem(const Domain &a, const Domain &b);
-
-    virtual void shl(const Domain &a, const Domain &b);
-
-    virtual void lshr(const Domain &a, const Domain &b);
-
-    virtual void ashr(const Domain &a, const Domain &b);
-
-    virtual void and_(const Domain &a, const Domain &b);
-
-    virtual void or_(const Domain &a, const Domain &b);
-
-    virtual void xor_(const Domain &a, const Domain &b);
-
-    virtual void icmp(const Domain &a, const Domain &b,
-                      llvm::CmpInst::Predicate predicate);
-
-    virtual void fcmp(const Domain &a, const Domain &b,
-                      llvm::CmpInst::Predicate predicate);
-
-    virtual void trunc(const Domain &value);
-
-    virtual void zext(const Domain &value);
-
-    virtual void sext(const Domain &value);
-
-    virtual void fptrunc(const Domain &value);
-
-    virtual void fpext(const Domain &value);
-
-    virtual void fptoui(const Domain &value);
-
-    virtual void fptosi(const Domain &value);
-
-    virtual void uitofp(const Domain &value);
-
-    virtual void sitofp(const Domain &value);
-
-public: // Lattice
-    /// Get accuracy of the abstract value (0 - 1). In finite-height
-    /// lattices, it is determined by the position of the value in the
-    /// lattice.
-    ///
-    /// Accuracy 0 means that the value represents all possible values
-    /// (top).  Accuracy 1 means that the value represents the most
-    /// precise and exact value (bottom).
-    virtual float accuracy() const;
+    virtual Domain &meet(const Domain &value) = 0;
 
     /// Is it the lowest value.
     virtual bool isBottom() const;
@@ -169,6 +103,88 @@ public: // Lattice
 
     /// Set it to the top value of lattice.
     virtual void setTop();
+
+    /// Get accuracy of the abstract value (0 - 1). In finite-height
+    /// lattices, it is determined by the position of the value in the
+    /// lattice.
+    ///
+    /// Accuracy 0 means that the value represents all possible values
+    /// (top).  Accuracy 1 means that the value represents the most
+    /// precise and exact value (bottom).
+    virtual float accuracy() const;
+
+public: // Instructions operating on values.
+    virtual Domain &add(const Domain &a, const Domain &b);
+
+    virtual Domain &fadd(const Domain &a, const Domain &b);
+
+    virtual Domain &sub(const Domain &a, const Domain &b);
+
+    virtual Domain &fsub(const Domain &a, const Domain &b);
+
+    virtual Domain &mul(const Domain &a, const Domain &b);
+
+    virtual Domain &fmul(const Domain &a, const Domain &b);
+
+    /// Unsigned division
+    virtual Domain &udiv(const Domain &a, const Domain &b);
+
+    /// Signed division.
+    virtual Domain &sdiv(const Domain &a, const Domain &b);
+
+    /// Floating point division.
+    virtual Domain &fdiv(const Domain &a, const Domain &b);
+
+    virtual Domain &urem(const Domain &a, const Domain &b);
+
+    virtual Domain &srem(const Domain &a, const Domain &b);
+
+    virtual Domain &frem(const Domain &a, const Domain &b);
+
+    virtual Domain &shl(const Domain &a, const Domain &b);
+
+    virtual Domain &lshr(const Domain &a, const Domain &b);
+
+    virtual Domain &ashr(const Domain &a, const Domain &b);
+
+    virtual Domain &and_(const Domain &a, const Domain &b);
+
+    virtual Domain &or_(const Domain &a, const Domain &b);
+
+    virtual Domain &xor_(const Domain &a, const Domain &b);
+
+    virtual Domain &icmp(const Domain &a, const Domain &b,
+                         llvm::CmpInst::Predicate predicate);
+
+    virtual Domain &fcmp(const Domain &a, const Domain &b,
+                         llvm::CmpInst::Predicate predicate);
+
+    virtual Domain &trunc(const Domain &value);
+
+    virtual Domain &zext(const Domain &value);
+
+    virtual Domain &sext(const Domain &value);
+
+    virtual Domain &fptrunc(const Domain &value);
+
+    virtual Domain &fpext(const Domain &value);
+
+    virtual Domain &fptoui(const Domain &value);
+
+    virtual Domain &fptosi(const Domain &value);
+
+    virtual Domain &uitofp(const Domain &value);
+
+    virtual Domain &sitofp(const Domain &value);
+
+public: // Widening interface.
+    Widening::DataInterface *getWideningData() const
+    {
+        return mWideningData;
+    }
+
+    /// This class takes ownership of the wideningData memory.
+    void setWideningData(Widening::DataInterface *wideningData);
 
 public: // Memory layout
     virtual bool isValue() const;

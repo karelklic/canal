@@ -22,12 +22,12 @@ Interval::Interval(const Environment &environment,
 }
 
 Interval::Interval(const Environment &environment,
-                   const llvm::APFloat &number)
+                   const llvm::APFloat &constant)
     : Domain(environment),
       mEmpty(false),
       mTop(false),
-      mFrom(number),
-      mTo(number)
+      mFrom(constant),
+      mTo(constant)
 {
 }
 
@@ -37,6 +37,17 @@ Interval::Interval(const Interval &value)
       mTop(value.mTop),
       mFrom(value.mFrom),
       mTo(value.mTo)
+{
+}
+
+Interval::Interval(const Environment &environment,
+                   const llvm::APFloat &from,
+                   const llvm::APFloat &to)
+    : Domain(environment),
+      mEmpty(false),
+      mTop(false),
+      mFrom(from),
+      mTo(to)
 {
 }
 
@@ -190,6 +201,9 @@ Interval::isSingleValue() const
 bool
 Interval::intersects(const Interval &value) const
 {
+    if (isBottom() || value.isBottom())
+        return false;
+
     llvm::APFloat::cmpResult res;
     res = getMax().compare(value.getMin());
     if (res == llvm::APFloat::cmpEqual ||
@@ -221,55 +235,13 @@ Interval::getMin() const
 bool
 Interval::isNaN() const
 {
-    return mFrom.isNaN() || mTo.isNaN();
+    return !mEmpty && !mTop && (mFrom.isNaN() || mTo.isNaN());
 }
 
 Interval *
 Interval::clone() const
 {
     return new Interval(*this);
-}
-
-bool
-Interval::operator==(const Domain& value) const
-{
-    if (this == &value)
-        return true;
-
-    const Interval *interval = dynCast<const Interval*>(&value);
-    if (!interval)
-        return false;
-
-    if (mEmpty)
-        return interval->mEmpty;
-
-    if (isTop())
-        return interval->isTop();
-
-    return mFrom.compare(interval->mFrom) == llvm::APFloat::cmpEqual &&
-        mTo.compare(interval->mTo) == llvm::APFloat::cmpEqual;
-}
-
-void
-Interval::merge(const Domain &value)
-{
-    const Interval &interval = dynCast<const Interval&>(value);
-    if (interval.mEmpty)
-        return;
-
-    mEmpty = false;
-
-    if (interval.isTop())
-    {
-        mTop = true;
-        return;
-    }
-
-    if (mFrom.compare(interval.mFrom) == llvm::APFloat::cmpGreaterThan)
-        mFrom = interval.mFrom;
-
-    if (mTo.compare(interval.mTo) == llvm::APFloat::cmpLessThan)
-        mTo = interval.mTo;
 }
 
 size_t
@@ -303,6 +275,164 @@ Interval::setZero(const llvm::Value *place)
     mEmpty = false;
     mFrom = llvm::APFloat::getZero(mFrom.getSemantics());
     mTo = llvm::APFloat::getZero(mTo.getSemantics());
+}
+
+bool
+Interval::operator==(const Domain& value) const
+{
+    if (this == &value)
+        return true;
+
+    const Interval *interval = dynCast<const Interval*>(&value);
+    if (!interval)
+        return false;
+
+    if (mEmpty)
+        return interval->mEmpty;
+
+    if (isTop())
+        return interval->isTop();
+
+    return mFrom.compare(interval->mFrom) == llvm::APFloat::cmpEqual &&
+        mTo.compare(interval->mTo) == llvm::APFloat::cmpEqual;
+}
+
+bool
+Interval::operator<(const Domain& value) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Interval::operator>(const Domain& value) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Interval &
+Interval::join(const Domain &value)
+{
+    if (isTop())
+        return *this;
+
+    if (value.isBottom())
+        return *this;
+
+    if (value.isTop())
+    {
+        setTop();
+        return *this;
+    }
+
+    const Interval &interval = dynCast<const Interval&>(value);
+
+    if (isBottom())
+    {
+        mFrom = interval.mFrom;
+        mTo = interval.mTo;
+    }
+    else
+    {
+        if (mFrom.compare(interval.mFrom) == llvm::APFloat::cmpGreaterThan)
+            mFrom = interval.mFrom;
+        if (mEmpty || mTo.compare(interval.mTo) == llvm::APFloat::cmpLessThan)
+            mTo = interval.mTo;
+    }
+
+    mEmpty = false;
+    return *this;
+}
+
+Interval &
+Interval::meet(const Domain &value)
+{
+    if (isBottom())
+        return *this;
+
+    if (value.isTop())
+        return *this;
+
+    if (value.isBottom())
+    {
+        setBottom();
+        return *this;
+    }
+
+    const Interval &interval = dynCast<const Interval&>(value);
+    if (isTop())
+    {
+        mFrom = interval.mFrom;
+        mTo = interval.mTo;
+    }
+    else if (intersects(interval))
+    {
+        if (mFrom.compare(interval.mFrom) == llvm::APFloat::cmpLessThan)
+            mFrom = interval.mFrom;
+
+        if (mTo.compare(interval.mTo) == llvm::APFloat::cmpGreaterThan)
+            mTo = interval.mTo;
+    }
+    else
+        mEmpty = true;
+
+    mTop = false;
+    return *this;
+}
+
+bool
+Interval::isBottom() const
+{
+    return mEmpty;
+}
+
+void
+Interval::setBottom()
+{
+    mEmpty = true;
+    mTop = false;
+}
+
+bool
+Interval::isTop() const
+{
+    return !mEmpty && mTop;
+}
+
+void
+Interval::setTop()
+{
+    mEmpty = false;
+    mTop = true;
+}
+
+float
+Interval::accuracy() const
+{
+    if (mEmpty)
+        return 1.0f;
+
+    if (mTop)
+        return 0.0f;
+
+    llvm::APFloat divisor = llvm::APFloat::getLargest(
+        getSemantics(), /*negative=*/false);
+
+    llvm::APFloat::opStatus status = divisor.subtract(
+        llvm::APFloat::getLargest(getSemantics(), /*negative=*/true),
+        llvm::APFloat::rmNearestTiesToEven);
+
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+    llvm::APFloat dividend = mTo;
+    status = dividend.subtract(mFrom, llvm::APFloat::rmNearestTiesToEven);
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+    llvm::APFloat coverage = dividend;
+    status = coverage.divide(divisor, llvm::APFloat::rmNearestTiesToEven);
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+    float result = 1.0f - coverage.convertToFloat();
+    return result > 1.0f ? 1.0f : (result < 0.0f ? 0.0f : result);
 }
 
 // See IntegerInterval.cpp minMax
@@ -435,9 +565,12 @@ minMax(llvm::APFloat& min,
 
 #define OVERFLOW_TO_TOP(op)        \
     if (op != llvm::APFloat::opOK) \
-        return setTop();
+    {                              \
+        setTop();                  \
+        return *this;              \
+    }
 
-void
+Interval &
 Interval::fadd(const Domain &a, const Domain &b)
 {
     const Interval &aa = dynCast<const Interval&>(a),
@@ -445,7 +578,7 @@ Interval::fadd(const Domain &a, const Domain &b)
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
-        return;
+        return *this;
 
     mTop = (aa.mTop || bb.mTop);
     if (!mTop)
@@ -456,9 +589,11 @@ Interval::fadd(const Domain &a, const Domain &b)
         mTo = aa.mTo;
         OVERFLOW_TO_TOP(mTo.add(bb.mFrom, ROUNDING_MODE));
     }
+
+    return *this;
 }
 
-void
+Interval &
 Interval::fsub(const Domain &a, const Domain &b)
 {
     const Interval &aa = dynCast<const Interval&>(a),
@@ -466,7 +601,7 @@ Interval::fsub(const Domain &a, const Domain &b)
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
-        return;
+        return *this;
 
     mTop = (aa.mTop || bb.mTop);
     if (!mTop)
@@ -477,9 +612,11 @@ Interval::fsub(const Domain &a, const Domain &b)
         mTo = aa.mTo;
         OVERFLOW_TO_TOP(mTo.subtract(bb.mFrom, ROUNDING_MODE));
     }
+
+    return *this;
 }
 
-void
+Interval &
 Interval::fmul(const Domain &a, const Domain &b)
 {
     const Interval &aa = dynCast<const Interval&>(a),
@@ -487,7 +624,7 @@ Interval::fmul(const Domain &a, const Domain &b)
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
-        return;
+        return *this;
 
     mTop = (aa.mTop || bb.mTop);
     if (!mTop)
@@ -500,11 +637,14 @@ Interval::fmul(const Domain &a, const Domain &b)
         OVERFLOW_TO_TOP(toFrom.multiply(bb.mFrom, ROUNDING_MODE));
         OVERFLOW_TO_TOP(toTo.multiply(bb.mTo, ROUNDING_MODE));
         mTop = minMax(mFrom, mTo,
-               fromFrom, fromTo, toFrom, toTo);
+                      fromFrom, fromTo,
+                      toFrom, toTo);
     }
+
+    return *this;
 }
 
-void
+Interval &
 Interval::fdiv(const Domain &a, const Domain &b)
 {
     const Interval &aa = dynCast<const Interval&>(a),
@@ -512,7 +652,7 @@ Interval::fdiv(const Domain &a, const Domain &b)
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
-        return;
+        return *this;
 
     mTop = (aa.mTop || bb.mTop);
     if (!mTop)
@@ -525,11 +665,14 @@ Interval::fdiv(const Domain &a, const Domain &b)
         OVERFLOW_TO_TOP(toFrom.divide(bb.mFrom, ROUNDING_MODE));
         OVERFLOW_TO_TOP(toTo.divide(bb.mTo, ROUNDING_MODE));
         mTop = minMax(mFrom, mTo,
-               fromFrom, fromTo, toFrom, toTo);
+                      fromFrom, fromTo,
+                      toFrom, toTo);
     }
+
+    return *this;
 }
 
-void
+Interval &
 Interval::frem(const Domain &a, const Domain &b)
 {
     const Interval &aa = dynCast<const Interval&>(a),
@@ -537,15 +680,16 @@ Interval::frem(const Domain &a, const Domain &b)
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
-        return;
+        return *this;
 
     mTop = (aa.mTop || bb.mTop);
     setTop();
+    return *this;
 }
 
 #undef OVERFLOW_TO_TOP
 
-void
+Interval &
 Interval::uitofp(const Domain &value)
 {
     const Integer::Container &c =
@@ -556,14 +700,15 @@ Interval::uitofp(const Domain &value)
         !c.getInterval().unsignedMax(max))
     {
         setTop();
-        return;
+        return *this;
     }
 
     mFrom = llvm::APFloat(min);
     mTo = llvm::APFloat(max);
+    return *this;
 }
 
-void
+Interval &
 Interval::sitofp(const Domain &value)
 {
     const Integer::Container &c =
@@ -574,66 +719,12 @@ Interval::sitofp(const Domain &value)
         !c.getInterval().signedMax(max))
     {
         setTop();
-        return;
+        return *this;
     }
 
     mFrom = llvm::APFloat(min);
     mTo = llvm::APFloat(max);
-}
-
-float
-Interval::accuracy() const
-{
-    if (mEmpty)
-        return 1.0f;
-
-    if (mTop)
-        return 0.0f;
-
-    llvm::APFloat divisor = llvm::APFloat::getLargest(
-        getSemantics(), /*negative=*/false);
-
-    llvm::APFloat::opStatus status = divisor.subtract(
-        llvm::APFloat::getLargest(getSemantics(), /*negative=*/true),
-        llvm::APFloat::rmNearestTiesToEven);
-
-    CANAL_ASSERT(status == llvm::APFloat::opOK);
-
-    llvm::APFloat dividend = mTo;
-    status = dividend.subtract(mFrom, llvm::APFloat::rmNearestTiesToEven);
-    CANAL_ASSERT(status == llvm::APFloat::opOK);
-
-    llvm::APFloat coverage = dividend;
-    status = coverage.divide(divisor, llvm::APFloat::rmNearestTiesToEven);
-    CANAL_ASSERT(status == llvm::APFloat::opOK);
-
-    float result = 1.0f - coverage.convertToFloat();
-    return result > 1.0f ? 1.0f : (result < 0.0f ? 0.0f : result);
-}
-
-bool
-Interval::isBottom() const
-{
-    return mEmpty;
-}
-
-void
-Interval::setBottom()
-{
-    mEmpty = true;
-}
-
-bool
-Interval::isTop() const
-{
-    return !mEmpty && mTop;
-}
-
-void
-Interval::setTop()
-{
-    mEmpty = false;
-    mTop = true;
+    return *this;
 }
 
 const llvm::Type &

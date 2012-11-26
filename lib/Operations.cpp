@@ -902,7 +902,7 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
 
     Domain *result = aggregate->clone();
     Domain *item = getValueLocation(result, instruction);
-    item->merge(*insertedValue);
+    item->join(*insertedValue);
     state.addFunctionVariable(instruction, result);
 }
 
@@ -1215,7 +1215,7 @@ Operations::phi(const llvm::PHINode &instruction,
             continue;
 
         if (mergedValue)
-            mergedValue->merge(*value);
+            mergedValue->join(*value);
         else
             mergedValue = value->clone();
     }
@@ -1268,7 +1268,7 @@ Operations::select(const llvm::SelectInst &instruction,
     case 2:
         // Both true and false results are possible.
         resultValue = trueValue->clone();
-        resultValue->merge(*falseValue);
+        resultValue->join(*falseValue);
         break;
     default:
         CANAL_DIE();

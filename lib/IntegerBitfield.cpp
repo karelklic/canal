@@ -67,8 +67,8 @@ Bitfield::setBitValue(unsigned pos, int value)
     }
 }
 
-static inline
-void resizeAndClearResult(llvm::APInt &result, const unsigned bitWidth)
+static void
+resizeAndClearResult(llvm::APInt &result, const unsigned bitWidth)
 {
     result = llvm::APInt(bitWidth, 0, false);
 }
@@ -200,27 +200,6 @@ Bitfield::clone() const
     return new Bitfield(*this);
 }
 
-bool
-Bitfield::operator==(const Domain& value) const
-{
-    if (this == &value)
-        return true;
-
-    const Bitfield *other = dynCast<const Bitfield*>(&value);
-    if (!other)
-        return false;
-
-    return mZeroes == other->mZeroes && mOnes == other->mOnes;
-}
-
-void
-Bitfield::merge(const Domain &value)
-{
-    const Bitfield &bits = dynCast<const Bitfield&>(value);
-    mZeroes |= bits.mZeroes;
-    mOnes |= bits.mOnes;
-}
-
 size_t
 Bitfield::memoryUsage() const
 {
@@ -254,67 +233,163 @@ Bitfield::setZero(const llvm::Value *place)
     mOnes = 0;
 }
 
+bool
+Bitfield::operator==(const Domain& value) const
+{
+    if (this == &value)
+        return true;
+
+    const Bitfield *other = dynCast<const Bitfield*>(&value);
+    if (!other)
+        return false;
+
+    return mZeroes == other->mZeroes && mOnes == other->mOnes;
+}
+
+bool
+Bitfield::operator<(const Domain& value) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Bitfield::operator>(const Domain& value) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Bitfield &
+Bitfield::join(const Domain &value)
+{
+    const Bitfield &bits = dynCast<const Bitfield&>(value);
+    mZeroes |= bits.mZeroes;
+    mOnes |= bits.mOnes;
+    return *this;
+}
+
+Bitfield &
+Bitfield::meet(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Bitfield::isBottom() const
+{
+    return mZeroes.countPopulation() == 0 &&
+        mOnes.countPopulation() == 0;
+}
+
 void
+Bitfield::setBottom()
+{
+    mZeroes = mOnes = 0;
+}
+
+bool
+Bitfield::isTop() const
+{
+    return mZeroes.countPopulation() == mZeroes.getBitWidth() &&
+        mOnes.countPopulation() == mOnes.getBitWidth();
+}
+
+void
+Bitfield::setTop()
+{
+#if (LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9)
+    // Old interface replaced in LLVM 2.9.
+    mZeroes.set();
+    mOnes.set();
+#else
+    mZeroes.setAllBits();
+    mOnes.setAllBits();
+#endif
+}
+
+float
+Bitfield::accuracy() const
+{
+    int variableBits = 0;
+    for (unsigned pos = 0; pos < getBitWidth(); ++pos)
+    {
+        if (getBitValue(pos) == 2)
+            ++variableBits;
+    }
+
+    return 1.0 - (variableBits / (float)getBitWidth());
+}
+
+Bitfield &
 Bitfield::add(const Domain &a, const Domain &b)
 {
     setTop();
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::sub(const Domain &a, const Domain &b)
 {
     setTop();
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::mul(const Domain &a, const Domain &b)
 {
     setTop();
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::udiv(const Domain &a, const Domain &b)
 {
     setTop();
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::sdiv(const Domain &a, const Domain &b)
 {
     setTop();
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::urem(const Domain &a, const Domain &b)
 {
     setTop();
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::srem(const Domain &a, const Domain &b)
 {
     setTop();
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::shl(const Domain &a, const Domain &b)
 {
     setTop();
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::lshr(const Domain &a, const Domain &b)
 {
     setTop();
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::ashr(const Domain &a, const Domain &b)
 {
     setTop();
+    return *this;
 }
 
-static void
+static Bitfield &
 bitOperation(Bitfield &result,
              const Domain &a,
              const Domain &b,
@@ -331,6 +406,8 @@ bitOperation(Bitfield &result,
         result.setBitValue(pos, operation(aa.getBitValue(pos),
                                           bb.getBitValue(pos)));
     }
+
+    return result;
 }
 
 // First number in a pair is mOnes, second is mZeroes
@@ -355,10 +432,10 @@ bitAnd(int valueA, int valueB)
         return (valueA == -1 || valueB == -1) ? -1 : 1;
 }
 
-void
+Bitfield &
 Bitfield::and_(const Domain &a, const Domain &b)
 {
-    bitOperation(*this, a, b, bitAnd);
+    return bitOperation(*this, a, b, bitAnd);
 }
 
 // First number in a pair is mOnes, second is mZeroes
@@ -383,10 +460,10 @@ bitOr(int valueA, int valueB)
         return (valueA == 1 || valueB == 1) ? 1 : -1;
 }
 
-void
+Bitfield &
 Bitfield::or_(const Domain &a, const Domain &b)
 {
-    bitOperation(*this, a, b, bitOr);
+    return bitOperation(*this, a, b, bitOr);
 }
 
 // First number in a pair is mOnes, second is mZeroes
@@ -411,10 +488,10 @@ bitXor(int valueA, int valueB)
         return (valueA == 1 || valueB == 1) ? 1 : -1;
 }
 
-void
+Bitfield &
 Bitfield::xor_(const Domain &a, const Domain &b)
 {
-    bitOperation(*this, a, b, bitXor);
+    return bitOperation(*this, a, b, bitXor);
 }
 
 // -1 if a < b, 0 if a == b, 1 if a > b, 2 if unknown
@@ -488,7 +565,7 @@ compareEqual(const Bitfield &a, const Bitfield &b)
     return (wasTop ? -1 : 0);
 }
 
-void
+Bitfield &
 Bitfield::icmp(const Domain &a, const Domain &b,
                llvm::CmpInst::Predicate predicate)
 {
@@ -499,14 +576,15 @@ Bitfield::icmp(const Domain &a, const Domain &b,
     if (aa.isTop() || bb.isTop())
     {
         setTop(); // Could be both
-        return;
+        return *this;
     }
 
     if (aa.isBottom() || bb.isBottom())
     {
         setBottom(); // Undefined
-        return;
+        return *this;
     }
+
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
 
     switch (predicate)
@@ -660,9 +738,10 @@ Bitfield::icmp(const Domain &a, const Domain &b,
     default:
         CANAL_DIE();
     }
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::fcmp(const Domain &a, const Domain &b,
                llvm::CmpInst::Predicate predicate)
 {
@@ -689,17 +768,20 @@ Bitfield::fcmp(const Domain &a, const Domain &b,
     default:
         CANAL_DIE();
     }
+
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::trunc(const Domain &value)
 {
     const Bitfield &bitfield = dynCast<const Bitfield&>(value);
     mZeroes = APIntUtils::trunc(bitfield.mZeroes, getBitWidth());
     mOnes = APIntUtils::trunc(bitfield.mOnes, getBitWidth());
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::zext(const Domain &value)
 {
     const Bitfield &bitfield = dynCast<const Bitfield&>(value);
@@ -708,72 +790,31 @@ Bitfield::zext(const Domain &value)
 
     for (unsigned i = bitfield.mZeroes.getBitWidth(); i < getBitWidth(); ++i)
         APIntUtils::setBit(mZeroes, i);
+
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::sext(const Domain &value)
 {
     const Bitfield &bitfield = dynCast<const Bitfield&>(value);
     mZeroes = APIntUtils::sext(bitfield.mZeroes, getBitWidth());
     mOnes = APIntUtils::sext(bitfield.mOnes, getBitWidth());
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::fptoui(const Domain &value)
 {
     setTop();
+    return *this;
 }
 
-void
+Bitfield &
 Bitfield::fptosi(const Domain &value)
 {
     setTop();
-}
-
-float
-Bitfield::accuracy() const
-{
-    int variableBits = 0;
-    for (unsigned pos = 0; pos < getBitWidth(); ++pos)
-    {
-        if (getBitValue(pos) == 2)
-            ++variableBits;
-    }
-
-    return 1.0 - (variableBits / (float)getBitWidth());
-}
-
-bool
-Bitfield::isBottom() const
-{
-    return mZeroes.countPopulation() == 0 &&
-        mOnes.countPopulation() == 0;
-}
-
-void
-Bitfield::setBottom()
-{
-    mZeroes = mOnes = 0;
-}
-
-bool
-Bitfield::isTop() const
-{
-    return mZeroes.countPopulation() == mZeroes.getBitWidth() &&
-        mOnes.countPopulation() == mOnes.getBitWidth();
-}
-
-void
-Bitfield::setTop()
-{
-#if (LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9)
-    // Old interface replaced in LLVM 2.9.
-    mZeroes.set();
-    mOnes.set();
-#else
-    mZeroes.setAllBits();
-    mOnes.setAllBits();
-#endif
+    return *this;
 }
 
 const llvm::IntegerType &

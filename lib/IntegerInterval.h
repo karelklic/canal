@@ -39,6 +39,11 @@ public:
     Interval(const Environment &environment,
              const llvm::APInt &constant);
 
+    /// @brief Standard constructor.
+    Interval(const Environment &environment,
+             const llvm::APInt &from,
+             const llvm::APInt &to);
+
     /// Copy constructor.
     Interval(const Interval &value);
 
@@ -93,60 +98,31 @@ public:
     /// Returns true if the interval represents a unsigned single value.
     bool isUnsignedSingleValue() const;
 
+    /// Does the interval represent signle bit that is set to 1?
+    bool isTrue() const;
+
+    /// Does the interval represent signle bit that is set to 0?
+    bool isFalse() const;
+
 public: // Implementation of Domain.
-    /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Interval *clone() const;
-    /// Implementation of Domain::operator==().
-    virtual bool operator==(const Domain& value) const;
-    /// Implementation of Domain::merge().
-    virtual void merge(const Domain &value);
-    /// Implementation of Domain::memoryUsage().
+
     virtual size_t memoryUsage() const;
-    /// Implementation of Domain::toString().
+
     virtual std::string toString() const;
-    /// Implementation of Domain::setZero().
+
     virtual void setZero(const llvm::Value *place);
 
-    /// Implementation of Domain::add().
-    virtual void add(const Domain &a, const Domain &b);
-    /// Implementation of Domain::sub().
-    virtual void sub(const Domain &a, const Domain &b);
-    /// Implementation of Domain::mul().
-    virtual void mul(const Domain &a, const Domain &b);
-    /// Implementation of Domain::udiv().
-    virtual void udiv(const Domain &a, const Domain &b);
-    /// Implementation of Domain::sdiv().
-    virtual void sdiv(const Domain &a, const Domain &b);
-    /// Implementation of Domain::urem().
-    virtual void urem(const Domain &a, const Domain &b);
-    /// Implementation of Domain::srem().
-    virtual void srem(const Domain &a, const Domain &b);
-    /// Implementation of Domain::shl().
-    virtual void shl(const Domain &a, const Domain &b);
-    /// Implementation of Domain::lshr().
-    virtual void lshr(const Domain &a, const Domain &b);
-    /// Implementation of Domain::ashr().
-    virtual void ashr(const Domain &a, const Domain &b);
-    /// Implementation of Domain::and_().
-    virtual void and_(const Domain &a, const Domain &b);
-    /// Implementation of Domain::or_().
-    virtual void or_(const Domain &a, const Domain &b);
-    /// Implementation of Domain::xor_().
-    virtual void xor_(const Domain &a, const Domain &b);
-    /// Implementation of Domain::icmp().
-    virtual void icmp(const Domain &a, const Domain &b,
-                      llvm::CmpInst::Predicate predicate);
-    /// Implementation of Domain::fcmp().
-    virtual void fcmp(const Domain &a, const Domain &b,
-                      llvm::CmpInst::Predicate predicate);
-    virtual void trunc(const Domain &value);
-    virtual void zext(const Domain &value);
-    virtual void sext(const Domain &value);
-    virtual void fptoui(const Domain &value);
-    virtual void fptosi(const Domain &value);
+    virtual bool operator==(const Domain& value) const;
 
-    virtual float accuracy() const;
+    virtual bool operator<(const Domain &value) const;
+
+    virtual bool operator>(const Domain &value) const;
+
+    virtual Interval &join(const Domain &value);
+
+    virtual Interval &meet(const Domain &value);
 
     virtual bool isBottom() const;
 
@@ -155,6 +131,50 @@ public: // Implementation of Domain.
     virtual bool isTop() const;
 
     virtual void setTop();
+
+    virtual float accuracy() const;
+
+    virtual Interval &add(const Domain &a, const Domain &b);
+
+    virtual Interval &sub(const Domain &a, const Domain &b);
+
+    virtual Interval &mul(const Domain &a, const Domain &b);
+
+    virtual Interval &udiv(const Domain &a, const Domain &b);
+
+    virtual Interval &sdiv(const Domain &a, const Domain &b);
+
+    virtual Interval &urem(const Domain &a, const Domain &b);
+
+    virtual Interval &srem(const Domain &a, const Domain &b);
+
+    virtual Interval &shl(const Domain &a, const Domain &b);
+
+    virtual Interval &lshr(const Domain &a, const Domain &b);
+
+    virtual Interval &ashr(const Domain &a, const Domain &b);
+
+    virtual Interval &and_(const Domain &a, const Domain &b);
+
+    virtual Interval &or_(const Domain &a, const Domain &b);
+
+    virtual Interval &xor_(const Domain &a, const Domain &b);
+
+    virtual Interval &icmp(const Domain &a, const Domain &b,
+                           llvm::CmpInst::Predicate predicate);
+
+    virtual Interval &fcmp(const Domain &a, const Domain &b,
+                           llvm::CmpInst::Predicate predicate);
+
+    virtual Interval &trunc(const Domain &value);
+
+    virtual Interval &zext(const Domain &value);
+
+    virtual Interval &sext(const Domain &value);
+
+    virtual Interval &fptoui(const Domain &value);
+
+    virtual Interval &fptosi(const Domain &value);
 };
 
 } // namespace Integer
