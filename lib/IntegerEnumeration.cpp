@@ -5,6 +5,8 @@
 namespace Canal {
 namespace Integer {
 
+unsigned int Enumeration::ENUMERATION_THRESHOLD = 40;
+
 Enumeration::Enumeration(const Environment &environment,
                          unsigned bitWidth)
     : Domain(environment), mTop(false), mBitWidth(bitWidth)
@@ -229,7 +231,7 @@ Enumeration::join(const Domain &value)
         mValues.insert(enumeration.mValues.begin(),
                        enumeration.mValues.end());
 
-        if (mValues.size() > mMaxSize)
+        if (mValues.size() > ENUMERATION_THRESHOLD)
             setTop();
     }
 
@@ -680,7 +682,7 @@ Enumeration::applyOperation(const Domain &a,
                 }
             }
 
-            if (mValues.size() > mMaxSize)
+            if (mValues.size() > ENUMERATION_THRESHOLD)
             {
                 setTop();
                 return *this;

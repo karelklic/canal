@@ -16,7 +16,7 @@ public:
 
     unsigned mBitWidth;
 
-    static const unsigned int mMaxSize = 40;
+    static unsigned int ENUMERATION_THRESHOLD;
 
 public:
     /// Initializes to the lowest value.
