@@ -46,6 +46,11 @@ CMakeCache.txt
 /tests/IntegerIntervalTest
 /tests/ICMPTest
 /tests/MergeTest
+/tests/ArrayExactSizeTest
+/tests/ArraySingleItemTest
+/tests/FloatIntervalTest
+/tests/IntegerBitfieldTest
+/tests/IntegerEnumerationTest
 /tests/*.o
 
 /wrappers/config.py
