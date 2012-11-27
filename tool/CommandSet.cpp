@@ -32,7 +32,8 @@ CommandSet::getCompletionMatches(const std::vector<std::string> &args,
         if (optionName.substr(0, arg.length()) == arg)
             result.push_back(optionName);
     }
-    
+
+    std::sort(result.begin(), result.end());
     return result;
 }
 
