@@ -6,6 +6,7 @@
 #include "Utils.h"
 #include "ArraySingleItem.h"
 #include "ArrayExactSize.h"
+#include "ArrayStringPrefix.h"
 #include "FloatInterval.h"
 #include "Pointer.h"
 #include "PointerUtils.h"
@@ -52,24 +53,8 @@ Constructors::create(const llvm::Type &type) const
 
     if (type.isArrayTy() || type.isVectorTy())
     {
-        uint64_t size;
-        if (type.isArrayTy())
-        {
-            const llvm::ArrayType &arrayType =
-                llvm::cast<llvm::ArrayType>(type);
-
-            size = arrayType.getNumElements();
-        }
-        else
-        {
-            const llvm::VectorType &vectorType =
-                llvm::cast<llvm::VectorType>(type);
-
-            size = vectorType.getNumElements();
-        }
-
-        llvm::OwningPtr<Domain> value(create(*type.getContainedType(0)));
-        return createArray(size, *value);
+        const llvm::SequentialType &stype = llvmCast<llvm::SequentialType>(type);
+        return createArray(stype);
     }
 
     if (type.isStructTy())
@@ -210,7 +195,7 @@ Constructors::create(const llvm::Constant &value,
                                     state));
         }
 
-        return createArray(values);
+        return createArray(*vectorValue.getType(), values);
     }
 
     if (llvm::isa<llvm::ConstantArray>(value))
@@ -228,7 +213,7 @@ Constructors::create(const llvm::Constant &value,
                                     state));
         }
 
-        return createArray(values);
+        return createArray(*arrayValue.getType(), values);
     }
 
 #if (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1) || LLVM_VERSION_MAJOR > 3
@@ -285,7 +270,7 @@ Constructors::create(const llvm::Constant &value,
 Domain *
 Constructors::createInteger(unsigned bitWidth) const
 {
-    Integer::Container* container = new Integer::Container(mEnvironment);
+    Integer::Container *container = new Integer::Container(mEnvironment);
     container->mValues.push_back(new Integer::Bitfield(mEnvironment, bitWidth));
     container->mValues.push_back(new Integer::Enumeration(mEnvironment, bitWidth));
     container->mValues.push_back(new Integer::Interval(mEnvironment, bitWidth));
@@ -293,8 +278,9 @@ Constructors::createInteger(unsigned bitWidth) const
 }
 
 Domain *
-Constructors::createInteger(const llvm::APInt &number) const {
-    Integer::Container* container = new Integer::Container(mEnvironment);
+Constructors::createInteger(const llvm::APInt &number) const
+{
+    Integer::Container *container = new Integer::Container(mEnvironment);
     container->mValues.push_back(new Integer::Bitfield(mEnvironment, number));
     container->mValues.push_back(new Integer::Enumeration(mEnvironment, number));
     container->mValues.push_back(new Integer::Interval(mEnvironment, number));
@@ -302,37 +288,58 @@ Constructors::createInteger(const llvm::APInt &number) const {
 }
 
 Domain *
-Constructors::createFloat(const llvm::fltSemantics &semantics) const {
+Constructors::createFloat(const llvm::fltSemantics &semantics) const
+{
     return new Float::Interval(mEnvironment, semantics);
 }
 
 Domain *
-Constructors::createFloat(const llvm::APFloat &number) const {
+Constructors::createFloat(const llvm::APFloat &number) const
+{
     return new Float::Interval(mEnvironment, number);
 }
 
 Domain *
-Constructors::createArray(Domain *size, Domain *value) const {
-    return new Array::SingleItem(mEnvironment, size, value);
+Constructors::createArray(const llvm::SequentialType &type) const
+{
+    Integer::Container *container = new Integer::Container(mEnvironment);
+    container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
+    container->mValues.push_back(new Array::SingleItem(mEnvironment, type));
+    container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
+    return container;
 }
 
 Domain *
-Constructors::createArray(uint64_t size, const Domain &value) const {
-    return new Array::ExactSize(mEnvironment, size, value);
+Constructors::createArray(const llvm::SequentialType &type,
+                          Domain *size) const
+{
+    Integer::Container *container = new Integer::Container(mEnvironment);
+    container->mValues.push_back(new Array::ExactSize(mEnvironment, type, size));
+    container->mValues.push_back(new Array::SingleItem(mEnvironment, type, size));
+    container->mValues.push_back(new Array::StringPrefix(mEnvironment, type, size));
+    return container;
 }
 
 Domain *
-Constructors::createArray(const std::vector<Domain*> &values) const {
-    return new Array::ExactSize(mEnvironment, values);
+Constructors::createArray(const llvm::SequentialType &type,
+                        const std::vector<Domain*> &values) const
+{
+    Integer::Container *container = new Integer::Container(mEnvironment);
+    container->mValues.push_back(new Array::ExactSize(mEnvironment, type, values));
+    container->mValues.push_back(new Array::SingleItem(mEnvironment, type, values));
+    container->mValues.push_back(new Array::StringPrefix(mEnvironment, type, values));
+    return container;
 }
 
 Domain *
-Constructors::createPointer(const llvm::Type &type) const {
+Constructors::createPointer(const llvm::Type &type) const
+{
     return new Pointer::Pointer(mEnvironment, type);
 }
 
 Domain *
-Constructors::createStructure(const std::vector<Domain*> &members) const {
+Constructors::createStructure(const std::vector<Domain*> &members) const
+{
     return new Structure(mEnvironment, members);
 }
 

@@ -1,25 +1,68 @@
 #include "ArraySingleItem.h"
 #include "Utils.h"
 #include "IntegerContainer.h"
+#include "Environment.h"
+#include "Constructors.h"
 
 namespace Canal {
 namespace Array {
 
 SingleItem::SingleItem(const Environment &environment,
-                       Domain* size,
-                       Domain* value)
-    : Domain(environment), mValue(value), mSize(size)
+                       const llvm::SequentialType &type)
+    : Domain(environment), mType(type)
 {
+    const llvm::Type &elementType = *type.getElementType();
+    mValue = environment.getConstructors().create(elementType);
+
+    uint64_t count = 0;
+
+    const llvm::ArrayType *array = llvm::dyn_cast<llvm::ArrayType>(&type);
+    if (array)
+        count = array->getNumElements();
+
+    const llvm::VectorType *vector = llvm::dyn_cast<llvm::VectorType>(&type);
+    if (vector)
+        count = vector->getNumElements();
+
+    mSize = environment.getConstructors().createInteger(llvm::APInt(64, count));
+    if (count == 0)
+        mSize->setTop();
+}
+
+SingleItem::SingleItem(const Environment &environment,
+                       const llvm::SequentialType &type,
+                       const std::vector<Domain*> &values)
+    : Domain(environment), mType(type)
+{
+    mSize = environment.getConstructors().createInteger(llvm::APInt(64, values.size()));
+
+    const llvm::Type &elementType = *type.getElementType();
+    mValue = environment.getConstructors().create(elementType);
+
+    std::vector<Domain*>::const_iterator it = values.begin(),
+        itend = values.end();
+
+    for (; it != itend; ++it)
+    {
+        mValue->join(**it);
+        delete *it;
+    }
+}
+
+SingleItem::SingleItem(const Environment &environment,
+                       const llvm::SequentialType &type,
+                       Domain* size)
+    : Domain(environment), mSize(size), mType(type)
+{
+    const llvm::Type &elementType = *type.getElementType();
+    mValue = environment.getConstructors().create(elementType);
 }
 
 SingleItem::SingleItem(const SingleItem &value)
-    : Domain(value), mValue(value.mValue), mSize(value.mSize)
+    : Domain(value), mValue(value.mValue), mSize(value.mSize), mType(value.mType)
 {
-    if (mValue)
-        mValue = mValue->clone();
-
-    if (mSize)
-        mSize = mSize->clone();
+    mValue = mValue->clone();
+    mSize = mSize->clone();
 }
 
 SingleItem::~SingleItem()
@@ -38,8 +81,8 @@ size_t
 SingleItem::memoryUsage() const
 {
     size_t size = sizeof(SingleItem);
-    size += (mValue ? mValue->memoryUsage() : 0);
-    size += (mSize ? mSize->memoryUsage() : 0);
+    size += mValue->memoryUsage();
+    size += mSize->memoryUsage();
     return size;
 }
 
@@ -67,16 +110,10 @@ SingleItem::operator==(const Domain &value) const
     if (!singleItem)
         return false;
 
-    if ((mSize && !singleItem->mSize) || (!mSize && singleItem->mSize))
+    if (*mValue != *singleItem->mValue)
         return false;
 
-    if ((mValue && !singleItem->mValue) || (!mValue && singleItem->mValue))
-        return false;
-
-    if (mValue && *mValue != *singleItem->mValue)
-        return false;
-
-    if (mSize && *mSize != *singleItem->mSize)
+    if (*mSize != *singleItem->mSize)
         return false;
 
     return true;
@@ -85,13 +122,43 @@ SingleItem::operator==(const Domain &value) const
 bool
 SingleItem::operator<(const Domain& value) const
 {
-    CANAL_NOT_IMPLEMENTED();
+    if (this == &value)
+        return false;
+
+    const SingleItem *singleItem =
+        dynCast<const SingleItem*>(&value);
+
+    if (!singleItem)
+        return false;
+
+    if (!(*mValue < *singleItem->mValue))
+        return false;
+
+    if (!(*mSize < *singleItem->mSize))
+        return false;
+
+    return true;
 }
 
 bool
 SingleItem::operator>(const Domain& value) const
 {
-    CANAL_NOT_IMPLEMENTED();
+    if (this == &value)
+        return false;
+
+    const SingleItem *singleItem =
+        dynCast<const SingleItem*>(&value);
+
+    if (!singleItem)
+        return false;
+
+    if (!(*mValue > *singleItem->mValue))
+        return false;
+
+    if (!(*mSize > *singleItem->mSize))
+        return false;
+
+    return true;
 }
 
 SingleItem &

@@ -11,20 +11,29 @@ namespace Array {
 /// members separately, not losing precision at all.
 class ExactSize : public Domain, public Interface
 {
-public:
+    /// Empty array indicates the top value.
     std::vector<Domain*> mValues;
 
+    /// The type of the arrayx.
+    const llvm::SequentialType &mType;
+
 public:
-    /// @param elementValue
-    ///   This class does not take ownership of this value.
+    /// Standard constructor.
+    ///
+    /// If the type is suitable for exact size array, bottom domains
+    /// of element type are created in mValues.
     ExactSize(const Environment &environment,
-              const uint64_t size,
-              const Domain &elementValue);
+              const llvm::SequentialType &type);
 
     /// @param values
     ///   This class takes ownership of the values.
     ExactSize(const Environment &environment,
+              const llvm::SequentialType &type,
               const std::vector<Domain*> &values);
+
+    ExactSize(const Environment &environment,
+              const llvm::SequentialType &type,
+              Domain *size);
 
     /// Copy constructor.
     ExactSize(const ExactSize &value);
@@ -113,6 +122,23 @@ public: // Implementation of Domain.
     virtual ExactSize &fcmp(const Domain &a, const Domain &b,
                             llvm::CmpInst::Predicate predicate);
 
+    virtual bool isValue() const
+    {
+        return true;
+    }
+
+    /// Covariant return type.
+    virtual const llvm::SequentialType &getValueType() const;
+
+    virtual bool hasValueExactSize() const
+    {
+        return true;
+    }
+
+    virtual Domain *getValueCell(uint64_t offset) const;
+
+    virtual void mergeValueCell(uint64_t offset, const Domain &value);
+
 public: // Implementation of Array::Interface.
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 
@@ -121,6 +147,16 @@ public: // Implementation of Array::Interface.
     virtual void setItem(const Domain &offset, const Domain &value);
 
     virtual void setItem(uint64_t offset, const Domain &value);
+
+private:
+    ExactSize &binaryOperation(const Domain &a,
+                               const Domain &b,
+                               Domain::BinaryOperation operation);
+
+    ExactSize &cmpOperation(const Domain &a,
+                            const Domain &b,
+                            llvm::CmpInst::Predicate predicate,
+                            Domain::CmpOperation operation);
 };
 
 } // namespace Array

@@ -607,7 +607,6 @@ Container::isValue() const
 const llvm::Type &
 Container::getValueType() const
 {
-    const llmv::Type *type = NULL;
     std::vector<Domain*>::const_iterator it = mValues.begin(),
         itend = mValues.end();
 
@@ -617,7 +616,7 @@ Container::getValueType() const
             return (*it)->getValueType();
     }
 
-    CANAL_FATAL_ERROR();
+    CANAL_FATAL_ERROR("No value found.");
 }
 
 bool
@@ -647,7 +646,7 @@ Container::getValueAbstractSize() const
             return (*it)->getValueAbstractSize();
     }
 
-    CANAL_FATAL_ERROR();
+    CANAL_FATAL_ERROR("No value found.");
 }
 
 Domain *

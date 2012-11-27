@@ -160,7 +160,7 @@ Target::merge(const Target &target)
 
         std::vector<Domain*>::const_iterator it2 = target.mElementOffsets.begin();
         for (; it1 != it1end; ++it1, ++it2)
-            (*it1)->merge(**it2);
+            (*it1)->join(**it2);
 
         break;
     }

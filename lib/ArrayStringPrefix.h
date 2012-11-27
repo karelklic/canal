@@ -15,14 +15,25 @@ public:
     std::string mPrefix;
     bool mIsBottom;
 
-public:
-    /// Standard constructor
-    StringPrefix(const Environment &environment);
+    const llvm::SequentialType &mType;
 
-    /// @param value
-    ///   This class does not take ownership of this value.
+public:
+    /// Standard constructor.
     StringPrefix(const Environment &environment,
-              const std::string &value);
+                 const llvm::SequentialType &type);
+
+    /// @param values
+    ///   This class takes ownership of the values.
+    StringPrefix(const Environment &environment,
+                 const llvm::SequentialType &type,
+                 const std::vector<Domain*> &values);
+
+    StringPrefix(const Environment &environment,
+                 const llvm::SequentialType &type,
+                 Domain *size);
+
+    StringPrefix(const Environment &environment,
+                 const std::string &value);
 
 public: // Implementation of Domain.
     /// Covariant return type.
@@ -95,6 +106,25 @@ public: // Implementation of Domain.
 
     virtual StringPrefix &fcmp(const Domain &a, const Domain &b,
                                llvm::CmpInst::Predicate predicate);
+
+    virtual bool isValue() const
+    {
+        return true;
+    }
+
+    /// Covariant return type.
+    virtual const llvm::SequentialType &getValueType() const;
+
+    virtual bool hasValueExactSize() const
+    {
+        return false;
+    }
+
+    virtual Domain *getValueAbstractSize() const;
+
+    virtual Domain *getValueCell(uint64_t offset) const;
+
+    virtual void mergeValueCell(uint64_t offset, const Domain &value);
 
 public: // Implementation of Array::Interface.
     virtual std::vector<Domain*> getItem(const Domain &offset) const;

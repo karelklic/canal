@@ -230,7 +230,7 @@ Pointer::store(const Domain &value, State &state) const
         if (mTargets.size() == 1 && destinations.size() == 1)
         {
             (*destinations.begin())->setBottom();
-            (*destinations.begin())->merge(value);
+            (*destinations.begin())->join(value);
         }
         else
         {
@@ -241,7 +241,7 @@ Pointer::store(const Domain &value, State &state) const
                 itdend = destinations.end();
 
             for (; itd != itdend; ++itd)
-                (*itd)->merge(value);
+                (*itd)->join(value);
         }
 
         if (state.hasGlobalBlock(*it->second->mTarget))

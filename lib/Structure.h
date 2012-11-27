@@ -50,6 +50,23 @@ public: // Implementation of Domain.
 
     virtual float accuracy() const;
 
+    virtual bool isValue() const
+    {
+        return true;
+    }
+
+    /// Covariant return type.
+    virtual const llvm::StructType &getValueType() const;
+
+    virtual bool hasValueExactSize() const
+    {
+        return true;
+    }
+
+    virtual Domain *getValueCell(uint64_t offset) const;
+
+    virtual void mergeValueCell(uint64_t offset, const Domain &value);
+
 public: // Implementation of Array::Interface.
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 

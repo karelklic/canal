@@ -1,22 +1,66 @@
 #include "ArrayStringPrefix.h"
 #include "IntegerContainer.h"
 #include "Utils.h"
+#include "Environment.h"
 
 namespace Canal {
 namespace Array {
 
-StringPrefix::StringPrefix(const Environment &environment)
-    : Domain(environment)
+StringPrefix::StringPrefix(const Environment &environment,
+                           const llvm::SequentialType &type)
+    : Domain(environment), mIsBottom(true), mType(type)
 {
-    mIsBottom = true;
+    llvm::Type *int8 = llvm::Type::getInt8Ty(environment.getContext());
+    if (mType.getElementType() != int8)
+        setTop();
 }
 
 StringPrefix::StringPrefix(const Environment &environment,
-                     const std::string &value)
-    : Domain(environment)
+                           const llvm::SequentialType &type,
+                           const std::vector<Domain*> &values)
+    : Domain(environment), mIsBottom(true), mType(type)
 {
-    mPrefix = value;
-    mIsBottom = false;
+    llvm::Type *int8 = llvm::Type::getInt8Ty(environment.getContext());
+
+    std::vector<Domain*>::const_iterator it = values.begin(),
+        itend = values.end();
+
+    if (mType.getElementType() != int8)
+        setTop();
+
+    for (; it != itend; ++it)
+    {
+        if (!isTop())
+        {
+            // TODO: get the characters out of values and append them
+            // to mPrefix instead of setting to top.
+            setTop();
+        }
+
+        delete *it;
+    }
+}
+
+StringPrefix::StringPrefix(const Environment &environment,
+                           const llvm::SequentialType &type,
+                           Domain *size)
+    : Domain(environment), mIsBottom(true), mType(type)
+{
+    llvm::Type *int8 = llvm::Type::getInt8Ty(environment.getContext());
+    if (mType.getElementType() != int8)
+        setTop();
+
+    delete size;
+}
+
+StringPrefix::StringPrefix(const Environment &environment,
+                           const std::string &value)
+    : Domain(environment),
+      mPrefix(value),
+      mIsBottom(false),
+      mType(*llvm::ArrayType::get(llvm::Type::getInt8Ty(environment.getContext()),
+                                  value.size()))
+{
 }
 
 StringPrefix *

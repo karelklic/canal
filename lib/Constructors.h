@@ -45,11 +45,13 @@ public:
 
     Domain *createFloat(const llvm::APFloat &number) const;
 
-    Domain *createArray(Domain *size, Domain *value) const;
+    Domain *createArray(const llvm::SequentialType &type) const;
 
-    Domain *createArray(uint64_t size, const Domain &value) const;
+    Domain *createArray(const llvm::SequentialType &type,
+                        Domain *size) const;
 
-    Domain *createArray(const std::vector<Domain*> &values) const;
+    Domain *createArray(const llvm::SequentialType &type,
+                        const std::vector<Domain*> &values) const;
 
     Domain *createPointer(const llvm::Type &type) const;
 

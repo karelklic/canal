@@ -126,6 +126,23 @@ public: // Implementation of Domain.
     virtual bool isBottom() const;
 
     virtual void setBottom();
+
+    virtual bool isValue() const
+    {
+        return true;
+    }
+
+    /// Covariant return type.
+    virtual const llvm::PointerType &getValueType() const;
+
+    virtual bool hasValueExactSize() const
+    {
+        return true;
+    }
+
+    virtual Domain *getValueCell(uint64_t offset) const;
+
+    virtual void mergeValueCell(uint64_t offset, const Domain &value);
 };
 
 } // namespace Pointer

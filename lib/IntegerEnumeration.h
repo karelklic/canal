@@ -152,6 +152,23 @@ public: // Implementation of Domain.
 
     virtual Enumeration &fptosi(const Domain &value);
 
+    virtual bool isValue() const
+    {
+        return true;
+    }
+
+    /// Covariant return type.
+    virtual const llvm::IntegerType &getValueType() const;
+
+    virtual bool hasValueExactSize() const
+    {
+        return true;
+    }
+
+    virtual Domain *getValueCell(uint64_t offset) const;
+
+    virtual void mergeValueCell(uint64_t offset, const Domain &value);
+
 protected:
     Enumeration &applyOperation(const Domain &a,
                                 const Domain &b,

@@ -1,7 +1,7 @@
 #include "Domain.h"
 #include "Utils.h"
 #include "WideningDataInterface.h"
-#include <typeinfo>
+#include "Environment.h"
 
 namespace Canal {
 
@@ -277,7 +277,7 @@ Domain::getValueCell(uint64_t offset) const
 }
 
 void
-Domain::setValueCell(uint64_t offset, const Domain &value)
+Domain::mergeValueCell(uint64_t offset, const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }

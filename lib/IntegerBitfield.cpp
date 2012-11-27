@@ -3,6 +3,7 @@
 #include "APIntUtils.h"
 #include "FloatInterval.h"
 #include "Environment.h"
+#include "Constructors.h"
 
 namespace Canal {
 namespace Integer {
