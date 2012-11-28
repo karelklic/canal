@@ -128,9 +128,9 @@ testIcmp()
     CANAL_ASSERT(result.icmp(const0, from0to1, llvm::CmpInst::ICMP_EQ).isTop());
     CANAL_ASSERT(result.icmp(const0, from0to1, llvm::CmpInst::ICMP_NE).isTop());
     CANAL_ASSERT(result.icmp(const0, from0to1, llvm::CmpInst::ICMP_SGT).isFalse());
-    CANAL_ASSERT(result.icmp(const0, from0to1, llvm::CmpInst::ICMP_SGE).isFalse());
+    CANAL_ASSERT(result.icmp(const0, from0to1, llvm::CmpInst::ICMP_SGE).isTop());
     CANAL_ASSERT(result.icmp(const0, from0to1, llvm::CmpInst::ICMP_UGT).isFalse());
-    CANAL_ASSERT(result.icmp(const0, from0to1, llvm::CmpInst::ICMP_UGE).isFalse());
+    CANAL_ASSERT(result.icmp(const0, from0to1, llvm::CmpInst::ICMP_UGE).isTop());
     CANAL_ASSERT(result.icmp(const0, from0to1, llvm::CmpInst::ICMP_SLT).isTop());
     CANAL_ASSERT(result.icmp(const0, from0to1, llvm::CmpInst::ICMP_SLE).isTrue());
     CANAL_ASSERT(result.icmp(const0, from0to1, llvm::CmpInst::ICMP_ULT).isTop());

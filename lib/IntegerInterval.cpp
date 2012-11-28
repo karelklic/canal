@@ -1075,7 +1075,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mUnsignedFrom.uge(bb.mUnsignedTo))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (!aa.mUnsignedTo.ule(bb.mUnsignedFrom))
+        else if (!aa.mUnsignedTo.ult(bb.mUnsignedFrom))
             setTop();
 
         break;
@@ -1138,7 +1138,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mSignedFrom.sge(bb.mSignedTo))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (!aa.mSignedTo.sle(bb.mSignedFrom))
+        else if (!aa.mSignedTo.slt(bb.mSignedFrom))
             setTop();
 
         break;
