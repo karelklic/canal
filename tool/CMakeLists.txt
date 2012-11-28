@@ -17,6 +17,7 @@ add_executable(canal-tool
     CommandQuit.cpp
     CommandRun.cpp
     Commands.cpp
+    CommandSet.cpp
     CommandShell.cpp
     CommandShow.cpp
     CommandStart.cpp

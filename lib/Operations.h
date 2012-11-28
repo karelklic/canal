@@ -33,7 +33,10 @@ public:
 
     virtual ~Operations() {}
 
-    const Environment &getEnvironment() const { return mEnvironment; }
+    const Environment &getEnvironment() const
+    {
+        return mEnvironment;
+    }
 
     /// Interprets current instruction.
     void interpretInstruction(const llvm::Instruction &instruction,

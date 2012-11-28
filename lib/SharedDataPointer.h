@@ -93,21 +93,9 @@ public:
         return mPointer != ptr.mPointer;
     }
 
-    T &operator*()
-    {
-        considerClone();
-        return *mPointer;
-    }
-
     const T &operator*() const
     {
         return *mPointer;
-    }
-
-    T *operator->()
-    {
-        considerClone();
-        return mPointer;
     }
 
     const T *operator->() const
@@ -118,6 +106,12 @@ public:
     bool operator!() const
     {
         return !mPointer;
+    }
+
+    T *mutable_()
+    {
+        considerClone();
+        return mPointer;
     }
 
     const T *data() const

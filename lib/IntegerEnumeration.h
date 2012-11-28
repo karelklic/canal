@@ -16,7 +16,7 @@ public:
 
     unsigned mBitWidth;
 
-    static const unsigned int mMaxSize = 40;
+    static unsigned int ENUMERATION_THRESHOLD;
 
 public:
     /// Initializes to the lowest value.
@@ -25,12 +25,15 @@ public:
 
     /// Initializes to the given value.
     Enumeration(const Environment &environment,
-                const llvm::APInt &number);
+                const llvm::APInt &constant);
 
     /// Copy constructor.
     Enumeration(const Enumeration &value);
 
-    unsigned getBitWidth() const { return mBitWidth; }
+    unsigned getBitWidth() const
+    {
+        return mBitWidth;
+    }
 
     /// Lowest signed number represented by this abstract domain.
     /// @param result
@@ -71,65 +74,31 @@ public:
     /// Does this enumeration represent single value?
     bool isSingleValue() const;
 
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    Enumeration &operator=(const Enumeration &value);
+    /// Does the enumeration represent signle bit that is set to 1?
+    bool isTrue() const;
+
+    /// Does the enumeration represent signle bit that is set to 0?
+    bool isFalse() const;
 
 public: // Implementation of Domain.
-    /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Enumeration *clone() const;
-    /// Implementation of Domain::operator==().
-    virtual bool operator==(const Domain& value) const;
-    /// Implementation of Domain::merge().
-    virtual void merge(const Domain &value);
-    /// Implementation of Domain::memoryUsage().
+
     virtual size_t memoryUsage() const;
-    /// Implementation of Domain::toString().
+
     virtual std::string toString() const;
-    /// Implementation of Domain::setZero().
+
     virtual void setZero(const llvm::Value *place);
 
-    /// Implementation of Domain::add().
-    virtual void add(const Domain &a, const Domain &b);
-    /// Implementation of Domain::sub().
-    virtual void sub(const Domain &a, const Domain &b);
-    /// Implementation of Domain::mul().
-    virtual void mul(const Domain &a, const Domain &b);
-    /// Implementation of Domain::udiv().
-    virtual void udiv(const Domain &a, const Domain &b);
-    /// Implementation of Domain::sdiv().
-    virtual void sdiv(const Domain &a, const Domain &b);
-    /// Implementation of Domain::urem().
-    virtual void urem(const Domain &a, const Domain &b);
-    /// Implementation of Domain::srem().
-    virtual void srem(const Domain &a, const Domain &b);
-    /// Implementation of Domain::shl().
-    virtual void shl(const Domain &a, const Domain &b);
-    /// Implementation of Domain::lshr().
-    virtual void lshr(const Domain &a, const Domain &b);
-    /// Implementation of Domain::ashr().
-    virtual void ashr(const Domain &a, const Domain &b);
-    /// Implementation of Domain::and_().
-    virtual void and_(const Domain &a, const Domain &b);
-    /// Implementation of Domain::or_().
-    virtual void or_(const Domain &a, const Domain &b);
-    /// Implementation of Domain::xor_().
-    virtual void xor_(const Domain &a, const Domain &b);
-    /// Implementation of Domain::icmp().
-    virtual void icmp(const Domain &a, const Domain &b,
-                      llvm::CmpInst::Predicate predicate);
-    /// Implementation of Domain::fcmp().
-    virtual void fcmp(const Domain &a, const Domain &b,
-                      llvm::CmpInst::Predicate predicate);
-    virtual void trunc(const Domain &value);
-    virtual void zext(const Domain &value);
-    virtual void sext(const Domain &value);
-    virtual void fptoui(const Domain &value);
-    virtual void fptosi(const Domain &value);
+    virtual bool operator==(const Domain& value) const;
 
-    virtual float accuracy() const;
+    virtual bool operator<(const Domain &value) const;
+
+    virtual bool operator>(const Domain &value) const;
+
+    virtual Enumeration &join(const Domain &value);
+
+    virtual Enumeration &meet(const Domain &value);
 
     virtual bool isBottom() const;
 
@@ -139,11 +108,55 @@ public: // Implementation of Domain.
 
     virtual void setTop();
 
+    virtual float accuracy() const;
+
+    virtual Enumeration &add(const Domain &a, const Domain &b);
+
+    virtual Enumeration &sub(const Domain &a, const Domain &b);
+
+    virtual Enumeration &mul(const Domain &a, const Domain &b);
+
+    virtual Enumeration &udiv(const Domain &a, const Domain &b);
+
+    virtual Enumeration &sdiv(const Domain &a, const Domain &b);
+
+    virtual Enumeration &urem(const Domain &a, const Domain &b);
+
+    virtual Enumeration &srem(const Domain &a, const Domain &b);
+
+    virtual Enumeration &shl(const Domain &a, const Domain &b);
+
+    virtual Enumeration &lshr(const Domain &a, const Domain &b);
+
+    virtual Enumeration &ashr(const Domain &a, const Domain &b);
+
+    virtual Enumeration &and_(const Domain &a, const Domain &b);
+
+    virtual Enumeration &or_(const Domain &a, const Domain &b);
+
+    virtual Enumeration &xor_(const Domain &a, const Domain &b);
+
+    virtual Enumeration &icmp(const Domain &a, const Domain &b,
+                              llvm::CmpInst::Predicate predicate);
+
+    virtual Enumeration &fcmp(const Domain &a, const Domain &b,
+                              llvm::CmpInst::Predicate predicate);
+
+    virtual Enumeration &trunc(const Domain &value);
+
+    virtual Enumeration &zext(const Domain &value);
+
+    virtual Enumeration &sext(const Domain &value);
+
+    virtual Enumeration &fptoui(const Domain &value);
+
+    virtual Enumeration &fptosi(const Domain &value);
+
 protected:
-    void applyOperation(const Domain &a,
-                        const Domain &b,
-                        APIntUtils::Operation operation1,
-                        APIntUtils::OperationWithOverflow operation2);
+    Enumeration &applyOperation(const Domain &a,
+                                const Domain &b,
+                                APIntUtils::Operation operation1,
+                                APIntUtils::OperationWithOverflow operation2);
 };
 
 } // namespace Integer

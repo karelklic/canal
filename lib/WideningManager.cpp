@@ -56,7 +56,7 @@ Manager::widen(const llvm::BasicBlock &wideningPoint,
     for (; it2 != it2end; ++it2)
     {
 	StateMap::iterator it1 = first.find(it2->first);
-	if (it1 != first.end() && *const_cast<const SharedDataPointer<Domain>&>(it1->second) != *it2->second)
+	if (it1 != first.end() && *it1->second != *it2->second)
         {
 #if 0 //Debug info for fixpoint calculation
             std::cout << ((it1->second)->toString()) << "\n";
@@ -67,7 +67,7 @@ Manager::widen(const llvm::BasicBlock &wideningPoint,
             std::cout << ((it2->second)->toString()) << "\n";
 #endif
 
-            widen(wideningPoint, *it1->second, *it2->second);
+            widen(wideningPoint, *it1->second.mutable_(), *it2->second);
         }
     }
 }

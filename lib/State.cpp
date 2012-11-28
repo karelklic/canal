@@ -74,12 +74,12 @@ State::mergeGlobal(const State &state)
 void
 State::mergeReturnedValue(const State &state)
 {
+    if (!state.mReturnedValue)
+        return;
+
     if (mReturnedValue)
-    {
-        if (state.mReturnedValue)
-            mReturnedValue->merge(*state.mReturnedValue);
-    }
-    else if (state.mReturnedValue)
+        mReturnedValue->join(*state.mReturnedValue);
+    else
         mReturnedValue = state.mReturnedValue->clone();
 }
 
@@ -139,8 +139,8 @@ State::mergeForeignFunctionBlocks(const State &state,
 
             mFunctionBlocks.insert(*it2);
         }
-	else if (*const_cast<const SharedDataPointer<Domain>&>(it1->second) != *it2->second)
-            it1->second->merge(*it2->second);
+	else if (*it1->second != *it2->second)
+            it1->second.mutable_()->join(*it2->second);
     }
 }
 
@@ -178,7 +178,7 @@ void
 State::mergeToReturnedValue(const Domain &value)
 {
     if (mReturnedValue)
-        mReturnedValue->merge(value);
+        mReturnedValue->join(value);
     else
         mReturnedValue = value.clone();
 }

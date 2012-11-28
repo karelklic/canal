@@ -95,18 +95,21 @@ dereference(Domain *block,
         CANAL_ASSERT_MSG(first.getEnumeration().mValues.begin()->isMinValue(),
                          "First offset is expected to be zero!");
 
-        std::vector<Domain*>::const_iterator itOffsets = offsets.begin() + 1;
-        for (; itOffsets != offsets.end(); ++itOffsets)
+        std::vector<Domain*>::const_iterator ito = offsets.begin() + 1,
+            itoend = offsets.end();
+
+        for (; ito != itoend; ++ito)
         {
             std::vector<Domain*> nextLevelResult;
-            std::vector<Domain*>::const_iterator itItems = result.begin();
-            for (; itItems != result.end(); ++itItems)
+            std::vector<Domain*>::const_iterator iti = result.begin(),
+                itiend = result.end();
+
+            for (; iti != itiend; ++iti)
             {
                 std::vector<Domain*> items;
-                Array::Interface &array =
-                    dynCast<Array::Interface&>(**itItems);
+                Array::Interface &array = dynCast<Array::Interface&>(**iti);
 
-                items = array.getItem(**itOffsets);
+                items = array.getItem(**ito);
                 nextLevelResult.insert(nextLevelResult.end(),
                                        items.begin(),
                                        items.end());
@@ -142,18 +145,21 @@ dereference(const Domain *block,
         CANAL_ASSERT_MSG(first.getEnumeration().mValues.begin()->isMinValue(),
                          "First offset is expected to be zero!");
 
-        std::vector<Domain*>::const_iterator itOffsets = offsets.begin() + 1;
-        for (; itOffsets != offsets.end(); ++itOffsets)
+        std::vector<Domain*>::const_iterator ito = offsets.begin() + 1,
+            itoend = offsets.end();
+
+        for (; ito != itoend; ++ito)
         {
             std::vector<const Domain*> nextLevelResult;
-            std::vector<const Domain*>::const_iterator itItems = result.begin();
-            for (; itItems != result.end(); ++itItems)
+            std::vector<const Domain*>::const_iterator iti = result.begin(),
+                itiend = result.end();
+
+            for (; iti != itiend; ++iti)
             {
                 std::vector<Domain*> items;
-                const Array::Interface &array =
-                    dynCast<const Array::Interface&>(**itItems);
+                const Array::Interface &array = dynCast<const Array::Interface&>(**iti);
 
-                items = array.getItem(**itOffsets);
+                items = array.getItem(**ito);
                 nextLevelResult.insert(nextLevelResult.end(),
                                        items.begin(),
                                        items.end());
@@ -187,7 +193,7 @@ Pointer::dereferenceAndMerge(const State &state) const
         for (; it != values.end(); ++it)
         {
             if (mergedValue)
-                mergedValue->merge(**it);
+                mergedValue->join(**it);
             else
                 mergedValue = (*it)->clone();
         }
@@ -259,8 +265,10 @@ Pointer::store(const Domain &value, State &state) const
 {
     // Go through all target memory blocks for the pointer and merge
     // them with the value being stored.
-    PlaceTargetMap::const_iterator it = mTargets.begin();
-    for (; it != mTargets.end(); ++it)
+    PlaceTargetMap::const_iterator it = mTargets.begin(),
+        itend = mTargets.end();
+
+    for (; it != itend; ++it)
     {
         if (it->second->mType != Target::Block)
             continue;
@@ -272,9 +280,27 @@ Pointer::store(const Domain &value, State &state) const
         std::vector<Domain*> destinations = dereference(result,
                                                         it->second->mOffsets);
 
-        std::vector<Domain*>::iterator itDest = destinations.begin();
-        for (; itDest != destinations.end(); ++itDest)
-            (*itDest)->merge(value);
+        // When a pointer points to a single memory target, the old
+        // value can be rewritten instead of merging with it to
+        // increase precision.  Pointer with a single memory target is
+        // very common case in LLVM as local variables are managed
+        // this way as pointers to stack.
+        if (mTargets.size() == 1 && destinations.size() == 1)
+        {
+            (*destinations.begin())->setBottom();
+            (*destinations.begin())->join(value);
+        }
+        else
+        {
+            // When the pointer references multiple locations, we
+            // assume that actual program run can choose any target,
+            // so we merge the stored value into all existing values.
+            std::vector<Domain*>::iterator itd = destinations.begin(),
+                itdend = destinations.end();
+
+            for (; itd != itdend; ++itd)
+                (*itd)->join(value);
+        }
 
         if (state.hasGlobalBlock(*it->second->mTarget))
             state.addGlobalBlock(*it->second->mTarget, result);
@@ -313,59 +339,6 @@ Pointer::clone() const
     return new Pointer(*this);
 }
 
-bool
-Pointer::operator==(const Domain &value) const
-{
-    if (this == &value)
-        return true;
-
-    // Check if the value has the same type.
-    const Pointer *pointer =
-        dynCast<const Pointer*>(&value);
-
-    if (!pointer)
-        return false;
-
-    if (&pointer->mType != &mType)
-        return false;
-
-    // Check if it has the same number of targets.
-    if (pointer->mTargets.size() != mTargets.size())
-        return false;
-
-    // Check the targets.
-    PlaceTargetMap::const_iterator it1 = pointer->mTargets.begin(),
-        it2 = mTargets.begin();
-    for (; it2 != mTargets.end(); ++it1, ++it2)
-    {
-        if (it1->first != it2->first || *it1->second != *it2->second)
-            return false;
-    }
-
-    return true;
-}
-
-void
-Pointer::merge(const Domain &value)
-{
-    const Pointer &vv = dynCast<const Pointer&>(value);
-    CANAL_ASSERT_MSG(&vv.mType == &mType,
-                     "Unexpected different types in a pointer merge ("
-                     << Canal::toString(vv.mType) << " != "
-                     << Canal::toString(mType) << ")");
-
-    PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
-    for (; valueit != vv.mTargets.end(); ++valueit)
-    {
-        PlaceTargetMap::iterator it = mTargets.find(valueit->first);
-        if (it == mTargets.end())
-            mTargets.insert(PlaceTargetMap::value_type(
-                                valueit->first, new Target(*valueit->second)));
-        else
-            it->second->merge(*valueit->second);
-    }
-}
-
 size_t
 Pointer::memoryUsage() const
 {
@@ -397,12 +370,98 @@ Pointer::toString() const
 void
 Pointer::setZero(const llvm::Value *place)
 {
-    mTargets.clear();
+    llvm::DeleteContainerSeconds(mTargets);
     addTarget(Target::Constant,
               place,
               NULL,
               std::vector<Domain*>(),
               NULL);
+}
+
+bool
+Pointer::operator==(const Domain &value) const
+{
+    if (this == &value)
+        return true;
+
+    // Check if the value has the same type.
+    const Pointer *pointer =
+        dynCast<const Pointer*>(&value);
+
+    if (!pointer)
+        return false;
+
+    if (&pointer->mType != &mType)
+        return false;
+
+    // Check if it has the same number of targets.
+    if (pointer->mTargets.size() != mTargets.size())
+        return false;
+
+    // Check the targets.
+    PlaceTargetMap::const_iterator it1 = pointer->mTargets.begin(),
+        it2 = mTargets.begin();
+
+    for (; it2 != mTargets.end(); ++it1, ++it2)
+    {
+        if (it1->first != it2->first || *it1->second != *it2->second)
+            return false;
+    }
+
+    return true;
+}
+
+bool
+Pointer::operator<(const Domain &value) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Pointer::operator>(const Domain &value) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Pointer &
+Pointer::join(const Domain &value)
+{
+    const Pointer &vv = dynCast<const Pointer&>(value);
+    CANAL_ASSERT_MSG(&vv.mType == &mType,
+                     "Unexpected different types in a pointer merge ("
+                     << Canal::toString(vv.mType) << " != "
+                     << Canal::toString(mType) << ")");
+
+    PlaceTargetMap::const_iterator valueit = vv.mTargets.begin();
+    for (; valueit != vv.mTargets.end(); ++valueit)
+    {
+        PlaceTargetMap::iterator it = mTargets.find(valueit->first);
+        if (it == mTargets.end())
+            mTargets.insert(PlaceTargetMap::value_type(
+                                valueit->first, new Target(*valueit->second)));
+        else
+            it->second->merge(*valueit->second);
+    }
+
+    return *this;
+}
+
+Pointer &
+Pointer::meet(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Pointer::isBottom() const
+{
+    return mTargets.empty();
+}
+
+void
+Pointer::setBottom()
+{
+    llvm::DeleteContainerSeconds(mTargets);
 }
 
 } // namespace Pointer

@@ -9,13 +9,15 @@ Interface::getValue(const Domain &offset) const
 {
     Domain *result = NULL;
     std::vector<Domain*> items(getItem(offset));
-    std::vector<Domain*>::const_iterator it = items.begin();
-    for (; it != items.end(); ++it)
+    std::vector<Domain*>::const_iterator it = items.begin(),
+        itend = items.end();
+
+    for (; it != itend; ++it)
     {
         if (!result)
             result = (*it)->clone();
         else
-            result->merge(**it);
+            result->join(**it);
     }
 
     return result;

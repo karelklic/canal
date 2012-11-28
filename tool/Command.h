@@ -27,13 +27,28 @@ public:
     virtual ~Command() {}
 
     // User printable name of the function.
-    const std::string &getName() const { return mName; }
+    const std::string &getName() const
+    {
+        return mName;
+    }
+
     // Command shortcut.  Empty string if command has none.
-    const std::string &getShortcut() const { return mShortcut; }
+    const std::string &getShortcut() const
+    {
+        return mShortcut;
+    }
+
     // Short explanation of the command.
-    const std::string &getHelpLine() const { return mHelpLine; }
+    const std::string &getHelpLine() const
+    {
+        return mHelpLine;
+    }
+
     // Long explanation of the command.
-    const std::string &getHelp() const { return mHelp; }
+    const std::string &getHelp() const
+    {
+        return mHelp;
+    }
 
     // Finds completion options for given arguments.
     virtual std::vector<std::string> getCompletionMatches(

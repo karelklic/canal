@@ -38,7 +38,10 @@ public:
     Bitfield(const Bitfield &value);
 
     /// Return the number of bits of the represented number.
-    unsigned getBitWidth() const { return mZeroes.getBitWidth(); }
+    unsigned getBitWidth() const
+    {
+        return mZeroes.getBitWidth();
+    }
 
     /// Returns 0 if the bit is known to be 0.  Returns 1 if the bit is
     /// known to be 1.  Returns -1 if the bit value is unknown.
@@ -90,65 +93,25 @@ public:
     /// Does these bits represent single value?
     bool isSingleValue() const;
 
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    Bitfield &operator=(const Bitfield &value);
-
 public: // Implementation of Domain.
-    /// Implementation of Domain::clone().
     /// Covariant return type.
     virtual Bitfield *clone() const;
-    /// Implementation of Domain::operator==().
-    virtual bool operator==(const Domain& value) const;
-    /// Implementation of Domain::merge().
-    virtual void merge(const Domain &value);
-    /// Implementation of Domain::memoryUsage().
+
     virtual size_t memoryUsage() const;
-    /// Implementation of Domain::toString().
+
     virtual std::string toString() const;
-    /// Implementation of Domain::setZero().
+
     virtual void setZero(const llvm::Value *place);
 
-    /// Implementation of Domain::add().
-    virtual void add(const Domain &a, const Domain &b);
-    /// Implementation of Domain::sub().
-    virtual void sub(const Domain &a, const Domain &b);
-    /// Implementation of Domain::mul().
-    virtual void mul(const Domain &a, const Domain &b);
-    /// Implementation of Domain::udiv().
-    virtual void udiv(const Domain &a, const Domain &b);
-    /// Implementation of Domain::sdiv().
-    virtual void sdiv(const Domain &a, const Domain &b);
-    /// Implementation of Domain::urem().
-    virtual void urem(const Domain &a, const Domain &b);
-    /// Implementation of Domain::srem().
-    virtual void srem(const Domain &a, const Domain &b);
-    /// Implementation of Domain::shl().
-    virtual void shl(const Domain &a, const Domain &b);
-    /// Implementation of Domain::lshr().
-    virtual void lshr(const Domain &a, const Domain &b);
-    /// Implementation of Domain::ashr().
-    virtual void ashr(const Domain &a, const Domain &b);
-    /// Implementation of Domain::and_().
-    virtual void and_(const Domain &a, const Domain &b);
-    /// Implementation of Domain::or_().
-    virtual void or_(const Domain &a, const Domain &b);
-    /// Implementation of Domain::xor_().
-    virtual void xor_(const Domain &a, const Domain &b);
-    /// Implementation of Domain::icmp().
-    virtual void icmp(const Domain &a, const Domain &b,
-                      llvm::CmpInst::Predicate predicate);
-    /// Implementation of Domain::fcmp().
-    virtual void fcmp(const Domain &a, const Domain &b,
-                      llvm::CmpInst::Predicate predicate);
-    virtual void trunc(const Domain &value);
-    virtual void zext(const Domain &value);
-    virtual void sext(const Domain &value);
-    virtual void fptoui(const Domain &value);
-    virtual void fptosi(const Domain &value);
+    virtual bool operator==(const Domain& value) const;
 
-    virtual float accuracy() const;
+    virtual bool operator<(const Domain &value) const;
+
+    virtual bool operator>(const Domain &value) const;
+
+    virtual Bitfield &join(const Domain &value);
+
+    virtual Bitfield &meet(const Domain &value);
 
     virtual bool isBottom() const;
 
@@ -157,6 +120,50 @@ public: // Implementation of Domain.
     virtual bool isTop() const;
 
     virtual void setTop();
+
+    virtual float accuracy() const;
+
+    virtual Bitfield &add(const Domain &a, const Domain &b);
+
+    virtual Bitfield &sub(const Domain &a, const Domain &b);
+
+    virtual Bitfield &mul(const Domain &a, const Domain &b);
+
+    virtual Bitfield &udiv(const Domain &a, const Domain &b);
+
+    virtual Bitfield &sdiv(const Domain &a, const Domain &b);
+
+    virtual Bitfield &urem(const Domain &a, const Domain &b);
+
+    virtual Bitfield &srem(const Domain &a, const Domain &b);
+
+    virtual Bitfield &shl(const Domain &a, const Domain &b);
+
+    virtual Bitfield &lshr(const Domain &a, const Domain &b);
+
+    virtual Bitfield &ashr(const Domain &a, const Domain &b);
+
+    virtual Bitfield &and_(const Domain &a, const Domain &b);
+
+    virtual Bitfield &or_(const Domain &a, const Domain &b);
+
+    virtual Bitfield &xor_(const Domain &a, const Domain &b);
+
+    virtual Bitfield &icmp(const Domain &a, const Domain &b,
+                           llvm::CmpInst::Predicate predicate);
+
+    virtual Bitfield &fcmp(const Domain &a, const Domain &b,
+                           llvm::CmpInst::Predicate predicate);
+
+    virtual Bitfield &trunc(const Domain &value);
+
+    virtual Bitfield &zext(const Domain &value);
+
+    virtual Bitfield &sext(const Domain &value);
+
+    virtual Bitfield &fptoui(const Domain &value);
+
+    virtual Bitfield &fptosi(const Domain &value);
 };
 
 } // namespace Integer

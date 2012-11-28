@@ -8,7 +8,6 @@ namespace Float {
 
 class Interval : public Domain
 {
-public:
     bool mEmpty;
     bool mTop;
     llvm::APFloat mFrom;
@@ -19,7 +18,11 @@ public:
              const llvm::fltSemantics &semantics);
 
     Interval(const Environment &environment,
-             const llvm::APFloat &number);
+             const llvm::APFloat &constant);
+
+    Interval(const Environment &environment,
+             const llvm::APFloat &from,
+             const llvm::APFloat &to);
 
     /// Copy constructor.
     Interval(const Interval &value);
@@ -45,35 +48,25 @@ public:
 
     llvm::APFloat getMin() const;
 
-private:
-    /// Assignment operator declaration.  Prevents accidental
-    /// assignments of domains.  Do not implement!
-    Interval &operator=(const Interval &value);
-
 public: // Implementation of Domain.
-    // Implementation of Domain::clone().
     // Covariant return type.
     virtual Interval *clone() const;
-    // Implementation of Domain::operator==().
-    virtual bool operator==(const Domain& value) const;
-    // Implementation of Domain::merge().
-    virtual void merge(const Domain &value);
-    // Implementation of Domain::memoryUsage().
+
     virtual size_t memoryUsage() const;
-    // Implementation of Domain::toString().
+
     virtual std::string toString() const;
-    /// Implementation of Domain::setZero().
+
     virtual void setZero(const llvm::Value *place);
 
-    virtual void fadd(const Domain &a, const Domain &b);
-    virtual void fsub(const Domain &a, const Domain &b);
-    virtual void fmul(const Domain &a, const Domain &b);
-    virtual void fdiv(const Domain &a, const Domain &b);
-    virtual void frem(const Domain &a, const Domain &b);
-    virtual void uitofp(const Domain &value);
-    virtual void sitofp(const Domain &value);
+    virtual bool operator==(const Domain& value) const;
 
-    virtual float accuracy() const;
+    virtual bool operator<(const Domain &value) const;
+
+    virtual bool operator>(const Domain &value) const;
+
+    virtual Interval &join(const Domain &value);
+
+    virtual Interval &meet(const Domain &value);
 
     virtual bool isBottom() const;
 
@@ -82,9 +75,25 @@ public: // Implementation of Domain.
     virtual bool isTop() const;
 
     virtual void setTop();
+
+    virtual float accuracy() const;
+
+    virtual Interval &fadd(const Domain &a, const Domain &b);
+
+    virtual Interval &fsub(const Domain &a, const Domain &b);
+
+    virtual Interval &fmul(const Domain &a, const Domain &b);
+
+    virtual Interval &fdiv(const Domain &a, const Domain &b);
+
+    virtual Interval &frem(const Domain &a, const Domain &b);
+
+    virtual Interval &uitofp(const Domain &value);
+
+    virtual Interval &sitofp(const Domain &value);
 };
 
 } // namespace Float
 } // namespace Canal
 
-#endif // LIBCANAL_FLOAT_H
+#endif // LIBCANAL_FLOAT_INTERVAL_H

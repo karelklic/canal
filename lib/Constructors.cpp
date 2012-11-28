@@ -147,10 +147,13 @@ Constructors::create(const llvm::Constant &value,
             deleteVariable = true;
         }
         else
-            variable = state->findVariable(**value.op_begin());
+            variable = state->findVariable(firstValue);
 
         CANAL_ASSERT_MSG(variable, "It is expected that variable used"
-                         " in constant expressions is available.");
+                         " in constant expressions is available.\n"
+                         "Missing: \"" << firstValue << "\"\n"
+                         << "In \"" << value << "\"\n"
+                         << "On line \"" << place << "\"");
 
         Domain *result = NULL;
         switch (exprValue.getOpcode())
@@ -380,7 +383,10 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
                          " with more than 64 bits.");
 
         // Convert to 64-bit if necessary.
-        llvm::APInt extended = APIntUtils::sext(constant.getValue(), 64);
+        llvm::APInt extended = constant.getValue();
+        if (extended.getBitWidth() < 64)
+            extended = APIntUtils::sext(extended, 64);
+
         offsets.push_back(createInteger(extended));
     }
 

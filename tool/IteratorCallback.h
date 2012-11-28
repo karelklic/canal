@@ -14,8 +14,12 @@ protected:
     bool mBasicBlockEnter;
 
 public:
-    IteratorCallback() : mFixpointReached(false), mFunctionEnter(false),
-        mBasicBlockEnter(false) {}
+    IteratorCallback()
+        : mFixpointReached(false),
+          mFunctionEnter(false),
+          mBasicBlockEnter(false)
+    {
+    }
 
     virtual void onFixpointReached();
 
@@ -25,11 +29,20 @@ public:
 
     virtual void onInstructionExit(const llvm::Instruction &instruction);
 
-    bool isFixpointReached() const { return mFixpointReached; }
+    bool isFixpointReached() const
+    {
+        return mFixpointReached;
+    }
 
-    bool isFunctionEnter() { return mFunctionEnter; }
+    bool isFunctionEnter()
+    {
+        return mFunctionEnter;
+    }
 
-    bool isBasicBlockEnter() { return mFunctionEnter; }
+    bool isBasicBlockEnter()
+    {
+        return mFunctionEnter;
+    }
 };
 
 #endif // CANAL_ITERATOR_CALLBACK

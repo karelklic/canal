@@ -21,22 +21,31 @@ public:
     // @param module
     //   LLVM module that contains all functions.
     Environment(llvm::Module *module);
+
     ~Environment();
 
     llvm::LLVMContext &getContext() const;
 
-    llvm::Module &getModule() const { return *mModule; }
+    llvm::Module &getModule() const
+    {
+        return *mModule;
+    }
 
-    const llvm::TargetData &getTargetData() const { return mTargetData; }
+    const llvm::TargetData &getTargetData() const
+    {
+        return mTargetData;
+    }
 
-    SlotTracker &getSlotTracker() const { return mSlotTracker; }
+    SlotTracker &getSlotTracker() const
+    {
+        return mSlotTracker;
+    }
 
     const Constructors &getConstructors() const
     {
         return *mConstructors;
     }
 
-public:
     void setConstructors(Constructors *constructors)
     {
         mConstructors = constructors;
