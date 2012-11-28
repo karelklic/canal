@@ -74,346 +74,209 @@ testJoin()
 static void
 testIcmp()
 {
-    Integer::Bitfield bitfield1(*gEnvironment, llvm::APInt(32, 0)),
-        bitfield2(*gEnvironment, llvm::APInt(32, 1)),
-        bitfield3(*gEnvironment, llvm::APInt(32, -1, true)),
-        bitfield4(bitfield1),
-        bitfield5(bitfield2),
-        bitfield6(bitfield3),
-        result(bitfield1),
-        bitfield7(*gEnvironment, llvm::APInt(32, 2)),
-        bitfield8(*gEnvironment, llvm::APInt(32, 3)),
-        bitfield9(bitfield7),
-        bitfield10(bitfield1),
-        bitfield11(bitfield2);
+    Integer::Bitfield const0(*gEnvironment, llvm::APInt(32, 0)),
+        const1(*gEnvironment, llvm::APInt(32, 1)),
+        const_1(*gEnvironment, llvm::APInt(32, -1, true)),
+        const0to1(const0),
+        const0to1_2(const1),
+        const_1to0(const_1),
+        result(*gEnvironment, llvm::APInt(1, 1)),
+        const2(*gEnvironment, llvm::APInt(32, 2)),
+        const3(*gEnvironment, llvm::APInt(32, 3)),
+        const2to3(const2),
+        const0to2(const0),
+        const1to3(const1);
 
-    llvm::APInt res;
-    bitfield4.join(bitfield2); //0-1
-    bitfield5.join(bitfield1); //0-1
-    bitfield6.join(bitfield1); //-1-0
-    bitfield9.join(bitfield8); //2-3
-    bitfield10.join(bitfield7); //0-2
-    bitfield11.join(bitfield8); //1-3
+    const0to1.join(const1); //0-1
+    const0to1_2.join(const0); //0-1
+    const_1to0.join(const0); //-1-0
+    const2to3.join(const3); //2-3
+    const0to2.join(const2); //0-2
+    const1to3.join(const3); //1-3
 
-    result.icmp(bitfield1, bitfield2, llvm::CmpInst::ICMP_EQ); //0 != 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    //0 = 0
+    CANAL_ASSERT(result.icmp(const0, const0, llvm::CmpInst::ICMP_EQ).isTrue());
+    CANAL_ASSERT(result.icmp(const0, const0, llvm::CmpInst::ICMP_NE).isFalse());
+    CANAL_ASSERT(result.icmp(const0, const0, llvm::CmpInst::ICMP_SGT).isFalse());
+    CANAL_ASSERT(result.icmp(const0, const0, llvm::CmpInst::ICMP_SGE).isTrue());
+    CANAL_ASSERT(result.icmp(const0, const0, llvm::CmpInst::ICMP_UGT).isFalse());
+    CANAL_ASSERT(result.icmp(const0, const0, llvm::CmpInst::ICMP_UGE).isTrue());
+    CANAL_ASSERT(result.icmp(const0, const0, llvm::CmpInst::ICMP_SLT).isFalse());
+    CANAL_ASSERT(result.icmp(const0, const0, llvm::CmpInst::ICMP_SLE).isTrue());
+    CANAL_ASSERT(result.icmp(const0, const0, llvm::CmpInst::ICMP_ULT).isFalse());
+    CANAL_ASSERT(result.icmp(const0, const0, llvm::CmpInst::ICMP_ULE).isTrue());
 
-    result.icmp(bitfield1, bitfield2, llvm::CmpInst::ICMP_NE); //0 != 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    //0 < 1
+    CANAL_ASSERT(result.icmp(const0, const1, llvm::CmpInst::ICMP_EQ).isFalse());
+    CANAL_ASSERT(result.icmp(const0, const1, llvm::CmpInst::ICMP_NE).isTrue());
+    CANAL_ASSERT(result.icmp(const0, const1, llvm::CmpInst::ICMP_SGT).isFalse());
+    CANAL_ASSERT(result.icmp(const0, const1, llvm::CmpInst::ICMP_SGE).isFalse());
+    CANAL_ASSERT(result.icmp(const0, const1, llvm::CmpInst::ICMP_UGT).isFalse());
+    CANAL_ASSERT(result.icmp(const0, const1, llvm::CmpInst::ICMP_UGE).isFalse());
+    CANAL_ASSERT(result.icmp(const0, const1, llvm::CmpInst::ICMP_SLT).isTrue());
+    CANAL_ASSERT(result.icmp(const0, const1, llvm::CmpInst::ICMP_SLE).isTrue());
+    CANAL_ASSERT(result.icmp(const0, const1, llvm::CmpInst::ICMP_ULT).isTrue());
+    CANAL_ASSERT(result.icmp(const0, const1, llvm::CmpInst::ICMP_ULE).isTrue());
 
-    result.icmp(bitfield2, bitfield6, llvm::CmpInst::ICMP_EQ); //-1-0 ? 1 (when unsigned, -1-0 is 0-max) -> unsigned top
-    CANAL_ASSERT(result.isTop()); //Difference from interval
-
-    result.icmp(bitfield2, bitfield6, llvm::CmpInst::ICMP_NE); //-1-0 ? 1 (when unsigned, -1-0 is 0-max) -> signed true, unsigned top
-    CANAL_ASSERT(result.isTop()); //Difference from interval
-
-    result.icmp(bitfield4, bitfield7, llvm::CmpInst::ICMP_EQ); //0-1 != 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield7, llvm::CmpInst::ICMP_NE); //0-1 != 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield5, llvm::CmpInst::ICMP_EQ); //0-1 ? 0-1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield5, llvm::CmpInst::ICMP_NE); //0-1 ? 0-1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield6, llvm::CmpInst::ICMP_EQ); //0-1 ? -1-0
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield6, llvm::CmpInst::ICMP_NE); //0-1 ? -1-0
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield4, llvm::CmpInst::ICMP_EQ); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield4, llvm::CmpInst::ICMP_NE); //0-1 ==  0-1 (same object)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield1, llvm::CmpInst::ICMP_EQ); //0-1 ? 0
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield1, llvm::CmpInst::ICMP_NE); //0-1 ? 0
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield1, bitfield4, llvm::CmpInst::ICMP_EQ); //0 ? 0-1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield1, bitfield4, llvm::CmpInst::ICMP_NE); //0 ? 0-1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield9, llvm::CmpInst::ICMP_EQ); //0-1 != 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield9, llvm::CmpInst::ICMP_NE); //0-1 != 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    //1 > 0
+    CANAL_ASSERT(result.icmp(const1, const0, llvm::CmpInst::ICMP_EQ).isFalse());
+    CANAL_ASSERT(result.icmp(const1, const0, llvm::CmpInst::ICMP_NE).isTrue());
+    CANAL_ASSERT(result.icmp(const1, const0, llvm::CmpInst::ICMP_SGT).isTrue());
+    CANAL_ASSERT(result.icmp(const1, const0, llvm::CmpInst::ICMP_SGE).isTrue());
+    CANAL_ASSERT(result.icmp(const1, const0, llvm::CmpInst::ICMP_UGT).isTrue());
+    CANAL_ASSERT(result.icmp(const1, const0, llvm::CmpInst::ICMP_UGE).isTrue());
+    CANAL_ASSERT(result.icmp(const1, const0, llvm::CmpInst::ICMP_SLT).isFalse());
+    CANAL_ASSERT(result.icmp(const1, const0, llvm::CmpInst::ICMP_SLE).isFalse());
+    CANAL_ASSERT(result.icmp(const1, const0, llvm::CmpInst::ICMP_ULT).isFalse());
+    CANAL_ASSERT(result.icmp(const1, const0, llvm::CmpInst::ICMP_ULE).isFalse());
 
     //Difference from interval
-    result.icmp(bitfield10, bitfield11, llvm::CmpInst::ICMP_EQ); //0-2 != 1-3 (difference in last bit)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    //-1-0 ? 1 (when unsigned, -1-0 is 0-max)
+    CANAL_ASSERT(result.icmp(const1, const_1to0, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(const1, const_1to0, llvm::CmpInst::ICMP_NE).isTop());
+    CANAL_ASSERT(result.icmp(const1, const_1to0, llvm::CmpInst::ICMP_SLE).isTop());
+    CANAL_ASSERT(result.icmp(const1, const_1to0, llvm::CmpInst::ICMP_SLT).isTop());
+    CANAL_ASSERT(result.icmp(const1, const_1to0, llvm::CmpInst::ICMP_ULE).isTop());
+    CANAL_ASSERT(result.icmp(const1, const_1to0, llvm::CmpInst::ICMP_ULT).isTop());
+    CANAL_ASSERT(result.icmp(const1, const_1to0, llvm::CmpInst::ICMP_SGE).isTop());
+    CANAL_ASSERT(result.icmp(const1, const_1to0, llvm::CmpInst::ICMP_SGT).isTop());
+    CANAL_ASSERT(result.icmp(const1, const_1to0, llvm::CmpInst::ICMP_UGE).isTop());
+    CANAL_ASSERT(result.icmp(const1, const_1to0, llvm::CmpInst::ICMP_UGT).isTop());
 
-    result.icmp(bitfield10, bitfield11, llvm::CmpInst::ICMP_NE); //0-2 != 1-3 (difference in last bit)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    //Difference from interval
+     //0 ? -1-0 (when unsigned, -1-0 is 0-max)
+    CANAL_ASSERT(result.icmp(const0, const_1to0, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(const0, const_1to0, llvm::CmpInst::ICMP_NE).isTop());
+    CANAL_ASSERT(result.icmp(const0, const_1to0, llvm::CmpInst::ICMP_SLE).isTop());
+    CANAL_ASSERT(result.icmp(const0, const_1to0, llvm::CmpInst::ICMP_SLT).isTop());
+    CANAL_ASSERT(result.icmp(const0, const_1to0, llvm::CmpInst::ICMP_ULE).isTop());
+    CANAL_ASSERT(result.icmp(const0, const_1to0, llvm::CmpInst::ICMP_ULT).isTop());
+    CANAL_ASSERT(result.icmp(const0, const_1to0, llvm::CmpInst::ICMP_SGE).isTop());
+    CANAL_ASSERT(result.icmp(const0, const_1to0, llvm::CmpInst::ICMP_SGT).isTop());
+    CANAL_ASSERT(result.icmp(const0, const_1to0, llvm::CmpInst::ICMP_UGE).isTop());
+    CANAL_ASSERT(result.icmp(const0, const_1to0, llvm::CmpInst::ICMP_UGT).isTop());
 
-    result.icmp(bitfield1, bitfield2, llvm::CmpInst::ICMP_SGT); //0 > 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    //0-1 < 2
+    CANAL_ASSERT(result.icmp(const0to1, const2, llvm::CmpInst::ICMP_EQ).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const2, llvm::CmpInst::ICMP_NE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const2, llvm::CmpInst::ICMP_SGE).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const2, llvm::CmpInst::ICMP_SGT).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const2, llvm::CmpInst::ICMP_UGE).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const2, llvm::CmpInst::ICMP_UGT).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const2, llvm::CmpInst::ICMP_SLE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const2, llvm::CmpInst::ICMP_SLT).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const2, llvm::CmpInst::ICMP_ULE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const2, llvm::CmpInst::ICMP_ULT).isTrue());
 
-    result.icmp(bitfield1, bitfield2, llvm::CmpInst::ICMP_SGE); //0 > 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    //0-1 >= 0
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_NE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_SGE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_SGT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_UGE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_UGT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_SLE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_SLT).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_ULE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_ULT).isFalse());
 
-    result.icmp(bitfield1, bitfield2, llvm::CmpInst::ICMP_UGT); //0 > 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    //0 <= 0-1
+    CANAL_ASSERT(result.icmp(const0, const0to1, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(const0, const0to1, llvm::CmpInst::ICMP_NE).isTop());
+    CANAL_ASSERT(result.icmp(const0, const0to1, llvm::CmpInst::ICMP_SGT).isFalse());
+    CANAL_ASSERT(result.icmp(const0, const0to1, llvm::CmpInst::ICMP_SGE).isTop());
+    CANAL_ASSERT(result.icmp(const0, const0to1, llvm::CmpInst::ICMP_UGT).isFalse());
+    CANAL_ASSERT(result.icmp(const0, const0to1, llvm::CmpInst::ICMP_UGE).isTop());
+    CANAL_ASSERT(result.icmp(const0, const0to1, llvm::CmpInst::ICMP_SLT).isTop());
+    CANAL_ASSERT(result.icmp(const0, const0to1, llvm::CmpInst::ICMP_SLE).isTrue());
+    CANAL_ASSERT(result.icmp(const0, const0to1, llvm::CmpInst::ICMP_ULT).isTop());
+    CANAL_ASSERT(result.icmp(const0, const0to1, llvm::CmpInst::ICMP_ULE).isTrue());
 
-    result.icmp(bitfield1, bitfield2, llvm::CmpInst::ICMP_UGE); //0 > 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    //0-1 >= 0
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_NE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_SGT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_SGE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_UGT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_UGE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_SLT).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_SLE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_ULT).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const0, llvm::CmpInst::ICMP_ULE).isTop());
 
-    result.icmp(bitfield1, bitfield2, llvm::CmpInst::ICMP_SLT); //0 > 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    //0-1 <= 1
+    CANAL_ASSERT(result.icmp(const0to1, const1, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const1, llvm::CmpInst::ICMP_NE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const1, llvm::CmpInst::ICMP_SGE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const1, llvm::CmpInst::ICMP_SGT).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const1, llvm::CmpInst::ICMP_UGE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const1, llvm::CmpInst::ICMP_UGT).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const1, llvm::CmpInst::ICMP_SLE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const1, llvm::CmpInst::ICMP_SLT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const1, llvm::CmpInst::ICMP_ULE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const1, llvm::CmpInst::ICMP_ULT).isTop());
 
-    result.icmp(bitfield1, bitfield2, llvm::CmpInst::ICMP_SLE); //0 > 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    //0-1 ? 0-1
+    CANAL_ASSERT(result.icmp(const0to1, const0to1_2, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1_2, llvm::CmpInst::ICMP_NE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1_2, llvm::CmpInst::ICMP_UGT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1_2, llvm::CmpInst::ICMP_UGE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1_2, llvm::CmpInst::ICMP_SGT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1_2, llvm::CmpInst::ICMP_SGE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1_2, llvm::CmpInst::ICMP_ULT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1_2, llvm::CmpInst::ICMP_ULE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1_2, llvm::CmpInst::ICMP_SLT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1_2, llvm::CmpInst::ICMP_SLE).isTop());
 
-    result.icmp(bitfield1, bitfield2, llvm::CmpInst::ICMP_ULT); //0 > 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    //0-1 ? 0-1 (same object)
+    CANAL_ASSERT(result.icmp(const0to1, const0to1, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1, llvm::CmpInst::ICMP_NE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1, llvm::CmpInst::ICMP_SGT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1, llvm::CmpInst::ICMP_SGE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1, llvm::CmpInst::ICMP_UGT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1, llvm::CmpInst::ICMP_UGE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1, llvm::CmpInst::ICMP_SLT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1, llvm::CmpInst::ICMP_SLE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1, llvm::CmpInst::ICMP_ULT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const0to1, llvm::CmpInst::ICMP_ULE).isTop());
 
-    result.icmp(bitfield1, bitfield2, llvm::CmpInst::ICMP_ULE); //0 > 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-
-    result.icmp(bitfield2, bitfield6, llvm::CmpInst::ICMP_SLE); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
-    //CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    //Difference from interval
+    //0-1 ? -1-0
+    CANAL_ASSERT(result.icmp(const0to1, const_1to0, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const_1to0, llvm::CmpInst::ICMP_NE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const_1to0, llvm::CmpInst::ICMP_UGT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const_1to0, llvm::CmpInst::ICMP_UGE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const_1to0, llvm::CmpInst::ICMP_SGT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const_1to0, llvm::CmpInst::ICMP_SGE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const_1to0, llvm::CmpInst::ICMP_ULT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const_1to0, llvm::CmpInst::ICMP_ULE).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const_1to0, llvm::CmpInst::ICMP_SLT).isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const_1to0, llvm::CmpInst::ICMP_SLE).isTop());
     CANAL_ASSERT(result.isTop());
 
-    result.icmp(bitfield2, bitfield6, llvm::CmpInst::ICMP_SLT); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
-    //CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield2, bitfield6, llvm::CmpInst::ICMP_ULE); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield2, bitfield6, llvm::CmpInst::ICMP_ULT); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield2, bitfield6, llvm::CmpInst::ICMP_SGE); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
-    //CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield2, bitfield6, llvm::CmpInst::ICMP_SGT); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
-    //CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield2, bitfield6, llvm::CmpInst::ICMP_UGE); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield2, bitfield6, llvm::CmpInst::ICMP_UGT); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
-    CANAL_ASSERT(result.isTop());
-
-
-    result.icmp(bitfield1, bitfield6, llvm::CmpInst::ICMP_SLE); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
-    //CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield1, bitfield6, llvm::CmpInst::ICMP_SLT); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield1, bitfield6, llvm::CmpInst::ICMP_ULE); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
-    //CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield1, bitfield6, llvm::CmpInst::ICMP_ULT); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield1, bitfield6, llvm::CmpInst::ICMP_SGE); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
-    //CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield1, bitfield6, llvm::CmpInst::ICMP_SGT); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield1, bitfield6, llvm::CmpInst::ICMP_UGE); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
-    //CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield1, bitfield6, llvm::CmpInst::ICMP_UGT); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
-    CANAL_ASSERT(result.isTop());
-
-
-    result.icmp(bitfield4, bitfield7, llvm::CmpInst::ICMP_SGE); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield7, llvm::CmpInst::ICMP_SGT); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield7, llvm::CmpInst::ICMP_UGE); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield7, llvm::CmpInst::ICMP_UGT); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield7, llvm::CmpInst::ICMP_SLE); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield7, llvm::CmpInst::ICMP_SLT); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield7, llvm::CmpInst::ICMP_ULE); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield7, llvm::CmpInst::ICMP_ULT); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-
-    result.icmp(bitfield4, bitfield1, llvm::CmpInst::ICMP_SGE); //0-1 <= 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield1, llvm::CmpInst::ICMP_SGT); //0-1 <= 1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield1, llvm::CmpInst::ICMP_UGE); //0-1 <= 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield1, llvm::CmpInst::ICMP_UGT); //0-1 <= 1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield1, llvm::CmpInst::ICMP_SLE); //0-1 <= 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield1, llvm::CmpInst::ICMP_SLT); //0-1 <= 1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield1, llvm::CmpInst::ICMP_ULE); //0-1 <= 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield1, llvm::CmpInst::ICMP_ULT); //0-1 <= 1
-    CANAL_ASSERT(result.isTop());
-
-
-    result.icmp(bitfield4, bitfield5, llvm::CmpInst::ICMP_UGT); //0-1 ? 0-1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield5, llvm::CmpInst::ICMP_UGE); //0-1 ? 0-1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield5, llvm::CmpInst::ICMP_SGT); //0-1 ? 0-1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield5, llvm::CmpInst::ICMP_SGE); //0-1 ? 0-1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield5, llvm::CmpInst::ICMP_ULT); //0-1 ? 0-1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield5, llvm::CmpInst::ICMP_ULE); //0-1 ? 0-1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield5, llvm::CmpInst::ICMP_SLT); //0-1 ? 0-1
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield5, llvm::CmpInst::ICMP_SLE); //0-1 ? 0-1
-    CANAL_ASSERT(result.isTop());
-
-
-    result.icmp(bitfield4, bitfield6, llvm::CmpInst::ICMP_UGT); //0-1 ? -1-0
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield6, llvm::CmpInst::ICMP_UGE); //0-1 ? -1-0
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield6, llvm::CmpInst::ICMP_SGT); //0-1 ? -1-0
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield6, llvm::CmpInst::ICMP_SGE); //0-1 <= -1-0 //Signed
-    //CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield6, llvm::CmpInst::ICMP_ULT); //0-1 ? -1-0
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield6, llvm::CmpInst::ICMP_ULE); //0-1 ? -1-0
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield6, llvm::CmpInst::ICMP_SLT); //0-1 ? -1-0
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield6, llvm::CmpInst::ICMP_SLE); //0-1 <= -1-0 //Signed
-    //CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-    CANAL_ASSERT(result.isTop());
-
-
-    result.icmp(bitfield4, bitfield4, llvm::CmpInst::ICMP_SGT); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield4, llvm::CmpInst::ICMP_SGE); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield4, llvm::CmpInst::ICMP_UGT); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield4, llvm::CmpInst::ICMP_UGE); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield4, llvm::CmpInst::ICMP_SLT); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield4, llvm::CmpInst::ICMP_SLE); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield4, llvm::CmpInst::ICMP_ULT); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield4, bitfield4, llvm::CmpInst::ICMP_ULE); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-
-    result.icmp(bitfield4, bitfield9, llvm::CmpInst::ICMP_SGE); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield9, llvm::CmpInst::ICMP_SGT); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield9, llvm::CmpInst::ICMP_UGE); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield9, llvm::CmpInst::ICMP_UGT); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
-
-    result.icmp(bitfield4, bitfield9, llvm::CmpInst::ICMP_SLE); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield9, llvm::CmpInst::ICMP_SLT); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield9, llvm::CmpInst::ICMP_ULE); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-    result.icmp(bitfield4, bitfield9, llvm::CmpInst::ICMP_ULT); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
-
-
-    result.icmp(bitfield10, bitfield11, llvm::CmpInst::ICMP_SGE); //0-2 ? 1-3
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield10, bitfield11, llvm::CmpInst::ICMP_SGT); //0-2 ? 1-3
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield10, bitfield11, llvm::CmpInst::ICMP_UGE); //0-2 ? 1-3
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield10, bitfield11, llvm::CmpInst::ICMP_UGT); //0-2 ? 1-3
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield10, bitfield11, llvm::CmpInst::ICMP_SLE); //0-2 ? 1-3
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield10, bitfield11, llvm::CmpInst::ICMP_SLT); //0-2 ? 1-3
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield10, bitfield11, llvm::CmpInst::ICMP_ULE); //0-2 ? 1-3
-    CANAL_ASSERT(result.isTop());
-
-    result.icmp(bitfield10, bitfield11, llvm::CmpInst::ICMP_ULT); //0-2 ? 1-3
-    CANAL_ASSERT(result.isTop());
+    CANAL_ASSERT(result.icmp(const0to1, const2to3, llvm::CmpInst::ICMP_EQ).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const2to3, llvm::CmpInst::ICMP_NE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const2to3, llvm::CmpInst::ICMP_SGE).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const2to3, llvm::CmpInst::ICMP_SGT).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const2to3, llvm::CmpInst::ICMP_UGE).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const2to3, llvm::CmpInst::ICMP_UGT).isFalse());
+    CANAL_ASSERT(result.icmp(const0to1, const2to3, llvm::CmpInst::ICMP_SLE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const2to3, llvm::CmpInst::ICMP_SLT).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const2to3, llvm::CmpInst::ICMP_ULE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to1, const2to3, llvm::CmpInst::ICMP_ULT).isTrue());
+
+    //Difference from interval
+    //0-2 != 1-3 (difference in last bit), but 0-2 ? 1-3 in inequality comparison
+    CANAL_ASSERT(result.icmp(const0to2, const1to3, llvm::CmpInst::ICMP_EQ).isFalse());
+    CANAL_ASSERT(result.icmp(const0to2, const1to3, llvm::CmpInst::ICMP_NE).isTrue());
+    CANAL_ASSERT(result.icmp(const0to2, const1to3, llvm::CmpInst::ICMP_SGE).isTop());
+    CANAL_ASSERT(result.icmp(const0to2, const1to3, llvm::CmpInst::ICMP_SGT).isTop());
+    CANAL_ASSERT(result.icmp(const0to2, const1to3, llvm::CmpInst::ICMP_UGE).isTop());
+    CANAL_ASSERT(result.icmp(const0to2, const1to3, llvm::CmpInst::ICMP_UGT).isTop());
+    CANAL_ASSERT(result.icmp(const0to2, const1to3, llvm::CmpInst::ICMP_SLE).isTop());
+    CANAL_ASSERT(result.icmp(const0to2, const1to3, llvm::CmpInst::ICMP_SLT).isTop());
+    CANAL_ASSERT(result.icmp(const0to2, const1to3, llvm::CmpInst::ICMP_ULE).isTop());
+    CANAL_ASSERT(result.icmp(const0to2, const1to3, llvm::CmpInst::ICMP_ULT).isTop());
 }
 
 int

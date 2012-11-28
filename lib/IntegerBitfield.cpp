@@ -494,6 +494,7 @@ Bitfield::xor_(const Domain &a, const Domain &b)
 }
 
 // -1 if a < b, 0 if a == b, 1 if a > b, 2 if unknown
+// and if you compare with top: 3 if !(a < b), 4 if !(a > b)
 static int
 compare(const Bitfield &a,
         const Bitfield &b,
@@ -518,9 +519,23 @@ compare(const Bitfield &a,
                     return 2; // If both values are top
 
                 if (i == 0 || i == 1)
-                    return (i ? -1 : 1); // If first value is set
+                    return (i ? 3 : 4); // If first value is set
+                    //1 >= T -> !(1 < T) -> 3, 0 <= T -> !(0 > T) -> 4
                 else
-                    return (j ? -1 : 1); // If second value is set
+                    return (j ? 4 : 3); // If second value is set
+                    //T <= 1 -> !(T > 1) -> 4, T >= 0 -> !(T < 0) -> 3
+            }
+
+            if (!equality && !first) {
+                if ((i == -1 || i == 2) && (j == -1 || j == 2))
+                    return 2; //Both values are top
+                if (i == 0 || i == 1)
+                    return (i ? 3 : 4); //If first value is set
+                    //1 >= T -> !(1 < T) -> 3, 0 <= T -> !(0 > T) -> 4
+                else
+                    return (j ? 4 : 3); //If second value is set
+                    //T <= 1 -> !(T > 1) -> 4, T >= 0 -> !(T < 0) -> 3
+
             }
 
             return 2;
@@ -594,13 +609,6 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         // If there is at least one known bit in both Bitfields,
         // that differs, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b)
-        { // Same object
-            mZeroes = ~1;
-            mOnes = 1;
-            break;
-        }
-
         switch (compareEqual(aa, bb))
         {
         case 0:  mZeroes = ~1; mOnes = 1; break;
@@ -615,13 +623,6 @@ Bitfield::icmp(const Domain &a, const Domain &b,
         // If there is at least one known bit in both Bitfields,
         // that differs, the result is 1.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b)
-        { //Same object
-            mZeroes = ~0;
-            mOnes = 0;
-            break;
-        }
-
         switch (compareEqual(aa, bb))
         {
         case 0:  mZeroes = ~0; mOnes = 0; break;
@@ -633,104 +634,84 @@ Bitfield::icmp(const Domain &a, const Domain &b,
     case llvm::CmpInst::ICMP_UGT: // unsigned greater than
         switch (compare(aa, bb, false))
         {
-        case 1:  mZeroes = ~1; mOnes = 1; break;
-        case 2:  setTop(); break;
-        default: mZeroes = ~0; mOnes = 0;
+        case 1:  mZeroes = ~1; mOnes = 1; break; //A > B
+        case 3: //!(A < B) -> A >= B -> no useful information
+        case 2:  setTop(); break; //TOP
+        default: mZeroes = ~0; mOnes = 0; //A < B, !(A > B) -> A <= B
         }
 
         break;
     case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
-        if (&a == &b)
-        { //Same object
-            mZeroes = ~1;
-            mOnes = 1;
-            break;
-        }
-
         switch (compare(aa, bb, false, true))
         {
-        case 0:
-        case 1:  mZeroes = ~1; mOnes = 1; break;
-        case 2:  setTop(); break;
-        default: mZeroes = ~0; mOnes = 0;
+        case 0:  //A = B
+        case 3:  //!(A < B) -> A >= B
+        case 1:  mZeroes = ~1; mOnes = 1; break; //A > B
+        case -1: mZeroes = ~0; mOnes = 0; break; //A < B
+        default:  setTop(); break; //TOP, !(A > B) -> A <= B
         }
 
         break;
     case llvm::CmpInst::ICMP_ULT: // unsigned less than
         switch (compare(aa, bb, false))
         {
-        case -1: mZeroes = ~1; mOnes = 1; break;
-        case 2:  setTop(); break;
-        default: mZeroes = ~0; mOnes = 0;
+        case -1: mZeroes = ~1; mOnes = 1; break; //A < B
+        case 4: //!(A > B) -> A <= B -> no useful information
+        case 2:  setTop(); break; //TOP
+        default: mZeroes = ~0; mOnes = 0; //A > B, !(A < B) -> A >= B
         }
 
         break;
     case llvm::CmpInst::ICMP_ULE: // unsigned less or equal
-        if (&a == &b)
-        { //Same object
-            mZeroes = ~1;
-            mOnes = 1;
-            break;
-        }
-
         switch (compare(aa, bb, false, true))
         {
-        case 0:
-        case -1: mZeroes = ~1; mOnes = 1; break;
-        case 2:  setTop(); break;
-        default: mZeroes = ~0; mOnes = 0;
+        case 0: //A = B
+        case 4: //!(A > B) -> A <= B
+        case -1: mZeroes = ~1; mOnes = 1; break; //A < B
+        case 1: mZeroes = ~0; mOnes = 0; break; //A > B
+        default:  setTop(); break; //TOP, !(A < B) -> A >= B
         }
 
         break;
     case llvm::CmpInst::ICMP_SGT: // signed greater than
         switch (compare(aa, bb, true))
         {
-        case 1:  mZeroes = ~1; mOnes = 1; break;
-        case 2:  setTop(); break;
-        default: mZeroes = ~0; mOnes = 0;
+        case 1:  mZeroes = ~1; mOnes = 1; break; //A > B
+        case 3: //!(A < B) -> A >= B -> no useful information
+        case 2:  setTop(); break; //TOP
+        default: mZeroes = ~0; mOnes = 0; //A < B, !(A > B) -> A <= B
         }
 
         break;
     case llvm::CmpInst::ICMP_SGE: // signed greater or equal
-        if (&a == &b)
-        { //Same object
-            mZeroes = ~1;
-            mOnes = 1;
-            break;
-        }
-
         switch (compare(aa, bb, true, true))
         {
-        case 0:
-        case 1:  mZeroes = ~1; mOnes = 1; break;
-        case 2:  setTop(); break;
-        default: mZeroes = ~0; mOnes = 0;
+        case 0:  //A = B
+        case 3:  //!(A < B) -> A >= B
+        case 1:  mZeroes = ~1; mOnes = 1; break; //A > B
+        case -1: mZeroes = ~0; mOnes = 0; break; //A < B
+        default:  setTop(); break; //TOP, !(A > B) -> A <= B
         }
 
         break;
     case llvm::CmpInst::ICMP_SLT: // signed less than
         switch (compare(aa, bb, true))
         {
-        case -1: mZeroes = ~1; mOnes = 1; break;
-        case 2:  setTop(); break;
-        default: mZeroes = ~0; mOnes = 0;
+        case -1: mZeroes = ~1; mOnes = 1; break; //A < B
+        case 4: //!(A > B) -> A <= B -> no useful information
+        case 2:  setTop(); break; //TOP
+        default: mZeroes = ~0; mOnes = 0; //A > B, !(A < B) -> A >= B
         }
 
         break;
     case llvm::CmpInst::ICMP_SLE: // signed less or equal
-        if (&a == &b)
-        { //Same object
-            mZeroes = ~1;
-            mOnes = 1;
-            break;
-        }
-
         switch (compare(aa, bb, true, true))
         {
-        case 0:
-        case -1: mZeroes = ~1; mOnes = 1; break;
-        case 2:  setTop(); break;
-        default: mZeroes = ~0; mOnes = 0;
+        case 0: //A = B
+        case 4: //!(A > B) -> A <= B
+        case -1: mZeroes = ~1; mOnes = 1; break; //A < B
+        case 1: mZeroes = ~0; mOnes = 0; break; //A > B
+        default:  setTop(); break; //TOP, !(A < B) -> A >= B
         }
 
         break;
@@ -814,6 +795,16 @@ Bitfield::fptosi(const Domain &value)
 {
     setTop();
     return *this;
+}
+
+bool
+Bitfield::isTrue() const {
+    return mZeroes.getBitWidth() == 1 && mZeroes == 0 && mOnes == 1;
+}
+
+bool
+Bitfield::isFalse() const {
+    return mZeroes.getBitWidth() == 1 && mZeroes == 1 && mOnes == 0;
 }
 
 } // namespace Integer
