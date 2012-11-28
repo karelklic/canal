@@ -1,7 +1,8 @@
 #ifndef LIBCANAL_STATE_MAP_H
 #define LIBCANAL_STATE_MAP_H
 
-#include "Prereq.h"
+#include "SharedDataPointer.h"
+#include "Domain.h"
 #include <map>
 #include <cstddef>
 
@@ -13,7 +14,7 @@ class StateMap
 {
     /// llvm::Value represents a place in the program (an instruction,
     /// instance of llvm::Instruction).
-    typedef std::map<const llvm::Value*, Domain*> Map;
+    typedef std::map<const llvm::Value*, SharedDataPointer<Domain> > Map;
     Map mMap;
 
 public:
