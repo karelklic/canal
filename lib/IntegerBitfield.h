@@ -93,6 +93,12 @@ public:
     /// Does these bits represent single value?
     bool isSingleValue() const;
 
+    /// Does the interval represent signle bit that is set to 1?
+    bool isTrue() const;
+
+    /// Does the interval represent signle bit that is set to 0?
+    bool isFalse() const;
+
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual Bitfield *clone() const;
