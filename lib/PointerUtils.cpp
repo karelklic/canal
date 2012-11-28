@@ -1,5 +1,6 @@
 #include "PointerUtils.h"
 #include "Pointer.h"
+#include "Utils.h"
 
 namespace Canal {
 namespace Pointer {
@@ -12,11 +13,11 @@ Utils::addTarget(Canal::Domain &pointer,
                  const std::vector<Domain *> &offsets,
                  Canal::Domain *numericOffset)
 {
-    dynamic_cast<Pointer&>(pointer).addTarget(type,
-                                              place,
-                                              target,
-                                              offsets,
-                                              numericOffset);
+    dynCast<Pointer&>(pointer).addTarget(type,
+                                         place,
+                                         target,
+                                         offsets,
+                                         numericOffset);
 }
 
 } // namespace Pointer
