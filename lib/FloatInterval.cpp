@@ -105,7 +105,7 @@ Interval::compare(const Interval &value,
     //   Opcode                        U L G E  Intuitive operation
     case llvm::CmpInst::FCMP_OEQ:   // 0 0 0 1  ordered and equal
     case llvm::CmpInst::FCMP_UEQ:   // 1 0 0 1  unordered or equal
-        if (this == &value || (isSingleValue() && *this == value))
+        if (this == &value || (isConstant() && *this == value))
             return 1;
         else if (intersects(value))
             return 2;
@@ -167,7 +167,7 @@ Interval::compare(const Interval &value,
     case llvm::CmpInst::FCMP_UNE:   // 1 1 1 0  unordered or not equal
         if (!intersects(value))
             return 1;
-        else if (!(this == &value || (isSingleValue() && *this == value)))
+        else if (!(this == &value || (isConstant() && *this == value)))
             return 2;
         else
             return 0;
@@ -187,7 +187,7 @@ Interval::getSemantics() const
 }
 
 bool
-Interval::isSingleValue() const
+Interval::isConstant() const
 {
     if (isBottom() || isTop())
         return false;

@@ -40,7 +40,7 @@ public:
 
     const llvm::fltSemantics &getSemantics() const;
 
-    bool isSingleValue() const;
+    bool isConstant() const;
 
     bool intersects(const Interval &value) const;
 
