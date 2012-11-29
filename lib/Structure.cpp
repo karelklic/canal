@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "IntegerContainer.h"
 #include "IntegerSet.h"
+#include "IntegerUtils.h"
 #include "IntegerInterval.h"
 
 namespace Canal {
@@ -218,11 +219,9 @@ std::vector<Domain*>
 Structure::getItem(const Domain &offset) const
 {
     std::vector<Domain*> result;
-    const Integer::Container &integer =
-        dynCast<const Integer::Container&>(offset);
 
-    // First try an set, then interval.
-    const Integer::Set &set = integer.getSet();
+    // First try an enumeration, then interval.
+    const Integer::Set &set = Integer::Utils::getSet(offset);
     if (!set.isTop())
     {
         APIntUtils::USet::const_iterator it = set.mValues.begin(),
@@ -250,7 +249,7 @@ Structure::getItem(const Domain &offset) const
         return result;
     }
 
-    const Integer::Interval &interval = integer.getInterval();
+    const Integer::Interval &interval = Integer::Utils::getInterval(offset);
     // Let's care about the unsigned interval only.
     if (!interval.mUnsignedTop)
     {

@@ -2,6 +2,7 @@
 #include "IntegerContainer.h"
 #include "IntegerInterval.h"
 #include "Utils.h"
+#include "IntegerUtils.h"
 
 #define ROUNDING_MODE llvm::APFloat::rmNearestTiesToEven
 
@@ -689,12 +690,9 @@ Interval::frem(const Domain &a, const Domain &b)
 Interval &
 Interval::uitofp(const Domain &value)
 {
-    const Integer::Container &c =
-        dynCast<const Integer::Container&>(value);
-
     llvm::APInt min, max;
-    if (!c.getInterval().unsignedMin(min) ||
-        !c.getInterval().unsignedMax(max))
+    if (!Integer::Utils::unsignedMin(value, min) ||
+        !Integer::Utils::unsignedMax(value, max))
     {
         setTop();
         return *this;
@@ -708,12 +706,9 @@ Interval::uitofp(const Domain &value)
 Interval &
 Interval::sitofp(const Domain &value)
 {
-    const Integer::Container &c =
-        dynCast<const Integer::Container&>(value);
-
     llvm::APInt min, max;
-    if (!c.getInterval().signedMin(min) ||
-        !c.getInterval().signedMax(max))
+    if (!Integer::Utils::signedMin(value, min) ||
+        !Integer::Utils::signedMax(value, max))
     {
         setTop();
         return *this;
