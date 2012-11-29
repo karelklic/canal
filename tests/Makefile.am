@@ -75,7 +75,7 @@ noinst_PROGRAMS = \
 	ArraySingleItemTest \
 	FloatIntervalTest \
 	IntegerBitfieldTest \
-	IntegerEnumerationTest \
+	IntegerSetTest \
 	IntegerIntervalTest \
 	OperationsTest \
 	PointerTest

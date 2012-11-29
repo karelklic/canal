@@ -631,7 +631,7 @@ at_help_all="1;testsuite.at:4;ArrayExactSize;;
 2;testsuite.at:8;ArraySingleItem;;
 3;testsuite.at:12;FloatInterval;;
 4;testsuite.at:16;IntegerBitfield;;
-5;testsuite.at:20;IntegerEnumeration;;
+5;testsuite.at:20;IntegerSet;;
 6;testsuite.at:24;IntegerInterval;;
 7;testsuite.at:28;Operations;;
 8;testsuite.at:32;Pointer;;
@@ -1991,9 +1991,9 @@ $at_traceon; }
 at_status=`cat "$at_status_file"`
 #AT_STOP_4
 #AT_START_5
-# 5. testsuite.at:20: IntegerEnumeration
+# 5. testsuite.at:20: IntegerSet
 at_setup_line='testsuite.at:20'
-at_desc="IntegerEnumeration"
+at_desc="IntegerSet"
 $at_quiet $as_echo_n "  5: $at_desc                             "
 at_xfail=no
 echo "#                             -*- compilation -*-" >> "$at_group_log"
@@ -2002,14 +2002,14 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:21: ../../IntegerEnumerationTest"
+$as_echo "$at_srcdir/testsuite.at:21: ../../IntegerSetTest"
 echo testsuite.at:21 >"$at_check_line_file"
 
 if test -n "$at_traceon"; then
-  ( $at_traceon; ../../IntegerEnumerationTest ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; ../../IntegerSetTest ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; ../../IntegerEnumerationTest ) >"$at_stdout" 2>"$at_stderr"
+  ( :; ../../IntegerSetTest ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false

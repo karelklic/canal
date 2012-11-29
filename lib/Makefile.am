@@ -22,8 +22,8 @@ libcanal_la_SOURCES = \
 	IntegerBitfield.h \
 	IntegerContainer.cpp \
 	IntegerContainer.h \
-	IntegerEnumeration.cpp \
-	IntegerEnumeration.h \
+	IntegerSet.cpp \
+	IntegerSet.h \
 	IntegerInterval.cpp \
 	IntegerInterval.h \
 	InterpreterBasicBlock.cpp \
