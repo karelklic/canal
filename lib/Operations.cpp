@@ -6,6 +6,7 @@
 #include "FloatInterval.h"
 #include "IntegerBitfield.h"
 #include "IntegerContainer.h"
+#include "IntegerUtils.h"
 #include "OperationsCallback.h"
 #include "Pointer.h"
 #include "PointerUtils.h"
@@ -318,18 +319,17 @@ Operations::getElementPtrOffsets(std::vector<Domain*> &result,
     std::vector<Domain*>::iterator resultIt = result.begin();
     for (; resultIt != result.end(); ++resultIt)
     {
-        const Integer::Container &number =
-            dynCast<const Integer::Container&>(**resultIt);
+        unsigned bitWidth = Integer::Utils::getBitWidth(**resultIt);
 
-        CANAL_ASSERT_MSG(number.getBitWidth() <= 64,
+        CANAL_ASSERT_MSG(bitWidth <= 64,
                          "Cannot handle GetElementPtr offset"
                          " with more than 64 bits.");
 
-        if (number.getBitWidth() != 64)
+        if (bitWidth != 64)
         {
             Domain *extended = mConstructors.createInteger(64);
 
-            extended->sext(number);
+            extended->sext(**resultIt);
             delete *resultIt;
             *resultIt = extended;
         }
@@ -1251,8 +1251,8 @@ Operations::select(const llvm::SelectInst &instruction,
     const Integer::Container &conditionInt =
         dynCast<const Integer::Container&>(*condition);
 
-    CANAL_ASSERT(conditionInt.getBitfield().getBitWidth() == 1);
-    switch (conditionInt.getBitfield().getBitValue(0))
+    CANAL_ASSERT(Integer::Utils::getBitfield(conditionInt).getBitWidth() == 1);
+    switch (Integer::Utils::getBitfield(conditionInt).getBitValue(0))
     {
     case -1:
         // The condition result is undefined.  Let's wait for
