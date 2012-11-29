@@ -9,7 +9,7 @@ class CommandSet : public Command
     {
         WideningIterations = 1,
         NoMissing,
-        EnumerationThreshold
+        SetThreshold
     };
 
     typedef std::map<std::string, Option> OptionMap;

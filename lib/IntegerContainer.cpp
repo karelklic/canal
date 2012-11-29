@@ -1,6 +1,6 @@
 #include "IntegerContainer.h"
 #include "IntegerBitfield.h"
-#include "IntegerEnumeration.h"
+#include "IntegerSet.h"
 #include "IntegerInterval.h"
 #include "Environment.h"
 #include "Constructors.h"
@@ -31,7 +31,7 @@ Container::~Container()
 unsigned
 Container::getBitWidth() const
 {
-    return getEnumeration().getBitWidth();
+    return getSet().getBitWidth();
 }
 
 Bitfield &
@@ -46,16 +46,16 @@ Container::getBitfield() const
     return dynCast<const Bitfield&>(*mValues[0]);
 }
 
-Enumeration &
-Container::getEnumeration()
+Set &
+Container::getSet()
 {
-    return dynCast<Enumeration&>(*mValues[1]);
+    return dynCast<Set&>(*mValues[1]);
 }
 
-const Enumeration &
-Container::getEnumeration() const
+const Set &
+Container::getSet() const
 {
-    return dynCast<const Enumeration&>(*mValues[1]);
+    return dynCast<const Set&>(*mValues[1]);
 }
 
 Interval &
@@ -73,7 +73,7 @@ Container::getInterval() const
 bool
 Container::signedMin(llvm::APInt &result) const
 {
-    if (!getEnumeration().signedMin(result))
+    if (!getSet().signedMin(result))
         return false;
 
     llvm::APInt temp(getBitWidth(), 0);
@@ -95,7 +95,7 @@ Container::signedMin(llvm::APInt &result) const
 bool
 Container::signedMax(llvm::APInt &result) const
 {
-    if (!getEnumeration().signedMax(result))
+    if (!getSet().signedMax(result))
         return false;
 
     llvm::APInt temp(getBitWidth(), 0);
@@ -117,7 +117,7 @@ Container::signedMax(llvm::APInt &result) const
 bool
 Container::unsignedMin(llvm::APInt &result) const
 {
-    if (!getEnumeration().unsignedMin(result))
+    if (!getSet().unsignedMin(result))
         return false;
 
     llvm::APInt temp(getBitWidth(), 0);
@@ -139,7 +139,7 @@ Container::unsignedMin(llvm::APInt &result) const
 bool
 Container::unsignedMax(llvm::APInt &result) const
 {
-    if (!getEnumeration().unsignedMax(result))
+    if (!getSet().unsignedMax(result))
         return false;
 
     llvm::APInt temp(getBitWidth(), 0);
@@ -162,7 +162,7 @@ bool
 Container::isConstant() const
 {
     return getBitfield().isConstant()
-        && getEnumeration().isConstant()
+        && getSet().isConstant()
         && getInterval().isConstant();
 }
 

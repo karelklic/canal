@@ -4,7 +4,7 @@
 #include "State.h"
 #include "SlotTracker.h"
 #include "IntegerContainer.h"
-#include "IntegerEnumeration.h"
+#include "IntegerSet.h"
 #include "Environment.h"
 #include "Constructors.h"
 
@@ -89,10 +89,10 @@ dereference(Domain *block,
         const Integer::Container &first =
             dynCast<const Integer::Container&>(*offsets[0]);
 
-        CANAL_ASSERT_MSG(first.getEnumeration().mValues.size() == 1,
+        CANAL_ASSERT_MSG(first.getSet().mValues.size() == 1,
                          "First offset is expected to be zero!");
 
-        CANAL_ASSERT_MSG(first.getEnumeration().mValues.begin()->isMinValue(),
+        CANAL_ASSERT_MSG(first.getSet().mValues.begin()->isMinValue(),
                          "First offset is expected to be zero!");
 
         std::vector<Domain*>::const_iterator ito = offsets.begin() + 1,
@@ -139,10 +139,10 @@ dereference(const Domain *block,
         const Integer::Container &first =
             dynCast<const Integer::Container&>(*offsets[0]);
 
-        CANAL_ASSERT_MSG(first.getEnumeration().mValues.size() == 1,
+        CANAL_ASSERT_MSG(first.getSet().mValues.size() == 1,
                          "First offset is expected to be zero!");
 
-        CANAL_ASSERT_MSG(first.getEnumeration().mValues.begin()->isMinValue(),
+        CANAL_ASSERT_MSG(first.getSet().mValues.begin()->isMinValue(),
                          "First offset is expected to be zero!");
 
         std::vector<Domain*>::const_iterator ito = offsets.begin() + 1,
