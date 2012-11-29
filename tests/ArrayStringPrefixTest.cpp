@@ -24,7 +24,7 @@ static void
 testSetZero()
 {
     Array::StringPrefix prefix(*gEnvironment);
-    prefix.setTop();
+    prefix.setZero(NULL);
     CANAL_ASSERT(prefix.isTop());
 }
 
