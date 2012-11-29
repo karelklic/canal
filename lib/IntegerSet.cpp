@@ -417,7 +417,7 @@ Set::icmp(const Domain &a, const Domain &b,
         // If both sets are equal, the result is 1.  If
         // set intersection is empty, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b || (aa.mValues.size() == 1 && aa.mValues == bb.mValues))
+        if (aa.mValues.size() == 1 && aa.mValues == bb.mValues)
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (intersects(aa, bb))
             setTop();
@@ -431,7 +431,7 @@ Set::icmp(const Domain &a, const Domain &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (!intersects(aa, bb))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
-        else if (&a == &b || (aa.mValues.size() == 1 && aa.mValues == bb.mValues))
+        else if (aa.mValues.size() == 1 && aa.mValues == bb.mValues)
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
@@ -459,7 +459,7 @@ Set::icmp(const Domain &a, const Domain &b,
         // the first set is unsigned larger or equal than the largest
         // element from the second set, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (aa.mValues.begin()->uge(*bb.mValues.rbegin()) || &a == &b)
+        if (aa.mValues.begin()->uge(*bb.mValues.rbegin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (aa.mValues.rbegin()->ule(*bb.mValues.begin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
@@ -489,7 +489,7 @@ Set::icmp(const Domain &a, const Domain &b,
         // the first set is unsigned larger or equal than the largest
         // element from the second set, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (aa.mValues.rbegin()->ule(*bb.mValues.begin()) || &a == &b)
+        if (aa.mValues.rbegin()->ule(*bb.mValues.begin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (aa.mValues.begin()->uge(*bb.mValues.rbegin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
@@ -519,7 +519,7 @@ Set::icmp(const Domain &a, const Domain &b,
         // the first set is signed lower or equal than the lowest
         // element from the second set, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (minA.sge(maxB) || &a == &b)
+        if (minA.sge(maxB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (maxA.sle(minB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
@@ -549,7 +549,7 @@ Set::icmp(const Domain &a, const Domain &b,
         // the first set is signed larger or equal than the largest
         // element from the second set, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (maxA.sle(minB) || &a == &b)
+        if (maxA.sle(minB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (minA.sge(maxB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));

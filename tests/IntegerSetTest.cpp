@@ -126,10 +126,10 @@ testIcmp()
     CANAL_ASSERT(result.isTop());
 
     result.icmp(set4, set4, llvm::CmpInst::ICMP_EQ); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isTrue());
+    CANAL_ASSERT(result.isTop());
 
     result.icmp(set4, set4, llvm::CmpInst::ICMP_NE); //0-1 ==  0-1 (same object)
-    CANAL_ASSERT(result.isFalse());
+    CANAL_ASSERT(result.isTop());
 
     result.icmp(set4, set1, llvm::CmpInst::ICMP_EQ); //0-1 ? 0
     CANAL_ASSERT(result.isTop());
@@ -329,25 +329,25 @@ testIcmp()
     CANAL_ASSERT(result.isTop());
 
     result.icmp(set4, set4, llvm::CmpInst::ICMP_SGE); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isTrue());
+    CANAL_ASSERT(result.isTop());
 
     result.icmp(set4, set4, llvm::CmpInst::ICMP_UGT); //0-1 == 0-1 (same object)
     CANAL_ASSERT(result.isTop());
 
     result.icmp(set4, set4, llvm::CmpInst::ICMP_UGE); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isTrue());
+    CANAL_ASSERT(result.isTop());
 
     result.icmp(set4, set4, llvm::CmpInst::ICMP_SLT); //0-1 == 0-1 (same object)
     CANAL_ASSERT(result.isTop());
 
     result.icmp(set4, set4, llvm::CmpInst::ICMP_SLE); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isTrue());
+    CANAL_ASSERT(result.isTop());
 
     result.icmp(set4, set4, llvm::CmpInst::ICMP_ULT); //0-1 == 0-1 (same object)
     CANAL_ASSERT(result.isTop());
 
     result.icmp(set4, set4, llvm::CmpInst::ICMP_ULE); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isTrue());
+    CANAL_ASSERT(result.isTop());
 
 
     result.icmp(set4, set9, llvm::CmpInst::ICMP_SGE); //0-1 < 2-3
