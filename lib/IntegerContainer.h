@@ -76,7 +76,7 @@ public:
     bool unsignedMax(llvm::APInt &result) const;
 
     /// Find out whether all representations contain only single value
-    bool isSingleValue() const;
+    bool isConstant() const;
 
 public: // Implementation of Domain.
     /// Covariant return type.

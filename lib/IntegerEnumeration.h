@@ -72,7 +72,7 @@ public:
     bool unsignedMax(llvm::APInt &result) const;
 
     /// Does this enumeration represent single value?
-    bool isSingleValue() const;
+    bool isConstant() const;
 
     /// Does the enumeration represent signle bit that is set to 1?
     bool isTrue() const;

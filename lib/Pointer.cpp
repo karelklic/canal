@@ -310,7 +310,7 @@ Pointer::store(const Domain &value, State &state) const
 }
 
 bool
-Pointer::isSingleTarget() const
+Pointer::isConstant() const
 {
     if (mTargets.size() != 1)
         return false;
@@ -319,14 +319,14 @@ Pointer::isSingleTarget() const
     const Integer::Container *tmp =
         dynCast<const Integer::Container*>(target->mNumericOffset);
 
-    if (tmp && !tmp->isSingleValue())
+    if (tmp && !tmp->isConstant())
         return false;
 
     std::vector<Domain*>::const_iterator it = target->mOffsets.begin();
     for (; it != target->mOffsets.end(); ++it)
     {
         tmp = dynCast<const Integer::Container*>(*it);
-        if (!tmp->isSingleValue())
+        if (!tmp->isConstant())
             return false;
     }
 

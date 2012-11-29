@@ -175,20 +175,20 @@ testIcmp()
     interval11.join(interval8); //1-3
 
     result.icmp(interval2, interval6, llvm::CmpInst::ICMP_EQ); //-1-0 ? 1 (when unsigned, -1-0 is 0-max) -> signed false, unsigned top
-    CANAL_ASSERT(result.isSignedSingleValue() && result.signedMin(res) && res == 0); //Signed false
+    CANAL_ASSERT(result.isSignedConstant() && result.signedMin(res) && res == 0); //Signed false
     CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt::getMinValue(result.getBitWidth()) && //Unsigned top
                  result.unsignedMax(res) && res == llvm::APInt::getMaxValue(result.getBitWidth()));
 
     result.icmp(interval2, interval6, llvm::CmpInst::ICMP_NE); //-1-0 ? 1 (when unsigned, -1-0 is 0-max) -> signed true, unsigned top
-    CANAL_ASSERT(result.isSignedSingleValue() && result.signedMin(res) && res == 1); //Signed true
+    CANAL_ASSERT(result.isSignedConstant() && result.signedMin(res) && res == 1); //Signed true
     CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt::getMinValue(result.getBitWidth()) && //Unsigned top
                  result.unsignedMax(res) && res == llvm::APInt::getMaxValue(result.getBitWidth()));
 
     result.icmp(interval4, interval7, llvm::CmpInst::ICMP_EQ); //0-1 != 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval7, llvm::CmpInst::ICMP_NE); //0-1 != 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval5, llvm::CmpInst::ICMP_EQ); //0-1 ? 0-1
     CANAL_ASSERT(result.isTop());
@@ -203,10 +203,10 @@ testIcmp()
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval4, interval4, llvm::CmpInst::ICMP_EQ); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval4, llvm::CmpInst::ICMP_NE); //0-1 ==  0-1 (same object)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval1, llvm::CmpInst::ICMP_EQ); //0-1 ? 0
     CANAL_ASSERT(result.isTop());
@@ -221,10 +221,10 @@ testIcmp()
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval4, interval9, llvm::CmpInst::ICMP_EQ); //0-1 != 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval9, llvm::CmpInst::ICMP_NE); //0-1 != 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval10, interval11, llvm::CmpInst::ICMP_EQ); //0-2 ? 1-3
     CANAL_ASSERT(result.isTop());
@@ -247,10 +247,10 @@ testIcmp()
     interval11.join(interval8); //1-3
 
     result.icmp(interval2, interval6, llvm::CmpInst::ICMP_SLE); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval2, interval6, llvm::CmpInst::ICMP_SLT); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval2, interval6, llvm::CmpInst::ICMP_ULE); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
     CANAL_ASSERT(result.isTop());
@@ -259,10 +259,10 @@ testIcmp()
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval2, interval6, llvm::CmpInst::ICMP_SGE); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval2, interval6, llvm::CmpInst::ICMP_SGT); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval2, interval6, llvm::CmpInst::ICMP_UGE); //1 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >, unsigned top
     CANAL_ASSERT(result.isTop());
@@ -272,75 +272,75 @@ testIcmp()
 
 
     result.icmp(interval1, interval6, llvm::CmpInst::ICMP_SLE); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval1, interval6, llvm::CmpInst::ICMP_SLT); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval1, interval6, llvm::CmpInst::ICMP_ULE); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval1, interval6, llvm::CmpInst::ICMP_ULT); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval1, interval6, llvm::CmpInst::ICMP_SGE); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval1, interval6, llvm::CmpInst::ICMP_SGT); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval1, interval6, llvm::CmpInst::ICMP_UGE); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval1, interval6, llvm::CmpInst::ICMP_UGT); //0 ? -1-0 (when unsigned, -1-0 is 0-max) -> signed >=, unsigned <=
     CANAL_ASSERT(result.isTop());
 
 
     result.icmp(interval4, interval7, llvm::CmpInst::ICMP_SGE); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval7, llvm::CmpInst::ICMP_SGT); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval7, llvm::CmpInst::ICMP_UGE); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval7, llvm::CmpInst::ICMP_UGT); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval7, llvm::CmpInst::ICMP_SLE); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval7, llvm::CmpInst::ICMP_SLT); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval7, llvm::CmpInst::ICMP_ULE); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval7, llvm::CmpInst::ICMP_ULT); //0-1 < 2
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
 
     result.icmp(interval4, interval1, llvm::CmpInst::ICMP_SGE); //0-1 <= 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval1, llvm::CmpInst::ICMP_SGT); //0-1 <= 1
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval4, interval1, llvm::CmpInst::ICMP_UGE); //0-1 <= 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval1, llvm::CmpInst::ICMP_UGT); //0-1 <= 1
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval4, interval1, llvm::CmpInst::ICMP_SLE); //0-1 <= 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval1, llvm::CmpInst::ICMP_SLT); //0-1 <= 1
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval4, interval1, llvm::CmpInst::ICMP_ULE); //0-1 <= 1
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval1, llvm::CmpInst::ICMP_ULT); //0-1 <= 1
     CANAL_ASSERT(result.isTop());
@@ -381,7 +381,7 @@ testIcmp()
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval4, interval6, llvm::CmpInst::ICMP_SGE); //0-1 <= -1-0 //Signed
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval6, llvm::CmpInst::ICMP_ULT); //0-1 ? -1-0
     CANAL_ASSERT(result.isTop());
@@ -393,57 +393,57 @@ testIcmp()
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval4, interval6, llvm::CmpInst::ICMP_SLE); //0-1 <= -1-0 //Signed
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
 
     result.icmp(interval4, interval4, llvm::CmpInst::ICMP_SGT); //0-1 == 0-1 (same object)
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval4, interval4, llvm::CmpInst::ICMP_SGE); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval4, llvm::CmpInst::ICMP_UGT); //0-1 == 0-1 (same object)
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval4, interval4, llvm::CmpInst::ICMP_UGE); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval4, llvm::CmpInst::ICMP_SLT); //0-1 == 0-1 (same object)
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval4, interval4, llvm::CmpInst::ICMP_SLE); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval4, llvm::CmpInst::ICMP_ULT); //0-1 == 0-1 (same object)
     CANAL_ASSERT(result.isTop());
 
     result.icmp(interval4, interval4, llvm::CmpInst::ICMP_ULE); //0-1 == 0-1 (same object)
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
 
     result.icmp(interval4, interval9, llvm::CmpInst::ICMP_SGE); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval9, llvm::CmpInst::ICMP_SGT); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval9, llvm::CmpInst::ICMP_UGE); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval9, llvm::CmpInst::ICMP_UGT); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 0);
 
     result.icmp(interval4, interval9, llvm::CmpInst::ICMP_SLE); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval9, llvm::CmpInst::ICMP_SLT); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval9, llvm::CmpInst::ICMP_ULE); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
     result.icmp(interval4, interval9, llvm::CmpInst::ICMP_ULT); //0-1 < 2-3
-    CANAL_ASSERT(result.isSingleValue() && result.signedMin(res) && res == 1);
+    CANAL_ASSERT(result.isConstant() && result.signedMin(res) && res == 1);
 
 
     result.icmp(interval10, interval11, llvm::CmpInst::ICMP_SGE); //0-2 ? 1-3
@@ -485,13 +485,13 @@ testTrunc()
     Integer::Interval interval2(*gEnvironment, 3);
     interval2.trunc(Integer::Interval(*gEnvironment, llvm::APInt(8, 4)));
     llvm::APInt res;
-    CANAL_ASSERT(interval2.isSingleValue() && interval2.unsignedMin(res) && res == 4);
+    CANAL_ASSERT(interval2.isConstant() && interval2.unsignedMin(res) && res == 4);
     CANAL_ASSERT(interval2.getBitWidth() == 3);
 
     // Test truncation from i32 00000001 to i1.
     Integer::Interval interval3(*gEnvironment, 1);
     interval3.trunc(Integer::Interval(*gEnvironment, llvm::APInt(32, 1)));
-    CANAL_ASSERT(interval3.isSingleValue() && interval3.unsignedMin(res) && res == 1);
+    CANAL_ASSERT(interval3.isConstant() && interval3.unsignedMin(res) && res == 1);
     CANAL_ASSERT(interval3.getBitWidth() == 1);
 }
 

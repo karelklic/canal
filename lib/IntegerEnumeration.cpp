@@ -115,7 +115,7 @@ Enumeration::unsignedMax(llvm::APInt &result) const
 }
 
 bool
-Enumeration::isSingleValue() const
+Enumeration::isConstant() const
 {
     return (!mTop && mValues.size() == 1);
 }
@@ -123,14 +123,14 @@ Enumeration::isSingleValue() const
 bool
 Enumeration::isTrue() const
 {
-    return isSingleValue() &&
+    return isConstant() &&
         *mValues.begin() == llvm::APInt(1, 1);
 }
 
 bool
 Enumeration::isFalse() const
 {
-    return isSingleValue() &&
+    return isConstant() &&
         *mValues.begin() == llvm::APInt(1, 0);
 }
 

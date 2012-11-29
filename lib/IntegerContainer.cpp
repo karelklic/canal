@@ -159,11 +159,11 @@ Container::unsignedMax(llvm::APInt &result) const
 }
 
 bool
-Container::isSingleValue() const
+Container::isConstant() const
 {
-    return getBitfield().isSingleValue()
-        && getEnumeration().isSingleValue()
-        && getInterval().isSingleValue();
+    return getBitfield().isConstant()
+        && getEnumeration().isConstant()
+        && getInterval().isConstant();
 }
 
 Container *
@@ -440,7 +440,7 @@ Container::icmp(const Domain &a, const Domain &b,
 
     if (aPointer && bPointer)
     {
-        bool cmpSingle = aPointer->isSingleTarget() && bPointer->isSingleTarget(),
+        bool cmpSingle = aPointer->isConstant() && bPointer->isConstant(),
             cmpeq = (*aPointer == *bPointer);
 
         setBottom();

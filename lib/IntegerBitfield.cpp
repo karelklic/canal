@@ -188,7 +188,7 @@ Bitfield::unsignedMax(llvm::APInt &result) const
 }
 
 bool
-Bitfield::isSingleValue() const
+Bitfield::isConstant() const
 {
     return ~(mZeroes ^ mOnes) == 0;
 }
