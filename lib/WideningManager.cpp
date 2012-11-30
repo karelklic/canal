@@ -67,7 +67,7 @@ Manager::widen(const llvm::BasicBlock &wideningPoint,
             std::cout << ((it2->second)->toString()) << "\n";
 #endif
 
-            widen(wideningPoint, *it1->second, *it2->second);
+            widen(wideningPoint, *it1->second.mutable_(), *it2->second);
         }
     }
 }

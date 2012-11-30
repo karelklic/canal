@@ -115,13 +115,13 @@ Interval::unsignedMax(llvm::APInt &result) const
 }
 
 bool
-Interval::isSingleValue() const
+Interval::isConstant() const
 {
-    return isSignedSingleValue() && isUnsignedSingleValue();
+    return isSignedConstant() && isUnsignedConstant();
 }
 
 bool
-Interval::isSignedSingleValue() const
+Interval::isSignedConstant() const
 {
     if (isBottom() || mSignedTop)
         return false;
@@ -130,7 +130,7 @@ Interval::isSignedSingleValue() const
 }
 
 bool
-Interval::isUnsignedSingleValue() const
+Interval::isUnsignedConstant() const
 {
     if (isBottom() || mUnsignedTop)
         return false;
@@ -1000,8 +1000,8 @@ Interval::icmp(const Domain &a, const Domain &b,
         // Otherwise the result is the top value (both 0 and 1).
 
         // Signed equality
-        if (aa.isSignedSingleValue() &&
-            bb.isSignedSingleValue() &&
+        if (aa.isSignedConstant() &&
+            bb.isSignedConstant() &&
             aa.mSignedFrom == bb.mSignedFrom)
         {
             mSignedFrom = mSignedTo = 1;
@@ -1010,8 +1010,8 @@ Interval::icmp(const Domain &a, const Domain &b,
             mSignedTop = true;
 
         // Unsigned equality
-        if (aa.isUnsignedSingleValue() &&
-            bb.isUnsignedSingleValue() &&
+        if (aa.isUnsignedConstant() &&
+            bb.isUnsignedConstant() &&
             aa.mUnsignedFrom == bb.mUnsignedFrom)
         {
             mUnsignedFrom = mUnsignedTo = 1;
@@ -1025,8 +1025,8 @@ Interval::icmp(const Domain &a, const Domain &b,
         // Otherwise the result is the top value (both 0 and 1).
 
         // Signed inequality.
-        if (!(aa.isSignedSingleValue() &&
-              bb.isSignedSingleValue() &&
+        if (!(aa.isSignedConstant() &&
+              bb.isSignedConstant() &&
               aa.mSignedFrom == bb.mSignedFrom))
         {
             if (intersects(aa, bb, true, false))
@@ -1036,8 +1036,8 @@ Interval::icmp(const Domain &a, const Domain &b,
         }
 
         // Unsigned inequality.
-        if (!(aa.isUnsignedSingleValue() &&
-              bb.isUnsignedSingleValue() &&
+        if (!(aa.isUnsignedConstant() &&
+              bb.isUnsignedConstant() &&
               aa.mUnsignedFrom == bb.mUnsignedFrom))
         {
             if (intersects(aa, bb, false, true))
@@ -1075,7 +1075,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mUnsignedFrom.uge(bb.mUnsignedTo))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (!aa.mUnsignedTo.ule(bb.mUnsignedFrom))
+        else if (!aa.mUnsignedTo.ult(bb.mUnsignedFrom))
             setTop();
 
         break;
@@ -1138,7 +1138,7 @@ Interval::icmp(const Domain &a, const Domain &b,
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mSignedFrom.sge(bb.mSignedTo))
            mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo = 1;
-        else if (!aa.mSignedTo.sle(bb.mSignedFrom))
+        else if (!aa.mSignedTo.slt(bb.mSignedFrom))
             setTop();
 
         break;

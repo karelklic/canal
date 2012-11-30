@@ -7,7 +7,7 @@ namespace Canal {
 namespace Integer {
 
 class Bitfield;
-class Enumeration;
+class Set;
 class Interval;
 
 class Container : public Domain
@@ -29,14 +29,14 @@ public:
     Bitfield &getBitfield();
     const Bitfield &getBitfield() const;
 
-    Enumeration &getEnumeration();
-    const Enumeration &getEnumeration() const;
+    Set &getSet();
+    const Set &getSet() const;
 
     Interval &getInterval();
     const Interval &getInterval() const;
 
     /// Lowest signed number represented by this container.  Uses the
-    /// abstract domain (enum, interval, bits) with highest precision.
+    /// abstract domain (set, interval, bits) with highest precision.
     /// @param result
     ///   Filled by the minimum value if it is known.  Otherwise, the
     ///   value is undefined.
@@ -46,7 +46,7 @@ public:
     bool signedMin(llvm::APInt &result) const;
 
     /// Highest signed number represented by this container.  Uses the
-    /// abstract domain (enum, interval, bits) with highest precision.
+    /// abstract domain (set, interval, bits) with highest precision.
     /// @param result
     ///   Filled by the maximum value if it is known.  Otherwise, the
     ///   value is undefined.
@@ -56,7 +56,7 @@ public:
     bool signedMax(llvm::APInt &result) const;
 
     /// Lowest unsigned number represented by this container.  Uses the
-    /// abstract domain (enum, interval, bits) with highest precision.
+    /// abstract domain (set, interval, bits) with highest precision.
     /// @param result
     ///   Filled by the minimum value if it is known.  Otherwise, the
     ///   value is undefined.
@@ -66,7 +66,7 @@ public:
     bool unsignedMin(llvm::APInt &result) const;
 
     /// Highest unsigned number represented by this container.  Uses
-    /// the abstract domain (enum, interval, bits) with highest precision.
+    /// the abstract domain (set, interval, bits) with highest precision.
     /// @param result
     ///   Filled by the maximum value if it is known.  Otherwise, the
     ///   value is undefined.
@@ -76,7 +76,7 @@ public:
     bool unsignedMax(llvm::APInt &result) const;
 
     /// Find out whether all representations contain only single value
-    bool isSingleValue() const;
+    bool isConstant() const;
 
 public: // Implementation of Domain.
     /// Covariant return type.

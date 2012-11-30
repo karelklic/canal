@@ -137,11 +137,10 @@ State::mergeForeignFunctionBlocks(const State &state,
             if (containsPlace(currentFunction, it2->first))
                 continue;
 
-            mFunctionBlocks.insert(StateMap::value_type(it2->first,
-                                                        it2->second->clone()));
+            mFunctionBlocks.insert(*it2);
         }
 	else if (*it1->second != *it2->second)
-            it1->second->join(*it2->second);
+            it1->second.mutable_()->join(*it2->second);
     }
 }
 
@@ -195,11 +194,11 @@ State::findVariable(const llvm::Value &place) const
 {
     StateMap::const_iterator it = mGlobalVariables.find(&place);
     if (it != mGlobalVariables.end())
-        return it->second;
+        return it->second.data();
 
     it = mFunctionVariables.find(&place);
     if (it != mFunctionVariables.end())
-        return it->second;
+        return it->second.data();
 
     return NULL;
 }
@@ -209,11 +208,11 @@ State::findBlock(const llvm::Value &place) const
 {
     StateMap::const_iterator it = mGlobalBlocks.find(&place);
     if (it != mGlobalBlocks.end())
-        return it->second;
+        return it->second.data();
 
     it = mFunctionBlocks.find(&place);
     if (it != mFunctionBlocks.end())
-        return it->second;
+        return it->second.data();
 
     return NULL;
 }

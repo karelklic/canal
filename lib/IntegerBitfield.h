@@ -91,7 +91,13 @@ public:
     bool unsignedMax(llvm::APInt &result) const;
 
     /// Does these bits represent single value?
-    bool isSingleValue() const;
+    bool isConstant() const;
+
+    /// Does the interval represent signle bit that is set to 1?
+    bool isTrue() const;
+
+    /// Does the interval represent signle bit that is set to 0?
+    bool isFalse() const;
 
 public: // Implementation of Domain.
     /// Covariant return type.

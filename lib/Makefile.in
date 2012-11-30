@@ -79,7 +79,7 @@ am_libcanal_la_OBJECTS = libcanal_la-APIntUtils.lo \
 	libcanal_la-Domain.lo libcanal_la-Environment.lo \
 	libcanal_la-FloatInterval.lo libcanal_la-IntegerBitfield.lo \
 	libcanal_la-IntegerContainer.lo \
-	libcanal_la-IntegerEnumeration.lo \
+	libcanal_la-IntegerSet.lo \
 	libcanal_la-IntegerInterval.lo \
 	libcanal_la-InterpreterBasicBlock.lo \
 	libcanal_la-InterpreterFunction.lo libcanal_la-Interpreter.lo \
@@ -290,8 +290,8 @@ libcanal_la_SOURCES = \
 	IntegerBitfield.h \
 	IntegerContainer.cpp \
 	IntegerContainer.h \
-	IntegerEnumeration.cpp \
-	IntegerEnumeration.h \
+	IntegerSet.cpp \
+	IntegerSet.h \
 	IntegerInterval.cpp \
 	IntegerInterval.h \
 	InterpreterBasicBlock.cpp \
@@ -317,6 +317,7 @@ libcanal_la_SOURCES = \
 	PointerUtils.cpp \
 	PointerUtils.h \
 	Prereq.h \
+	SharedDataPointer.h \
 	SlotTracker.cpp \
 	SlotTracker.h \
 	State.cpp \
@@ -445,7 +446,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-FloatInterval.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerBitfield.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerContainer.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerEnumeration.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerSet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerInterval.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Interpreter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-InterpreterBasicBlock.Plo@am__quote@
@@ -566,12 +567,12 @@ libcanal_la-IntegerContainer.lo: IntegerContainer.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-IntegerContainer.lo `test -f 'IntegerContainer.cpp' || echo '$(srcdir)/'`IntegerContainer.cpp
 
-libcanal_la-IntegerEnumeration.lo: IntegerEnumeration.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-IntegerEnumeration.lo -MD -MP -MF $(DEPDIR)/libcanal_la-IntegerEnumeration.Tpo -c -o libcanal_la-IntegerEnumeration.lo `test -f 'IntegerEnumeration.cpp' || echo '$(srcdir)/'`IntegerEnumeration.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-IntegerEnumeration.Tpo $(DEPDIR)/libcanal_la-IntegerEnumeration.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerEnumeration.cpp' object='libcanal_la-IntegerEnumeration.lo' libtool=yes @AMDEPBACKSLASH@
+libcanal_la-IntegerSet.lo: IntegerSet.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-IntegerSet.lo -MD -MP -MF $(DEPDIR)/libcanal_la-IntegerSet.Tpo -c -o libcanal_la-IntegerSet.lo `test -f 'IntegerSet.cpp' || echo '$(srcdir)/'`IntegerSet.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-IntegerSet.Tpo $(DEPDIR)/libcanal_la-IntegerSet.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerSet.cpp' object='libcanal_la-IntegerSet.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-IntegerEnumeration.lo `test -f 'IntegerEnumeration.cpp' || echo '$(srcdir)/'`IntegerEnumeration.cpp
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-IntegerSet.lo `test -f 'IntegerSet.cpp' || echo '$(srcdir)/'`IntegerSet.cpp
 
 libcanal_la-IntegerInterval.lo: IntegerInterval.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-IntegerInterval.lo -MD -MP -MF $(DEPDIR)/libcanal_la-IntegerInterval.Tpo -c -o libcanal_la-IntegerInterval.lo `test -f 'IntegerInterval.cpp' || echo '$(srcdir)/'`IntegerInterval.cpp

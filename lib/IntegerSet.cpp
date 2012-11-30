@@ -1,18 +1,20 @@
-#include "IntegerEnumeration.h"
+#include "IntegerSet.h"
 #include "Utils.h"
 #include "FloatInterval.h"
 
 namespace Canal {
 namespace Integer {
 
-Enumeration::Enumeration(const Environment &environment,
+unsigned int Set::SET_THRESHOLD = 40;
+
+Set::Set(const Environment &environment,
                          unsigned bitWidth)
     : Domain(environment), mTop(false), mBitWidth(bitWidth)
 {
     CANAL_ASSERT(mBitWidth > 0);
 }
 
-Enumeration::Enumeration(const Environment &environment,
+Set::Set(const Environment &environment,
                          const llvm::APInt &constant)
     : Domain(environment), mTop(false), mBitWidth(constant.getBitWidth())
 {
@@ -20,7 +22,7 @@ Enumeration::Enumeration(const Environment &environment,
     CANAL_ASSERT(mBitWidth > 0);
 }
 
-Enumeration::Enumeration(const Enumeration &value)
+Set::Set(const Set &value)
     : Domain(value),
       mValues(value.mValues),
       mTop(value.mTop),
@@ -29,7 +31,7 @@ Enumeration::Enumeration(const Enumeration &value)
 }
 
 bool
-Enumeration::signedMin(llvm::APInt &result) const
+Set::signedMin(llvm::APInt &result) const
 {
     if (mTop)
         result = llvm::APInt::getSignedMinValue(mBitWidth);
@@ -44,8 +46,8 @@ Enumeration::signedMin(llvm::APInt &result) const
 
         if (bound == mValues.end())
         {
-            // If there is no negative number in this enumeration then
-            // the first element in this enumeration is lowest
+            // If there is no negative number in this set then
+            // the first element in this set is lowest
             result = *mValues.begin();
         }
         else
@@ -56,7 +58,7 @@ Enumeration::signedMin(llvm::APInt &result) const
 }
 
 bool
-Enumeration::signedMax(llvm::APInt &result) const
+Set::signedMax(llvm::APInt &result) const
 {
     if (mTop)
         result = llvm::APInt::getSignedMaxValue(mBitWidth);
@@ -67,10 +69,10 @@ Enumeration::signedMax(llvm::APInt &result) const
 
         //Find lowest negative number
         APIntUtils::USet::const_iterator bound = mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
-        if (bound == mValues.end() || //If there is no negative number in this enumeration
+        if (bound == mValues.end() || //If there is no negative number in this set
                 bound == mValues.begin())
-        { //or first element in this enumeration is negative
-            result = *mValues.rbegin(); //then the last element in this enumeration is highest
+        { //or first element in this set is negative
+            result = *mValues.rbegin(); //then the last element in this set is highest
         }
         else { //There are some positive numbers as well
             result = *(--bound); //then the highest number is the one directly preceeding lowest negative number
@@ -81,7 +83,7 @@ Enumeration::signedMax(llvm::APInt &result) const
 }
 
 bool
-Enumeration::unsignedMin(llvm::APInt &result) const
+Set::unsignedMin(llvm::APInt &result) const
 {
     if (mTop)
         result = llvm::APInt::getMinValue(mBitWidth);
@@ -97,7 +99,7 @@ Enumeration::unsignedMin(llvm::APInt &result) const
 }
 
 bool
-Enumeration::unsignedMax(llvm::APInt &result) const
+Set::unsignedMax(llvm::APInt &result) const
 {
     if (mTop)
         result = llvm::APInt::getMaxValue(mBitWidth);
@@ -113,44 +115,44 @@ Enumeration::unsignedMax(llvm::APInt &result) const
 }
 
 bool
-Enumeration::isSingleValue() const
+Set::isConstant() const
 {
     return (!mTop && mValues.size() == 1);
 }
 
 bool
-Enumeration::isTrue() const
+Set::isTrue() const
 {
-    return isSingleValue() &&
+    return isConstant() &&
         *mValues.begin() == llvm::APInt(1, 1);
 }
 
 bool
-Enumeration::isFalse() const
+Set::isFalse() const
 {
-    return isSingleValue() &&
+    return isConstant() &&
         *mValues.begin() == llvm::APInt(1, 0);
 }
 
-Enumeration *
-Enumeration::clone() const
+Set *
+Set::clone() const
 {
-    return new Enumeration(*this);
+    return new Set(*this);
 }
 
 size_t
-Enumeration::memoryUsage() const
+Set::memoryUsage() const
 {
-    size_t result = sizeof(Enumeration);
+    size_t result = sizeof(Set);
     result += mValues.size() * sizeof(llvm::APInt);
     return result;
 }
 
 std::string
-Enumeration::toString() const
+Set::toString() const
 {
     StringStream ss;
-    ss << "enumeration";
+    ss << "set";
     if (mTop)
         ss << " top";
     else if (mValues.empty())
@@ -165,7 +167,7 @@ Enumeration::toString() const
 }
 
 void
-Enumeration::setZero(const llvm::Value *place)
+Set::setZero(const llvm::Value *place)
 {
     mTop = false;
     mValues.clear();
@@ -173,18 +175,18 @@ Enumeration::setZero(const llvm::Value *place)
 }
 
 bool
-Enumeration::operator==(const Domain &value) const
+Set::operator==(const Domain &value) const
 {
     if (this == &value)
         return true;
 
-    const Enumeration *enumeration =
-        dynCast<const Enumeration*>(&value);
+    const Set *set =
+        dynCast<const Set*>(&value);
 
-    if (!enumeration)
+    if (!set)
         return false;
 
-    if (mTop != enumeration->mTop)
+    if (mTop != set->mTop)
         return false;
 
     if (mTop)
@@ -192,84 +194,84 @@ Enumeration::operator==(const Domain &value) const
 
     // Compare values only if the top is not set, otherwise we would
     // get false inequality.
-    return mValues == enumeration->mValues;
+    return mValues == set->mValues;
 }
 
 bool
-Enumeration::operator<(const Domain &value) const
+Set::operator<(const Domain &value) const
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 bool
-Enumeration::operator>(const Domain &value) const
+Set::operator>(const Domain &value) const
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
-Enumeration &
-Enumeration::join(const Domain &value)
+Set &
+Set::join(const Domain &value)
 {
     if (mTop)
         return *this;
 
-    const Enumeration &enumeration =
-        dynCast<const Enumeration&>(value);
+    const Set &set =
+        dynCast<const Set&>(value);
 
-    if (enumeration.isTop())
+    if (set.isTop())
         setTop();
     else
     {
-        CANAL_ASSERT_MSG(enumeration.getBitWidth() == getBitWidth(),
+        CANAL_ASSERT_MSG(set.getBitWidth() == getBitWidth(),
                          "Different bit width in merge: "
-                         << enumeration.getBitWidth()
+                         << set.getBitWidth()
                          << " bit value merged to "
                          << getBitWidth() << " bit value");
 
-        mValues.insert(enumeration.mValues.begin(),
-                       enumeration.mValues.end());
+        mValues.insert(set.mValues.begin(),
+                       set.mValues.end());
 
-        if (mValues.size() > mMaxSize)
+        if (mValues.size() > SET_THRESHOLD)
             setTop();
     }
 
     return *this;
 }
 
-Enumeration &
-Enumeration::meet(const Domain &value)
+Set &
+Set::meet(const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 bool
-Enumeration::isBottom() const
+Set::isBottom() const
 {
     return mValues.empty() && !mTop;
 }
 
 void
-Enumeration::setBottom()
+Set::setBottom()
 {
     mValues.clear();
     mTop = false;
 }
 
 bool
-Enumeration::isTop() const
+Set::isTop() const
 {
     return mTop;
 }
 
 void
-Enumeration::setTop()
+Set::setTop()
 {
     mValues.clear();
     mTop = true;
 }
 
 float
-Enumeration::accuracy() const
+Set::accuracy() const
 {
     if (mTop)
         return 0;
@@ -278,20 +280,20 @@ Enumeration::accuracy() const
     return 1;
 }
 
-Enumeration &
-Enumeration::add(const Domain &a, const Domain &b)
+Set &
+Set::add(const Domain &a, const Domain &b)
 {
     return applyOperation(a, b, &llvm::APInt::operator+, NULL);
 }
 
-Enumeration &
-Enumeration::sub(const Domain &a, const Domain &b)
+Set &
+Set::sub(const Domain &a, const Domain &b)
 {
     return applyOperation(a, b, &llvm::APInt::operator-, NULL);
 }
 
-Enumeration &
-Enumeration::mul(const Domain &a, const Domain &b)
+Set &
+Set::mul(const Domain &a, const Domain &b)
 {
 #if (LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR < 9)
     return applyOperation(a, b, &llvm::APInt::operator*, NULL);
@@ -300,69 +302,69 @@ Enumeration::mul(const Domain &a, const Domain &b)
 #endif
 }
 
-Enumeration &
-Enumeration::udiv(const Domain &a, const Domain &b)
+Set &
+Set::udiv(const Domain &a, const Domain &b)
 {
     return applyOperation(a, b, &llvm::APInt::udiv, NULL);
 }
 
-Enumeration &
-Enumeration::sdiv(const Domain &a, const Domain &b)
+Set &
+Set::sdiv(const Domain &a, const Domain &b)
 {
     return applyOperation(a, b, &llvm::APInt::sdiv, NULL);
 }
 
-Enumeration &
-Enumeration::urem(const Domain &a, const Domain &b)
+Set &
+Set::urem(const Domain &a, const Domain &b)
 {
     return applyOperation(a, b, &llvm::APInt::urem, NULL);
 }
 
-Enumeration &
-Enumeration::srem(const Domain &a, const Domain &b)
+Set &
+Set::srem(const Domain &a, const Domain &b)
 {
     return applyOperation(a, b, &llvm::APInt::srem, NULL);
 }
 
-Enumeration &
-Enumeration::shl(const Domain &a, const Domain &b)
+Set &
+Set::shl(const Domain &a, const Domain &b)
 {
     return applyOperation(a, b, &llvm::APInt::shl, NULL);
 }
 
-Enumeration &
-Enumeration::lshr(const Domain &a, const Domain &b)
+Set &
+Set::lshr(const Domain &a, const Domain &b)
 {
     return applyOperation(a, b, &llvm::APInt::lshr, NULL);
 }
 
-Enumeration &
-Enumeration::ashr(const Domain &a, const Domain &b)
+Set &
+Set::ashr(const Domain &a, const Domain &b)
 {
     return applyOperation(a, b, &llvm::APInt::ashr, NULL);
 }
 
-Enumeration &
-Enumeration::and_(const Domain &a, const Domain &b)
+Set &
+Set::and_(const Domain &a, const Domain &b)
 {
     return applyOperation(a, b, &llvm::APInt::operator&, NULL);
 }
 
-Enumeration &
-Enumeration::or_(const Domain &a, const Domain &b)
+Set &
+Set::or_(const Domain &a, const Domain &b)
 {
     return applyOperation(a, b, &llvm::APInt::operator|, NULL);
 }
 
-Enumeration &
-Enumeration::xor_(const Domain &a, const Domain &b)
+Set &
+Set::xor_(const Domain &a, const Domain &b)
 {
     return applyOperation(a, b, &llvm::APInt::operator^, NULL);
 }
 
 static bool
-intersects(const Enumeration &a,
-           const Enumeration &b)
+intersects(const Set &a,
+           const Set &b)
 {
     // Signed and unsigned does not matter, it contains specific values
     APIntUtils::USet::const_iterator ita = a.mValues.begin(),
@@ -382,12 +384,12 @@ intersects(const Enumeration &a,
     return false;
 }
 
-Enumeration &
-Enumeration::icmp(const Domain &a, const Domain &b,
+Set &
+Set::icmp(const Domain &a, const Domain &b,
                   llvm::CmpInst::Predicate predicate)
 {
-    const Enumeration &aa = dynCast<const Enumeration&>(a),
-        &bb = dynCast<const Enumeration&>(b);
+    const Set &aa = dynCast<const Set&>(a),
+        &bb = dynCast<const Set&>(b);
 
     if (aa.isTop() || bb.isTop())
     {
@@ -412,10 +414,10 @@ Enumeration::icmp(const Domain &a, const Domain &b,
     switch (predicate)
     {
     case llvm::CmpInst::ICMP_EQ:  // equal
-        // If both enumerations are equal, the result is 1.  If
-        // enumeration intersection is empty, the result is 0.
+        // If both sets are equal, the result is 1.  If
+        // set intersection is empty, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (&a == &b || (aa.mValues.size() == 1 && aa.mValues == bb.mValues))
+        if (aa.mValues.size() == 1 && aa.mValues == bb.mValues)
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (intersects(aa, bb))
             setTop();
@@ -424,23 +426,23 @@ Enumeration::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_NE:  // not equal
-        // If both enumerations are equal, the result is 0.  If
-        // enumeration intersection is empty, the result is 1.
+        // If both sets are equal, the result is 0.  If
+        // set intersection is empty, the result is 1.
         // Otherwise the result is the top value (both 0 and 1).
         if (!intersects(aa, bb))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
-        else if (&a == &b || (aa.mValues.size() == 1 && aa.mValues == bb.mValues))
+        else if (aa.mValues.size() == 1 && aa.mValues == bb.mValues)
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
         else
             setTop();
 
         break;
     case llvm::CmpInst::ICMP_UGT: // unsigned greater than
-        // If the lowest element from the first enumeration is
+        // If the lowest element from the first set is
         // unsigned greater than the largest element from the second
-        // enumeration, the result is 1.  If the largest element from
-        // the first enumeration is unsigned lower than the lowest
-        // element from the second enumeration, the result is 0.
+        // set, the result is 1.  If the largest element from
+        // the first set is unsigned lower than the lowest
+        // element from the second set, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mValues.begin()->ugt(*bb.mValues.rbegin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
@@ -451,13 +453,13 @@ Enumeration::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
-        // If the largest element from the first enumeration is
+        // If the largest element from the first set is
         // unsigned lower or equal the lowest element from the second
-        // enumeration, the result is 1.  If the lowest element from
-        // the first enumeration is unsigned larger or equal than the largest
-        // element from the second enumeration, the result is 0.
+        // set, the result is 1.  If the lowest element from
+        // the first set is unsigned larger or equal than the largest
+        // element from the second set, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (aa.mValues.begin()->uge(*bb.mValues.rbegin()) || &a == &b)
+        if (aa.mValues.begin()->uge(*bb.mValues.rbegin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (aa.mValues.rbegin()->ule(*bb.mValues.begin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
@@ -466,11 +468,11 @@ Enumeration::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_ULT: // unsigned less than
-        // If the largest element from the first enumeration is
+        // If the largest element from the first set is
         // unsigned lower than the lowest element from the second
-        // enumeration, the result is 1.  If the lowest element from
-        // the first enumeration is unsigned larger than the largest
-        // element from the second enumeration, the result is 0.
+        // set, the result is 1.  If the lowest element from
+        // the first set is unsigned larger than the largest
+        // element from the second set, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (aa.mValues.rbegin()->ult(*bb.mValues.begin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
@@ -481,13 +483,13 @@ Enumeration::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_ULE: // unsigned less or equal
-        // If the largest element from the first enumeration is
+        // If the largest element from the first set is
         // unsigned lower or equal the lowest element from the second
-        // enumeration, the result is 1.  If the lowest element from
-        // the first enumeration is unsigned larger or equal than the largest
-        // element from the second enumeration, the result is 0.
+        // set, the result is 1.  If the lowest element from
+        // the first set is unsigned larger or equal than the largest
+        // element from the second set, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (aa.mValues.rbegin()->ule(*bb.mValues.begin()) || &a == &b)
+        if (aa.mValues.rbegin()->ule(*bb.mValues.begin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (aa.mValues.begin()->uge(*bb.mValues.rbegin()))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
@@ -496,11 +498,11 @@ Enumeration::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_SGT: // signed greater than
-        // If the lowest element from the first enumeration is
+        // If the lowest element from the first set is
         // signed greater than the largest element from the second
-        // enumeration, the result is 1.  If the largest element from
-        // the first enumeration is signed lower than the lowest
-        // element from the second enumeration, the result is 0.
+        // set, the result is 1.  If the largest element from
+        // the first set is signed lower than the lowest
+        // element from the second set, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (minA.sgt(maxB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
@@ -511,13 +513,13 @@ Enumeration::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_SGE: // signed greater or equal
-        // If the lowest element from the first enumeration is
+        // If the lowest element from the first set is
         // signed greater or equal than the largest element from the second
-        // enumeration, the result is 1.  If the largest element from
-        // the first enumeration is signed lower or equal than the lowest
-        // element from the second enumeration, the result is 0.
+        // set, the result is 1.  If the largest element from
+        // the first set is signed lower or equal than the lowest
+        // element from the second set, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (minA.sge(maxB) || &a == &b)
+        if (minA.sge(maxB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (maxA.sle(minB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
@@ -526,11 +528,11 @@ Enumeration::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_SLT: // signed less than
-        // If the largest element from the first enumeration is
+        // If the largest element from the first set is
         // signed lower than the lowest element from the second
-        // enumeration, the result is 1.  If the lowest element from
-        // the first enumeration is signed larger than the largest
-        // element from the second enumeration, the result is 0.
+        // set, the result is 1.  If the lowest element from
+        // the first set is signed larger than the largest
+        // element from the second set, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
         if (maxA.slt(minB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
@@ -541,13 +543,13 @@ Enumeration::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_SLE: // signed less or equal
-        // If the largest element from the first enumeration is
+        // If the largest element from the first set is
         // signed lower or equal the lowest element from the second
-        // enumeration, the result is 1.  If the lowest element from
-        // the first enumeration is signed larger or equal than the largest
-        // element from the second enumeration, the result is 0.
+        // set, the result is 1.  If the lowest element from
+        // the first set is signed larger or equal than the largest
+        // element from the second set, the result is 0.
         // Otherwise the result is the top value (both 0 and 1).
-        if (maxA.sle(minB) || &a == &b)
+        if (maxA.sle(minB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/1));
         else if (minA.sge(maxB))
             mValues.insert(llvm::APInt(/*bitWidth*/1, /*val*/0));
@@ -562,8 +564,8 @@ Enumeration::icmp(const Domain &a, const Domain &b,
     return *this;
 }
 
-Enumeration &
-Enumeration::fcmp(const Domain &a, const Domain &b,
+Set &
+Set::fcmp(const Domain &a, const Domain &b,
                   llvm::CmpInst::Predicate predicate)
 {
     const Float::Interval &aa = dynCast<const Float::Interval&>(a),
@@ -593,64 +595,64 @@ Enumeration::fcmp(const Domain &a, const Domain &b,
     return *this;
 }
 
-Enumeration &
-Enumeration::trunc(const Domain &value)
+Set &
+Set::trunc(const Domain &value)
 {
-    const Enumeration &enumeration = dynCast<const Enumeration&>(value);
-    mTop = enumeration.mTop;
-    APIntUtils::USet::const_iterator it = enumeration.mValues.begin();
-    for (; it != enumeration.mValues.end(); ++it)
+    const Set &set = dynCast<const Set&>(value);
+    mTop = set.mTop;
+    APIntUtils::USet::const_iterator it = set.mValues.begin();
+    for (; it != set.mValues.end(); ++it)
         mValues.insert(APIntUtils::trunc(*it, getBitWidth()));
 
     return *this;
 }
 
-Enumeration &
-Enumeration::zext(const Domain &value)
+Set &
+Set::zext(const Domain &value)
 {
-    const Enumeration &enumeration = dynCast<const Enumeration&>(value);
-    mTop = enumeration.mTop;
-    APIntUtils::USet::const_iterator it = enumeration.mValues.begin();
-    for (; it != enumeration.mValues.end(); ++it)
+    const Set &set = dynCast<const Set&>(value);
+    mTop = set.mTop;
+    APIntUtils::USet::const_iterator it = set.mValues.begin();
+    for (; it != set.mValues.end(); ++it)
         mValues.insert(APIntUtils::zext(*it, getBitWidth()));
 
     return *this;
 }
 
-Enumeration &
-Enumeration::sext(const Domain &value)
+Set &
+Set::sext(const Domain &value)
 {
-    const Enumeration &enumeration = dynCast<const Enumeration&>(value);
-    mTop = enumeration.mTop;
-    APIntUtils::USet::const_iterator it = enumeration.mValues.begin();
-    for (; it != enumeration.mValues.end(); ++it)
+    const Set &set = dynCast<const Set&>(value);
+    mTop = set.mTop;
+    APIntUtils::USet::const_iterator it = set.mValues.begin();
+    for (; it != set.mValues.end(); ++it)
         mValues.insert(APIntUtils::sext(*it, getBitWidth()));
 
     return *this;
 }
 
-Enumeration &
-Enumeration::fptoui(const Domain &value)
+Set &
+Set::fptoui(const Domain &value)
 {
     setTop();
     return *this;
 }
 
-Enumeration &
-Enumeration::fptosi(const Domain &value)
+Set &
+Set::fptosi(const Domain &value)
 {
     setTop();
     return *this;
 }
 
-Enumeration &
-Enumeration::applyOperation(const Domain &a,
+Set &
+Set::applyOperation(const Domain &a,
                             const Domain &b,
                             APIntUtils::Operation operation1,
                             APIntUtils::OperationWithOverflow operation2)
 {
-    const Enumeration &aa = dynCast<const Enumeration&>(a),
-        &bb = dynCast<const Enumeration&>(b);
+    const Set &aa = dynCast<const Set&>(a),
+        &bb = dynCast<const Set&>(b);
 
     CANAL_ASSERT(this != &a && this != &b);
     setBottom();
@@ -680,7 +682,7 @@ Enumeration::applyOperation(const Domain &a,
                 }
             }
 
-            if (mValues.size() > mMaxSize)
+            if (mValues.size() > SET_THRESHOLD)
             {
                 setTop();
                 return *this;

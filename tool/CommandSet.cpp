@@ -1,4 +1,5 @@
 #include "CommandSet.h"
+#include "lib/IntegerSet.h"
 #include "lib/InterpreterOperationsCallback.h"
 #include "lib/WideningDataIterationCount.h"
 
@@ -11,6 +12,7 @@ CommandSet::CommandSet(Commands &commands)
 {
     mOptions["widening-iterations"] = CommandSet::WideningIterations;
     mOptions["no-missing"] = CommandSet::NoMissing;
+    mOptions["set-threshold"] = CommandSet::SetThreshold;
 }
 
 std::vector<std::string>
@@ -30,7 +32,8 @@ CommandSet::getCompletionMatches(const std::vector<std::string> &args,
         if (optionName.substr(0, arg.length()) == arg)
             result.push_back(optionName);
     }
-    
+
+    std::sort(result.begin(), result.end());
     return result;
 }
 
@@ -58,7 +61,7 @@ setWideningIterations(const std::vector<std::string> &args)
         return;
     }
 
-    Canal::Widening::DataIterationCount::ITERATION_COUNT = atoi(args[2].c_str());
+    Canal::Widening::DataIterationCount::ITERATION_COUNT = std::atoi(args[2].c_str());
     llvm::outs() << "Widening count set to " << args[2] << ".\n";
 }
 
@@ -67,6 +70,25 @@ setNoMissing()
 {
     Canal::Interpreter::printMissing = false;
     llvm::outs() << "Not printing missing functions.\n";
+}
+
+static void
+setSetThreshold(const std::vector<std::string> &args)
+{
+    if (args.size() < 3)
+    {
+        llvm::outs() << "Set threshold must be specified.\n";
+        return;
+    }
+
+    if (!isNumber(args[2]))
+    {
+        llvm::outs() << "Set threshold must be a number.\n";
+        return;
+    }
+
+    Canal::Integer::Set::SET_THRESHOLD = std::atoi(args[2].c_str());
+    llvm::outs() << "Set threshold set to " << args[2] << ".\n";
 }
 
 void
@@ -94,6 +116,9 @@ CommandSet::run(const std::vector<std::string> &args)
             break;
         case NoMissing:
             setNoMissing();
+            break;
+        case SetThreshold:
+            setSetThreshold(args);
             break;
         default:
             llvm::outs() << "No action defined for the command.\n";

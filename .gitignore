@@ -41,11 +41,8 @@ CMakeCache.txt
 /tests/atlocal
 /tests/testsuite.log
 /tests/testsuite.dir
-/tests/PointerTest
-/tests/OperationsTest
-/tests/IntegerIntervalTest
-/tests/ICMPTest
-/tests/MergeTest
+/tests/*Test
 /tests/*.o
+/tests/*.s
 
 /wrappers/config.py

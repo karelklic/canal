@@ -90,13 +90,13 @@ public:
 
     /// Returns true if the interval represents a single number.  Signed
     /// and unsigned representations might differ, though.
-    bool isSingleValue() const;
+    bool isConstant() const;
 
     /// Returns true if the interval represents a signed single value.
-    bool isSignedSingleValue() const;
+    bool isSignedConstant() const;
 
     /// Returns true if the interval represents a unsigned single value.
-    bool isUnsignedSingleValue() const;
+    bool isUnsignedConstant() const;
 
     /// Does the interval represent signle bit that is set to 1?
     bool isTrue() const;

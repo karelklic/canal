@@ -1,7 +1,7 @@
 #include "Constructors.h"
 #include "IntegerContainer.h"
 #include "IntegerBitfield.h"
-#include "IntegerEnumeration.h"
+#include "IntegerSet.h"
 #include "IntegerInterval.h"
 #include "Utils.h"
 #include "ArraySingleItem.h"
@@ -272,7 +272,7 @@ Constructors::createInteger(unsigned bitWidth) const
 {
     Integer::Container *container = new Integer::Container(mEnvironment);
     container->mValues.push_back(new Integer::Bitfield(mEnvironment, bitWidth));
-    container->mValues.push_back(new Integer::Enumeration(mEnvironment, bitWidth));
+    container->mValues.push_back(new Integer::Set(mEnvironment, bitWidth));
     container->mValues.push_back(new Integer::Interval(mEnvironment, bitWidth));
     return container;
 }
@@ -282,7 +282,7 @@ Constructors::createInteger(const llvm::APInt &number) const
 {
     Integer::Container *container = new Integer::Container(mEnvironment);
     container->mValues.push_back(new Integer::Bitfield(mEnvironment, number));
-    container->mValues.push_back(new Integer::Enumeration(mEnvironment, number));
+    container->mValues.push_back(new Integer::Set(mEnvironment, number));
     container->mValues.push_back(new Integer::Interval(mEnvironment, number));
     return container;
 }

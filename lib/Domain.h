@@ -1,7 +1,8 @@
 #ifndef LIBCANAL_DOMAIN_H
 #define LIBCANAL_DOMAIN_H
 
-#include "Prereq.h"
+#include "SharedDataPointer.h"
+
 #include <cstddef>
 #include <string>
 
@@ -15,7 +16,7 @@ class DataInterface;
 
 /// @brief
 /// Base class for all abstract domains.
-class Domain
+class Domain : public SharedData
 {
 public:
     typedef Domain&(Domain::*CastOperation)(const Domain&);

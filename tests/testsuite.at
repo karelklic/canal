@@ -17,8 +17,8 @@ AT_SETUP([IntegerBitfield])
 AT_CHECK([../../IntegerBitfieldTest], 0)
 AT_CLEANUP
 
-AT_SETUP([IntegerEnumeration])
-AT_CHECK([../../IntegerEnumerationTest], 0)
+AT_SETUP([IntegerSet])
+AT_CHECK([../../IntegerSetTest], 0)
 AT_CLEANUP
 
 AT_SETUP([IntegerInterval])

@@ -101,7 +101,7 @@ public:
                            const llvm::Type &type) const;
 
     /// Does this pointer point to single target?
-    bool isSingleTarget() const;
+    bool isConstant() const;
 
 public: // Implementation of Domain.
     /// Covariant return type.

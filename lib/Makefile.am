@@ -24,8 +24,8 @@ libcanal_la_SOURCES = \
 	IntegerBitfield.h \
 	IntegerContainer.cpp \
 	IntegerContainer.h \
-	IntegerEnumeration.cpp \
-	IntegerEnumeration.h \
+	IntegerSet.cpp \
+	IntegerSet.h \
 	IntegerInterval.cpp \
 	IntegerInterval.h \
 	InterpreterBasicBlock.cpp \
@@ -51,6 +51,7 @@ libcanal_la_SOURCES = \
 	PointerUtils.cpp \
 	PointerUtils.h \
 	Prereq.h \
+	SharedDataPointer.h \
 	SlotTracker.cpp \
 	SlotTracker.h \
 	State.cpp \

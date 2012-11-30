@@ -11,7 +11,7 @@ add_library(canal SHARED
     FloatUtils.cpp
     IntegerBitfield.cpp
     IntegerContainer.cpp
-    IntegerEnumeration.cpp
+    IntegerSet.cpp
     IntegerInterval.cpp
     InterpreterBasicBlock.cpp
     InterpreterFunction.cpp
