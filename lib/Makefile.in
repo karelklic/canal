@@ -77,9 +77,10 @@ am_libcanal_la_OBJECTS = libcanal_la-APIntUtils.lo \
 	libcanal_la-ArraySingleItem.lo \
 	libcanal_la-ArrayStringPrefix.lo libcanal_la-Constructors.lo \
 	libcanal_la-Domain.lo libcanal_la-Environment.lo \
-	libcanal_la-FloatInterval.lo libcanal_la-IntegerBitfield.lo \
-	libcanal_la-IntegerContainer.lo libcanal_la-IntegerSet.lo \
-	libcanal_la-IntegerInterval.lo libcanal_la-IntegerUtils.lo \
+	libcanal_la-FloatInterval.lo libcanal_la-FloatUtils.lo \
+	libcanal_la-IntegerBitfield.lo libcanal_la-IntegerContainer.lo \
+	libcanal_la-IntegerSet.lo libcanal_la-IntegerInterval.lo \
+	libcanal_la-IntegerUtils.lo \
 	libcanal_la-InterpreterBasicBlock.lo \
 	libcanal_la-InterpreterFunction.lo libcanal_la-Interpreter.lo \
 	libcanal_la-InterpreterIterator.lo \
@@ -285,6 +286,8 @@ libcanal_la_SOURCES = \
 	Environment.h \
 	FloatInterval.cpp \
 	FloatInterval.h \
+	FloatUtils.cpp \
+	FloatUtils.h \
 	IntegerBitfield.cpp \
 	IntegerBitfield.h \
 	IntegerContainer.cpp \
@@ -445,6 +448,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Domain.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Environment.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-FloatInterval.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-FloatUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerBitfield.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerContainer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerInterval.Plo@am__quote@
@@ -554,6 +558,13 @@ libcanal_la-FloatInterval.lo: FloatInterval.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FloatInterval.cpp' object='libcanal_la-FloatInterval.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-FloatInterval.lo `test -f 'FloatInterval.cpp' || echo '$(srcdir)/'`FloatInterval.cpp
+
+libcanal_la-FloatUtils.lo: FloatUtils.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-FloatUtils.lo -MD -MP -MF $(DEPDIR)/libcanal_la-FloatUtils.Tpo -c -o libcanal_la-FloatUtils.lo `test -f 'FloatUtils.cpp' || echo '$(srcdir)/'`FloatUtils.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-FloatUtils.Tpo $(DEPDIR)/libcanal_la-FloatUtils.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FloatUtils.cpp' object='libcanal_la-FloatUtils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-FloatUtils.lo `test -f 'FloatUtils.cpp' || echo '$(srcdir)/'`FloatUtils.cpp
 
 libcanal_la-IntegerBitfield.lo: IntegerBitfield.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-IntegerBitfield.lo -MD -MP -MF $(DEPDIR)/libcanal_la-IntegerBitfield.Tpo -c -o libcanal_la-IntegerBitfield.lo `test -f 'IntegerBitfield.cpp' || echo '$(srcdir)/'`IntegerBitfield.cpp
