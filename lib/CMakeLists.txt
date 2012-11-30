@@ -12,6 +12,7 @@ add_library(canal SHARED
     IntegerContainer.cpp
     IntegerSet.cpp
     IntegerInterval.cpp
+    IntegerUtils.cpp
     InterpreterBasicBlock.cpp
     InterpreterFunction.cpp
     Interpreter.cpp
