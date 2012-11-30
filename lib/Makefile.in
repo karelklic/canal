@@ -78,9 +78,8 @@ am_libcanal_la_OBJECTS = libcanal_la-APIntUtils.lo \
 	libcanal_la-ArrayStringPrefix.lo libcanal_la-Constructors.lo \
 	libcanal_la-Domain.lo libcanal_la-Environment.lo \
 	libcanal_la-FloatInterval.lo libcanal_la-IntegerBitfield.lo \
-	libcanal_la-IntegerContainer.lo \
-	libcanal_la-IntegerSet.lo \
-	libcanal_la-IntegerInterval.lo \
+	libcanal_la-IntegerContainer.lo libcanal_la-IntegerSet.lo \
+	libcanal_la-IntegerInterval.lo libcanal_la-IntegerUtils.lo \
 	libcanal_la-InterpreterBasicBlock.lo \
 	libcanal_la-InterpreterFunction.lo libcanal_la-Interpreter.lo \
 	libcanal_la-InterpreterIterator.lo \
@@ -294,6 +293,8 @@ libcanal_la_SOURCES = \
 	IntegerSet.h \
 	IntegerInterval.cpp \
 	IntegerInterval.h \
+	IntegerUtils.cpp \
+	IntegerUtils.h \
 	InterpreterBasicBlock.cpp \
 	InterpreterBasicBlock.h \
 	InterpreterFunction.cpp \
@@ -446,8 +447,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-FloatInterval.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerBitfield.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerContainer.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerSet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerInterval.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerSet.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-IntegerUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-Interpreter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-InterpreterBasicBlock.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcanal_la-InterpreterFunction.Plo@am__quote@
@@ -580,6 +582,13 @@ libcanal_la-IntegerInterval.lo: IntegerInterval.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerInterval.cpp' object='libcanal_la-IntegerInterval.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-IntegerInterval.lo `test -f 'IntegerInterval.cpp' || echo '$(srcdir)/'`IntegerInterval.cpp
+
+libcanal_la-IntegerUtils.lo: IntegerUtils.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-IntegerUtils.lo -MD -MP -MF $(DEPDIR)/libcanal_la-IntegerUtils.Tpo -c -o libcanal_la-IntegerUtils.lo `test -f 'IntegerUtils.cpp' || echo '$(srcdir)/'`IntegerUtils.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libcanal_la-IntegerUtils.Tpo $(DEPDIR)/libcanal_la-IntegerUtils.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='IntegerUtils.cpp' object='libcanal_la-IntegerUtils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -c -o libcanal_la-IntegerUtils.lo `test -f 'IntegerUtils.cpp' || echo '$(srcdir)/'`IntegerUtils.cpp
 
 libcanal_la-InterpreterBasicBlock.lo: InterpreterBasicBlock.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcanal_la_CXXFLAGS) $(CXXFLAGS) -MT libcanal_la-InterpreterBasicBlock.lo -MD -MP -MF $(DEPDIR)/libcanal_la-InterpreterBasicBlock.Tpo -c -o libcanal_la-InterpreterBasicBlock.lo `test -f 'InterpreterBasicBlock.cpp' || echo '$(srcdir)/'`InterpreterBasicBlock.cpp
