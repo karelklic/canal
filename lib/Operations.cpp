@@ -789,6 +789,7 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
 
     llvm::SmallVector<int, 16>::iterator it = shuffleMask.begin(),
         itend = shuffleMask.end();
+
     for (; it != itend; ++it)
     {
         size_t offset = *it;
