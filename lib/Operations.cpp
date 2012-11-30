@@ -480,9 +480,9 @@ void Operations::add(const llvm::BinaryOperator &instruction,
     if (aPointer || bPointer)
     {
         if (aPointer)
-            result = mConstructors.createPointer(aPointer->getType());
+            result = mConstructors.createPointer(aPointer->getValueType());
         else
-            result = mConstructors.createPointer(bPointer->getType());
+            result = mConstructors.createPointer(bPointer->getValueType());
 
         result->add(*a, *b);
     }
@@ -540,7 +540,7 @@ Operations::sub(const llvm::BinaryOperator &instruction,
     // Subtracting integer from pointer.
     if (aPointer && !bPointer)
     {
-        result = mConstructors.createPointer(aPointer->getType());
+        result = mConstructors.createPointer(aPointer->getValueType());
         result->sub(*a, *b);
     }
     else if (aPointer && bPointer) // Subtracting two pointers.
@@ -812,7 +812,8 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
         }
     }
 
-    Domain *result = mConstructors.createArray(newValues);
+    Domain *result = mConstructors.createArray(*instruction.getType(),
+                                               newValues);
 
     state.addFunctionVariable(instruction, result);
 }
@@ -911,41 +912,39 @@ void
 Operations::alloca_(const llvm::AllocaInst &instruction,
                     State &state)
 {
-    const llvm::Type &allocatedType = *instruction.getAllocatedType();
-    Domain *value = mConstructors.create(allocatedType);
+    Domain *value;
     std::vector<Domain*> offsets;
+
     if (instruction.isArrayAllocation())
     {
-        const llvm::Value *arraySize = instruction.getArraySize();
+        const llvm::Value &arraySize = *instruction.getArraySize();
         llvm::OwningPtr<Domain> constant;
-        const Domain *abstractSize = variableOrConstant(*arraySize,
+        const Domain *abstractSize = variableOrConstant(arraySize,
                                                         state,
                                                         instruction,
                                                         constant);
 
         if (!abstractSize)
-        {
-            delete value;
             return;
-        }
 
-        Domain *array;
-        array = mConstructors.createArray(abstractSize->clone(),
-                                          value);
-
-        value = array;
+        value = mConstructors.createArray(*instruction.getType(),
+                                          abstractSize->clone());
 
         // Set pointer offset.
         Domain *zero = mConstructors.createInteger(llvm::APInt(64, 0));
-
         offsets.push_back(zero);
         offsets.push_back(zero->clone());
     }
+    else
+    {
+        const llvm::Type &allocatedType = *instruction.getAllocatedType();
+        value = mConstructors.create(allocatedType);
+    }
 
     state.addFunctionBlock(instruction, value);
-    Domain *pointer;
-    pointer = mConstructors.createPointer(allocatedType);
 
+    Domain *pointer;
+    pointer = mConstructors.createPointer(*instruction.getType());
     Pointer::Utils::addTarget(*pointer,
                               Pointer::Target::Block,
                               &instruction,
@@ -1036,10 +1035,7 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
 
     const llvm::PointerType *pointerType = instruction.getType();
     CANAL_ASSERT(pointerType);
-    CANAL_ASSERT(pointerType->getElementType());
-    Pointer::Pointer *result = source.getElementPtr(
-        offsets, *pointerType->getElementType());
-
+    Pointer::Pointer *result = source.getElementPtr(offsets, *pointerType);
     state.addFunctionVariable(instruction, result);
 }
 
@@ -1151,9 +1147,7 @@ Operations::inttoptr(const llvm::IntToPtrInst &instruction,
     const llvm::PointerType &pointerType =
         llvmCast<const llvm::PointerType>(*instruction.getDestTy());
 
-    Domain *result = new Pointer::Pointer(source,
-                                          *pointerType.getElementType());
-
+    Domain *result = new Pointer::Pointer(source, pointerType);
     state.addFunctionVariable(instruction, result);
 }
 
@@ -1179,7 +1173,7 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
         llvmCast<const llvm::PointerType>(*destinationType);
 
     Domain *result = new Pointer::Pointer(sourcePointer,
-                                          *destPointerType.getElementType());
+                                          destPointerType);
 
     state.addFunctionVariable(instruction, result);
 }

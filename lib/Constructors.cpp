@@ -48,7 +48,7 @@ Constructors::create(const llvm::Type &type) const
         CANAL_ASSERT_MSG(pointerType.getElementType(),
                          "Element type must be known.");
 
-        return createPointer(*pointerType.getElementType());
+        return createPointer(pointerType);
     }
 
     if (type.isArrayTy() || type.isVectorTy())
@@ -66,7 +66,7 @@ Constructors::create(const llvm::Type &type) const
         for (unsigned i = 0; i < structType.getNumElements(); i ++)
             members.push_back(create(*structType.getElementType(i)));
 
-        return createStructure(members);
+        return createStructure(structType, members);
     }
 
     CANAL_DIE_MSG("Unsupported llvm::Type::TypeID: " << type.getTypeID());
@@ -95,8 +95,7 @@ Constructors::create(const llvm::Constant &value,
             llvmCast<llvm::ConstantPointerNull>(value);
 
         const llvm::PointerType &pointerType = *nullValue.getType();
-        Domain *constPointer;
-        constPointer = createPointer(*pointerType.getElementType());
+        Domain *constPointer = createPointer(pointerType);
 
         Pointer::Utils::addTarget(*constPointer,
                                   Pointer::Target::Constant,
@@ -177,7 +176,7 @@ Constructors::create(const llvm::Constant &value,
                                      state));
         }
 
-        return createStructure(members);
+        return createStructure(*structValue.getType(), members);
     }
 
     if (llvm::isa<llvm::ConstantVector>(value))
@@ -248,6 +247,8 @@ Constructors::create(const llvm::Constant &value,
 
     if (llvm::isa<llvm::Function>(value))
     {
+        CANAL_NOT_IMPLEMENTED();
+/*
         const llvm::Function &functionValue =
             llvmCast<llvm::Function>(value);
 
@@ -262,6 +263,7 @@ Constructors::create(const llvm::Constant &value,
                                   NULL);
 
         return constPointer;
+*/
     }
 
     CANAL_DIE_MSG("not implemented for " << typeid(value).name());
@@ -332,15 +334,16 @@ Constructors::createArray(const llvm::SequentialType &type,
 }
 
 Domain *
-Constructors::createPointer(const llvm::Type &type) const
+Constructors::createPointer(const llvm::PointerType &type) const
 {
     return new Pointer::Pointer(mEnvironment, type);
 }
 
 Domain *
-Constructors::createStructure(const std::vector<Domain*> &members) const
+Constructors::createStructure(const llvm::StructType &type,
+                              const std::vector<Domain*> &members) const
 {
-    return new Structure(mEnvironment, members);
+    return new Structure(mEnvironment, type, members);
 }
 
 Domain *
@@ -375,16 +378,11 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
         dynCast<const Pointer::Pointer*>(&variable);
 
     if (pointer)
-    {
-        return pointer->getElementPtr(offsets,
-                                      *pointerType.getElementType());
-    }
+        return pointer->getElementPtr(offsets, pointerType);
 
     // GetElementPtr on anything except a pointer.  For example, it is
     // called on arrays and structures.
-    Domain *result;
-    result = createPointer(*pointerType.getElementType());
-
+    Domain *result = createPointer(pointerType);
     Pointer::Utils::addTarget(*result,
                               Pointer::Target::Block,
                               &place,
@@ -411,14 +409,14 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
     if (pointer)
     {
         CANAL_ASSERT(pointerType);
-        return new Pointer::Pointer(*pointer, *pointerType->getElementType());
+        return new Pointer::Pointer(*pointer, *pointerType);
     }
 
     // BitCast from anything to a pointer.
     if (pointerType)
     {
         Domain *result;
-        result = createPointer(*pointerType->getElementType());
+        result = createPointer(*pointerType);
 
         Pointer::Utils::addTarget(*result,
                                   Pointer::Target::Block,

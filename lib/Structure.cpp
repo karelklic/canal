@@ -4,18 +4,21 @@
 #include "IntegerSet.h"
 #include "IntegerUtils.h"
 #include "IntegerInterval.h"
+#include "Environment.h"
+#include "Constructors.h"
 
 namespace Canal {
 
 Structure::Structure(const Environment &environment,
+                     const llvm::StructType &type,
                      const std::vector<Domain*> &members)
-    : Domain(environment), mMembers(members)
+    : Domain(environment), mMembers(members), mType(type)
 {
 
 }
 
 Structure::Structure(const Structure &value)
-    : Domain(value), mMembers(value.mMembers)
+    : Domain(value), mMembers(value.mMembers), mType(value.mType)
 {
     std::vector<Domain*>::iterator it = mMembers.begin(),
         itend = mMembers.end();
@@ -213,6 +216,26 @@ Structure::accuracy() const
         result += (*it)->accuracy();
 
     return result / mMembers.size();
+}
+
+const llvm::StructType &
+Structure::getValueType() const
+{
+    return mType;
+}
+
+Domain *
+Structure::getValueCell(uint64_t offset) const
+{
+    Domain *cell = mEnvironment.getConstructors().createInteger(8);
+    cell->setTop();
+    return cell;
+}
+
+void
+Structure::mergeValueCell(uint64_t offset, const Domain &value)
+{
+    setTop();
 }
 
 std::vector<Domain*>

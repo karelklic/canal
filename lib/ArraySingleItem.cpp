@@ -345,6 +345,32 @@ SingleItem::fcmp(const Domain &a, const Domain &b,
     CANAL_NOT_IMPLEMENTED();
 }
 
+const llvm::SequentialType &
+SingleItem::getValueType() const
+{
+    return mType;
+}
+
+Domain *
+SingleItem::getValueAbstractSize() const
+{
+    return mSize->clone();
+}
+
+Domain *
+SingleItem::getValueCell(uint64_t offset) const
+{
+    Domain *cell = mEnvironment.getConstructors().createInteger(8);
+    cell->setTop();
+    return cell;
+}
+
+void
+SingleItem::mergeValueCell(uint64_t offset, const Domain &value)
+{
+    setTop();
+}
+
 static void
 assertOffsetFitsToArray(uint64_t offset, const Domain &size)
 {

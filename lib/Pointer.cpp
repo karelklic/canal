@@ -13,7 +13,7 @@ namespace Canal {
 namespace Pointer {
 
 Pointer::Pointer(const Environment &environment,
-                 const llvm::Type &type)
+                 const llvm::PointerType &type)
     : Domain(environment), mType(type)
 {
 }
@@ -29,7 +29,7 @@ Pointer::Pointer(const Pointer &value)
 }
 
 Pointer::Pointer(const Pointer &value,
-                 const llvm::Type &newType)
+                 const llvm::PointerType &newType)
     : Domain(value),
       mTargets(value.mTargets),
       mType(newType)
@@ -248,7 +248,7 @@ Pointer::store(const Domain &value, State &state) const
 
 Pointer *
 Pointer::getElementPtr(const std::vector<Domain*> &offsets,
-                       const llvm::Type &type) const
+                       const llvm::PointerType &type) const
 {
     CANAL_ASSERT_MSG(!offsets.empty(),
                      "getElementPtr must be called with some offsets.");
@@ -444,6 +444,26 @@ void
 Pointer::setBottom()
 {
     llvm::DeleteContainerSeconds(mTargets);
+}
+
+const llvm::PointerType &
+Pointer::getValueType() const
+{
+    return mType;
+}
+
+Domain *
+Pointer::getValueCell(uint64_t offset) const
+{
+    Domain *cell = mEnvironment.getConstructors().createInteger(8);
+    cell->setTop();
+    return cell;
+}
+
+void
+Pointer::mergeValueCell(uint64_t offset, const Domain &value)
+{
+    setTop();
 }
 
 } // namespace Pointer

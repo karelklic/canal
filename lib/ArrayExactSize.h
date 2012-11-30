@@ -11,6 +11,7 @@ namespace Array {
 /// members separately, not losing precision at all.
 class ExactSize : public Domain, public Interface
 {
+public:
     /// Empty array indicates the top value.
     std::vector<Domain*> mValues;
 

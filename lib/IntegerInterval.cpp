@@ -2,6 +2,8 @@
 #include "Utils.h"
 #include "APIntUtils.h"
 #include "FloatInterval.h"
+#include "Environment.h"
+#include "Constructors.h"
 
 namespace Canal {
 namespace Integer {
@@ -1297,6 +1299,26 @@ Interval::fptosi(const Domain &value)
 {
     setTop();
     return *this;
+}
+
+const llvm::IntegerType &
+Interval::getValueType() const
+{
+    return *llvm::Type::getIntNTy(mEnvironment.getContext(), getBitWidth());
+}
+
+Domain *
+Interval::getValueCell(uint64_t offset) const
+{
+    Domain *cell = mEnvironment.getConstructors().createInteger(8);
+    cell->setTop();
+    return cell;
+}
+
+void
+Interval::mergeValueCell(uint64_t offset, const Domain &value)
+{
+    setTop();
 }
 
 } // namespace Integer

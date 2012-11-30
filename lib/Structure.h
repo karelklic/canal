@@ -12,8 +12,11 @@ class Structure : public Domain, public Array::Interface
 public:
     std::vector<Domain*> mMembers;
 
+    const llvm::StructType &mType;
+
 public:
     Structure(const Environment &environment,
+              const llvm::StructType &type,
               const std::vector<Domain*> &members);
 
     Structure(const Structure &value);

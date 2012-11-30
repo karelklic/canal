@@ -2,6 +2,7 @@
 #include "IntegerContainer.h"
 #include "Utils.h"
 #include "Environment.h"
+#include "Constructors.h"
 
 namespace Canal {
 namespace Array {
@@ -382,6 +383,32 @@ StringPrefix::fcmp(const Domain &a, const Domain &b,
 {
     setTop();
     return *this;
+}
+
+const llvm::SequentialType &
+StringPrefix::getValueType() const
+{
+    return mType;
+}
+
+Domain *
+StringPrefix::getValueAbstractSize() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain *
+StringPrefix::getValueCell(uint64_t offset) const
+{
+    Domain *cell = mEnvironment.getConstructors().createInteger(8);
+    cell->setTop();
+    return cell;
+}
+
+void
+StringPrefix::mergeValueCell(uint64_t offset, const Domain &value)
+{
+    setTop();
 }
 
 std::vector<Domain*>
