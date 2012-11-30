@@ -3,6 +3,7 @@
 #include "IntegerContainer.h"
 #include "Environment.h"
 #include "Constructors.h"
+#include "IntegerUtils.h"
 
 namespace Canal {
 namespace Array {
@@ -347,12 +348,8 @@ SingleItem::fcmp(const Domain &a, const Domain &b,
 static void
 assertOffsetFitsToArray(uint64_t offset, const Domain &size)
 {
-    // Get maximum size of the array.
-    const Integer::Container &integerSize =
-        dynCast<const Integer::Container&>(size);
-
-    llvm::APInt unsignedMaxSize(integerSize.getBitWidth(), 0);
-    bool sizeIsKnown = integerSize.unsignedMax(unsignedMaxSize);
+    llvm::APInt unsignedMaxSize(Integer::Utils::getBitWidth(size), 0);
+    bool sizeIsKnown = Integer::Utils::unsignedMax(size, unsignedMaxSize);
     // The following requirement can be changed if necessary.
     CANAL_ASSERT_MSG(sizeIsKnown, "Size must be a known value.");
     CANAL_ASSERT_MSG(offset < unsignedMaxSize.getZExtValue(),
@@ -362,12 +359,8 @@ assertOffsetFitsToArray(uint64_t offset, const Domain &size)
 static void
 assertOffsetFitsToArray(const Domain &offset, const Domain &size)
 {
-    // Check if the offset might point to the array.
-    const Integer::Container &integerOffset =
-        dynCast<const Integer::Container&>(offset);
-
-    llvm::APInt unsignedMinOffset(integerOffset.getBitWidth(), 0);
-    bool offsetIsKnown = integerOffset.unsignedMin(unsignedMinOffset);
+    llvm::APInt unsignedMinOffset(Integer::Utils::getBitWidth(offset), 0);
+    bool offsetIsKnown = Integer::Utils::unsignedMin(offset, unsignedMinOffset);
     // The following requirement can be changed if necessary.
     CANAL_ASSERT_MSG(offsetIsKnown, "Offset must be a known value.");
     assertOffsetFitsToArray(unsignedMinOffset.getZExtValue(), size);

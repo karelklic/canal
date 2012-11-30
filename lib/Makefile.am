@@ -28,6 +28,8 @@ libcanal_la_SOURCES = \
 	IntegerSet.h \
 	IntegerInterval.cpp \
 	IntegerInterval.h \
+	IntegerUtils.cpp \
+	IntegerUtils.h \
 	InterpreterBasicBlock.cpp \
 	InterpreterBasicBlock.h \
 	InterpreterFunction.cpp \

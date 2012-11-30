@@ -70,14 +70,14 @@ IntegerBitfieldTest_SOURCES = IntegerBitfieldTest.cpp
 IntegerBitfieldTest_OBJECTS = IntegerBitfieldTest.$(OBJEXT)
 IntegerBitfieldTest_LDADD = $(LDADD)
 IntegerBitfieldTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
-IntegerSetTest_SOURCES = IntegerSetTest.cpp
-IntegerSetTest_OBJECTS = IntegerSetTest.$(OBJEXT)
-IntegerSetTest_LDADD = $(LDADD)
-IntegerSetTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
 IntegerIntervalTest_SOURCES = IntegerIntervalTest.cpp
 IntegerIntervalTest_OBJECTS = IntegerIntervalTest.$(OBJEXT)
 IntegerIntervalTest_LDADD = $(LDADD)
 IntegerIntervalTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
+IntegerSetTest_SOURCES = IntegerSetTest.cpp
+IntegerSetTest_OBJECTS = IntegerSetTest.$(OBJEXT)
+IntegerSetTest_LDADD = $(LDADD)
+IntegerSetTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
 OperationsTest_SOURCES = OperationsTest.cpp
 OperationsTest_OBJECTS = OperationsTest.$(OBJEXT)
 OperationsTest_LDADD = $(LDADD)
@@ -101,12 +101,12 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = ArrayExactSizeTest.cpp ArraySingleItemTest.cpp \
 	FloatIntervalTest.cpp IntegerBitfieldTest.cpp \
-	IntegerSetTest.cpp IntegerIntervalTest.cpp \
-	OperationsTest.cpp PointerTest.cpp
+	IntegerIntervalTest.cpp IntegerSetTest.cpp OperationsTest.cpp \
+	PointerTest.cpp
 DIST_SOURCES = ArrayExactSizeTest.cpp ArraySingleItemTest.cpp \
 	FloatIntervalTest.cpp IntegerBitfieldTest.cpp \
-	IntegerSetTest.cpp IntegerIntervalTest.cpp \
-	OperationsTest.cpp PointerTest.cpp
+	IntegerIntervalTest.cpp IntegerSetTest.cpp OperationsTest.cpp \
+	PointerTest.cpp
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -323,12 +323,12 @@ FloatIntervalTest$(EXEEXT): $(FloatIntervalTest_OBJECTS) $(FloatIntervalTest_DEP
 IntegerBitfieldTest$(EXEEXT): $(IntegerBitfieldTest_OBJECTS) $(IntegerBitfieldTest_DEPENDENCIES) 
 	@rm -f IntegerBitfieldTest$(EXEEXT)
 	$(CXXLINK) $(IntegerBitfieldTest_OBJECTS) $(IntegerBitfieldTest_LDADD) $(LIBS)
-IntegerSetTest$(EXEEXT): $(IntegerSetTest_OBJECTS) $(IntegerSetTest_DEPENDENCIES) 
-	@rm -f IntegerSetTest$(EXEEXT)
-	$(CXXLINK) $(IntegerSetTest_OBJECTS) $(IntegerSetTest_LDADD) $(LIBS)
 IntegerIntervalTest$(EXEEXT): $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_DEPENDENCIES) 
 	@rm -f IntegerIntervalTest$(EXEEXT)
 	$(CXXLINK) $(IntegerIntervalTest_OBJECTS) $(IntegerIntervalTest_LDADD) $(LIBS)
+IntegerSetTest$(EXEEXT): $(IntegerSetTest_OBJECTS) $(IntegerSetTest_DEPENDENCIES) 
+	@rm -f IntegerSetTest$(EXEEXT)
+	$(CXXLINK) $(IntegerSetTest_OBJECTS) $(IntegerSetTest_LDADD) $(LIBS)
 OperationsTest$(EXEEXT): $(OperationsTest_OBJECTS) $(OperationsTest_DEPENDENCIES) 
 	@rm -f OperationsTest$(EXEEXT)
 	$(CXXLINK) $(OperationsTest_OBJECTS) $(OperationsTest_LDADD) $(LIBS)
@@ -346,8 +346,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ArraySingleItemTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FloatIntervalTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerBitfieldTest.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerSetTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerIntervalTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerSetTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OperationsTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PointerTest.Po@am__quote@
 

@@ -5,6 +5,7 @@
 #include "SlotTracker.h"
 #include "IntegerContainer.h"
 #include "IntegerSet.h"
+#include "IntegerUtils.h"
 #include "Environment.h"
 #include "Constructors.h"
 
@@ -86,13 +87,10 @@ dereference(Domain *block,
 
     if (!offsets.empty())
     {
-        const Integer::Container &first =
-            dynCast<const Integer::Container&>(*offsets[0]);
-
-        CANAL_ASSERT_MSG(first.getSet().mValues.size() == 1,
+        CANAL_ASSERT_MSG(Integer::Utils::getSet(*offsets[0]).mValues.size() == 1,
                          "First offset is expected to be zero!");
 
-        CANAL_ASSERT_MSG(first.getSet().mValues.begin()->isMinValue(),
+        CANAL_ASSERT_MSG(Integer::Utils::getSet(*offsets[0]).mValues.begin()->isMinValue(),
                          "First offset is expected to be zero!");
 
         std::vector<Domain*>::const_iterator ito = offsets.begin() + 1,
@@ -136,13 +134,10 @@ dereference(const Domain *block,
 
     if (!offsets.empty())
     {
-        const Integer::Container &first =
-            dynCast<const Integer::Container&>(*offsets[0]);
-
-        CANAL_ASSERT_MSG(first.getSet().mValues.size() == 1,
+        CANAL_ASSERT_MSG(Integer::Utils::getSet(*offsets[0]).mValues.size() == 1,
                          "First offset is expected to be zero!");
 
-        CANAL_ASSERT_MSG(first.getSet().mValues.begin()->isMinValue(),
+        CANAL_ASSERT_MSG(Integer::Utils::getSet(*offsets[0]).mValues.begin()->isMinValue(),
                          "First offset is expected to be zero!");
 
         std::vector<Domain*>::const_iterator ito = offsets.begin() + 1,
@@ -262,10 +257,7 @@ Pointer::getElementPtr(const std::vector<Domain*> &offsets,
     std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
     for (; offsetIt != offsets.end(); ++offsetIt)
     {
-        const Integer::Container &container =
-            dynCast<const Integer::Container&>(**offsetIt);
-
-        CANAL_ASSERT_MSG(container.getBitWidth() == 64,
+        CANAL_ASSERT_MSG(Integer::Utils::getBitWidth(**offsetIt) == 64,
                          "GetElementPtr offsets must have 64 bits!");
     }
 
@@ -309,14 +301,14 @@ Pointer::isConstant() const
     const Integer::Container *tmp =
         dynCast<const Integer::Container*>(target->mNumericOffset);
 
-    if (tmp && !tmp->isConstant())
+    if (tmp && !Integer::Utils::isConstant(*tmp))
         return false;
 
     std::vector<Domain*>::const_iterator it = target->mElementOffsets.begin();
     for (; it != target->mElementOffsets.end(); ++it)
     {
         tmp = dynCast<const Integer::Container*>(*it);
-        if (!tmp->isConstant())
+        if (!Integer::Utils::isConstant(*tmp))
             return false;
     }
 

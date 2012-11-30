@@ -24,60 +24,6 @@ public:
     /// Destructor.  Deletes the contents of the container.
     virtual ~Container();
 
-    unsigned getBitWidth() const;
-
-    Bitfield &getBitfield();
-    const Bitfield &getBitfield() const;
-
-    Set &getSet();
-    const Set &getSet() const;
-
-    Interval &getInterval();
-    const Interval &getInterval() const;
-
-    /// Lowest signed number represented by this container.  Uses the
-    /// abstract domain (set, interval, bits) with highest precision.
-    /// @param result
-    ///   Filled by the minimum value if it is known.  Otherwise, the
-    ///   value is undefined.
-    /// @return
-    ///   True if the result is known and the parameter was set to
-    ///   correct value.
-    bool signedMin(llvm::APInt &result) const;
-
-    /// Highest signed number represented by this container.  Uses the
-    /// abstract domain (set, interval, bits) with highest precision.
-    /// @param result
-    ///   Filled by the maximum value if it is known.  Otherwise, the
-    ///   value is undefined.
-    /// @return
-    ///   True if the result is known and the parameter was set to
-    ///   correct value.
-    bool signedMax(llvm::APInt &result) const;
-
-    /// Lowest unsigned number represented by this container.  Uses the
-    /// abstract domain (set, interval, bits) with highest precision.
-    /// @param result
-    ///   Filled by the minimum value if it is known.  Otherwise, the
-    ///   value is undefined.
-    /// @return
-    ///   True if the result is known and the parameter was set to
-    ///   correct value.
-    bool unsignedMin(llvm::APInt &result) const;
-
-    /// Highest unsigned number represented by this container.  Uses
-    /// the abstract domain (set, interval, bits) with highest precision.
-    /// @param result
-    ///   Filled by the maximum value if it is known.  Otherwise, the
-    ///   value is undefined.
-    /// @return
-    ///   True if the result is known and the parameter was set to
-    ///   correct value.
-    bool unsignedMax(llvm::APInt &result) const;
-
-    /// Find out whether all representations contain only single value
-    bool isConstant() const;
-
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual Container *clone() const;

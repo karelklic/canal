@@ -5,6 +5,7 @@
 #include "Utils.h"
 #include "Environment.h"
 #include "Constructors.h"
+#include "IntegerUtils.h"
 
 namespace Canal {
 namespace Array {
@@ -389,11 +390,8 @@ ExactSize::getItem(const Domain &offset) const
 {
     std::vector<Domain*> result;
 
-    const Integer::Container &integer =
-        dynCast<const Integer::Container&>(offset);
-
-    // First try an set, then interval.
-    const Integer::Set &set = integer.getSet();
+    // First try an enumeration, then interval.
+    const Integer::Set &set = Integer::Utils::getSet(offset);
     if (!set.isTop())
     {
         APIntUtils::USet::const_iterator it = set.mValues.begin(),
@@ -423,7 +421,7 @@ ExactSize::getItem(const Domain &offset) const
         return result;
     }
 
-    const Integer::Interval &interval = integer.getInterval();
+    const Integer::Interval &interval = Integer::Utils::getInterval(offset);
     // Let's care about the unsigned interval only.
     if (!interval.mUnsignedTop)
     {
@@ -465,11 +463,8 @@ ExactSize::getItem(uint64_t offset) const
 void
 ExactSize::setItem(const Domain &offset, const Domain &value)
 {
-    const Integer::Container &integer =
-        dynCast<const Integer::Container&>(offset);
-
-    // First try an set, then interval.
-    const Integer::Set &set = integer.getSet();
+    // First try an enumeration, then interval.
+    const Integer::Set &set = Integer::Utils::getSet(offset);
     if (!set.isTop())
     {
         APIntUtils::USet::const_iterator it = set.mValues.begin(),
@@ -493,7 +488,7 @@ ExactSize::setItem(const Domain &offset, const Domain &value)
         return;
     }
 
-    const Integer::Interval &interval = integer.getInterval();
+    const Integer::Interval &interval = Integer::Utils::getInterval(offset);
     // Let's care about the unsigned interval only.
     if (!interval.mUnsignedTop)
     {

@@ -1,6 +1,7 @@
 #include "PointerTarget.h"
 #include "ArrayInterface.h"
 #include "IntegerContainer.h"
+#include "IntegerUtils.h"
 #include "SlotTracker.h"
 #include "State.h"
 #include "Utils.h"
@@ -128,11 +129,8 @@ Target::merge(const Target &target)
         mNumericOffset = target.mNumericOffset->clone();
     else if (mNumericOffset && !target.mNumericOffset)
     {
-        const Integer::Container &numericOffsetInt =
-            dynCast<const Integer::Container&>(*mNumericOffset);
-
         llvm::APInt zero = llvm::APInt::getNullValue(
-            numericOffsetInt.getBitWidth());
+            Integer::Utils::getBitWidth(*mNumericOffset));
 
         Domain *zeroContainer = mEnvironment.getConstructors().createInteger(zero);
         mNumericOffset->join(*zeroContainer);
