@@ -1,8 +1,5 @@
 #include "lib/Utils.h"
 #include "lib/Environment.h"
-#include <llvm/Module.h>
-#include <llvm/LLVMContext.h>
-#include <llvm/Support/ManagedStatic.h>
 
 using namespace Canal;
 

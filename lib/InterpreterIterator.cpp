@@ -25,9 +25,15 @@ Iterator::Iterator(Module &module,
       mState(new State()),
       mCallback(&emptyCallback)
 {
-    mFunction = --mModule.end();
-    mBasicBlock = --(*mFunction)->end();
-    mInstruction = --(*mBasicBlock)->end();
+    if (!mModule.empty())
+    {
+        mFunction = --mModule.end();
+        if (!(*mFunction)->empty())
+        {
+            mBasicBlock = --(*mFunction)->end();
+            mInstruction = --(*mBasicBlock)->end();
+        }
+    }
 }
 
 void

@@ -31,8 +31,12 @@
 #include <llvm/Instruction.h>
 #include <llvm/Instructions.h>
 #include <llvm/Module.h>
+#include <llvm/LLVMContext.h>
+#include <llvm/Module.h>
 #include <llvm/Support/CFG.h>
 #include <llvm/Support/Casting.h>
+#include <llvm/Support/IRBuilder.h>
+#include <llvm/Support/ManagedStatic.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Target/TargetData.h>
 #include <llvm/Type.h>

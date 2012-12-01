@@ -51,6 +51,11 @@ public:
         return mBasicBlocks.end();
     }
 
+    bool empty() const
+    {
+        return mBasicBlocks.empty();
+    }
+
     State &getInputState()
     {
         return mInputState;
