@@ -343,6 +343,47 @@ testIcmp()
     CANAL_ASSERT(result.icmp(width1const0to1, width1const0to1, llvm::CmpInst::ICMP_SLT).isTop());
     CANAL_ASSERT(result.icmp(width1const0to1, width1const0to1, llvm::CmpInst::ICMP_ULE).isTop());
     CANAL_ASSERT(result.icmp(width1const0to1, width1const0to1, llvm::CmpInst::ICMP_ULT).isTop());
+
+    //Signed tests
+    Integer::Bitfield const_10(*gEnvironment, llvm::APInt(32, -10, true)),
+            const_5(*gEnvironment, llvm::APInt(32, -5, true)),
+            const_2_1(*gEnvironment, llvm::APInt(32, -2, true));
+    const_2_1.join(const_1);
+    //-10 < -5
+    CANAL_ASSERT(result.icmp(const_10, const_5, llvm::CmpInst::ICMP_EQ).isFalse());
+    CANAL_ASSERT(result.icmp(const_10, const_5, llvm::CmpInst::ICMP_NE).isTrue());
+    CANAL_ASSERT(result.icmp(const_10, const_5, llvm::CmpInst::ICMP_SGT).isFalse());
+    CANAL_ASSERT(result.icmp(const_10, const_5, llvm::CmpInst::ICMP_SGE).isFalse());
+    CANAL_ASSERT(result.icmp(const_10, const_5, llvm::CmpInst::ICMP_UGT).isFalse());
+    CANAL_ASSERT(result.icmp(const_10, const_5, llvm::CmpInst::ICMP_UGE).isFalse());
+    CANAL_ASSERT(result.icmp(const_10, const_5, llvm::CmpInst::ICMP_SLT).isTrue());
+    CANAL_ASSERT(result.icmp(const_10, const_5, llvm::CmpInst::ICMP_SLE).isTrue());
+    CANAL_ASSERT(result.icmp(const_10, const_5, llvm::CmpInst::ICMP_ULT).isTrue());
+    CANAL_ASSERT(result.icmp(const_10, const_5, llvm::CmpInst::ICMP_ULE).isTrue());
+
+    //-5 > -10
+    CANAL_ASSERT(result.icmp(const_5, const_10, llvm::CmpInst::ICMP_EQ).isFalse());
+    CANAL_ASSERT(result.icmp(const_5, const_10, llvm::CmpInst::ICMP_NE).isTrue());
+    CANAL_ASSERT(result.icmp(const_5, const_10, llvm::CmpInst::ICMP_SGT).isTrue());
+    CANAL_ASSERT(result.icmp(const_5, const_10, llvm::CmpInst::ICMP_SGE).isTrue());
+    CANAL_ASSERT(result.icmp(const_5, const_10, llvm::CmpInst::ICMP_UGT).isTrue());
+    CANAL_ASSERT(result.icmp(const_5, const_10, llvm::CmpInst::ICMP_UGE).isTrue());
+    CANAL_ASSERT(result.icmp(const_5, const_10, llvm::CmpInst::ICMP_SLT).isFalse());
+    CANAL_ASSERT(result.icmp(const_5, const_10, llvm::CmpInst::ICMP_SLE).isFalse());
+    CANAL_ASSERT(result.icmp(const_5, const_10, llvm::CmpInst::ICMP_ULT).isFalse());
+    CANAL_ASSERT(result.icmp(const_5, const_10, llvm::CmpInst::ICMP_ULE).isFalse());
+
+    //-2-1 <= -1
+    CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_NE).isTop());
+    CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_SGE).isTop());
+    CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_SGT).isFalse());
+    CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_UGE).isTop());
+    CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_UGT).isFalse());
+    CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_SLE).isTrue());
+    CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_SLT).isTop());
+    CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_ULE).isTrue());
+    CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_ULT).isTop());
 }
 
 int
