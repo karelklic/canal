@@ -1,0 +1,254 @@
+#!/bin/bash
+# tputcolors
+
+#Colored output functions
+function reset() {
+	echo -n "$(tput sgr0)";
+}
+function color() {
+	echo -n "$(tput setaf 4)$(tput bold)";
+}
+function print() {
+	echo "" #Newline
+	color;
+	STRING=$1
+	echo -e $STRING;
+	for i in $(seq ${#STRING}); do echo -n "="; done #Print the same amount of = as is the lenght of $1
+	echo "" #Newline
+	reset;
+}
+
+#Global dir variables
+LLVM_DIR=""
+LIBELF_DIR=""
+LLVM_PATH_DIR=""
+CANAL_DIR=""
+CANAL_BUILD_DIR=""
+BASE_DIR=`pwd`
+THREADS=$((`nproc` + 1))
+#Download, compile and install libelf if neccessary
+function get_libelf () {
+	LIBELF_DIR="libelf/"
+	if [ ! -d $LIBELF_DIR ]; then
+		print "Download of LibELF"
+		wget http://www.mr511.de/software/libelf-0.8.9.tar.gz
+		tar xzf libelf-0.8.9.tar.gz
+		rm libelf-0.8.9.tar.gz
+		cd libelf-0.8.9
+		print "Configuration of LibELF"
+		./configure --prefix=$BASE_DIR/libelf
+		print "Compilation of LibELF"
+		make -j $THREADS
+		print "Installation of LibELF"
+		make install
+		cd ..
+	fi
+}
+#Download CompilerRT (needed for llvm >= 3.1)
+function download_compiler_rt() {
+	print "Downlad of CompilerRT for LLVM $1"
+	declare -A urls dirs
+	urls=([31]="http://llvm.org/releases/3.1/compiler-rt-3.1.src.tar.gz")
+	dirs=([31]="compiler-rt.3.1.src")
+	
+	url=${urls[$1]}
+	archive=`basename $url`
+	dir=${dirs[$1]}
+	
+	cd projects
+	wget $url
+	tar xzf $archive
+	rm $archive
+	mv $dir compiler-rt
+	cd ..
+}
+#Download Clang
+function download_clang() {
+	print "Download of Clang for LLVM $1"
+	declare -A urls dirs
+	urls=([28]="http://llvm.org/releases/2.8/clang-2.8.tgz"
+		[29]="http://llvm.org/releases/2.9/clang-2.9.tgz"
+		[30]="http://llvm.org/releases/3.0/clang-3.0.tar.gz"
+		[31]="http://llvm.org/releases/3.1/clang-3.1.src.tar.gz")
+	dirs=([28]="clang-2.8" [29]="clang-2.9" [30]="clang-3.0.src" [31]="clang-3.1.src")
+	
+	url=${urls[$1]}
+	archive=`basename $url`
+	dir=${dirs[$1]}
+	
+	cd tools
+	wget $url
+	tar xzf $archive
+	rm $archive
+	mv $dir clang
+	cd ..
+	if [ $1 -ge 31 ]; then
+		download_compiler_rt $1;
+	fi
+}
+
+function get_llvm() {
+	LLVM_DIR="llvm-build-$1/"
+	LLVM_PATH_DIR="llvm-build-$1/bin/"
+	if [ ! -d ${LLVM_DIR%/} ]; then
+		print "Download of LLVM $1"
+		declare -A urls dirs
+		urls=([28]="http://llvm.org/releases/2.8/llvm-2.8.tgz"
+			[29]="http://llvm.org/releases/2.9/llvm-2.9.tgz"
+			[30]="http://llvm.org/releases/3.0/llvm-3.0.tar.gz"
+			[31]="http://llvm.org/releases/3.1/llvm-3.1.src.tar.gz")
+		dirs=([28]="llvm-2.8" [29]="llvm-2.9" [30]="llvm-3.0.src" [31]="llvm-3.1.src")
+		
+		url=${urls[$1]}
+		archive=`basename $url`
+		dir=${dirs[$1]}
+		
+		wget $url
+		tar xzf $archive
+		rm $archive
+		cd $dir
+		download_clang $1
+		mkdir build
+		cd build
+		print "Configuration of LLVM $1"
+		../configure --prefix=$BASE_DIR/$LLVM_DIR
+		print "Compilation of LLVM $1"
+		make -j $THREADS
+		print "Installation of LLVM $1"
+		make install
+		cd ../../
+	fi
+}
+#Handle CMAKE_PREFIX_PATH and PATH arguments for build & tests of canal:
+# save previous state and create new one, then restore it
+OLD_CMAKE_PREFIX_PATH=""
+OLD_PATH=""
+function set_paths() {
+	restore_paths
+	OLD_CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH
+	OLD_PATH=$PATH
+	export CMAKE_PREFIX_PATH=$BASE_DIR/$LLVM_DIR:$BASE_DIR/$LIBELF_DIR:$CMAKE_PREFIX_PATH
+	export PATH=$BASE_DIR/$LLVM_PATH_DIR:$PATH
+	export OLD_CMAKE_PREFIX_PATH=$OLD_CMAKE_PREFIX_PATH
+	export OLD_PATH=$OLD_PATH
+}
+function restore_paths() {
+	if [ -n "$OLD_CMAKE_PREFIX_PATH" ]; then
+		export CMAKE_PREFIX_PATH=$OLD_CMAKE_PREFIX_PATH
+		export OLD_CMAKE_PREFIX_PATH=""
+	fi
+	if [ -n "$OLD_PATH" ]; then
+		export PATH=$OLD_PATH
+		export OLD_PATH=""
+	fi
+}
+function move_to_build() {
+	CANAL_BUILD_DIR="canal-build-$1/"
+	set_paths
+	if [ ! -d ${CANAL_BUILD_DIR%/} ]; then
+		mkdir $CANAL_BUILD_DIR
+	fi
+	cd $CANAL_BUILD_DIR
+}
+function build_canal() {
+	restore_paths
+	get_libelf
+	get_llvm $1
+	
+	print "Building CANAL for LLVM $1"
+	move_to_build $1
+	rm -rf *
+	cmake $BASE_DIR/$CANAL_DIR
+	make -j $THREADS	
+	cd ..
+}
+
+function test_canal() {
+	print "Testing CANAL for LLVM $1"
+	get_llvm $1
+	move_to_build $1
+	CTEST_OUTPUT_ON_FAILURE=1 make test
+	cd ..
+}
+
+function get_canal() {
+	print "Getting canal branch $1"
+	CANAL_DIR="canal/"
+	if [ ! -d ${CANAL_DIR%/} ]; then
+		git clone https://github.com/karelklic/canal.git
+	fi
+	
+	cd canal
+	git pull
+	git checkout $1
+	cd ..
+}
+#Default parameters
+BRANCH="master"
+LLVM_VERSIONS="28,29,30,31"
+function usage() {
+	echo "Download script for canal and llvm"
+	echo "Options:"
+	echo -e "\t--(b)ranch - which branch to checkout (default $BRANCH)"
+	echo -e "\t--(l)lvm - which llvm versions to download (separated by commas, default $LLVM_VERSIONS)"
+	echo -e "\t--(t)hreads - number of threads to compile in (default $THREADS)"
+#	echo -e "\t--(p)aths - prepare paths for certain canal build version and move to the build directory (no compilation)"
+	echo -e "\t--(u)sage,(h)elp - this help"
+	exit 1
+}
+
+#Parse input arguments
+#ARGS=`getopt -o "b:,l:,t:,u,h,p:" -l "branch:,llvm:,threads:,usage,help,paths:" -n "download_script" -- "$@"`
+ARGS=`getopt -o "b:,l:,t:,u,h" -l "branch:,llvm:,threads:,usage,help" -n "download_script" -- "$@"`
+if [ $? -ne 0 ]; then
+	usage
+fi
+eval set -- "$ARGS"
+while true; do
+	case $1 in
+		-b | --branch)
+			BRANCH=$2
+			shift 2;;
+		-l | --llvm)
+			LLVM_VERSIONS=$2
+			shift 2;;
+		-t | --threads)
+			THREADS=$2
+			shift 2;;
+		-u | --usage | -h | --help)
+			usage
+			shift;;
+#		-p | --paths)
+#			move_to_build $2
+#			shift 2;
+#			exit 0;;
+		--)
+			shift;
+			break;;
+	esac
+done
+#Parse LLVM_VERSIONS
+OIFS="$IFS"
+IFS=','
+LLVM_VERSIONS=($LLVM_VERSIONS)
+IFS=$OIFS
+
+#Get canal
+get_canal $BRANCH
+
+#Build all canal versions
+for i in `seq 0 $((${#LLVM_VERSIONS[@]} - 1))`; do
+	VERSION=${LLVM_VERSIONS[$i]}
+	if [ $VERSION -lt 28 -o $VERSION -gt 31 ]; then
+		echo "Invalid version: $VERSION";
+		usage
+	fi
+	build_canal $VERSION
+done
+#Test all canal versions
+for i in `seq 0 $((${#LLVM_VERSIONS[@]} - 1))`; do
+	VERSION=${LLVM_VERSIONS[$i]}
+	test_canal $VERSION
+done
+restore_paths
+exit 0;

@@ -498,8 +498,7 @@ Bitfield::xor_(const Domain &a, const Domain &b)
 static int
 compare(const Bitfield &a,
         const Bitfield &b,
-        bool signed_,
-        bool equality = false)
+        bool signed_)
 {
     //Possible todo - TT >= 10 if signed
     bool first = true;
@@ -509,15 +508,24 @@ compare(const Bitfield &a,
         int j = b.getBitValue(pos);
         if (i == -1 || i == 2 || j == -1 || j == 2)
         {
-            if (equality && !first)
-            {
-                // If comparing with equality, then if one value is
-                // set and the other one is TOP: 0<=TOP and 1>=TOP ->
-                // return 0<TOP and 1>TOP, and comparison operator
-                // will handle the result correctly.
-                if ((i == -1 || i == 2) && (j == -1 || j == 2))
-                    return 2; // If both values are top
+            //If one value at least one value is top or bottom
+            if ((i == -1 || i == 2) && (j == -1 || j == 2))
+                return 2; // If both values are top
 
+            // If it is first bit and comparison is signed (signed bit comparison):
+            // then result is reversed
+            // T = <-1; 0>
+            if (first && signed_) {
+                if (i == 0 || i == 1)
+                    return (i ? 4 : 3); // If first value is set
+                    //-1 <= T -> !(-1 > T) -> 4, 0 >= T -> !(0 < T) -> 3
+                else
+                    return (j ? 3 : 4); // If second value is set
+                    //T >= -1 -> !(T < -1) -> 3, T <= 0 -> !(T > 0) -> 4
+            }
+            // Not reversed result
+            // T = <0; 1>
+            else {
                 if (i == 0 || i == 1)
                     return (i ? 3 : 4); // If first value is set
                     //1 >= T -> !(1 < T) -> 3, 0 <= T -> !(0 > T) -> 4
@@ -525,30 +533,18 @@ compare(const Bitfield &a,
                     return (j ? 4 : 3); // If second value is set
                     //T <= 1 -> !(T > 1) -> 4, T >= 0 -> !(T < 0) -> 3
             }
-
-            if (!equality && !first) {
-                if ((i == -1 || i == 2) && (j == -1 || j == 2))
-                    return 2; //Both values are top
-                if (i == 0 || i == 1)
-                    return (i ? 3 : 4); //If first value is set
-                    //1 >= T -> !(1 < T) -> 3, 0 <= T -> !(0 > T) -> 4
-                else
-                    return (j ? 4 : 3); //If second value is set
-                    //T <= 1 -> !(T > 1) -> 4, T >= 0 -> !(T < 0) -> 3
-
-            }
-
-            return 2;
         }
 
         if (i != j)
         {
             // Inequality
+            // If it is first bit and comparison is signed (signed bit comparison):
+            // then result is reversed
             if (i < j) // a < b
                 return ((first && signed_) ? 1 : -1);
 
             // a > b
-            return 1;
+            return ((first && signed_) ? -1 : 1);
         }
         first = false;
     }
@@ -587,7 +583,8 @@ Bitfield::icmp(const Domain &a, const Domain &b,
     const Bitfield &aa = dynCast<const Bitfield&>(a),
             &bb = dynCast<const Bitfield&>(b);
 
-    if (aa.isTop() || bb.isTop())
+    //If you do not compare only one bit, TOP value means any result
+    if (aa.getBitWidth() > 1 && (aa.isTop() || bb.isTop()))
     {
         setTop(); // Could be both
         return *this;
@@ -642,7 +639,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_UGE: // unsigned greater or equal
-        switch (compare(aa, bb, false, true))
+        switch (compare(aa, bb, false))
         {
         case 0:  //A = B
         case 3:  //!(A < B) -> A >= B
@@ -663,7 +660,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_ULE: // unsigned less or equal
-        switch (compare(aa, bb, false, true))
+        switch (compare(aa, bb, false))
         {
         case 0: //A = B
         case 4: //!(A > B) -> A <= B
@@ -684,7 +681,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_SGE: // signed greater or equal
-        switch (compare(aa, bb, true, true))
+        switch (compare(aa, bb, true))
         {
         case 0:  //A = B
         case 3:  //!(A < B) -> A >= B
@@ -705,7 +702,7 @@ Bitfield::icmp(const Domain &a, const Domain &b,
 
         break;
     case llvm::CmpInst::ICMP_SLE: // signed less or equal
-        switch (compare(aa, bb, true, true))
+        switch (compare(aa, bb, true))
         {
         case 0: //A = B
         case 4: //!(A > B) -> A <= B
