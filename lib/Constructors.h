@@ -55,6 +55,8 @@ public:
 
     Domain *createPointer(const llvm::PointerType &type) const;
 
+    Domain *createStructure(const llvm::StructType &type) const;
+
     Domain *createStructure(const llvm::StructType &type,
                             const std::vector<Domain*> &members) const;
 

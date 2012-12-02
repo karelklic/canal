@@ -16,6 +16,9 @@ public:
 
 public:
     Structure(const Environment &environment,
+              const llvm::StructType &type);
+
+    Structure(const Environment &environment,
               const llvm::StructType &type,
               const std::vector<Domain*> &members);
 

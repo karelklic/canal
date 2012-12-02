@@ -10,6 +10,18 @@
 namespace Canal {
 
 Structure::Structure(const Environment &environment,
+                     const llvm::StructType &type)
+    : Domain(environment), mType(type)
+{
+    for (unsigned i = 0; i < type.getNumElements(); ++i)
+    {
+        const Constructors &c = environment.getConstructors();
+        Domain *member = c.create(*type.getElementType(i));
+        mMembers.push_back(member);
+    }
+}
+
+Structure::Structure(const Environment &environment,
                      const llvm::StructType &type,
                      const std::vector<Domain*> &members)
     : Domain(environment), mMembers(members), mType(type)

@@ -62,11 +62,7 @@ Constructors::create(const llvm::Type &type) const
         const llvm::StructType &structType =
             llvmCast<llvm::StructType>(type);
 
-        std::vector<Domain*> members;
-        for (unsigned i = 0; i < structType.getNumElements(); i ++)
-            members.push_back(create(*structType.getElementType(i)));
-
-        return createStructure(structType, members);
+        return createStructure(structType);
     }
 
     CANAL_DIE_MSG("Unsupported llvm::Type::TypeID: " << type.getTypeID());
@@ -337,6 +333,12 @@ Domain *
 Constructors::createPointer(const llvm::PointerType &type) const
 {
     return new Pointer::Pointer(mEnvironment, type);
+}
+
+Domain *
+Constructors::createStructure(const llvm::StructType &type) const
+{
+    return new Structure(mEnvironment, type);
 }
 
 Domain *
