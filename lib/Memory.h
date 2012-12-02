@@ -2,6 +2,7 @@
 #define LIBCANAL_MEMORY_H
 
 #include "Domain.h"
+#include <vector>
 
 namespace Canal {
 
@@ -36,15 +37,29 @@ public: // Implementation of Domain.
     // Covariant return type.
     virtual Memory *clone() const;
 
-    virtual bool operator==(const Domain& value) const;
-
-    virtual void merge(const Domain &value);
-
     virtual size_t memoryUsage() const;
 
     virtual std::string toString() const;
 
     virtual void setZero(const llvm::Value *place);
+
+    virtual bool operator==(const Domain& value) const;
+
+    virtual bool operator<(const Domain &value) const;
+
+    virtual Domain &join(const Domain &value);
+
+    virtual Domain &meet(const Domain &value);
+
+    virtual bool isBottom() const;
+
+    virtual void setBottom();
+
+    virtual bool isTop() const;
+
+    virtual void setTop();
+
+    virtual float accuracy() const;
 
     virtual Domain &add(const Domain &a, const Domain &b);
 
@@ -105,16 +120,6 @@ public: // Implementation of Domain.
     virtual Domain &uitofp(const Domain &value);
 
     virtual Domain &sitofp(const Domain &value);
-
-    virtual float accuracy() const;
-
-    virtual bool isBottom() const;
-
-    virtual void setBottom();
-
-    virtual bool isTop() const;
-
-    virtual void setTop();
 };
 
 } // namespace Canal

@@ -1,4 +1,5 @@
 #include "Memory.h"
+#include "Utils.h"
 
 namespace Canal {
 
@@ -31,48 +32,109 @@ Memory::load(const llvm::Type &type,
 }
 
 void
-Memory::store(const Domain &value
+Memory::store(const Domain &value,
               const std::vector<Domain*> &offsets,
-              bool isSingleTarget) const
+              bool isSingleTarget)
 {
 }
 
 void
-Memory::store(const Domain &value
+Memory::store(const Domain &value,
               const Domain *numericOffset,
-              bool isSingleTarget) const
+              bool isSingleTarget)
 {
 }
 
 Memory *
 Memory::clone() const
 {
-}
-
-bool
-Memory::operator==(const Domain& value) const
-{
-}
-
-void
-Memory::merge(const Domain &value)
-{
+    return new Memory(*this);
 }
 
 size_t
 Memory::memoryUsage() const
 {
+    return sizeof(Memory) + mValue->memoryUsage();
 }
 
 std::string
 Memory::toString() const
 {
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void
 Memory::setZero(const llvm::Value *place)
 {
     mValue->setZero(place);
+}
+
+bool
+Memory::operator==(const Domain& value) const
+{
+    if (this == &value)
+        return true;
+
+    const Memory *other = dynCast<const Memory*>(&value);
+    if (!other)
+        return false;
+
+    return *mValue == *other->mValue;
+}
+
+bool
+Memory::operator<(const Domain &value) const
+{
+    if (this == &value)
+        return false;
+
+    const Memory *other = dynCast<const Memory*>(&value);
+    if (!other)
+        return false;
+
+    return *mValue < *other->mValue;
+}
+
+Domain &
+Memory::join(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain &
+Memory::meet(const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Memory::isBottom() const
+{
+    return mValue->isBottom();
+}
+
+void
+Memory::setBottom()
+{
+    mValue->setBottom();
+}
+
+bool
+Memory::isTop() const
+{
+    return mValue->isTop();
+}
+
+void
+Memory::setTop()
+{
+    mValue->setTop();
+}
+
+float
+Memory::accuracy() const
+{
+    return mValue->accuracy();
 }
 
 Domain &
@@ -278,36 +340,6 @@ Memory::sitofp(const Domain &value)
 {
     mValue->sitofp(value);
     return *this;
-}
-
-float
-Memory::accuracy() const
-{
-    return mValue->accuracy();
-}
-
-bool
-Memory::isBottom() const
-{
-    return mValue->isBottom();
-}
-
-void
-Memory::setBottom()
-{
-    mValue->setBottom();
-}
-
-bool
-Memory::isTop() const
-{
-    return mValue->isTop();
-}
-
-void
-Memory::setTop()
-{
-    mValue->setTop();
 }
 
 } // namespace Canal

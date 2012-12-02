@@ -105,12 +105,6 @@ Container::operator<(const Domain &value) const
     CANAL_NOT_IMPLEMENTED();
 }
 
-bool
-Container::operator>(const Domain &value) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
 Container &
 Container::join(const Domain &value)
 {

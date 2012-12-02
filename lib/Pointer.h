@@ -117,8 +117,6 @@ public: // Implementation of Domain.
 
     virtual bool operator<(const Domain &value) const;
 
-    virtual bool operator>(const Domain &value) const;
-
     virtual Pointer &join(const Domain &value);
 
     virtual Pointer &meet(const Domain &value);

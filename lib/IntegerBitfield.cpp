@@ -265,12 +265,6 @@ Bitfield::operator<(const Domain& value) const
     CANAL_NOT_IMPLEMENTED();
 }
 
-bool
-Bitfield::operator>(const Domain& value) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
 Bitfield &
 Bitfield::join(const Domain &value)
 {

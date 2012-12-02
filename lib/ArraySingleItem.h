@@ -56,8 +56,6 @@ public: // Implementation of Domain.
 
     virtual bool operator<(const Domain &value) const;
 
-    virtual bool operator>(const Domain &value) const;
-
     /// Computes a join of both values and array sizes.
     virtual SingleItem &join(const Domain &value);
 

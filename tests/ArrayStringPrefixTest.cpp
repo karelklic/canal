@@ -9,7 +9,12 @@ static Environment *gEnvironment;
 static void
 testConstructors()
 {
-    Array::StringPrefix stringPrefix(*gEnvironment);
+    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+        gEnvironment->getContext());
+
+    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+
+    Array::StringPrefix stringPrefix(*gEnvironment, type);
     CANAL_ASSERT(stringPrefix.isBottom());
 
     Array::StringPrefix stringPrefix2(*gEnvironment, "test");
@@ -20,7 +25,12 @@ testConstructors()
 static void
 testSetZero()
 {
-    Array::StringPrefix prefix(*gEnvironment);
+    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+        gEnvironment->getContext());
+
+    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+
+    Array::StringPrefix prefix(*gEnvironment, type);
     prefix.setZero(NULL);
     CANAL_ASSERT(prefix.isTop());
 }
@@ -28,8 +38,13 @@ testSetZero()
 static void
 testEquality()
 {
-    Array::StringPrefix prefix1(*gEnvironment),
-        prefix2(*gEnvironment),
+    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+        gEnvironment->getContext());
+
+    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+
+    Array::StringPrefix prefix1(*gEnvironment, type),
+        prefix2(*gEnvironment, type),
         prefix3(*gEnvironment, "test"),
         prefix4(*gEnvironment, "test"),
         prefix5(*gEnvironment, "aaa"),
@@ -48,7 +63,12 @@ testEquality()
 static void
 testJoin()
 {
-    Array::StringPrefix prefix1(*gEnvironment),
+    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+        gEnvironment->getContext());
+
+    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+
+    Array::StringPrefix prefix1(*gEnvironment, type),
         prefix2(*gEnvironment, "testone"),
         prefix3(*gEnvironment, "testtwothree"),
         prefix4(*gEnvironment, "notest"),

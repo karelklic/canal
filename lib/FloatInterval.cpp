@@ -304,12 +304,6 @@ Interval::operator<(const Domain& value) const
     CANAL_NOT_IMPLEMENTED();
 }
 
-bool
-Interval::operator>(const Domain& value) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
 Interval &
 Interval::join(const Domain &value)
 {

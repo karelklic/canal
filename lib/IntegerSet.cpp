@@ -205,12 +205,6 @@ Set::operator<(const Domain &value) const
     CANAL_NOT_IMPLEMENTED();
 }
 
-bool
-Set::operator>(const Domain &value) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
 Set &
 Set::join(const Domain &value)
 {

@@ -141,27 +141,6 @@ SingleItem::operator<(const Domain& value) const
     return true;
 }
 
-bool
-SingleItem::operator>(const Domain& value) const
-{
-    if (this == &value)
-        return false;
-
-    const SingleItem *singleItem =
-        dynCast<const SingleItem*>(&value);
-
-    if (!singleItem)
-        return false;
-
-    if (!(*mValue > *singleItem->mValue))
-        return false;
-
-    if (!(*mSize > *singleItem->mSize))
-        return false;
-
-    return true;
-}
-
 SingleItem &
 SingleItem::join(const Domain &value)
 {
