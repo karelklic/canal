@@ -1,50 +1,313 @@
+#include "Memory.h"
 
+namespace Canal {
+
+Memory::Memory(Domain *value)
+    : Domain(value->getEnvironment()), mValue(value)
+{
+}
+
+Memory::Memory(const Memory &value)
+    : Domain(value.getEnvironment()), mValue(value.mValue)
+{
+    mValue = mValue->clone();
+}
+
+Memory::~Memory()
+{
+    delete mValue;
+}
+
+Domain *
+Memory::load(const llvm::Type &type,
+             const std::vector<Domain*> &offsets) const
+{
+}
+
+Domain *
+Memory::load(const llvm::Type &type,
+             const Domain *numericOffset) const
+{
+}
 
 void
-Pointer::store(const Domain &value, State &state) const
+Memory::store(const Domain &value
+              const std::vector<Domain*> &offsets,
+              bool isSingleTarget) const
 {
-    // Go through all target memory blocks for the pointer and merge
-    // them with the value being stored.
-    PlaceTargetMap::const_iterator it = mTargets.begin(),
-        itend = mTargets.end();
-
-    for (; it != itend; ++it)
-    {
-        if (it->second->mType != Target::Block)
-            continue;
-
-        const Domain *source = state.findBlock(*it->second->mTarget);
-        CANAL_ASSERT(source);
-
-        Domain *result = source->clone();
-        std::vector<Domain*> destinations = dereference(result,
-                                                        it->second->mOffsets);
-
-        // When a pointer points to a single memory target, the old
-        // value can be rewritten instead of merging with it to
-        // increase precision.  Pointer with a single memory target is
-        // very common case in LLVM as local variables are managed
-        // this way as pointers to stack.
-        if (mTargets.size() == 1 && destinations.size() == 1)
-        {
-            (*destinations.begin())->setBottom();
-            (*destinations.begin())->join(value);
-        }
-        else
-        {
-            // When the pointer references multiple locations, we
-            // assume that actual program run can choose any target,
-            // so we merge the stored value into all existing values.
-            std::vector<Domain*>::iterator itd = destinations.begin(),
-                itdend = destinations.end();
-
-            for (; itd != itdend; ++itd)
-                (*itd)->join(value);
-        }
-
-        if (state.hasGlobalBlock(*it->second->mTarget))
-            state.addGlobalBlock(*it->second->mTarget, result);
-        else
-            state.addFunctionBlock(*it->second->mTarget, result);
-    }
 }
+
+void
+Memory::store(const Domain &value
+              const Domain *numericOffset,
+              bool isSingleTarget) const
+{
+}
+
+Memory *
+Memory::clone() const
+{
+}
+
+bool
+Memory::operator==(const Domain& value) const
+{
+}
+
+void
+Memory::merge(const Domain &value)
+{
+}
+
+size_t
+Memory::memoryUsage() const
+{
+}
+
+std::string
+Memory::toString() const
+{
+}
+
+void
+Memory::setZero(const llvm::Value *place)
+{
+    mValue->setZero(place);
+}
+
+Domain &
+Memory::add(const Domain &a, const Domain &b)
+{
+    mValue->add(a, b);
+    return *this;
+}
+
+Domain &
+Memory::fadd(const Domain &a, const Domain &b)
+{
+    mValue->fadd(a, b);
+    return *this;
+}
+
+Domain &
+Memory::sub(const Domain &a, const Domain &b)
+{
+    mValue->sub(a, b);
+    return *this;
+}
+
+Domain &
+Memory::fsub(const Domain &a, const Domain &b)
+{
+    mValue->fsub(a, b);
+    return *this;
+}
+
+Domain &
+Memory::mul(const Domain &a, const Domain &b)
+{
+    mValue->mul(a, b);
+    return *this;
+}
+
+Domain &
+Memory::fmul(const Domain &a, const Domain &b)
+{
+    mValue->fmul(a, b);
+    return *this;
+}
+
+Domain &
+Memory::udiv(const Domain &a, const Domain &b)
+{
+    mValue->udiv(a, b);
+    return *this;
+}
+
+Domain &
+Memory::sdiv(const Domain &a, const Domain &b)
+{
+    mValue->sdiv(a, b);
+    return *this;
+}
+
+Domain &
+Memory::fdiv(const Domain &a, const Domain &b)
+{
+    mValue->fdiv(a, b);
+    return *this;
+}
+
+Domain &
+Memory::urem(const Domain &a, const Domain &b)
+{
+    mValue->urem(a, b);
+    return *this;
+}
+
+Domain &
+Memory::srem(const Domain &a, const Domain &b)
+{
+    mValue->srem(a, b);
+    return *this;
+}
+
+Domain &
+Memory::frem(const Domain &a, const Domain &b)
+{
+    mValue->frem(a, b);
+    return *this;
+}
+
+Domain &
+Memory::shl(const Domain &a, const Domain &b)
+{
+    mValue->shl(a, b);
+    return *this;
+}
+
+Domain &
+Memory::lshr(const Domain &a, const Domain &b)
+{
+    mValue->lshr(a, b);
+    return *this;
+}
+
+Domain &
+Memory::ashr(const Domain &a, const Domain &b)
+{
+    mValue->ashr(a, b);
+    return *this;
+}
+
+Domain &
+Memory::and_(const Domain &a, const Domain &b)
+{
+    mValue->and_(a, b);
+    return *this;
+}
+
+Domain &
+Memory::or_(const Domain &a, const Domain &b)
+{
+    mValue->or_(a, b);
+    return *this;
+}
+
+Domain &
+Memory::xor_(const Domain &a, const Domain &b)
+{
+    mValue->xor_(a, b);
+    return *this;
+}
+
+Domain &
+Memory::icmp(const Domain &a, const Domain &b,
+             llvm::CmpInst::Predicate predicate)
+{
+    mValue->icmp(a, b, predicate);
+    return *this;
+}
+
+Domain &
+Memory::fcmp(const Domain &a, const Domain &b,
+             llvm::CmpInst::Predicate predicate)
+{
+    mValue->fcmp(a, b, predicate);
+    return *this;
+}
+
+Domain &
+Memory::trunc(const Domain &value)
+{
+    mValue->trunc(value);
+    return *this;
+}
+
+Domain &
+Memory::zext(const Domain &value)
+{
+    mValue->zext(value);
+    return *this;
+}
+
+Domain &
+Memory::sext(const Domain &value)
+{
+    mValue->sext(value);
+    return *this;
+}
+
+Domain &
+Memory::fptrunc(const Domain &value)
+{
+    mValue->fptrunc(value);
+    return *this;
+}
+
+Domain &
+Memory::fpext(const Domain &value)
+{
+    mValue->fpext(value);
+    return *this;
+}
+
+Domain &
+Memory::fptoui(const Domain &value)
+{
+    mValue->fptoui(value);
+    return *this;
+}
+
+Domain &
+Memory::fptosi(const Domain &value)
+{
+    mValue->fptosi(value);
+    return *this;
+}
+
+Domain &
+Memory::uitofp(const Domain &value)
+{
+    mValue->uitofp(value);
+    return *this;
+}
+
+Domain &
+Memory::sitofp(const Domain &value)
+{
+    mValue->sitofp(value);
+    return *this;
+}
+
+float
+Memory::accuracy() const
+{
+    return mValue->accuracy();
+}
+
+bool
+Memory::isBottom() const
+{
+    return mValue->isBottom();
+}
+
+void
+Memory::setBottom()
+{
+    mValue->setBottom();
+}
+
+bool
+Memory::isTop() const
+{
+    return mValue->isTop();
+}
+
+void
+Memory::setTop()
+{
+    mValue->setTop();
+}
+
+} // namespace Canal

@@ -20,6 +20,7 @@ add_library(canal SHARED
     InterpreterIterator.cpp
     InterpreterModule.cpp
     InterpreterOperationsCallback.cpp
+    Memory.cpp
     Operations.cpp
     Pointer.cpp
     PointerTarget.cpp

@@ -43,6 +43,8 @@ libcanal_la_SOURCES = \
 	InterpreterModule.h \
 	InterpreterOperationsCallback.cpp \
 	InterpreterOperationsCallback.h \
+	Memory.cpp \
+	Memory.h \
 	Operations.cpp \
 	Operations.h \
 	OperationsCallback.h \
