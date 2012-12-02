@@ -119,7 +119,82 @@ testJoin()
 static void
 testMeet()
 {
-   //TODO 
+    // bottom vs bottom
+    Array::StringPrefix bottom1(*gEnvironment);
+    Array::StringPrefix result1 = bottom1.meet(bottom1);
+    CANAL_ASSERT(result1.isBottom());
+
+    // bottom vs prefix
+    Array::StringPrefix bottom2(*gEnvironment),
+        prefix2(*gEnvironment, "abc");
+    Array::StringPrefix result2 = bottom2.meet(prefix2);
+    CANAL_ASSERT(result2.isBottom());
+
+    // prefix vs bottom
+    Array::StringPrefix prefix3(*gEnvironment, "abc"),
+        bottom3(*gEnvironment);
+    Array::StringPrefix result3 = prefix3.meet(bottom3);
+    CANAL_ASSERT(result3.isBottom());
+
+    // prefix vs with prefix
+    Array::StringPrefix prefix4(*gEnvironment, "abc"),
+        withPrefix4(*gEnvironment, "abcdef");
+    Array::StringPrefix result4 = prefix4.meet(withPrefix4);
+    CANAL_ASSERT(!result4.isBottom());
+    CANAL_ASSERT(result4.mPrefix == "abcdef");
+    CANAL_ASSERT(!result4.isTop());
+
+    // with prefix vs prefix
+    Array::StringPrefix withPrefix5(*gEnvironment, "abcghi"),
+        prefix5(*gEnvironment, "abc");
+    Array::StringPrefix result5 = withPrefix5.meet(prefix5);
+    // should be bottom
+    //CANAL_ASSERT(result5.isBottom());
+
+    // with prefix vs without prefix
+    Array::StringPrefix withPrefix6(*gEnvironment, "abcjkl"),
+        withoutPrefix6(*gEnvironment, "xyz");
+    Array::StringPrefix result6 = withPrefix6.meet(withoutPrefix6);
+    CANAL_ASSERT(result6.isBottom());
+
+    // without prefix vs with prefix
+    Array::StringPrefix withoutPrefix7(*gEnvironment, "uvw"),
+        withPrefix7(*gEnvironment, "abcmno");
+    Array::StringPrefix result7 = withoutPrefix7.meet(withPrefix7);
+    CANAL_ASSERT(result7.isBottom());
+
+    // prefix vs top
+    Array::StringPrefix prefix8(*gEnvironment, "abc"),
+        top8(*gEnvironment, "");
+    Array::StringPrefix result8 = prefix8.meet(top8);
+    CANAL_ASSERT(!result8.isBottom());
+    CANAL_ASSERT(result8.mPrefix == "abc");
+    CANAL_ASSERT(!result8.isTop());
+
+    // top vs prefix
+    Array::StringPrefix top9(*gEnvironment, ""),
+        prefix9(*gEnvironment, "abc");
+    Array::StringPrefix result9 = top9.meet(prefix9);
+    CANAL_ASSERT(!result9.isBottom());
+    CANAL_ASSERT(result9.mPrefix == "abc");
+    CANAL_ASSERT(!result9.isTop());
+
+    // top vs top
+    Array::StringPrefix top10(*gEnvironment, "");
+    Array::StringPrefix result10 = top10.meet(top10);
+    CANAL_ASSERT(result10.isTop());
+
+    // top vs bottom
+    Array::StringPrefix top11(*gEnvironment, ""),
+        bottom11(*gEnvironment);
+    Array::StringPrefix result11 = top11.meet(bottom11);
+    CANAL_ASSERT(result11.isBottom());
+
+    // bottom vs top
+    Array::StringPrefix bottom12(*gEnvironment),
+        top12(*gEnvironment, "");
+    Array::StringPrefix result12 = bottom12.meet(top12);
+    CANAL_ASSERT(result12.isBottom());
 }
 
 int
