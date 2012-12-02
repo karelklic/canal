@@ -352,12 +352,6 @@ SingleItem::getValueType() const
 }
 
 Domain *
-SingleItem::getValueAbstractSize() const
-{
-    return mSize->clone();
-}
-
-Domain *
 SingleItem::getValueCell(uint64_t offset) const
 {
     Domain *cell = mEnvironment.getConstructors().createInteger(8);

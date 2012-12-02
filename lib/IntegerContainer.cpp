@@ -497,21 +497,6 @@ Container::hasValueExactSize() const
 }
 
 Domain *
-Container::getValueAbstractSize() const
-{
-    std::vector<Domain*>::const_iterator it = mValues.begin(),
-        itend = mValues.end();
-
-    for (; it != itend; ++it)
-    {
-        if ((*it)->isValue())
-            return (*it)->getValueAbstractSize();
-    }
-
-    CANAL_FATAL_ERROR("No value found.");
-}
-
-Domain *
 Container::getValueCell(uint64_t offset) const
 {
     Domain *cell = NULL;

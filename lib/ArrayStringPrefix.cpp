@@ -392,12 +392,6 @@ StringPrefix::getValueType() const
 }
 
 Domain *
-StringPrefix::getValueAbstractSize() const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-Domain *
 StringPrefix::getValueCell(uint64_t offset) const
 {
     Domain *cell = mEnvironment.getConstructors().createInteger(8);

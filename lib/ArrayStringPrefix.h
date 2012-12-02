@@ -120,8 +120,6 @@ public: // Implementation of Domain.
         return false;
     }
 
-    virtual Domain *getValueAbstractSize() const;
-
     virtual Domain *getValueCell(uint64_t offset) const;
 
     virtual void mergeValueCell(uint64_t offset, const Domain &value);

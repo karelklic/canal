@@ -266,12 +266,6 @@ Domain::getValueExactSize()
 }
 
 Domain *
-Domain::getValueAbstractSize() const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-Domain *
 Domain::getValueCell(uint64_t offset) const
 {
     CANAL_NOT_IMPLEMENTED();

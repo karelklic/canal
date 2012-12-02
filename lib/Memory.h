@@ -115,8 +115,6 @@ public: // Implementation of Domain.
 
     virtual uint64_t getValueExactSize();
 
-    virtual Domain *getValueAbstractSize() const;
-
     virtual Domain *getValueCell(uint64_t offset) const;
 
     virtual void setValueCell(uint64_t offset, const Domain &value);
