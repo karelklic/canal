@@ -44,5 +44,6 @@ CMakeCache.txt
 /tests/*Test
 /tests/*.o
 /tests/*.s
+/tests/integration
 
 /wrappers/config.py
