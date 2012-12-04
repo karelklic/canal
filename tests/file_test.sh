@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TIME=360
+TIME=30
 
 if [ $# -ne 2 ]; then
 	echo "Usage: canal_tool_binary program_source";
