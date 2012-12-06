@@ -231,6 +231,44 @@ Domain::sitofp(const Domain &value)
     CANAL_NOT_IMPLEMENTED();
 }
 
+Domain &
+Domain::extractelement(const Domain &array,
+                       const Domain &index)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain &
+Domain::insertelement(const Domain &array,
+                      const Domain &element,
+                      const Domain &index)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain &
+Domain::shufflevector(const Domain &v1,
+                      const Domain &v2,
+                      const std::vector<uint32_t> &mask)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain &
+Domain::extractvalue(const Domain &aggregate,
+                     const std::vector<unsigned> &indices)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain &
+Domain::insertvalue(const Domain &aggregate,
+                    const Domain &element,
+                    const std::vector<unsigned> &indices)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 void
 Domain::setWideningData(Widening::DataInterface *wideningData)
 {

@@ -805,6 +805,19 @@ Bitfield::fptosi(const Domain &value)
     return *this;
 }
 
+Bitfield &
+Bitfield::extractelement(const Domain &array,
+                         const Domain &index)
+{
+}
+
+Bitfield &
+Bitfield::extractvalue(const Domain &aggregate,
+                       const std::vector<unsigned> &indices)
+{
+}
+
+
 const llvm::IntegerType &
 Bitfield::getValueType() const
 {

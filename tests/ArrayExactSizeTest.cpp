@@ -20,7 +20,6 @@ testConstructors()
 
     Array::ExactSize array(gInterpreter->getEnvironment(), type);
     CANAL_ASSERT(array.isBottom());
-    CANAL_ASSERT(array.size() == 10);
     CANAL_ASSERT(array == array);
 }
 

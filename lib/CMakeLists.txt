@@ -1,9 +1,9 @@
 add_library(canal SHARED
     APIntUtils.cpp
     ArrayExactSize.cpp
-    ArrayInterface.cpp
     ArraySingleItem.cpp
     ArrayStringPrefix.cpp
+    ArrayUtils.cpp
     Constructors.cpp
     Domain.cpp
     Environment.cpp

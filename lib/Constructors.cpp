@@ -312,20 +312,20 @@ Constructors::createArray(const llvm::SequentialType &type,
                           Domain *size) const
 {
     Integer::Container *container = new Integer::Container(mEnvironment);
-    container->mValues.push_back(new Array::ExactSize(mEnvironment, type, size));
+    container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, size));
-    container->mValues.push_back(new Array::StringPrefix(mEnvironment, type, size));
+    container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
     return container;
 }
 
 Domain *
 Constructors::createArray(const llvm::SequentialType &type,
-                        const std::vector<Domain*> &values) const
+                          const std::vector<Domain*> &values) const
 {
     Integer::Container *container = new Integer::Container(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type, values));
-    container->mValues.push_back(new Array::SingleItem(mEnvironment, type, values));
-    container->mValues.push_back(new Array::StringPrefix(mEnvironment, type, values));
+    container->mValues.push_back(new Array::SingleItem(mEnvironment, type, values.begin(), values.end()));
+    container->mValues.push_back(new Array::StringPrefix(mEnvironment, type, values.begin(), values.end()));
     return container;
 }
 

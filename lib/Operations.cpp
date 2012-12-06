@@ -684,16 +684,12 @@ Operations::extractelement(const llvm::ExtractElementInst &instruction,
                            instruction,
                            constants[1])
     };
+
     if (!values[0] || !values[1])
         return;
 
-    const Array::ExactSize *array =
-        dynCast<const Array::ExactSize*>(values[0]);
-
-    CANAL_ASSERT_MSG(array, "Invalid type of array.");
-    Domain *result = array->getValue(*values[1]);
-
-    // Store the result value to the state.
+    Domain *result = mConstructors.create(*instruction.getType());
+    result->extractelement(*values[0], *values[1]);
     state.addFunctionVariable(instruction, result);
 }
 
@@ -719,16 +715,12 @@ Operations::insertelement(const llvm::InsertElementInst &instruction,
                            instruction,
                            constants[2])
     };
+
     if (!values[0] || !values[1] || !values[2])
         return;
 
-    Domain *result = values[0]->clone();
-    Array::ExactSize *resultAsArray = dynCast<Array::ExactSize*>(result);
-
-    CANAL_ASSERT_MSG(result, "Invalid type of array.");
-    resultAsArray->setItem(*values[2], *values[1]);
-
-    // Store the result value to the state.
+    Domain *result = mConstructors.create(*instruction.getType());
+    result->insertelement(*values[0], *values[1], *values[2]);
     state.addFunctionVariable(instruction, result);
 }
 
@@ -747,25 +739,18 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
                            instruction,
                            constants[1])
     };
+
     if (!values[0] || !values[1])
         return;
 
-    const Array::ExactSize *array0 =
-        dynCast<const Array::ExactSize*>(values[0]);
-
-    CANAL_ASSERT_MSG(array0, "Invalid type in shufflevector.");
-    const Array::ExactSize *array1 =
-        dynCast<const Array::ExactSize*>(values[1]);
-
-    CANAL_ASSERT_MSG(array1, "Invalid type in shufflevector.");
-
-    std::vector<Domain*> newValues;
-
 #if LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1
-    llvm::SmallVector<int, 16> shuffleMask =
+    llvm::SmallVector<int, 16> shuffleMaskLlvm =
         instruction.getShuffleMask();
+
+    std::vector<uint32_t> shuffleMask(shuffleMaskLlvm.begin(),
+                                      shuffleMaskLlvm.end());
 #else
-    llvm::SmallVector<int, 16> shuffleMask;
+    std::vector<uint32_t> shuffleMask;
     {
         // Reimplementation of the missing getShuffleMask method.
         const llvm::Value *inputMask = instruction.getOperand(2);
@@ -780,84 +765,17 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
         for (unsigned i = 0; i != count; ++i)
         {
             llvm::Constant *constant = inputMaskConstant->getOperand(i);
-            int constantInt = llvm::isa<llvm::UndefValue>(constant) ? -1 :
+            uint32_t constantInt = llvm::isa<llvm::UndefValue>(constant) ? -1 :
                 llvmCast<llvm::ConstantInt>(constant)->getZExtValue();
+
             shuffleMask.push_back(constantInt);
         }
     }
 #endif
 
-    llvm::SmallVector<int, 16>::iterator it = shuffleMask.begin(),
-        itend = shuffleMask.end();
-
-    for (; it != itend; ++it)
-    {
-        size_t offset = *it;
-        if (offset == (size_t)-1)
-        {
-            Domain *value = mConstructors.create(
-                *instruction.getType()->getElementType());
-
-            newValues.push_back(value);
-        }
-        else if (offset < array0->size())
-            newValues.push_back(array0->mValues[offset]->clone());
-        else
-        {
-            CANAL_ASSERT_MSG(offset < array0->size() + array1->size(),
-                             "Offset out of bounds.");
-
-            offset -= array0->size();
-            newValues.push_back(array1->mValues[offset]->clone());
-        }
-    }
-
-    Domain *result = mConstructors.createArray(*instruction.getType(),
-                                               newValues);
-
+    Domain *result = mConstructors.create(*instruction.getType());
+    result->shufflevector(*values[0], *values[1], shuffleMask);
     state.addFunctionVariable(instruction, result);
-}
-
-template <typename T> static Domain *
-getValueLocation(Domain *aggregate, const T &instruction)
-{
-    Domain *item = aggregate;
-    typename T::idx_iterator it = instruction.idx_begin(),
-        itend = instruction.idx_end();
-
-    for (; it != itend; ++it)
-    {
-        const Array::Interface *array =
-            dynCast<const Array::Interface*>(item);
-
-        CANAL_ASSERT_MSG(array,
-                         "ExtractValue reached an unsupported type.");
-
-        item = array->getItem(*it);
-    }
-
-    return item;
-}
-
-template <typename T> static const Domain *
-getValueLocation(const Domain *aggregate, const T &instruction)
-{
-    const Domain *item = aggregate;
-    typename T::idx_iterator it = instruction.idx_begin(),
-        itend = instruction.idx_end();
-
-    for (; it != itend; ++it)
-    {
-        const Array::Interface *array =
-            dynCast<const Array::Interface*>(item);
-
-        CANAL_ASSERT_MSG(array,
-                         "ExtractValue reached an unsupported type.");
-
-        item = array->getItem(*it);
-    }
-
-    return item;
 }
 
 void
@@ -874,8 +792,13 @@ Operations::extractvalue(const llvm::ExtractValueInst &instruction,
     if (!aggregate)
         return;
 
-    const Domain *item = getValueLocation(aggregate, instruction);
-    state.addFunctionVariable(instruction, item->clone());
+    llvm::ArrayRef<unsigned> indicesLlvm = instruction.getIndices();
+    std::vector<unsigned> indices(indicesLlvm.begin(),
+                                  indicesLlvm.end());
+
+    Domain *result = mConstructors.create(*instruction.getType());
+    result->extractvalue(*aggregate, indices);
+    state.addFunctionVariable(instruction, result);
 }
 
 void
@@ -902,9 +825,12 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
     if (!insertedValue)
         return;
 
-    Domain *result = aggregate->clone();
-    Domain *item = getValueLocation(result, instruction);
-    item->join(*insertedValue);
+    llvm::ArrayRef<unsigned> indicesLlvm = instruction.getIndices();
+    std::vector<unsigned> indices(indicesLlvm.begin(),
+                                  indicesLlvm.end());
+
+    Domain *result = mConstructors.create(*instruction.getType());
+    result->insertvalue(*aggregate, *insertedValue, indices);
     state.addFunctionVariable(instruction, result);
 }
 

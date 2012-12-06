@@ -2,12 +2,11 @@
 #define LIBCANAL_STRUCTURE_H
 
 #include "Domain.h"
-#include "ArrayInterface.h"
 #include <vector>
 
 namespace Canal {
 
-class Structure : public Domain, public Array::Interface
+class Structure : public Domain
 {
 public:
     std::vector<Domain*> mMembers;
@@ -54,6 +53,10 @@ public: // Implementation of Domain.
 
     virtual float accuracy() const;
 
+    virtual Structure &insertelement(const Domain &array,
+                                     const Domain &element,
+                                     const Domain &index);
+
     virtual bool isValue() const
     {
         return true;
@@ -70,15 +73,6 @@ public: // Implementation of Domain.
     virtual Domain *getValueCell(uint64_t offset) const;
 
     virtual void mergeValueCell(uint64_t offset, const Domain &value);
-
-public: // Implementation of Array::Interface.
-    virtual std::vector<Domain*> getItem(const Domain &offset) const;
-
-    virtual Domain *getItem(uint64_t offset) const;
-
-    virtual void setItem(const Domain &offset, const Domain &value);
-
-    virtual void setItem(uint64_t offset, const Domain &value);
 };
 
 } // namespace Canal

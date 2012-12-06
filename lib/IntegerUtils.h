@@ -7,79 +7,80 @@ namespace Canal {
 class Domain;
 
 namespace Integer {
+
 class Bitfield;
 class Set;
 class Interval;
 
-namespace Utils
-{
-    unsigned getBitWidth(const Domain &value);
+namespace Utils {
 
-    Bitfield &getBitfield(Domain &value);
+unsigned getBitWidth(const Domain &value);
 
-    const Bitfield &getBitfield(const Domain &value);
+Bitfield &getBitfield(Domain &value);
 
-    Set &getSet(Domain &value);
+const Bitfield &getBitfield(const Domain &value);
 
-    const Set &getSet(const Domain &value);
+Set &getSet(Domain &value);
 
-    Interval &getInterval(Domain &value);
+const Set &getSet(const Domain &value);
 
-    const Interval &getInterval(const Domain &value);
+Interval &getInterval(Domain &value);
 
-    /// Lowest signed number represented by this container.  Uses the
-    /// abstract domain (enum, interval, bits) with highest precision.
-    /// @param value
-    ///   Abstract value that represents number.
-    /// @param result
-    ///   Filled by the minimum value if it is known.  Otherwise, the
-    ///   value is undefined.
-    /// @return
-    ///   True if the result is known and the parameter was set to
-    ///   correct value.
-    bool signedMin(const Domain &value, llvm::APInt &result);
+const Interval &getInterval(const Domain &value);
 
-    /// Highest signed number represented by this container.  Uses the
-    /// abstract domain (enum, interval, bits) with highest precision.
-    /// @param value
-    ///   Abstract value that represents number.
-    /// @param result
-    ///   Filled by the maximum value if it is known.  Otherwise, the
-    ///   value is undefined.
-    /// @return
-    ///   True if the result is known and the parameter was set to
-    ///   correct value.
-    bool signedMax(const Domain &value, llvm::APInt &result);
+/// Lowest signed number represented by this container.  Uses the
+/// abstract domain (enum, interval, bits) with highest precision.
+/// @param value
+///   Abstract value that represents number.
+/// @param result
+///   Filled by the minimum value if it is known.  Otherwise, the
+///   value is undefined.
+/// @return
+///   True if the result is known and the parameter was set to
+///   correct value.
+bool signedMin(const Domain &value, llvm::APInt &result);
 
-    /// Lowest unsigned number represented by this container.  Uses the
-    /// abstract domain (enum, interval, bits) with highest precision.
-    /// @param value
-    ///   Abstract value that represents number.
-    /// @param result
-    ///   Filled by the minimum value if it is known.  Otherwise, the
-    ///   value is undefined.
-    /// @return
-    ///   True if the result is known and the parameter was set to
-    ///   correct value.
+/// Highest signed number represented by this container.  Uses the
+/// abstract domain (enum, interval, bits) with highest precision.
+/// @param value
+///   Abstract value that represents number.
+/// @param result
+///   Filled by the maximum value if it is known.  Otherwise, the
+///   value is undefined.
+/// @return
+///   True if the result is known and the parameter was set to
+///   correct value.
+bool signedMax(const Domain &value, llvm::APInt &result);
 
-    bool unsignedMin(const Domain &value, llvm::APInt &result);
-    /// Highest unsigned number represented by this container.  Uses
-    /// the abstract domain (enum, interval, bits) with highest precision.
-    /// @param value
-    ///   Abstract value that represents number.
-    /// @param result
-    ///   Filled by the maximum value if it is known.  Otherwise, the
-    ///   value is undefined.
-    /// @return
-    ///   True if the result is known and the parameter was set to
-    ///   correct value.
+/// Lowest unsigned number represented by this container.  Uses the
+/// abstract domain (enum, interval, bits) with highest precision.
+/// @param value
+///   Abstract value that represents number.
+/// @param result
+///   Filled by the minimum value if it is known.  Otherwise, the
+///   value is undefined.
+/// @return
+///   True if the result is known and the parameter was set to
+///   correct value.
 
-    bool unsignedMax(const Domain &value, llvm::APInt &result);
+bool unsignedMin(const Domain &value, llvm::APInt &result);
+/// Highest unsigned number represented by this container.  Uses
+/// the abstract domain (enum, interval, bits) with highest precision.
+/// @param value
+///   Abstract value that represents number.
+/// @param result
+///   Filled by the maximum value if it is known.  Otherwise, the
+///   value is undefined.
+/// @return
+///   True if the result is known and the parameter was set to
+///   correct value.
 
-    /// Find out whether all representations contain only single value
-    /// @param value
-    ///   Abstract value that represents number.
-    bool isConstant(const Domain &value);
+bool unsignedMax(const Domain &value, llvm::APInt &result);
+
+/// Find out whether all representations contain only single value
+/// @param value
+///   Abstract value that represents number.
+bool isConstant(const Domain &value);
 
 } // namespace Utils
 } // namespace Integer

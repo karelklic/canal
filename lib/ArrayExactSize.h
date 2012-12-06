@@ -2,20 +2,20 @@
 #define LIBCANAL_ARRAY_EXACT_SIZE_H
 
 #include "Domain.h"
-#include "ArrayInterface.h"
 
 namespace Canal {
 namespace Array {
 
 /// Array with exact size and limited length.  It keeps all array
 /// members separately, not losing precision at all.
-class ExactSize : public Domain, public Interface
+class ExactSize : public Domain
 {
 public:
-    /// Empty array indicates the top value.
+    /// Empty mValues indicate that the ExactSize object is at the top
+    /// value because the size is not exact.
     std::vector<Domain*> mValues;
 
-    /// The type of the arrayx.
+    /// The type of the array.
     const llvm::SequentialType &mType;
 
 public:
@@ -32,20 +32,11 @@ public:
               const llvm::SequentialType &type,
               const std::vector<Domain*> &values);
 
-    ExactSize(const Environment &environment,
-              const llvm::SequentialType &type,
-              Domain *size);
-
     /// Copy constructor.
     ExactSize(const ExactSize &value);
 
     // Standard destructor.
     virtual ~ExactSize();
-
-    size_t size() const
-    {
-        return mValues.size();
-    }
 
 public: // Implementation of Domain.
     /// Covariant return type.
@@ -115,11 +106,31 @@ public: // Implementation of Domain.
 
     virtual ExactSize &xor_(const Domain &a, const Domain &b);
 
-    virtual ExactSize &icmp(const Domain &a, const Domain &b,
+    virtual ExactSize &icmp(const Domain &a,
+                            const Domain &b,
                             llvm::CmpInst::Predicate predicate);
 
-    virtual ExactSize &fcmp(const Domain &a, const Domain &b,
+    virtual ExactSize &fcmp(const Domain &a,
+                            const Domain &b,
                             llvm::CmpInst::Predicate predicate);
+
+    virtual ExactSize &extractelement(const Domain &array,
+                                      const Domain &index);
+
+    virtual ExactSize &insertelement(const Domain &array,
+                                     const Domain &element,
+                                     const Domain &index);
+
+    virtual ExactSize &shufflevector(const Domain &v1,
+                                     const Domain &v2,
+                                     const std::vector<uint32_t> &mask);
+
+    virtual ExactSize &extractvalue(const Domain &aggregate,
+                                    const std::vector<unsigned> &indices);
+
+    virtual ExactSize &insertvalue(const Domain &aggregate,
+                                   const Domain &element,
+                                   const std::vector<unsigned> &indices);
 
     virtual bool isValue() const
     {
@@ -131,21 +142,12 @@ public: // Implementation of Domain.
 
     virtual bool hasValueExactSize() const
     {
-        return true;
+        return !mValues.empty();
     }
 
     virtual Domain *getValueCell(uint64_t offset) const;
 
     virtual void mergeValueCell(uint64_t offset, const Domain &value);
-
-public: // Implementation of Array::Interface.
-    virtual std::vector<Domain*> getItem(const Domain &offset) const;
-
-    virtual Domain *getItem(uint64_t offset) const;
-
-    virtual void setItem(const Domain &offset, const Domain &value);
-
-    virtual void setItem(uint64_t offset, const Domain &value);
 
 private:
     ExactSize &binaryOperation(const Domain &a,

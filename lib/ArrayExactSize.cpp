@@ -38,14 +38,6 @@ ExactSize::ExactSize(const Environment &environment,
 {
 }
 
-ExactSize::ExactSize(const Environment &environment,
-                     const llvm::SequentialType &type,
-                     Domain *size)
-    : Domain(environment), mType(type)
-{
-    delete size;
-}
-
 ExactSize::ExactSize(const ExactSize &value)
     : Domain(value), mValues(value.mValues), mType(value.mType)
 {
@@ -85,12 +77,18 @@ std::string
 ExactSize::toString() const
 {
     StringStream ss;
-    ss << "arrayExactSize\n";
-    std::vector<Domain*>::const_iterator it = mValues.begin(),
-        itend = mValues.end();
 
-    for (; it != itend; ++it)
-        ss << indent((*it)->toString(), 4);
+    if (mValues.empty())
+        ss << "arrayExactSize top\n";
+    else
+    {
+        ss << "arrayExactSize\n";
+        std::vector<Domain*>::const_iterator it = mValues.begin(),
+            itend = mValues.end();
+
+        for (; it != itend; ++it)
+            ss << indent((*it)->toString(), 4);
+    }
 
     return ss.str();
 }
@@ -118,7 +116,8 @@ ExactSize::operator==(const Domain &value) const
     if (mValues.size() != array->mValues.size())
         return false;
 
-    std::vector<Domain*>::const_iterator itA = mValues.begin(),
+    std::vector<Domain*>::const_iterator
+        itA = mValues.begin(),
         itAend = mValues.end(),
         itB = array->mValues.begin();
 
@@ -144,11 +143,16 @@ ExactSize::join(const Domain &value)
 {
     const ExactSize &val = dynCast<const ExactSize&>(value);
 
-    CANAL_ASSERT_MSG(val.size() == size(),
+    CANAL_ASSERT_MSG(mValues.size() == val.mValues.size(),
                      "Operations with arrays "
                      "require the array size to be equal.");
 
-    std::vector<Domain*>::const_iterator it = mValues.begin(),
+    CANAL_ASSERT_MSG(&mType == &val.mType,
+                     "Operations with arrays "
+                     "require the array type to be equal.");
+
+    std::vector<Domain*>::const_iterator
+        it = mValues.begin(),
         itend = mValues.end(),
         itv = val.mValues.begin();
 
@@ -163,11 +167,16 @@ ExactSize::meet(const Domain &value)
 {
     const ExactSize &val = dynCast<const ExactSize&>(value);
 
-    CANAL_ASSERT_MSG(val.size() == size(),
+    CANAL_ASSERT_MSG(val.mValues.size() == mValues.size(),
                      "Operations with arrays "
                      "require the array size to be equal.");
 
-    std::vector<Domain*>::const_iterator it = mValues.begin(),
+    CANAL_ASSERT_MSG(&mType == &val.mType,
+                     "Operations with arrays "
+                     "require the array type to be equal.");
+
+    std::vector<Domain*>::const_iterator
+        it = mValues.begin(),
         itend = mValues.end(),
         itv = val.mValues.begin();
 
@@ -198,6 +207,9 @@ ExactSize::isBottom() const
 void
 ExactSize::setBottom()
 {
+    CANAL_ASSERT_MSG(!mValues.empty(),
+                     "Cannot set the array to bottom.");
+
     std::vector<Domain*>::const_iterator it = mValues.begin(),
         itend = mValues.end();
 
@@ -345,17 +357,84 @@ ExactSize::xor_(const Domain &a, const Domain &b)
 }
 
 ExactSize &
-ExactSize::icmp(const Domain &a, const Domain &b,
+ExactSize::icmp(const Domain &a,
+                const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
     return cmpOperation(a, b, predicate, &Domain::icmp);
 }
 
 ExactSize &
-ExactSize::fcmp(const Domain &a, const Domain &b,
+ExactSize::fcmp(const Domain &a,
+                const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
     return cmpOperation(a, b, predicate, &Domain::fcmp);
+}
+
+ExactSize &
+ExactSize::extractelement(const Domain &array,
+                          const Domain &index)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+ExactSize &
+ExactSize::insertelement(const Domain &array,
+                         const Domain &element,
+                         const Domain &index)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+ExactSize &
+ExactSize::shufflevector(const Domain &v1,
+                         const Domain &v2,
+                         const std::vector<uint32_t> &mask)
+{
+    const ExactSize &vv1 = dynCast<const ExactSize&>(v1),
+        &vv2 = dynCast<const ExactSize&>(v2);
+
+    CANAL_ASSERT_MSG(vv1.mValues.size() == vv2.mValues.size() &&
+                     mValues.size() == mask.size(),
+                     "Shuffle vector operation "
+                     "require the arrays size to be equal.");
+
+    std::vector<uint32_t>::const_iterator it = mask.begin(),
+        itend = mask.end();
+
+    for (; it != itend; ++it)
+    {
+        if (*it == (uint32_t)-1)
+            continue;
+
+        if (*it < vv1.mValues.size())
+            mValues[itend - it - 1]->join(*vv1.mValues[*it]);
+        else
+        {
+            CANAL_ASSERT_MSG(*it < vv1.mValues.size() + vv2.mValues.size(),
+                             "Offset out of bounds.");
+
+            mValues[itend - it - 1]->join(*vv2.mValues[*it - vv1.mValues.size()]);
+        }
+    }
+
+    return *this;
+}
+
+ExactSize &
+ExactSize::extractvalue(const Domain &aggregate,
+                        const std::vector<unsigned> &indices)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+ExactSize &
+ExactSize::insertvalue(const Domain &aggregate,
+                       const Domain &element,
+                       const std::vector<unsigned> &indices)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 const llvm::SequentialType &
@@ -526,7 +605,8 @@ ExactSize::binaryOperation(const Domain &a,
     const ExactSize &aa = dynCast<const ExactSize&>(a),
         &bb = dynCast<const ExactSize&>(b);
 
-    CANAL_ASSERT_MSG(aa.size() == bb.size() && size() == aa.size(),
+    CANAL_ASSERT_MSG(aa.mValues.size() == bb.mValues.size() &&
+                     mValues.size() == aa.mValues.size(),
                      "Binary operations with arrays "
                      "require the array size to be equal.");
 
@@ -551,8 +631,8 @@ ExactSize::cmpOperation(const Domain &a,
     const ExactSize &aa = dynCast<const ExactSize&>(a),
         &bb = dynCast<const ExactSize&>(b);
 
-    CANAL_ASSERT_MSG(size() == aa.size() &&
-                     aa.size() == bb.size(),
+    CANAL_ASSERT_MSG(mValues.size() == aa.mValues.size() &&
+                     aa.mValues.size() == bb.mValues.size(),
                      "Binary operations with arrays "
                      "require the array size to be equal.");
 

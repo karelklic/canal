@@ -221,6 +221,24 @@ Structure::accuracy() const
     return result / mMembers.size();
 }
 
+Structure &
+Structure::insertelement(const Domain &array,
+                         const Domain &element,
+                         const Domain &index)
+{
+    const Structure &s = dynCast<const Structure&>(array);
+
+    CANAL_ASSERT(&s.mType == mType &&
+                 s.mMembers.size() == mMembers.size());
+
+    std::vector<Domain*>::const_iterator
+        it = mMembers.begin(),
+        itend = mMembers.end(),
+        its = s.mMembers.begin();
+
+    CANAL_NOT_IMPLEMENTED();
+}
+
 const llvm::StructType &
 Structure::getValueType() const
 {
@@ -314,12 +332,6 @@ Structure::getItem(uint64_t offset) const
                      "Offset out of bounds.");
 
     return mMembers[offset];
-}
-
-void
-Structure::setItem(const Domain &offset, const Domain &value)
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 void

@@ -2,17 +2,15 @@
 #define LIBCANAL_ARRAY_STRING_PREFIX_H
 
 #include "Domain.h"
-#include "ArrayInterface.h"
 
 namespace Canal {
 namespace Array {
 
-/// Array with exact size and limited length.  It keeps all array
-/// members separately, not losing precision at all.
-class StringPrefix : public Domain, public Interface
+class StringPrefix : public Domain
 {
 public:
     std::string mPrefix;
+
     bool mIsBottom;
 
     const llvm::SequentialType &mType;
@@ -26,11 +24,8 @@ public:
     ///   This class takes ownership of the values.
     StringPrefix(const Environment &environment,
                  const llvm::SequentialType &type,
-                 const std::vector<Domain*> &values);
-
-    StringPrefix(const Environment &environment,
-                 const llvm::SequentialType &type,
-                 Domain *size);
+                 std::vector<Domain*>::const_iterator begin,
+                 std::vector<Domain*>::const_iterator end);
 
     StringPrefix(const Environment &environment,
                  const std::string &value);
@@ -105,6 +100,10 @@ public: // Implementation of Domain.
     virtual StringPrefix &fcmp(const Domain &a, const Domain &b,
                                llvm::CmpInst::Predicate predicate);
 
+    virtual StringPrefix &shufflevector(const Domain &v1,
+                                        const Domain &v2,
+                                        const std::vector<uint32_t> &mask);
+
     virtual bool isValue() const
     {
         return true;
@@ -121,15 +120,6 @@ public: // Implementation of Domain.
     virtual Domain *getValueCell(uint64_t offset) const;
 
     virtual void mergeValueCell(uint64_t offset, const Domain &value);
-
-public: // Implementation of Array::Interface.
-    virtual std::vector<Domain*> getItem(const Domain &offset) const;
-
-    virtual Domain *getItem(uint64_t offset) const;
-
-    virtual void setItem(const Domain &offset, const Domain &value);
-
-    virtual void setItem(uint64_t offset, const Domain &value);
 };
 
 } // namespace Array

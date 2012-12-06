@@ -169,6 +169,12 @@ public: // Implementation of Domain.
 
     virtual Bitfield &fptosi(const Domain &value);
 
+    virtual Bitfield &extractelement(const Domain &array,
+                                     const Domain &index);
+
+    virtual Bitfield &extractvalue(const Domain &aggregate,
+                                   const std::vector<unsigned> &indices);
+
     virtual bool isValue() const
     {
         return true;

@@ -32,27 +32,23 @@ SingleItem::SingleItem(const Environment &environment,
 
 SingleItem::SingleItem(const Environment &environment,
                        const llvm::SequentialType &type,
-                       const std::vector<Domain*> &values)
+                       std::vector<Domain*>::const_iterator begin,
+                       std::vector<Domain*>::const_iterator end)
     : Domain(environment), mType(type)
 {
-    mSize = environment.getConstructors().createInteger(llvm::APInt(64, values.size()));
+    llvm::APInt size(64, end - begin);
+    mSize = environment.getConstructors().createInteger(size);
 
     const llvm::Type &elementType = *type.getElementType();
     mValue = environment.getConstructors().create(elementType);
-
-    std::vector<Domain*>::const_iterator it = values.begin(),
-        itend = values.end();
-
-    for (; it != itend; ++it)
-    {
+    std::vector<Domain*>::const_iterator it = begin;
+    for (; it != end; ++it)
         mValue->join(**it);
-        delete *it;
-    }
 }
 
 SingleItem::SingleItem(const Environment &environment,
                        const llvm::SequentialType &type,
-                       Domain* size)
+                       Domain *size)
     : Domain(environment), mSize(size), mType(type)
 {
     const llvm::Type &elementType = *type.getElementType();
@@ -320,6 +316,14 @@ SingleItem::icmp(const Domain &a, const Domain &b,
 SingleItem &
 SingleItem::fcmp(const Domain &a, const Domain &b,
                 llvm::CmpInst::Predicate predicate)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+SingleItem &
+SingleItem::shufflevector(const Domain &v1,
+                          const Domain &v2,
+                          const std::vector<uint32_t> &mask)
 {
     CANAL_NOT_IMPLEMENTED();
 }

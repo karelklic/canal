@@ -78,10 +78,12 @@ public: // Implementation of Domain.
 
     virtual Container &xor_(const Domain &a, const Domain &b);
 
-    virtual Container &icmp(const Domain &a, const Domain &b,
+    virtual Container &icmp(const Domain &a,
+                            const Domain &b,
                             llvm::CmpInst::Predicate predicate);
 
-    virtual Container &fcmp(const Domain &a, const Domain &b,
+    virtual Container &fcmp(const Domain &a,
+                            const Domain &b,
                             llvm::CmpInst::Predicate predicate);
 
     virtual Container &trunc(const Domain &value);
@@ -93,6 +95,17 @@ public: // Implementation of Domain.
     virtual Container &fptoui(const Domain &value);
 
     virtual Container &fptosi(const Domain &value);
+
+    virtual Container &extractelement(const Domain &array,
+                                      const Domain &index);
+
+    virtual Container &insertelement(const Domain &array,
+                                     const Domain &element,
+                                     const Domain &index);
+
+    virtual Container &shufflevector(const Domain &v1,
+                                     const Domain &v2,
+                                     const std::vector<uint32_t> &mask);
 
     virtual bool isValue() const;
 

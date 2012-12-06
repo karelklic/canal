@@ -2,7 +2,6 @@
 #define LIBCANAL_ARRAY_SINGLE_ITEM_H
 
 #include "Domain.h"
-#include "ArrayInterface.h"
 
 namespace Canal {
 namespace Array {
@@ -12,7 +11,7 @@ namespace Array {
 /// merged and used to move the single value up in its lattice.
 //
 /// This array type is very imprecise.
-class SingleItem : public Domain, public Interface
+class SingleItem : public Domain
 {
 public:
     Domain *mValue;
@@ -28,11 +27,10 @@ public:
     SingleItem(const Environment &environment,
                const llvm::SequentialType &type);
 
-    /// @param values
-    ///   This class takes ownership of the values.
     SingleItem(const Environment &environment,
                const llvm::SequentialType &type,
-               const std::vector<Domain*> &values);
+               std::vector<Domain*>::const_iterator begin,
+               std::vector<Domain*>::const_iterator end);
 
     SingleItem(const Environment &environment,
                const llvm::SequentialType &type,
@@ -112,11 +110,17 @@ public: // Implementation of Domain.
 
     virtual SingleItem &xor_(const Domain &a, const Domain &b);
 
-    virtual SingleItem &icmp(const Domain &a, const Domain &b,
+    virtual SingleItem &icmp(const Domain &a,
+                             const Domain &b,
                              llvm::CmpInst::Predicate predicate);
 
-    virtual SingleItem &fcmp(const Domain &a, const Domain &b,
+    virtual SingleItem &fcmp(const Domain &a,
+                             const Domain &b,
                              llvm::CmpInst::Predicate predicate);
+
+    virtual SingleItem &shufflevector(const Domain &v1,
+                                      const Domain &v2,
+                                      const std::vector<uint32_t> &mask);
 
     virtual bool isValue() const
     {
@@ -134,15 +138,6 @@ public: // Implementation of Domain.
     virtual Domain *getValueCell(uint64_t offset) const;
 
     virtual void mergeValueCell(uint64_t offset, const Domain &value);
-
-public: // Implementation of Array::Interface.
-    virtual std::vector<Domain*> getItem(const Domain &offset) const;
-
-    virtual Domain *getItem(uint64_t offset) const;
-
-    virtual void setItem(const Domain &offset, const Domain &value);
-
-    virtual void setItem(uint64_t offset, const Domain &value);
 };
 
 } // namespace Array

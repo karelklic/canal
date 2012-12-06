@@ -1,5 +1,6 @@
 #include "ArrayStringPrefix.h"
 #include "IntegerContainer.h"
+#include "IntegerUtils.h"
 #include "Utils.h"
 #include "Environment.h"
 #include "Constructors.h"
@@ -18,40 +19,36 @@ StringPrefix::StringPrefix(const Environment &environment,
 
 StringPrefix::StringPrefix(const Environment &environment,
                            const llvm::SequentialType &type,
-                           const std::vector<Domain*> &values)
+                           std::vector<Domain*>::const_iterator begin,
+                           std::vector<Domain*>::const_iterator end)
     : Domain(environment), mIsBottom(true), mType(type)
 {
     llvm::Type *int8 = llvm::Type::getInt8Ty(environment.getContext());
-
-    std::vector<Domain*>::const_iterator it = values.begin(),
-        itend = values.end();
-
     if (mType.getElementType() != int8)
         setTop();
-
-    for (; it != itend; ++it)
+    else
     {
-        if (!isTop())
+        std::vector<Domain*>::const_iterator it = begin;
+        for (; it != end; ++it)
         {
-            // TODO: get the characters out of values and append them
-            // to mPrefix instead of setting to top.
-            setTop();
+            if (!Integer::Utils::isConstant(**it))
+                break;
+
+            CANAL_ASSERT_MSG(8 == Integer::Utils::getBitWidth(**it),
+                             "String reqires 8-bit characters.");
+
+            llvm::APInt constant;
+            bool success = Integer::Utils::signedMin(**it, constant);
+            CANAL_ASSERT(success);
+
+            uint64_t c = constant.getZExtValue();
+            if (c == 0 || c > 255)
+                break;
+
+            mIsBottom = false;
+            mPrefix.append(1, (char)c);
         }
-
-        delete *it;
     }
-}
-
-StringPrefix::StringPrefix(const Environment &environment,
-                           const llvm::SequentialType &type,
-                           Domain *size)
-    : Domain(environment), mIsBottom(true), mType(type)
-{
-    llvm::Type *int8 = llvm::Type::getInt8Ty(environment.getContext());
-    if (mType.getElementType() != int8)
-        setTop();
-
-    delete size;
 }
 
 StringPrefix::StringPrefix(const Environment &environment,
@@ -364,7 +361,8 @@ StringPrefix::xor_(const Domain &a, const Domain &b)
 }
 
 StringPrefix &
-StringPrefix::icmp(const Domain &a, const Domain &b,
+StringPrefix::icmp(const Domain &a,
+                   const Domain &b,
                    llvm::CmpInst::Predicate predicate)
 {
     setTop();
@@ -372,8 +370,18 @@ StringPrefix::icmp(const Domain &a, const Domain &b,
 }
 
 StringPrefix &
-StringPrefix::fcmp(const Domain &a, const Domain &b,
+StringPrefix::fcmp(const Domain &a,
+                   const Domain &b,
                    llvm::CmpInst::Predicate predicate)
+{
+    setTop();
+    return *this;
+}
+
+StringPrefix &
+StringPrefix::shufflevector(const Domain &v1,
+                            const Domain &v2,
+                            const std::vector<uint32_t> &mask)
 {
     setTop();
     return *this;
@@ -397,30 +405,6 @@ void
 StringPrefix::mergeValueCell(uint64_t offset, const Domain &value)
 {
     setTop();
-}
-
-std::vector<Domain*>
-StringPrefix::getItem(const Domain &offset) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-Domain *
-StringPrefix::getItem(uint64_t offset) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-StringPrefix::setItem(const Domain &offset, const Domain &value)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-StringPrefix::setItem(uint64_t offset, const Domain &value)
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 } // namespace Array

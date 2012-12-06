@@ -445,6 +445,47 @@ Container::fptosi(const Domain &value)
     return *this;
 }
 
+Container &
+Container::extractelement(const Domain &array,
+                          const Domain &index)
+{
+    std::vector<Domain*>::iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+        (**it).extractelement(array, index);
+
+    return *this;
+}
+
+Container &
+Container::insertelement(const Domain &array,
+                         const Domain &element,
+                         const Domain &index)
+{
+    std::vector<Domain*>::iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+        (**it).insertelement(array, element, index);
+
+    return *this;
+}
+
+Container &
+Container::shufflevector(const Domain &v1,
+                         const Domain &v2,
+                         const std::vector<uint32_t> &mask)
+{
+    std::vector<Domain*>::iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+        (**it).shufflevector(v1, v2, mask);
+
+    return *this;
+}
+
 bool
 Container::isValue() const
 {

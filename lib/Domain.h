@@ -147,10 +147,12 @@ public: // Instructions operating on values.
 
     virtual Domain &xor_(const Domain &a, const Domain &b);
 
-    virtual Domain &icmp(const Domain &a, const Domain &b,
+    virtual Domain &icmp(const Domain &a,
+                         const Domain &b,
                          llvm::CmpInst::Predicate predicate);
 
-    virtual Domain &fcmp(const Domain &a, const Domain &b,
+    virtual Domain &fcmp(const Domain &a,
+                         const Domain &b,
                          llvm::CmpInst::Predicate predicate);
 
     virtual Domain &trunc(const Domain &value);
@@ -170,6 +172,36 @@ public: // Instructions operating on values.
     virtual Domain &uitofp(const Domain &value);
 
     virtual Domain &sitofp(const Domain &value);
+
+    /// Extracts a single element from an array at a specified index.
+    virtual Domain &extractelement(const Domain &array,
+                                   const Domain &index);
+
+    /// Inserts an element into an array at a specified index.
+    virtual Domain &insertelement(const Domain &array,
+                                  const Domain &element,
+                                  const Domain &index);
+
+    /// Constructs a permutation of elements from two input vectors,
+    /// returning a vector with the same element type as the input and
+    /// length that is the same as the shuffle mask.
+    /// @param v1
+    /// @param v2
+    ///   Arrays with the same type.
+    /// @param mask
+    ///   A shuffle mask whose element type is always 'i32'.
+    virtual Domain &shufflevector(const Domain &v1,
+                                  const Domain &v2,
+                                  const std::vector<uint32_t> &mask);
+
+    /// Extracts the value of a member field from an aggregate value.
+    virtual Domain &extractvalue(const Domain &aggregate,
+                                 const std::vector<unsigned> &indices);
+
+    /// Inserts a value into a member field in an aggregate value.
+    virtual Domain &insertvalue(const Domain &aggregate,
+                                const Domain &element,
+                                const std::vector<unsigned> &indices);
 
 public: // Widening interface.
     Widening::DataInterface *getWideningData() const
