@@ -148,8 +148,9 @@ testMeet()
     Array::StringPrefix withPrefix5(*gEnvironment, "abcghi"),
         prefix5(*gEnvironment, "abc");
     Array::StringPrefix result5 = withPrefix5.meet(prefix5);
-    // should be bottom
-    //CANAL_ASSERT(result5.isBottom());
+    CANAL_ASSERT(!result5.isBottom());
+    CANAL_ASSERT(result5.mPrefix == "abcghi");
+    CANAL_ASSERT(!result5.isTop());
 
     // with prefix vs without prefix
     Array::StringPrefix withPrefix6(*gEnvironment, "abcjkl"),
