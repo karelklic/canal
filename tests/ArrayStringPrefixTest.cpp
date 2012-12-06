@@ -53,66 +53,82 @@ testEquality()
 static void
 testJoin()
 {
-    Array::StringPrefix bottom(*gEnvironment),
-        withCommonPrefix1(*gEnvironment, "testone"),
-        withCommonPrefix2(*gEnvironment, "testtwothree"),
-        withoutCommonPrefix(*gEnvironment, "notest"),
-        top(*gEnvironment, "");
-
     // bottom vs bottom
-    Array::StringPrefix result1 = bottom.join(bottom);
+    Array::StringPrefix bottom1(*gEnvironment);
+    Array::StringPrefix result1 = bottom1.join(bottom1);
     CANAL_ASSERT(result1.isBottom());
 
     // non-bottom vs bottom
-    Array::StringPrefix result2 = withCommonPrefix1.join(bottom);
+    Array::StringPrefix withPrefix2(*gEnvironment, "testone"),
+        bottom2(*gEnvironment);
+    Array::StringPrefix result2 = withPrefix2.join(bottom2);
     CANAL_ASSERT(!result2.isBottom());
     CANAL_ASSERT(result2.mPrefix == "testone");
     CANAL_ASSERT(!result2.isTop());
 
     // bottom vs non-bottom
-    Array::StringPrefix result3 = bottom.join(withCommonPrefix1);
+    Array::StringPrefix bottom3(*gEnvironment),
+        withPrefix3(*gEnvironment, "testone");
+    Array::StringPrefix result3 = bottom3.join(withPrefix3);
     CANAL_ASSERT(!result3.isBottom());
     CANAL_ASSERT(result3.mPrefix == "testone");
     CANAL_ASSERT(!result3.isTop());
 
     // non-bottom vs non-bottom with common prefix
-    Array::StringPrefix result4 = withCommonPrefix1.join(withCommonPrefix2);
+    Array::StringPrefix withPrefix4a(*gEnvironment, "testone"),
+        withPrefix4b(*gEnvironment, "testtwothree");
+    Array::StringPrefix result4 = withPrefix4a.join(withPrefix4b);
     CANAL_ASSERT(!result4.isBottom());
     CANAL_ASSERT(result4.mPrefix == "test");
     CANAL_ASSERT(!result4.isTop());
 
     // non-bottom vs non-bottom with common prefix switcheroo
-    Array::StringPrefix result5 = withCommonPrefix2.join(withCommonPrefix1);
+    Array::StringPrefix withPrefix5a(*gEnvironment, "testtwothree"),
+        withPrefix5b(*gEnvironment, "testone");
+    Array::StringPrefix result5 = withPrefix5a.join(withPrefix5b);
     CANAL_ASSERT(!result5.isBottom());
     CANAL_ASSERT(result5.mPrefix == "test");
     CANAL_ASSERT(!result5.isTop());
 
     // non-bottom vs non-bottom without common prefix
-    Array::StringPrefix result6 = withCommonPrefix2.join(withoutCommonPrefix);
+    Array::StringPrefix withPrefix6(*gEnvironment, "testone"),
+        withoutPrefix6(*gEnvironment, "xyz");
+    Array::StringPrefix result6 = withPrefix6.join(withoutPrefix6);
     CANAL_ASSERT(result6.isTop());
 
     // non-bottom vs non-bottom without common prefix switcheroo
-    Array::StringPrefix result7 = withoutCommonPrefix.join(withCommonPrefix2);
+    Array::StringPrefix withoutPrefix7(*gEnvironment, "xyz"),
+        withPrefix7(*gEnvironment, "testone");
+    Array::StringPrefix result7 = withoutPrefix7.join(withPrefix7);
     CANAL_ASSERT(result7.isTop());
 
     // non-bottom vs top
-    Array::StringPrefix result8 = withoutCommonPrefix.join(top);
+    Array::StringPrefix withoutPrefix8(*gEnvironment, "xyz"),
+        top8(*gEnvironment, "");
+    Array::StringPrefix result8 = withoutPrefix8.join(top8);
     CANAL_ASSERT(result8.isTop());
 
     // top vs non-bottom
-    Array::StringPrefix result9 = top.join(withoutCommonPrefix);
+    Array::StringPrefix top9(*gEnvironment, ""),
+        withoutPrefix9(*gEnvironment, "xyz");
+    Array::StringPrefix result9 = top9.join(withoutPrefix9);
     CANAL_ASSERT(result9.isTop());
 
     // top vs top
-    Array::StringPrefix result10 = top.join(top);
+    Array::StringPrefix top10(*gEnvironment, "");
+    Array::StringPrefix result10 = top10.join(top10);
     CANAL_ASSERT(result10.isTop());
 
     // bottom vs top
-    Array::StringPrefix result11 = bottom.join(top);
+    Array::StringPrefix bottom11(*gEnvironment),
+        top11(*gEnvironment, "");
+    Array::StringPrefix result11 = bottom11.join(top11);
     CANAL_ASSERT(result11.isTop());
 
     // top vs bottom
-    Array::StringPrefix result12 = top.join(bottom);
+    Array::StringPrefix top12(*gEnvironment, ""),
+        bottom12(*gEnvironment);
+    Array::StringPrefix result12 = top12.join(bottom12);
     CANAL_ASSERT(result12.isTop());
 }
 
