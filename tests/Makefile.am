@@ -73,6 +73,7 @@ AM_LDFLAGS = $(LLVM_LDFLAGS)
 noinst_PROGRAMS = \
 	ArrayExactSizeTest \
 	ArraySingleItemTest \
+	ArrayStringPrefixTest \
 	FloatIntervalTest \
 	IntegerBitfieldTest \
 	IntegerSetTest \
