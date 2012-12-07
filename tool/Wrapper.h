@@ -4,7 +4,7 @@
 class Wrapper
 {
 public:
-    Wrapper(int argc, char **argv);
+    Wrapper(int argc, const char **argv);
 
     int run();
 };

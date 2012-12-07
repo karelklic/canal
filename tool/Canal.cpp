@@ -92,7 +92,7 @@ main(int argc, char **argv)
 
     if (0 == strcmp(programName, "gcc"))
     {
-        Wrapper wrapper(argc, argv);
+        Wrapper wrapper(argc, (const char**)argv);
         return wrapper.run();
     }
 
