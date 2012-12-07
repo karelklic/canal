@@ -44,7 +44,9 @@ canal_SOURCES = \
 	State.h \
 	State.cpp \
 	Utils.h \
-	Utils.cpp
+	Utils.cpp \
+	Wrapper.h \
+	Wrapper.cpp
 
-canal_LDADD = $(top_builddir)/lib/libcanal.la -lreadline -lhistory $(LLVM_LDFLAGS) $(LLVM_LIBS)
+canal_LDADD = $(top_builddir)/lib/libcanal.la -lreadline -lhistory $(LLVM_LDFLAGS)  $(LLVM_LIBS) $(CLANG_LIBS)
 canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS) -I$(top_srcdir) -DDATADIR='"$(datadir)"'

@@ -1,4 +1,5 @@
 #include "Commands.h"
+#include "Wrapper.h"
 #include <string>
 #include <cstring>
 #include <cctype>
@@ -86,6 +87,15 @@ completeEntry(const char *text, int state)
 int
 main(int argc, char **argv)
 {
+    // Check if the tool is acting like a compiler or linker.
+    char *programName = basename(argv[0]);
+
+    if (0 == strcmp(programName, "gcc"))
+    {
+        Wrapper wrapper(argc, (const char**)argv);
+        return wrapper.run();
+    }
+
     // Initialize the readline library.
     // Allow conditional parsing of the ~/.inputrc file.
     rl_readline_name = (char*)"Canal";

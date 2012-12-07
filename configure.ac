@@ -24,7 +24,7 @@ LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
 AC_SUBST([LLVM_VERSION])
 LLVM_CFLAGS=`$LLVM_CONFIG --cppflags | sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
 AC_SUBST([LLVM_CFLAGS])
-LLVM_LIBS=`$LLVM_CONFIG --libs`
+LLVM_LIBS=`$LLVM_CONFIG --libs | sed -e 's/-lLLVMMSP430CodeGen//g' -e 's/-lLLVMMSP430AsmPrinter//g' -e 's/-lLLVMMSP430Desc//g' -e 's/-lLLVMMSP430Info//g'`
 AC_SUBST([LLVM_LIBS])
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 AC_SUBST([LLVM_LDFLAGS])
@@ -33,6 +33,9 @@ LLVM_VERSION_MAJOR=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:
 AC_DEFINE_UNQUOTED([LLVM_VERSION_MAJOR], [$LLVM_VERSION_MAJOR], [LLVM major version])
 LLVM_VERSION_MINOR=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/\2/'`
 AC_DEFINE_UNQUOTED([LLVM_VERSION_MINOR], [$LLVM_VERSION_MINOR], [LLVM minor version])
+
+CLANG_LIBS="-lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema -lclangStaticAnalyzerFrontend -lclangStaticAnalyzerCheckers -lclangStaticAnalyzerCore -lclangAnalysis -lclangIndex -lclangARCMigrate -lclangRewrite -lclangAST -lclangLex -lclangBasic"
+AC_SUBST([CLANG_LIBS])
 
 
 # Capture compile-time LLVM NDEBUG status.
