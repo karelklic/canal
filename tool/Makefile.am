@@ -45,8 +45,18 @@ canal_SOURCES = \
 	State.cpp \
 	Utils.h \
 	Utils.cpp \
-	Wrapper.h \
-	Wrapper.cpp
+	WrapperGcc.h \
+	WrapperGcc.cpp
 
 canal_LDADD = $(top_builddir)/lib/libcanal.la -lreadline -lhistory $(LLVM_LDFLAGS)  $(LLVM_LIBS) $(CLANG_LIBS)
 canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS) -I$(top_srcdir) -DDATADIR='"$(datadir)"'
+
+install-exec-hook:
+	mkdir -p $(DESTDIR)$(datadir)/canal/wrappers && \
+	cd $(DESTDIR)$(datadir)/canal/wrappers && \
+	$(LN_S)	-f $(DESTDIR)$(bindir)/canal$(EXEEXT) gcc$(EXEEXT) && \
+	$(LN_S)	-f $(DESTDIR)$(bindir)/canal$(EXEEXT) g++$(EXEEXT) && \
+	$(LN_S)	-f $(DESTDIR)$(bindir)/canal$(EXEEXT) ld$(EXEEXT)
+
+
+

@@ -6,6 +6,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CXX
 AC_USE_SYSTEM_EXTENSIONS
 AC_CONFIG_HEADERS([lib/Config.h:lib/ConfigAutotools.h.in])
+AC_PROG_LN_S
 
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
@@ -24,7 +25,7 @@ LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
 AC_SUBST([LLVM_VERSION])
 LLVM_CFLAGS=`$LLVM_CONFIG --cppflags | sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
 AC_SUBST([LLVM_CFLAGS])
-LLVM_LIBS=`$LLVM_CONFIG --libs | sed -e 's/-lLLVMMSP430CodeGen//g' -e 's/-lLLVMMSP430AsmPrinter//g' -e 's/-lLLVMMSP430Desc//g' -e 's/-lLLVMMSP430Info//g'`
+LLVM_LIBS=`$LLVM_CONFIG --libs`
 AC_SUBST([LLVM_LIBS])
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 AC_SUBST([LLVM_LDFLAGS])
@@ -34,7 +35,7 @@ AC_DEFINE_UNQUOTED([LLVM_VERSION_MAJOR], [$LLVM_VERSION_MAJOR], [LLVM major vers
 LLVM_VERSION_MINOR=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/\2/'`
 AC_DEFINE_UNQUOTED([LLVM_VERSION_MINOR], [$LLVM_VERSION_MINOR], [LLVM minor version])
 
-CLANG_LIBS="-lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema -lclangStaticAnalyzerFrontend -lclangStaticAnalyzerCheckers -lclangStaticAnalyzerCore -lclangAnalysis -lclangIndex -lclangARCMigrate -lclangRewrite -lclangAST -lclangLex -lclangBasic"
+CLANG_LIBS="-lLLVM-$LLVM_VERSION -lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema -lclangStaticAnalyzerFrontend -lclangStaticAnalyzerCheckers -lclangStaticAnalyzerCore -lclangAnalysis -lclangIndex -lclangARCMigrate -lclangRewrite -lclangAST -lclangLex -lclangBasic"
 AC_SUBST([CLANG_LIBS])
 
 

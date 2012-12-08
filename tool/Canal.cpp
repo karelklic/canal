@@ -1,12 +1,12 @@
 #include "Commands.h"
-#include "Wrapper.h"
+#include "WrapperGcc.h"
+#include "lib/WideningDataIterationCount.h"
+#include "lib/InterpreterOperationsCallback.h"
+#include "lib/Utils.h"
 #include <string>
 #include <cstring>
 #include <cctype>
 #include <cstdlib>
-#include "lib/WideningDataIterationCount.h"
-#include "lib/InterpreterOperationsCallback.h"
-#include "lib/Utils.h"
 
 extern "C" {
 #include <readline/readline.h>
@@ -88,11 +88,13 @@ int
 main(int argc, char **argv)
 {
     // Check if the tool is acting like a compiler or linker.
-    char *programName = basename(argv[0]);
+    std::string programName = basename(argv[0]);
 
-    if (0 == strcmp(programName, "gcc"))
+    if (programName == "gcc" ||
+        programName == "g++" ||
+        programName == "ld")
     {
-        Wrapper wrapper(argc, (const char**)argv);
+        WrapperGcc wrapper(argc, argv);
         return wrapper.run();
     }
 

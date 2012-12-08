@@ -24,7 +24,8 @@ add_executable(canal-tool
     CommandStep.cpp
     IteratorCallback.cpp
     State.cpp
-    Utils.cpp)
+    Utils.cpp
+    WrapperGcc.cpp)
 
 target_link_libraries(canal-tool
     canal
