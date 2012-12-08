@@ -1,21 +1,10 @@
-#ifndef CANAL_WRAPPER_H
-#define CANAL_WRAPPER_H
+#ifndef CANAL_WRAPPER_GCC_H
+#define CANAL_WRAPPER_GCC_H
 
 #include "Prereq.h"
 
-class WrapperGcc
-{
-    int mArgCount;
-    char **mArgVector;
+int wrapGcc(int argc, char **argv);
 
-public:
-    WrapperGcc(int argCount, char **argVector);
+int wrapLd(int argc, char **argv);
 
-    int run();
-
-private:
-    int runOriginalTool();
-    void runLlvm();
-};
-
-#endif // CANAL_WRAPPER_H
+#endif // CANAL_WRAPPER_GCC_H

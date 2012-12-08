@@ -91,12 +91,12 @@ main(int argc, char **argv)
     std::string programName = basename(argv[0]);
 
     if (programName == "gcc" ||
-        programName == "g++" ||
-        programName == "ld")
+        programName == "g++")
     {
-        WrapperGcc wrapper(argc, argv);
-        return wrapper.run();
+        return wrapGcc(argc, argv);
     }
+    else if (programName == "ld")
+        return wrapLd(argc, argv);
 
     // Initialize the readline library.
     // Allow conditional parsing of the ~/.inputrc file.

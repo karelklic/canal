@@ -30,8 +30,12 @@
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/TimeValue.h>
 #include <llvm/ValueSymbolTable.h>
-#include <clang/Driver/Driver.h>
+#include <clang/Driver/Action.h>
+#include <clang/Driver/Arg.h>
 #include <clang/Driver/ArgList.h>
+#include <clang/Driver/Compilation.h>
+#include <clang/Driver/Driver.h>
+#include <clang/Driver/Job.h>
 #include <clang/Driver/Option.h>
 #include <clang/Driver/Options.h>
 #include <clang/Frontend/DiagnosticOptions.h>
