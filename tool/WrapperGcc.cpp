@@ -72,10 +72,10 @@ WrapperGcc::runLlvm()
 
     log << "\n";
 
-    std::string str;
-    llvm::raw_string_ostream ostream(str);
+    std::string diagnosticString;
+    llvm::raw_string_ostream diagnosticStream(diagnosticString);
     clang::TextDiagnosticPrinter *textDiagnosticPrinter
-        = new clang::TextDiagnosticPrinter(ostream, clang::DiagnosticOptions());
+        = new clang::TextDiagnosticPrinter(diagnosticStream, clang::DiagnosticOptions());
 
     llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diagID(new clang::DiagnosticIDs());
     clang::DiagnosticsEngine diagnosticsEngine(diagID, textDiagnosticPrinter);
@@ -127,4 +127,8 @@ WrapperGcc::runLlvm()
     // information if possible.
     if (result < 0)
         driver.generateCompilationDiagnostics(*compilation, failingCommand);
+
+    diagnosticStream.flush();
+    if (!diagnosticString.empty())
+        log << "diagnostics:\n" << diagnosticString;
 }
