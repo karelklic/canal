@@ -1,5 +1,5 @@
 #include "CommandSet.h"
-#include "lib/IntegerEnumeration.h"
+#include "lib/IntegerSet.h"
 #include "lib/InterpreterOperationsCallback.h"
 #include "lib/WideningDataIterationCount.h"
 
@@ -12,7 +12,7 @@ CommandSet::CommandSet(Commands &commands)
 {
     mOptions["widening-iterations"] = CommandSet::WideningIterations;
     mOptions["no-missing"] = CommandSet::NoMissing;
-    mOptions["enumeration-threshold"] = CommandSet::EnumerationThreshold;
+    mOptions["set-threshold"] = CommandSet::SetThreshold;
 }
 
 std::vector<std::string>
@@ -73,22 +73,22 @@ setNoMissing()
 }
 
 static void
-setEnumerationThreshold(const std::vector<std::string> &args)
+setSetThreshold(const std::vector<std::string> &args)
 {
     if (args.size() < 3)
     {
-        llvm::outs() << "Enumeration threshold must be specified.\n";
+        llvm::outs() << "Set threshold must be specified.\n";
         return;
     }
 
     if (!isNumber(args[2]))
     {
-        llvm::outs() << "Enumeration threshold must be a number.\n";
+        llvm::outs() << "Set threshold must be a number.\n";
         return;
     }
 
-    Canal::Integer::Enumeration::ENUMERATION_THRESHOLD = std::atoi(args[2].c_str());
-    llvm::outs() << "Enumeration threshold set to " << args[2] << ".\n";
+    Canal::Integer::Set::SET_THRESHOLD = std::atoi(args[2].c_str());
+    llvm::outs() << "Set threshold set to " << args[2] << ".\n";
 }
 
 void
@@ -117,8 +117,8 @@ CommandSet::run(const std::vector<std::string> &args)
         case NoMissing:
             setNoMissing();
             break;
-        case EnumerationThreshold:
-            setEnumerationThreshold(args);
+        case SetThreshold:
+            setSetThreshold(args);
             break;
         default:
             llvm::outs() << "No action defined for the command.\n";

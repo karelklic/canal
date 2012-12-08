@@ -1,5 +1,5 @@
-#ifndef LIBCANAL_INTEGER_ENUMERATION_H
-#define LIBCANAL_INTEGER_ENUMERATION_H
+#ifndef LIBCANAL_INTEGER_SET_H
+#define LIBCANAL_INTEGER_SET_H
 
 #include "Domain.h"
 #include "APIntUtils.h"
@@ -7,7 +7,7 @@
 namespace Canal {
 namespace Integer {
 
-class Enumeration : public Domain
+class Set : public Domain
 {
 public:
     APIntUtils::USet mValues;
@@ -16,19 +16,19 @@ public:
 
     unsigned mBitWidth;
 
-    static unsigned int ENUMERATION_THRESHOLD;
+    static unsigned int SET_THRESHOLD;
 
 public:
     /// Initializes to the lowest value.
-    Enumeration(const Environment &environment,
+    Set(const Environment &environment,
                 unsigned bitWidth);
 
     /// Initializes to the given value.
-    Enumeration(const Environment &environment,
+    Set(const Environment &environment,
                 const llvm::APInt &constant);
 
     /// Copy constructor.
-    Enumeration(const Enumeration &value);
+    Set(const Set &value);
 
     unsigned getBitWidth() const
     {
@@ -71,18 +71,18 @@ public:
     ///   correct value.
     bool unsignedMax(llvm::APInt &result) const;
 
-    /// Does this enumeration represent single value?
-    bool isSingleValue() const;
+    /// Does this set represent single value?
+    bool isConstant() const;
 
-    /// Does the enumeration represent signle bit that is set to 1?
+    /// Does the set represent signle bit that is set to 1?
     bool isTrue() const;
 
-    /// Does the enumeration represent signle bit that is set to 0?
+    /// Does the set represent signle bit that is set to 0?
     bool isFalse() const;
 
 public: // Implementation of Domain.
     /// Covariant return type.
-    virtual Enumeration *clone() const;
+    virtual Set *clone() const;
 
     virtual size_t memoryUsage() const;
 
@@ -96,9 +96,9 @@ public: // Implementation of Domain.
 
     virtual bool operator>(const Domain &value) const;
 
-    virtual Enumeration &join(const Domain &value);
+    virtual Set &join(const Domain &value);
 
-    virtual Enumeration &meet(const Domain &value);
+    virtual Set &meet(const Domain &value);
 
     virtual bool isBottom() const;
 
@@ -110,50 +110,50 @@ public: // Implementation of Domain.
 
     virtual float accuracy() const;
 
-    virtual Enumeration &add(const Domain &a, const Domain &b);
+    virtual Set &add(const Domain &a, const Domain &b);
 
-    virtual Enumeration &sub(const Domain &a, const Domain &b);
+    virtual Set &sub(const Domain &a, const Domain &b);
 
-    virtual Enumeration &mul(const Domain &a, const Domain &b);
+    virtual Set &mul(const Domain &a, const Domain &b);
 
-    virtual Enumeration &udiv(const Domain &a, const Domain &b);
+    virtual Set &udiv(const Domain &a, const Domain &b);
 
-    virtual Enumeration &sdiv(const Domain &a, const Domain &b);
+    virtual Set &sdiv(const Domain &a, const Domain &b);
 
-    virtual Enumeration &urem(const Domain &a, const Domain &b);
+    virtual Set &urem(const Domain &a, const Domain &b);
 
-    virtual Enumeration &srem(const Domain &a, const Domain &b);
+    virtual Set &srem(const Domain &a, const Domain &b);
 
-    virtual Enumeration &shl(const Domain &a, const Domain &b);
+    virtual Set &shl(const Domain &a, const Domain &b);
 
-    virtual Enumeration &lshr(const Domain &a, const Domain &b);
+    virtual Set &lshr(const Domain &a, const Domain &b);
 
-    virtual Enumeration &ashr(const Domain &a, const Domain &b);
+    virtual Set &ashr(const Domain &a, const Domain &b);
 
-    virtual Enumeration &and_(const Domain &a, const Domain &b);
+    virtual Set &and_(const Domain &a, const Domain &b);
 
-    virtual Enumeration &or_(const Domain &a, const Domain &b);
+    virtual Set &or_(const Domain &a, const Domain &b);
 
-    virtual Enumeration &xor_(const Domain &a, const Domain &b);
+    virtual Set &xor_(const Domain &a, const Domain &b);
 
-    virtual Enumeration &icmp(const Domain &a, const Domain &b,
+    virtual Set &icmp(const Domain &a, const Domain &b,
                               llvm::CmpInst::Predicate predicate);
 
-    virtual Enumeration &fcmp(const Domain &a, const Domain &b,
+    virtual Set &fcmp(const Domain &a, const Domain &b,
                               llvm::CmpInst::Predicate predicate);
 
-    virtual Enumeration &trunc(const Domain &value);
+    virtual Set &trunc(const Domain &value);
 
-    virtual Enumeration &zext(const Domain &value);
+    virtual Set &zext(const Domain &value);
 
-    virtual Enumeration &sext(const Domain &value);
+    virtual Set &sext(const Domain &value);
 
-    virtual Enumeration &fptoui(const Domain &value);
+    virtual Set &fptoui(const Domain &value);
 
-    virtual Enumeration &fptosi(const Domain &value);
+    virtual Set &fptosi(const Domain &value);
 
 protected:
-    Enumeration &applyOperation(const Domain &a,
+    Set &applyOperation(const Domain &a,
                                 const Domain &b,
                                 APIntUtils::Operation operation1,
                                 APIntUtils::OperationWithOverflow operation2);
@@ -162,4 +162,4 @@ protected:
 } // namespace Integer
 } // namespace Canal
 
-#endif // LIBCANAL_INTEGER_ENUMERATION_H
+#endif // LIBCANAL_INTEGER_SET_H

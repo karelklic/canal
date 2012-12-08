@@ -1,6 +1,6 @@
 #include "IntegerContainer.h"
 #include "IntegerBitfield.h"
-#include "IntegerEnumeration.h"
+#include "IntegerSet.h"
 #include "IntegerInterval.h"
 #include "Environment.h"
 #include "Constructors.h"
@@ -26,144 +26,6 @@ Container::Container(const Container &value)
 Container::~Container()
 {
     llvm::DeleteContainerPointers(mValues);
-}
-
-unsigned
-Container::getBitWidth() const
-{
-    return getEnumeration().getBitWidth();
-}
-
-Bitfield &
-Container::getBitfield()
-{
-    return dynCast<Bitfield&>(*mValues[0]);
-}
-
-const Bitfield &
-Container::getBitfield() const
-{
-    return dynCast<const Bitfield&>(*mValues[0]);
-}
-
-Enumeration &
-Container::getEnumeration()
-{
-    return dynCast<Enumeration&>(*mValues[1]);
-}
-
-const Enumeration &
-Container::getEnumeration() const
-{
-    return dynCast<const Enumeration&>(*mValues[1]);
-}
-
-Interval &
-Container::getInterval()
-{
-    return dynCast<Interval&>(*mValues[2]);
-}
-
-const Interval &
-Container::getInterval() const
-{
-    return dynCast<const Interval&>(*mValues[2]);
-}
-
-bool
-Container::signedMin(llvm::APInt &result) const
-{
-    if (!getEnumeration().signedMin(result))
-        return false;
-
-    llvm::APInt temp(getBitWidth(), 0);
-    if (!getInterval().signedMin(temp))
-        return false;
-
-    if (result.sgt(temp))
-        result = temp;
-
-    if (!getBitfield().signedMin(temp))
-        return false;
-
-    if (result.sgt(temp))
-        result = temp;
-
-    return true;
-}
-
-bool
-Container::signedMax(llvm::APInt &result) const
-{
-    if (!getEnumeration().signedMax(result))
-        return false;
-
-    llvm::APInt temp(getBitWidth(), 0);
-    if (!getInterval().signedMax(temp))
-        return false;
-
-    if (result.slt(temp))
-        result = temp;
-
-    if (!getBitfield().signedMax(temp))
-        return false;
-
-    if (result.slt(temp))
-        result = temp;
-
-    return true;
-}
-
-bool
-Container::unsignedMin(llvm::APInt &result) const
-{
-    if (!getEnumeration().unsignedMin(result))
-        return false;
-
-    llvm::APInt temp(getBitWidth(), 0);
-    if (!getInterval().unsignedMin(temp))
-        return false;
-
-    if (result.ugt(temp))
-        result = temp;
-
-    if (!getBitfield().unsignedMin(temp))
-        return false;
-
-    if (result.ugt(temp))
-        result = temp;
-
-    return true;
-}
-
-bool
-Container::unsignedMax(llvm::APInt &result) const
-{
-    if (!getEnumeration().unsignedMax(result))
-        return false;
-
-    llvm::APInt temp(getBitWidth(), 0);
-    if (!getInterval().unsignedMax(temp))
-        return false;
-
-    if (result.ult(temp))
-        result = temp;
-
-    if (!getBitfield().unsignedMax(temp))
-        return false;
-
-    if (result.ult(temp))
-        result = temp;
-
-    return true;
-}
-
-bool
-Container::isSingleValue() const
-{
-    return getBitfield().isSingleValue()
-        && getEnumeration().isSingleValue()
-        && getInterval().isSingleValue();
 }
 
 Container *
@@ -440,7 +302,7 @@ Container::icmp(const Domain &a, const Domain &b,
 
     if (aPointer && bPointer)
     {
-        bool cmpSingle = aPointer->isSingleTarget() && bPointer->isSingleTarget(),
+        bool cmpSingle = aPointer->isConstant() && bPointer->isConstant(),
             cmpeq = (*aPointer == *bPointer);
 
         setBottom();

@@ -29,7 +29,7 @@ size_t
 StringPrefix::memoryUsage() const
 {
     size_t size = sizeof(StringPrefix);
-    size += mPrefix.size() * sizeof(Domain*);
+    size += mPrefix.size();
     return size;
 }
 
@@ -37,8 +37,19 @@ std::string
 StringPrefix::toString() const
 {
     StringStream ss;
-    ss << "arrayStringPrefix\n";
-    ss << mPrefix;
+    ss << "string prefix ";
+
+    if (isTop())
+        ss << "top";
+
+    if (isBottom())
+        ss << "bottom";
+
+    ss << "\n";
+
+    if (!isBottom() && !isTop())
+        ss << "    " << mPrefix << "\n";
+
     return ss.str();
 }
 

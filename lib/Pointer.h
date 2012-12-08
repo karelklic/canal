@@ -104,7 +104,7 @@ public:
     void store(const Domain &value, State &state) const;
 
     /// Does this pointer point to single target?
-    bool isSingleTarget() const;
+    bool isConstant() const;
 
 private:
     /// Assignment operator declaration.  Prevents accidental

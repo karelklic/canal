@@ -1,8 +1,9 @@
 #include "ArrayExactSize.h"
 #include "IntegerContainer.h"
-#include "IntegerEnumeration.h"
+#include "IntegerSet.h"
 #include "IntegerInterval.h"
 #include "Utils.h"
+#include "IntegerUtils.h"
 
 namespace Canal {
 namespace Array {
@@ -393,22 +394,19 @@ ExactSize::getItem(const Domain &offset) const
 {
     std::vector<Domain*> result;
 
-    const Integer::Container &integer =
-        dynCast<const Integer::Container&>(offset);
-
     // First try an enumeration, then interval.
-    const Integer::Enumeration &enumeration = integer.getEnumeration();
-    if (!enumeration.isTop())
+    const Integer::Set &set = Integer::Utils::getSet(offset);
+    if (!set.isTop())
     {
-        APIntUtils::USet::const_iterator it = enumeration.mValues.begin(),
-            itend = enumeration.mValues.end();
+        APIntUtils::USet::const_iterator it = set.mValues.begin(),
+            itend = set.mValues.end();
 
         for (; it != itend; ++it)
         {
             CANAL_ASSERT(it->getBitWidth() <= 64);
             uint64_t numOffset = it->getZExtValue();
 
-            // If some offset from the enumeration points out of the
+            // If some offset from the set points out of the
             // array bounds, we ignore it FOR NOW.  It might be caused
             // either by a bug in the code, or by imprecision of the
             // interpreter.
@@ -418,16 +416,16 @@ ExactSize::getItem(const Domain &offset) const
             result.push_back(mValues[numOffset]);
         }
 
-        // At least one of the offsets in the enumeration should point
+        // At least one of the offsets in the set should point
         // to the array.  Otherwise it might be a bug in the
         // interpreter that requires investigation.
-        CANAL_ASSERT_MSG(!result.empty() || enumeration.mValues.empty(),
+        CANAL_ASSERT_MSG(!result.empty() || set.mValues.empty(),
                          "All offsets out of bound, array size "
                          << mValues.size());
         return result;
     }
 
-    const Integer::Interval &interval = integer.getInterval();
+    const Integer::Interval &interval = Integer::Utils::getInterval(offset);
     // Let's care about the unsigned interval only.
     if (!interval.mUnsignedTop)
     {
@@ -449,7 +447,7 @@ ExactSize::getItem(const Domain &offset) const
         return result;
     }
 
-    // Both enumeration and interval are set to the top value, so return
+    // Both set and interval are set to the top value, so return
     // all members.
     result.insert(result.end(), mValues.begin(), mValues.end());
 
@@ -469,22 +467,19 @@ ExactSize::getItem(uint64_t offset) const
 void
 ExactSize::setItem(const Domain &offset, const Domain &value)
 {
-    const Integer::Container &integer =
-        dynCast<const Integer::Container&>(offset);
-
     // First try an enumeration, then interval.
-    const Integer::Enumeration &enumeration = integer.getEnumeration();
-    if (!enumeration.isTop())
+    const Integer::Set &set = Integer::Utils::getSet(offset);
+    if (!set.isTop())
     {
-        APIntUtils::USet::const_iterator it = enumeration.mValues.begin(),
-            itend = enumeration.mValues.end();
+        APIntUtils::USet::const_iterator it = set.mValues.begin(),
+            itend = set.mValues.end();
 
         for (; it != itend; ++it)
         {
             CANAL_ASSERT(it->getBitWidth() <= 64);
             uint64_t numOffset = it->getZExtValue();
 
-            // If some offset from the enumeration points out of the
+            // If some offset from the set points out of the
             // array bounds, we ignore it.  It might be caused either
             // by a bug in the code, or by imprecision of the
             // interpreter.
@@ -497,7 +492,7 @@ ExactSize::setItem(const Domain &offset, const Domain &value)
         return;
     }
 
-    const Integer::Interval &interval = integer.getInterval();
+    const Integer::Interval &interval = Integer::Utils::getInterval(offset);
     // Let's care about the unsigned interval only.
     if (!interval.mUnsignedTop)
     {
@@ -515,7 +510,7 @@ ExactSize::setItem(const Domain &offset, const Domain &value)
         return;
     }
 
-    // Both enumeration and interval are set to the top value, so merge
+    // Both set and interval are set to the top value, so merge
     // the value to all items of the array.
     std::vector<Domain*>::const_iterator it = mValues.begin(),
         itend = mValues.end();

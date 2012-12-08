@@ -1,7 +1,8 @@
 #include "Structure.h"
 #include "Utils.h"
 #include "IntegerContainer.h"
-#include "IntegerEnumeration.h"
+#include "IntegerSet.h"
+#include "IntegerUtils.h"
 #include "IntegerInterval.h"
 
 namespace Canal {
@@ -218,22 +219,20 @@ std::vector<Domain*>
 Structure::getItem(const Domain &offset) const
 {
     std::vector<Domain*> result;
-    const Integer::Container &integer =
-        dynCast<const Integer::Container&>(offset);
 
     // First try an enumeration, then interval.
-    const Integer::Enumeration &enumeration = integer.getEnumeration();
-    if (!enumeration.isTop())
+    const Integer::Set &set = Integer::Utils::getSet(offset);
+    if (!set.isTop())
     {
-        APIntUtils::USet::const_iterator it = enumeration.mValues.begin(),
-            itend = enumeration.mValues.end();
+        APIntUtils::USet::const_iterator it = set.mValues.begin(),
+            itend = set.mValues.end();
 
         for (; it != itend; ++it)
         {
             CANAL_ASSERT(it->getBitWidth() <= 64);
             uint64_t numOffset = it->getZExtValue();
 
-            // If some offset from the enumeration points out of the
+            // If some offset from the set points out of the
             // array bounds, we ignore it FOR NOW.  It might be caused
             // either by a bug in the code, or by imprecision of the
             // interpreter.
@@ -243,14 +242,14 @@ Structure::getItem(const Domain &offset) const
             result.push_back(mMembers[numOffset]);
         }
 
-        // At least one of the offsets in the enumeration should point
+        // At least one of the offsets in the set should point
         // to the array.  Otherwise it might be a bug in the
         // interpreter that requires investigation.
         CANAL_ASSERT(!result.empty());
         return result;
     }
 
-    const Integer::Interval &interval = integer.getInterval();
+    const Integer::Interval &interval = Integer::Utils::getInterval(offset);
     // Let's care about the unsigned interval only.
     if (!interval.mUnsignedTop)
     {
@@ -273,7 +272,7 @@ Structure::getItem(const Domain &offset) const
         return result;
     }
 
-    // Both enumeration and interval are set to the top value, so return
+    // Both set and interval are set to the top value, so return
     // all members.
     result.insert(result.end(), mMembers.begin(), mMembers.end());
 

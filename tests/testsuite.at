@@ -9,6 +9,10 @@ AT_SETUP([ArraySingleItem])
 AT_CHECK([../../ArraySingleItemTest], 0)
 AT_CLEANUP
 
+AT_SETUP([ArrayStringPrefix])
+AT_CHECK([../../ArrayStringPrefixTest], 0)
+AT_CLEANUP
+
 AT_SETUP([FloatInterval])
 AT_CHECK([../../FloatIntervalTest], 0)
 AT_CLEANUP
@@ -17,8 +21,8 @@ AT_SETUP([IntegerBitfield])
 AT_CHECK([../../IntegerBitfieldTest], 0)
 AT_CLEANUP
 
-AT_SETUP([IntegerEnumeration])
-AT_CHECK([../../IntegerEnumerationTest], 0)
+AT_SETUP([IntegerSet])
+AT_CHECK([../../IntegerSetTest], 0)
 AT_CLEANUP
 
 AT_SETUP([IntegerInterval])
