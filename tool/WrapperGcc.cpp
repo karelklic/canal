@@ -205,7 +205,7 @@ assemblyOnly_changeCommandOutput(const clang::driver::Command &command,
                                     missingArgIndex,
                                     missingArgCount);
 
-    inputArgList->eraseArg(clang::driver::cc1options::OPT_emit_obj);
+    //inputArgList->eraseArg(clang::driver::cc1options::OPT_emit_obj);
     inputArgList->eraseArg(clang::driver::cc1options::OPT_coverage_file);
     inputArgList->eraseArg(clang::driver::cc1options::OPT_dependency_file);
     inputArgList->eraseArg(clang::driver::cc1options::OPT_MT);
@@ -227,7 +227,6 @@ assemblyOnly_changeCommandOutput(const clang::driver::Command &command,
         log << "error: -o argument not found\n";
 
     clang::driver::ArgStringList arguments;
-    arguments.push_back("-emit-llvm");
     clang::driver::InputArgList::const_iterator it = inputArgList->begin();
     for (; it != inputArgList->end(); ++it)
         (*it)->render(*inputArgList, arguments);
@@ -235,7 +234,7 @@ assemblyOnly_changeCommandOutput(const clang::driver::Command &command,
     clang::driver::Command *newCommand;
     newCommand = new clang::driver::Command(command.getSource(),
                                             command.getCreator(),
-                                            command.getExecutable(),
+                                            "clang",
                                             arguments);
 
     delete table;
