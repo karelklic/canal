@@ -42,7 +42,8 @@ run(int argc, char **argv)
 }
 
 static llvm::raw_ostream &
-operator<<(llvm::raw_ostream &target, const clang::driver::ArgStringList &list)
+operator<<(llvm::raw_ostream &target,
+           const clang::driver::ArgStringList &list)
 {
     for (size_t i = 0; i < list.size(); ++i)
     {
@@ -68,7 +69,8 @@ operator<<(llvm::raw_ostream &target, char **argv)
 }
 
 static llvm::raw_ostream &
-operator<<(llvm::raw_ostream &target, const clang::driver::Command &command)
+operator<<(llvm::raw_ostream &target,
+           const clang::driver::Command &command)
 {
     target << " - command: " << command.getExecutable() << "\n"
            << "   action: " << command.getSource().getClassName() << "\n"
@@ -103,7 +105,9 @@ operator<<(llvm::raw_ostream &target, const clang::driver::JobList &jobList)
 }
 
 static clang::driver::ArgStringList
-filterDriverArguments(int argc, char **argv, clang::driver::Driver &driver)
+filterDriverArguments(int argc,
+                      char **argv,
+                      clang::driver::Driver &driver)
 {
     llvm::ArrayRef<const char*> originalArguments(argv, argc);
 
@@ -188,8 +192,86 @@ getCommandCount(const clang::driver::JobList &jobList,
     return result;
 }
 
+static clang::driver::Command *
+assemblyOnly_changeCommandOutput(const clang::driver::Command &command,
+                                 clang::driver::Driver &driver,
+                                 llvm::raw_ostream &log)
+{
+    clang::driver::OptTable *table = clang::driver::createCC1OptTable();
+    unsigned missingArgIndex, missingArgCount;
+    clang::driver::InputArgList *inputArgList;
+    inputArgList = table->ParseArgs(command.getArguments().begin(),
+                                    command.getArguments().end(),
+                                    missingArgIndex,
+                                    missingArgCount);
+
+    inputArgList->eraseArg(clang::driver::cc1options::OPT_emit_obj);
+    inputArgList->eraseArg(clang::driver::cc1options::OPT_coverage_file);
+    inputArgList->eraseArg(clang::driver::cc1options::OPT_dependency_file);
+    inputArgList->eraseArg(clang::driver::cc1options::OPT_MT);
+
+    // Change the output.
+    clang::driver::Arg *arg = inputArgList->getLastArg(clang::driver::cc1options::OPT_o);
+    if (arg)
+    {
+        if (arg->getValues().size() == 1)
+        {
+            std::string output = arg->getValues()[0];
+            arg->getValues().clear();
+            arg->getValues().push_back(inputArgList->MakeArgString(output + ".llvm"));
+        }
+        else
+            log << "error: -o does not have one value\n";
+    }
+    else
+        log << "error: -o argument not found\n";
+
+    clang::driver::ArgStringList arguments;
+    arguments.push_back("-emit-llvm");
+    clang::driver::InputArgList::const_iterator it = inputArgList->begin();
+    for (; it != inputArgList->end(); ++it)
+        (*it)->render(*inputArgList, arguments);
+
+    clang::driver::Command *newCommand;
+    newCommand = new clang::driver::Command(command.getSource(),
+                                            command.getCreator(),
+                                            command.getExecutable(),
+                                            arguments);
+
+    delete table;
+    return newCommand;
+}
+
+static void
+assemblyOnly_modifyJobList(clang::driver::JobList &jobList,
+                           clang::driver::Driver &driver,
+                           llvm::raw_ostream &log)
+{
+    clang::driver::JobList::iterator it = jobList.begin();
+    for (; it != jobList.end(); ++it)
+    {
+        if ((*it)->getKind() == clang::driver::Job::JobListClass)
+        {
+            clang::driver::JobList &subList =
+                Canal::llvmCast<clang::driver::JobList>(**it);
+
+            assemblyOnly_modifyJobList(subList, driver, log);
+        }
+        else
+        {
+            const clang::driver::Command *command =
+                Canal::llvmCast<clang::driver::Command>(*it);
+
+            *it = assemblyOnly_changeCommandOutput(*command, driver, log);
+            delete command;
+        }
+    }
+}
+
 static bool
-modifyJobList(clang::driver::JobList &jobList)
+modifyJobList(clang::driver::JobList &jobList,
+              clang::driver::Driver &driver,
+              llvm::raw_ostream &log)
 {
     int assembly = getCommandCount(
         jobList, clang::driver::Action::AssembleJobClass);
@@ -203,11 +285,16 @@ modifyJobList(clang::driver::JobList &jobList)
         return false;
     else if (assembly > 0 && linker == 0)
     {
-        // TODO
-        return false;
+        // Change the job to emit LLVM.
+        // Change the output file.
+        // Add command to merge the output file to the original output file.
+        assemblyOnly_modifyJobList(jobList, driver, log);
+        return true;
     }
     else if (assembly == 0 && linker == 1)
     {
+        // Link the LLVM code inside the .o files as well, and include
+        // it in the output file.
         // TODO
         return false;
     }
@@ -226,7 +313,9 @@ static void
 runClang(int argc, char **argv)
 {
     std::string errorInfo;
-    llvm::raw_fd_ostream log("canal.log", errorInfo, llvm::raw_fd_ostream::F_Append);
+    llvm::raw_fd_ostream log("canal.log",
+                             errorInfo,
+                             llvm::raw_fd_ostream::F_Append);
 
     log << "======================================================\n";
     log << "time: " << llvm::sys::TimeValue::now().str() << "\n";
@@ -235,7 +324,8 @@ runClang(int argc, char **argv)
     std::string diagnosticString;
     llvm::raw_string_ostream diagnosticStream(diagnosticString);
     clang::TextDiagnosticPrinter *textDiagnosticPrinter
-        = new clang::TextDiagnosticPrinter(diagnosticStream, clang::DiagnosticOptions());
+        = new clang::TextDiagnosticPrinter(diagnosticStream,
+                                           clang::DiagnosticOptions());
 
     llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diagID(new clang::DiagnosticIDs());
     clang::DiagnosticsEngine diagnosticsEngine(diagID, textDiagnosticPrinter);
@@ -260,7 +350,7 @@ runClang(int argc, char **argv)
     clang::driver::JobList &jobList = compilation->getJobs();
     log << "original jobs (" << jobList.size() << "):\n" << jobList;
 
-    bool success = modifyJobList(jobList);
+    bool success = modifyJobList(jobList, driver, log);
     if (success)
         log << "new jobs (" << jobList.size() << "):\n" << jobList;
     else
@@ -270,10 +360,11 @@ runClang(int argc, char **argv)
         return;
     }
 
+    // TODO: do not execute compilation for gcc tasks.
     int result = 0;
     const clang::driver::Command *failingCommand = 0;
-    //if (compilation.get())
-    //    result = driver.ExecuteCompilation(*compilation, failingCommand);
+    if (compilation.get())
+        result = driver.ExecuteCompilation(*compilation, failingCommand);
 
     // If result status is < 0, then the driver command signalled an
     // error.  In this case, generate additional diagnostic

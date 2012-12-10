@@ -33,11 +33,13 @@
 #include <clang/Driver/Action.h>
 #include <clang/Driver/Arg.h>
 #include <clang/Driver/ArgList.h>
+#include <clang/Driver/CC1Options.h>
 #include <clang/Driver/Compilation.h>
 #include <clang/Driver/Driver.h>
 #include <clang/Driver/Job.h>
 #include <clang/Driver/Option.h>
 #include <clang/Driver/Options.h>
+#include <clang/Driver/OptTable.h>
 #include <clang/Frontend/DiagnosticOptions.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
 
