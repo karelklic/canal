@@ -49,7 +49,7 @@ function download_compiler_rt() {
 	print "Downlad of CompilerRT for LLVM $1"
 	declare -A urls dirs
 	urls=([31]="http://llvm.org/releases/3.1/compiler-rt-3.1.src.tar.gz")
-	dirs=([31]="compiler-rt.3.1.src")
+	dirs=([31]="compiler-rt-3.1.src")
 	
 	url=${urls[$1]}
 	archive=`basename $url`
