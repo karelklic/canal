@@ -48,6 +48,7 @@ function get_libelf () {
 		print "Installation of LibELF"
 		make install
 		cd ..
+		rm -rf libelf-0.8.9
 	fi
 }
 #Download CompilerRT (needed for llvm >= 3.1)
@@ -123,6 +124,7 @@ function get_llvm() {
 		print "Installation of LLVM $1"
 		make install
 		cd ../../
+		rm -rf $dir
 	fi
 }
 #Handle CMAKE_PREFIX_PATH and PATH arguments for build & tests of canal:
