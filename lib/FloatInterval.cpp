@@ -285,11 +285,11 @@ Interval::operator==(const Domain& value) const
     if (!interval)
         return false;
 
-    if (mEmpty)
-        return interval->mEmpty;
+    if (mEmpty || interval->mEmpty)
+        return mEmpty == interval->mEmpty;
 
-    if (isTop())
-        return interval->isTop();
+    if (isTop() || interval->isTop())
+        return isTop() == interval->isTop();
 
     return mFrom.compare(interval->mFrom) == llvm::APFloat::cmpEqual &&
         mTo.compare(interval->mTo) == llvm::APFloat::cmpEqual;
@@ -333,7 +333,7 @@ Interval::join(const Domain &value)
     {
         if (mFrom.compare(interval.mFrom) == llvm::APFloat::cmpGreaterThan)
             mFrom = interval.mFrom;
-        if (mEmpty || mTo.compare(interval.mTo) == llvm::APFloat::cmpLessThan)
+        if (mTo.compare(interval.mTo) == llvm::APFloat::cmpLessThan)
             mTo = interval.mTo;
     }
 

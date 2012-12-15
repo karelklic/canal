@@ -41,6 +41,33 @@ testJoin()
     CANAL_ASSERT(test.join(ten) == ten);
     CANAL_ASSERT(test.join(bot) == ten);
     CANAL_ASSERT(test.join(top).isTop());
+
+    Float::Interval zero(*gEnvironment, llvm::APFloat(0.0f)),
+            allInfinity(*gEnvironment, llvm::APFloat::getInf(zero.getSemantics(), true));
+    allInfinity.join(Float::Interval(*gEnvironment, llvm::APFloat::getInf(zero.getSemantics(), false)));
+    CANAL_ASSERT(allInfinity != zero);
+    CANAL_ASSERT(zero.join(allInfinity) == allInfinity);
+}
+
+static void
+testComparison() {
+    Float::Interval zero(*gEnvironment, llvm::APFloat(0.0f)),
+            bot(*gEnvironment, llvm::APFloat::IEEEsingle),
+            top(*gEnvironment, llvm::APFloat::IEEEsingle);
+    top.setTop();
+
+    CANAL_ASSERT(top == top);
+    CANAL_ASSERT(bot == bot);
+    CANAL_ASSERT(zero == zero);
+
+    CANAL_ASSERT(top != zero);
+    CANAL_ASSERT(zero != top);
+
+    CANAL_ASSERT(top != bot);
+    CANAL_ASSERT(bot != top);
+
+    CANAL_ASSERT(bot != zero);
+    CANAL_ASSERT(zero != bot);
 }
 
 static void
@@ -81,6 +108,7 @@ main(int argc, char **argv)
     gEnvironment = new Environment(module);
 
     testConstructors();
+    testComparison();
     testJoin();
     testDivisionByZero();
 

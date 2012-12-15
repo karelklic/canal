@@ -1,7 +1,9 @@
 #include "StateMap.h"
 #include "Domain.h"
 #include "Utils.h"
-
+#if 0 //Print differences in state map for fixpoint calculation
+#include <iostream>
+#endif
 namespace Canal {
 
 StateMap::StateMap(const StateMap &map) : mMap(map.mMap)
@@ -26,8 +28,13 @@ StateMap::operator==(const StateMap &map) const
     for (const_iterator it = begin(); it != end(); ++it)
     {
         StateMap::const_iterator mapit = map.find(it->first);
-	if (mapit == map.end() || *it->second != *mapit->second)
+        if (mapit == map.end() || *it->second != *mapit->second) {
+#if 0 //Print differences in state map for fixpoint calculation
+            if (mapit == map.end()) std::cout << "Map ended" << std::endl;
+            else std::cout << (*it->second).toString() << (*mapit->second).toString() << std::endl;
+#endif
             return false;
+        }
     }
 
     return true;
