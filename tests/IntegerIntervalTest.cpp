@@ -493,6 +493,26 @@ testTrunc()
     interval3.trunc(Integer::Interval(*gEnvironment, llvm::APInt(32, 1)));
     CANAL_ASSERT(interval3.isConstant() && interval3.unsignedMin(res) && res == 1);
     CANAL_ASSERT(interval3.getBitWidth() == 1);
+
+    // Test truncation from i64 0 - 4294967295 (max i32 unsigned value) to i32 -> unsigned 0 to 4294967295, signed -1 to 0
+    Integer::Interval interval4(*gEnvironment, 32);
+    interval4.trunc(Integer::Interval(*gEnvironment, llvm::APInt(64, 4294967295u))
+                    .join(Integer::Interval(*gEnvironment, llvm::APInt(64, 0))));
+    CANAL_ASSERT(interval4.unsignedMin(res) && res == llvm::APInt(32, 0) && //Unsigned 0 to 4294967295
+                 interval4.unsignedMax(res) && res == llvm::APInt(32, 4294967295u));
+    CANAL_ASSERT(interval4.signedMin(res) && res == llvm::APInt(32, -1) && //Signed -1 to 0
+                 interval4.signedMax(res) && res == llvm::APInt(32, 0));
+    CANAL_ASSERT(interval4.getBitWidth() == 32);
+
+    // Test truncation from i64 -1 - 0 to i32 -> unsigned top, signed -1 to 0
+    Integer::Interval interval5(*gEnvironment, 32);
+    interval5.trunc(Integer::Interval(*gEnvironment, llvm::APInt(64, -1, true))
+                    .join(Integer::Interval(*gEnvironment, llvm::APInt(64, 0))));
+    CANAL_ASSERT(interval5.unsignedMin(res) && res == llvm::APInt::getMinValue(32) && //Unsigned top
+                 interval5.unsignedMax(res) && res == llvm::APInt::getMaxValue(32));
+    CANAL_ASSERT(interval5.signedMin(res) && res == llvm::APInt(32, -1) && //Signed -1 to 0
+                 interval5.signedMax(res) && res == llvm::APInt(32, 0));
+    CANAL_ASSERT(interval5.getBitWidth() == 32);
 }
 
 static void

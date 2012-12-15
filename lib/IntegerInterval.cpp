@@ -1237,8 +1237,10 @@ Interval::trunc(const Domain &value)
     mEmpty = interval.mEmpty;
 
     mSignedTop = interval.mSignedTop
-        || !interval.mSignedFrom.isIntN(getBitWidth())
-        || !interval.mSignedTo.isIntN(getBitWidth());
+        || (!interval.mSignedFrom.isSignedIntN(getBitWidth()) &&
+            !interval.mSignedFrom.isIntN(getBitWidth()))
+        || (!interval.mSignedTo.isSignedIntN(getBitWidth()) &&
+            !interval.mSignedTo.isIntN(getBitWidth()));
 
     if (!mSignedTop)
     {
@@ -1252,6 +1254,11 @@ Interval::trunc(const Domain &value)
             mSignedTop = true;
         else
         {
+            if (!mSignedFrom.isNegative() && mSignedTo.isNegative()) {
+                //If during truncate mTo became negative and mFrom stayed positive,
+                //mFrom and mTo have to be swapped
+                std::swap(mSignedFrom, mSignedTo);
+            }
             CANAL_ASSERT_MSG(mSignedFrom.sle(mSignedTo),
                              "mSignedFrom must be lower than mSignedTo");
         }
