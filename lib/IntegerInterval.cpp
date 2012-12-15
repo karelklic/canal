@@ -741,10 +741,23 @@ Interval::udiv(const Domain &a, const Domain &b)
     mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
     if (!mUnsignedTop)
     {
-        llvm::APInt toTo = aa.mUnsignedTo.udiv(bb.mUnsignedTo);
-        llvm::APInt toFrom = aa.mUnsignedTo.udiv(bb.mUnsignedFrom);
-        llvm::APInt fromTo = aa.mUnsignedFrom.udiv(bb.mUnsignedTo);
-        llvm::APInt fromFrom = aa.mUnsignedFrom.udiv(bb.mUnsignedFrom);
+        if (bb.mUnsignedFrom == 0 && bb.mUnsignedTo == 0) { //Division by zero
+            mUnsignedTop = true;
+            return *this;
+        }
+        llvm::APInt toTo, toFrom, fromTo, fromFrom;
+        if (bb.mUnsignedFrom == 0) { //From is zero -> divide by 1 -> same as original
+            toFrom = aa.mUnsignedTo;
+            fromFrom = aa.mUnsignedFrom;
+        }
+        else {
+            toFrom = aa.mUnsignedTo.udiv(bb.mUnsignedFrom);
+            fromFrom = aa.mUnsignedFrom.udiv(bb.mUnsignedFrom);
+        }
+        //mUnsignedTo cannot be zero, because this is unsigned division and from <= to (from = to is already handled)
+        toTo = aa.mUnsignedTo.udiv(bb.mUnsignedTo);
+        fromTo = aa.mUnsignedFrom.udiv(bb.mUnsignedTo);
+
         minMax(/*signed=*/false,
                mUnsignedFrom,
                mUnsignedTo,
@@ -772,39 +785,43 @@ Interval::sdiv(const Domain &a, const Domain &b)
     mSignedTop = aa.mSignedTop || bb.mSignedTop;
     if (!mSignedTop)
     {
-        llvm::APInt toTo = APIntUtils::sdiv_ov(aa.mSignedTo,
-                                               bb.mSignedTo,
-                                               mSignedTop);
-
-        if (!mSignedTop)
-        {
-            llvm::APInt toFrom = APIntUtils::sdiv_ov(aa.mSignedTo,
-                                                     bb.mSignedFrom,
-                                                     mSignedTop);
-
+        if (bb.mSignedFrom == 0 && bb.mSignedTo == 0) { //Division by zero
+            mSignedTop = true;
+            return *this;
+        }
+        llvm::APInt toTo, toFrom, fromTo, fromFrom;
+        if (bb.mSignedFrom == 0) { //From is zero -> divide by 1 -> same as original
+            fromFrom = aa.mSignedFrom;
+            toFrom = aa.mSignedTo;
+        }
+        else {
+            fromFrom = APIntUtils::sdiv_ov(aa.mSignedFrom, bb.mSignedFrom, mSignedTop);
+            if (!mSignedTop) {
+                toFrom = APIntUtils::sdiv_ov(aa.mSignedTo, bb.mSignedFrom, mSignedTop);
+            }
+        }
+        if (!mSignedTop) {
+            if (bb.mSignedTo == 0) { //To is zero -> divide by -1
+                fromTo = APIntUtils::sdiv_ov(aa.mSignedFrom, llvm::APInt(bb.getBitWidth(), -1, true), mSignedTop);
+                if (!mSignedTop) {
+                    toTo = APIntUtils::sdiv_ov(aa.mSignedTo, llvm::APInt(bb.getBitWidth(), -1, true), mSignedTop);
+                }
+            }
+            else {
+                fromTo = APIntUtils::sdiv_ov(aa.mSignedFrom, bb.mSignedTo, mSignedTop);
+                if (!mSignedTop) {
+                    toTo = APIntUtils::sdiv_ov(aa.mSignedTo, bb.mSignedTo, mSignedTop);
+                }
+            }
             if (!mSignedTop)
             {
-                llvm::APInt fromTo = APIntUtils::sdiv_ov(aa.mSignedFrom,
-                                                         bb.mSignedTo,
-                                                         mSignedTop);
-
-                if (!mSignedTop)
-                {
-                    llvm::APInt fromFrom = APIntUtils::sdiv_ov(aa.mSignedFrom,
-                                                               bb.mSignedFrom,
-                                                               mSignedTop);
-
-                    if (!mSignedTop)
-                    {
-                        minMax(/*signed=*/true,
-                               mSignedFrom,
-                               mSignedTo,
-                               toTo,
-                               toFrom,
-                               fromTo,
-                               fromFrom);
-                    }
-                }
+                minMax(/*signed=*/true,
+                       mSignedFrom,
+                       mSignedTo,
+                       toTo,
+                       toFrom,
+                       fromTo,
+                       fromFrom);
             }
         }
     }
@@ -824,6 +841,7 @@ Interval::urem(const Domain &a, const Domain &b)
         return *this;
 
     setTop();
+    //When implemented, handle division by zero - see #145
     return *this;
 }
 
@@ -839,6 +857,7 @@ Interval::srem(const Domain &a, const Domain &b)
         return *this;
 
     setTop();
+    //When implemented, handle division by zero - see #145
     return *this;
 }
 

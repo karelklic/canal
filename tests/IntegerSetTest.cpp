@@ -399,6 +399,46 @@ testIcmp()
     CANAL_ASSERT(result.isTop());
 }
 
+static void
+testDivisionByZero() {
+    Integer::Set zero(*gEnvironment, llvm::APInt(32, 0)),
+            one(*gEnvironment, llvm::APInt(32, 1)),
+            two(*gEnvironment, llvm::APInt(32, 2)),
+            one_two(one),
+            zero_one(zero),
+            minusone_zero(*gEnvironment, llvm::APInt(32, -1, true)),
+            minusone_minustwo(*gEnvironment, llvm::APInt(32, -2, true)),
+            result(*gEnvironment, 32);
+    one_two.join(two);
+    zero_one.join(one);
+    minusone_minustwo.join(minusone_zero); //minusone_zero is now only -1
+    minusone_zero.join(zero);
+
+    //Udiv test
+    CANAL_ASSERT(result.udiv(one, zero).isTop());
+    CANAL_ASSERT(result.udiv(zero, zero).isTop());
+    CANAL_ASSERT(result.udiv(one_two, zero_one) == one_two);
+    CANAL_ASSERT(result.udiv(one_two, minusone_zero) == zero); //Division by 0 - maxint => zero
+
+    //Sdiv test
+    CANAL_ASSERT(result.sdiv(one, zero).isTop());
+    CANAL_ASSERT(result.sdiv(zero, zero).isTop());
+    CANAL_ASSERT(result.sdiv(one_two, zero_one) == one_two);
+    CANAL_ASSERT(result.sdiv(one_two, minusone_zero) == minusone_minustwo);
+
+    //Urem test
+    CANAL_ASSERT(result.urem(one, zero).isTop());
+    CANAL_ASSERT(result.urem(zero, zero).isTop());
+    CANAL_ASSERT(result.urem(one_two, zero_one) == zero);
+    CANAL_ASSERT(result.urem(one_two, minusone_zero) == one_two); //Remainder of 0 - maxint => identity
+
+    //Srem test
+    CANAL_ASSERT(result.srem(one, zero).isTop());
+    CANAL_ASSERT(result.srem(zero, zero).isTop());
+    CANAL_ASSERT(result.srem(one_two, zero_one) == zero);
+    CANAL_ASSERT(result.srem(one_two, minusone_zero) == zero);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -410,6 +450,7 @@ main(int argc, char **argv)
 
     testJoin();
     testIcmp();
+    testDivisionByZero();
 
     delete gEnvironment;
     return 0;

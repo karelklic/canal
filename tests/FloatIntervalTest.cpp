@@ -43,6 +43,34 @@ testJoin()
     CANAL_ASSERT(test.join(top).isTop());
 }
 
+static void
+testDivisionByZero() {
+    Float::Interval zero(*gEnvironment, llvm::APFloat(0.0f)),
+            one(*gEnvironment, llvm::APFloat(1.0f)),
+            two(*gEnvironment, llvm::APFloat(2.0f)),
+            one_two(one),
+            zero_one(zero),
+            minusone_zero(*gEnvironment, llvm::APFloat(-1.0f)),
+            result(zero);
+    one_two.join(two);
+    zero_one.join(one);
+    minusone_zero.join(zero);
+
+    llvm::APFloat res(0.0f);
+
+    //Fdiv test
+    CANAL_ASSERT(result.fdiv(one, zero).isTop());
+    CANAL_ASSERT(result.fdiv(zero, zero).isTop());
+
+    result.fdiv(one_two, zero_one);
+    res = result.getMin(); CANAL_ASSERT(res.compare(llvm::APFloat(1.0f)) == llvm::APFloat::cmpEqual); //One to infinity
+    res = result.getMax(); CANAL_ASSERT(res.isInfinity() && !res.isNegative());
+
+    result.fdiv(one_two, minusone_zero); //Division by -1 to 0
+    res = result.getMin(); CANAL_ASSERT(res.isInfinity() && res.isNegative()); //Negative infinity minus one
+    res = result.getMax(); CANAL_ASSERT(res.compare(llvm::APFloat(-1.0f)) == llvm::APFloat::cmpEqual); //Unsigned zero to two
+}
+
 int
 main(int argc, char **argv)
 {
@@ -54,6 +82,7 @@ main(int argc, char **argv)
 
     testConstructors();
     testJoin();
+    testDivisionByZero();
 
     delete gEnvironment;
     return 0;
