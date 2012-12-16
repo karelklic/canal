@@ -170,6 +170,8 @@ public: // Implementation of Domain.
     virtual Bitfield &fptoui(const Domain &value);
 
     virtual Bitfield &fptosi(const Domain &value);
+private:
+    void shift(const Domain &a, const Domain &b, bool right, int shiftValue);
 };
 
 } // namespace Integer

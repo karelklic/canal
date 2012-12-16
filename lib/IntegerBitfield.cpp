@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "APIntUtils.h"
 #include "FloatInterval.h"
+#include <queue>
 
 namespace Canal {
 namespace Integer {
@@ -343,6 +344,7 @@ Bitfield &
 Bitfield::udiv(const Domain &a, const Domain &b)
 {
     setTop();
+    //When implemented, handle division by zero - see #145
     return *this;
 }
 
@@ -350,6 +352,7 @@ Bitfield &
 Bitfield::sdiv(const Domain &a, const Domain &b)
 {
     setTop();
+    //When implemented, handle division by zero - see #145
     return *this;
 }
 
@@ -357,6 +360,7 @@ Bitfield &
 Bitfield::urem(const Domain &a, const Domain &b)
 {
     setTop();
+    //When implemented, handle division by zero - see #145
     return *this;
 }
 
@@ -364,27 +368,82 @@ Bitfield &
 Bitfield::srem(const Domain &a, const Domain &b)
 {
     setTop();
+    //When implemented, handle division by zero - see #145
     return *this;
+}
+
+void inline
+Bitfield::shift(const Domain &a, const Domain &b, bool right, int shiftValue) {
+    const Bitfield &aa = dynCast<const Bitfield&>(a),
+        &bb = dynCast<const Bitfield&>(b);
+    CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth() &&
+            getBitWidth() == aa.getBitWidth());
+    if (aa.isTop() || bb.isTop()) {
+        setTop();
+        return;
+    }
+    if (aa.isBottom() || bb.isBottom()) {
+        setBottom();
+        return;
+    }
+    unsigned counts[4] = {0, 0, 0, 0}; //Bottoms, zeros, ones, tops
+    llvm::APInt minShift_, maxShift_;
+    if (!bb.unsignedMin(minShift_) || !bb.unsignedMax(maxShift_))
+        setBottom(); //If at least one bit is bottom, the result should be bottom
+    if (minShift_.uge(getBitWidth())) { //You shift for more than the bitwidth -> result is 0
+        mZeroes = ~0; mOnes = 0;
+        return;
+    }
+
+    maxShift_ -= minShift_; //It has to be the size
+    unsigned minShift = minShift_.getLimitedValue(getBitWidth()),
+            maxShift = maxShift_.getLimitedValue(getBitWidth());
+    counts[shiftValue + 1] = maxShift + minShift; //Put maxShift zeros from shift
+    std::queue<unsigned> q; //Queue of bits to handle -> you need to handle them after minShift
+
+    for (int i = (right ? getBitWidth() - 1 : 0); (right ? i >= 0 : i < getBitWidth()); (right ? i -- : i ++)) {
+        q.push(aa.getBitValue(i) + 1); //Push this bit into queue
+
+        if (q.size() > minShift) { //If minShift is reached, put this in for merge
+            counts[q.front()] = maxShift + 1; //It can be this bit value for next maxShift + 1 bits (+1 for current)
+            //Replace the current value with new one
+            q.pop();
+        }
+
+        if (counts[0]) //Can be bottom
+            setBitValue(i, -1); //Set bottom
+        else if (counts[3] || (counts[1] && counts[2])) //Can be top or can be zero and one
+            setBitValue(i, 2); //Set top
+        else //Can be either zero or one
+            setBitValue(i, (counts[2] ? 1 : 0));
+
+        //Substract counts of possible bits
+        counts[0] = (counts[0] ? counts[0] - 1 : 0);
+        counts[1] = (counts[1] ? counts[1] - 1 : 0);
+        counts[2] = (counts[2] ? counts[2] - 1 : 0);
+        counts[3] = (counts[3] ? counts[3] - 1 : 0);
+    }
 }
 
 Bitfield &
 Bitfield::shl(const Domain &a, const Domain &b)
 {
-    setTop();
+    shift(a, b, false, 0);
     return *this;
 }
 
 Bitfield &
 Bitfield::lshr(const Domain &a, const Domain &b)
 {
-    setTop();
+    shift(a, b, true, 0);
     return *this;
 }
 
 Bitfield &
 Bitfield::ashr(const Domain &a, const Domain &b)
 {
-    setTop();
+    const Bitfield &aa = dynCast<const Bitfield&>(a);
+    shift(a, b, true, aa.getBitValue(aa.getBitWidth() - 1));
     return *this;
 }
 
