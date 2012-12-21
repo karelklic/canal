@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "lib/Utils.h"
 #include <unistd.h>
+#include <errno.h>
 
 static int
 run(int argc, char **argv)
@@ -109,13 +110,17 @@ filterDriverArguments(int argc,
                       char **argv,
                       clang::driver::Driver &driver)
 {
-    llvm::ArrayRef<const char*> originalArguments(argv, argc);
-
     clang::driver::ArgStringList result;
-    result.push_back(originalArguments[0]);
+    result.push_back(argv[0]);
 
+#if LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
     clang::driver::InputArgList *inputArgList =
-        driver.ParseArgStrings(originalArguments.slice(1));
+        driver.ParseArgStrings(argv + 1);
+#else
+    clang::driver::InputArgList *inputArgList =
+        driver.ParseArgStrings(const_cast<const char**>(argv + 1),
+                               const_cast<const char**>(argv + argc));
+#endif
 
     if (inputArgList->hasArg(clang::driver::options::OPT__HASH_HASH_HASH))
         return result;

@@ -15,20 +15,13 @@
 #  endif
 #endif
 
-#include <llvm/ADT/ArrayRef.h>
 #include <llvm/ADT/StringRef.h>
 #include <llvm/Analysis/CallGraph.h>
 #include <llvm/Analysis/LoopInfo.h>
-#if LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
-#include <llvm/InitializePasses.h>
-#endif // LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
 #include <llvm/LLVMContext.h>
 #include <llvm/PassManager.h>
-#include <llvm/Support/Host.h>
 #include <llvm/Support/IRReader.h>
 #include <llvm/Support/MemoryBuffer.h>
-#include <llvm/Support/TargetSelect.h>
-#include <llvm/Support/TimeValue.h>
 #include <llvm/ValueSymbolTable.h>
 #include <clang/Driver/Action.h>
 #include <clang/Driver/Arg.h>
@@ -42,6 +35,17 @@
 #include <clang/Driver/OptTable.h>
 #include <clang/Frontend/DiagnosticOptions.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
+
+#if LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
+#  include <llvm/InitializePasses.h>
+#  include <llvm/Support/Host.h>
+#  include <llvm/Support/TimeValue.h>
+#  include <llvm/Support/TargetSelect.h>
+#else // LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
+#  include <llvm/System/Host.h>
+#  include <llvm/System/TimeValue.h>
+#  include <llvm/Target/TargetSelect.h>
+#endif // LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
 
 #ifdef CANAL_NDEBUG_SWITCHED
 #  undef CANAL_NDEBUG_SWITCHED

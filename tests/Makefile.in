@@ -35,10 +35,10 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = ArrayExactSizeTest$(EXEEXT) \
-	ArraySingleItemTest$(EXEEXT) FloatIntervalTest$(EXEEXT) \
-	IntegerBitfieldTest$(EXEEXT) IntegerSetTest$(EXEEXT) \
-	IntegerIntervalTest$(EXEEXT) OperationsTest$(EXEEXT) \
-	PointerTest$(EXEEXT)
+	ArraySingleItemTest$(EXEEXT) ArrayStringPrefixTest$(EXEEXT) \
+	FloatIntervalTest$(EXEEXT) IntegerBitfieldTest$(EXEEXT) \
+	IntegerSetTest$(EXEEXT) IntegerIntervalTest$(EXEEXT) \
+	OperationsTest$(EXEEXT) PointerTest$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/atlocal.in
@@ -62,6 +62,10 @@ ArraySingleItemTest_SOURCES = ArraySingleItemTest.cpp
 ArraySingleItemTest_OBJECTS = ArraySingleItemTest.$(OBJEXT)
 ArraySingleItemTest_LDADD = $(LDADD)
 ArraySingleItemTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
+ArrayStringPrefixTest_SOURCES = ArrayStringPrefixTest.cpp
+ArrayStringPrefixTest_OBJECTS = ArrayStringPrefixTest.$(OBJEXT)
+ArrayStringPrefixTest_LDADD = $(LDADD)
+ArrayStringPrefixTest_DEPENDENCIES = $(top_builddir)/lib/libcanal.la
 FloatIntervalTest_SOURCES = FloatIntervalTest.cpp
 FloatIntervalTest_OBJECTS = FloatIntervalTest.$(OBJEXT)
 FloatIntervalTest_LDADD = $(LDADD)
@@ -100,13 +104,13 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = ArrayExactSizeTest.cpp ArraySingleItemTest.cpp \
-	FloatIntervalTest.cpp IntegerBitfieldTest.cpp \
-	IntegerIntervalTest.cpp IntegerSetTest.cpp OperationsTest.cpp \
-	PointerTest.cpp
+	ArrayStringPrefixTest.cpp FloatIntervalTest.cpp \
+	IntegerBitfieldTest.cpp IntegerIntervalTest.cpp \
+	IntegerSetTest.cpp OperationsTest.cpp PointerTest.cpp
 DIST_SOURCES = ArrayExactSizeTest.cpp ArraySingleItemTest.cpp \
-	FloatIntervalTest.cpp IntegerBitfieldTest.cpp \
-	IntegerIntervalTest.cpp IntegerSetTest.cpp OperationsTest.cpp \
-	PointerTest.cpp
+	ArrayStringPrefixTest.cpp FloatIntervalTest.cpp \
+	IntegerBitfieldTest.cpp IntegerIntervalTest.cpp \
+	IntegerSetTest.cpp OperationsTest.cpp PointerTest.cpp
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -122,6 +126,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLANG = @CLANG@
+CLANG_LIBS = @CLANG_LIBS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -317,6 +322,9 @@ ArrayExactSizeTest$(EXEEXT): $(ArrayExactSizeTest_OBJECTS) $(ArrayExactSizeTest_
 ArraySingleItemTest$(EXEEXT): $(ArraySingleItemTest_OBJECTS) $(ArraySingleItemTest_DEPENDENCIES) 
 	@rm -f ArraySingleItemTest$(EXEEXT)
 	$(CXXLINK) $(ArraySingleItemTest_OBJECTS) $(ArraySingleItemTest_LDADD) $(LIBS)
+ArrayStringPrefixTest$(EXEEXT): $(ArrayStringPrefixTest_OBJECTS) $(ArrayStringPrefixTest_DEPENDENCIES) 
+	@rm -f ArrayStringPrefixTest$(EXEEXT)
+	$(CXXLINK) $(ArrayStringPrefixTest_OBJECTS) $(ArrayStringPrefixTest_LDADD) $(LIBS)
 FloatIntervalTest$(EXEEXT): $(FloatIntervalTest_OBJECTS) $(FloatIntervalTest_DEPENDENCIES) 
 	@rm -f FloatIntervalTest$(EXEEXT)
 	$(CXXLINK) $(FloatIntervalTest_OBJECTS) $(FloatIntervalTest_LDADD) $(LIBS)
@@ -344,6 +352,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ArrayExactSizeTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ArraySingleItemTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ArrayStringPrefixTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FloatIntervalTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerBitfieldTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IntegerIntervalTest.Po@am__quote@
