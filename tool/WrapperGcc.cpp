@@ -125,24 +125,30 @@ filterDriverArguments(int argc,
     if (inputArgList->hasArg(clang::driver::options::OPT__HASH_HASH_HASH))
         return result;
 
-    inputArgList->eraseArg(clang::driver::options::OPT_dumpmachine);
-    inputArgList->eraseArg(clang::driver::options::OPT_dumpversion);
-    inputArgList->eraseArg(clang::driver::options::OPT__print_diagnostic_categories);
-    inputArgList->eraseArg(clang::driver::options::OPT__help);
-    inputArgList->eraseArg(clang::driver::options::OPT__help_hidden);
-    inputArgList->eraseArg(clang::driver::options::OPT__version);
-    inputArgList->eraseArg(clang::driver::options::OPT_v);
-    inputArgList->eraseArg(clang::driver::options::OPT_print_search_dirs);
-    inputArgList->eraseArg(clang::driver::options::OPT_print_file_name_EQ);
-    inputArgList->eraseArg(clang::driver::options::OPT_print_prog_name_EQ);
-    inputArgList->eraseArg(clang::driver::options::OPT_print_libgcc_file_name);
-    inputArgList->eraseArg(clang::driver::options::OPT_print_multi_lib);
-    inputArgList->eraseArg(clang::driver::options::OPT_print_multi_directory);
-    inputArgList->eraseArg(clang::driver::options::OPT_print_multi_os_directory);
-
     clang::driver::InputArgList::const_iterator it = inputArgList->begin();
     for (; it != inputArgList->end(); ++it)
+    {
+        if ((*it)->getOption().matches(clang::driver::options::OPT_dumpmachine)
+            || (*it)->getOption().matches(clang::driver::options::OPT_dumpversion)
+            || (*it)->getOption().matches(clang::driver::options::OPT__print_diagnostic_categories)
+            || (*it)->getOption().matches(clang::driver::options::OPT__help)
+            || (*it)->getOption().matches(clang::driver::options::OPT__help_hidden)
+            || (*it)->getOption().matches(clang::driver::options::OPT__version)
+            || (*it)->getOption().matches(clang::driver::options::OPT_v)
+            || (*it)->getOption().matches(clang::driver::options::OPT_print_search_dirs)
+            || (*it)->getOption().matches(clang::driver::options::OPT_print_file_name_EQ)
+            || (*it)->getOption().matches(clang::driver::options::OPT_print_prog_name_EQ)
+            || (*it)->getOption().matches(clang::driver::options::OPT_print_libgcc_file_name)
+            || (*it)->getOption().matches(clang::driver::options::OPT_print_multi_lib)
+            || (*it)->getOption().matches(clang::driver::options::OPT_print_multi_directory)
+            || (*it)->getOption().matches(clang::driver::options::OPT_print_multi_directory)
+            || (*it)->getOption().matches(clang::driver::options::OPT_print_multi_os_directory))
+        {
+            continue;
+        }
+
         (*it)->render(*inputArgList, result);
+    }
 
     delete inputArgList;
     return result;
