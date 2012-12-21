@@ -211,8 +211,8 @@ assemblyOnly_changeCommandOutput(const clang::driver::Command &command,
     clang::driver::OptTable *table = clang::driver::createCC1OptTable();
     unsigned missingArgIndex, missingArgCount;
     clang::driver::InputArgList *inputArgList;
-    inputArgList = table->ParseArgs(command.getArguments().begin(),
-                                    command.getArguments().end(),
+    inputArgList = table->ParseArgs(const_cast<const char**>(command.getArguments().begin()),
+                                    const_cast<const char**>(command.getArguments().end()),
                                     missingArgIndex,
                                     missingArgCount);
 
