@@ -621,7 +621,7 @@ at_change_dir=false
 # List of the tested programs.
 at_tested=''
 # List of the all the test groups.
-at_groups_all=' 1 2 3 4 5 6 7 8'
+at_groups_all=' 1 2 3 4 5 6 7 8 9'
 # As many question marks as there are digits in the last test group number.
 # Used to normalize the test group numbers so that `ls' lists them in
 # numerical order.
@@ -629,12 +629,13 @@ at_format='?'
 # Description of all the test groups.
 at_help_all="1;testsuite.at:4;ArrayExactSize;;
 2;testsuite.at:8;ArraySingleItem;;
-3;testsuite.at:12;FloatInterval;;
-4;testsuite.at:16;IntegerBitfield;;
-5;testsuite.at:20;IntegerSet;;
-6;testsuite.at:24;IntegerInterval;;
-7;testsuite.at:28;Operations;;
-8;testsuite.at:32;Pointer;;
+3;testsuite.at:12;ArrayStringPrefix;;
+4;testsuite.at:16;FloatInterval;;
+5;testsuite.at:20;IntegerBitfield;;
+6;testsuite.at:24;IntegerSet;;
+7;testsuite.at:28;IntegerInterval;;
+8;testsuite.at:32;Operations;;
+9;testsuite.at:36;Pointer;;
 "
 
 # at_func_validate_ranges [NAME...]
@@ -646,7 +647,7 @@ at_func_validate_ranges ()
   for at_grp
   do
     eval at_value=\$$at_grp
-    if test $at_value -lt 1 || test $at_value -gt 8; then
+    if test $at_value -lt 1 || test $at_value -gt 9; then
       $as_echo "invalid test group: $at_value" >&2
       exit 1
     fi
@@ -1921,10 +1922,10 @@ $at_traceon; }
 at_status=`cat "$at_status_file"`
 #AT_STOP_2
 #AT_START_3
-# 3. testsuite.at:12: FloatInterval
+# 3. testsuite.at:12: ArrayStringPrefix
 at_setup_line='testsuite.at:12'
-at_desc="FloatInterval"
-$at_quiet $as_echo_n "  3: $at_desc                                  "
+at_desc="ArrayStringPrefix"
+$at_quiet $as_echo_n "  3: $at_desc                              "
 at_xfail=no
 echo "#                             -*- compilation -*-" >> "$at_group_log"
 (
@@ -1932,14 +1933,14 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:13: ../../FloatIntervalTest"
+$as_echo "$at_srcdir/testsuite.at:13: ../../ArrayStringPrefixTest"
 echo testsuite.at:13 >"$at_check_line_file"
 
 if test -n "$at_traceon"; then
-  ( $at_traceon; ../../FloatIntervalTest ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; ../../ArrayStringPrefixTest ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; ../../FloatIntervalTest ) >"$at_stdout" 2>"$at_stderr"
+  ( :; ../../ArrayStringPrefixTest ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -1956,10 +1957,10 @@ $at_traceon; }
 at_status=`cat "$at_status_file"`
 #AT_STOP_3
 #AT_START_4
-# 4. testsuite.at:16: IntegerBitfield
+# 4. testsuite.at:16: FloatInterval
 at_setup_line='testsuite.at:16'
-at_desc="IntegerBitfield"
-$at_quiet $as_echo_n "  4: $at_desc                                "
+at_desc="FloatInterval"
+$at_quiet $as_echo_n "  4: $at_desc                                  "
 at_xfail=no
 echo "#                             -*- compilation -*-" >> "$at_group_log"
 (
@@ -1967,14 +1968,14 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:17: ../../IntegerBitfieldTest"
+$as_echo "$at_srcdir/testsuite.at:17: ../../FloatIntervalTest"
 echo testsuite.at:17 >"$at_check_line_file"
 
 if test -n "$at_traceon"; then
-  ( $at_traceon; ../../IntegerBitfieldTest ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; ../../FloatIntervalTest ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; ../../IntegerBitfieldTest ) >"$at_stdout" 2>"$at_stderr"
+  ( :; ../../FloatIntervalTest ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -1991,10 +1992,10 @@ $at_traceon; }
 at_status=`cat "$at_status_file"`
 #AT_STOP_4
 #AT_START_5
-# 5. testsuite.at:20: IntegerSet
+# 5. testsuite.at:20: IntegerBitfield
 at_setup_line='testsuite.at:20'
-at_desc="IntegerSet"
-$at_quiet $as_echo_n "  5: $at_desc                             "
+at_desc="IntegerBitfield"
+$at_quiet $as_echo_n "  5: $at_desc                                "
 at_xfail=no
 echo "#                             -*- compilation -*-" >> "$at_group_log"
 (
@@ -2002,14 +2003,14 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:21: ../../IntegerSetTest"
+$as_echo "$at_srcdir/testsuite.at:21: ../../IntegerBitfieldTest"
 echo testsuite.at:21 >"$at_check_line_file"
 
 if test -n "$at_traceon"; then
-  ( $at_traceon; ../../IntegerSetTest ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; ../../IntegerBitfieldTest ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; ../../IntegerSetTest ) >"$at_stdout" 2>"$at_stderr"
+  ( :; ../../IntegerBitfieldTest ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -2026,10 +2027,10 @@ $at_traceon; }
 at_status=`cat "$at_status_file"`
 #AT_STOP_5
 #AT_START_6
-# 6. testsuite.at:24: IntegerInterval
+# 6. testsuite.at:24: IntegerSet
 at_setup_line='testsuite.at:24'
-at_desc="IntegerInterval"
-$at_quiet $as_echo_n "  6: $at_desc                                "
+at_desc="IntegerSet"
+$at_quiet $as_echo_n "  6: $at_desc                                     "
 at_xfail=no
 echo "#                             -*- compilation -*-" >> "$at_group_log"
 (
@@ -2037,14 +2038,14 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:25: ../../IntegerIntervalTest"
+$as_echo "$at_srcdir/testsuite.at:25: ../../IntegerSetTest"
 echo testsuite.at:25 >"$at_check_line_file"
 
 if test -n "$at_traceon"; then
-  ( $at_traceon; ../../IntegerIntervalTest ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; ../../IntegerSetTest ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; ../../IntegerIntervalTest ) >"$at_stdout" 2>"$at_stderr"
+  ( :; ../../IntegerSetTest ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -2061,10 +2062,10 @@ $at_traceon; }
 at_status=`cat "$at_status_file"`
 #AT_STOP_6
 #AT_START_7
-# 7. testsuite.at:28: Operations
+# 7. testsuite.at:28: IntegerInterval
 at_setup_line='testsuite.at:28'
-at_desc="Operations"
-$at_quiet $as_echo_n "  7: $at_desc                                     "
+at_desc="IntegerInterval"
+$at_quiet $as_echo_n "  7: $at_desc                                "
 at_xfail=no
 echo "#                             -*- compilation -*-" >> "$at_group_log"
 (
@@ -2072,14 +2073,14 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:29: ../../OperationsTest"
+$as_echo "$at_srcdir/testsuite.at:29: ../../IntegerIntervalTest"
 echo testsuite.at:29 >"$at_check_line_file"
 
 if test -n "$at_traceon"; then
-  ( $at_traceon; ../../OperationsTest ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; ../../IntegerIntervalTest ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; ../../OperationsTest ) >"$at_stdout" 2>"$at_stderr"
+  ( :; ../../IntegerIntervalTest ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -2096,10 +2097,10 @@ $at_traceon; }
 at_status=`cat "$at_status_file"`
 #AT_STOP_7
 #AT_START_8
-# 8. testsuite.at:32: Pointer
+# 8. testsuite.at:32: Operations
 at_setup_line='testsuite.at:32'
-at_desc="Pointer"
-$at_quiet $as_echo_n "  8: $at_desc                                        "
+at_desc="Operations"
+$at_quiet $as_echo_n "  8: $at_desc                                     "
 at_xfail=no
 echo "#                             -*- compilation -*-" >> "$at_group_log"
 (
@@ -2107,14 +2108,14 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:33: ../../PointerTest"
+$as_echo "$at_srcdir/testsuite.at:33: ../../OperationsTest"
 echo testsuite.at:33 >"$at_check_line_file"
 
 if test -n "$at_traceon"; then
-  ( $at_traceon; ../../PointerTest ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; ../../OperationsTest ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; ../../PointerTest ) >"$at_stdout" 2>"$at_stderr"
+  ( :; ../../OperationsTest ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -2130,3 +2131,38 @@ $at_traceon; }
 ) 5>&1 2>&1 | eval $at_tee_pipe
 at_status=`cat "$at_status_file"`
 #AT_STOP_8
+#AT_START_9
+# 9. testsuite.at:36: Pointer
+at_setup_line='testsuite.at:36'
+at_desc="Pointer"
+$at_quiet $as_echo_n "  9: $at_desc                                        "
+at_xfail=no
+echo "#                             -*- compilation -*-" >> "$at_group_log"
+(
+  $as_echo "9. testsuite.at:36: testing ..."
+  $at_traceon
+
+{ $at_traceoff
+$as_echo "$at_srcdir/testsuite.at:37: ../../PointerTest"
+echo testsuite.at:37 >"$at_check_line_file"
+
+if test -n "$at_traceon"; then
+  ( $at_traceon; ../../PointerTest ) >"$at_stdout" 2>"$at_stder1"
+  at_func_filter_trace $?
+else
+  ( :; ../../PointerTest ) >"$at_stdout" 2>"$at_stderr"
+fi
+at_status=$?
+at_failed=false
+at_func_diff_devnull "$at_stderr" || at_failed=:
+at_func_diff_devnull "$at_stdout" || at_failed=:
+at_func_check_status 0 $at_status "$at_srcdir/testsuite.at:37"
+
+$at_failed && at_func_log_failure
+$at_traceon; }
+
+  $at_traceoff
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 | eval $at_tee_pipe
+at_status=`cat "$at_status_file"`
+#AT_STOP_9
