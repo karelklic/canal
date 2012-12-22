@@ -36,16 +36,21 @@
 #include <clang/Frontend/DiagnosticOptions.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
 
-#if LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR == 8
+#  include <llvm/System/Host.h>
+#  include <llvm/System/TimeValue.h>
+#  include <llvm/Target/TargetSelect.h>
+#elif LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR == 9
+#  include <llvm/InitializePasses.h>
+#  include <llvm/Support/Host.h>
+#  include <llvm/Support/TimeValue.h>
+#  include <llvm/Target/TargetSelect.h>
+#else
 #  include <llvm/InitializePasses.h>
 #  include <llvm/Support/Host.h>
 #  include <llvm/Support/TimeValue.h>
 #  include <llvm/Support/TargetSelect.h>
-#else // LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
-#  include <llvm/System/Host.h>
-#  include <llvm/System/TimeValue.h>
-#  include <llvm/Target/TargetSelect.h>
-#endif // LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
+#endif
 
 #ifdef CANAL_NDEBUG_SWITCHED
 #  undef CANAL_NDEBUG_SWITCHED
