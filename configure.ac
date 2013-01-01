@@ -35,7 +35,7 @@ AC_DEFINE_UNQUOTED([LLVM_VERSION_MAJOR], [$LLVM_VERSION_MAJOR], [LLVM major vers
 LLVM_VERSION_MINOR=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/\2/'`
 AC_DEFINE_UNQUOTED([LLVM_VERSION_MINOR], [$LLVM_VERSION_MINOR], [LLVM minor version])
 
-CLANG_LIBS="-lLLVM-$LLVM_VERSION -lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema -lclangStaticAnalyzerFrontend -lclangStaticAnalyzerCheckers -lclangStaticAnalyzerCore -lclangAnalysis -lclangIndex -lclangARCMigrate -lclangRewrite -lclangAST -lclangLex -lclangBasic"
+CLANG_LIBS="-lLLVM-$LLVM_VERSION -lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema  -lclangAnalysis -lclangIndex -lclangRewrite -lclangAST -lclangLex -lclangBasic"
 AC_SUBST([CLANG_LIBS])
 
 

@@ -216,10 +216,12 @@ assemblyOnly_changeCommandOutput(const clang::driver::Command &command,
                                     missingArgIndex,
                                     missingArgCount);
 
+#if LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
     //inputArgList->eraseArg(clang::driver::cc1options::OPT_emit_obj);
     inputArgList->eraseArg(clang::driver::cc1options::OPT_coverage_file);
     inputArgList->eraseArg(clang::driver::cc1options::OPT_dependency_file);
     inputArgList->eraseArg(clang::driver::cc1options::OPT_MT);
+#endif
 
     // Change the output.
     clang::driver::Arg *arg = inputArgList->getLastArg(clang::driver::cc1options::OPT_o);
@@ -337,13 +339,20 @@ runClang(int argc, char **argv)
         = new clang::TextDiagnosticPrinter(diagnosticStream,
                                            clang::DiagnosticOptions());
 
+#if LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
     llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diagID(new clang::DiagnosticIDs());
     clang::DiagnosticsEngine diagnosticsEngine(diagID, textDiagnosticPrinter);
+#else
+    clang::Diagnostic diagnosticsEngine(textDiagnosticPrinter);
+#endif
 
     clang::driver::Driver driver(argv[0],
                                  llvm::sys::getHostTriple(),
                                  "a.out",
                                  /*IsProduction*/true,
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR == 8
+                                 /*IsCXXProduction*/true,
+#endif
                                  diagnosticsEngine);
 
     clang::driver::ArgStringList clangArguments = filterDriverArguments(argc, argv, driver);
@@ -354,8 +363,14 @@ runClang(int argc, char **argv)
         return;
 
     llvm::InitializeAllTargets();
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR == 8
+    llvm::OwningPtr<clang::driver::Compilation>
+        compilation(driver.BuildCompilation(clangArguments.size(),
+                                            clangArguments.data()));
+#else
     llvm::OwningPtr<clang::driver::Compilation>
         compilation(driver.BuildCompilation(clangArguments));
+#endif
 
     clang::driver::JobList &jobList = compilation->getJobs();
     log << "original jobs (" << jobList.size() << "):\n" << jobList;
@@ -372,15 +387,25 @@ runClang(int argc, char **argv)
 
     // TODO: do not execute compilation for gcc tasks.
     int result = 0;
+#if LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
     const clang::driver::Command *failingCommand = 0;
+#endif
     if (compilation.get())
+    {
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR == 8
+        result = driver.ExecuteCompilation(*compilation);
+#else
         result = driver.ExecuteCompilation(*compilation, failingCommand);
+#endif
+    }
 
+#if LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
     // If result status is < 0, then the driver command signalled an
     // error.  In this case, generate additional diagnostic
     // information if possible.
     if (result < 0)
         driver.generateCompilationDiagnostics(*compilation, failingCommand);
+#endif
 
     diagnosticStream.flush();
     if (!diagnosticString.empty())
