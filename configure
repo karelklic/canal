@@ -15732,7 +15732,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-CLANG_LIBS="-lLLVM-$LLVM_VERSION -lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema  -lclangAnalysis -lclangIndex -lclangRewrite -lclangAST -lclangLex -lclangBasic"
+CLANG_LIBS="-lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema  -lclangAnalysis -lclangIndex -lclangRewrite -lclangAST -lclangLex -lclangBasic"
 
 
 

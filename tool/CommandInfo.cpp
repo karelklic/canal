@@ -417,9 +417,10 @@ char FunctionDetailedInfo::ID = 0;
 
 static llvm::RegisterPass<FunctionDetailedInfo>
 FunctionDetailedInfoRegistration(
-    "functiondetailedinfo", "FunctionDetailedInfo Pass",
+    "functiondetailedinfo",
+    "FunctionDetailedInfo Pass",
     false /* Only looks at CFG */,
-    false /* Analysis Pass */);
+    true /* Analysis Pass */);
 
 void
 CommandInfo::infoFunction(const std::string &name) const
