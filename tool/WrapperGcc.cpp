@@ -113,7 +113,7 @@ filterDriverArguments(int argc,
     clang::driver::ArgStringList result;
     result.push_back(argv[0]);
 
-#if LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 8
+#if LLVM_VERSION_MAJOR > 2 || LLVM_VERSION_MINOR > 9
     clang::driver::InputArgList *inputArgList =
         driver.ParseArgStrings(argv + 1);
 #else
