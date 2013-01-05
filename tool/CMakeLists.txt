@@ -29,6 +29,7 @@ add_executable(canal-tool
 
 target_link_libraries(canal-tool
     canal
+    ${CLANG_LIBS}
     ${READLINE_LIBRARIES}
     ${LIBELF_LIBRARIES})
 

@@ -12,6 +12,7 @@ ENABLE_TESTING()
 find_package(Readline REQUIRED)
 find_package(LibElf)
 find_package(LLVM REQUIRED)
+find_package(Clang REQUIRED)
 
 include_directories(${LLVM_INCLUDE_DIRS})
 link_directories(${LLVM_LIBRARY_DIRS})
