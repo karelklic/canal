@@ -7,6 +7,7 @@
 #if 0 //Debug info for fixpoint calculation
 #include "Utils.h"
 #include "Environment.h"
+#include <iostream>
 #endif
 
 namespace Canal {

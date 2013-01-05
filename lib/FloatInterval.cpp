@@ -285,11 +285,11 @@ Interval::operator==(const Domain& value) const
     if (!interval)
         return false;
 
-    if (mEmpty)
-        return interval->mEmpty;
+    if (mEmpty || interval->mEmpty)
+        return mEmpty == interval->mEmpty;
 
-    if (isTop())
-        return interval->isTop();
+    if (isTop() || interval->isTop())
+        return isTop() == interval->isTop();
 
     return mFrom.compare(interval->mFrom) == llvm::APFloat::cmpEqual &&
         mTo.compare(interval->mTo) == llvm::APFloat::cmpEqual;
@@ -333,7 +333,7 @@ Interval::join(const Domain &value)
     {
         if (mFrom.compare(interval.mFrom) == llvm::APFloat::cmpGreaterThan)
             mFrom = interval.mFrom;
-        if (mEmpty || mTo.compare(interval.mTo) == llvm::APFloat::cmpLessThan)
+        if (mTo.compare(interval.mTo) == llvm::APFloat::cmpLessThan)
             mTo = interval.mTo;
     }
 
@@ -655,13 +655,30 @@ Interval::fdiv(const Domain &a, const Domain &b)
     mTop = (aa.mTop || bb.mTop);
     if (!mTop)
     {
+        if (bb.mFrom.isZero() && bb.mTo.isZero()) { //Division by zero
+            setTop();
+            return *this;
+        }
         llvm::APFloat fromFrom(aa.mFrom), fromTo(aa.mFrom),
                 toFrom(aa.mTo), toTo(aa.mTo);
 
-        OVERFLOW_TO_TOP(fromFrom.divide(bb.mFrom, ROUNDING_MODE));
-        OVERFLOW_TO_TOP(fromTo.divide(bb.mTo, ROUNDING_MODE));
-        OVERFLOW_TO_TOP(toFrom.divide(bb.mFrom, ROUNDING_MODE));
-        OVERFLOW_TO_TOP(toTo.divide(bb.mTo, ROUNDING_MODE));
+        if (bb.mFrom.isZero()) { //From is zero -> divide by very small number larger than zero -> infinity with same sign
+            fromFrom = llvm::APFloat::getInf(fromFrom.getSemantics(), aa.mFrom.isNegative());
+            toFrom = llvm::APFloat::getInf(fromFrom.getSemantics(), aa.mTo.isNegative());
+        }
+        else {
+            OVERFLOW_TO_TOP(fromFrom.divide(bb.mFrom, ROUNDING_MODE));
+            OVERFLOW_TO_TOP(toFrom.divide(bb.mFrom, ROUNDING_MODE));
+        }
+
+        if (bb.mTo.isZero()) { //To is zero -> divide by very small number smaller than zero -> infinity with changed sign
+            fromTo = llvm::APFloat::getInf(fromFrom.getSemantics(), !aa.mFrom.isNegative());
+            toTo = llvm::APFloat::getInf(fromFrom.getSemantics(), !aa.mTo.isNegative());
+        }
+        else {
+            OVERFLOW_TO_TOP(fromTo.divide(bb.mTo, ROUNDING_MODE));
+            OVERFLOW_TO_TOP(toTo.divide(bb.mTo, ROUNDING_MODE));
+        }
         mTop = minMax(mFrom, mTo,
                       fromFrom, fromTo,
                       toFrom, toTo);
@@ -682,6 +699,7 @@ Interval::frem(const Domain &a, const Domain &b)
 
     mTop = (aa.mTop || bb.mTop);
     setTop();
+    //When implemented, handle division by zero - see #145
     return *this;
 }
 

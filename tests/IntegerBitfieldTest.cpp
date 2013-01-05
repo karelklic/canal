@@ -386,6 +386,183 @@ testIcmp()
     CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_ULT).isTop());
 }
 
+static void
+testShl () {
+    Integer::Bitfield one(*gEnvironment, llvm::APInt(32, 1)),
+            bitsize(*gEnvironment, llvm::APInt(32, 32)),
+            zero(*gEnvironment, llvm::APInt(32, 0)),
+            two(*gEnvironment, llvm::APInt(32, 2)),
+            zero_one(zero),
+            three(*gEnvironment, llvm::APInt(32, 3)),
+            one_three(one);
+    zero_one.join(one);
+    one_three.join(three);
+    llvm::APInt res;
+
+    { //Shift left for more than bitsize -> 0
+        Integer::Bitfield tmp(one);
+        tmp.shl(one, bitsize);
+        CANAL_ASSERT(tmp.isConstant() && tmp.unsignedMin(res) && res == 0);
+    }
+
+    { //Identity
+        Integer::Bitfield tmp(zero);
+        CANAL_ASSERT(tmp.shl(three, zero) == three);
+    }
+
+    { //Shift one to the left, one bit per iteration
+        Integer::Bitfield tmp(one);
+        for (unsigned i = 1; i < 31; i ++) { //Basic left shift
+            Integer::Bitfield t(tmp);
+            tmp.shl(t, one);
+            CANAL_ASSERT(tmp.isConstant() && tmp.unsignedMin(res) && res == pow(2, i));
+        }
+    }
+
+    { //Shift one to the left by zero to one -> merge of
+        //...0001
+        //...0010 ->
+        //...00TT
+        Integer::Bitfield result(zero), tmp2(zero);
+        result.shl(one, zero_one);
+        CANAL_ASSERT(result.unsignedMin(res) && res == 0 &&
+                     result.unsignedMax(res) && res == 3);
+        tmp2.shl(result, zero_one); //Move ...00TT to left by zero_one -> 0TTT
+        CANAL_ASSERT(tmp2.unsignedMin(res) && res == 0 &&
+                     tmp2.unsignedMax(res) && res == 7);
+        tmp2.shl(one, one_three); //Move ...0001 to left by one_three -> ...0000TTT0
+        CANAL_ASSERT(tmp2.unsignedMin(res) && res == 0 &&
+                     tmp2.unsignedMax(res) && res == 14);
+    }
+
+    { //Shift left of 01010101...0101
+        Integer::Bitfield val(*gEnvironment, llvm::APInt(32, 1431655765)), tmp(zero);
+        CANAL_ASSERT(tmp.shl(val, zero_one).isTop()); //Move to left by zero to one -> top
+        tmp.shl(val, two);
+        CANAL_ASSERT(tmp.isConstant() && tmp.unsignedMin(res) && res == 1431655764); //Move to left by two -> 01010101...0100
+    }
+}
+
+static void
+testLshr () {
+    Integer::Bitfield one(*gEnvironment, llvm::APInt(32, 1)),
+            one_shift(*gEnvironment, llvm::APInt::getSignedMinValue(32)), //10000...000
+            bitsize(*gEnvironment, llvm::APInt(32, 32)),
+            zero(*gEnvironment, llvm::APInt(32, 0)),
+            two(*gEnvironment, llvm::APInt(32, 2)),
+            zero_one(zero),
+            three(*gEnvironment, llvm::APInt(32, 3)),
+            one_three(one);
+    zero_one.join(one);
+    one_three.join(three);
+    llvm::APInt res;
+
+    { //Shift rigth for more than bitsize -> 0
+        Integer::Bitfield tmp(one);
+        tmp.lshr(one_shift, bitsize);
+        CANAL_ASSERT(tmp.isConstant() && tmp.unsignedMin(res) && res == 0);
+    }
+
+    { //Identity
+        Integer::Bitfield tmp(zero);
+        CANAL_ASSERT(tmp.lshr(three, zero) == three);
+    }
+
+    { //Shift one to the right, one bit per iteration
+        Integer::Bitfield tmp(one_shift);
+        for (unsigned i = 1; i < 31; i ++) { //Basic right shift
+            Integer::Bitfield t(tmp);
+            tmp.lshr(t, one);
+            CANAL_ASSERT(tmp.isConstant() && tmp.unsignedMin(res) && res == pow(2, 31 - i));
+        }
+    }
+
+    { //Shift one to the right by zero to one -> merge of
+        //1000...0
+        //0100...0 ->
+        //TT00...0
+        Integer::Bitfield result(zero), tmp2(zero);
+        result.lshr(one_shift, zero_one);
+        CANAL_ASSERT(result.unsignedMin(res) && res == 0 &&
+                     result.unsignedMax(res) && res == 3221225472u);
+        tmp2.lshr(result, zero_one); //Move TT00...0 to right by zero_one -> TTT0...0
+        CANAL_ASSERT(tmp2.unsignedMin(res) && res == 0 &&
+                     tmp2.unsignedMax(res) && res == 3758096384u);
+        tmp2.lshr(one_shift, one_three); //Move 1000...0 to right by one_three -> 0TTT000...0
+        CANAL_ASSERT(tmp2.unsignedMin(res) && res == 0 &&
+                     tmp2.unsignedMax(res) && res == 1879048192u);
+    }
+
+    { //Shift right of 1010101010101...1010
+        Integer::Bitfield val(*gEnvironment, llvm::APInt(32, 2863311530u)), tmp(zero);
+        CANAL_ASSERT(tmp.lshr(val, zero_one).isTop()); //Move to right by zero to one -> top
+        tmp.lshr(val, two); //Move to right by two -> 001010101...1010
+        CANAL_ASSERT(tmp.isConstant() && tmp.unsignedMin(res) && res == 715827882u);
+    }
+}
+
+static void
+testAshr () {
+    Integer::Bitfield one(*gEnvironment, llvm::APInt(32, 1)),
+            one_shift(*gEnvironment, llvm::APInt::getSignedMinValue(32)), //10000...000
+            bitsize(*gEnvironment, llvm::APInt(32, 32)),
+            zero(*gEnvironment, llvm::APInt(32, 0)),
+            two(*gEnvironment, llvm::APInt(32, 2)),
+            zero_one(zero),
+            three(*gEnvironment, llvm::APInt(32, 3)),
+            one_three(one);
+    zero_one.join(one);
+    one_three.join(three);
+    llvm::APInt res;
+
+    { //Shift rigth for more than bitsize -> 0
+        Integer::Bitfield tmp(one);
+        tmp.ashr(one_shift, bitsize);
+        CANAL_ASSERT(tmp.isConstant() && tmp.unsignedMin(res) && res == 0);
+    }
+
+    { //Identity
+        Integer::Bitfield tmp(zero);
+        CANAL_ASSERT(tmp.ashr(three, zero) == three);
+    }
+
+    { //Shift one to the right, one bit per iteration
+        Integer::Bitfield tmp(one_shift);
+        unsigned sum = pow(2, 31);
+        for (unsigned i = 1; i < 31; i ++) { //Basic right shift -> propagate one
+            Integer::Bitfield t(tmp);
+            sum += pow(2, 31 - i);
+            tmp.ashr(t, one);
+            CANAL_ASSERT(tmp.isConstant() && tmp.unsignedMin(res) && res == sum);
+        }
+    }
+
+    { //Shift one to the right by zero to one -> merge of
+        //1000...0
+        //1100...0 ->
+        //1T00...0
+        Integer::Bitfield result(zero), tmp2(zero);
+        result.ashr(one_shift, zero_one);
+        CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt::getSignedMinValue(32) &&
+                     result.unsignedMax(res) && res == 3221225472u);
+        tmp2.ashr(result, zero_one); //Move 1T00...0 to right by zero_one -> 1TT0...0
+        CANAL_ASSERT(tmp2.unsignedMin(res) && res == llvm::APInt::getSignedMinValue(32) &&
+                     tmp2.unsignedMax(res) && res == 3758096384u);
+        tmp2.ashr(one_shift, one_three); //Move 1000...0 to right by one_three -> 11TT000...0
+        CANAL_ASSERT(tmp2.unsignedMin(res) && res == 3221225472u &&
+                     tmp2.unsignedMax(res) && res == 4026531840u);
+    }
+
+    { //Shift right of 1010101010101...1010
+        Integer::Bitfield val(*gEnvironment, llvm::APInt(32, 2863311530u)), tmp(zero);
+        tmp.ashr(val, zero_one); //Move to right by zero to one -> 1TTTTTT
+        CANAL_ASSERT(tmp.unsignedMin(res) && res == llvm::APInt::getSignedMinValue(32) &&
+                     tmp.unsignedMax(res) && res == llvm::APInt::getMaxValue(32));
+        tmp.ashr(val, two); //Move to right by two -> 111010101...1010
+        CANAL_ASSERT(tmp.isConstant() && tmp.unsignedMin(res) && res == 3937053354u);
+    }
+}
+
 int
 main(int argc, char **argv)
 {
@@ -397,6 +574,9 @@ main(int argc, char **argv)
 
     testJoin();
     testIcmp();
+    testShl();
+    testLshr();
+    testAshr();
 
     delete gEnvironment;
     return 0;

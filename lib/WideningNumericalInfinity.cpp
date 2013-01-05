@@ -1,6 +1,7 @@
 #include "WideningNumericalInfinity.h"
 #include "WideningDataIterationCount.h"
 #include "IntegerContainer.h"
+#include "FloatInterval.h"
 #include "Utils.h"
 
 namespace Canal {
@@ -13,8 +14,10 @@ NumericalInfinity::widen(const llvm::BasicBlock &wideningPoint,
 {
     Integer::Container *firstContainer =
         dynCast<Integer::Container*>(&first);
+    Float::Interval *f =
+            dynCast<Float::Interval*>(&first);
 
-    if (!firstContainer)
+    if (!firstContainer && !f)
         return;
 
     //const Integer::Container &secondContainer =
@@ -39,7 +42,8 @@ NumericalInfinity::widen(const llvm::BasicBlock &wideningPoint,
         return;
 
     // Widening.
-    firstContainer->setTop();
+    if (firstContainer) firstContainer->setTop();
+    else f->setTop();
 }
 
 } // namespace Widening

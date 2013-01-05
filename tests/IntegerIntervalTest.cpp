@@ -493,6 +493,75 @@ testTrunc()
     interval3.trunc(Integer::Interval(*gEnvironment, llvm::APInt(32, 1)));
     CANAL_ASSERT(interval3.isConstant() && interval3.unsignedMin(res) && res == 1);
     CANAL_ASSERT(interval3.getBitWidth() == 1);
+
+    // Test truncation from i64 0 - 4294967295 (max i32 unsigned value) to i32 -> unsigned 0 to 4294967295, signed -1 to 0
+    Integer::Interval interval4(*gEnvironment, 32);
+    interval4.trunc(Integer::Interval(*gEnvironment, llvm::APInt(64, 4294967295u))
+                    .join(Integer::Interval(*gEnvironment, llvm::APInt(64, 0))));
+    CANAL_ASSERT(interval4.unsignedMin(res) && res == llvm::APInt(32, 0) && //Unsigned 0 to 4294967295
+                 interval4.unsignedMax(res) && res == llvm::APInt(32, 4294967295u));
+    CANAL_ASSERT(interval4.signedMin(res) && res == llvm::APInt(32, -1) && //Signed -1 to 0
+                 interval4.signedMax(res) && res == llvm::APInt(32, 0));
+    CANAL_ASSERT(interval4.getBitWidth() == 32);
+
+    // Test truncation from i64 -1 - 0 to i32 -> unsigned top, signed -1 to 0
+    Integer::Interval interval5(*gEnvironment, 32);
+    interval5.trunc(Integer::Interval(*gEnvironment, llvm::APInt(64, -1, true))
+                    .join(Integer::Interval(*gEnvironment, llvm::APInt(64, 0))));
+    CANAL_ASSERT(interval5.unsignedMin(res) && res == llvm::APInt::getMinValue(32) && //Unsigned top
+                 interval5.unsignedMax(res) && res == llvm::APInt::getMaxValue(32));
+    CANAL_ASSERT(interval5.signedMin(res) && res == llvm::APInt(32, -1) && //Signed -1 to 0
+                 interval5.signedMax(res) && res == llvm::APInt(32, 0));
+    CANAL_ASSERT(interval5.getBitWidth() == 32);
+}
+
+static void
+testDivisionByZero() {
+    Integer::Interval zero(*gEnvironment, llvm::APInt(32, 0)),
+            one(*gEnvironment, llvm::APInt(32, 1)),
+            two(*gEnvironment, llvm::APInt(32, 2)),
+            one_two(one),
+            zero_one(zero),
+            minusone_zero(*gEnvironment, llvm::APInt(32, -1, true)),
+            result(*gEnvironment, 32);
+    one_two.join(two);
+    zero_one.join(one);
+    minusone_zero.join(zero);
+
+    llvm::APInt res;
+
+    //Udiv test
+    CANAL_ASSERT(result.udiv(one, zero).isTop());
+    CANAL_ASSERT(result.udiv(zero, zero).isTop());
+
+    result.udiv(one_two, zero_one);
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 1) && //Unsigned one to two
+                 result.unsignedMax(res) && res == llvm::APInt(32, 2));
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt::getSignedMinValue(result.getBitWidth()) && //Signed top
+                 result.signedMax(res) && res == llvm::APInt::getSignedMaxValue(result.getBitWidth()));
+
+    result.udiv(one_two, minusone_zero); //Division by 0 - maxint => 1 - maxint => 0-2 unsigned
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 2)); //Unsigned zero to two
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt::getSignedMinValue(result.getBitWidth()) && //Signed top
+                 result.signedMax(res) && res == llvm::APInt::getSignedMaxValue(result.getBitWidth()));
+
+
+    //Sdiv test
+    CANAL_ASSERT(result.sdiv(one, zero).isTop());
+    CANAL_ASSERT(result.sdiv(zero, zero).isTop());
+
+    result.sdiv(one_two, zero_one);
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, 1) && //Signed one to two
+                 result.signedMax(res) && res == llvm::APInt(32, 2));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt::getMinValue(result.getBitWidth()) && //Unsigned top
+                 result.unsignedMax(res) && res == llvm::APInt::getMaxValue(result.getBitWidth()));
+
+    result.sdiv(one_two, minusone_zero); //Division by -1 - 0 -> division by -1
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, -2, true) && //Signed minus two to minus one
+                 result.signedMax(res) && res == llvm::APInt(32, -1, true));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt::getMinValue(result.getBitWidth()) && //Unsigned top
+                 result.unsignedMax(res) && res == llvm::APInt::getMaxValue(result.getBitWidth()));
 }
 
 int
@@ -509,6 +578,8 @@ main(int argc, char **argv)
     testJoin();
     testIcmp();
     testTrunc();
+
+    testDivisionByZero();
 
     delete gEnvironment;
     return 0;

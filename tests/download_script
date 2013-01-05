@@ -25,7 +25,13 @@ LLVM_PATH_DIR=""
 CANAL_DIR=""
 CANAL_BUILD_DIR=""
 BASE_DIR=`pwd`
+
+#Default parameters
 THREADS=$((`nproc` + 1))
+BRANCH="master"
+LLVM_VERSIONS="28,29,30,31,32"
+OUTPUT_ON_FAILURE=0
+
 #Download, compile and install libelf if neccessary
 function get_libelf () {
 	LIBELF_DIR="libelf/"
@@ -42,6 +48,7 @@ function get_libelf () {
 		print "Installation of LibELF"
 		make install
 		cd ..
+		rm -rf libelf-0.8.9
 	fi
 }
 
@@ -132,6 +139,7 @@ function get_llvm() {
 		print "Installation of LLVM $1"
 		make install REQUIRES_RTTI=1
 		cd ../../
+		rm -rf $dir
 	fi
 }
 
@@ -187,7 +195,11 @@ function test_canal() {
 	print "Testing CANAL for LLVM $1"
 	get_llvm $1
 	move_to_build $1
-	CTEST_OUTPUT_ON_FAILURE=1 make test
+	if [ $OUTPUT_ON_FAILURE -eq 1 ]; then
+		CTEST_OUTPUT_ON_FAILURE=1 make test
+	else
+		unset CTEST_OUTPUT_ON_FAILURE; make test
+	fi
 	cd ..
 }
 
@@ -203,23 +215,22 @@ function get_canal() {
 	git checkout $1
 	cd ..
 }
-#Default parameters
-BRANCH="master"
-LLVM_VERSIONS="28,29,30,31,32"
+
 function usage() {
 	echo "Download script for canal and llvm"
 	echo "Options:"
 	echo -e "\t--(b)ranch - which branch to checkout (default $BRANCH)"
 	echo -e "\t--(l)lvm - which llvm versions to download (separated by commas, default $LLVM_VERSIONS)"
 	echo -e "\t--(t)hreads - number of threads to compile in (default $THREADS)"
+	echo -e "\t--(o)utput-on-failure - prints output on failure during tests (default $OUTPUT_ON_FAILURE)"
 #	echo -e "\t--(p)aths - prepare paths for certain canal build version and move to the build directory (no compilation)"
 	echo -e "\t--(u)sage,(h)elp - this help"
 	exit 1
 }
 
 #Parse input arguments
-#ARGS=`getopt -o "b:,l:,t:,u,h,p:" -l "branch:,llvm:,threads:,usage,help,paths:" -n "download_script" -- "$@"`
-ARGS=`getopt -o "b:,l:,t:,u,h" -l "branch:,llvm:,threads:,usage,help" -n "download_script" -- "$@"`
+#ARGS=`getopt -o "b:,l:,t:,u,h,p:,o" -l "branch:,llvm:,threads:,usage,help,paths:,output-on-failure" -n "download_script" -- "$@"`
+ARGS=`getopt -o "b:,l:,t:,u,h,o" -l "branch:,llvm:,threads:,usage,help,output-on-failure" -n "download_script" -- "$@"`
 if [ $? -ne 0 ]; then
 	usage
 fi
@@ -237,6 +248,9 @@ while true; do
 			shift 2;;
 		-u | --usage | -h | --help)
 			usage
+			shift;;
+		-o | --output-on-failure)
+			OUTPUT_ON_FAILURE=1
 			shift;;
 #		-p | --paths)
 #			move_to_build $2

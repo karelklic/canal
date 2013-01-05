@@ -157,6 +157,10 @@ protected:
                                 const Domain &b,
                                 APIntUtils::Operation operation1,
                                 APIntUtils::OperationWithOverflow operation2);
+
+    Set &applyOperationDivision(const Domain &a,
+                                const Domain &b,
+                                APIntUtils::Operation operation1);
 };
 
 } // namespace Integer

@@ -305,25 +305,25 @@ Set::mul(const Domain &a, const Domain &b)
 Set &
 Set::udiv(const Domain &a, const Domain &b)
 {
-    return applyOperation(a, b, &llvm::APInt::udiv, NULL);
+    return applyOperationDivision(a, b, &llvm::APInt::udiv);
 }
 
 Set &
 Set::sdiv(const Domain &a, const Domain &b)
 {
-    return applyOperation(a, b, &llvm::APInt::sdiv, NULL);
+    return applyOperationDivision(a, b, &llvm::APInt::sdiv);
 }
 
 Set &
 Set::urem(const Domain &a, const Domain &b)
 {
-    return applyOperation(a, b, &llvm::APInt::urem, NULL);
+    return applyOperationDivision(a, b, &llvm::APInt::urem);
 }
 
 Set &
 Set::srem(const Domain &a, const Domain &b)
 {
-    return applyOperation(a, b, &llvm::APInt::srem, NULL);
+    return applyOperationDivision(a, b, &llvm::APInt::srem);
 }
 
 Set &
@@ -681,6 +681,48 @@ Set::applyOperation(const Domain &a,
                     return *this;
                 }
             }
+
+            if (mValues.size() > SET_THRESHOLD)
+            {
+                setTop();
+                return *this;
+            }
+        }
+    }
+
+    return *this;
+}
+
+Set &
+Set::applyOperationDivision(const Domain &a,
+                            const Domain &b,
+                            APIntUtils::Operation operation1)
+{
+    const Set &aa = dynCast<const Set&>(a),
+        &bb = dynCast<const Set&>(b);
+
+    CANAL_ASSERT(this != &a && this != &b);
+    setBottom();
+    if (aa.isTop() || bb.isTop())
+    {
+        setTop();
+        return *this;
+    }
+
+    CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
+    APIntUtils::USet::const_iterator aaIt = aa.mValues.begin();
+
+    if (bb.mValues.size() == 1 && *bb.mValues.begin() == 0) { //Only division by zero
+        setTop();
+        return *this;
+    }
+    for (; aaIt != aa.mValues.end(); ++aaIt)
+    {
+        APIntUtils::USet::const_iterator bbIt = bb.mValues.begin();
+        for (; bbIt != bb.mValues.end(); ++bbIt)
+        {
+            if (*bbIt == 0) continue; //Avoid division by zero
+            mValues.insert(((*aaIt).*(operation1))(*bbIt));
 
             if (mValues.size() > SET_THRESHOLD)
             {

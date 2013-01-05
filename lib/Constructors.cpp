@@ -165,7 +165,7 @@ Constructors::create(const llvm::Constant &value,
             result = createBitCast(exprValue, *variable, place);
             break;
         default:
-            CANAL_NOT_IMPLEMENTED();
+            CANAL_FATAL_ERROR("Instruction not implemented: " << exprValue.getOpcodeName());
         }
 
         if (deleteVariable)
