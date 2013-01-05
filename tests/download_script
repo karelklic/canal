@@ -31,7 +31,7 @@ function get_libelf () {
 	LIBELF_DIR="libelf/"
 	if [ ! -d $LIBELF_DIR ]; then
 		print "Download of LibELF"
-		wget http://www.mr511.de/software/libelf-0.8.9.tar.gz
+		wget -c http://www.mr511.de/software/libelf-0.8.9.tar.gz
 		tar xzf libelf-0.8.9.tar.gz
 		rm libelf-0.8.9.tar.gz
 		cd libelf-0.8.9
@@ -44,24 +44,28 @@ function get_libelf () {
 		cd ..
 	fi
 }
+
 #Download CompilerRT (needed for llvm >= 3.1)
 function download_compiler_rt() {
 	print "Downlad of CompilerRT for LLVM $1"
 	declare -A urls dirs
-	urls=([31]="http://llvm.org/releases/3.1/compiler-rt-3.1.src.tar.gz")
-	dirs=([31]="compiler-rt.3.1.src")
-	
+	urls=([31]="http://llvm.org/releases/3.1/compiler-rt-3.1.src.tar.gz"
+	      [32]="http://llvm.org/releases/3.2/compiler-rt-3.2.src.tar.gz")
+	dirs=([31]="compiler-rt-3.1.src"
+	      [32]="compiler-rt-3.2.src")
+
 	url=${urls[$1]}
 	archive=`basename $url`
 	dir=${dirs[$1]}
-	
+
 	cd projects
-	wget $url
+	wget -c $url
 	tar xzf $archive
 	rm $archive
 	mv $dir compiler-rt
 	cd ..
 }
+
 #Download Clang
 function download_clang() {
 	print "Download of Clang for LLVM $1"
@@ -69,21 +73,26 @@ function download_clang() {
 	urls=([28]="http://llvm.org/releases/2.8/clang-2.8.tgz"
 		[29]="http://llvm.org/releases/2.9/clang-2.9.tgz"
 		[30]="http://llvm.org/releases/3.0/clang-3.0.tar.gz"
-		[31]="http://llvm.org/releases/3.1/clang-3.1.src.tar.gz")
-	dirs=([28]="clang-2.8" [29]="clang-2.9" [30]="clang-3.0.src" [31]="clang-3.1.src")
-	
+		[31]="http://llvm.org/releases/3.1/clang-3.1.src.tar.gz"
+		[32]="http://llvm.org/releases/3.2/clang-3.2.src.tar.gz")
+	dirs=([28]="clang-2.8"
+	      [29]="clang-2.9"
+	      [30]="clang-3.0.src"
+	      [31]="clang-3.1.src"
+	      [32]="clang-3.2.src")
+
 	url=${urls[$1]}
 	archive=`basename $url`
 	dir=${dirs[$1]}
-	
+
 	cd tools
-	wget $url
+	wget -c $url
 	tar xzf $archive
 	rm $archive
 	mv $dir clang
 	cd ..
 	if [ $1 -ge 31 ]; then
-		download_compiler_rt $1;
+		download_compiler_rt $1
 	fi
 }
 
@@ -96,14 +105,20 @@ function get_llvm() {
 		urls=([28]="http://llvm.org/releases/2.8/llvm-2.8.tgz"
 			[29]="http://llvm.org/releases/2.9/llvm-2.9.tgz"
 			[30]="http://llvm.org/releases/3.0/llvm-3.0.tar.gz"
-			[31]="http://llvm.org/releases/3.1/llvm-3.1.src.tar.gz")
-		dirs=([28]="llvm-2.8" [29]="llvm-2.9" [30]="llvm-3.0.src" [31]="llvm-3.1.src")
-		
+			[31]="http://llvm.org/releases/3.1/llvm-3.1.src.tar.gz"
+			[32]="http://llvm.org/releases/3.2/llvm-3.2.src.tar.gz")
+
+		dirs=([28]="llvm-2.8"
+		      [29]="llvm-2.9"
+		      [30]="llvm-3.0.src"
+		      [31]="llvm-3.1.src"
+		      [32]="llvm-3.2.src")
+
 		url=${urls[$1]}
 		archive=`basename $url`
 		dir=${dirs[$1]}
-		
-		wget $url
+
+		wget -c $url
 		tar xzf $archive
 		rm $archive
 		cd $dir
@@ -113,16 +128,18 @@ function get_llvm() {
 		print "Configuration of LLVM $1"
 		../configure --prefix=$BASE_DIR/$LLVM_DIR
 		print "Compilation of LLVM $1"
-		make -j $THREADS
+		make -j $THREADS REQUIRES_RTTI=1
 		print "Installation of LLVM $1"
-		make install
+		make install REQUIRES_RTTI=1
 		cd ../../
 	fi
 }
+
 #Handle CMAKE_PREFIX_PATH and PATH arguments for build & tests of canal:
 # save previous state and create new one, then restore it
 OLD_CMAKE_PREFIX_PATH=""
 OLD_PATH=""
+
 function set_paths() {
 	restore_paths
 	OLD_CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH
@@ -132,6 +149,7 @@ function set_paths() {
 	export OLD_CMAKE_PREFIX_PATH=$OLD_CMAKE_PREFIX_PATH
 	export OLD_PATH=$OLD_PATH
 }
+
 function restore_paths() {
 	if [ -n "$OLD_CMAKE_PREFIX_PATH" ]; then
 		export CMAKE_PREFIX_PATH=$OLD_CMAKE_PREFIX_PATH
@@ -142,6 +160,7 @@ function restore_paths() {
 		export OLD_PATH=""
 	fi
 }
+
 function move_to_build() {
 	CANAL_BUILD_DIR="canal-build-$1/"
 	set_paths
@@ -150,16 +169,17 @@ function move_to_build() {
 	fi
 	cd $CANAL_BUILD_DIR
 }
+
 function build_canal() {
 	restore_paths
 	get_libelf
 	get_llvm $1
-	
+
 	print "Building CANAL for LLVM $1"
 	move_to_build $1
 	rm -rf *
 	cmake $BASE_DIR/$CANAL_DIR
-	make -j $THREADS	
+	make -j $THREADS
 	cd ..
 }
 
@@ -177,7 +197,7 @@ function get_canal() {
 	if [ ! -d ${CANAL_DIR%/} ]; then
 		git clone https://github.com/karelklic/canal.git
 	fi
-	
+
 	cd canal
 	git pull
 	git checkout $1
@@ -185,7 +205,7 @@ function get_canal() {
 }
 #Default parameters
 BRANCH="master"
-LLVM_VERSIONS="28,29,30,31"
+LLVM_VERSIONS="28,29,30,31,32"
 function usage() {
 	echo "Download script for canal and llvm"
 	echo "Options:"
@@ -227,6 +247,7 @@ while true; do
 			break;;
 	esac
 done
+
 #Parse LLVM_VERSIONS
 OIFS="$IFS"
 IFS=','
@@ -239,7 +260,7 @@ get_canal $BRANCH
 #Build all canal versions
 for i in `seq 0 $((${#LLVM_VERSIONS[@]} - 1))`; do
 	VERSION=${LLVM_VERSIONS[$i]}
-	if [ $VERSION -lt 28 -o $VERSION -gt 31 ]; then
+	if [ $VERSION -lt 28 -o $VERSION -gt 32 ]; then
 		echo "Invalid version: $VERSION";
 		usage
 	fi
@@ -251,4 +272,5 @@ for i in `seq 0 $((${#LLVM_VERSIONS[@]} - 1))`; do
 	test_canal $VERSION
 done
 restore_paths
-exit 0;
+
+exit 0

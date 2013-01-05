@@ -57,6 +57,3 @@ install-exec-hook:
 	$(LN_S)	-f $(DESTDIR)$(bindir)/canal$(EXEEXT) gcc$(EXEEXT) && \
 	$(LN_S)	-f $(DESTDIR)$(bindir)/canal$(EXEEXT) g++$(EXEEXT) && \
 	$(LN_S)	-f $(DESTDIR)$(bindir)/canal$(EXEEXT) ld$(EXEEXT)
-
-
-
