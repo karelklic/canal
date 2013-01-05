@@ -34,7 +34,7 @@ OUTPUT_ON_FAILURE=0
 
 #Download, compile and install libelf if neccessary
 function get_libelf () {
-	LIBELF_DIR="libelf/"
+	LIBELF_DIR="libelf-build/"
 	if [ ! -d $LIBELF_DIR ]; then
 		print "Download of LibELF"
 		wget -c http://www.mr511.de/software/libelf-0.8.9.tar.gz
@@ -42,7 +42,7 @@ function get_libelf () {
 		rm libelf-0.8.9.tar.gz
 		cd libelf-0.8.9
 		print "Configuration of LibELF"
-		./configure --prefix=$BASE_DIR/libelf
+		./configure --prefix=$BASE_DIR/$LIBELF_DIR
 		print "Compilation of LibELF"
 		make -j $THREADS
 		print "Installation of LibELF"
@@ -135,9 +135,9 @@ function get_llvm() {
 		print "Configuration of LLVM $1"
 		../configure --prefix=$BASE_DIR/$LLVM_DIR
 		print "Compilation of LLVM $1"
-		make -j $THREADS REQUIRES_RTTI=1
+		REQUIRES_RTTI=1 make -j $THREADS
 		print "Installation of LLVM $1"
-		make install REQUIRES_RTTI=1
+		REQUIRES_RTTI=1 make install
 		cd ../../
 		rm -rf $dir
 	fi
