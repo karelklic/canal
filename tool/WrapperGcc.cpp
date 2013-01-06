@@ -242,6 +242,7 @@ assemblyOnly_changeCommandOutput(const clang::driver::Command &command,
     clang::driver::Arg *arg = inputArgList->getLastArg(clang::driver::cc1options::OPT_o);
 #else
     // TODO
+    clang::driver::Arg *arg = inputArgList->getLastArg(clang::driver::cc1options::OPT_o);
 #endif
 
     // Change the output.
