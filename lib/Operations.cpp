@@ -761,7 +761,7 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
 
     std::vector<Domain*> newValues;
 
-#if LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1
+#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 0
     llvm::SmallVector<int, 16> shuffleMask =
         instruction.getShuffleMask();
 #else

@@ -131,7 +131,11 @@ filterDriverArguments(int argc,
         if ((*it)->getOption().matches(clang::driver::options::OPT_dumpmachine)
             || (*it)->getOption().matches(clang::driver::options::OPT_dumpversion)
             || (*it)->getOption().matches(clang::driver::options::OPT__print_diagnostic_categories)
+#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+            || (*it)->getOption().matches(clang::driver::options::OPT_help)
+#else
             || (*it)->getOption().matches(clang::driver::options::OPT__help)
+#endif
             || (*it)->getOption().matches(clang::driver::options::OPT__help_hidden)
             || (*it)->getOption().matches(clang::driver::options::OPT__version)
             || (*it)->getOption().matches(clang::driver::options::OPT_v)
@@ -208,7 +212,12 @@ assemblyOnly_changeCommandOutput(const clang::driver::Command &command,
                                  clang::driver::Driver &driver,
                                  llvm::raw_ostream &log)
 {
+#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+    clang::driver::OptTable *table = clang::driver::createDriverOptTable();
+#else
     clang::driver::OptTable *table = clang::driver::createCC1OptTable();
+#endif
+
     unsigned missingArgIndex, missingArgCount;
     clang::driver::InputArgList *inputArgList;
     inputArgList = table->ParseArgs(const_cast<const char**>(command.getArguments().begin()),
@@ -216,15 +225,26 @@ assemblyOnly_changeCommandOutput(const clang::driver::Command &command,
                                     missingArgIndex,
                                     missingArgCount);
 
-#if LLVM_VERSION_MAJOR > 2
-    //inputArgList->eraseArg(clang::driver::cc1options::OPT_emit_obj);
+    // TODO: some commands seems to not generate usual output,
+    // see -emit-pth, -emit-pch, -emit-obj, -emit-module.
+    // In such cases, we probably should not run LLVM.
+    // inputArgList->eraseArg(clang::driver::cc1options::OPT_emit_obj);
+
+#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+    inputArgList->eraseArg(clang::driver::options::OPT_coverage_file);
+    inputArgList->eraseArg(clang::driver::options::OPT_dependency_file);
+    inputArgList->eraseArg(clang::driver::options::OPT_MT);
+    clang::driver::Arg *arg = inputArgList->getLastArg(clang::driver::options::OPT_o);
+#elif LLVM_VERSION_MAJOR > 2
     inputArgList->eraseArg(clang::driver::cc1options::OPT_coverage_file);
     inputArgList->eraseArg(clang::driver::cc1options::OPT_dependency_file);
     inputArgList->eraseArg(clang::driver::cc1options::OPT_MT);
+    clang::driver::Arg *arg = inputArgList->getLastArg(clang::driver::cc1options::OPT_o);
+#else
+    // TODO
 #endif
 
     // Change the output.
-    clang::driver::Arg *arg = inputArgList->getLastArg(clang::driver::cc1options::OPT_o);
     if (arg)
     {
         if (arg->getValues().size() == 1)
@@ -335,20 +355,28 @@ runClang(int argc, char **argv)
 
     std::string diagnosticString;
     llvm::raw_string_ostream diagnosticStream(diagnosticString);
+
+#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+    clang::TextDiagnosticPrinter *textDiagnosticPrinter
+        = new clang::TextDiagnosticPrinter(diagnosticStream,
+                                           NULL);
+#else
     clang::TextDiagnosticPrinter *textDiagnosticPrinter
         = new clang::TextDiagnosticPrinter(diagnosticStream,
                                            clang::DiagnosticOptions());
+#endif
 
-#if LLVM_VERSION_MAJOR > 2
+#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+    llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diagID(new clang::DiagnosticIDs());
+    clang::DiagnosticsEngine diagnosticsEngine(diagID, NULL, textDiagnosticPrinter);
+#elif LLVM_VERSION_MAJOR > 2
     llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diagID(new clang::DiagnosticIDs());
     clang::DiagnosticsEngine diagnosticsEngine(diagID, textDiagnosticPrinter);
-#else
-#  if LLVM_VERSION_MINOR > 8
+#elif LLVM_VERSION_MINOR > 8
     llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diagID(new clang::DiagnosticIDs());
     clang::Diagnostic diagnosticsEngine(diagID, textDiagnosticPrinter);
-#  else
+#else
     clang::Diagnostic diagnosticsEngine(textDiagnosticPrinter);
-#  endif
 #endif
 
     clang::driver::Driver driver(argv[0],
