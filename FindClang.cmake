@@ -32,18 +32,24 @@ FIND_AND_ADD_CLANG_LIB(clangParse)
 FIND_AND_ADD_CLANG_LIB(clangLex)
 FIND_AND_ADD_CLANG_LIB(clangBasic)
 
+# Ubuntu ships clang in a single dynamic shared library.
+if (NOT CLANG_LIBS)
+  MESSAGE(STATUS "Clang not found")
+  find_library(CLANG_LIBS clang)
+endif (NOT CLANG_LIBS)
+
 MESSAGE(STATUS "Clang libs: " ${CLANG_LIBS})
 
-if(CLANG_LIBS)
+if (CLANG_LIBS)
   set(CLANG_FOUND TRUE)
-endif(CLANG_LIBS)
+endif (CLANG_LIBS)
 
-if(CLANG_FOUND)
+if (CLANG_FOUND)
   message(STATUS "Found Clang: ${CLANG_INCLUDE_DIRS}")
-else(CLANG_FOUND)
-  if(CLANG_FIND_REQUIRED)
+else (CLANG_FOUND)
+  if (CLANG_FIND_REQUIRED)
     message(FATAL_ERROR "Could NOT find Clang")
-  endif(CLANG_FIND_REQUIRED)
-endif(CLANG_FOUND)
+  endif (CLANG_FIND_REQUIRED)
+endif (CLANG_FOUND)
 
 endif (NOT LLVM_INCLUDE_DIRS OR NOT LLVM_LIBRARY_DIRS)
