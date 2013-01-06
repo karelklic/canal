@@ -118,8 +118,6 @@ AC_CONFIG_FILES([
     tests/Makefile
     tests/atlocal
     tool/Makefile
-    wrappers/config.py
-    wrappers/Makefile
 ])
 
 AC_OUTPUT
