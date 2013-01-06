@@ -34,7 +34,7 @@ FIND_AND_ADD_CLANG_LIB(clangBasic)
 
 # Ubuntu ships clang in a single dynamic shared library.
 if (NOT CLANG_LIBS)
-  find_library(CLANG_LIBS clang)
+  find_library(CLANG_LIBS clang HINTS ${LLVM_LIBRARY_DIRS})
 endif (NOT CLANG_LIBS)
 
 MESSAGE(STATUS "Clang libs: " ${CLANG_LIBS})

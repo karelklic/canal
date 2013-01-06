@@ -113,7 +113,7 @@ filterDriverArguments(int argc,
     clang::driver::ArgStringList result;
     result.push_back(argv[0]);
 
-#if LLVM_VERSION_MAJOR > 2
+#if CLANG_VERSION_MAJOR > 2
     clang::driver::InputArgList *inputArgList =
         driver.ParseArgStrings(llvm::ArrayRef<const char*>(argv + 1, argc - 1));
 #else
@@ -131,7 +131,7 @@ filterDriverArguments(int argc,
         if ((*it)->getOption().matches(clang::driver::options::OPT_dumpmachine)
             || (*it)->getOption().matches(clang::driver::options::OPT_dumpversion)
             || (*it)->getOption().matches(clang::driver::options::OPT__print_diagnostic_categories)
-#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+#if (CLANG_VERSION_MAJOR == 3 && CLANG_VERSION_MINOR > 1) || CLANG_VERSION_MAJOR > 3
             || (*it)->getOption().matches(clang::driver::options::OPT_help)
 #else
             || (*it)->getOption().matches(clang::driver::options::OPT__help)
@@ -212,7 +212,7 @@ assemblyOnly_changeCommandOutput(const clang::driver::Command &command,
                                  clang::driver::Driver &driver,
                                  llvm::raw_ostream &log)
 {
-#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+#if (CLANG_VERSION_MAJOR == 3 && CLANG_VERSION_MINOR > 1) || CLANG_VERSION_MAJOR > 3
     clang::driver::OptTable *table = clang::driver::createDriverOptTable();
 #else
     clang::driver::OptTable *table = clang::driver::createCC1OptTable();
@@ -230,12 +230,12 @@ assemblyOnly_changeCommandOutput(const clang::driver::Command &command,
     // In such cases, we probably should not run LLVM.
     // inputArgList->eraseArg(clang::driver::cc1options::OPT_emit_obj);
 
-#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+#if (CLANG_VERSION_MAJOR == 3 && CLANG_VERSION_MINOR > 1) || CLANG_VERSION_MAJOR > 3
     inputArgList->eraseArg(clang::driver::options::OPT_coverage_file);
     inputArgList->eraseArg(clang::driver::options::OPT_dependency_file);
     inputArgList->eraseArg(clang::driver::options::OPT_MT);
     clang::driver::Arg *arg = inputArgList->getLastArg(clang::driver::options::OPT_o);
-#elif LLVM_VERSION_MAJOR > 2
+#elif CLANG_VERSION_MAJOR > 2
     inputArgList->eraseArg(clang::driver::cc1options::OPT_coverage_file);
     inputArgList->eraseArg(clang::driver::cc1options::OPT_dependency_file);
     inputArgList->eraseArg(clang::driver::cc1options::OPT_MT);
@@ -357,7 +357,7 @@ runClang(int argc, char **argv)
     std::string diagnosticString;
     llvm::raw_string_ostream diagnosticStream(diagnosticString);
 
-#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+#if (CLANG_VERSION_MAJOR == 3 && CLANG_VERSION_MINOR > 1) || CLANG_VERSION_MAJOR > 3
     clang::TextDiagnosticPrinter *textDiagnosticPrinter
         = new clang::TextDiagnosticPrinter(diagnosticStream,
                                            NULL);
@@ -367,13 +367,13 @@ runClang(int argc, char **argv)
                                            clang::DiagnosticOptions());
 #endif
 
-#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+#if (CLANG_VERSION_MAJOR == 3 && CLANG_VERSION_MINOR > 1) || CLANG_VERSION_MAJOR > 3
     llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diagID(new clang::DiagnosticIDs());
     clang::DiagnosticsEngine diagnosticsEngine(diagID, NULL, textDiagnosticPrinter);
-#elif LLVM_VERSION_MAJOR > 2
+#elif CLANG_VERSION_MAJOR > 2
     llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diagID(new clang::DiagnosticIDs());
     clang::DiagnosticsEngine diagnosticsEngine(diagID, textDiagnosticPrinter);
-#elif LLVM_VERSION_MINOR > 8
+#elif CLANG_VERSION_MINOR > 8
     llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diagID(new clang::DiagnosticIDs());
     clang::Diagnostic diagnosticsEngine(diagID, textDiagnosticPrinter);
 #else
@@ -381,14 +381,14 @@ runClang(int argc, char **argv)
 #endif
 
     clang::driver::Driver driver(argv[0],
-#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 0
+#if (CLANG_VERSION_MAJOR == 3 && CLANG_VERSION_MINOR > 0) || CLANG_VERSION_MAJOR > 3
                                  llvm::sys::getDefaultTargetTriple(),
 #else
                                  llvm::sys::getHostTriple(),
 #endif
                                  "a.out",
                                  /*IsProduction*/true,
-#if LLVM_VERSION_MAJOR == 2
+#if CLANG_VERSION_MAJOR == 2
                                  /*IsCXXProduction*/true,
 #endif
                                  diagnosticsEngine);
@@ -401,7 +401,7 @@ runClang(int argc, char **argv)
         return;
 
     llvm::InitializeAllTargets();
-#if LLVM_VERSION_MAJOR > 2
+#if CLANG_VERSION_MAJOR > 2
     llvm::OwningPtr<clang::driver::Compilation>
         compilation(driver.BuildCompilation(clangArguments));
 #else
@@ -425,19 +425,19 @@ runClang(int argc, char **argv)
 
     // TODO: do not execute compilation for gcc tasks.
     int result = 0;
-#if LLVM_VERSION_MAJOR > 2
+#if CLANG_VERSION_MAJOR > 2
     const clang::driver::Command *failingCommand = 0;
 #endif
     if (compilation.get())
     {
-#if LLVM_VERSION_MAJOR > 2
+#if CLANG_VERSION_MAJOR > 2
         result = driver.ExecuteCompilation(*compilation, failingCommand);
 #else
         result = driver.ExecuteCompilation(*compilation);
 #endif
     }
 
-#if LLVM_VERSION_MAJOR > 2
+#if CLANG_VERSION_MAJOR > 2
     // If result status is < 0, then the driver command signalled an
     // error.  In this case, generate additional diagnostic
     // information if possible.
