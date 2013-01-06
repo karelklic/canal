@@ -24,6 +24,11 @@ public:
     /// Destructor.  Deletes the contents of the container.
     virtual ~Container();
 
+    static bool classof(const Domain *value)
+    {
+        return value->getKind() == IntegerContainerKind;
+    }
+
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual Container *clone() const;

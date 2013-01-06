@@ -99,6 +99,11 @@ public:
     /// Does the interval represent signle bit that is set to 0?
     bool isFalse() const;
 
+    static bool classof(const Domain *value)
+    {
+        return value->getKind() == IntegerBitfieldKind;
+    }
+
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual Bitfield *clone() const;

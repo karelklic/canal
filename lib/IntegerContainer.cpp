@@ -12,7 +12,9 @@ namespace Canal {
 namespace Integer {
 
 Container::Container(const Environment &environment)
-    : Domain(environment) {}
+    : Domain(environment, Domain::IntegerContainerKind)
+{
+}
 
 Container::Container(const Container &value)
     : Domain(value)
@@ -74,7 +76,7 @@ Container::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const Container *container = dynCast<const Container*>(&value);
+    const Container *container = llvm::dyn_cast<Container>(&value);
     if (!container)
         return false;
 
@@ -112,7 +114,7 @@ Container &
 Container::join(const Domain &value)
 {
     std::vector<Domain*>::iterator it = mValues.begin();
-    const Container &container = dynCast<const Container&>(value);
+    const Container &container = llvm::cast<Container>(value);
     CANAL_ASSERT(mValues.size() == container.mValues.size());
     std::vector<Domain*>::const_iterator it2 = container.mValues.begin();
     for (; it != mValues.end(); ++it, ++it2)
@@ -201,8 +203,8 @@ binaryOperation(Container &result,
                 const Domain &b,
                 Domain::BinaryOperation operation)
 {
-    const Container &aa = dynCast<const Container&>(a),
-        &bb = dynCast<const Container&>(b);
+    const Container &aa = llvm::cast<Container>(a),
+        &bb = llvm::cast<Container>(b);
 
     std::vector<Domain*>::iterator it(result.mValues.begin());
     std::vector<Domain*>::const_iterator ita = aa.mValues.begin(),
@@ -297,8 +299,8 @@ Container::icmp(const Domain &a, const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
     const Pointer::Pointer
-        *aPointer = dynCast<const Pointer::Pointer*>(&a),
-        *bPointer = dynCast<const Pointer::Pointer*>(&b);
+        *aPointer = llvm::dyn_cast<Pointer::Pointer>(&a),
+        *bPointer = llvm::dyn_cast<Pointer::Pointer>(&b);
 
     if (aPointer && bPointer)
     {
@@ -349,8 +351,8 @@ Container::icmp(const Domain &a, const Domain &b,
         return *this;
     }
 
-    const Container &aa = dynCast<const Container&>(a),
-        &bb = dynCast<const Container&>(b);
+    const Container &aa = llvm::cast<Container>(a),
+        &bb = llvm::cast<Container>(b);
 
     std::vector<Domain*>::iterator it(mValues.begin());
     std::vector<Domain*>::const_iterator ita = aa.mValues.begin(),
@@ -378,7 +380,7 @@ castOperation(Container &result,
               const Domain &value,
               Domain::CastOperation operation)
 {
-    const Container &container = dynCast<const Container&>(value);
+    const Container &container = llvm::cast<Container>(value);
     std::vector<Domain*>::iterator it = result.mValues.begin();
     std::vector<Domain*>::const_iterator itc = container.mValues.begin();
     for (; it != result.mValues.end(); ++it, ++itc)

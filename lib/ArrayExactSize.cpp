@@ -11,7 +11,7 @@ namespace Array {
 ExactSize::ExactSize(const Environment &environment,
                      uint64_t size,
                      const Domain &value)
-    : Domain(environment)
+    : Domain(environment, Domain::ArrayExactSizeKind)
 {
     for (uint64_t i = 0; i < size; ++i)
         mValues.push_back(value.clone());
@@ -19,7 +19,7 @@ ExactSize::ExactSize(const Environment &environment,
 
 ExactSize::ExactSize(const Environment &environment,
                      const std::vector<Domain*> &values)
-    : Domain(environment), mValues(values)
+    : Domain(environment, Domain::ArrayExactSizeKind), mValues(values)
 {
 }
 
@@ -87,7 +87,7 @@ ExactSize::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const ExactSize *array = dynCast<const ExactSize*>(&value);
+    const ExactSize *array = llvm::dyn_cast<ExactSize>(&value);
     if (!array)
         return false;
 
@@ -124,7 +124,7 @@ ExactSize::operator>(const Domain& value) const
 ExactSize &
 ExactSize::join(const Domain &value)
 {
-    const ExactSize &val = dynCast<const ExactSize&>(value);
+    const ExactSize &val = llvm::cast<ExactSize>(value);
 
     CANAL_ASSERT_MSG(val.size() == size(),
                      "Operations with arrays "
@@ -143,7 +143,7 @@ ExactSize::join(const Domain &value)
 ExactSize &
 ExactSize::meet(const Domain &value)
 {
-    const ExactSize &val = dynCast<const ExactSize&>(value);
+    const ExactSize &val = llvm::cast<ExactSize>(value);
 
     CANAL_ASSERT_MSG(val.size() == size(),
                      "Operations with arrays "
@@ -221,8 +221,8 @@ binaryOperation(ExactSize &result,
                 const Domain &b,
                 Domain::BinaryOperation operation)
 {
-    const ExactSize &aa = dynCast<const ExactSize&>(a),
-        &bb = dynCast<const ExactSize&>(b);
+    const ExactSize &aa = llvm::cast<ExactSize>(a),
+        &bb = llvm::cast<ExactSize>(b);
 
     CANAL_ASSERT_MSG(aa.size() == bb.size() && result.size() == aa.size(),
                      "Binary operations with arrays "
@@ -355,8 +355,8 @@ cmpOperation(ExactSize &result,
              llvm::CmpInst::Predicate predicate,
              Domain::CmpOperation operation)
 {
-    const ExactSize &aa = dynCast<const ExactSize&>(a),
-        &bb = dynCast<const ExactSize&>(b);
+    const ExactSize &aa = llvm::cast<ExactSize>(a),
+        &bb = llvm::cast<ExactSize>(b);
 
     CANAL_ASSERT_MSG(result.size() == aa.size() &&
                      aa.size() == bb.size(),

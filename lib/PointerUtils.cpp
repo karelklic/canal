@@ -13,11 +13,11 @@ Utils::addTarget(Canal::Domain &pointer,
                  const std::vector<Domain *> &offsets,
                  Canal::Domain *numericOffset)
 {
-    dynCast<Pointer&>(pointer).addTarget(type,
-                                         place,
-                                         target,
-                                         offsets,
-                                         numericOffset);
+    llvm::cast<Pointer>(pointer).addTarget(type,
+                                           place,
+                                           target,
+                                           offsets,
+                                           numericOffset);
 }
 
 } // namespace Pointer

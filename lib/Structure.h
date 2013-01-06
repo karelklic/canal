@@ -20,6 +20,11 @@ public:
 
     virtual ~Structure();
 
+    static bool classof(const Domain *value)
+    {
+        return value->getKind() == StructureKind;
+    }
+
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual Structure *clone() const;

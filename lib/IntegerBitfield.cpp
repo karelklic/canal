@@ -9,7 +9,7 @@ namespace Integer {
 
 Bitfield::Bitfield(const Environment &environment,
                    unsigned bitWidth)
-    : Domain(environment),
+    : Domain(environment, Domain::IntegerBitfieldKind),
       mZeroes(bitWidth, 0),
       mOnes(bitWidth, 0)
 {
@@ -17,7 +17,7 @@ Bitfield::Bitfield(const Environment &environment,
 
 Bitfield::Bitfield(const Environment &environment,
                    const llvm::APInt &number)
-    : Domain(environment),
+    : Domain(environment, Domain::IntegerBitfieldKind),
       mZeroes(~number),
       mOnes(number)
 {
@@ -239,7 +239,7 @@ Bitfield::operator==(const Domain& value) const
     if (this == &value)
         return true;
 
-    const Bitfield *other = dynCast<const Bitfield*>(&value);
+    const Bitfield *other = llvm::dyn_cast<Bitfield>(&value);
     if (!other)
         return false;
 
@@ -261,7 +261,7 @@ Bitfield::operator>(const Domain& value) const
 Bitfield &
 Bitfield::join(const Domain &value)
 {
-    const Bitfield &bits = dynCast<const Bitfield&>(value);
+    const Bitfield &bits = llvm::cast<Bitfield>(value);
     mZeroes |= bits.mZeroes;
     mOnes |= bits.mOnes;
     return *this;
@@ -372,20 +372,27 @@ Bitfield::srem(const Domain &a, const Domain &b)
     return *this;
 }
 
-void inline
-Bitfield::shift(const Domain &a, const Domain &b, bool right, int shiftValue) {
-    const Bitfield &aa = dynCast<const Bitfield&>(a),
-        &bb = dynCast<const Bitfield&>(b);
+void
+Bitfield::shift(const Domain &a, const Domain &b, bool right, int shiftValue)
+{
+    const Bitfield &aa = llvm::cast<Bitfield>(a),
+        &bb = llvm::cast<Bitfield>(b);
+
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth() &&
             getBitWidth() == aa.getBitWidth());
-    if (aa.isTop() || bb.isTop()) {
+
+    if (aa.isTop() || bb.isTop())
+    {
         setTop();
         return;
     }
-    if (aa.isBottom() || bb.isBottom()) {
+
+    if (aa.isBottom() || bb.isBottom())
+    {
         setBottom();
         return;
     }
+
     unsigned counts[4] = {0, 0, 0, 0}; //Bottoms, zeros, ones, tops
     llvm::APInt minShift_, maxShift_;
     if (!bb.unsignedMin(minShift_) || !bb.unsignedMax(maxShift_))
@@ -442,7 +449,7 @@ Bitfield::lshr(const Domain &a, const Domain &b)
 Bitfield &
 Bitfield::ashr(const Domain &a, const Domain &b)
 {
-    const Bitfield &aa = dynCast<const Bitfield&>(a);
+    const Bitfield &aa = llvm::cast<Bitfield>(a);
     shift(a, b, true, aa.getBitValue(aa.getBitWidth() - 1));
     return *this;
 }
@@ -453,8 +460,8 @@ bitOperation(Bitfield &result,
              const Domain &b,
              int(*operation)(int,int))
 {
-    const Bitfield &aa = dynCast<const Bitfield&>(a),
-        &bb = dynCast<const Bitfield&>(b);
+    const Bitfield &aa = llvm::cast<Bitfield>(a),
+        &bb = llvm::cast<Bitfield>(b);
 
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth() &&
                  result.getBitWidth() == aa.getBitWidth());
@@ -639,8 +646,8 @@ Bitfield::icmp(const Domain &a, const Domain &b,
                llvm::CmpInst::Predicate predicate)
 {
 
-    const Bitfield &aa = dynCast<const Bitfield&>(a),
-            &bb = dynCast<const Bitfield&>(b);
+    const Bitfield &aa = llvm::cast<Bitfield>(a),
+            &bb = llvm::cast<Bitfield>(b);
 
     //If you do not compare only one bit, TOP value means any result
     if (aa.getBitWidth() > 1 && (aa.isTop() || bb.isTop()))
@@ -781,8 +788,8 @@ Bitfield &
 Bitfield::fcmp(const Domain &a, const Domain &b,
                llvm::CmpInst::Predicate predicate)
 {
-    const Float::Interval &aa = dynCast<const Float::Interval&>(a),
-        &bb = dynCast<const Float::Interval&>(b);
+    const Float::Interval &aa = llvm::cast<Float::Interval>(a),
+        &bb = llvm::cast<Float::Interval>(b);
 
     int result = aa.compare(bb, predicate);
     switch (result)
@@ -811,7 +818,7 @@ Bitfield::fcmp(const Domain &a, const Domain &b,
 Bitfield &
 Bitfield::trunc(const Domain &value)
 {
-    const Bitfield &bitfield = dynCast<const Bitfield&>(value);
+    const Bitfield &bitfield = llvm::cast<Bitfield>(value);
     mZeroes = APIntUtils::trunc(bitfield.mZeroes, getBitWidth());
     mOnes = APIntUtils::trunc(bitfield.mOnes, getBitWidth());
     return *this;
@@ -820,7 +827,7 @@ Bitfield::trunc(const Domain &value)
 Bitfield &
 Bitfield::zext(const Domain &value)
 {
-    const Bitfield &bitfield = dynCast<const Bitfield&>(value);
+    const Bitfield &bitfield = llvm::cast<Bitfield>(value);
     mZeroes = APIntUtils::zext(bitfield.mZeroes, getBitWidth());
     mOnes = APIntUtils::zext(bitfield.mOnes, getBitWidth());
 
@@ -833,7 +840,7 @@ Bitfield::zext(const Domain &value)
 Bitfield &
 Bitfield::sext(const Domain &value)
 {
-    const Bitfield &bitfield = dynCast<const Bitfield&>(value);
+    const Bitfield &bitfield = llvm::cast<Bitfield>(value);
     mZeroes = APIntUtils::sext(bitfield.mZeroes, getBitWidth());
     mOnes = APIntUtils::sext(bitfield.mOnes, getBitWidth());
     return *this;

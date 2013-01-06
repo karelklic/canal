@@ -17,4 +17,3 @@ find_package_handle_standard_args(
     READLINE_INCLUDE_DIRS)
 
 mark_as_advanced(READLINE_INCLUDE_DIRS READLINE_LIBRARIES)
-

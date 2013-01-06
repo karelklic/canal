@@ -30,6 +30,11 @@ public:
 
     virtual ~SingleItem();
 
+    static bool classof(const Domain *value)
+    {
+        return value->getKind() == ArraySingleItemKind;
+    }
+
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual SingleItem *clone() const;

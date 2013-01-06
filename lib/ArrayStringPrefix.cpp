@@ -6,14 +6,14 @@ namespace Canal {
 namespace Array {
 
 StringPrefix::StringPrefix(const Environment &environment)
-    : Domain(environment)
+    : Domain(environment, Domain::ArrayStringPrefixKind)
 {
     mIsBottom = true;
 }
 
 StringPrefix::StringPrefix(const Environment &environment,
-                     const std::string &value)
-    : Domain(environment)
+                           const std::string &value)
+    : Domain(environment, Domain::ArrayStringPrefixKind)
 {
     mPrefix = value;
     mIsBottom = false;
@@ -65,7 +65,7 @@ StringPrefix::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const StringPrefix *array = dynCast<const StringPrefix*>(&value);
+    const StringPrefix *array = llvm::dyn_cast<StringPrefix>(&value);
     if (!array)
         return false;
 
@@ -121,8 +121,7 @@ StringPrefix::join(const Domain &value)
         return *this;
     }
 
-    const StringPrefix &array = dynCast<const StringPrefix&>(value);
-
+    const StringPrefix &array = llvm::cast<StringPrefix>(value);
     if (isBottom())
         mPrefix = array.mPrefix;
     else
@@ -147,11 +146,9 @@ StringPrefix::meet(const Domain &value)
         return *this;
     }
 
-    const StringPrefix &array = dynCast<const StringPrefix&>(value);
+    const StringPrefix &array = llvm::cast<StringPrefix>(value);
     if (isTop())
-    {
         mPrefix = array.mPrefix;
-    }
     else if (0 == array.mPrefix.compare(0, mPrefix.length(), mPrefix))
     {
         // Array is a prefix of us
