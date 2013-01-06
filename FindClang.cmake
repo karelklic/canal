@@ -34,7 +34,6 @@ FIND_AND_ADD_CLANG_LIB(clangBasic)
 
 # Ubuntu ships clang in a single dynamic shared library.
 if (NOT CLANG_LIBS)
-  MESSAGE(STATUS "Clang not found")
   find_library(CLANG_LIBS clang)
 endif (NOT CLANG_LIBS)
 
