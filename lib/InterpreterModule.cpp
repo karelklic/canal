@@ -6,6 +6,7 @@
 #include "Utils.h"
 #include "Constructors.h"
 #include "Environment.h"
+#include "Memory.h"
 #include <set>
 
 namespace Canal {
@@ -93,13 +94,13 @@ Module::Module(const llvm::Module &module,
                                                     **it,
                                                     &mGlobalState);
 
-                mGlobalState.addGlobalVariable(**it, value);
+                mGlobalState.addGlobalVariable(**it, new Memory(value));
                 continue;
             }
 
             const llvm::Type &elementType = *(*it)->getType()->getElementType();
             Domain *block = constructors.create(elementType);
-            mGlobalState.addGlobalBlock(**it, block);
+            mGlobalState.addGlobalBlock(**it, new Memory(block));
 
             Domain *value = constructors.create(*(*it)->getType());
 

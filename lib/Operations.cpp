@@ -14,6 +14,7 @@
 #include "Utils.h"
 #include "Domain.h"
 #include "State.h"
+#include "Memory.h"
 #include <map>
 #include <cassert>
 #include <cstdio>
@@ -867,7 +868,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
         value = mConstructors.create(allocatedType);
     }
 
-    state.addFunctionBlock(instruction, value);
+    state.addFunctionBlock(instruction, new Memory(value));
 
     Domain *pointer;
     pointer = mConstructors.createPointer(*instruction.getType());

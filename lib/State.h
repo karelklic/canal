@@ -8,6 +8,7 @@
 namespace Canal {
 
 class Domain;
+class Memory;
 class SlotTracker;
 
 /// @brief Abstract memory state.
@@ -101,10 +102,10 @@ public:
     ///   addFunctionBlock.
     void addFunctionVariable(const llvm::Value &place, Domain *value);
 
-    void addGlobalBlock(const llvm::Value &place, Domain *value);
+    void addGlobalBlock(const llvm::Value &place, Memory *value);
 
     /// Adds a value created by alloca to the stack.
-    void addFunctionBlock(const llvm::Value &place, Domain *value);
+    void addFunctionBlock(const llvm::Value &place, Memory *value);
 
     void setReturnedValue(Domain *value);
 
@@ -115,7 +116,8 @@ public:
         return mReturnedValue;
     }
 
-    void addVariableArgument(const llvm::Instruction &place, Domain *argument);
+    void addVariableArgument(const llvm::Instruction &place,
+                             Domain *argument);
 
     const StateMap &getGlobalVariables() const
     {
@@ -165,7 +167,7 @@ public:
     /// Search both global and function blocks for a place.  If the
     /// place is found, the block is returned.  Otherwise NULL is
     /// returned.
-    const Domain *findBlock(const llvm::Value &place) const;
+    const Memory *findBlock(const llvm::Value &place) const;
 
     bool hasGlobalBlock(const llvm::Value &place) const;
 

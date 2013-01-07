@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include "Environment.h"
 #include "SlotTracker.h"
+#include "Memory.h"
 
 namespace Canal {
 
@@ -156,13 +157,13 @@ State::addFunctionVariable(const llvm::Value &place, Domain *value)
 }
 
 void
-State::addGlobalBlock(const llvm::Value &place, Domain *value)
+State::addGlobalBlock(const llvm::Value &place, Memory *value)
 {
     mGlobalBlocks.insert(place, value);
 }
 
 void
-State::addFunctionBlock(const llvm::Value &place, Domain *value)
+State::addFunctionBlock(const llvm::Value &place, Memory *value)
 {
     mFunctionBlocks.insert(place, value);
 }
@@ -203,16 +204,16 @@ State::findVariable(const llvm::Value &place) const
     return NULL;
 }
 
-const Domain *
+const Memory *
 State::findBlock(const llvm::Value &place) const
 {
     StateMap::const_iterator it = mGlobalBlocks.find(&place);
     if (it != mGlobalBlocks.end())
-        return it->second.data();
+        return llvm::cast<Memory>(it->second.data());
 
     it = mFunctionBlocks.find(&place);
     if (it != mFunctionBlocks.end())
-        return it->second.data();
+        return llvm::cast<Memory>(it->second.data());
 
     return NULL;
 }

@@ -8,6 +8,7 @@
 #include "IntegerUtils.h"
 #include "Environment.h"
 #include "Constructors.h"
+#include "Memory.h"
 
 namespace Canal {
 namespace Pointer {
@@ -74,100 +75,6 @@ Pointer::addTarget(Target::Type type,
         mTargets.insert(PlaceTargetMap::value_type(place, pointerTarget));
 }
 
-/// Dereference the target in a certain block.  Dereferencing might
-/// result in multiple values being returned due to the nature of
-/// offsets (offsets might include integer intervals).  The returned
-/// pointers point to the memory owned by the block.
-static std::vector<Domain*>
-dereference(Domain *block,
-            const std::vector<Domain*> &offsets)
-{
-    std::vector<Domain*> result;
-    result.push_back(block);
-
-    if (!offsets.empty())
-    {
-        CANAL_ASSERT_MSG(Integer::Utils::getSet(*offsets[0]).mValues.size() == 1,
-                         "First offset is expected to be zero!");
-
-        CANAL_ASSERT_MSG(Integer::Utils::getSet(*offsets[0]).mValues.begin()->isMinValue(),
-                         "First offset is expected to be zero!");
-
-        std::vector<Domain*>::const_iterator ito = offsets.begin() + 1,
-            itoend = offsets.end();
-
-        for (; ito != itoend; ++ito)
-        {
-            std::vector<Domain*> nextLevelResult;
-            std::vector<Domain*>::const_iterator iti = result.begin(),
-                itiend = result.end();
-
-            for (; iti != itiend; ++iti)
-            {
-                std::vector<Domain*> items;
-                Array::Interface &array = dynCast<Array::Interface&>(**iti);
-
-                items = array.getItem(**ito);
-                nextLevelResult.insert(nextLevelResult.end(),
-                                       items.begin(),
-                                       items.end());
-            }
-
-            result.swap(nextLevelResult);
-        }
-    }
-
-    return result;
-}
-
-
-/// Dereference the target in a certain block.  Dereferencing might
-/// result in multiple values being returned due to the nature of
-/// offsets (offsets might include integer intervals).  The returned
-/// pointers point to the memory owned by the block.
-static std::vector<const Domain*>
-dereference(const Domain *block,
-            const std::vector<Domain*> &offsets)
-{
-    std::vector<const Domain*> result;
-    result.push_back(block);
-
-    if (!offsets.empty())
-    {
-        CANAL_ASSERT_MSG(Integer::Utils::getSet(*offsets[0]).mValues.size() == 1,
-                         "First offset is expected to be zero!");
-
-        CANAL_ASSERT_MSG(Integer::Utils::getSet(*offsets[0]).mValues.begin()->isMinValue(),
-                         "First offset is expected to be zero!");
-
-        std::vector<Domain*>::const_iterator ito = offsets.begin() + 1,
-            itoend = offsets.end();
-
-        for (; ito != itoend; ++ito)
-        {
-            std::vector<const Domain*> nextLevelResult;
-            std::vector<const Domain*>::const_iterator iti = result.begin(),
-                itiend = result.end();
-
-            for (; iti != itiend; ++iti)
-            {
-                std::vector<Domain*> items;
-                const Array::Interface &array =
-                    dynCast<const Array::Interface&>(**iti);
-
-                items = array.getItem(**ito);
-                nextLevelResult.insert(nextLevelResult.end(),
-                                       items.begin(),
-                                       items.end());
-            }
-
-            result.swap(nextLevelResult);
-        }
-    }
-
-    return result;
-}
-
 Domain *
 Pointer::load(const State &state) const
 {
@@ -178,10 +85,10 @@ Pointer::load(const State &state) const
         if (it->second->mType != Target::Block)
             continue;
 
-        const Domain *source = state.findBlock(*it->second->mTarget);
+        const Memory *source = state.findBlock(*it->second->mTarget);
         CANAL_ASSERT(source);
 
-        std::vector<const Domain*> values =
+/*        std::vector<const Domain*> values =
             dereference(source, it->second->mElementOffsets);
 
         std::vector<const Domain*>::const_iterator it = values.begin();
@@ -192,6 +99,7 @@ Pointer::load(const State &state) const
             else
                 mergedValue = (*it)->clone();
         }
+*/
     }
 
     return mergedValue;
@@ -210,13 +118,12 @@ Pointer::store(const Domain &value, State &state) const
         if (it->second->mType != Target::Block)
             continue;
 
-        const Domain *source = state.findBlock(*it->second->mTarget);
+        const Memory *source = state.findBlock(*it->second->mTarget);
         CANAL_ASSERT(source);
 
-        Domain *result = source->clone();
-        std::vector<Domain*> destinations =
-            dereference(result, it->second->mElementOffsets);
-
+        Memory *result = source->clone();
+        result->store(value, it->second->mElementOffsets, mTargets.size() == 1);
+/*
         // When a pointer points to a single memory target, the old
         // value can be rewritten instead of merging with it to
         // increase precision.  Pointer with a single memory target is
@@ -238,7 +145,7 @@ Pointer::store(const Domain &value, State &state) const
             for (; itd != itdend; ++itd)
                 (*itd)->join(value);
         }
-
+*/
         if (state.hasGlobalBlock(*it->second->mTarget))
             state.addGlobalBlock(*it->second->mTarget, result);
         else

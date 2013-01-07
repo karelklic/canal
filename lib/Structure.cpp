@@ -6,6 +6,7 @@
 #include "IntegerInterval.h"
 #include "Environment.h"
 #include "Constructors.h"
+#include "Memory.h"
 
 namespace Canal {
 
@@ -228,7 +229,7 @@ Structure::insertelement(const Domain &array,
 {
     const Structure &s = dynCast<const Structure&>(array);
 
-    CANAL_ASSERT(&s.mType == mType &&
+    CANAL_ASSERT(&s.mType == &mType &&
                  s.mMembers.size() == mMembers.size());
 
     std::vector<Domain*>::const_iterator
@@ -257,90 +258,6 @@ void
 Structure::mergeValueCell(uint64_t offset, const Domain &value)
 {
     setTop();
-}
-
-std::vector<Domain*>
-Structure::getItem(const Domain &offset) const
-{
-    std::vector<Domain*> result;
-
-    // First try an enumeration, then interval.
-    const Integer::Set &set = Integer::Utils::getSet(offset);
-    if (!set.isTop())
-    {
-        APIntUtils::USet::const_iterator it = set.mValues.begin(),
-            itend = set.mValues.end();
-
-        for (; it != itend; ++it)
-        {
-            CANAL_ASSERT(it->getBitWidth() <= 64);
-            uint64_t numOffset = it->getZExtValue();
-
-            // If some offset from the set points out of the
-            // array bounds, we ignore it FOR NOW.  It might be caused
-            // either by a bug in the code, or by imprecision of the
-            // interpreter.
-            if (numOffset >= mMembers.size())
-                continue;
-
-            result.push_back(mMembers[numOffset]);
-        }
-
-        // At least one of the offsets in the set should point
-        // to the array.  Otherwise it might be a bug in the
-        // interpreter that requires investigation.
-        CANAL_ASSERT(!result.empty());
-        return result;
-    }
-
-    const Integer::Interval &interval = Integer::Utils::getInterval(offset);
-    // Let's care about the unsigned interval only.
-    if (!interval.mUnsignedTop)
-    {
-        CANAL_ASSERT(interval.mUnsignedFrom.getBitWidth() <= 64);
-        uint64_t from = interval.mUnsignedFrom.getZExtValue();
-        // Included in the interval!
-        uint64_t to = interval.mUnsignedTo.getZExtValue();
-
-        // At least part of the interval should point to the array.
-        // Otherwise it might be a bug in the interpreter that
-        // requires investigation.
-        CANAL_ASSERT(from < mMembers.size());
-        if (to >= mMembers.size())
-            to = mMembers.size();
-
-        result.insert(result.end(),
-                      mMembers.begin() + from,
-                      mMembers.begin() + to);
-
-        return result;
-    }
-
-    // Both set and interval are set to the top value, so return
-    // all members.
-    result.insert(result.end(), mMembers.begin(), mMembers.end());
-
-    // Zero length arrays are not supported.
-    CANAL_ASSERT(!result.empty());
-    return result;
-}
-
-Domain *
-Structure::getItem(uint64_t offset) const
-{
-    CANAL_ASSERT_MSG(offset < mMembers.size(),
-                     "Offset out of bounds.");
-
-    return mMembers[offset];
-}
-
-void
-Structure::setItem(uint64_t offset, const Domain &value)
-{
-    CANAL_ASSERT_MSG(offset < mMembers.size(),
-                     "Offset out of bounds.");
-
-    mMembers[offset]->join(value);
 }
 
 } // namespace Canal
