@@ -45,7 +45,7 @@
 #  include <llvm/Support/TargetSelect.h>
 #endif
 
-#if HAVE_CLANG
+#ifdef HAVE_CLANG
 #include <clang/Basic/Version.h>
 #include <clang/Driver/Action.h>
 #include <clang/Driver/Arg.h>

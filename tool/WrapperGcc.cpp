@@ -42,7 +42,7 @@ run(int argc, char **argv)
         return 127;
 }
 
-#if HAVE_CLANG
+#ifdef HAVE_CLANG
 
 static llvm::raw_ostream &
 operator<<(llvm::raw_ostream &target,
@@ -458,7 +458,7 @@ int
 wrapGcc(int argc, char **argv)
 {
     int result = run(argc, argv);
-#if HAVE_CLANG
+#ifdef HAVE_CLANG
     runClang(argc, argv);
 #endif
     return result;

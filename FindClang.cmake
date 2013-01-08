@@ -16,9 +16,8 @@ if (CLANG_${_libname_}_LIB)
 endif (CLANG_${_libname_}_LIB)
 ENDMACRO(FIND_AND_ADD_CLANG_LIB)
 
-set(CLANG_INCLUDE_DIRS ${CLANG_INCLUDE_DIRS} ${LLVM_INCLUDE_DIRS})
-set(CLANG_INCLUDE_DIRS ${CLANG_INCLUDE_DIRS} ${CLANG_INCLUDE_DIR})
-
+# Clang shared library provides just the limited C interface, so it
+# can not be used.  We look for the static libraries.
 FIND_AND_ADD_CLANG_LIB(clangFrontend)
 FIND_AND_ADD_CLANG_LIB(clangDriver)
 FIND_AND_ADD_CLANG_LIB(clangCodeGen)
@@ -32,17 +31,12 @@ FIND_AND_ADD_CLANG_LIB(clangParse)
 FIND_AND_ADD_CLANG_LIB(clangLex)
 FIND_AND_ADD_CLANG_LIB(clangBasic)
 
-# Ubuntu ships clang in a single dynamic shared library.
-if (NOT CLANG_LIBS)
-  MESSAGE(STATUS "Considering Clang shared library")
-  find_library(CLANG_LIBS clang HINTS ${LLVM_LIBRARY_DIRS})
-endif (NOT CLANG_LIBS)
+find_path(CLANG_INCLUDE_DIRS clang/Basic/Version.h HINTS ${LLVM_INCLUDE_DIRS})
 
-MESSAGE(STATUS "Clang libs: " ${CLANG_LIBS})
-
-if (CLANG_LIBS)
+if (CLANG_LIBS AND CLANG_INCLUDE_DIRS)
+  MESSAGE(STATUS "Clang libs: " ${CLANG_LIBS})
   set(CLANG_FOUND TRUE)
-endif (CLANG_LIBS)
+endif (CLANG_LIBS AND CLANG_INCLUDE_DIRS)
 
 if (CLANG_FOUND)
   message(STATUS "Found Clang: ${CLANG_INCLUDE_DIRS}")

@@ -7,6 +7,7 @@ AC_PROG_CXX
 AC_USE_SYSTEM_EXTENSIONS
 AC_CONFIG_HEADERS([lib/Config.h:lib/ConfigAutotools.h.in])
 AC_PROG_LN_S
+AC_LANG(C++)
 
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
@@ -49,12 +50,12 @@ AC_SUBST([LLVM_LIBS])
 # Clang shared library provides just the limited C interface, so it can not be used.
 # We look for the static libraries.
 AC_CHECK_LIB([clangBasic], [main], [clang_lib_found=yes], [clang_lib_found=no])
+CPPFLAGS=$LLVM_CFLAGS
 AC_CHECK_HEADERS([clang/Basic/Version.h], [clang_header_found=yes], [clang_header_found=no])
-test ! \( "$clang_lib_found" = "yes" -a "$clang_header_found" = "yes" \)
-have_clang=$?
-AC_DEFINE_UNQUOTED(HAVE_CLANG, $have_clang, [Have Clang])
-if test "$have_clang" = "1"
+
+if test "$clang_lib_found" = "yes" -a "$clang_header_found" = "yes"
 then
+    AC_DEFINE(HAVE_CLANG, [], [Have Clang])
     CLANG_LIBS="-lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema  -lclangAnalysis -lclangIndex -lclangRewrite -lclangAST -lclangLex -lclangBasic"
 else
     CLANG_LIBS=""

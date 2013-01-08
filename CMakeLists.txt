@@ -23,11 +23,10 @@ add_subdirectory("lib/")
 add_subdirectory("tool/")
 add_subdirectory("tests/")
 
-# Prepare variables for the configuration file.
-SET(HAVE_GELF_H LIBELF_FOUND)
-SET(HAVE_LIBELF_H LIBELF_FOUND)
-SET(HAVE_LIBELF LIBELF_FOUND)
-SET(HAVE_READLINE_READLINE_H READLINE_FOUND)
+SET(HAVE_GELF_H ${LIBELF_FOUND})
+SET(HAVE_LIBELF ${LIBELF_FOUND})
+SET(HAVE_READLINE_READLINE_H ${READLINE_FOUND})
+SET(HAVE_CLANG ${CLANG_FOUND})
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/lib/ConfigCMake.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/lib/Config.h)
