@@ -127,32 +127,6 @@ llvmCast(const Y &val)
         typename llvm::simplify_type<Y>::SimpleType>::doit(val);
 }
 
-template <typename X, typename Y> inline X
-dynCast(Y &val)
-{
-    try
-    {
-        return dynamic_cast<X>(val);
-    }
-    catch (std::bad_cast exception)
-        CANAL_FATAL_ERROR(exception.what());
-}
-
-template <typename X, typename Y> inline X
-dynCast(const Y &val)
-{
-    try
-    {
-        return dynamic_cast<X>(val);
-    }
-    catch (std::bad_cast exception)
-    {
-        CANAL_FATAL_ERROR(exception.what()
-                          << " from " << typeid(val).name()
-                          << " to " << typeid(X).name());
-    }
-}
-
 
 /// A raw_string_ostream that writes to an embedded std::string.  This
 /// is a simple adaptor class.

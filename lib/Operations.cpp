@@ -825,12 +825,8 @@ getValueLocation(Domain *aggregate, const T &instruction)
 
     for (; it != itend; ++it)
     {
-        const Array::Interface *array =
-            dynCast<const Array::Interface*>(item);
-
-        CANAL_ASSERT_MSG(array,
-                         "ExtractValue reached an unsupported type.");
-
+        const Array::Interface *array = llvm::cast<Array::Interface>(item);
+        CANAL_ASSERT_MSG(array, "ExtractValue reached an unsupported type.");
         item = array->getItem(*it);
     }
 
@@ -846,12 +842,8 @@ getValueLocation(const Domain *aggregate, const T &instruction)
 
     for (; it != itend; ++it)
     {
-        const Array::Interface *array =
-            dynCast<const Array::Interface*>(item);
-
-        CANAL_ASSERT_MSG(array,
-                         "ExtractValue reached an unsupported type.");
-
+        const Array::Interface *array = llvm::cast<Array::Interface>(item);
+        CANAL_ASSERT_MSG(array, "ExtractValue reached an unsupported type.");
         item = array->getItem(*it);
     }
 

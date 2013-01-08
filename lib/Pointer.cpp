@@ -105,7 +105,7 @@ dereference(Domain *block,
             for (; iti != itiend; ++iti)
             {
                 std::vector<Domain*> items;
-                Array::Interface &array = dynCast<Array::Interface&>(**iti);
+                Array::Interface &array = llvm::cast<Array::Interface>(**iti);
 
                 items = array.getItem(**ito);
                 nextLevelResult.insert(nextLevelResult.end(),
@@ -152,9 +152,7 @@ dereference(const Domain *block,
             for (; iti != itiend; ++iti)
             {
                 std::vector<Domain*> items;
-                const Array::Interface &array =
-                    dynCast<const Array::Interface&>(**iti);
-
+                const Array::Interface &array = llvm::cast<Array::Interface>(**iti);
                 items = array.getItem(**ito);
                 nextLevelResult.insert(nextLevelResult.end(),
                                        items.begin(),
