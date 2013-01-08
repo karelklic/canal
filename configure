@@ -834,8 +834,8 @@ HAVE_PDFLATEX_FALSE
 HAVE_PDFLATEX_TRUE
 PDFLATEX
 CLANG_LIBS
-LLVM_LDFLAGS
 LLVM_LIBS
+LLVM_LDFLAGS
 LLVM_CFLAGS
 LLVM_VERSION
 CLANG
@@ -15714,8 +15714,6 @@ LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
 
 LLVM_CFLAGS=`$LLVM_CONFIG --cppflags | sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
 
-LLVM_LIBS=`$LLVM_CONFIG --libs`
-
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 
 # Quadrigraphs are used here: [ gives you [ and ] gives you ].
@@ -15733,6 +15731,88 @@ _ACEOF
 
 
 LDFLAGS=$LLVM_LDFLAGS
+
+as_ac_Lib=`$as_echo "ac_cv_lib_LLVM-$LLVM_VERSION_MAJOR.$LLVM_VERSION_MINOR''_main" | $as_tr_sh`
+{ $as_echo "$as_me:$LINENO: checking for main in -lLLVM-$LLVM_VERSION_MAJOR.$LLVM_VERSION_MINOR" >&5
+$as_echo_n "checking for main in -lLLVM-$LLVM_VERSION_MAJOR.$LLVM_VERSION_MINOR... " >&6; }
+if { as_var=$as_ac_Lib; eval "test \"\${$as_var+set}\" = set"; }; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lLLVM-$LLVM_VERSION_MAJOR.$LLVM_VERSION_MINOR  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  eval "$as_ac_Lib=yes"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	eval "$as_ac_Lib=no"
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+ac_res=`eval 'as_val=${'$as_ac_Lib'}
+		 $as_echo "$as_val"'`
+	       { $as_echo "$as_me:$LINENO: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+as_val=`eval 'as_val=${'$as_ac_Lib'}
+		 $as_echo "$as_val"'`
+   if test "x$as_val" = x""yes; then
+  llvm_lib_found=yes
+else
+  llvm_lib_found=no
+fi
+
+if test "$clang_lib_found" = no
+then
+  LLVM_LIBS=`$LLVM_CONFIG --libs`
+else
+  LLVM_LIBS="-lLLVM-$LLVM_VERSION_MAJOR.$LLVM_VERSION_MINOR"
+fi
+
+
+
+
+
 { $as_echo "$as_me:$LINENO: checking for main in -lclang" >&5
 $as_echo_n "checking for main in -lclang... " >&6; }
 if test "${ac_cv_lib_clang_main+set}" = set; then
@@ -17044,7 +17124,7 @@ AUTOM4TE=${AUTOM4TE-"${am_missing_run}autom4te"}
 O0CFLAGS=`echo $CFLAGS | sed 's/-O[0-9] *//g'`
 
 
-ac_config_files="$ac_config_files canal.spec Makefile docs/Makefile lib/Makefile tests/Makefile tests/atlocal tool/Makefile wrappers/config.py wrappers/Makefile"
+ac_config_files="$ac_config_files canal.spec Makefile docs/Makefile lib/Makefile tests/Makefile tests/atlocal tool/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -18162,8 +18242,6 @@ do
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tests/atlocal") CONFIG_FILES="$CONFIG_FILES tests/atlocal" ;;
     "tool/Makefile") CONFIG_FILES="$CONFIG_FILES tool/Makefile" ;;
-    "wrappers/config.py") CONFIG_FILES="$CONFIG_FILES wrappers/config.py" ;;
-    "wrappers/Makefile") CONFIG_FILES="$CONFIG_FILES wrappers/Makefile" ;;
 
   *) { { $as_echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 $as_echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

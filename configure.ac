@@ -25,8 +25,6 @@ LLVM_VERSION=`$LLVM_CONFIG --version | sed 's/svn.*//g'`
 AC_SUBST([LLVM_VERSION])
 LLVM_CFLAGS=`$LLVM_CONFIG --cppflags | sed -e 's/-DNDEBUG\>//g' -e 's/-pedantic//g'`
 AC_SUBST([LLVM_CFLAGS])
-LLVM_LIBS=`$LLVM_CONFIG --libs`
-AC_SUBST([LLVM_LIBS])
 LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`
 AC_SUBST([LLVM_LDFLAGS])
 # Quadrigraphs are used here: @<:@ gives you [ and @:>@ gives you ].
@@ -36,6 +34,19 @@ LLVM_VERSION_MINOR=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:
 AC_DEFINE_UNQUOTED([LLVM_VERSION_MINOR], [$LLVM_VERSION_MINOR], [LLVM minor version])
 
 LDFLAGS=$LLVM_LDFLAGS
+
+AC_CHECK_LIB([LLVM-$LLVM_VERSION_MAJOR.$LLVM_VERSION_MINOR], [main], [llvm_lib_found=yes], [llvm_lib_found=no])
+if test "$clang_lib_found" = no
+then
+  LLVM_LIBS=`$LLVM_CONFIG --libs`
+else
+  LLVM_LIBS="-lLLVM-$LLVM_VERSION_MAJOR.$LLVM_VERSION_MINOR"
+fi
+
+AC_SUBST([LLVM_LIBS])
+
+
+
 AC_CHECK_LIB([clang], [main], [clang_lib_found=yes], [clang_lib_found=no])
 if test "$clang_lib_found" = no
 then

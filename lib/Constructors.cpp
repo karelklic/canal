@@ -283,7 +283,7 @@ Constructors::create(const llvm::Constant &value,
         return constPointer;
     }
 
-    CANAL_DIE_MSG("not implemented for " << typeid(value).name());
+    CANAL_NOT_IMPLEMENTED();
 }
 
 Domain *

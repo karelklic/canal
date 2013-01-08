@@ -67,7 +67,7 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir dist dist-all distcheck
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = lib tool wrappers tests docs
+DIST_SUBDIRS = lib tool tests docs
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -247,7 +247,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4
 @BUILD_DOCUMENTATION_TRUE@MAYBE_DOCUMENTATION = docs
-SUBDIRS = lib tool wrappers tests $(MAYBE_DOCUMENTATION)
+SUBDIRS = lib tool tests $(MAYBE_DOCUMENTATION)
 EXTRA_DIST = canal.spec.in
 UPLOAD_URI = kklic@fedorahosted.org:canal
 RPM_DIRS = --define "_sourcedir `pwd`" \
