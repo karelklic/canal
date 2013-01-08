@@ -28,7 +28,23 @@ public:
                                            const Domain&,
                                            llvm::CmpInst::Predicate predicate);
 
+    /// Discriminator for LLVM-style RTTI (dyn_cast<> et al.)
+    enum DomainKind {
+        ArrayExactSizeKind,
+        ArraySingleItemKind,
+        ArrayStringPrefixKind,
+        FloatIntervalKind,
+        IntegerContainerKind,
+        IntegerBitfieldKind,
+        IntegerIntervalKind,
+        IntegerSetKind,
+        PointerKind,
+        StructureKind
+    };
+
     const Environment &mEnvironment;
+
+    const enum DomainKind mKind;
 
     Widening::DataInterface *mWideningData;
 
@@ -37,7 +53,8 @@ public:
 
 public:
     /// Standard constructor.
-    Domain(const Environment &environment);
+    Domain(const Environment &environment,
+           DomainKind kind);
 
     /// Copy constructor.  Careful!  Copy constructor of base class is
     /// not called by automatically generated copy constructor of
@@ -50,6 +67,11 @@ public:
     const Environment &getEnvironment() const
     {
         return mEnvironment;
+    }
+
+    enum DomainKind getKind() const
+    {
+        return mKind;
     }
 
     /// Create a copy of this value.

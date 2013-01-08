@@ -8,15 +8,19 @@ namespace Integer {
 unsigned int Set::SET_THRESHOLD = 40;
 
 Set::Set(const Environment &environment,
-                         unsigned bitWidth)
-    : Domain(environment), mTop(false), mBitWidth(bitWidth)
+         unsigned bitWidth)
+    : Domain(environment, Domain::IntegerSetKind),
+      mTop(false),
+      mBitWidth(bitWidth)
 {
     CANAL_ASSERT(mBitWidth > 0);
 }
 
 Set::Set(const Environment &environment,
-                         const llvm::APInt &constant)
-    : Domain(environment), mTop(false), mBitWidth(constant.getBitWidth())
+         const llvm::APInt &constant)
+    : Domain(environment, Domain::IntegerSetKind),
+      mTop(false),
+      mBitWidth(constant.getBitWidth())
 {
     mValues.insert(constant);
     CANAL_ASSERT(mBitWidth > 0);
@@ -180,8 +184,7 @@ Set::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const Set *set =
-        dynCast<const Set*>(&value);
+    const Set *set = llvm::dyn_cast<Set>(&value);
 
     if (!set)
         return false;
@@ -215,9 +218,7 @@ Set::join(const Domain &value)
     if (mTop)
         return *this;
 
-    const Set &set =
-        dynCast<const Set&>(value);
-
+    const Set &set = llvm::cast<Set>(value);
     if (set.isTop())
         setTop();
     else
@@ -388,8 +389,8 @@ Set &
 Set::icmp(const Domain &a, const Domain &b,
                   llvm::CmpInst::Predicate predicate)
 {
-    const Set &aa = dynCast<const Set&>(a),
-        &bb = dynCast<const Set&>(b);
+    const Set &aa = llvm::cast<Set>(a),
+        &bb = llvm::cast<Set>(b);
 
     if (aa.isTop() || bb.isTop())
     {
@@ -565,11 +566,12 @@ Set::icmp(const Domain &a, const Domain &b,
 }
 
 Set &
-Set::fcmp(const Domain &a, const Domain &b,
-                  llvm::CmpInst::Predicate predicate)
+Set::fcmp(const Domain &a,
+          const Domain &b,
+          llvm::CmpInst::Predicate predicate)
 {
-    const Float::Interval &aa = dynCast<const Float::Interval&>(a),
-        &bb = dynCast<const Float::Interval&>(b);
+    const Float::Interval &aa = llvm::cast<Float::Interval>(a),
+        &bb = llvm::cast<Float::Interval>(b);
 
     int result = aa.compare(bb, predicate);
     switch (result)
@@ -598,7 +600,7 @@ Set::fcmp(const Domain &a, const Domain &b,
 Set &
 Set::trunc(const Domain &value)
 {
-    const Set &set = dynCast<const Set&>(value);
+    const Set &set = llvm::cast<Set>(value);
     mTop = set.mTop;
     APIntUtils::USet::const_iterator it = set.mValues.begin();
     for (; it != set.mValues.end(); ++it)
@@ -610,7 +612,7 @@ Set::trunc(const Domain &value)
 Set &
 Set::zext(const Domain &value)
 {
-    const Set &set = dynCast<const Set&>(value);
+    const Set &set = llvm::cast<Set>(value);
     mTop = set.mTop;
     APIntUtils::USet::const_iterator it = set.mValues.begin();
     for (; it != set.mValues.end(); ++it)
@@ -622,7 +624,7 @@ Set::zext(const Domain &value)
 Set &
 Set::sext(const Domain &value)
 {
-    const Set &set = dynCast<const Set&>(value);
+    const Set &set = llvm::cast<Set>(value);
     mTop = set.mTop;
     APIntUtils::USet::const_iterator it = set.mValues.begin();
     for (; it != set.mValues.end(); ++it)
@@ -651,8 +653,8 @@ Set::applyOperation(const Domain &a,
                             APIntUtils::Operation operation1,
                             APIntUtils::OperationWithOverflow operation2)
 {
-    const Set &aa = dynCast<const Set&>(a),
-        &bb = dynCast<const Set&>(b);
+    const Set &aa = llvm::cast<Set>(a),
+        &bb = llvm::cast<Set>(b);
 
     CANAL_ASSERT(this != &a && this != &b);
     setBottom();
@@ -698,8 +700,8 @@ Set::applyOperationDivision(const Domain &a,
                             const Domain &b,
                             APIntUtils::Operation operation1)
 {
-    const Set &aa = dynCast<const Set&>(a),
-        &bb = dynCast<const Set&>(b);
+    const Set &aa = llvm::cast<Set>(a),
+        &bb = llvm::cast<Set>(b);
 
     CANAL_ASSERT(this != &a && this != &b);
     setBottom();
@@ -712,10 +714,12 @@ Set::applyOperationDivision(const Domain &a,
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
     APIntUtils::USet::const_iterator aaIt = aa.mValues.begin();
 
-    if (bb.mValues.size() == 1 && *bb.mValues.begin() == 0) { //Only division by zero
+    if (bb.mValues.size() == 1 && *bb.mValues.begin() == 0)
+    { //Only division by zero
         setTop();
         return *this;
     }
+
     for (; aaIt != aa.mValues.end(); ++aaIt)
     {
         APIntUtils::USet::const_iterator bbIt = bb.mValues.begin();

@@ -20,46 +20,43 @@ getBitWidth(const Domain &value)
 Bitfield &
 getBitfield(Domain &value)
 {
-    Container &container = dynCast<Container&>(value);
-    return dynCast<Bitfield&>(*container.mValues[0]);
+    Container &container = llvm::cast<Container>(value);
+    return llvm::cast<Bitfield>(*container.mValues[0]);
 }
 
 const Bitfield &
 getBitfield(const Domain &value)
 {
-    const Container &container =
-        dynCast<const Container&>(value);
-    return dynCast<const Bitfield&>(*container.mValues[0]);
+    const Container &container = llvm::cast<Container>(value);
+    return llvm::cast<Bitfield>(*container.mValues[0]);
 }
 
 Set &
 getSet(Domain &value)
 {
-    Container &container = dynCast<Container&>(value);
-    return dynCast<Set&>(*container.mValues[1]);
+    Container &container = llvm::cast<Container>(value);
+    return llvm::cast<Set>(*container.mValues[1]);
 }
 
 const Set &
 getSet(const Domain &value)
 {
-    const Container &container =
-        dynCast<const Container&>(value);
-    return dynCast<const Set&>(*container.mValues[1]);
+    const Container &container = llvm::cast<Container>(value);
+    return llvm::cast<Set>(*container.mValues[1]);
 }
 
 Interval &
 getInterval(Domain &value)
 {
-    Container &container = dynCast<Container&>(value);
-    return dynCast<Interval&>(*container.mValues[2]);
+    Container &container = llvm::cast<Container>(value);
+    return llvm::cast<Interval>(*container.mValues[2]);
 }
 
 const Interval &
 getInterval(const Domain &value)
 {
-    const Container &container =
-        dynCast<const Container&>(value);
-    return dynCast<const Interval&>(*container.mValues[2]);
+    const Container &container = llvm::cast<Container>(value);
+    return llvm::cast<Interval>(*container.mValues[2]);
 }
 
 bool

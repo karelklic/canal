@@ -11,7 +11,7 @@ namespace Float {
 
 Interval::Interval(const Environment &environment,
                    const llvm::fltSemantics &semantics)
-    : Domain(environment),
+    : Domain(environment, Domain::FloatIntervalKind),
       mEmpty(true),
       mTop(false),
       mFrom(semantics),
@@ -21,7 +21,7 @@ Interval::Interval(const Environment &environment,
 
 Interval::Interval(const Environment &environment,
                    const llvm::APFloat &constant)
-    : Domain(environment),
+    : Domain(environment, Domain::FloatIntervalKind),
       mEmpty(false),
       mTop(false),
       mFrom(constant),
@@ -41,7 +41,7 @@ Interval::Interval(const Interval &value)
 Interval::Interval(const Environment &environment,
                    const llvm::APFloat &from,
                    const llvm::APFloat &to)
-    : Domain(environment),
+    : Domain(environment, Domain::FloatIntervalKind),
       mEmpty(false),
       mTop(false),
       mFrom(from),
@@ -281,7 +281,7 @@ Interval::operator==(const Domain& value) const
     if (this == &value)
         return true;
 
-    const Interval *interval = dynCast<const Interval*>(&value);
+    const Interval *interval = llvm::dyn_cast<Interval>(&value);
     if (!interval)
         return false;
 
@@ -322,8 +322,7 @@ Interval::join(const Domain &value)
         return *this;
     }
 
-    const Interval &interval = dynCast<const Interval&>(value);
-
+    const Interval &interval = llvm::cast<Interval>(value);
     if (isBottom())
     {
         mFrom = interval.mFrom;
@@ -333,6 +332,7 @@ Interval::join(const Domain &value)
     {
         if (mFrom.compare(interval.mFrom) == llvm::APFloat::cmpGreaterThan)
             mFrom = interval.mFrom;
+
         if (mTo.compare(interval.mTo) == llvm::APFloat::cmpLessThan)
             mTo = interval.mTo;
     }
@@ -356,7 +356,7 @@ Interval::meet(const Domain &value)
         return *this;
     }
 
-    const Interval &interval = dynCast<const Interval&>(value);
+    const Interval &interval = llvm::cast<Interval>(value);
     if (isTop())
     {
         mFrom = interval.mFrom;
@@ -571,8 +571,8 @@ minMax(llvm::APFloat& min,
 Interval &
 Interval::fadd(const Domain &a, const Domain &b)
 {
-    const Interval &aa = dynCast<const Interval&>(a),
-        &bb = dynCast<const Interval&>(b);
+    const Interval &aa = llvm::cast<Interval>(a),
+        &bb = llvm::cast<Interval>(b);
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
@@ -594,8 +594,8 @@ Interval::fadd(const Domain &a, const Domain &b)
 Interval &
 Interval::fsub(const Domain &a, const Domain &b)
 {
-    const Interval &aa = dynCast<const Interval&>(a),
-        &bb = dynCast<const Interval&>(b);
+    const Interval &aa = llvm::cast<Interval>(a),
+        &bb = llvm::cast<Interval>(b);
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
@@ -617,8 +617,8 @@ Interval::fsub(const Domain &a, const Domain &b)
 Interval &
 Interval::fmul(const Domain &a, const Domain &b)
 {
-    const Interval &aa = dynCast<const Interval&>(a),
-        &bb = dynCast<const Interval&>(b);
+    const Interval &aa = llvm::cast<Interval>(a),
+        &bb = llvm::cast<Interval>(b);
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
@@ -645,8 +645,8 @@ Interval::fmul(const Domain &a, const Domain &b)
 Interval &
 Interval::fdiv(const Domain &a, const Domain &b)
 {
-    const Interval &aa = dynCast<const Interval&>(a),
-        &bb = dynCast<const Interval&>(b);
+    const Interval &aa = llvm::cast<Interval>(a),
+        &bb = llvm::cast<Interval>(b);
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
@@ -690,8 +690,8 @@ Interval::fdiv(const Domain &a, const Domain &b)
 Interval &
 Interval::frem(const Domain &a, const Domain &b)
 {
-    const Interval &aa = dynCast<const Interval&>(a),
-        &bb = dynCast<const Interval&>(b);
+    const Interval &aa = llvm::cast<Interval>(a),
+        &bb = llvm::cast<Interval>(b);
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)

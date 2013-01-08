@@ -37,6 +37,11 @@ public:
         return mValues.size();
     }
 
+    static bool classof(const Domain *value)
+    {
+        return value->getKind() == ArrayExactSizeKind;
+    }
+
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual ExactSize *clone() const;

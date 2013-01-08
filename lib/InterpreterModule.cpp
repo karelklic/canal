@@ -19,7 +19,7 @@ processValue(const llvm::Value *value,
              const llvm::GlobalVariable *currentVariable)
 {
     const llvm::GlobalVariable *variable =
-        dynCast<const llvm::GlobalVariable*>(value);
+        llvm::dyn_cast<llvm::GlobalVariable>(value);
 
     if (variable)
     {
@@ -45,7 +45,9 @@ processValue(const llvm::Value *value,
     }
     else
     {
-        const llvm::Constant *constant = dynCast<const llvm::Constant*>(value);
+        const llvm::Constant *constant =
+            llvm::dyn_cast<llvm::Constant>(value);
+
         if (!constant)
             return;
 

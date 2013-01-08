@@ -395,7 +395,7 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
 
     // GetElementPtr on a Pointer
     const Pointer::Pointer *pointer =
-        dynCast<const Pointer::Pointer*>(&variable);
+        llvm::dyn_cast<Pointer::Pointer>(&variable);
 
     if (pointer)
     {
@@ -427,7 +427,7 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
     // BitCast from Pointer.  It is always a bitcast to some other
     // pointer.
     const Pointer::Pointer *pointer =
-        dynCast<const Pointer::Pointer*>(&variable);
+        llvm::dyn_cast<Pointer::Pointer>(&variable);
 
     const llvm::PointerType *pointerType =
         llvmCast<const llvm::PointerType>(value.getType());

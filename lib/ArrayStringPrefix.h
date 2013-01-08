@@ -24,6 +24,11 @@ public:
     StringPrefix(const Environment &environment,
               const std::string &value);
 
+    static bool classof(const Domain *value)
+    {
+        return value->getKind() == ArrayStringPrefixKind;
+    }
+
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual StringPrefix *clone() const;

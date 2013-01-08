@@ -80,6 +80,11 @@ public:
     /// Does the set represent signle bit that is set to 0?
     bool isFalse() const;
 
+    static bool classof(const Domain *value)
+    {
+        return value->getKind() == IntegerSetKind;
+    }
+
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual Set *clone() const;

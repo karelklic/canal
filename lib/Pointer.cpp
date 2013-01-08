@@ -14,7 +14,7 @@ namespace Pointer {
 
 Pointer::Pointer(const Environment &environment,
                  const llvm::Type &type)
-    : Domain(environment), mType(type)
+    : Domain(environment, Domain::PointerKind), mType(type)
 {
 }
 
@@ -105,7 +105,7 @@ dereference(Domain *block,
             for (; iti != itiend; ++iti)
             {
                 std::vector<Domain*> items;
-                Array::Interface &array = dynCast<Array::Interface&>(**iti);
+                Array::Interface &array = llvm::cast<Array::Interface>(**iti);
 
                 items = array.getItem(**ito);
                 nextLevelResult.insert(nextLevelResult.end(),
@@ -152,8 +152,7 @@ dereference(const Domain *block,
             for (; iti != itiend; ++iti)
             {
                 std::vector<Domain*> items;
-                const Array::Interface &array = dynCast<const Array::Interface&>(**iti);
-
+                const Array::Interface &array = llvm::cast<Array::Interface>(**iti);
                 items = array.getItem(**ito);
                 nextLevelResult.insert(nextLevelResult.end(),
                                        items.begin(),
@@ -308,17 +307,17 @@ Pointer::isConstant() const
         return false;
 
     const Target *target = mTargets.begin()->second;
-    const Integer::Container *tmp =
-        dynCast<const Integer::Container*>(target->mNumericOffset);
 
-    if (tmp && !Integer::Utils::isConstant(*tmp))
+    if (target->mNumericOffset &&
+        !Integer::Utils::isConstant(*target->mNumericOffset))
+    {
         return false;
+    }
 
     std::vector<Domain*>::const_iterator it = target->mOffsets.begin();
     for (; it != target->mOffsets.end(); ++it)
     {
-        tmp = dynCast<const Integer::Container*>(*it);
-        if (!Integer::Utils::isConstant(*tmp))
+        if (!Integer::Utils::isConstant(**it))
             return false;
     }
 
@@ -377,9 +376,7 @@ Pointer::operator==(const Domain &value) const
         return true;
 
     // Check if the value has the same type.
-    const Pointer *pointer =
-        dynCast<const Pointer*>(&value);
-
+    const Pointer *pointer = llvm::dyn_cast<Pointer>(&value);
     if (!pointer)
         return false;
 
@@ -418,7 +415,7 @@ Pointer::operator>(const Domain &value) const
 Pointer &
 Pointer::join(const Domain &value)
 {
-    const Pointer &vv = dynCast<const Pointer&>(value);
+    const Pointer &vv = llvm::cast<Pointer>(value);
     CANAL_ASSERT_MSG(&vv.mType == &mType,
                      "Unexpected different types in a pointer merge ("
                      << Canal::toString(vv.mType) << " != "

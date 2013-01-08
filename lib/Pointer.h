@@ -106,6 +106,11 @@ public:
     /// Does this pointer point to single target?
     bool isConstant() const;
 
+    static bool classof(const Domain *value)
+    {
+        return value->getKind() == PointerKind;
+    }
+
 private:
     /// Assignment operator declaration.  Prevents accidental
     /// assignments of domains.  Do not implement!

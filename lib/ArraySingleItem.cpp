@@ -9,7 +9,7 @@ namespace Array {
 SingleItem::SingleItem(const Environment &environment,
                        Domain* size,
                        Domain* value)
-    : Domain(environment), mValue(value), mSize(size)
+    : Domain(environment, Domain::ArraySingleItemKind), mValue(value), mSize(size)
 {
 }
 
@@ -63,7 +63,7 @@ SingleItem::operator==(const Domain &value) const
         return true;
 
     const SingleItem *singleItem =
-        dynCast<const SingleItem*>(&value);
+        llvm::dyn_cast<SingleItem>(&value);
 
     if (!singleItem)
         return false;
@@ -98,7 +98,7 @@ SingleItem::operator>(const Domain& value) const
 SingleItem &
 SingleItem::join(const Domain &value)
 {
-    const SingleItem &array = dynCast<const SingleItem&>(value);
+    const SingleItem &array = llvm::cast<SingleItem>(value);
     mValue->join(*array.mValue);
     mSize->join(*array.mSize);
     return *this;
@@ -107,7 +107,7 @@ SingleItem::join(const Domain &value)
 SingleItem &
 SingleItem::meet(const Domain &value)
 {
-    const SingleItem &array = dynCast<const SingleItem&>(value);
+    const SingleItem &array = llvm::cast<SingleItem>(value);
     mValue->meet(*array.mValue);
     mSize->meet(*array.mSize);
     return *this;
@@ -149,8 +149,8 @@ binaryOperation(SingleItem &result,
                 const Domain &b,
                 Domain::BinaryOperation operation)
 {
-    const SingleItem &aa = dynCast<const SingleItem&>(a),
-        &bb = dynCast<const SingleItem&>(b);
+    const SingleItem &aa = llvm::cast<SingleItem>(a),
+        &bb = llvm::cast<SingleItem>(b);
 
     ((result.mValue)->*(operation))(*aa.mValue, *bb.mValue);
     return result;

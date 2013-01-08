@@ -5,8 +5,10 @@
 
 namespace Canal {
 
-Domain::Domain(const Environment &environment)
+Domain::Domain(const Environment &environment,
+               enum DomainKind kind)
     : mEnvironment(environment),
+      mKind(kind),
       mWideningData(NULL)
 {
 }
@@ -14,6 +16,7 @@ Domain::Domain(const Environment &environment)
 Domain::Domain(const Domain &value)
     : SharedData(value),
       mEnvironment(value.mEnvironment),
+      mKind(value.mKind),
       mWideningData(value.mWideningData)
 {
     if (mWideningData)
