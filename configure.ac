@@ -35,6 +35,7 @@ AC_DEFINE_UNQUOTED([LLVM_VERSION_MINOR], [$LLVM_VERSION_MINOR], [LLVM minor vers
 
 LDFLAGS=$LLVM_LDFLAGS
 
+# Prefer LLVM shared library.  If that is not available, use static libraries.
 AC_CHECK_LIB([LLVM-$LLVM_VERSION_MAJOR.$LLVM_VERSION_MINOR], [main], [llvm_lib_found=yes], [llvm_lib_found=no])
 if test "$clang_lib_found" = no
 then
@@ -45,20 +46,18 @@ fi
 
 AC_SUBST([LLVM_LIBS])
 
-
-
-AC_CHECK_LIB([clang], [main], [clang_lib_found=yes], [clang_lib_found=no])
-if test "$clang_lib_found" = no
+# Clang shared library provides just the limited C interface, so it can not be used.
+# We look for the static libraries.
+AC_CHECK_LIB([clangBasic], [main], [clang_lib_found=yes], [clang_lib_found=no])
+AC_CHECK_HEADERS([clang/Basic/Version.h], [clang_header_found=yes], [clang_header_found=no])
+test ! \( "$clang_lib_found" = "yes" -a "$clang_header_found" = "yes" \)
+have_clang=$?
+AC_DEFINE_UNQUOTED(HAVE_CLANG, $have_clang, [Have Clang])
+if test "$have_clang" = "1"
 then
-  AC_CHECK_LIB([clangBasic], [main], [clang_lib_found=yes], [clang_lib_found=no])
-  if test "$clang_lib_found" = no
-  then
-    AC_MSG_ERROR([Please install Clang development headers and library])
-  else
     CLANG_LIBS="-lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema  -lclangAnalysis -lclangIndex -lclangRewrite -lclangAST -lclangLex -lclangBasic"
-  fi
 else
-  CLANG_LIBS="-lclang"
+    CLANG_LIBS=""
 fi
 
 AC_SUBST([CLANG_LIBS])

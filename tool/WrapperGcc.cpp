@@ -42,6 +42,8 @@ run(int argc, char **argv)
         return 127;
 }
 
+#if HAVE_CLANG
+
 static llvm::raw_ostream &
 operator<<(llvm::raw_ostream &target,
            const clang::driver::ArgStringList &list)
@@ -450,11 +452,15 @@ runClang(int argc, char **argv)
         log << "diagnostics:\n" << diagnosticString;
 }
 
+#endif // HAVE_CLANG
+
 int
 wrapGcc(int argc, char **argv)
 {
     int result = run(argc, argv);
+#if HAVE_CLANG
     runClang(argc, argv);
+#endif
     return result;
 }
 
