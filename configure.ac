@@ -35,7 +35,21 @@ AC_DEFINE_UNQUOTED([LLVM_VERSION_MAJOR], [$LLVM_VERSION_MAJOR], [LLVM major vers
 LLVM_VERSION_MINOR=`$LLVM_CONFIG --version | sed 's/\(@<:@0-9@:>@*\).\(@<:@0-9@:>@*\).*/\2/'`
 AC_DEFINE_UNQUOTED([LLVM_VERSION_MINOR], [$LLVM_VERSION_MINOR], [LLVM minor version])
 
-CLANG_LIBS="-lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema  -lclangAnalysis -lclangIndex -lclangRewrite -lclangAST -lclangLex -lclangBasic"
+LDFLAGS=$LLVM_LDFLAGS
+AC_CHECK_LIB([clang], [main], [clang_lib_found=yes], [clang_lib_found=no])
+if test "$clang_lib_found" = no
+then
+  AC_CHECK_LIB([clangBasic], [main], [clang_lib_found=yes], [clang_lib_found=no])
+  if test "$clang_lib_found" = no
+  then
+    AC_MSG_ERROR([Please install Clang development headers and library])
+  else
+    CLANG_LIBS="-lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema  -lclangAnalysis -lclangIndex -lclangRewrite -lclangAST -lclangLex -lclangBasic"
+  fi
+else
+  CLANG_LIBS="-lclang"
+fi
+
 AC_SUBST([CLANG_LIBS])
 
 
