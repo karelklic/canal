@@ -52,7 +52,6 @@ protected: // Helper functions.
     ///  constant.  Otherwise, it returns NULL.
     const Domain *variableOrConstant(const llvm::Value &place,
                                      State &state,
-                                     const llvm::Instruction &instruction,
                                      llvm::OwningPtr<Domain> &constant) const;
 
     template<typename T> void interpretCall(const T &instruction,

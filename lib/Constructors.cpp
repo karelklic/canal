@@ -185,7 +185,8 @@ Constructors::create(const llvm::Constant &value,
         for (uint64_t i = 0; i < elementCount; ++i)
         {
             members.push_back(create(*structValue.getOperand(i),
-                                     place,
+                                     *structValue.getOperand(i),
+                                     //place,
                                      state));
         }
 
@@ -203,7 +204,8 @@ Constructors::create(const llvm::Constant &value,
         for (unsigned i = 0; i < elementCount; ++i)
         {
             values.push_back(create(*vectorValue.getOperand(i),
-                                    place,
+                                    *vectorValue.getOperand(i),
+                                    //place,
                                     state));
         }
 
@@ -221,7 +223,8 @@ Constructors::create(const llvm::Constant &value,
         for (uint64_t i = 0; i < elementCount; ++i)
         {
             values.push_back(create(*arrayValue.getOperand(i),
-                                    place,
+                                    *arrayValue.getOperand(i),
+                                    //place,
                                     state));
         }
 

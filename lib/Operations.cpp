@@ -166,7 +166,6 @@ Operations::interpretInstruction(const llvm::Instruction &instruction,
 const Domain *
 Operations::variableOrConstant(const llvm::Value &place,
                                State &state,
-                               const llvm::Instruction &instruction,
                                llvm::OwningPtr<Domain> &constant) const
 {
     const Domain *variable = state.findVariable(place);
@@ -176,7 +175,7 @@ Operations::variableOrConstant(const llvm::Value &place,
     if (llvm::isa<llvm::Constant>(place))
     {
         Domain *constValue = mConstructors.create(llvmCast<llvm::Constant>(place),
-                                                  instruction,
+                                                  place,
                                                   &state);
 
         llvm::OwningPtr<Domain> ptr(constValue);
@@ -215,7 +214,6 @@ Operations::interpretCall(const T &instruction,
         llvm::OwningPtr<Domain> constant;
         const Domain *value = variableOrConstant(*operand,
                                                  state,
-                                                 instruction,
                                                  constant);
 
         if (!value)
@@ -231,7 +229,6 @@ Operations::interpretCall(const T &instruction,
         llvm::OwningPtr<Domain> constant;
         const Domain *value = variableOrConstant(*operand,
                                                  state,
-                                                 instruction,
                                                  constant);
 
         if (!value)
@@ -257,11 +254,9 @@ Operations::binaryOperation(const llvm::BinaryOperator &instruction,
     const Domain *values[2] = {
         variableOrConstant(*instruction.getOperand(0),
                            state,
-                           instruction,
                            constants[0]),
         variableOrConstant(*instruction.getOperand(1),
                            state,
-                           instruction,
                            constants[1])
     };
     if (!values[0] || !values[1])
@@ -347,7 +342,6 @@ Operations::castOperation(const llvm::CastInst &instruction,
     const Domain *source = variableOrConstant(
         *instruction.getOperand(0),
         state,
-        instruction,
         constant);
 
     if (!source)
@@ -373,11 +367,9 @@ Operations::cmpOperation(const llvm::CmpInst &instruction,
     const Domain *values[2] = {
         variableOrConstant(*instruction.getOperand(0),
                            state,
-                           instruction,
                            constants[0]),
         variableOrConstant(*instruction.getOperand(1),
                            state,
-                           instruction,
                            constants[1])
     };
 
@@ -404,7 +396,6 @@ Operations::ret(const llvm::ReturnInst &instruction,
     llvm::OwningPtr<Domain> constant;
     const Domain *variable = variableOrConstant(*value,
                                                 state,
-                                                instruction,
                                                 constant);
 
     if (variable)
@@ -454,12 +445,10 @@ void Operations::add(const llvm::BinaryOperator &instruction,
     llvm::OwningPtr<Domain> constants[2];
     const Domain *a = variableOrConstant(*instruction.getOperand(0),
                                          state,
-                                         instruction,
                                          constants[0]);
 
     const Domain *b = variableOrConstant(*instruction.getOperand(1),
                                          state,
-                                         instruction,
                                          constants[1]);
 
     if (!a || !b)
@@ -514,12 +503,10 @@ Operations::sub(const llvm::BinaryOperator &instruction,
     llvm::OwningPtr<Domain> constants[2];
     const Domain *a = variableOrConstant(*instruction.getOperand(0),
                                          state,
-                                         instruction,
                                          constants[0]);
 
     const Domain *b = variableOrConstant(*instruction.getOperand(1),
                                          state,
-                                         instruction,
                                          constants[1]);
 
     if (!a || !b)
@@ -677,11 +664,9 @@ Operations::extractelement(const llvm::ExtractElementInst &instruction,
     const Domain *values[2] = {
         variableOrConstant(*instruction.getOperand(0),
                            state,
-                           instruction,
                            constants[0]),
         variableOrConstant(*instruction.getOperand(1),
                            state,
-                           instruction,
                            constants[1])
     };
     if (!values[0] || !values[1])
@@ -708,15 +693,12 @@ Operations::insertelement(const llvm::InsertElementInst &instruction,
     const Domain *values[3] = {
         variableOrConstant(*instruction.getOperand(0),
                            state,
-                           instruction,
                            constants[0]),
         variableOrConstant(*instruction.getOperand(1),
                            state,
-                           instruction,
                            constants[1]),
         variableOrConstant(*instruction.getOperand(2),
                            state,
-                           instruction,
                            constants[2])
     };
     if (!values[0] || !values[1] || !values[2])
@@ -740,11 +722,9 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
     const Domain *values[2] = {
         variableOrConstant(*instruction.getOperand(0),
                            state,
-                           instruction,
                            constants[0]),
         variableOrConstant(*instruction.getOperand(1),
                            state,
-                           instruction,
                            constants[1])
     };
     if (!values[0] || !values[1])
@@ -866,7 +846,6 @@ Operations::extractvalue(const llvm::ExtractValueInst &instruction,
     const Domain *aggregate = variableOrConstant(
         *instruction.getAggregateOperand(),
         state,
-        instruction,
         constant);
 
     if (!aggregate)
@@ -884,7 +863,6 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
     const Domain *aggregate = variableOrConstant(
         *instruction.getAggregateOperand(),
         state,
-        instruction,
         aggregateConstant);
 
     if (!aggregate)
@@ -894,7 +872,6 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
     const Domain *insertedValue = variableOrConstant(
         *instruction.getInsertedValueOperand(),
         state,
-        instruction,
         insertedConstant);
 
     if (!insertedValue)
@@ -920,7 +897,6 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
         llvm::OwningPtr<Domain> constant;
         const Domain *abstractSize = variableOrConstant(*arraySize,
                                                         state,
-                                                        instruction,
                                                         constant);
 
         if (!abstractSize)
@@ -988,13 +964,11 @@ Operations::store(const llvm::StoreInst &instruction,
     const Domain *pointer = variableOrConstant(
         *instruction.getPointerOperand(),
         state,
-        instruction,
         constantPointer);
 
     const Domain *value = variableOrConstant(
         *instruction.getValueOperand(),
         state,
-        instruction,
         constantValue);
 
     if (!pointer || !value)
@@ -1207,7 +1181,6 @@ Operations::phi(const llvm::PHINode &instruction,
         const Domain *value = variableOrConstant(
             *instruction.getIncomingValue(i),
             state,
-            instruction,
             constant);
 
         if (!value)
@@ -1238,13 +1211,11 @@ Operations::select(const llvm::SelectInst &instruction,
     const Domain *trueValue = variableOrConstant(
         *instruction.getTrueValue(),
         state,
-        instruction,
         trueConstant);
 
     const Domain *falseValue = variableOrConstant(
         *instruction.getFalseValue(),
         state,
-        instruction,
         falseConstant);
 
     Domain *resultValue;

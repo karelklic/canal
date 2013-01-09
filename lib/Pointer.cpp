@@ -55,8 +55,9 @@ Pointer::addTarget(Target::Type type,
                      "Place is mandatory.");
 
     CANAL_ASSERT_MSG(llvm::isa<llvm::Instruction>(place) ||
-                     llvm::isa<llvm::GlobalValue>(place),
-                     "Place must be either an instruction or a global value.");
+                     llvm::isa<llvm::GlobalValue>(place) ||
+                     llvm::isa<llvm::Constant>(place),
+                     "Place must be either an instruction or a global value or a constant.");
 
     Target *pointerTarget = new Target(mEnvironment,
                                        type,
