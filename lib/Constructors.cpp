@@ -116,14 +116,7 @@ Constructors::create(const llvm::Constant &value,
         const llvm::PointerType &pointerType = *nullValue.getType();
         Domain *constPointer;
         constPointer = createPointer(*pointerType.getElementType());
-
-        Pointer::Utils::addTarget(*constPointer,
-                                  Pointer::Target::Constant,
-                                  &place,
-                                  NULL,
-                                  std::vector<Domain*>(),
-                                  NULL);
-
+        constPointer->setZero(&place);
         return constPointer;
     }
 
