@@ -247,6 +247,19 @@ public: // Array interface.
     ///  instruction, which provides exact numeric offsets.
     virtual void setItem(uint64_t offset, const Domain &value);
 
+public: // Memory layout
+    virtual bool isValue() const;
+
+    virtual const llvm::Type &getValueType() const;
+
+    virtual bool hasValueExactSize() const;
+
+    virtual uint64_t getValueExactSize();
+
+    virtual Domain *getValueCell(uint64_t offset) const;
+
+    virtual void mergeValueCell(uint64_t offset, const Domain &value);
+
 private: // Domains are non-copyable.
     /// Assignment operator declaration.  Prevents accidental
     /// assignments of domains.  Do not implement!

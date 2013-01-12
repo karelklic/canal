@@ -58,6 +58,8 @@ public:
     {
         mConstructors = constructors;
     }
+
+    uint64_t getTypeStoreSize(const llvm::Type &type) const;
 };
 
 } // namespace Canal

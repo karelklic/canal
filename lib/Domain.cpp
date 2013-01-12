@@ -1,6 +1,7 @@
 #include "Domain.h"
 #include "Utils.h"
 #include "WideningDataInterface.h"
+#include "Environment.h"
 #include <typeinfo>
 
 namespace Canal {
@@ -282,6 +283,43 @@ Domain::setItem(const Domain &offset, const Domain &value)
 
 void
 Domain::setItem(uint64_t offset, const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Domain::isValue() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+const llvm::Type &
+Domain::getValueType() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Domain::hasValueExactSize() const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+uint64_t
+Domain::getValueExactSize()
+{
+    CANAL_ASSERT(hasValueExactSize());
+    return mEnvironment.getTypeStoreSize(getValueType());
+}
+
+Domain *
+Domain::getValueCell(uint64_t offset) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Domain::mergeValueCell(uint64_t offset, const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
 }
