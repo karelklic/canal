@@ -2,14 +2,13 @@
 #define LIBCANAL_ARRAY_STRING_PREFIX_H
 
 #include "Domain.h"
-#include "ArrayInterface.h"
 
 namespace Canal {
 namespace Array {
 
 /// Array with exact size and limited length.  It keeps all array
 /// members separately, not losing precision at all.
-class StringPrefix : public Domain, public Interface
+class StringPrefix : public Domain
 {
 public:
     std::string mPrefix;
@@ -23,6 +22,11 @@ public:
     ///   This class does not take ownership of this value.
     StringPrefix(const Environment &environment,
               const std::string &value);
+
+    static bool classof(const Domain *value)
+    {
+        return value->getKind() == ArrayStringPrefixKind;
+    }
 
 public: // Implementation of Domain.
     /// Covariant return type.
@@ -96,7 +100,6 @@ public: // Implementation of Domain.
     virtual StringPrefix &fcmp(const Domain &a, const Domain &b,
                                llvm::CmpInst::Predicate predicate);
 
-public: // Implementation of Array::Interface.
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 
     virtual Domain *getItem(uint64_t offset) const;

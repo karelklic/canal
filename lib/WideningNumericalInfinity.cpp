@@ -13,28 +13,24 @@ NumericalInfinity::widen(const llvm::BasicBlock &wideningPoint,
                          const Domain &second)
 {
     Integer::Container *firstContainer =
-        dynCast<Integer::Container*>(&first);
-    Float::Interval *f =
-            dynCast<Float::Interval*>(&first);
+        llvm::dyn_cast<Integer::Container>(&first);
 
+    Float::Interval *f = llvm::dyn_cast<Float::Interval>(&first);
     if (!firstContainer && !f)
         return;
 
     //const Integer::Container &secondContainer =
-    //    dynCast<const Integer::Container&>(second);
+    //    llvm::cast<Integer::Container>(second);
 
     DataInterface *data = first.getWideningData();
     DataIterationCount *iterationCount;
     if (data)
-        iterationCount = dynCast<DataIterationCount*>(data);
+        iterationCount = llvm::cast<DataIterationCount>(data);
     else
     {
         iterationCount = new DataIterationCount();
         first.setWideningData(iterationCount);
     }
-
-    CANAL_ASSERT_MSG(iterationCount,
-                     "Invalid or conflicting widening data.");
 
     iterationCount->increase(wideningPoint);
 

@@ -9,9 +9,8 @@ namespace Canal {
 
 Structure::Structure(const Environment &environment,
                      const std::vector<Domain*> &members)
-    : Domain(environment), mMembers(members)
+    : Domain(environment, Domain::StructureKind), mMembers(members)
 {
-
 }
 
 Structure::Structure(const Structure &value)
@@ -76,7 +75,7 @@ typedef bool(Domain::*CmpOperation)(const Domain&)const;
 static bool
 compareMembers(const Structure &a, const Domain &b, CmpOperation operation)
 {
-    const Structure *bb = dynCast<const Structure*>(&b);
+    const Structure *bb = llvm::dyn_cast<Structure>(&b);
     if (!bb)
         return false;
 
@@ -128,7 +127,7 @@ typedef Domain&(Domain::*JoinOrMeetOperation)(const Domain&);
 static Structure &
 joinOrMeet(Structure &a, const Domain &b, JoinOrMeetOperation op)
 {
-    const Structure &bb = dynCast<const Structure&>(b);
+    const Structure &bb = llvm::cast<Structure>(b);
     CANAL_ASSERT(a.mMembers.size() == bb.mMembers.size());
     std::vector<Domain*>::iterator ita = a.mMembers.begin(),
         itaend = a.mMembers.end();

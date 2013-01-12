@@ -12,26 +12,23 @@ Pointers::widen(const llvm::BasicBlock &wideningPoint,
                 const Domain &second)
 {
     Pointer::Pointer *firstPointer =
-        dynCast<Pointer::Pointer*>(&first);
+        llvm::dyn_cast<Pointer::Pointer>(&first);
 
     if (!firstPointer)
         return;
 
     //const Integer::Container &secondContainer =
-    //    dynCast<const Integer::Container&>(second);
+    //    llvm::cast<Integer::Container>(second);
 
     DataInterface *data = first.getWideningData();
     DataIterationCount *iterationCount;
     if (data)
-        iterationCount = dynCast<DataIterationCount*>(data);
+        iterationCount = llvm::cast<DataIterationCount>(data);
     else
     {
         iterationCount = new DataIterationCount();
         first.setWideningData(iterationCount);
     }
-
-    CANAL_ASSERT_MSG(iterationCount,
-                     "Invalid or conflicting widening data.");
 
     iterationCount->increase(wideningPoint);
 

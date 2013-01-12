@@ -11,7 +11,11 @@ class Environment
 {
     llvm::Module *mModule;
 
+#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+    llvm::DataLayout mTargetData;
+#else
     llvm::TargetData mTargetData;
+#endif
 
     mutable SlotTracker mSlotTracker;
 
@@ -31,7 +35,11 @@ public:
         return *mModule;
     }
 
+#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+    const llvm::DataLayout &getTargetData() const
+#else
     const llvm::TargetData &getTargetData() const
+#endif
     {
         return mTargetData;
     }

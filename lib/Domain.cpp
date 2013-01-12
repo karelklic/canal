@@ -5,8 +5,10 @@
 
 namespace Canal {
 
-Domain::Domain(const Environment &environment)
+Domain::Domain(const Environment &environment,
+               enum DomainKind kind)
     : mEnvironment(environment),
+      mKind(kind),
       mWideningData(NULL)
 {
 }
@@ -14,6 +16,7 @@ Domain::Domain(const Environment &environment)
 Domain::Domain(const Domain &value)
     : SharedData(value),
       mEnvironment(value.mEnvironment),
+      mKind(value.mKind),
       mWideningData(value.mWideningData)
 {
     if (mWideningData)
@@ -238,6 +241,49 @@ Domain::setWideningData(Widening::DataInterface *wideningData)
                      "Widening data set were already set.");
 
     mWideningData = wideningData;
+}
+
+Domain *
+Domain::getValue(const Domain &offset) const
+{
+    Domain *result = NULL;
+    std::vector<Domain*> items(getItem(offset));
+    std::vector<Domain*>::const_iterator it = items.begin(),
+        itend = items.end();
+
+    for (; it != itend; ++it)
+    {
+        if (!result)
+            result = (*it)->clone();
+        else
+            result->join(**it);
+    }
+
+    return result;
+}
+
+std::vector<Domain*>
+Domain::getItem(const Domain &offset) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain *
+Domain::getItem(uint64_t offset) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Domain::setItem(const Domain &offset, const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Domain::setItem(uint64_t offset, const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 } // namespace Canal

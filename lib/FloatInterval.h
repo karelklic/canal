@@ -48,6 +48,11 @@ public:
 
     llvm::APFloat getMin() const;
 
+    static bool classof(const Domain *value)
+    {
+        return value->getKind() == FloatIntervalKind;
+    }
+
 public: // Implementation of Domain.
     // Covariant return type.
     virtual Interval *clone() const;

@@ -6,13 +6,16 @@
 #cmakedefine HAVE_LIBELF 1
 
 /* Define to 1 if you have the <libelf.h> header file. */
-#cmakedefine HAVE_LIBELF_H
+#cmakedefine HAVE_LIBELF_H 1
 
 /* Define to 1 if you have the <readline/readline.h> header file. */
-#cmakedefine HAVE_READLINE_READLINE_H
+#cmakedefine HAVE_READLINE_READLINE_H 1
 
 /* LLVM has been compiled with NDEBUG */
-#cmakedefine LLVM_WITH_NDEBUG
+#cmakedefine LLVM_WITH_NDEBUG 1
+
+/* Have Clang. */
+#cmakedefine HAVE_CLANG 1
 
 #define LLVM_VERSION_MAJOR @LLVM_VERSION_MAJOR@
 

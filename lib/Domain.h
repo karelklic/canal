@@ -28,7 +28,23 @@ public:
                                            const Domain&,
                                            llvm::CmpInst::Predicate predicate);
 
+    /// Discriminator for LLVM-style RTTI (dyn_cast<> et al.)
+    enum DomainKind {
+        ArrayExactSizeKind,
+        ArraySingleItemKind,
+        ArrayStringPrefixKind,
+        FloatIntervalKind,
+        IntegerContainerKind,
+        IntegerBitfieldKind,
+        IntegerIntervalKind,
+        IntegerSetKind,
+        PointerKind,
+        StructureKind
+    };
+
     const Environment &mEnvironment;
+
+    const enum DomainKind mKind;
 
     Widening::DataInterface *mWideningData;
 
@@ -37,7 +53,8 @@ public:
 
 public:
     /// Standard constructor.
-    Domain(const Environment &environment);
+    Domain(const Environment &environment,
+           DomainKind kind);
 
     /// Copy constructor.  Careful!  Copy constructor of base class is
     /// not called by automatically generated copy constructor of
@@ -50,6 +67,11 @@ public:
     const Environment &getEnvironment() const
     {
         return mEnvironment;
+    }
+
+    enum DomainKind getKind() const
+    {
+        return mKind;
     }
 
     /// Create a copy of this value.
@@ -189,6 +211,41 @@ public: // Widening interface.
 
     /// This class takes ownership of the wideningData memory.
     void setWideningData(Widening::DataInterface *wideningData);
+
+public: // Array interface.
+    /// Gets the value representing the array item or items pointed by
+    /// the provided offset.  Caller is responsible for deleting the
+    /// returned value.
+    Domain *getValue(const Domain &offset) const;
+
+    /// Get the array items pointed by the provided offset.  Returns
+    /// internal array items that are owned by the array.  Caller must
+    /// not delete the items.
+    virtual std::vector<Domain*> getItem(const Domain &offset) const;
+
+    /// Get the array item pointed by the provided offset.  Returns
+    /// internal array item that is owned by the array.  Caller must
+    /// not delete the item.
+    /// @note
+    ///  The uint64_t offset variant exists because of the extractvalue
+    ///  instruction, which provides exact numeric offsets.
+    /// @note
+    ///  For future array domains it might be necessary to extend this
+    ///  method to return a list of values.
+    virtual Domain *getItem(uint64_t offset) const;
+
+    /// @param value
+    ///  The method does not take the ownership of this memory.  It
+    ///  copies the contents of the value instead.
+    virtual void setItem(const Domain &offset, const Domain &value);
+
+    /// @param value
+    ///  The method does not take the ownership of this memory.  It
+    ///  copies the contents of the value instead.
+    /// @note
+    ///  The uint64_t offset variant exists because of the insertvalue
+    ///  instruction, which provides exact numeric offsets.
+    virtual void setItem(uint64_t offset, const Domain &value);
 
 private: // Domains are non-copyable.
     /// Assignment operator declaration.  Prevents accidental

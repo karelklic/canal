@@ -2,14 +2,13 @@
 #define LIBCANAL_ARRAY_EXACT_SIZE_H
 
 #include "Domain.h"
-#include "ArrayInterface.h"
 
 namespace Canal {
 namespace Array {
 
 /// Array with exact size and limited length.  It keeps all array
 /// members separately, not losing precision at all.
-class ExactSize : public Domain, public Interface
+class ExactSize : public Domain
 {
 public:
     std::vector<Domain*> mValues;
@@ -35,6 +34,11 @@ public:
     size_t size() const
     {
         return mValues.size();
+    }
+
+    static bool classof(const Domain *value)
+    {
+        return value->getKind() == ArrayExactSizeKind;
     }
 
 public: // Implementation of Domain.
@@ -113,7 +117,6 @@ public: // Implementation of Domain.
     virtual ExactSize &fcmp(const Domain &a, const Domain &b,
                             llvm::CmpInst::Predicate predicate);
 
-public: // Implementation of Array::Interface.
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 
     virtual Domain *getItem(uint64_t offset) const;

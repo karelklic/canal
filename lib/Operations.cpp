@@ -456,10 +456,10 @@ void Operations::add(const llvm::BinaryOperator &instruction,
 
     // Pointer arithmetic.
     const Pointer::Pointer *aPointer =
-        dynCast<const Pointer::Pointer*>(a);
+        llvm::dyn_cast<Pointer::Pointer>(a);
 
     const Pointer::Pointer *bPointer =
-        dynCast<const Pointer::Pointer*>(b);
+        llvm::dyn_cast<Pointer::Pointer>(b);
 
     CANAL_ASSERT_MSG(!aPointer || !bPointer,
                      "Unable to add two pointers.");
@@ -514,10 +514,10 @@ Operations::sub(const llvm::BinaryOperator &instruction,
 
     // Pointer arithmetic.
     const Pointer::Pointer *aPointer =
-        dynCast<const Pointer::Pointer*>(a);
+        llvm::dyn_cast<Pointer::Pointer>(a);
 
     const Pointer::Pointer *bPointer =
-        dynCast<const Pointer::Pointer*>(b);
+        llvm::dyn_cast<Pointer::Pointer>(b);
 
     CANAL_ASSERT_MSG(aPointer || !bPointer,
                      "Subtracting pointer from constant!");
@@ -673,7 +673,7 @@ Operations::extractelement(const llvm::ExtractElementInst &instruction,
         return;
 
     const Array::ExactSize *array =
-        dynCast<const Array::ExactSize*>(values[0]);
+        llvm::dyn_cast<Array::ExactSize>(values[0]);
 
     CANAL_ASSERT_MSG(array, "Invalid type of array.");
     Domain *result = array->getValue(*values[1]);
@@ -705,9 +705,9 @@ Operations::insertelement(const llvm::InsertElementInst &instruction,
         return;
 
     Domain *result = values[0]->clone();
-    Array::ExactSize *resultAsArray = dynCast<Array::ExactSize*>(result);
+    Array::ExactSize *resultAsArray = llvm::dyn_cast<Array::ExactSize>(result);
 
-    CANAL_ASSERT_MSG(result, "Invalid type of array.");
+    CANAL_ASSERT_MSG(resultAsArray, "Invalid type of array.");
     resultAsArray->setItem(*values[2], *values[1]);
 
     // Store the result value to the state.
@@ -731,17 +731,17 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
         return;
 
     const Array::ExactSize *array0 =
-        dynCast<const Array::ExactSize*>(values[0]);
+        llvm::dyn_cast<Array::ExactSize>(values[0]);
 
     CANAL_ASSERT_MSG(array0, "Invalid type in shufflevector.");
     const Array::ExactSize *array1 =
-        dynCast<const Array::ExactSize*>(values[1]);
+        llvm::dyn_cast<Array::ExactSize>(values[1]);
 
     CANAL_ASSERT_MSG(array1, "Invalid type in shufflevector.");
 
     std::vector<Domain*> newValues;
 
-#if LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1
+#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 0
     llvm::SmallVector<int, 16> shuffleMask =
         instruction.getShuffleMask();
 #else
@@ -804,15 +804,7 @@ getValueLocation(Domain *aggregate, const T &instruction)
         itend = instruction.idx_end();
 
     for (; it != itend; ++it)
-    {
-        const Array::Interface *array =
-            dynCast<const Array::Interface*>(item);
-
-        CANAL_ASSERT_MSG(array,
-                         "ExtractValue reached an unsupported type.");
-
-        item = array->getItem(*it);
-    }
+        item = item->getItem(*it);
 
     return item;
 }
@@ -825,15 +817,7 @@ getValueLocation(const Domain *aggregate, const T &instruction)
         itend = instruction.idx_end();
 
     for (; it != itend; ++it)
-    {
-        const Array::Interface *array =
-            dynCast<const Array::Interface*>(item);
-
-        CANAL_ASSERT_MSG(array,
-                         "ExtractValue reached an unsupported type.");
-
-        item = array->getItem(*it);
-    }
+        item = item->getItem(*it);
 
     return item;
 }
@@ -945,7 +929,7 @@ Operations::load(const llvm::LoadInst &instruction,
         return;
 
     const Pointer::Pointer &pointer =
-        dynCast<const Pointer::Pointer&>(*variable);
+        llvm::cast<Pointer::Pointer>(*variable);
 
     // Pointer found. Merge all possible values and store the result
     // into the state.
@@ -975,7 +959,7 @@ Operations::store(const llvm::StoreInst &instruction,
         return;
 
     const Pointer::Pointer &inclusionBased =
-        dynCast<const Pointer::Pointer&>(*pointer);
+        llvm::cast<Pointer::Pointer>(*pointer);
 
     inclusionBased.store(*value, state);
 }
@@ -992,7 +976,7 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
         return;
 
     const Pointer::Pointer &source =
-        dynCast<const Pointer::Pointer&>(*base);
+        llvm::cast<Pointer::Pointer>(*base);
 
     // We get offsets. Either constants or Integer::Container.
     // Pointer points either to an array (or array offset), or to a
@@ -1120,10 +1104,10 @@ Operations::inttoptr(const llvm::IntToPtrInst &instruction,
         return;
 
     const Pointer::Pointer &source =
-        dynCast<const Pointer::Pointer&>(*operand);
+        llvm::cast<Pointer::Pointer>(*operand);
 
     const llvm::PointerType &pointerType =
-        llvmCast<const llvm::PointerType>(*instruction.getDestTy());
+        llvm::cast<llvm::PointerType>(*instruction.getDestTy());
 
     Pointer::Pointer *result =
         source.bitcast(*pointerType.getElementType());
@@ -1147,7 +1131,7 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
         return;
 
     const Pointer::Pointer &sourcePointer =
-        dynCast<const Pointer::Pointer&>(*source);
+        llvm::cast<Pointer::Pointer>(*source);
 
     const llvm::PointerType &destPointerType =
         llvmCast<const llvm::PointerType>(*destinationType);
@@ -1220,7 +1204,7 @@ Operations::select(const llvm::SelectInst &instruction,
 
     Domain *resultValue;
     const Integer::Container &conditionInt =
-        dynCast<const Integer::Container&>(*condition);
+        llvm::cast<Integer::Container>(*condition);
 
     CANAL_ASSERT(Integer::Utils::getBitfield(conditionInt).getBitWidth() == 1);
     switch (Integer::Utils::getBitfield(conditionInt).getBitValue(0))

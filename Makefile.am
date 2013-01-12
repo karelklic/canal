@@ -1,10 +1,8 @@
-ACLOCAL_AMFLAGS = -I m4
-
 if BUILD_DOCUMENTATION
   MAYBE_DOCUMENTATION = docs
 endif
 
-SUBDIRS = lib tool wrappers tests $(MAYBE_DOCUMENTATION)
+SUBDIRS = lib tool tests $(MAYBE_DOCUMENTATION)
 
 EXTRA_DIST = canal.spec.in
 
