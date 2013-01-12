@@ -2,7 +2,7 @@ language: cpp
 compiler:
   - gcc
   - clang
-script: ./configure && make && make check
+script: autoreconf -if && ./configure && make && make check
 install: sudo apt-get install llvm-dev libclang-dev libelf-dev libreadline-dev
 
 matrix:
