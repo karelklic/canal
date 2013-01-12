@@ -2,7 +2,6 @@
 #define LIBCANAL_ARRAY_SINGLE_ITEM_H
 
 #include "Domain.h"
-#include "ArrayInterface.h"
 
 namespace Canal {
 namespace Array {
@@ -12,7 +11,7 @@ namespace Array {
 /// merged and used to move the single value up in its lattice.
 //
 /// This array type is very imprecise.
-class SingleItem : public Domain, public Interface
+class SingleItem : public Domain
 {
 public:
     Domain *mValue;
@@ -113,7 +112,6 @@ public: // Implementation of Domain.
     virtual SingleItem &fcmp(const Domain &a, const Domain &b,
                              llvm::CmpInst::Predicate predicate);
 
-public: // Implementation of Array::Interface.
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 
     virtual Domain *getItem(uint64_t offset) const;

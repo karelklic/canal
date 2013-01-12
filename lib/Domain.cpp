@@ -243,4 +243,47 @@ Domain::setWideningData(Widening::DataInterface *wideningData)
     mWideningData = wideningData;
 }
 
+Domain *
+Domain::getValue(const Domain &offset) const
+{
+    Domain *result = NULL;
+    std::vector<Domain*> items(getItem(offset));
+    std::vector<Domain*>::const_iterator it = items.begin(),
+        itend = items.end();
+
+    for (; it != itend; ++it)
+    {
+        if (!result)
+            result = (*it)->clone();
+        else
+            result->join(**it);
+    }
+
+    return result;
+}
+
+std::vector<Domain*>
+Domain::getItem(const Domain &offset) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain *
+Domain::getItem(uint64_t offset) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Domain::setItem(const Domain &offset, const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Domain::setItem(uint64_t offset, const Domain &value)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 } // namespace Canal

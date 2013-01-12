@@ -824,11 +824,7 @@ getValueLocation(Domain *aggregate, const T &instruction)
         itend = instruction.idx_end();
 
     for (; it != itend; ++it)
-    {
-        const Array::Interface *array = llvm::cast<Array::Interface>(item);
-        CANAL_ASSERT_MSG(array, "ExtractValue reached an unsupported type.");
-        item = array->getItem(*it);
-    }
+        item = item->getItem(*it);
 
     return item;
 }
@@ -841,11 +837,7 @@ getValueLocation(const Domain *aggregate, const T &instruction)
         itend = instruction.idx_end();
 
     for (; it != itend; ++it)
-    {
-        const Array::Interface *array = llvm::cast<Array::Interface>(item);
-        CANAL_ASSERT_MSG(array, "ExtractValue reached an unsupported type.");
-        item = array->getItem(*it);
-    }
+        item = item->getItem(*it);
 
     return item;
 }

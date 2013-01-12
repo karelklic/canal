@@ -105,9 +105,7 @@ dereference(Domain *block,
             for (; iti != itiend; ++iti)
             {
                 std::vector<Domain*> items;
-                Array::Interface &array = llvm::cast<Array::Interface>(**iti);
-
-                items = array.getItem(**ito);
+                items = (**iti).getItem(**ito);
                 nextLevelResult.insert(nextLevelResult.end(),
                                        items.begin(),
                                        items.end());
@@ -152,8 +150,7 @@ dereference(const Domain *block,
             for (; iti != itiend; ++iti)
             {
                 std::vector<Domain*> items;
-                const Array::Interface &array = llvm::cast<Array::Interface>(**iti);
-                items = array.getItem(**ito);
+                items = (**iti).getItem(**ito);
                 nextLevelResult.insert(nextLevelResult.end(),
                                        items.begin(),
                                        items.end());
