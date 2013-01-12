@@ -24,14 +24,15 @@ add_executable(canal-tool
     CommandStep.cpp
     IteratorCallback.cpp
     State.cpp
-    Utils.cpp)
+    Utils.cpp
+    WrapperGcc.cpp)
 
 target_link_libraries(canal-tool
     canal
+    ${CLANG_LIBS}
     ${READLINE_LIBRARIES}
     ${LIBELF_LIBRARIES})
 
 set_target_properties(canal-tool
     PROPERTIES
     OUTPUT_NAME canal)
-

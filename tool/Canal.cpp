@@ -1,11 +1,12 @@
 #include "Commands.h"
+#include "WrapperGcc.h"
+#include "lib/WideningDataIterationCount.h"
+#include "lib/InterpreterOperationsCallback.h"
+#include "lib/Utils.h"
 #include <string>
 #include <cstring>
 #include <cctype>
 #include <cstdlib>
-#include "lib/WideningDataIterationCount.h"
-#include "lib/InterpreterOperationsCallback.h"
-#include "lib/Utils.h"
 
 extern "C" {
 #include <readline/readline.h>
@@ -86,6 +87,17 @@ completeEntry(const char *text, int state)
 int
 main(int argc, char **argv)
 {
+    // Check if the tool is acting like a compiler or linker.
+    std::string programName = basename(argv[0]);
+
+    if (programName == "gcc" ||
+        programName == "g++")
+    {
+        return wrapGcc(argc, argv);
+    }
+    else if (programName == "ld")
+        return wrapLd(argc, argv);
+
     // Initialize the readline library.
     // Allow conditional parsing of the ~/.inputrc file.
     rl_readline_name = (char*)"Canal";

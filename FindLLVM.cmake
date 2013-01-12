@@ -22,10 +22,10 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)" "\\1" LLVM_VERSION_MAJOR
+string(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*" "\\1" LLVM_VERSION_MAJOR
 	     "${LLVM_VERSION}")
 
-string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)" "\\2" LLVM_VERSION_MINOR
+string(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*" "\\2" LLVM_VERSION_MINOR
 	     "${LLVM_VERSION}")
 
 execute_process(
@@ -52,11 +52,15 @@ else (LLVM_CFLAGS MATCHES "\\-DNDEBUG")
     set(LLVM_WITH_NDEBUG FALSE)
 endif (LLVM_CFLAGS MATCHES "\\-DNDEBUG")
 
-execute_process(
-  COMMAND ${LLVM_CONFIG_EXECUTABLE} --libs core bitreader asmparser target analysis transformutils
-  OUTPUT_VARIABLE LLVM_MODULE_LIBS
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+
+find_library(LLVM_MODULE_LIBS LLVM-${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR} ${LLVM_LIBRARY_DIRS})
+if (NOT LLVM_MODULE_LIBS)
+  execute_process(
+    COMMAND ${LLVM_CONFIG_EXECUTABLE} --libs
+    OUTPUT_VARIABLE LLVM_MODULE_LIBS
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+endif (NOT LLVM_MODULE_LIBS)
 
 execute_process(
   COMMAND ${LLVM_CONFIG_EXECUTABLE} --ldflags

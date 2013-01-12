@@ -4,8 +4,6 @@ libcanal_la_SOURCES = \
 	APIntUtils.h \
 	ArrayExactSize.cpp \
 	ArrayExactSize.h \
-	ArrayInterface.cpp \
-	ArrayInterface.h \
 	ArraySingleItem.cpp \
 	ArraySingleItem.h \
 	ArrayStringPrefix.cpp \

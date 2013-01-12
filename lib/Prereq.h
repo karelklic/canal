@@ -34,9 +34,13 @@
 #include <llvm/Support/CFG.h>
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/raw_ostream.h>
-#include <llvm/Target/TargetData.h>
 #include <llvm/Type.h>
 #include <llvm/Value.h>
+#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
+#  include <llvm/DataLayout.h>
+#else
+#  include <llvm/Target/TargetData.h>
+#endif
 
 #ifdef CANAL_NDEBUG_SWITCHED
 #  undef CANAL_NDEBUG_SWITCHED

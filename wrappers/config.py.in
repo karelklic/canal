@@ -1,4 +1,0 @@
-# -*- mode:python -*-
-
-CLANG = "@CLANG@"
-LLVM_LINK = "@LLVM_LINK@"

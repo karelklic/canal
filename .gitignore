@@ -3,13 +3,13 @@
 .libs
 *~
 Makefile
+Makefile.in
 CMakeFiles
 cmake_install.cmake
 CTestTestfile.cmake
 CMakeCache.txt
 
 /Testing
-
 /canal.config
 /canal.creator
 /canal.files
@@ -18,6 +18,16 @@ CMakeCache.txt
 /config.log
 /config.status
 /libtool
+/ar-lib
+/INSTALL
+/aclocal.m4
+/config.guess
+/config.sub
+/configure
+/depcomp
+/install-sh
+/ltmain.sh
+/missing
 
 /docs/*.aux
 /docs/canal.idx
@@ -34,6 +44,7 @@ CMakeCache.txt
 /lib/Config.h
 /lib/stamp-h1
 /lib/libcanal.so
+/lib/ConfigAutotools.h.in
 
 /tool/canal
 
