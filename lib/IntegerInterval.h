@@ -123,8 +123,6 @@ public: // Implementation of Domain.
 
     virtual bool operator<(const Domain &value) const;
 
-    virtual bool operator>(const Domain &value) const;
-
     virtual Interval &join(const Domain &value);
 
     virtual Interval &meet(const Domain &value);

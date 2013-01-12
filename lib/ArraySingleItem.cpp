@@ -89,12 +89,6 @@ SingleItem::operator<(const Domain& value) const
     CANAL_NOT_IMPLEMENTED();
 }
 
-bool
-SingleItem::operator>(const Domain& value) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
 SingleItem &
 SingleItem::join(const Domain &value)
 {

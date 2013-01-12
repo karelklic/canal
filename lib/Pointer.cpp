@@ -404,12 +404,6 @@ Pointer::operator<(const Domain &value) const
     CANAL_NOT_IMPLEMENTED();
 }
 
-bool
-Pointer::operator>(const Domain &value) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
 Pointer &
 Pointer::join(const Domain &value)
 {

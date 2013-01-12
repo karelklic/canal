@@ -38,8 +38,6 @@ public: // Implementation of Domain.
 
     virtual bool operator<(const Domain &value) const;
 
-    virtual bool operator>(const Domain &value) const;
-
     virtual Structure &join(const Domain &value);
 
     virtual Structure &meet(const Domain &value);

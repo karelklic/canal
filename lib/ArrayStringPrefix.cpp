@@ -84,12 +84,6 @@ StringPrefix::operator<(const Domain &value) const
     CANAL_NOT_IMPLEMENTED();
 }
 
-bool
-StringPrefix::operator>(const Domain &value) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
 static std::string
 commonPrefix(std::string first, std::string second)
 {

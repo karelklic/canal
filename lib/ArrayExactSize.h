@@ -55,8 +55,6 @@ public: // Implementation of Domain.
 
     virtual bool operator<(const Domain &value) const;
 
-    virtual bool operator>(const Domain &value) const;
-
     virtual ExactSize &join(const Domain &value);
 
     virtual ExactSize &meet(const Domain &value);

@@ -106,13 +106,6 @@ public: // Lattice
         return operator==(value) || operator<(value);
     }
 
-    virtual bool operator>(const Domain &value) const = 0;
-
-    virtual bool operator>=(const Domain &value) const
-    {
-        return operator>(value) || operator==(value);
-    }
-
     /// Merge another value into this one.
     virtual Domain &join(const Domain &value) = 0;
 

@@ -115,12 +115,6 @@ ExactSize::operator<(const Domain& value) const
     CANAL_NOT_IMPLEMENTED();
 }
 
-bool
-ExactSize::operator>(const Domain& value) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
 ExactSize &
 ExactSize::join(const Domain &value)
 {

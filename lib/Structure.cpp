@@ -113,15 +113,6 @@ Structure::operator<(const Domain &value) const
     return compareMembers(*this, value, &Domain::operator<);
 }
 
-bool
-Structure::operator>(const Domain &value) const
-{
-    if (this == &value)
-        return false;
-
-    return compareMembers(*this, value, &Domain::operator>);
-}
-
 typedef Domain&(Domain::*JoinOrMeetOperation)(const Domain&);
 
 static Structure &
