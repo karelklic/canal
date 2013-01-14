@@ -8,6 +8,7 @@
 #include "ArrayExactSize.h"
 #include "ArrayStringPrefix.h"
 #include "FloatInterval.h"
+#include "FloatUtils.h"
 #include "Pointer.h"
 #include "PointerUtils.h"
 #include "Structure.h"
@@ -38,10 +39,10 @@ Constructors::create(const llvm::Type &type) const
 
     if (type.isFloatingPointTy())
     {
-        const llvm::fltSemantics *semantics =
-            getFloatingPointSemantics(type);
+        const llvm::fltSemantics &semantics =
+            Float::Utils::getSemantics(type);
 
-        return createFloat(*semantics);
+        return createFloat(semantics);
     }
 
     if (type.isPointerTy())
@@ -345,32 +346,6 @@ Constructors::createPointer(const llvm::Type &type) const {
 Domain *
 Constructors::createStructure(const std::vector<Domain*> &members) const {
     return new Structure(mEnvironment, members);
-}
-
-const llvm::fltSemantics *
-Constructors::getFloatingPointSemantics(const llvm::Type &type)
-{
-    CANAL_ASSERT(type.isFloatingPointTy());
-
-    const llvm::fltSemantics *semantics;
-#if (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1) || LLVM_VERSION_MAJOR > 3
-    if (type.isHalfTy())
-        semantics = &llvm::APFloat::IEEEhalf;
-    else
-#endif
-    if (type.isFloatTy())
-        semantics = &llvm::APFloat::IEEEsingle;
-    else if (type.isDoubleTy())
-        semantics = &llvm::APFloat::IEEEdouble;
-    else if (type.isFP128Ty())
-        semantics = &llvm::APFloat::IEEEquad;
-    else if (type.isPPC_FP128Ty())
-        semantics = &llvm::APFloat::PPCDoubleDouble;
-    else if (type.isX86_FP80Ty())
-        semantics = &llvm::APFloat::x87DoubleExtended;
-    else
-        CANAL_DIE();
-    return semantics;
 }
 
 Domain *
