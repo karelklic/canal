@@ -12,7 +12,7 @@ static Environment *gEnvironment;
 static void
 testConstructors()
 {
-    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+    const llvm::Type &elementType = *llvm::Type::getInt8Ty(
         gEnvironment->getContext());
 
     const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
@@ -28,7 +28,7 @@ testConstructors()
 static void
 testSetZero()
 {
-    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+    const llvm::Type &elementType = *llvm::Type::getInt8Ty(
         gEnvironment->getContext());
 
     const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
@@ -41,7 +41,7 @@ testSetZero()
 static void
 testEquality()
 {
-    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+    const llvm::Type &elementType = *llvm::Type::getInt8Ty(
         gEnvironment->getContext());
 
     const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
@@ -66,7 +66,7 @@ testEquality()
 static void
 testJoin()
 {
-    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+    const llvm::Type &elementType = *llvm::Type::getInt8Ty(
         gEnvironment->getContext());
 
     const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
@@ -153,7 +153,7 @@ testJoin()
 static void
 testMeet()
 {
-    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+    const llvm::Type &elementType = *llvm::Type::getInt8Ty(
         gEnvironment->getContext());
 
     const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);

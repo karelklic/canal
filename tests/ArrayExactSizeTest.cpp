@@ -14,7 +14,7 @@ static Interpreter::Interpreter *gInterpreter;
 static void
 testConstructors()
 {
-    llvm::Type &elementType = *llvm::Type::getInt32Ty(
+    const llvm::Type &elementType = *llvm::Type::getInt32Ty(
         gInterpreter->getEnvironment().getContext());
 
     const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);

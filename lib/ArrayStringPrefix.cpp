@@ -13,7 +13,7 @@ StringPrefix::StringPrefix(const Environment &environment,
       mIsBottom(true),
       mType(type)
 {
-    llvm::Type *int8 = llvm::Type::getInt8Ty(environment.getContext());
+    const llvm::Type *int8 = llvm::Type::getInt8Ty(environment.getContext());
     if (mType.getElementType() != int8)
         setTop();
 }
@@ -26,7 +26,7 @@ StringPrefix::StringPrefix(const Environment &environment,
       mIsBottom(true),
       mType(type)
 {
-    llvm::Type *int8 = llvm::Type::getInt8Ty(environment.getContext());
+    const llvm::Type *int8 = llvm::Type::getInt8Ty(environment.getContext());
     if (mType.getElementType() != int8)
         setTop();
     else
