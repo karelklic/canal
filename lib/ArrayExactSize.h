@@ -11,18 +11,25 @@ namespace Array {
 class ExactSize : public Domain
 {
 public:
+    /// Empty mValues indicate that the ExactSize object is at the top
+    /// value because the size is not exact.
     std::vector<Domain*> mValues;
 
+    /// The type of the array.
+    const llvm::SequentialType &mType;
+
 public:
-    /// @param value
-    ///   This class does not take ownership of this value.
+    /// Standard constructor.
+    ///
+    /// If the type is suitable for exact size array, bottom values of
+    /// element type are created in mValues.
     ExactSize(const Environment &environment,
-              const uint64_t size,
-              const Domain &value);
+              const llvm::SequentialType &type);
 
     /// @param values
     ///   This class takes ownership of the values.
     ExactSize(const Environment &environment,
+              const llvm::SequentialType &type,
               const std::vector<Domain*> &values);
 
     /// Copy constructor.

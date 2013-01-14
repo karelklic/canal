@@ -2,19 +2,64 @@
 #include "Utils.h"
 #include "IntegerContainer.h"
 #include "IntegerUtils.h"
+#include "Environment.h"
+#include "Constructors.h"
 
 namespace Canal {
 namespace Array {
 
 SingleItem::SingleItem(const Environment &environment,
-                       Domain* size,
-                       Domain* value)
-    : Domain(environment, Domain::ArraySingleItemKind), mValue(value), mSize(size)
+                       const llvm::SequentialType &type)
+    : Domain(environment, Domain::ArraySingleItemKind),
+      mType(type)
 {
+    const llvm::Type &elementType = *type.getElementType();
+    mValue = environment.getConstructors().create(elementType);
+
+    uint64_t count = 0;
+
+    const llvm::ArrayType *array = llvm::dyn_cast<llvm::ArrayType>(&type);
+    if (array)
+        count = array->getNumElements();
+
+    const llvm::VectorType *vector = llvm::dyn_cast<llvm::VectorType>(&type);
+    if (vector)
+        count = vector->getNumElements();
+
+    mSize = environment.getConstructors().createInteger(llvm::APInt(64, count));
+    if (count == 0)
+        mSize->setTop();
+}
+
+SingleItem::SingleItem(const Environment &environment,
+                       const llvm::SequentialType &type,
+                       std::vector<Domain*>::const_iterator begin,
+                       std::vector<Domain*>::const_iterator end)
+    : Domain(environment, Domain::ArraySingleItemKind), mType(type)
+{
+    llvm::APInt size(64, end - begin);
+    mSize = environment.getConstructors().createInteger(size);
+
+    const llvm::Type &elementType = *type.getElementType();
+    mValue = environment.getConstructors().create(elementType);
+    std::vector<Domain*>::const_iterator it = begin;
+    for (; it != end; ++it)
+        mValue->join(**it);
+}
+
+SingleItem::SingleItem(const Environment &environment,
+                       const llvm::SequentialType &type,
+                       Domain *size)
+    : Domain(environment, Domain::ArraySingleItemKind),
+      mSize(size),
+      mType(type)
+{
+    const llvm::Type &elementType = *type.getElementType();
+    mValue = environment.getConstructors().create(elementType);
 }
 
 SingleItem::SingleItem(const SingleItem &value)
-    : Domain(value), mValue(value.mValue), mSize(value.mSize)
+    : Domain(value), mValue(value.mValue), mSize(value.mSize), mType(value.mType)
 {
     if (mValue)
         mValue = mValue->clone();

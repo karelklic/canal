@@ -20,10 +20,20 @@ public:
     /// It is either a Constant or Integer::Container.
     Domain *mSize;
 
+    const llvm::SequentialType &mType;
+
 public:
     SingleItem(const Environment &environment,
-               Domain *size,
-               Domain *value);
+               const llvm::SequentialType &type);
+
+    SingleItem(const Environment &environment,
+               const llvm::SequentialType &type,
+               std::vector<Domain*>::const_iterator begin,
+               std::vector<Domain*>::const_iterator end);
+
+    SingleItem(const Environment &environment,
+               const llvm::SequentialType &type,
+               Domain *size);
 
     SingleItem(const SingleItem &value);
 

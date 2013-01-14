@@ -6,6 +6,7 @@
 #include "Utils.h"
 #include "ArraySingleItem.h"
 #include "ArrayExactSize.h"
+#include "ArrayStringPrefix.h"
 #include "FloatInterval.h"
 #include "Pointer.h"
 #include "PointerUtils.h"
@@ -48,32 +49,15 @@ Constructors::create(const llvm::Type &type) const
         const llvm::PointerType &pointerType =
             llvmCast<const llvm::PointerType>(type);
 
-        CANAL_ASSERT_MSG(pointerType.getElementType(),
-                         "Element type must be known.");
-
-        return createPointer(*pointerType.getElementType());
+        return createPointer(pointerType);
     }
 
     if (type.isArrayTy() || type.isVectorTy())
     {
-        uint64_t size;
-        if (type.isArrayTy())
-        {
-            const llvm::ArrayType &arrayType =
-                llvm::cast<llvm::ArrayType>(type);
+        const llvm::SequentialType &stype =
+            llvmCast<llvm::SequentialType>(type);
 
-            size = arrayType.getNumElements();
-        }
-        else
-        {
-            const llvm::VectorType &vectorType =
-                llvm::cast<llvm::VectorType>(type);
-
-            size = vectorType.getNumElements();
-        }
-
-        llvm::OwningPtr<Domain> value(create(*type.getContainedType(0)));
-        return createArray(size, *value);
+        return createArray(stype);
     }
 
     if (type.isStructTy())
@@ -115,7 +99,7 @@ Constructors::create(const llvm::Constant &value,
 
         const llvm::PointerType &pointerType = *nullValue.getType();
         Domain *constPointer;
-        constPointer = createPointer(*pointerType.getElementType());
+        constPointer = createPointer(pointerType);
         constPointer->setZero(&place);
         return constPointer;
     }
@@ -158,7 +142,8 @@ Constructors::create(const llvm::Constant &value,
             result = createBitCast(exprValue, *variable, place);
             break;
         default:
-            CANAL_FATAL_ERROR("Instruction not implemented: " << exprValue.getOpcodeName());
+            CANAL_FATAL_ERROR("Instruction not implemented: "
+                              << exprValue.getOpcodeName());
         }
 
         if (deleteVariable)
@@ -209,7 +194,7 @@ Constructors::create(const llvm::Constant &value,
                                     state));
         }
 
-        return createArray(values);
+        return createArray(*vectorValue.getType(), values);
     }
 
     if (llvm::isa<llvm::ConstantArray>(value))
@@ -228,7 +213,7 @@ Constructors::create(const llvm::Constant &value,
                                     state));
         }
 
-        return createArray(values);
+        return createArray(*arrayValue.getType(), values);
     }
 
 #if (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1) || LLVM_VERSION_MAJOR > 3
@@ -249,7 +234,7 @@ Constructors::create(const llvm::Constant &value,
                                     state));
         }
 
-        return createArray(values);
+        return createArray(*sequentialValue.getType(), values);
     }
 #endif
 
@@ -312,18 +297,44 @@ Constructors::createFloat(const llvm::APFloat &number) const {
 }
 
 Domain *
-Constructors::createArray(Domain *size, Domain *value) const {
-    return new Array::SingleItem(mEnvironment, size, value);
+Constructors::createArray(const llvm::SequentialType &type) const
+{
+    return new Array::SingleItem(mEnvironment, type);
+/*
+    Integer::Container *container = new Integer::Container(mEnvironment);
+    container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
+    container->mValues.push_back(new Array::SingleItem(mEnvironment, type));
+    container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
+    return container;
+*/
 }
 
 Domain *
-Constructors::createArray(uint64_t size, const Domain &value) const {
-    return new Array::ExactSize(mEnvironment, size, value);
+Constructors::createArray(const llvm::SequentialType &type,
+                          Domain *size) const
+{
+    return new Array::SingleItem(mEnvironment, type, size);
+/*
+    Integer::Container *container = new Integer::Container(mEnvironment);
+    container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
+    container->mValues.push_back(new Array::SingleItem(mEnvironment, type, size));
+    container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
+    return container;
+*/
 }
 
 Domain *
-Constructors::createArray(const std::vector<Domain*> &values) const {
-    return new Array::ExactSize(mEnvironment, values);
+Constructors::createArray(const llvm::SequentialType &type,
+                          const std::vector<Domain*> &values) const
+{
+    return new Array::SingleItem(mEnvironment, type, values.begin(), values.end());
+/*
+    Integer::Container *container = new Integer::Container(mEnvironment);
+    container->mValues.push_back(new Array::ExactSize(mEnvironment, type, values));
+    container->mValues.push_back(new Array::SingleItem(mEnvironment, type, values.begin(), values.end()));
+    container->mValues.push_back(new Array::StringPrefix(mEnvironment, type, values.begin(), values.end()));
+    return container;
+*/
 }
 
 Domain *
@@ -396,14 +407,14 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     if (pointer)
     {
         return pointer->getElementPtr(offsets,
-                                      *pointerType.getElementType(),
+                                      pointerType,
                                       *this);
     }
 
     // GetElementPtr on anything except a pointer.  For example, it is
     // called on arrays and structures.
     Domain *result;
-    result = createPointer(*pointerType.getElementType());
+    result = createPointer(pointerType);
 
     Pointer::Utils::addTarget(*result,
                               Pointer::Target::Block,
@@ -431,14 +442,14 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
     if (pointer)
     {
         CANAL_ASSERT(pointerType);
-        return pointer->bitcast(*pointerType->getElementType());
+        return pointer->bitcast(*pointerType);
     }
 
     // BitCast from anything to a pointer.
     if (pointerType)
     {
         Domain *result;
-        result = createPointer(*pointerType->getElementType());
+        result = createPointer(*pointerType);
 
         Pointer::Utils::addTarget(*result,
                                   Pointer::Target::Block,

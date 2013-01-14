@@ -1,22 +1,67 @@
 #include "ArrayStringPrefix.h"
 #include "IntegerContainer.h"
 #include "Utils.h"
+#include "Environment.h"
+#include "IntegerUtils.h"
 
 namespace Canal {
 namespace Array {
 
-StringPrefix::StringPrefix(const Environment &environment)
-    : Domain(environment, Domain::ArrayStringPrefixKind)
+StringPrefix::StringPrefix(const Environment &environment,
+                           const llvm::SequentialType &type)
+    : Domain(environment, Domain::ArrayStringPrefixKind),
+      mIsBottom(true),
+      mType(type)
 {
-    mIsBottom = true;
+    llvm::Type *int8 = llvm::Type::getInt8Ty(environment.getContext());
+    if (mType.getElementType() != int8)
+        setTop();
+}
+
+StringPrefix::StringPrefix(const Environment &environment,
+                           const llvm::SequentialType &type,
+                           std::vector<Domain*>::const_iterator begin,
+                           std::vector<Domain*>::const_iterator end)
+    : Domain(environment, Domain::ArrayStringPrefixKind),
+      mIsBottom(true),
+      mType(type)
+{
+    llvm::Type *int8 = llvm::Type::getInt8Ty(environment.getContext());
+    if (mType.getElementType() != int8)
+        setTop();
+    else
+    {
+        std::vector<Domain*>::const_iterator it = begin;
+        for (; it != end; ++it)
+        {
+            if (!Integer::Utils::isConstant(**it))
+                break;
+
+            CANAL_ASSERT_MSG(8 == Integer::Utils::getBitWidth(**it),
+                             "String reqires 8-bit characters.");
+
+            llvm::APInt constant;
+            bool success = Integer::Utils::signedMin(**it, constant);
+            CANAL_ASSERT(success);
+
+            uint64_t c = constant.getZExtValue();
+            if (c == 0 || c > 255)
+                break;
+
+            mIsBottom = false;
+            mPrefix.append(1, (char)c);
+        }
+    }
 }
 
 StringPrefix::StringPrefix(const Environment &environment,
                            const std::string &value)
-    : Domain(environment, Domain::ArrayStringPrefixKind)
+    : Domain(environment, Domain::ArrayStringPrefixKind),
+      mPrefix(value),
+      mIsBottom(false),
+      mType(*llvm::ArrayType::get(llvm::Type::getInt8Ty(environment.getContext()),
+                                  value.size()))
 {
-    mPrefix = value;
-    mIsBottom = false;
 }
 
 StringPrefix *

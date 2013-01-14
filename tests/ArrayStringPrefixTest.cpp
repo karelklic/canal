@@ -12,7 +12,12 @@ static Environment *gEnvironment;
 static void
 testConstructors()
 {
-    Array::StringPrefix stringPrefix(*gEnvironment);
+    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+        gEnvironment->getContext());
+
+    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+
+    Array::StringPrefix stringPrefix(*gEnvironment, type);
     CANAL_ASSERT(stringPrefix.isBottom());
 
     Array::StringPrefix stringPrefix2(*gEnvironment, "test");
@@ -23,7 +28,12 @@ testConstructors()
 static void
 testSetZero()
 {
-    Array::StringPrefix prefix(*gEnvironment);
+    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+        gEnvironment->getContext());
+
+    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+
+    Array::StringPrefix prefix(*gEnvironment, type);
     prefix.setZero(NULL);
     CANAL_ASSERT(prefix.isTop());
 }
@@ -31,43 +41,51 @@ testSetZero()
 static void
 testEquality()
 {
-    Array::StringPrefix bottom(*gEnvironment),
-        nonBottom1(*gEnvironment, "test"),
-        nonBottom2(*gEnvironment, "aaa"),
-        top(*gEnvironment, "");
+    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+        gEnvironment->getContext());
 
-    CANAL_ASSERT(bottom == bottom);
-    CANAL_ASSERT(bottom != nonBottom1);
-    CANAL_ASSERT(nonBottom1 != bottom);
-    CANAL_ASSERT(nonBottom1 == nonBottom1);
-    CANAL_ASSERT(nonBottom1 != nonBottom2);
-    CANAL_ASSERT(nonBottom2 != nonBottom1);
-    CANAL_ASSERT(nonBottom2 == nonBottom2);
-    CANAL_ASSERT(nonBottom2 != top);
-    CANAL_ASSERT(top != nonBottom2);
-    CANAL_ASSERT(top == top);
-    CANAL_ASSERT(bottom != top);
-    CANAL_ASSERT(top != bottom);
+    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+
+    Array::StringPrefix prefix1(*gEnvironment, type),
+        prefix2(*gEnvironment, type),
+        prefix3(*gEnvironment, "test"),
+        prefix4(*gEnvironment, "test"),
+        prefix5(*gEnvironment, "aaa"),
+        prefix6(*gEnvironment, "");
+
+    CANAL_ASSERT(prefix1 == prefix1);
+    CANAL_ASSERT(prefix1 == prefix2);
+    CANAL_ASSERT(prefix1 != prefix3);
+    CANAL_ASSERT(prefix3 == prefix4);
+    CANAL_ASSERT(prefix3 != prefix5);
+    CANAL_ASSERT(prefix1 != prefix6);
+    CANAL_ASSERT(prefix3 != prefix6);
+    CANAL_ASSERT(prefix6 == prefix6);
 }
 
 static void
 testJoin()
 {
+    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+        gEnvironment->getContext());
+
+    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+
     // bottom vs bottom
-    Array::StringPrefix bottom1(*gEnvironment);
+    Array::StringPrefix bottom1(*gEnvironment, type);
     Array::StringPrefix result1 = bottom1.join(bottom1);
     CANAL_ASSERT(result1.isBottom());
 
     // non-bottom vs bottom
     Array::StringPrefix withPrefix2(*gEnvironment, "testone"),
-        bottom2(*gEnvironment);
+        bottom2(*gEnvironment, type);
     Array::StringPrefix result2 = withPrefix2.join(bottom2);
     CANAL_ASSERT(!result2.isBottom());
     CANAL_ASSERT(result2.mPrefix == "testone");
     CANAL_ASSERT(!result2.isTop());
 
     // bottom vs non-bottom
-    Array::StringPrefix bottom3(*gEnvironment),
+    Array::StringPrefix bottom3(*gEnvironment, type),
         withPrefix3(*gEnvironment, "testone");
     Array::StringPrefix result3 = bottom3.join(withPrefix3);
     CANAL_ASSERT(!result3.isBottom());
@@ -120,14 +138,14 @@ testJoin()
     CANAL_ASSERT(result10.isTop());
 
     // bottom vs top
-    Array::StringPrefix bottom11(*gEnvironment),
+    Array::StringPrefix bottom11(*gEnvironment, type),
         top11(*gEnvironment, "");
     Array::StringPrefix result11 = bottom11.join(top11);
     CANAL_ASSERT(result11.isTop());
 
     // top vs bottom
     Array::StringPrefix top12(*gEnvironment, ""),
-        bottom12(*gEnvironment);
+        bottom12(*gEnvironment, type);
     Array::StringPrefix result12 = top12.join(bottom12);
     CANAL_ASSERT(result12.isTop());
 }
@@ -135,26 +153,32 @@ testJoin()
 static void
 testMeet()
 {
+    llvm::Type &elementType = *llvm::Type::getInt8Ty(
+        gEnvironment->getContext());
+
+    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+
     // bottom vs bottom
-    Array::StringPrefix bottom1(*gEnvironment);
+    Array::StringPrefix bottom1(*gEnvironment, type);
     Array::StringPrefix result1 = bottom1.meet(bottom1);
     CANAL_ASSERT(result1.isBottom());
 
     // bottom vs prefix
-    Array::StringPrefix bottom2(*gEnvironment),
+    Array::StringPrefix bottom2(*gEnvironment, type),
         prefix2(*gEnvironment, "abc");
     Array::StringPrefix result2 = bottom2.meet(prefix2);
     CANAL_ASSERT(result2.isBottom());
 
     // prefix vs bottom
     Array::StringPrefix prefix3(*gEnvironment, "abc"),
-        bottom3(*gEnvironment);
+        bottom3(*gEnvironment, type);
     Array::StringPrefix result3 = prefix3.meet(bottom3);
     CANAL_ASSERT(result3.isBottom());
 
     // prefix vs with prefix
     Array::StringPrefix prefix4(*gEnvironment, "abc"),
         withPrefix4(*gEnvironment, "abcdef");
+
     Array::StringPrefix result4 = prefix4.meet(withPrefix4);
     CANAL_ASSERT(!result4.isBottom());
     CANAL_ASSERT(result4.mPrefix == "abcdef");
@@ -203,12 +227,12 @@ testMeet()
 
     // top vs bottom
     Array::StringPrefix top11(*gEnvironment, ""),
-        bottom11(*gEnvironment);
+        bottom11(*gEnvironment, type);
     Array::StringPrefix result11 = top11.meet(bottom11);
     CANAL_ASSERT(result11.isBottom());
 
     // bottom vs top
-    Array::StringPrefix bottom12(*gEnvironment),
+    Array::StringPrefix bottom12(*gEnvironment, type),
         top12(*gEnvironment, "");
     Array::StringPrefix result12 = bottom12.meet(top12);
     CANAL_ASSERT(result12.isBottom());

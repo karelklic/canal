@@ -12,16 +12,28 @@ class StringPrefix : public Domain
 {
 public:
     std::string mPrefix;
+
     bool mIsBottom;
+
+
+    const llvm::SequentialType &mType;
 
 public:
     /// Standard constructor
-    StringPrefix(const Environment &environment);
+    StringPrefix(const Environment &environment,
+                 const llvm::SequentialType &type);
+
+    /// @param values
+    /// This class takes ownership of the values.
+    StringPrefix(const Environment &environment,
+                 const llvm::SequentialType &type,
+                 std::vector<Domain*>::const_iterator begin,
+                 std::vector<Domain*>::const_iterator end);
 
     /// @param value
     ///   This class does not take ownership of this value.
     StringPrefix(const Environment &environment,
-              const std::string &value);
+                 const std::string &value);
 
     static bool classof(const Domain *value)
     {

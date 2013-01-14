@@ -98,6 +98,14 @@ public: // Implementation of Domain.
     virtual Container &fptoui(const Domain &value);
 
     virtual Container &fptosi(const Domain &value);
+
+    virtual std::vector<Domain*> getItem(const Domain &offset) const;
+
+    virtual Domain *getItem(uint64_t offset) const;
+
+    virtual void setItem(const Domain &offset, const Domain &value);
+
+    virtual void setItem(uint64_t offset, const Domain &value);
 };
 
 } // namespace Integer

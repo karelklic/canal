@@ -17,6 +17,7 @@ class Function;
 class Module
 {
     const llvm::Module &mModule;
+
     const Environment &mEnvironment;
 
     // State of all functions is kept here.
@@ -31,13 +32,27 @@ public:
 
     virtual ~Module();
 
-    std::vector<Function*>::const_iterator begin() const { return mFunctions.begin(); }
+    std::vector<Function*>::const_iterator begin() const
+    {
+        return mFunctions.begin();
+    }
 
-    std::vector<Function*>::const_iterator end() const { return mFunctions.end(); }
+    std::vector<Function*>::const_iterator end() const
+    {
+        return mFunctions.end();
+    }
+
+    bool empty() const
+    {
+        return mFunctions.empty();
+    }
 
     Function *getFunction(const char *name) const;
 
-    Function *getFunction(const std::string &name) const { return getFunction(name.c_str()); }
+    Function *getFunction(const std::string &name) const
+    {
+        return getFunction(name.c_str());
+    }
 
     Function *getFunction(const llvm::Function &function) const;
 

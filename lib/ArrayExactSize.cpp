@@ -4,31 +4,50 @@
 #include "IntegerInterval.h"
 #include "Utils.h"
 #include "IntegerUtils.h"
+#include "Environment.h"
+#include "Constructors.h"
 
 namespace Canal {
 namespace Array {
 
 ExactSize::ExactSize(const Environment &environment,
-                     uint64_t size,
-                     const Domain &value)
-    : Domain(environment, Domain::ArrayExactSizeKind)
+                     const llvm::SequentialType &type)
+    : Domain(environment, Domain::ArrayExactSizeKind),
+      mType(type)
 {
-    for (uint64_t i = 0; i < size; ++i)
-        mValues.push_back(value.clone());
+    uint64_t count = 0;
+
+    const llvm::ArrayType *array = llvm::dyn_cast<llvm::ArrayType>(&type);
+    if (array)
+        count = array->getNumElements();
+
+    const llvm::VectorType *vector = llvm::dyn_cast<llvm::VectorType>(&type);
+    if (vector)
+        count = vector->getNumElements();
+
+    for (uint64_t i = 0; i < count; ++i)
+    {
+        const llvm::Type &elementType = *type.getElementType();
+        mValues.push_back(environment.getConstructors().create(elementType));
+    }
 }
 
 ExactSize::ExactSize(const Environment &environment,
+                     const llvm::SequentialType &type,
                      const std::vector<Domain*> &values)
-    : Domain(environment, Domain::ArrayExactSizeKind), mValues(values)
+    : Domain(environment, Domain::ArrayExactSizeKind),
+      mValues(values),
+      mType(type)
 {
 }
 
 ExactSize::ExactSize(const ExactSize &value)
-    : Domain(value)
+    : Domain(value), mValues(value.mValues), mType(value.mType)
 {
-    mValues = value.mValues;
-    std::vector<Domain*>::iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
+    std::vector<Domain*>::iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
         *it = (*it)->clone();
 }
 
@@ -61,12 +80,18 @@ std::string
 ExactSize::toString() const
 {
     StringStream ss;
-    ss << "arrayExactSize\n";
-    std::vector<Domain*>::const_iterator it = mValues.begin(),
-        itend = mValues.end();
 
-    for (; it != itend; ++it)
-        ss << indent((*it)->toString(), 4);
+    if (mValues.empty())
+        ss << "arrayExactSize top\n";
+    else
+    {
+        ss << "arrayExactSize\n";
+        std::vector<Domain*>::const_iterator it = mValues.begin(),
+            itend = mValues.end();
+
+        for (; it != itend; ++it)
+            ss << indent((*it)->toString(), 4);
+    }
 
     return ss.str();
 }
