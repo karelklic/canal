@@ -317,31 +317,9 @@ SingleItem::fcmp(const Domain &a, const Domain &b,
     CANAL_NOT_IMPLEMENTED();
 }
 
-static void
-assertOffsetFitsToArray(uint64_t offset, const Domain &size)
-{
-    llvm::APInt unsignedMaxSize(Integer::Utils::getBitWidth(size), 0);
-    bool sizeIsKnown = Integer::Utils::unsignedMax(size, unsignedMaxSize);
-    // The following requirement can be changed if necessary.
-    CANAL_ASSERT_MSG(sizeIsKnown, "Size must be a known value.");
-    CANAL_ASSERT_MSG(offset < unsignedMaxSize.getZExtValue(),
-                     "Offset out of bounds.");
-}
-
-static void
-assertOffsetFitsToArray(const Domain &offset, const Domain &size)
-{
-    llvm::APInt unsignedMinOffset(Integer::Utils::getBitWidth(offset), 0);
-    bool offsetIsKnown = Integer::Utils::unsignedMin(offset, unsignedMinOffset);
-    // The following requirement can be changed if necessary.
-    CANAL_ASSERT_MSG(offsetIsKnown, "Offset must be a known value.");
-    assertOffsetFitsToArray(unsignedMinOffset.getZExtValue(), size);
-}
-
 std::vector<Domain*>
 SingleItem::getItem(const Domain &offset) const
 {
-    assertOffsetFitsToArray(offset, *mSize);
     std::vector<Domain*> result;
     result.push_back(mValue);
     return result;
@@ -350,21 +328,18 @@ SingleItem::getItem(const Domain &offset) const
 Domain *
 SingleItem::getItem(uint64_t offset) const
 {
-    assertOffsetFitsToArray(offset, *mSize);
     return mValue;
 }
 
 void
 SingleItem::setItem(const Domain &offset, const Domain &value)
 {
-    assertOffsetFitsToArray(offset, *mSize);
     mValue->join(value);
 }
 
 void
 SingleItem::setItem(uint64_t offset, const Domain &value)
 {
-    assertOffsetFitsToArray(offset, *mSize);
     mValue->join(value);
 }
 
