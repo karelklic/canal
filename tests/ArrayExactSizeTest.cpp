@@ -14,10 +14,8 @@ static Interpreter::Interpreter *gInterpreter;
 static void
 testConstructors()
 {
-    const llvm::Type &elementType = *llvm::Type::getInt32Ty(
-        gInterpreter->getEnvironment().getContext());
-
-    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+    const llvm::ArrayType &type = *llvm::ArrayType::get(llvm::Type::getInt32Ty(
+        gInterpreter->getEnvironment().getContext()), 10);
 
     Array::ExactSize array(gInterpreter->getEnvironment(), type);
     CANAL_ASSERT(array.isBottom());

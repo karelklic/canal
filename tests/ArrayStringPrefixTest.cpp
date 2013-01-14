@@ -12,10 +12,8 @@ static Environment *gEnvironment;
 static void
 testConstructors()
 {
-    const llvm::Type &elementType = *llvm::Type::getInt8Ty(
-        gEnvironment->getContext());
-
-    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+    const llvm::ArrayType &type = *llvm::ArrayType::get(llvm::Type::getInt8Ty(
+        gEnvironment->getContext()), 10);
 
     Array::StringPrefix stringPrefix(*gEnvironment, type);
     CANAL_ASSERT(stringPrefix.isBottom());
@@ -28,10 +26,8 @@ testConstructors()
 static void
 testSetZero()
 {
-    const llvm::Type &elementType = *llvm::Type::getInt8Ty(
-        gEnvironment->getContext());
-
-    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+    const llvm::ArrayType &type = *llvm::ArrayType::get(llvm::Type::getInt8Ty(
+        gEnvironment->getContext()), 10);
 
     Array::StringPrefix prefix(*gEnvironment, type);
     prefix.setZero(NULL);
@@ -41,10 +37,8 @@ testSetZero()
 static void
 testEquality()
 {
-    const llvm::Type &elementType = *llvm::Type::getInt8Ty(
-        gEnvironment->getContext());
-
-    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+    const llvm::ArrayType &type = *llvm::ArrayType::get(llvm::Type::getInt8Ty(
+        gEnvironment->getContext()), 10);
 
     Array::StringPrefix prefix1(*gEnvironment, type),
         prefix2(*gEnvironment, type),
@@ -66,10 +60,8 @@ testEquality()
 static void
 testJoin()
 {
-    const llvm::Type &elementType = *llvm::Type::getInt8Ty(
-        gEnvironment->getContext());
-
-    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+    const llvm::ArrayType &type = *llvm::ArrayType::get(llvm::Type::getInt8Ty(
+        gEnvironment->getContext()), 10);
 
     // bottom vs bottom
     Array::StringPrefix bottom1(*gEnvironment, type);
@@ -153,10 +145,8 @@ testJoin()
 static void
 testMeet()
 {
-    const llvm::Type &elementType = *llvm::Type::getInt8Ty(
-        gEnvironment->getContext());
-
-    const llvm::ArrayType &type = *llvm::ArrayType::get(&elementType, 10);
+    const llvm::ArrayType &type = *llvm::ArrayType::get(llvm::Type::getInt8Ty(
+        gEnvironment->getContext()), 10);
 
     // bottom vs bottom
     Array::StringPrefix bottom1(*gEnvironment, type);
