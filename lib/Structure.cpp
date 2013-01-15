@@ -4,17 +4,34 @@
 #include "IntegerSet.h"
 #include "IntegerUtils.h"
 #include "IntegerInterval.h"
+#include "Constructors.h"
+#include "Environment.h"
 
 namespace Canal {
 
 Structure::Structure(const Environment &environment,
+                     const llvm::StructType &type)
+    : Domain(environment, Domain::StructureKind), mType(type)
+{
+    for (unsigned i = 0; i < type.getNumElements(); ++i)
+    {
+        const Constructors &c = environment.getConstructors();
+        Domain *member = c.create(*type.getElementType(i));
+        mMembers.push_back(member);
+    }
+}
+
+Structure::Structure(const Environment &environment,
+                     const llvm::StructType &type,
                      const std::vector<Domain*> &members)
-    : Domain(environment, Domain::StructureKind), mMembers(members)
+    : Domain(environment, Domain::StructureKind),
+      mMembers(members),
+      mType(type)
 {
 }
 
 Structure::Structure(const Structure &value)
-    : Domain(value), mMembers(value.mMembers)
+    : Domain(value), mMembers(value.mMembers), mType(value.mType)
 {
     std::vector<Domain*>::iterator it = mMembers.begin(),
         itend = mMembers.end();

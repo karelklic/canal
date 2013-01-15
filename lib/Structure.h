@@ -11,8 +11,14 @@ class Structure : public Domain
 public:
     std::vector<Domain*> mMembers;
 
+    const llvm::StructType &mType;
+
 public:
     Structure(const Environment &environment,
+              const llvm::StructType &type);
+
+    Structure(const Environment &environment,
+              const llvm::StructType &type,
               const std::vector<Domain*> &members);
 
     Structure(const Structure &value);

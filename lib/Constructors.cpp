@@ -70,7 +70,7 @@ Constructors::create(const llvm::Type &type) const
         for (unsigned i = 0; i < structType.getNumElements(); i ++)
             members.push_back(create(*structType.getElementType(i)));
 
-        return createStructure(members);
+        return createStructure(structType, members);
     }
 
     CANAL_DIE_MSG("Unsupported llvm::Type::TypeID: " << type.getTypeID());
@@ -176,7 +176,7 @@ Constructors::create(const llvm::Constant &value,
                                      state));
         }
 
-        return createStructure(members);
+        return createStructure(*structValue.getType(), members);
     }
 
     if (llvm::isa<llvm::ConstantVector>(value))
@@ -339,13 +339,22 @@ Constructors::createArray(const llvm::SequentialType &type,
 }
 
 Domain *
-Constructors::createPointer(const llvm::Type &type) const {
+Constructors::createPointer(const llvm::Type &type) const
+{
     return new Pointer::Pointer(mEnvironment, type);
 }
 
 Domain *
-Constructors::createStructure(const std::vector<Domain*> &members) const {
-    return new Structure(mEnvironment, members);
+Constructors::createStructure(const llvm::StructType &type) const
+{
+    return new Structure(mEnvironment, type);
+}
+
+Domain *
+Constructors::createStructure(const llvm::StructType &type,
+                              const std::vector<Domain*> &members) const
+{
+    return new Structure(mEnvironment, type, members);
 }
 
 Domain *
