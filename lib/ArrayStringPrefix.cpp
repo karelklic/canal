@@ -415,13 +415,15 @@ StringPrefix::extractvalue(const std::vector<unsigned> &indices) const
 {
     if (isTop())
     {
-        const llvm::Type *type = &mType;
+        // Cannot use const-correctness here because of differences
+        // between LLVM versions.
+        llvm::Type *type = (llvm::Type*)&mType;
         std::vector<unsigned>::const_iterator it = indices.begin(),
             itend = indices.end();
 
         for (; it != itend; ++it)
         {
-            const llvm::CompositeType *composite = llvm::cast<llvm::CompositeType>(type);
+            llvm::CompositeType *composite = llvm::cast<llvm::CompositeType>(type);
             type = composite->getTypeAtIndex(*it);
         }
 
