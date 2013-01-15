@@ -101,6 +101,12 @@ SingleItem::toString() const
     return ss.str();
 }
 
+void
+SingleItem::setZero(const llvm::Value *place)
+{
+    mValue->setZero(place);
+}
+
 bool
 SingleItem::operator==(const Domain &value) const
 {
@@ -402,18 +408,6 @@ SingleItem::getItem(const Domain &offset) const
     std::vector<Domain*> result;
     result.push_back(mValue);
     return result;
-}
-
-Domain *
-SingleItem::getItem(uint64_t offset) const
-{
-    return mValue;
-}
-
-void
-SingleItem::setZero(const llvm::Value *place)
-{
-    mValue->setZero(place);
 }
 
 } // namespace Array

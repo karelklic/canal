@@ -293,12 +293,6 @@ Domain::getItem(const Domain &offset) const
     CANAL_NOT_IMPLEMENTED();
 }
 
-Domain *
-Domain::getItem(uint64_t offset) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
 bool
 Domain::isValue() const
 {

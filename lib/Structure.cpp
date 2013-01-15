@@ -390,13 +390,4 @@ Structure::getItem(const Domain &offset) const
     return result;
 }
 
-Domain *
-Structure::getItem(uint64_t offset) const
-{
-    CANAL_ASSERT_MSG(offset < mMembers.size(),
-                     "Offset out of bounds.");
-
-    return mMembers[offset];
-}
-
 } // namespace Canal

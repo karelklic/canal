@@ -140,8 +140,6 @@ public: // Implementation of Domain.
                              const std::vector<unsigned> &indices);
 
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
-
-    virtual Domain *getItem(uint64_t offset) const;
 };
 
 } // namespace Array

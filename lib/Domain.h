@@ -247,17 +247,6 @@ public: // Array interface.
     /// not delete the items.
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 
-    /// Get the array item pointed by the provided offset.  Returns
-    /// internal array item that is owned by the array.  Caller must
-    /// not delete the item.
-    /// @note
-    ///  The uint64_t offset variant exists because of the extractvalue
-    ///  instruction, which provides exact numeric offsets.
-    /// @note
-    ///  For future array domains it might be necessary to extend this
-    ///  method to return a list of values.
-    virtual Domain *getItem(uint64_t offset) const;
-
 public: // Memory layout
     virtual bool isValue() const;
 

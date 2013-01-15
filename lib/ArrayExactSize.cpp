@@ -801,13 +801,5 @@ ExactSize::getItem(const Domain &offset) const
     return result;
 }
 
-Domain *
-ExactSize::getItem(uint64_t offset) const
-{
-    CANAL_ASSERT_MSG(offset < mValues.size(),
-                     "Offset out of bounds.");
-    return mValues[offset];
-}
-
 } // namespace Array
 } // namespace Canal
