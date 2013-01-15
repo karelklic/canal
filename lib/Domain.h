@@ -172,10 +172,12 @@ public: // Instructions operating on values.
 
     virtual Domain &xor_(const Domain &a, const Domain &b);
 
-    virtual Domain &icmp(const Domain &a, const Domain &b,
+    virtual Domain &icmp(const Domain &a,
+                         const Domain &b,
                          llvm::CmpInst::Predicate predicate);
 
-    virtual Domain &fcmp(const Domain &a, const Domain &b,
+    virtual Domain &fcmp(const Domain &a,
+                         const Domain &b,
                          llvm::CmpInst::Predicate predicate);
 
     virtual Domain &trunc(const Domain &value);
@@ -195,6 +197,10 @@ public: // Instructions operating on values.
     virtual Domain &uitofp(const Domain &value);
 
     virtual Domain &sitofp(const Domain &value);
+
+    virtual Domain &shufflevector(const Domain &a,
+                                  const Domain &b,
+                                  const std::vector<uint32_t> &mask);
 
 public: // Widening interface.
     Widening::DataInterface *getWideningData() const

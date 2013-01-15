@@ -13,6 +13,7 @@ namespace Array {
 ExactSize::ExactSize(const Environment &environment,
                      const llvm::SequentialType &type)
     : Domain(environment, Domain::ArrayExactSizeKind),
+      mHasExactSize(true),
       mType(type)
 {
     uint64_t count = 0;
@@ -20,10 +21,14 @@ ExactSize::ExactSize(const Environment &environment,
     const llvm::ArrayType *array = llvm::dyn_cast<llvm::ArrayType>(&type);
     if (array)
         count = array->getNumElements();
-
-    const llvm::VectorType *vector = llvm::dyn_cast<llvm::VectorType>(&type);
-    if (vector)
-        count = vector->getNumElements();
+    else
+    {
+        const llvm::VectorType *vector = llvm::dyn_cast<llvm::VectorType>(&type);
+        if (vector)
+            count = vector->getNumElements();
+        else
+            mHasExactSize = false;
+    }
 
     for (uint64_t i = 0; i < count; ++i)
     {
@@ -37,12 +42,13 @@ ExactSize::ExactSize(const Environment &environment,
                      const std::vector<Domain*> &values)
     : Domain(environment, Domain::ArrayExactSizeKind),
       mValues(values),
+      mHasExactSize(true),
       mType(type)
 {
 }
 
 ExactSize::ExactSize(const ExactSize &value)
-    : Domain(value), mValues(value.mValues), mType(value.mType)
+    : Domain(value), mValues(value.mValues), mHasExactSize(value.mHasExactSize), mType(value.mType)
 {
     std::vector<Domain*>::iterator it = mValues.begin(),
         itend = mValues.end();
@@ -81,9 +87,7 @@ ExactSize::toString() const
 {
     StringStream ss;
 
-    if (mValues.empty())
-        ss << "arrayExactSize top\n";
-    else
+    if (mHasExactSize)
     {
         ss << "arrayExactSize\n";
         std::vector<Domain*>::const_iterator it = mValues.begin(),
@@ -92,6 +96,8 @@ ExactSize::toString() const
         for (; it != itend; ++it)
             ss << indent((*it)->toString(), 4);
     }
+    else
+        ss << "arrayExactSize notExactSize\n";
 
     return ss.str();
 }
@@ -112,21 +118,17 @@ ExactSize::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const ExactSize *array = llvm::dyn_cast<ExactSize>(&value);
-    if (!array)
-        return false;
-
-    if (mValues.size() != array->mValues.size())
-        return false;
+    const ExactSize &array = llvm::cast<ExactSize>(value);
+    CANAL_ASSERT(mHasExactSize == array.mHasExactSize);
+    CANAL_ASSERT(&mType == &array.mType);
+    CANAL_ASSERT(mValues.size() == array.mValues.size());
 
     std::vector<Domain*>::const_iterator itA = mValues.begin(),
         itAend = mValues.end(),
-        itB = array->mValues.begin();
+        itB = array.mValues.begin();
 
     for (; itA != itAend; ++itA, ++itB)
     {
-        if (*itA == *itB) //If iterators point to the same object
-            continue; //skip casting and comparison of object
         if (**itA != **itB)
             return false;
     }
@@ -137,21 +139,42 @@ ExactSize::operator==(const Domain &value) const
 bool
 ExactSize::operator<(const Domain& value) const
 {
-    CANAL_NOT_IMPLEMENTED();
+    if (this == &value)
+        return false;
+
+    const ExactSize &array = llvm::cast<ExactSize>(value);
+    CANAL_ASSERT(mHasExactSize == array.mHasExactSize);
+    CANAL_ASSERT(&mType == &array.mType);
+    CANAL_ASSERT(mValues.size() == array.mValues.size());
+
+    if (!mHasExactSize)
+        return false;
+
+    std::vector<Domain*>::const_iterator itA = mValues.begin(),
+        itAend = mValues.end(),
+        itB = array.mValues.begin();
+
+    for (; itA != itAend; ++itA, ++itB)
+    {
+        if (!(**itA < **itB))
+            return false;
+    }
+
+    return true;
 }
 
 ExactSize &
 ExactSize::join(const Domain &value)
 {
-    const ExactSize &val = llvm::cast<ExactSize>(value);
+    const ExactSize &array = llvm::cast<ExactSize>(value);
+    CANAL_ASSERT(mHasExactSize == array.mHasExactSize);
+    CANAL_ASSERT(&mType == &array.mType);
+    CANAL_ASSERT(mValues.size() == array.mValues.size());
 
-    CANAL_ASSERT_MSG(val.size() == size(),
-                     "Operations with arrays "
-                     "require the array size to be equal.");
-
-    std::vector<Domain*>::const_iterator it = mValues.begin(),
+    std::vector<Domain*>::const_iterator
+        it = mValues.begin(),
         itend = mValues.end(),
-        itv = val.mValues.begin();
+        itv = array.mValues.begin();
 
     for (; it != itend; ++it, ++itv)
         (*it)->join(**itv);
@@ -162,15 +185,15 @@ ExactSize::join(const Domain &value)
 ExactSize &
 ExactSize::meet(const Domain &value)
 {
-    const ExactSize &val = llvm::cast<ExactSize>(value);
+    const ExactSize &array = llvm::cast<ExactSize>(value);
+    CANAL_ASSERT(mHasExactSize == array.mHasExactSize);
+    CANAL_ASSERT(&mType == &array.mType);
+    CANAL_ASSERT(mValues.size() == array.mValues.size());
 
-    CANAL_ASSERT_MSG(val.size() == size(),
-                     "Operations with arrays "
-                     "require the array size to be equal.");
-
-    std::vector<Domain*>::const_iterator it = mValues.begin(),
+    std::vector<Domain*>::const_iterator
+        it = mValues.begin(),
         itend = mValues.end(),
-        itv = val.mValues.begin();
+        itv = array.mValues.begin();
 
     for (; it != itend; ++it, ++itv)
         (*it)->meet(**itv);
@@ -181,6 +204,9 @@ ExactSize::meet(const Domain &value)
 bool
 ExactSize::isBottom() const
 {
+    if (!mHasExactSize)
+        return false;
+
     std::vector<Domain*>::const_iterator it = mValues.begin(),
         itend = mValues.end();
 
@@ -196,6 +222,7 @@ ExactSize::isBottom() const
 void
 ExactSize::setBottom()
 {
+    CANAL_ASSERT(mHasExactSize);
     std::vector<Domain*>::const_iterator it = mValues.begin(),
         itend = mValues.end();
 
@@ -206,6 +233,9 @@ ExactSize::setBottom()
 bool
 ExactSize::isTop() const
 {
+    if (!mHasExactSize)
+        return true;
+
     std::vector<Domain*>::const_iterator it = mValues.begin(),
         itend = mValues.end();
 
@@ -231,7 +261,18 @@ ExactSize::setTop()
 float
 ExactSize::accuracy() const
 {
-    CANAL_NOT_IMPLEMENTED();
+    if (!mHasExactSize)
+        return 0;
+
+    CANAL_ASSERT(!mValues.empty());
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    float sum = 0;
+    for (; it != itend; ++it)
+        sum += (*it)->accuracy();
+
+    return sum / mValues.size();
 }
 
 static ExactSize &
@@ -243,9 +284,12 @@ binaryOperation(ExactSize &result,
     const ExactSize &aa = llvm::cast<ExactSize>(a),
         &bb = llvm::cast<ExactSize>(b);
 
-    CANAL_ASSERT_MSG(aa.size() == bb.size() && result.size() == aa.size(),
-                     "Binary operations with arrays "
-                     "require the array size to be equal.");
+    CANAL_ASSERT(result.mHasExactSize == aa.mHasExactSize);
+    CANAL_ASSERT(&result.mType == &aa.mType);
+    CANAL_ASSERT(result.mValues.size() == aa.mValues.size());
+    CANAL_ASSERT(result.mHasExactSize == bb.mHasExactSize);
+    CANAL_ASSERT(&result.mType == &bb.mType);
+    CANAL_ASSERT(result.mValues.size() == bb.mValues.size());
 
     std::vector<Domain*>::const_iterator ita = aa.mValues.begin(),
         itb = bb.mValues.begin();
@@ -377,10 +421,12 @@ cmpOperation(ExactSize &result,
     const ExactSize &aa = llvm::cast<ExactSize>(a),
         &bb = llvm::cast<ExactSize>(b);
 
-    CANAL_ASSERT_MSG(result.size() == aa.size() &&
-                     aa.size() == bb.size(),
-                     "Binary operations with arrays "
-                     "require the array size to be equal.");
+    CANAL_ASSERT(result.mHasExactSize == aa.mHasExactSize);
+    CANAL_ASSERT(&result.mType == &aa.mType);
+    CANAL_ASSERT(result.mValues.size() == aa.mValues.size());
+    CANAL_ASSERT(result.mHasExactSize == bb.mHasExactSize);
+    CANAL_ASSERT(&result.mType == &bb.mType);
+    CANAL_ASSERT(result.mValues.size() == bb.mValues.size());
 
     std::vector<Domain*>::const_iterator
         it = result.mValues.begin(),
@@ -395,17 +441,57 @@ cmpOperation(ExactSize &result,
 }
 
 ExactSize &
-ExactSize::icmp(const Domain &a, const Domain &b,
+ExactSize::icmp(const Domain &a,
+                const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
     return cmpOperation(*this, a, b, predicate, &Domain::icmp);
 }
 
 ExactSize &
-ExactSize::fcmp(const Domain &a, const Domain &b,
+ExactSize::fcmp(const Domain &a,
+                const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
     return cmpOperation(*this, a, b, predicate, &Domain::fcmp);
+}
+
+ExactSize &
+ExactSize::shufflevector(const Domain &a,
+                         const Domain &b,
+                         const std::vector<uint32_t> &mask)
+{
+    if (!mHasExactSize)
+        return *this;
+
+    const ExactSize &aa = llvm::cast<ExactSize>(a),
+        &bb = llvm::cast<ExactSize>(b);
+
+    CANAL_ASSERT(aa.mHasExactSize == bb.mHasExactSize);
+    CANAL_ASSERT(&aa.mType == &bb.mType);
+    CANAL_ASSERT(aa.mValues.size() == bb.mValues.size());
+    CANAL_ASSERT(mValues.size() == mask.size());
+
+    std::vector<uint32_t>::const_iterator it = mask.begin(),
+        itend = mask.end();
+
+    for (; it != itend; ++it)
+    {
+        if (*it == (uint32_t)-1)
+            continue;
+
+        if (*it < aa.mValues.size())
+            mValues[itend - it - 1]->join(*aa.mValues[*it]);
+        else
+        {
+            CANAL_ASSERT_MSG(*it < aa.mValues.size() + bb.mValues.size(),
+                             "Offset out of bounds.");
+
+            mValues[itend - it - 1]->join(*bb.mValues[*it - aa.mValues.size()]);
+        }
+    }
+
+    return *this;
 }
 
 std::vector<Domain*>

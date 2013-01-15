@@ -720,25 +720,18 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
                            state,
                            constants[1])
     };
+
     if (!values[0] || !values[1])
         return;
 
-    const Array::ExactSize *array0 =
-        llvm::dyn_cast<Array::ExactSize>(values[0]);
-
-    CANAL_ASSERT_MSG(array0, "Invalid type in shufflevector.");
-    const Array::ExactSize *array1 =
-        llvm::dyn_cast<Array::ExactSize>(values[1]);
-
-    CANAL_ASSERT_MSG(array1, "Invalid type in shufflevector.");
-
-    std::vector<Domain*> newValues;
-
-#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 0
-    llvm::SmallVector<int, 16> shuffleMask =
+#if (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR > 0) || LLVM_VERSION_MAJOR > 3
+    llvm::SmallVector<int, 16> shuffleMaskSmallVector =
         instruction.getShuffleMask();
+
+    std::vector<uint32_t> shuffleMask(shuffleMaskSmallVector.begin(),
+                                      shuffleMaskSmallVector.end());
 #else
-    llvm::SmallVector<int, 16> shuffleMask;
+    std::vector<uint32_t> shuffleMask;
     {
         // Reimplementation of the missing getShuffleMask method.
         const llvm::Value *inputMask = instruction.getOperand(2);
@@ -753,41 +746,16 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
         for (unsigned i = 0; i != count; ++i)
         {
             llvm::Constant *constant = inputMaskConstant->getOperand(i);
-            int constantInt = llvm::isa<llvm::UndefValue>(constant) ? -1 :
+            uint32_t constantInt = llvm::isa<llvm::UndefValue>(constant) ? -1 :
                 llvmCast<llvm::ConstantInt>(constant)->getZExtValue();
+
             shuffleMask.push_back(constantInt);
         }
     }
 #endif
 
-    llvm::SmallVector<int, 16>::iterator it = shuffleMask.begin(),
-        itend = shuffleMask.end();
-
-    for (; it != itend; ++it)
-    {
-        size_t offset = *it;
-        if (offset == (size_t)-1)
-        {
-            Domain *value = mConstructors.create(
-                *instruction.getType()->getElementType());
-
-            newValues.push_back(value);
-        }
-        else if (offset < array0->size())
-            newValues.push_back(array0->mValues[offset]->clone());
-        else
-        {
-            CANAL_ASSERT_MSG(offset < array0->size() + array1->size(),
-                             "Offset out of bounds.");
-
-            offset -= array0->size();
-            newValues.push_back(array1->mValues[offset]->clone());
-        }
-    }
-
-    Domain *result = mConstructors.createArray(*instruction.getType(),
-                                               newValues);
-
+    Domain *result = mConstructors.create(*instruction.getType());
+    result->shufflevector(*values[0], *values[1], shuffleMask);
     state.addFunctionVariable(instruction, result);
 }
 

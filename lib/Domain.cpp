@@ -235,6 +235,14 @@ Domain::sitofp(const Domain &value)
     CANAL_NOT_IMPLEMENTED();
 }
 
+Domain &
+Domain::shufflevector(const Domain &v1,
+                      const Domain &v2,
+                      const std::vector<uint32_t> &mask)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 void
 Domain::setWideningData(Widening::DataInterface *wideningData)
 {

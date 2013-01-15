@@ -11,9 +11,9 @@ namespace Array {
 class ExactSize : public Domain
 {
 public:
-    /// Empty mValues indicate that the ExactSize object is at the top
-    /// value because the size is not exact.
     std::vector<Domain*> mValues;
+
+    bool mHasExactSize;
 
     /// The type of the array.
     const llvm::SequentialType &mType;
@@ -37,11 +37,6 @@ public:
 
     // Standard destructor.
     virtual ~ExactSize();
-
-    size_t size() const
-    {
-        return mValues.size();
-    }
 
     static bool classof(const Domain *value)
     {
@@ -116,11 +111,17 @@ public: // Implementation of Domain.
 
     virtual ExactSize &xor_(const Domain &a, const Domain &b);
 
-    virtual ExactSize &icmp(const Domain &a, const Domain &b,
+    virtual ExactSize &icmp(const Domain &a,
+                            const Domain &b,
                             llvm::CmpInst::Predicate predicate);
 
-    virtual ExactSize &fcmp(const Domain &a, const Domain &b,
+    virtual ExactSize &fcmp(const Domain &a,
+                            const Domain &b,
                             llvm::CmpInst::Predicate predicate);
+
+    virtual ExactSize &shufflevector(const Domain &a,
+                                     const Domain &b,
+                                     const std::vector<uint32_t> &mask);
 
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 
