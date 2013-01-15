@@ -220,6 +220,9 @@ public: // Instructions operating on values.
                                   const Domain &b,
                                   const std::vector<uint32_t> &mask);
 
+    /// Extracts the value of a member field from an aggregate value.
+    virtual Domain *extractvalue(const std::vector<unsigned> &indices) const;
+
 public: // Widening interface.
     Widening::DataInterface *getWideningData() const
     {
@@ -230,11 +233,6 @@ public: // Widening interface.
     void setWideningData(Widening::DataInterface *wideningData);
 
 public: // Array interface.
-    /// Gets the value representing the array item or items pointed by
-    /// the provided offset.  Caller is responsible for deleting the
-    /// returned value.
-    Domain *getValue(const Domain &offset) const;
-
     /// Get the array items pointed by the provided offset.  Returns
     /// internal array items that are owned by the array.  Caller must
     /// not delete the items.

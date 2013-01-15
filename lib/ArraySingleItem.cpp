@@ -350,6 +350,19 @@ SingleItem::shufflevector(const Domain &a,
     return *this;
 }
 
+Domain *
+SingleItem::extractvalue(const std::vector<unsigned> &indices) const
+{
+    CANAL_ASSERT(!indices.empty());
+    if (indices.size() > 1)
+    {
+        return mValue->extractvalue(std::vector<unsigned>(indices.begin() + 1,
+                                                          indices.end()));
+    }
+    else
+        return mValue->clone();
+}
+
 std::vector<Domain*>
 SingleItem::getItem(const Domain &offset) const
 {

@@ -6,12 +6,11 @@
 namespace Canal {
 namespace Array {
 
-/// Array with exact size and limited length.  It keeps all array
-/// members separately, not losing precision at all.
 class StringPrefix : public Domain
 {
 public:
     std::string mPrefix;
+    //std::vector<Domain*> mPrefix;
 
     bool mIsBottom;
 
@@ -120,6 +119,8 @@ public: // Implementation of Domain.
     virtual StringPrefix &shufflevector(const Domain &a,
                                         const Domain &b,
                                         const std::vector<uint32_t> &mask);
+
+    virtual Domain *extractvalue(const std::vector<unsigned> &indices) const;
 };
 
 } // namespace Array

@@ -111,14 +111,11 @@ StringPrefix::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const StringPrefix *array = llvm::dyn_cast<StringPrefix>(&value);
-    if (!array)
+    const StringPrefix &array = llvm::cast<StringPrefix>(value);
+    if (isBottom() != array.isBottom())
         return false;
 
-    if (mIsBottom != array->mIsBottom)
-        return false;
-
-    if (!mIsBottom && (mPrefix != array->mPrefix))
+    if (!mIsBottom && (mPrefix != array.mPrefix))
         return false;
 
     return true;
@@ -127,7 +124,17 @@ StringPrefix::operator==(const Domain &value) const
 bool
 StringPrefix::operator<(const Domain &value) const
 {
+    if (this == &value)
+        return false;
+
+    const StringPrefix &array = llvm::cast<StringPrefix>(value);
+    if (array.isBottom())
+        return false;
+
+    //if (!isBottom() && commonPrefix..._
     CANAL_NOT_IMPLEMENTED();
+
+    return true;
 }
 
 static std::string
@@ -401,6 +408,32 @@ StringPrefix::shufflevector(const Domain &a,
 {
     setTop();
     return *this;
+}
+
+Domain *
+StringPrefix::extractvalue(const std::vector<unsigned> &indices) const
+{
+    if (isTop())
+    {
+        const llvm::Type *type = &mType;
+        std::vector<unsigned>::const_iterator it = indices.begin(),
+            itend = indices.end();
+
+        for (; it != itend; ++it)
+        {
+            const llvm::CompositeType *composite = llvm::cast<llvm::CompositeType>(type);
+            type = composite->getTypeAtIndex(*it);
+        }
+
+        Domain *result = mEnvironment.getConstructors().create(*type);
+        result->setTop();
+        return result;
+    }
+
+    CANAL_ASSERT(indices.size() == 1);
+    Domain *result = mEnvironment.getConstructors().create(*mType.getElementType());
+    result->setTop();
+    return result;
 }
 
 } // namespace Array

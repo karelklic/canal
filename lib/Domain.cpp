@@ -257,6 +257,12 @@ Domain::shufflevector(const Domain &v1,
     CANAL_NOT_IMPLEMENTED();
 }
 
+Domain *
+Domain::extractvalue(const std::vector<unsigned> &indices) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 void
 Domain::setWideningData(Widening::DataInterface *wideningData)
 {
@@ -264,25 +270,6 @@ Domain::setWideningData(Widening::DataInterface *wideningData)
                      "Widening data set were already set.");
 
     mWideningData = wideningData;
-}
-
-Domain *
-Domain::getValue(const Domain &offset) const
-{
-    Domain *result = NULL;
-    std::vector<Domain*> items(getItem(offset));
-    std::vector<Domain*>::const_iterator it = items.begin(),
-        itend = items.end();
-
-    for (; it != itend; ++it)
-    {
-        if (!result)
-            result = (*it)->clone();
-        else
-            result->join(**it);
-    }
-
-    return result;
 }
 
 std::vector<Domain*>

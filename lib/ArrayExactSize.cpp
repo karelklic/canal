@@ -462,6 +462,12 @@ ExactSize::extractelement(const Domain &index) const
     const llvm::Type &elementType = *mType.getElementType();
     Domain *result = mEnvironment.getConstructors().create(elementType);
 
+    if (!mHasExactSize)
+    {
+        result->setTop();
+        return result;
+    }
+
     // First try an enumeration, then interval.
     const Integer::Set &set = Integer::Utils::getSet(index);
     if (!set.isTop())
@@ -643,6 +649,38 @@ ExactSize::shufflevector(const Domain &a,
     }
 
     return *this;
+}
+
+Domain *
+ExactSize::extractvalue(const std::vector<unsigned> &indices) const
+{
+    if (!mHasExactSize)
+    {
+        const llvm::Type *type = &mType;
+        std::vector<unsigned>::const_iterator it = indices.begin(),
+            itend = indices.end();
+
+        for (; it != itend; ++it)
+        {
+            const llvm::CompositeType *composite = llvm::cast<llvm::CompositeType>(type);
+            type = composite->getTypeAtIndex(*it);
+        }
+
+        Domain *result = mEnvironment.getConstructors().create(*type);
+        result->setTop();
+        return result;
+    }
+
+    CANAL_ASSERT(!indices.empty());
+    unsigned index = indices[0];
+    CANAL_ASSERT(index < mValues.size());
+    if (indices.size() > 1)
+    {
+        return mValues[index]->extractvalue(std::vector<unsigned>(indices.begin() + 1,
+                                                                  indices.end()));
+    }
+    else
+        return mValues[index]->clone();
 }
 
 std::vector<Domain*>
