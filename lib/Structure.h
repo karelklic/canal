@@ -58,6 +58,10 @@ public: // Implementation of Domain.
 
     virtual float accuracy() const;
 
+    virtual Structure &insertelement(const Domain &array,
+                                     const Domain &element,
+                                     const Domain &index);
+
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 
     virtual Domain *getItem(uint64_t offset) const;

@@ -457,6 +457,88 @@ ExactSize::fcmp(const Domain &a,
 }
 
 ExactSize &
+ExactSize::insertelement(const Domain &array,
+                         const Domain &element,
+                         const Domain &index)
+{
+    const ExactSize &exactSize = llvm::cast<ExactSize>(array);
+    CANAL_ASSERT(mHasExactSize == exactSize.mHasExactSize);
+    CANAL_ASSERT(&mType == &exactSize.mType);
+    CANAL_ASSERT(mValues.size() == exactSize.mValues.size());
+
+    if (!mHasExactSize)
+        return *this;
+
+    // Copy the original values.
+    std::vector<Domain*>::const_iterator itA = mValues.begin(),
+        itAend = mValues.end(),
+        itB = exactSize.mValues.begin();
+
+    for (; itA != itAend; ++itA, ++itB)
+        (*itA)->join(**itB);
+
+    // First try an enumeration of indices.
+    const Integer::Set &set = Integer::Utils::getSet(index);
+    if (!set.isTop())
+    {
+        APIntUtils::USet::const_iterator it = set.mValues.begin(),
+            itend = set.mValues.end();
+
+        for (; it != itend; ++it)
+        {
+            CANAL_ASSERT(it->getBitWidth() <= 64);
+            uint64_t numOffset = it->getZExtValue();
+
+            // If some offset from the set points out of the
+            // array bounds, we ignore it.  It might be caused either
+            // by a bug in the code, or by imprecision of the
+            // interpreter.
+            if (numOffset >= mValues.size())
+                continue;
+
+            if (set.mValues.size() == 1)
+            {
+                delete mValues[numOffset];
+                mValues[numOffset] = element.clone();
+            }
+            else
+                mValues[numOffset]->join(element);
+        }
+
+        return *this;
+    }
+
+    // Try the interval of indices.
+    // Let's care about the unsigned interval only.
+    const Integer::Interval &interval = Integer::Utils::getInterval(index);
+    if (!interval.mUnsignedTop)
+    {
+        CANAL_ASSERT(interval.mUnsignedFrom.getBitWidth() <= 64);
+        uint64_t from = interval.mUnsignedFrom.getZExtValue();
+        // Included in the interval!
+        uint64_t to = interval.mUnsignedTo.getZExtValue();
+        // At least part of the interval should point to the array.
+        // Otherwise it might be a bug in the interpreter that
+        // requires investigation.
+        CANAL_ASSERT(from < mValues.size());
+        for (size_t loop = from; loop < mValues.size() && loop <= to; ++loop)
+            mValues[loop]->join(element);
+
+        return *this;
+    }
+
+    // Both set and interval are set to the top value, so merge
+    // the value to all items of the array.
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+        (*it)->join(element);
+
+    return *this;
+}
+
+ExactSize &
 ExactSize::shufflevector(const Domain &a,
                          const Domain &b,
                          const std::vector<uint32_t> &mask)

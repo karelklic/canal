@@ -120,6 +120,14 @@ public: // Implementation of Domain.
     virtual SingleItem &fcmp(const Domain &a, const Domain &b,
                              llvm::CmpInst::Predicate predicate);
 
+    virtual SingleItem &insertelement(const Domain &array,
+                                      const Domain &element,
+                                      const Domain &index);
+
+    virtual SingleItem &shufflevector(const Domain &a,
+                                      const Domain &b,
+                                      const std::vector<uint32_t> &mask);
+
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 
     virtual Domain *getItem(uint64_t offset) const;

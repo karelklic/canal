@@ -15,7 +15,6 @@ public:
 
     bool mIsBottom;
 
-
     const llvm::SequentialType &mType;
 
 public:
@@ -110,13 +109,13 @@ public: // Implementation of Domain.
     virtual StringPrefix &fcmp(const Domain &a, const Domain &b,
                                llvm::CmpInst::Predicate predicate);
 
-    virtual std::vector<Domain*> getItem(const Domain &offset) const;
+    virtual StringPrefix &insertelement(const Domain &array,
+                                        const Domain &element,
+                                        const Domain &index);
 
-    virtual Domain *getItem(uint64_t offset) const;
-
-    virtual void setItem(const Domain &offset, const Domain &value);
-
-    virtual void setItem(uint64_t offset, const Domain &value);
+    virtual StringPrefix &shufflevector(const Domain &a,
+                                        const Domain &b,
+                                        const std::vector<uint32_t> &mask);
 };
 
 } // namespace Array

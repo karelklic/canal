@@ -198,6 +198,19 @@ public: // Instructions operating on values.
 
     virtual Domain &sitofp(const Domain &value);
 
+    /// Inserts an element into an array at a specified index.
+    virtual Domain &insertelement(const Domain &array,
+                                  const Domain &element,
+                                  const Domain &index);
+
+    /// Constructs a permutation of elements from two input vectors,
+    /// returning a vector with the same element type as the input and
+    /// length that is the same as the shuffle mask.
+    /// @param a
+    /// @param b
+    ///   Arrays with the same type.
+    /// @param mask
+    ///   A shuffle mask whose element type is always 'i32'.
     virtual Domain &shufflevector(const Domain &a,
                                   const Domain &b,
                                   const std::vector<uint32_t> &mask);

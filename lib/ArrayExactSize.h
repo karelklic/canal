@@ -119,6 +119,10 @@ public: // Implementation of Domain.
                             const Domain &b,
                             llvm::CmpInst::Predicate predicate);
 
+    virtual ExactSize &insertelement(const Domain &array,
+                                     const Domain &element,
+                                     const Domain &index);
+
     virtual ExactSize &shufflevector(const Domain &a,
                                      const Domain &b,
                                      const std::vector<uint32_t> &mask);

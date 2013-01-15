@@ -222,6 +222,40 @@ Structure::accuracy() const
     return result / mMembers.size();
 }
 
+Structure &
+Structure::insertelement(const Domain &array,
+                         const Domain &element,
+                         const Domain &index)
+{
+    const Structure &structure = llvm::cast<Structure>(array);
+    CANAL_ASSERT(&mType == &structure.mType);
+    CANAL_ASSERT(mMembers.size() == structure.mMembers.size());
+
+    // Replace a single element or set to top.
+    const Integer::Set &set = Integer::Utils::getSet(index);
+    if (set.isTop() || set.mValues.size() != 1)
+        setTop();
+    else
+    {
+        // Copy the original values.
+        std::vector<Domain*>::const_iterator itA = mMembers.begin(),
+            itAend = mMembers.end(),
+            itB = structure.mMembers.begin();
+
+        for (; itA != itAend; ++itA, ++itB)
+            (*itA)->join(**itB);
+
+        // Set the single element.
+        CANAL_ASSERT(set.mValues.begin()->getBitWidth() <= 64);
+        uint64_t numOffset = set.mValues.begin()->getZExtValue();
+
+        delete mMembers[numOffset];
+        mMembers[numOffset] = element.clone();
+    }
+
+    return *this;
+}
+
 std::vector<Domain*>
 Structure::getItem(const Domain &offset) const
 {

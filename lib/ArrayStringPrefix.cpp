@@ -376,28 +376,22 @@ StringPrefix::fcmp(const Domain &a, const Domain &b,
     return *this;
 }
 
-std::vector<Domain*>
-StringPrefix::getItem(const Domain &offset) const
+StringPrefix &
+StringPrefix::insertelement(const Domain &array,
+                            const Domain &element,
+                            const Domain &index)
 {
-    CANAL_NOT_IMPLEMENTED();
+    setTop();
+    return *this;
 }
 
-Domain *
-StringPrefix::getItem(uint64_t offset) const
+StringPrefix &
+StringPrefix::shufflevector(const Domain &a,
+                            const Domain &b,
+                            const std::vector<uint32_t> &mask)
 {
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-StringPrefix::setItem(const Domain &offset, const Domain &value)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-StringPrefix::setItem(uint64_t offset, const Domain &value)
-{
-    CANAL_NOT_IMPLEMENTED();
+    setTop();
+    return *this;
 }
 
 } // namespace Array

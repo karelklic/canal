@@ -236,6 +236,14 @@ Domain::sitofp(const Domain &value)
 }
 
 Domain &
+Domain::insertelement(const Domain &array,
+                      const Domain &element,
+                      const Domain &index)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain &
 Domain::shufflevector(const Domain &v1,
                       const Domain &v2,
                       const std::vector<uint32_t> &mask)

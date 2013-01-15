@@ -304,17 +304,44 @@ SingleItem::xor_(const Domain &a, const Domain &b)
 }
 
 SingleItem &
-SingleItem::icmp(const Domain &a, const Domain &b,
-                llvm::CmpInst::Predicate predicate)
+SingleItem::icmp(const Domain &a,
+                 const Domain &b,
+                 llvm::CmpInst::Predicate predicate)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 SingleItem &
-SingleItem::fcmp(const Domain &a, const Domain &b,
-                llvm::CmpInst::Predicate predicate)
+SingleItem::fcmp(const Domain &a,
+                 const Domain &b,
+                 llvm::CmpInst::Predicate predicate)
 {
     CANAL_NOT_IMPLEMENTED();
+}
+
+SingleItem &
+SingleItem::insertelement(const Domain &array,
+                          const Domain &element,
+                          const Domain &index)
+{
+    const SingleItem &singleItem = llvm::cast<SingleItem>(array);
+    CANAL_ASSERT(&mType == &singleItem.mType);
+    mValue->join(*singleItem.mValue);
+    mValue->join(element);
+}
+
+SingleItem &
+SingleItem::shufflevector(const Domain &a,
+                          const Domain &b,
+                          const std::vector<uint32_t> &mask)
+{
+    const SingleItem &aa = llvm::cast<SingleItem>(a),
+        &bb = llvm::cast<SingleItem>(b);
+
+    CANAL_ASSERT(&aa.mType == &bb.mType);
+    mValue->join(*aa.mValue);
+    mValue->join(*bb.mValue);
+    return *this;
 }
 
 std::vector<Domain*>
