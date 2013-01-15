@@ -120,6 +120,8 @@ public: // Implementation of Domain.
     virtual SingleItem &fcmp(const Domain &a, const Domain &b,
                              llvm::CmpInst::Predicate predicate);
 
+    virtual Domain *extractelement(const Domain &index) const;
+
     virtual SingleItem &insertelement(const Domain &array,
                                       const Domain &element,
                                       const Domain &index);

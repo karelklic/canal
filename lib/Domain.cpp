@@ -236,7 +236,7 @@ Domain::sitofp(const Domain &value)
 }
 
 Domain *
-Domain::extractelement(const Domain &index)
+Domain::extractelement(const Domain &index) const
 {
     CANAL_NOT_IMPLEMENTED();
 }

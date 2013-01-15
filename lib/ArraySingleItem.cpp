@@ -319,6 +319,12 @@ SingleItem::fcmp(const Domain &a,
     CANAL_NOT_IMPLEMENTED();
 }
 
+Domain *
+SingleItem::extractelement(const Domain &index) const
+{
+    return mValue->clone();
+}
+
 SingleItem &
 SingleItem::insertelement(const Domain &array,
                           const Domain &element,

@@ -58,6 +58,8 @@ public: // Implementation of Domain.
 
     virtual float accuracy() const;
 
+    virtual Domain *extractelement(const Domain &index) const;
+
     virtual Structure &insertelement(const Domain &array,
                                      const Domain &element,
                                      const Domain &index);

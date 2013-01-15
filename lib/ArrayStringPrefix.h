@@ -103,11 +103,15 @@ public: // Implementation of Domain.
 
     virtual StringPrefix &xor_(const Domain &a, const Domain &b);
 
-    virtual StringPrefix &icmp(const Domain &a, const Domain &b,
+    virtual StringPrefix &icmp(const Domain &a,
+                               const Domain &b,
                                llvm::CmpInst::Predicate predicate);
 
-    virtual StringPrefix &fcmp(const Domain &a, const Domain &b,
+    virtual StringPrefix &fcmp(const Domain &a,
+                               const Domain &b,
                                llvm::CmpInst::Predicate predicate);
+
+    virtual Domain *extractelement(const Domain &index) const;
 
     virtual StringPrefix &insertelement(const Domain &array,
                                         const Domain &element,

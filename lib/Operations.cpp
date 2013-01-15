@@ -673,9 +673,7 @@ Operations::extractelement(const llvm::ExtractElementInst &instruction,
     if (!values[0] || !values[1])
         return;
 
-    Domain *result = values[0]->getValue(*values[1]);
-
-    // Store the result value to the state.
+    Domain *result = values[0]->extractelement(*values[1]);
     state.addFunctionVariable(instruction, result);
 }
 

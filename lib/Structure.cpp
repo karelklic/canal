@@ -222,6 +222,17 @@ Structure::accuracy() const
     return result / mMembers.size();
 }
 
+Domain *
+Structure::extractelement(const Domain &index) const
+{
+    // Replace a single element or set to top.
+    const Integer::Set &set = Integer::Utils::getSet(index);
+    CANAL_ASSERT(!set.isTop() && set.mValues.size() == 1);
+    CANAL_ASSERT(set.mValues.begin()->getBitWidth() <= 64);
+    uint64_t numOffset = set.mValues.begin()->getZExtValue();
+    return mMembers[numOffset]->clone();
+}
+
 Structure &
 Structure::insertelement(const Domain &array,
                          const Domain &element,

@@ -119,7 +119,7 @@ public: // Implementation of Domain.
                             const Domain &b,
                             llvm::CmpInst::Predicate predicate);
 
-    virtual Domain *extractelement(const Domain &index);
+    virtual Domain *extractelement(const Domain &index) const;
 
     virtual ExactSize &insertelement(const Domain &array,
                                      const Domain &element,

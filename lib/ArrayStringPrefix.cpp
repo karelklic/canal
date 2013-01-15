@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include "Environment.h"
 #include "IntegerUtils.h"
+#include "Constructors.h"
 
 namespace Canal {
 namespace Array {
@@ -374,6 +375,14 @@ StringPrefix::fcmp(const Domain &a, const Domain &b,
 {
     setTop();
     return *this;
+}
+
+Domain *StringPrefix::extractelement(const Domain &index) const
+{
+    const llvm::Type &elementType = *mType.getElementType();
+    Domain *result = mEnvironment.getConstructors().create(elementType);
+    result->setTop();
+    return result;
 }
 
 StringPrefix &

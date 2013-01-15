@@ -201,7 +201,7 @@ public: // Instructions operating on values.
 
     /// Extracts a single element from an array at a specified index.
     /// The element is returned.  Caller is responsible for deleting it.
-    virtual Domain *extractelement(const Domain &index);
+    virtual Domain *extractelement(const Domain &index) const;
 
     /// Inserts an element into an array at a specified index.
     virtual Domain &insertelement(const Domain &array,

@@ -457,7 +457,7 @@ ExactSize::fcmp(const Domain &a,
 }
 
 Domain *
-ExactSize::extractelement(const Domain &index)
+ExactSize::extractelement(const Domain &index) const
 {
     const llvm::Type &elementType = *mType.getElementType();
     Domain *result = mEnvironment.getConstructors().create(elementType);
