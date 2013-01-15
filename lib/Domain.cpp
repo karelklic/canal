@@ -263,6 +263,21 @@ Domain::extractvalue(const std::vector<unsigned> &indices) const
     CANAL_NOT_IMPLEMENTED();
 }
 
+Domain &
+Domain::insertvalue(const Domain &aggregate,
+                    const Domain &element,
+                    const std::vector<unsigned> &indices)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Domain::insertvalue(const Domain &element,
+                    const std::vector<unsigned> &indices)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 void
 Domain::setWideningData(Widening::DataInterface *wideningData)
 {

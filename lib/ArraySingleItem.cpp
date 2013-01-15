@@ -334,6 +334,9 @@ SingleItem::insertelement(const Domain &array,
     CANAL_ASSERT(&mType == &singleItem.mType);
     mValue->join(*singleItem.mValue);
     mValue->join(element);
+
+    delete mSize;
+    mSize = singleItem.mSize->clone();
 }
 
 SingleItem &
@@ -361,6 +364,36 @@ SingleItem::extractvalue(const std::vector<unsigned> &indices) const
     }
     else
         return mValue->clone();
+}
+
+SingleItem &
+SingleItem::insertvalue(const Domain &aggregate,
+                        const Domain &element,
+                        const std::vector<unsigned> &indices)
+{
+    const SingleItem &singleItem = llvm::cast<SingleItem>(aggregate);
+    CANAL_ASSERT(&mType == &singleItem.mType);
+    mValue->join(*singleItem.mValue);
+    delete mSize;
+    mSize = singleItem.mSize->clone();
+
+    insertvalue(element, indices);
+    return *this;
+}
+
+void
+SingleItem::insertvalue(const Domain &element,
+                        const std::vector<unsigned> &indices)
+{
+    CANAL_ASSERT(!indices.empty());
+    if (indices.size() > 1)
+    {
+        mValue->insertvalue(element,
+                            std::vector<unsigned>(indices.begin() + 1,
+                                                  indices.end()));
+    }
+    else
+        mValue->join(element);
 }
 
 std::vector<Domain*>

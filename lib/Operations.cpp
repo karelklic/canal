@@ -778,19 +778,6 @@ Operations::extractvalue(const llvm::ExtractValueInst &instruction,
     state.addFunctionVariable(instruction, result);
 }
 
-template <typename T> static Domain *
-getValueLocation(Domain *aggregate, const T &instruction)
-{
-    Domain *item = aggregate;
-    typename T::idx_iterator it = instruction.idx_begin(),
-        itend = instruction.idx_end();
-
-    for (; it != itend; ++it)
-        item = item->getItem(*it);
-
-    return item;
-}
-
 void
 Operations::insertvalue(const llvm::InsertValueInst &instruction,
                         State &state)
@@ -813,9 +800,12 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
     if (!insertedValue)
         return;
 
-    Domain *result = aggregate->clone();
-    Domain *item = getValueLocation(result, instruction);
-    item->join(*insertedValue);
+    llvm::ArrayRef<unsigned> indicesLlvm = instruction.getIndices();
+    std::vector<unsigned> indices(indicesLlvm.begin(),
+                                  indicesLlvm.end());
+
+    Domain *result = mConstructors.create(*instruction.getType());
+    result->insertvalue(*aggregate, *insertedValue, indices);
     state.addFunctionVariable(instruction, result);
 }
 

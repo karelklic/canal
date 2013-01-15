@@ -223,6 +223,15 @@ public: // Instructions operating on values.
     /// Extracts the value of a member field from an aggregate value.
     virtual Domain *extractvalue(const std::vector<unsigned> &indices) const;
 
+    /// Inserts a value into a member field in an aggregate value.
+    virtual Domain &insertvalue(const Domain &aggregate,
+                                const Domain &element,
+                                const std::vector<unsigned> &indices);
+
+    /// Inserts a value into a member field in an aggregate value.
+    virtual void insertvalue(const Domain &element,
+                             const std::vector<unsigned> &indices);
+
 public: // Widening interface.
     Widening::DataInterface *getWideningData() const
     {

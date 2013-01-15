@@ -438,5 +438,21 @@ StringPrefix::extractvalue(const std::vector<unsigned> &indices) const
     return result;
 }
 
+StringPrefix &
+StringPrefix::insertvalue(const Domain &aggregate,
+                          const Domain &element,
+                          const std::vector<unsigned> &indices)
+{
+    setTop();
+    return *this;
+}
+
+void
+StringPrefix::insertvalue(const Domain &element,
+                          const std::vector<unsigned> &indices)
+{
+    setTop();
+}
+
 } // namespace Array
 } // namespace Canal

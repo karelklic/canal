@@ -121,6 +121,13 @@ public: // Implementation of Domain.
                                         const std::vector<uint32_t> &mask);
 
     virtual Domain *extractvalue(const std::vector<unsigned> &indices) const;
+
+    virtual StringPrefix &insertvalue(const Domain &aggregate,
+                                      const Domain &element,
+                                      const std::vector<unsigned> &indices);
+
+    virtual void insertvalue(const Domain &element,
+                             const std::vector<unsigned> &indices);
 };
 
 } // namespace Array

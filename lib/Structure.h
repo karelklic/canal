@@ -66,6 +66,13 @@ public: // Implementation of Domain.
 
     virtual Domain *extractvalue(const std::vector<unsigned> &indices) const;
 
+    virtual Structure &insertvalue(const Domain &aggregate,
+                                   const Domain &element,
+                                   const std::vector<unsigned> &indices);
+
+    virtual void insertvalue(const Domain &element,
+                             const std::vector<unsigned> &indices);
+
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 
     virtual Domain *getItem(uint64_t offset) const;

@@ -685,6 +685,55 @@ ExactSize::extractvalue(const std::vector<unsigned> &indices) const
         return mValues[index]->clone();
 }
 
+ExactSize &
+ExactSize::insertvalue(const Domain &aggregate,
+                       const Domain &element,
+                       const std::vector<unsigned> &indices)
+{
+    const ExactSize &exactSize = llvm::cast<ExactSize>(aggregate);
+    CANAL_ASSERT(mHasExactSize == exactSize.mHasExactSize);
+    CANAL_ASSERT(&mType == &exactSize.mType);
+    CANAL_ASSERT(mValues.size() == exactSize.mValues.size());
+
+    if (!mHasExactSize)
+        return *this;
+
+    // Copy the original values.
+    std::vector<Domain*>::const_iterator itA = mValues.begin(),
+        itAend = mValues.end(),
+        itB = exactSize.mValues.begin();
+
+    for (; itA != itAend; ++itA, ++itB)
+        (*itA)->join(**itB);
+
+    // Insert the element.
+    insertvalue(element, indices);
+    return *this;
+}
+
+void
+ExactSize::insertvalue(const Domain &element,
+                       const std::vector<unsigned> &indices)
+{
+    CANAL_ASSERT(!indices.empty());
+    if (!mHasExactSize)
+        return;
+
+    unsigned index = indices[0];
+    CANAL_ASSERT(index < mValues.size());
+    if (indices.size() > 1)
+    {
+        mValues[index]->insertvalue(element,
+                                    std::vector<unsigned>(indices.begin() + 1,
+                                                          indices.end()));
+    }
+    else
+    {
+        delete mValues[index];
+        mValues[index] = element.clone();
+    }
+}
+
 std::vector<Domain*>
 ExactSize::getItem(const Domain &offset) const
 {

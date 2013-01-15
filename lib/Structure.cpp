@@ -282,6 +282,48 @@ Structure::extractvalue(const std::vector<unsigned> &indices) const
         return mMembers[index]->clone();
 }
 
+Structure &
+Structure::insertvalue(const Domain &aggregate,
+                       const Domain &element,
+                       const std::vector<unsigned> &indices)
+{
+    const Structure &structure = llvm::cast<Structure>(aggregate);
+    CANAL_ASSERT(&mType == &structure.mType);
+    CANAL_ASSERT(mMembers.size() == structure.mMembers.size());
+
+    // Copy the original values.
+    std::vector<Domain*>::const_iterator itA = mMembers.begin(),
+        itAend = mMembers.end(),
+        itB = structure.mMembers.begin();
+
+    for (; itA != itAend; ++itA, ++itB)
+        (*itA)->join(**itB);
+
+    // Insert the element.
+    insertvalue(element, indices);
+    return *this;
+}
+
+void
+Structure::insertvalue(const Domain &element,
+                       const std::vector<unsigned> &indices)
+{
+    CANAL_ASSERT(!indices.empty());
+    unsigned index = indices[0];
+    CANAL_ASSERT(index < mMembers.size());
+    if (indices.size() > 1)
+    {
+        mMembers[index]->insertvalue(element,
+                                     std::vector<unsigned>(indices.begin() + 1,
+                                                           indices.end()));
+    }
+    else
+    {
+        delete mMembers[index];
+        mMembers[index] = element.clone();
+    }
+}
+
 std::vector<Domain*>
 Structure::getItem(const Domain &offset) const
 {
