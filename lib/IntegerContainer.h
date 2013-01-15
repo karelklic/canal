@@ -98,6 +98,25 @@ public: // Implementation of Domain.
     virtual Container &fptoui(const Domain &value);
 
     virtual Container &fptosi(const Domain &value);
+
+    virtual Domain *extractelement(const Domain &index) const;
+
+    virtual Container &insertelement(const Domain &array,
+                                     const Domain &element,
+                                     const Domain &index);
+
+    virtual Container &shufflevector(const Domain &a,
+                                     const Domain &b,
+                                     const std::vector<uint32_t> &mask);
+
+    virtual Domain *extractvalue(const std::vector<unsigned> &indices) const;
+
+    virtual Container &insertvalue(const Domain &aggregate,
+                                   const Domain &element,
+                                   const std::vector<unsigned> &indices);
+
+    virtual void insertvalue(const Domain &element,
+                             const std::vector<unsigned> &indices);
 };
 
 } // namespace Integer

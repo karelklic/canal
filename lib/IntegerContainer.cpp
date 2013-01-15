@@ -421,5 +421,117 @@ Container::fptosi(const Domain &value)
     return *this;
 }
 
+Domain *
+Container::extractelement(const Domain &index) const
+{
+    Domain *result = NULL;
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+    {
+        Domain *value = (**it).extractelement(index);
+        if (result)
+        {
+            result->meet(*value);
+            delete value;
+        }
+        else
+            result = value;
+    }
+
+    return result;
+}
+
+Container &
+Container::insertelement(const Domain &array,
+                         const Domain &element,
+                         const Domain &index)
+{
+    const Container &container = llvm::cast<Container>(array);
+    CANAL_ASSERT(container.mValues.size() == mValues.size());
+
+    std::vector<Domain*>::iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    std::vector<Domain*>::const_iterator itc = container.mValues.begin();
+    for (; it != itend; ++it, ++itc)
+        (**it).insertelement(**itc, element, index);
+
+    return *this;
+}
+
+Container &
+Container::shufflevector(const Domain &a,
+                         const Domain &b,
+                         const std::vector<uint32_t> &mask)
+{
+    const Container &aa = llvm::cast<Container>(a),
+        &bb = llvm::cast<Container>(b);
+
+    CANAL_ASSERT(aa.mValues.size() == mValues.size());
+    CANAL_ASSERT(bb.mValues.size() == mValues.size());
+
+    std::vector<Domain*>::iterator it = mValues.begin();
+    std::vector<Domain*>::const_iterator ita = aa.mValues.begin(),
+        itb = bb.mValues.begin();
+
+    for (; it != mValues.end(); ++it, ++ita, ++itb)
+        (**it).shufflevector(**ita, **itb, mask);
+
+    return *this;
+}
+
+Domain *
+Container::extractvalue(const std::vector<unsigned> &indices) const
+{
+    Domain *result = NULL;
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+    {
+        Domain *value = (**it).extractvalue(indices);
+        if (result)
+        {
+            result->meet(*value);
+            delete value;
+        }
+        else
+            result = value;
+    }
+
+    return result;
+}
+
+Container &
+Container::insertvalue(const Domain &aggregate,
+                       const Domain &element,
+                       const std::vector<unsigned> &indices)
+{
+    const Container &container = llvm::cast<Container>(aggregate);
+    CANAL_ASSERT(container.mValues.size() == mValues.size());
+
+    std::vector<Domain*>::iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    std::vector<Domain*>::const_iterator itc = container.mValues.begin();
+    for (; it != itend; ++it, ++itc)
+        (**it).insertvalue(**itc, element, indices);
+
+    return *this;
+}
+
+void
+Container::insertvalue(const Domain &element,
+                       const std::vector<unsigned> &indices)
+{
+    std::vector<Domain*>::iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+        (**it).insertvalue(element, indices);
+}
+
 } // namespace Integer
 } // namespace Canal
