@@ -697,13 +697,12 @@ Operations::insertelement(const llvm::InsertElementInst &instruction,
                            state,
                            constants[2])
     };
+
     if (!values[0] || !values[1] || !values[2])
         return;
 
-    Domain *result = values[0]->clone();
-    result->setItem(*values[2], *values[1]);
-
-    // Store the result value to the state.
+    Domain *result = mConstructors.create(*instruction.getType());
+    result->insertelement(*values[0], *values[1], *values[2]);
     state.addFunctionVariable(instruction, result);
 }
 

@@ -331,19 +331,4 @@ Structure::getItem(uint64_t offset) const
     return mMembers[offset];
 }
 
-void
-Structure::setItem(const Domain &offset, const Domain &value)
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-void
-Structure::setItem(uint64_t offset, const Domain &value)
-{
-    CANAL_ASSERT_MSG(offset < mMembers.size(),
-                     "Offset out of bounds.");
-
-    mMembers[offset]->join(value);
-}
-
 } // namespace Canal

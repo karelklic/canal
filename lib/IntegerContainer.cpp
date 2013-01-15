@@ -421,26 +421,5 @@ Container::fptosi(const Domain &value)
     return *this;
 }
 
-std::vector<Domain*>
-Container::getItem(const Domain &offset) const
-{
-    
-}
-
-Domain *
-Container::getItem(uint64_t offset) const
-{
-}
-
-void
-Container::setItem(const Domain &offset, const Domain &value)
-{
-}
-
-void
-Container::setItem(uint64_t offset, const Domain &value)
-{
-}
-
 } // namespace Integer
 } // namespace Canal

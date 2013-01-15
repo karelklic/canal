@@ -246,19 +246,6 @@ public: // Array interface.
     ///  method to return a list of values.
     virtual Domain *getItem(uint64_t offset) const;
 
-    /// @param value
-    ///  The method does not take the ownership of this memory.  It
-    ///  copies the contents of the value instead.
-    virtual void setItem(const Domain &offset, const Domain &value);
-
-    /// @param value
-    ///  The method does not take the ownership of this memory.  It
-    ///  copies the contents of the value instead.
-    /// @note
-    ///  The uint64_t offset variant exists because of the insertvalue
-    ///  instruction, which provides exact numeric offsets.
-    virtual void setItem(uint64_t offset, const Domain &value);
-
 public: // Memory layout
     virtual bool isValue() const;
 

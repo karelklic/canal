@@ -359,18 +359,6 @@ SingleItem::getItem(uint64_t offset) const
 }
 
 void
-SingleItem::setItem(const Domain &offset, const Domain &value)
-{
-    mValue->join(value);
-}
-
-void
-SingleItem::setItem(uint64_t offset, const Domain &value)
-{
-    mValue->join(value);
-}
-
-void
 SingleItem::setZero(const llvm::Value *place)
 {
     mValue->setZero(place);
