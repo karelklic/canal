@@ -235,6 +235,12 @@ Domain::sitofp(const Domain &value)
     CANAL_NOT_IMPLEMENTED();
 }
 
+Domain *
+Domain::extractelement(const Domain &index)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 Domain &
 Domain::insertelement(const Domain &array,
                       const Domain &element,

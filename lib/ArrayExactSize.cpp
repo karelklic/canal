@@ -456,6 +456,75 @@ ExactSize::fcmp(const Domain &a,
     return cmpOperation(*this, a, b, predicate, &Domain::fcmp);
 }
 
+Domain *
+ExactSize::extractelement(const Domain &index)
+{
+    const llvm::Type &elementType = *mType.getElementType();
+    Domain *result = mEnvironment.getConstructors().create(elementType);
+
+    // First try an enumeration, then interval.
+    const Integer::Set &set = Integer::Utils::getSet(index);
+    if (!set.isTop())
+    {
+        APIntUtils::USet::const_iterator it = set.mValues.begin(),
+            itend = set.mValues.end();
+
+        for (; it != itend; ++it)
+        {
+            CANAL_ASSERT(it->getBitWidth() <= 64);
+            uint64_t numOffset = it->getZExtValue();
+
+            // If some offset from the set points out of the
+            // array bounds, we ignore it FOR NOW.  It might be caused
+            // either by a bug in the code, or by imprecision of the
+            // interpreter.
+            if (numOffset >= mValues.size())
+                continue;
+
+            result->join(*mValues[numOffset]);
+        }
+
+        // At least one of the offsets in the set should point
+        // to the array.  Otherwise it might be a bug in the
+        // interpreter that requires investigation.
+        CANAL_ASSERT_MSG(!result->isBottom() || set.mValues.empty(),
+                         "All offsets out of bound, array size "
+                         << mValues.size());
+        return result;
+    }
+
+    const Integer::Interval &interval = Integer::Utils::getInterval(index);
+    // Let's care about the unsigned interval only.
+    if (!interval.mUnsignedTop)
+    {
+        CANAL_ASSERT(interval.mUnsignedFrom.getBitWidth() <= 64);
+        uint64_t from = interval.mUnsignedFrom.getZExtValue();
+        // Included in the interval!
+        uint64_t to = interval.mUnsignedTo.getZExtValue();
+        // At least part of the interval should point to the array.
+        // Otherwise it might be a bug in the interpreter that
+        // requires investigation.
+        CANAL_ASSERT(from < mValues.size());
+        if (to >= mValues.size())
+            to = mValues.size();
+
+        for (uint64_t i = from; i < to; ++i)
+            result->join(*mValues[i]);
+
+        return result;
+    }
+
+    // Both set and interval are set to the top value, so merge
+    // all items of the array.
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
+
+    for (; it != itend; ++it)
+        result->join(**it);
+
+    return result;
+}
+
 ExactSize &
 ExactSize::insertelement(const Domain &array,
                          const Domain &element,

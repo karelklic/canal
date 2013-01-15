@@ -145,7 +145,8 @@ public: // Instructions operating on values.
 
     virtual Domain &fmul(const Domain &a, const Domain &b);
 
-    /// Unsigned division
+    /// Unsigned division.
+    /// Stores the result of unsigned division a / b to this object.
     virtual Domain &udiv(const Domain &a, const Domain &b);
 
     /// Signed division.
@@ -197,6 +198,10 @@ public: // Instructions operating on values.
     virtual Domain &uitofp(const Domain &value);
 
     virtual Domain &sitofp(const Domain &value);
+
+    /// Extracts a single element from an array at a specified index.
+    /// The element is returned.  Caller is responsible for deleting it.
+    virtual Domain *extractelement(const Domain &index);
 
     /// Inserts an element into an array at a specified index.
     virtual Domain &insertelement(const Domain &array,
