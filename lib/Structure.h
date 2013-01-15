@@ -64,6 +64,8 @@ public: // Implementation of Domain.
                                      const Domain &element,
                                      const Domain &index);
 
+    virtual Domain *extractvalue(const std::vector<unsigned> &indices) const;
+
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 
     virtual Domain *getItem(uint64_t offset) const;

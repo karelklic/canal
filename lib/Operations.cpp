@@ -757,32 +757,6 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
     state.addFunctionVariable(instruction, result);
 }
 
-template <typename T> static Domain *
-getValueLocation(Domain *aggregate, const T &instruction)
-{
-    Domain *item = aggregate;
-    typename T::idx_iterator it = instruction.idx_begin(),
-        itend = instruction.idx_end();
-
-    for (; it != itend; ++it)
-        item = item->getItem(*it);
-
-    return item;
-}
-
-template <typename T> static const Domain *
-getValueLocation(const Domain *aggregate, const T &instruction)
-{
-    const Domain *item = aggregate;
-    typename T::idx_iterator it = instruction.idx_begin(),
-        itend = instruction.idx_end();
-
-    for (; it != itend; ++it)
-        item = item->getItem(*it);
-
-    return item;
-}
-
 void
 Operations::extractvalue(const llvm::ExtractValueInst &instruction,
                          State &state)
@@ -796,8 +770,25 @@ Operations::extractvalue(const llvm::ExtractValueInst &instruction,
     if (!aggregate)
         return;
 
-    const Domain *item = getValueLocation(aggregate, instruction);
-    state.addFunctionVariable(instruction, item->clone());
+    llvm::ArrayRef<unsigned> indicesLlvm = instruction.getIndices();
+    std::vector<unsigned> indices(indicesLlvm.begin(),
+                                  indicesLlvm.end());
+
+    Domain *result = aggregate->extractvalue(indices);
+    state.addFunctionVariable(instruction, result);
+}
+
+template <typename T> static Domain *
+getValueLocation(Domain *aggregate, const T &instruction)
+{
+    Domain *item = aggregate;
+    typename T::idx_iterator it = instruction.idx_begin(),
+        itend = instruction.idx_end();
+
+    for (; it != itend; ++it)
+        item = item->getItem(*it);
+
+    return item;
 }
 
 void

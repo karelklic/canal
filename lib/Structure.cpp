@@ -267,6 +267,21 @@ Structure::insertelement(const Domain &array,
     return *this;
 }
 
+Domain *
+Structure::extractvalue(const std::vector<unsigned> &indices) const
+{
+    CANAL_ASSERT(!indices.empty());
+    unsigned index = indices[0];
+    CANAL_ASSERT(index < mMembers.size());
+    if (indices.size() > 1)
+    {
+        return mMembers[index]->extractvalue(std::vector<unsigned>(indices.begin() + 1,
+                                                                   indices.end()));
+    }
+    else
+        return mMembers[index]->clone();
+}
+
 std::vector<Domain*>
 Structure::getItem(const Domain &offset) const
 {
