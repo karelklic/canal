@@ -669,6 +669,7 @@ Operations::extractelement(const llvm::ExtractElementInst &instruction,
                            state,
                            constants[1])
     };
+
     if (!values[0] || !values[1])
         return;
 
