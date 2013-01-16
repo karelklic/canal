@@ -665,7 +665,7 @@ ExactSize::extractvalue(const std::vector<unsigned> &indices) const
         for (; it != itend; ++it)
         {
             llvm::CompositeType *composite = llvm::cast<llvm::CompositeType>(type);
-            type = composite->getTypeAtIndex(*it);
+            type = (llvm::Type*)composite->getTypeAtIndex(*it);
         }
 
         Domain *result = mEnvironment.getConstructors().create(*type);
