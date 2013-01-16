@@ -324,6 +324,30 @@ Structure::insertvalue(const Domain &element,
     }
 }
 
+Domain *
+Structure::load(const llvm::Type &type,
+                const std::vector<Domain*> &offsets) const
+{
+    if (offsets.empty())
+    {
+        if (&mType == &type)
+            return clone();
+        else
+        {
+            Domain *result = mEnvironment.getConstructors().create(type);
+            result->setTop();
+            return result;
+        }
+    }
+
+    Domain *subitem = extractelement(*offsets[0]);
+    Domain *result = subitem->load(type, std::vector<Domain*>(offsets.begin() + 1,
+                                                              offsets.end()));
+
+    delete subitem;
+    return result;
+}
+
 std::vector<Domain*>
 Structure::getItem(const Domain &offset) const
 {

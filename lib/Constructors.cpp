@@ -253,7 +253,8 @@ Constructors::create(const llvm::Constant &value,
             llvmCast<llvm::Function>(value);
 
         Domain *constPointer;
-        constPointer = createPointer(*functionValue.getFunctionType());
+        constPointer = createPointer(*llvm::PointerType::getUnqual(
+                                         functionValue.getFunctionType()));
 
         Pointer::Utils::addTarget(*constPointer,
                                   Pointer::Target::Function,
@@ -288,12 +289,14 @@ Constructors::createInteger(const llvm::APInt &number) const {
 }
 
 Domain *
-Constructors::createFloat(const llvm::fltSemantics &semantics) const {
+Constructors::createFloat(const llvm::fltSemantics &semantics) const
+{
     return new Float::Interval(mEnvironment, semantics);
 }
 
 Domain *
-Constructors::createFloat(const llvm::APFloat &number) const {
+Constructors::createFloat(const llvm::APFloat &number) const
+{
     return new Float::Interval(mEnvironment, number);
 }
 
@@ -339,7 +342,7 @@ Constructors::createArray(const llvm::SequentialType &type,
 }
 
 Domain *
-Constructors::createPointer(const llvm::Type &type) const
+Constructors::createPointer(const llvm::PointerType &type) const
 {
     return new Pointer::Pointer(mEnvironment, type);
 }

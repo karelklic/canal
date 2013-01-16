@@ -1,6 +1,7 @@
 #include "IntegerSet.h"
 #include "Utils.h"
 #include "FloatInterval.h"
+#include "Environment.h"
 
 namespace Canal {
 namespace Integer {
@@ -641,11 +642,17 @@ Set::fptosi(const Domain &value)
     return *this;
 }
 
+const llvm::IntegerType &
+Set::getValueType() const
+{
+    return *llvm::Type::getIntNTy(mEnvironment.getContext(), getBitWidth());
+}
+
 Set &
 Set::applyOperation(const Domain &a,
-                            const Domain &b,
-                            APIntUtils::Operation operation1,
-                            APIntUtils::OperationWithOverflow operation2)
+                    const Domain &b,
+                    APIntUtils::Operation operation1,
+                    APIntUtils::OperationWithOverflow operation2)
 {
     const Set &aa = llvm::cast<Set>(a),
         &bb = llvm::cast<Set>(b);

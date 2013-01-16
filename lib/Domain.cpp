@@ -2,7 +2,7 @@
 #include "Utils.h"
 #include "WideningDataInterface.h"
 #include "Environment.h"
-#include <typeinfo>
+#include "Constructors.h"
 
 namespace Canal {
 
@@ -278,6 +278,22 @@ Domain::insertvalue(const Domain &element,
     CANAL_NOT_IMPLEMENTED();
 }
 
+Domain *
+Domain::load(const llvm::Type &type,
+             const std::vector<Domain*> &offsets) const
+{
+    // Default implementation.  Useful for non-array objects.
+    CANAL_ASSERT(offsets.empty());
+    if (&type == &getValueType())
+        return clone();
+    else
+    {
+        Domain *result = mEnvironment.getConstructors().create(type);
+        result->setTop();
+        return result;
+    }
+}
+
 void
 Domain::setWideningData(Widening::DataInterface *wideningData)
 {
@@ -289,12 +305,6 @@ Domain::setWideningData(Widening::DataInterface *wideningData)
 
 std::vector<Domain*>
 Domain::getItem(const Domain &offset) const
-{
-    CANAL_NOT_IMPLEMENTED();
-}
-
-bool
-Domain::isValue() const
 {
     CANAL_NOT_IMPLEMENTED();
 }

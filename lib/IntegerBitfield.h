@@ -173,6 +173,10 @@ public: // Implementation of Domain.
     virtual Bitfield &fptoui(const Domain &value);
 
     virtual Bitfield &fptosi(const Domain &value);
+
+    /// Covariant return type.
+    virtual const llvm::IntegerType &getValueType() const;
+
 private:
     void shift(const Domain &a, const Domain &b, bool right, int shiftValue);
 };

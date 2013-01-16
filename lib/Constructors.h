@@ -53,7 +53,7 @@ public:
     Domain *createArray(const llvm::SequentialType &type,
                         const std::vector<Domain*> &values) const;
 
-    Domain *createPointer(const llvm::Type &type) const;
+    Domain *createPointer(const llvm::PointerType &type) const;
 
     Domain *createStructure(const llvm::StructType &type) const;
 

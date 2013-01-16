@@ -469,9 +469,9 @@ void Operations::add(const llvm::BinaryOperator &instruction,
     if (aPointer || bPointer)
     {
         if (aPointer)
-            result = mConstructors.createPointer(aPointer->getType());
+            result = mConstructors.createPointer(aPointer->getValueType());
         else
-            result = mConstructors.createPointer(bPointer->getType());
+            result = mConstructors.createPointer(bPointer->getValueType());
 
         result->add(*a, *b);
     }
@@ -527,7 +527,7 @@ Operations::sub(const llvm::BinaryOperator &instruction,
     // Subtracting integer from pointer.
     if (aPointer && !bPointer)
     {
-        result = mConstructors.createPointer(aPointer->getType());
+        result = mConstructors.createPointer(aPointer->getValueType());
         result->sub(*a, *b);
     }
     else if (aPointer && bPointer) // Subtracting two pointers.

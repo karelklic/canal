@@ -533,5 +533,47 @@ Container::insertvalue(const Domain &element,
         (**it).insertvalue(element, indices);
 }
 
+Domain *
+Container::load(const llvm::Type &type,
+                const std::vector<Domain*> &offsets) const
+{
+    if (offsets.empty())
+    {
+        if (&type == &getValueType())
+            return clone();
+        else
+        {
+            Domain *result = mEnvironment.getConstructors().create(type);
+            result->setTop();
+            return result;
+        }
+    }
+
+    Domain *subitem = extractelement(*offsets[0]);
+    Domain *result = subitem->load(type, std::vector<Domain*>(offsets.begin() + 1,
+                                                              offsets.end()));
+
+    delete subitem;
+    return result;
+}
+
+const llvm::Type &
+Container::getValueType() const
+{
+    const llvm::Type *result = NULL;
+    std::vector<Domain*>::const_iterator it = mValues.begin();
+    for (; it != mValues.end(); ++it)
+    {
+        if (result)
+        {
+            CANAL_ASSERT(result == &(**it).getValueType());
+        }
+        else
+            result = &(**it).getValueType();
+    }
+
+    return *result;
+}
+
 } // namespace Integer
 } // namespace Canal

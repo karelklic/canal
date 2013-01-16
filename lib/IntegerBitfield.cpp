@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "APIntUtils.h"
 #include "FloatInterval.h"
+#include "Environment.h"
 #include <queue>
 
 namespace Canal {
@@ -192,6 +193,18 @@ bool
 Bitfield::isConstant() const
 {
     return ~(mZeroes ^ mOnes) == 0;
+}
+
+bool
+Bitfield::isTrue() const
+{
+    return mZeroes.getBitWidth() == 1 && mZeroes == 0 && mOnes == 1;
+}
+
+bool
+Bitfield::isFalse() const
+{
+    return mZeroes.getBitWidth() == 1 && mZeroes == 1 && mOnes == 0;
 }
 
 Bitfield *
@@ -854,14 +867,10 @@ Bitfield::fptosi(const Domain &value)
     return *this;
 }
 
-bool
-Bitfield::isTrue() const {
-    return mZeroes.getBitWidth() == 1 && mZeroes == 0 && mOnes == 1;
-}
-
-bool
-Bitfield::isFalse() const {
-    return mZeroes.getBitWidth() == 1 && mZeroes == 1 && mOnes == 0;
+const llvm::IntegerType &
+Bitfield::getValueType() const
+{
+    return *llvm::Type::getIntNTy(mEnvironment.getContext(), getBitWidth());
 }
 
 } // namespace Integer

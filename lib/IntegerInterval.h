@@ -178,6 +178,9 @@ public: // Implementation of Domain.
     virtual Interval &fptoui(const Domain &value);
 
     virtual Interval &fptosi(const Domain &value);
+
+    /// Covariant return type.
+    virtual const llvm::IntegerType &getValueType() const;
 };
 
 } // namespace Integer

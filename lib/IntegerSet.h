@@ -155,6 +155,9 @@ public: // Implementation of Domain.
 
     virtual Set &fptosi(const Domain &value);
 
+    /// Covariant return type.
+    virtual const llvm::IntegerType &getValueType() const;
+
 protected:
     Set &applyOperation(const Domain &a,
                                 const Domain &b,

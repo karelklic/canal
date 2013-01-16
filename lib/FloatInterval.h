@@ -94,6 +94,8 @@ public: // Implementation of Domain.
     virtual Interval &uitofp(const Domain &value);
 
     virtual Interval &sitofp(const Domain &value);
+
+    virtual const llvm::Type &getValueType() const;
 };
 
 } // namespace Float

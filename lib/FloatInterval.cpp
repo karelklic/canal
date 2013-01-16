@@ -1,8 +1,10 @@
 #include "FloatInterval.h"
 #include "IntegerContainer.h"
 #include "IntegerInterval.h"
-#include "Utils.h"
 #include "IntegerUtils.h"
+#include "FloatUtils.h"
+#include "Utils.h"
+#include "Environment.h"
 
 #define ROUNDING_MODE llvm::APFloat::rmNearestTiesToEven
 
@@ -729,6 +731,13 @@ Interval::sitofp(const Domain &value)
     mFrom = llvm::APFloat(min);
     mTo = llvm::APFloat(max);
     return *this;
+}
+
+const llvm::Type &
+Interval::getValueType() const
+{
+    return Utils::getType(mFrom.getSemantics(),
+                          mEnvironment.getContext());
 }
 
 } // namespace Float

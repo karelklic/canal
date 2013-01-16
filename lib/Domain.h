@@ -232,6 +232,13 @@ public: // Instructions operating on values.
     virtual void insertvalue(const Domain &element,
                              const std::vector<unsigned> &indices);
 
+    virtual Domain *load(const llvm::Type &type,
+                         const std::vector<Domain*> &offsets) const;
+
+    //virtual Domain *store(const Domain &value,
+    //                      const std::vector<Domain*> &offsets,
+    //                      bool overwrite);
+
 public: // Widening interface.
     Widening::DataInterface *getWideningData() const
     {
@@ -248,8 +255,6 @@ public: // Array interface.
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 
 public: // Memory layout
-    virtual bool isValue() const;
-
     virtual const llvm::Type &getValueType() const;
 
     virtual bool hasValueExactSize() const;

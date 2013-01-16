@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "APIntUtils.h"
 #include "FloatInterval.h"
+#include "Environment.h"
 
 namespace Canal {
 namespace Integer {
@@ -1317,6 +1318,12 @@ Interval::fptosi(const Domain &value)
 {
     setTop();
     return *this;
+}
+
+const llvm::IntegerType &
+Interval::getValueType() const
+{
+    return *llvm::Type::getIntNTy(mEnvironment.getContext(), getBitWidth());
 }
 
 } // namespace Integer

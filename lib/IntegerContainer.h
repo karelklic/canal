@@ -117,6 +117,11 @@ public: // Implementation of Domain.
 
     virtual void insertvalue(const Domain &element,
                              const std::vector<unsigned> &indices);
+
+    virtual Domain *load(const llvm::Type &type,
+                         const std::vector<Domain*> &offsets) const;
+
+    virtual const llvm::Type &getValueType() const;
 };
 
 } // namespace Integer

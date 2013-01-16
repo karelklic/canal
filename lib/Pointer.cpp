@@ -13,7 +13,7 @@ namespace Canal {
 namespace Pointer {
 
 Pointer::Pointer(const Environment &environment,
-                 const llvm::Type &type)
+                 const llvm::PointerType &type)
     : Domain(environment, Domain::PointerKind), mType(type)
 {
 }
@@ -29,7 +29,7 @@ Pointer::Pointer(const Pointer &value)
 }
 
 Pointer::Pointer(const Pointer &value,
-                 const llvm::Type &newType)
+                 const llvm::PointerType &newType)
     : Domain(value),
       mTargets(value.mTargets),
       mType(newType)
@@ -75,6 +75,100 @@ Pointer::addTarget(Target::Type type,
         mTargets.insert(PlaceTargetMap::value_type(place, pointerTarget));
 }
 
+Domain *
+Pointer::dereferenceAndMerge(const State &state) const
+{
+    Domain *mergedValue = NULL;
+    PlaceTargetMap::const_iterator it = mTargets.begin();
+    for (; it != mTargets.end(); ++it)
+    {
+        if (it->second->mType != Target::Block)
+            continue;
+
+        const Domain *source = state.findBlock(*it->second->mTarget);
+        CANAL_ASSERT(source);
+
+        std::vector<Domain*> offsets;
+        if (!it->second->mOffsets.empty())
+        {
+            CANAL_ASSERT_MSG(Integer::Utils::getSet(*it->second->mOffsets[0]).mValues.size() == 1,
+                             "First offset is expected to be zero!");
+
+            CANAL_ASSERT_MSG(Integer::Utils::getSet(*it->second->mOffsets[0]).mValues.begin()->isMinValue(),
+                             "First offset is expected to be zero!");
+
+            offsets = std::vector<Domain*>(it->second->mOffsets.begin() + 1,
+                                           it->second->mOffsets.end());
+        }
+
+        Domain *loaded = source->load(*getValueType().getElementType(),
+                                      offsets);
+
+        if (mergedValue)
+        {
+            mergedValue->join(*loaded);
+            delete loaded;
+        }
+        else
+            mergedValue = loaded;
+    }
+
+    return mergedValue;
+}
+
+Pointer *
+Pointer::bitcast(const llvm::PointerType &type) const
+{
+    return new Pointer(*this, type);
+}
+
+Pointer *
+Pointer::getElementPtr(const std::vector<Domain*> &offsets,
+                       const llvm::PointerType &type,
+                       const Constructors &constructors) const
+{
+    CANAL_ASSERT_MSG(!offsets.empty(),
+                     "getElementPtr must be called with some offsets.");
+
+    // Check that all offsets are 64-bit integers.
+    std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
+    for (; offsetIt != offsets.end(); ++offsetIt)
+    {
+        CANAL_ASSERT_MSG(Integer::Utils::getBitWidth(**offsetIt) == 64,
+                         "GetElementPtr offsets must have 64 bits!");
+    }
+
+    Pointer *result = new Pointer(*this, type);
+
+    // Iterate over all targets, and adjust the target offsets.
+    PlaceTargetMap::iterator targetIt = result->mTargets.begin();
+    for (; targetIt != result->mTargets.end(); ++targetIt)
+    {
+        std::vector<Domain*> &targetOffsets = targetIt->second->mOffsets;
+        std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
+        for (; offsetIt != offsets.end(); ++offsetIt)
+        {
+            if (offsetIt == offsets.begin() && !targetOffsets.empty())
+            {
+                Domain *newLast = constructors.createInteger(64);
+                newLast->add(*targetOffsets.back(), **offsets.begin());
+                delete targetOffsets.back();
+                targetOffsets.pop_back();
+                targetOffsets.push_back(newLast);
+                continue;
+            }
+
+            targetOffsets.push_back((*offsetIt)->clone());
+        }
+    }
+
+    // Delete the offsets, because this method takes ownership of them
+    // and it no longer needs them.
+    std::for_each(offsets.begin(), offsets.end(), llvm::deleter<Domain>);
+
+    return result;
+}
+
 /// Dereference the target in a certain block.  Dereferencing might
 /// result in multiple values being returned due to the nature of
 /// offsets (offsets might include integer intervals).  The returned
@@ -115,136 +209,6 @@ dereference(Domain *block,
             result.swap(nextLevelResult);
         }
     }
-
-    return result;
-}
-
-
-/// Dereference the target in a certain block.  Dereferencing might
-/// result in multiple values being returned due to the nature of
-/// offsets (offsets might include integer intervals).  The returned
-/// pointers point to the memory owned by the block.
-static std::vector<const Domain*>
-dereference(const Domain *block,
-            const std::vector<Domain*> &offsets)
-{
-    std::vector<const Domain*> result;
-    result.push_back(block);
-
-    if (!offsets.empty())
-    {
-        CANAL_ASSERT_MSG(Integer::Utils::getSet(*offsets[0]).mValues.size() == 1,
-                         "First offset is expected to be zero!");
-
-        CANAL_ASSERT_MSG(Integer::Utils::getSet(*offsets[0]).mValues.begin()->isMinValue(),
-                         "First offset is expected to be zero!");
-
-        std::vector<Domain*>::const_iterator ito = offsets.begin() + 1,
-            itoend = offsets.end();
-
-        for (; ito != itoend; ++ito)
-        {
-            std::vector<const Domain*> nextLevelResult;
-            std::vector<const Domain*>::const_iterator iti = result.begin(),
-                itiend = result.end();
-
-            for (; iti != itiend; ++iti)
-            {
-                std::vector<Domain*> items;
-                items = (**iti).getItem(**ito);
-                nextLevelResult.insert(nextLevelResult.end(),
-                                       items.begin(),
-                                       items.end());
-            }
-
-            result.swap(nextLevelResult);
-        }
-    }
-
-    return result;
-}
-
-
-Domain *
-Pointer::dereferenceAndMerge(const State &state) const
-{
-    Domain *mergedValue = NULL;
-    PlaceTargetMap::const_iterator it = mTargets.begin();
-    for (; it != mTargets.end(); ++it)
-    {
-        if (it->second->mType != Target::Block)
-            continue;
-
-        const Domain *source = state.findBlock(*it->second->mTarget);
-        CANAL_ASSERT(source);
-
-        std::vector<const Domain*> values =
-            dereference(source, it->second->mOffsets);
-
-        std::vector<const Domain*>::const_iterator it = values.begin();
-        for (; it != values.end(); ++it)
-        {
-            if (mergedValue)
-                mergedValue->join(**it);
-            else
-                mergedValue = (*it)->clone();
-        }
-    }
-
-    return mergedValue;
-}
-
-Pointer *
-Pointer::bitcast(const llvm::Type &type) const
-{
-    return new Pointer(*this, type);
-}
-
-Pointer *
-Pointer::getElementPtr(const std::vector<Domain*> &offsets,
-                       const llvm::Type &type,
-                       const Constructors &constructors) const
-{
-    CANAL_ASSERT_MSG(!offsets.empty(),
-                     "getElementPtr must be called with some offsets.");
-
-    // Check that all offsets are 64-bit integers.
-    std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
-    for (; offsetIt != offsets.end(); ++offsetIt)
-    {
-        CANAL_ASSERT_MSG(Integer::Utils::getBitWidth(**offsetIt) == 64,
-                         "GetElementPtr offsets must have 64 bits!");
-    }
-
-    Pointer *result = new Pointer(*this, type);
-
-    // TODO: handle mNumericOffset.
-
-    // Iterate over all targets, and adjust the target offsets.
-    PlaceTargetMap::iterator targetIt = result->mTargets.begin();
-    for (; targetIt != result->mTargets.end(); ++targetIt)
-    {
-        std::vector<Domain*> &targetOffsets = targetIt->second->mOffsets;
-        std::vector<Domain*>::const_iterator offsetIt = offsets.begin();
-        for (; offsetIt != offsets.end(); ++offsetIt)
-        {
-            if (offsetIt == offsets.begin() && !targetOffsets.empty())
-            {
-                Domain *newLast = constructors.createInteger(64);
-                newLast->add(*targetOffsets.back(), **offsets.begin());
-                delete targetOffsets.back();
-                targetOffsets.pop_back();
-                targetOffsets.push_back(newLast);
-                continue;
-            }
-
-            targetOffsets.push_back((*offsetIt)->clone());
-        }
-    }
-
-    // Delete the offsets, because this method takes ownership of them
-    // and it no longer needs them.
-    std::for_each(offsets.begin(), offsets.end(), llvm::deleter<Domain>);
 
     return result;
 }
