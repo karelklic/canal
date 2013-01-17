@@ -43,6 +43,12 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
                                    State &resultState,
                                    const llvm::Value &resultPlace)
 {
+    if (function.getName() == "strcat")
+    {
+        onFunctionCallStrcat(function, callState, resultState, resultPlace);
+        return;
+    }
+
     // Function not found.  Set the resultant value to the Top
     // value.
     if (function.isIntrinsic())
@@ -92,6 +98,23 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
         Domain *result = func->getOutputState().getReturnedValue()->clone();
         resultState.addFunctionVariable(resultPlace, result);
     }
+}
+
+void
+OperationsCallback::onFunctionCallStrcat(const llvm::Function &function,
+                                         const State &callState,
+                                         State &resultState,
+                                         const llvm::Value &resultPlace)
+{
+    CANAL_ASSERT(function.getArgumentList().size() == 2);
+    const llvm::Argument &destArgument = *function.getArgumentList().begin();
+    const llvm::Argument &srcArgument = *(++function.getArgumentList().begin());
+    const Domain *destinationPointer = callState.findVariable(destArgument);
+    const Domain *sourcePointer = callState.findVariable(srcArgument);
+
+    CANAL_NOT_IMPLEMENTED();
+
+    resultState.addFunctionVariable(resultPlace, destinationPointer->clone());
 }
 
 } // namespace Interpreter
