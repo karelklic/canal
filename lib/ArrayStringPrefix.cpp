@@ -111,7 +111,7 @@ StringPrefix::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const StringPrefix &array = llvm::cast<StringPrefix>(value);
+    const StringPrefix &array = checkedCast<StringPrefix>(value);
     if (isBottom() != array.isBottom())
         return false;
 
@@ -127,7 +127,7 @@ StringPrefix::operator<(const Domain &value) const
     if (this == &value)
         return false;
 
-    const StringPrefix &array = llvm::cast<StringPrefix>(value);
+    const StringPrefix &array = checkedCast<StringPrefix>(value);
     if (array.isBottom())
         return false;
 
@@ -168,7 +168,7 @@ StringPrefix::join(const Domain &value)
         return *this;
     }
 
-    const StringPrefix &array = llvm::cast<StringPrefix>(value);
+    const StringPrefix &array = checkedCast<StringPrefix>(value);
     if (isBottom())
         mPrefix = array.mPrefix;
     else
@@ -193,7 +193,7 @@ StringPrefix::meet(const Domain &value)
         return *this;
     }
 
-    const StringPrefix &array = llvm::cast<StringPrefix>(value);
+    const StringPrefix &array = checkedCast<StringPrefix>(value);
     if (isTop())
         mPrefix = array.mPrefix;
     else if (0 == array.mPrefix.compare(0, mPrefix.length(), mPrefix))
@@ -423,7 +423,7 @@ StringPrefix::extractvalue(const std::vector<unsigned> &indices) const
 
         for (; it != itend; ++it)
         {
-            llvm::CompositeType *composite = llvm::cast<llvm::CompositeType>(type);
+            llvm::CompositeType *composite = checkedCast<llvm::CompositeType>(type);
             type = (llvm::Type*)composite->getTypeAtIndex(*it);
         }
 

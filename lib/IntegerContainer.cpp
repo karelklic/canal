@@ -76,21 +76,13 @@ Container::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const Container *container = llvm::dyn_cast<Container>(&value);
-    if (!container)
-        return false;
-
-    CANAL_ASSERT(mValues.size() == container->mValues.size());
-    std::vector<Domain*>::const_iterator ita(mValues.begin()),
-        itb(container->mValues.begin());
+    const Container &container = checkedCast<Container>(value);
+    CANAL_ASSERT(mValues.size() == container.mValues.size());
+    std::vector<Domain*>::const_iterator ita = mValues.begin(),
+        itb = container.mValues.begin();
 
     for (; ita != mValues.end(); ++ita, ++itb)
     {
-        // If iterators point to the same object skip casting and
-        // comparison of object.
-        if (*ita == *itb)
-            continue;
-
         if (**ita != **itb)
             return false;
     }
@@ -101,14 +93,28 @@ Container::operator==(const Domain &value) const
 bool
 Container::operator<(const Domain &value) const
 {
-    CANAL_NOT_IMPLEMENTED();
+    if (this == &value)
+        return false;
+
+    const Container &container = checkedCast<Container>(value);
+    CANAL_ASSERT(mValues.size() == container.mValues.size());
+    std::vector<Domain*>::const_iterator ita = mValues.begin(),
+        itb = container.mValues.begin();
+
+    for (; ita != mValues.end(); ++ita, ++itb)
+    {
+        if (!(**ita < **itb))
+            return false;
+    }
+
+    return true;
 }
 
 Container &
 Container::join(const Domain &value)
 {
     std::vector<Domain*>::iterator it = mValues.begin();
-    const Container &container = llvm::cast<Container>(value);
+    const Container &container = checkedCast<Container>(value);
     CANAL_ASSERT(mValues.size() == container.mValues.size());
     std::vector<Domain*>::const_iterator it2 = container.mValues.begin();
     for (; it != mValues.end(); ++it, ++it2)
@@ -120,7 +126,14 @@ Container::join(const Domain &value)
 Container &
 Container::meet(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    std::vector<Domain*>::iterator it = mValues.begin();
+    const Container &container = checkedCast<Container>(value);
+    CANAL_ASSERT(mValues.size() == container.mValues.size());
+    std::vector<Domain*>::const_iterator it2 = container.mValues.begin();
+    for (; it != mValues.end(); ++it, ++it2)
+        (*it)->meet(**it2);
+
+    return *this;
 }
 
 bool
@@ -197,8 +210,8 @@ binaryOperation(Container &result,
                 const Domain &b,
                 Domain::BinaryOperation operation)
 {
-    const Container &aa = llvm::cast<Container>(a),
-        &bb = llvm::cast<Container>(b);
+    const Container &aa = checkedCast<Container>(a),
+        &bb = checkedCast<Container>(b);
 
     std::vector<Domain*>::iterator it(result.mValues.begin());
     std::vector<Domain*>::const_iterator ita = aa.mValues.begin(),
@@ -293,8 +306,8 @@ Container::icmp(const Domain &a, const Domain &b,
                 llvm::CmpInst::Predicate predicate)
 {
     const Pointer::Pointer
-        *aPointer = llvm::dyn_cast<Pointer::Pointer>(&a),
-        *bPointer = llvm::dyn_cast<Pointer::Pointer>(&b);
+        *aPointer = dynCast<Pointer::Pointer>(&a),
+        *bPointer = dynCast<Pointer::Pointer>(&b);
 
     if (aPointer && bPointer)
     {
@@ -345,8 +358,8 @@ Container::icmp(const Domain &a, const Domain &b,
         return *this;
     }
 
-    const Container &aa = llvm::cast<Container>(a),
-        &bb = llvm::cast<Container>(b);
+    const Container &aa = checkedCast<Container>(a),
+        &bb = checkedCast<Container>(b);
 
     std::vector<Domain*>::iterator it(mValues.begin());
     std::vector<Domain*>::const_iterator ita = aa.mValues.begin(),
@@ -374,7 +387,7 @@ castOperation(Container &result,
               const Domain &value,
               Domain::CastOperation operation)
 {
-    const Container &container = llvm::cast<Container>(value);
+    const Container &container = checkedCast<Container>(value);
     std::vector<Domain*>::iterator it = result.mValues.begin();
     std::vector<Domain*>::const_iterator itc = container.mValues.begin();
     for (; it != result.mValues.end(); ++it, ++itc)
@@ -448,7 +461,7 @@ Container::insertelement(const Domain &array,
                          const Domain &element,
                          const Domain &index)
 {
-    const Container &container = llvm::cast<Container>(array);
+    const Container &container = checkedCast<Container>(array);
     CANAL_ASSERT(container.mValues.size() == mValues.size());
 
     std::vector<Domain*>::iterator it = mValues.begin(),
@@ -466,8 +479,8 @@ Container::shufflevector(const Domain &a,
                          const Domain &b,
                          const std::vector<uint32_t> &mask)
 {
-    const Container &aa = llvm::cast<Container>(a),
-        &bb = llvm::cast<Container>(b);
+    const Container &aa = checkedCast<Container>(a),
+        &bb = checkedCast<Container>(b);
 
     CANAL_ASSERT(aa.mValues.size() == mValues.size());
     CANAL_ASSERT(bb.mValues.size() == mValues.size());
@@ -509,7 +522,7 @@ Container::insertvalue(const Domain &aggregate,
                        const Domain &element,
                        const std::vector<unsigned> &indices)
 {
-    const Container &container = llvm::cast<Container>(aggregate);
+    const Container &container = checkedCast<Container>(aggregate);
     CANAL_ASSERT(container.mValues.size() == mValues.size());
 
     std::vector<Domain*>::iterator it = mValues.begin(),
@@ -564,7 +577,7 @@ Container::store(const Domain &value,
 {
     if (offsets.empty())
     {
-        const Container &container = llvm::cast<Container>(value);
+        const Container &container = checkedCast<Container>(value);
         CANAL_ASSERT(container.mValues.size() == mValues.size());
 
         std::vector<Domain*>::iterator it = mValues.begin(),

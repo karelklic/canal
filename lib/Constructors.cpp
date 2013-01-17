@@ -301,42 +301,36 @@ Constructors::createFloat(const llvm::APFloat &number) const
 Domain *
 Constructors::createArray(const llvm::SequentialType &type) const
 {
-    return new Array::SingleItem(mEnvironment, type);
-/*
+//    return new Array::SingleItem(mEnvironment, type);
     Integer::Container *container = new Integer::Container(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
     return container;
-*/
 }
 
 Domain *
 Constructors::createArray(const llvm::SequentialType &type,
                           Domain *size) const
 {
-    return new Array::SingleItem(mEnvironment, type, size);
-/*
+//    return new Array::SingleItem(mEnvironment, type, size);
     Integer::Container *container = new Integer::Container(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, size));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
     return container;
-*/
 }
 
 Domain *
 Constructors::createArray(const llvm::SequentialType &type,
                           const std::vector<Domain*> &values) const
 {
-    return new Array::SingleItem(mEnvironment, type, values.begin(), values.end());
-/*
+//    return new Array::SingleItem(mEnvironment, type, values.begin(), values.end());
     Integer::Container *container = new Integer::Container(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type, values));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, values.begin(), values.end()));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type, values.begin(), values.end()));
     return container;
-*/
 }
 
 Domain *
@@ -386,9 +380,7 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
         checkedCast<const llvm::PointerType>(*value.getType());
 
     // GetElementPtr on a Pointer
-    const Pointer::Pointer *pointer =
-        llvm::dyn_cast<Pointer::Pointer>(&variable);
-
+    const Pointer::Pointer *pointer = dynCast<Pointer::Pointer>(&variable);
     if (pointer)
     {
         return pointer->getElementPtr(offsets,
@@ -400,7 +392,6 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     // called on arrays and structures.
     Domain *result;
     result = createPointer(pointerType);
-
     Pointer::Utils::addTarget(*result,
                               Pointer::Target::Block,
                               &place,

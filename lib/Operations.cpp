@@ -455,12 +455,8 @@ void Operations::add(const llvm::BinaryOperator &instruction,
         return;
 
     // Pointer arithmetic.
-    const Pointer::Pointer *aPointer =
-        llvm::dyn_cast<Pointer::Pointer>(a);
-
-    const Pointer::Pointer *bPointer =
-        llvm::dyn_cast<Pointer::Pointer>(b);
-
+    const Pointer::Pointer *aPointer = dynCast<Pointer::Pointer>(a);
+    const Pointer::Pointer *bPointer = dynCast<Pointer::Pointer>(b);
     CANAL_ASSERT_MSG(!aPointer || !bPointer,
                      "Unable to add two pointers.");
 
@@ -513,12 +509,8 @@ Operations::sub(const llvm::BinaryOperator &instruction,
         return;
 
     // Pointer arithmetic.
-    const Pointer::Pointer *aPointer =
-        llvm::dyn_cast<Pointer::Pointer>(a);
-
-    const Pointer::Pointer *bPointer =
-        llvm::dyn_cast<Pointer::Pointer>(b);
-
+    const Pointer::Pointer *aPointer = dynCast<Pointer::Pointer>(a);
+    const Pointer::Pointer *bPointer = dynCast<Pointer::Pointer>(b);
     CANAL_ASSERT_MSG(aPointer || !bPointer,
                      "Subtracting pointer from constant!");
 
@@ -866,7 +858,7 @@ Operations::load(const llvm::LoadInst &instruction,
         return;
 
     const Pointer::Pointer &pointer =
-        llvm::cast<Pointer::Pointer>(*variable);
+        checkedCast<Pointer::Pointer>(*variable);
 
     // Pointer found. Merge all possible values and store the result
     // into the state.
@@ -896,7 +888,7 @@ Operations::store(const llvm::StoreInst &instruction,
         return;
 
     const Pointer::Pointer &inclusionBased =
-        llvm::cast<Pointer::Pointer>(*pointer);
+        checkedCast<Pointer::Pointer>(*pointer);
 
     inclusionBased.store(*value, state);
 }
@@ -913,7 +905,7 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
         return;
 
     const Pointer::Pointer &source =
-        llvm::cast<Pointer::Pointer>(*base);
+        checkedCast<Pointer::Pointer>(*base);
 
     // We get offsets. Either constants or Integer::Container.
     // Pointer points either to an array (or array offset), or to a
@@ -1039,10 +1031,10 @@ Operations::inttoptr(const llvm::IntToPtrInst &instruction,
         return;
 
     const Pointer::Pointer &source =
-        llvm::cast<Pointer::Pointer>(*operand);
+        checkedCast<Pointer::Pointer>(*operand);
 
     const llvm::PointerType &pointerType =
-        llvm::cast<llvm::PointerType>(*instruction.getDestTy());
+        checkedCast<llvm::PointerType>(*instruction.getDestTy());
 
     Pointer::Pointer *result =
         source.bitcast(pointerType);
@@ -1066,7 +1058,7 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
         return;
 
     const Pointer::Pointer &sourcePointer =
-        llvm::cast<Pointer::Pointer>(*source);
+        checkedCast<Pointer::Pointer>(*source);
 
     const llvm::PointerType &destPointerType =
         checkedCast<llvm::PointerType>(*destinationType);
@@ -1139,7 +1131,7 @@ Operations::select(const llvm::SelectInst &instruction,
 
     Domain *resultValue;
     const Integer::Container &conditionInt =
-        llvm::cast<Integer::Container>(*condition);
+        checkedCast<Integer::Container>(*condition);
 
     CANAL_ASSERT(Integer::Utils::getBitfield(conditionInt).getBitWidth() == 1);
     switch (Integer::Utils::getBitfield(conditionInt).getBitValue(0))

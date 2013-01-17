@@ -18,11 +18,11 @@ SingleItem::SingleItem(const Environment &environment,
 
     uint64_t count = 0;
 
-    const llvm::ArrayType *array = llvm::dyn_cast<llvm::ArrayType>(&type);
+    const llvm::ArrayType *array = dynCast<llvm::ArrayType>(&type);
     if (array)
         count = array->getNumElements();
 
-    const llvm::VectorType *vector = llvm::dyn_cast<llvm::VectorType>(&type);
+    const llvm::VectorType *vector = dynCast<llvm::VectorType>(&type);
     if (vector)
         count = vector->getNumElements();
 
@@ -138,7 +138,7 @@ SingleItem::operator<(const Domain& value) const
 SingleItem &
 SingleItem::join(const Domain &value)
 {
-    const SingleItem &array = llvm::cast<SingleItem>(value);
+    const SingleItem &array = checkedCast<SingleItem>(value);
     mValue->join(*array.mValue);
     mSize->join(*array.mSize);
     return *this;
@@ -147,7 +147,7 @@ SingleItem::join(const Domain &value)
 SingleItem &
 SingleItem::meet(const Domain &value)
 {
-    const SingleItem &array = llvm::cast<SingleItem>(value);
+    const SingleItem &array = checkedCast<SingleItem>(value);
     mValue->meet(*array.mValue);
     mSize->meet(*array.mSize);
     return *this;
@@ -189,8 +189,8 @@ binaryOperation(SingleItem &result,
                 const Domain &b,
                 Domain::BinaryOperation operation)
 {
-    const SingleItem &aa = llvm::cast<SingleItem>(a),
-        &bb = llvm::cast<SingleItem>(b);
+    const SingleItem &aa = checkedCast<SingleItem>(a),
+        &bb = checkedCast<SingleItem>(b);
 
     ((result.mValue)->*(operation))(*aa.mValue, *bb.mValue);
     return result;
@@ -331,7 +331,7 @@ SingleItem::insertelement(const Domain &array,
                           const Domain &element,
                           const Domain &index)
 {
-    const SingleItem &singleItem = llvm::cast<SingleItem>(array);
+    const SingleItem &singleItem = checkedCast<SingleItem>(array);
     CANAL_ASSERT(&mType == &singleItem.mType);
     mValue->join(*singleItem.mValue);
     mValue->join(element);
@@ -346,8 +346,8 @@ SingleItem::shufflevector(const Domain &a,
                           const Domain &b,
                           const std::vector<uint32_t> &mask)
 {
-    const SingleItem &aa = llvm::cast<SingleItem>(a),
-        &bb = llvm::cast<SingleItem>(b);
+    const SingleItem &aa = checkedCast<SingleItem>(a),
+        &bb = checkedCast<SingleItem>(b);
 
     CANAL_ASSERT(&aa.mType == &bb.mType);
     mValue->join(*aa.mValue);
@@ -373,7 +373,7 @@ SingleItem::insertvalue(const Domain &aggregate,
                         const Domain &element,
                         const std::vector<unsigned> &indices)
 {
-    const SingleItem &singleItem = llvm::cast<SingleItem>(aggregate);
+    const SingleItem &singleItem = checkedCast<SingleItem>(aggregate);
     CANAL_ASSERT(&mType == &singleItem.mType);
     mValue->join(*singleItem.mValue);
     delete mSize;

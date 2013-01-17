@@ -194,7 +194,7 @@ Target::toString(SlotTracker &slotTracker) const
     case Block:
     {
         const llvm::Instruction *instruction =
-            llvm::dyn_cast<llvm::Instruction>(mTarget);
+            dynCast<llvm::Instruction>(mTarget);
 
         if (instruction)
         {

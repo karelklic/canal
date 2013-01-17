@@ -136,13 +136,19 @@ castOrNull(Y *val)
     CANAL_ASSERT_MSG(llvm::isa<X>(val),
                      "castOrNull<Ty>() argument of incompatible type!");
 
-    return llvm::cast<X>(val);
+    return checkedCast<X>(val);
 }
 
 template <class X, class Y> inline typename llvm::cast_retty<X, Y>::ret_type
 dynCast(const Y &Val)
 {
-    return llvm::isa<X>(Val) ? llvm::cast<X, Y>(Val) : 0;
+    return llvm::isa<X>(Val) ? checkedCast<X, Y>(Val) : 0;
+}
+
+template <class X, class Y> inline typename llvm::cast_retty<X, Y>::ret_type
+dynCastOrNull(const Y &val)
+{
+    return (val && llvm::isa<X>(val)) ? checkedCast<X, Y>(val) : 0;
 }
 
 /// A raw_string_ostream that writes to an embedded std::string.  This

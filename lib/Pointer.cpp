@@ -284,19 +284,16 @@ Pointer::operator==(const Domain &value) const
         return true;
 
     // Check if the value has the same type.
-    const Pointer *pointer = llvm::dyn_cast<Pointer>(&value);
-    if (!pointer)
-        return false;
-
-    if (&pointer->mType != &mType)
+    const Pointer &pointer = checkedCast<Pointer>(value);
+    if (&pointer.mType != &mType)
         return false;
 
     // Check if it has the same number of targets.
-    if (pointer->mTargets.size() != mTargets.size())
+    if (pointer.mTargets.size() != mTargets.size())
         return false;
 
     // Check the targets.
-    PlaceTargetMap::const_iterator it1 = pointer->mTargets.begin(),
+    PlaceTargetMap::const_iterator it1 = pointer.mTargets.begin(),
         it2 = mTargets.begin();
 
     for (; it2 != mTargets.end(); ++it1, ++it2)

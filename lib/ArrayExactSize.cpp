@@ -18,12 +18,12 @@ ExactSize::ExactSize(const Environment &environment,
 {
     uint64_t count = 0;
 
-    const llvm::ArrayType *array = llvm::dyn_cast<llvm::ArrayType>(&type);
+    const llvm::ArrayType *array = dynCast<llvm::ArrayType>(&type);
     if (array)
         count = array->getNumElements();
     else
     {
-        const llvm::VectorType *vector = llvm::dyn_cast<llvm::VectorType>(&type);
+        const llvm::VectorType *vector = dynCast<llvm::VectorType>(&type);
         if (vector)
             count = vector->getNumElements();
         else
@@ -118,7 +118,7 @@ ExactSize::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const ExactSize &array = llvm::cast<ExactSize>(value);
+    const ExactSize &array = checkedCast<ExactSize>(value);
     CANAL_ASSERT(mHasExactSize == array.mHasExactSize);
     CANAL_ASSERT(&mType == &array.mType);
     CANAL_ASSERT(mValues.size() == array.mValues.size());
@@ -142,7 +142,7 @@ ExactSize::operator<(const Domain& value) const
     if (this == &value)
         return false;
 
-    const ExactSize &array = llvm::cast<ExactSize>(value);
+    const ExactSize &array = checkedCast<ExactSize>(value);
     CANAL_ASSERT(mHasExactSize == array.mHasExactSize);
     CANAL_ASSERT(&mType == &array.mType);
     CANAL_ASSERT(mValues.size() == array.mValues.size());
@@ -166,7 +166,7 @@ ExactSize::operator<(const Domain& value) const
 ExactSize &
 ExactSize::join(const Domain &value)
 {
-    const ExactSize &array = llvm::cast<ExactSize>(value);
+    const ExactSize &array = checkedCast<ExactSize>(value);
     CANAL_ASSERT(mHasExactSize == array.mHasExactSize);
     CANAL_ASSERT(&mType == &array.mType);
     CANAL_ASSERT(mValues.size() == array.mValues.size());
@@ -185,7 +185,7 @@ ExactSize::join(const Domain &value)
 ExactSize &
 ExactSize::meet(const Domain &value)
 {
-    const ExactSize &array = llvm::cast<ExactSize>(value);
+    const ExactSize &array = checkedCast<ExactSize>(value);
     CANAL_ASSERT(mHasExactSize == array.mHasExactSize);
     CANAL_ASSERT(&mType == &array.mType);
     CANAL_ASSERT(mValues.size() == array.mValues.size());
@@ -281,8 +281,8 @@ binaryOperation(ExactSize &result,
                 const Domain &b,
                 Domain::BinaryOperation operation)
 {
-    const ExactSize &aa = llvm::cast<ExactSize>(a),
-        &bb = llvm::cast<ExactSize>(b);
+    const ExactSize &aa = checkedCast<ExactSize>(a),
+        &bb = checkedCast<ExactSize>(b);
 
     CANAL_ASSERT(result.mHasExactSize == aa.mHasExactSize);
     CANAL_ASSERT(&result.mType == &aa.mType);
@@ -418,8 +418,8 @@ cmpOperation(ExactSize &result,
              llvm::CmpInst::Predicate predicate,
              Domain::CmpOperation operation)
 {
-    const ExactSize &aa = llvm::cast<ExactSize>(a),
-        &bb = llvm::cast<ExactSize>(b);
+    const ExactSize &aa = checkedCast<ExactSize>(a),
+        &bb = checkedCast<ExactSize>(b);
 
     CANAL_ASSERT(result.mHasExactSize == aa.mHasExactSize);
     CANAL_ASSERT(&result.mType == &aa.mType);
@@ -490,12 +490,6 @@ ExactSize::extractelement(const Domain &index) const
             result->join(*mValues[numOffset]);
         }
 
-        // At least one of the offsets in the set should point
-        // to the array.  Otherwise it might be a bug in the
-        // interpreter that requires investigation.
-        CANAL_ASSERT_MSG(!result->isBottom() || set.mValues.empty(),
-                         "All offsets out of bound, array size "
-                         << mValues.size());
         return result;
     }
 
@@ -536,7 +530,7 @@ ExactSize::insertelement(const Domain &array,
                          const Domain &element,
                          const Domain &index)
 {
-    const ExactSize &exactSize = llvm::cast<ExactSize>(array);
+    const ExactSize &exactSize = checkedCast<ExactSize>(array);
     CANAL_ASSERT(mHasExactSize == exactSize.mHasExactSize);
     CANAL_ASSERT(&mType == &exactSize.mType);
     CANAL_ASSERT(mValues.size() == exactSize.mValues.size());
@@ -621,8 +615,8 @@ ExactSize::shufflevector(const Domain &a,
     if (!mHasExactSize)
         return *this;
 
-    const ExactSize &aa = llvm::cast<ExactSize>(a),
-        &bb = llvm::cast<ExactSize>(b);
+    const ExactSize &aa = checkedCast<ExactSize>(a),
+        &bb = checkedCast<ExactSize>(b);
 
     CANAL_ASSERT(aa.mHasExactSize == bb.mHasExactSize);
     CANAL_ASSERT(&aa.mType == &bb.mType);
@@ -664,7 +658,7 @@ ExactSize::extractvalue(const std::vector<unsigned> &indices) const
 
         for (; it != itend; ++it)
         {
-            llvm::CompositeType *composite = llvm::cast<llvm::CompositeType>(type);
+            llvm::CompositeType *composite = checkedCast<llvm::CompositeType>(type);
             type = (llvm::Type*)composite->getTypeAtIndex(*it);
         }
 
@@ -690,7 +684,7 @@ ExactSize::insertvalue(const Domain &aggregate,
                        const Domain &element,
                        const std::vector<unsigned> &indices)
 {
-    const ExactSize &exactSize = llvm::cast<ExactSize>(aggregate);
+    const ExactSize &exactSize = checkedCast<ExactSize>(aggregate);
     CANAL_ASSERT(mHasExactSize == exactSize.mHasExactSize);
     CANAL_ASSERT(&mType == &exactSize.mType);
     CANAL_ASSERT(mValues.size() == exactSize.mValues.size());

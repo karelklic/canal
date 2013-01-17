@@ -44,7 +44,7 @@ public:
 
     const Environment &mEnvironment;
 
-    const enum DomainKind mKind;
+    const DomainKind mKind;
 
     Widening::DataInterface *mWideningData;
 
@@ -69,7 +69,7 @@ public:
         return mEnvironment;
     }
 
-    enum DomainKind getKind() const
+    DomainKind getKind() const
     {
         return mKind;
     }

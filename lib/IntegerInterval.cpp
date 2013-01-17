@@ -239,28 +239,25 @@ Interval::operator==(const Domain& value) const
     if (this == &value)
         return true;
 
-    const Interval *interval = llvm::dyn_cast<Interval>(&value);
-    if (!interval)
+    const Interval &interval = checkedCast<Interval>(value);
+    if (getBitWidth() != interval.getBitWidth())
         return false;
 
-    if (getBitWidth() != interval->getBitWidth())
+    if (mEmpty || interval.mEmpty)
+        return mEmpty == interval.mEmpty;
+
+    if (mSignedTop ^ interval.mSignedTop ||
+        mUnsignedTop ^ interval.mUnsignedTop)
         return false;
 
-    if (mEmpty || interval->mEmpty)
-        return mEmpty == interval->mEmpty;
-
-    if (mSignedTop ^ interval->mSignedTop ||
-        mUnsignedTop ^ interval->mUnsignedTop)
-        return false;
-
-    if (!mSignedTop && (mSignedFrom != interval->mSignedFrom ||
-                        mSignedTo != interval->mSignedTo))
+    if (!mSignedTop && (mSignedFrom != interval.mSignedFrom ||
+                        mSignedTo != interval.mSignedTo))
     {
         return false;
     }
 
-    if (!mUnsignedTop && (mUnsignedFrom != interval->mUnsignedFrom ||
-                          mUnsignedTo != interval->mUnsignedTo))
+    if (!mUnsignedTop && (mUnsignedFrom != interval.mUnsignedFrom ||
+                          mUnsignedTo != interval.mUnsignedTo))
     {
         return false;
     }
@@ -277,7 +274,7 @@ Interval::operator<(const Domain& value) const
 Interval &
 Interval::join(const Domain &value)
 {
-    const Interval &interval = llvm::cast<Interval>(value);
+    const Interval &interval = checkedCast<Interval>(value);
     if (interval.mEmpty)
         return *this;
 
@@ -445,8 +442,8 @@ Interval::accuracy() const
 Interval &
 Interval::add(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -485,8 +482,8 @@ Interval::add(const Domain &a, const Domain &b)
 Interval &
 Interval::sub(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -630,8 +627,8 @@ minMax(bool isSigned,
 Interval &
 Interval::mul(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -724,8 +721,8 @@ Interval::mul(const Domain &a, const Domain &b)
 Interval &
 Interval::udiv(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -768,8 +765,8 @@ Interval::udiv(const Domain &a, const Domain &b)
 Interval &
 Interval::sdiv(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -827,8 +824,8 @@ Interval::sdiv(const Domain &a, const Domain &b)
 Interval &
 Interval::urem(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -843,8 +840,8 @@ Interval::urem(const Domain &a, const Domain &b)
 Interval &
 Interval::srem(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -859,8 +856,8 @@ Interval::srem(const Domain &a, const Domain &b)
 Interval &
 Interval::shl(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -874,8 +871,8 @@ Interval::shl(const Domain &a, const Domain &b)
 Interval &
 Interval::lshr(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -889,8 +886,8 @@ Interval::lshr(const Domain &a, const Domain &b)
 Interval &
 Interval::ashr(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -904,8 +901,8 @@ Interval::ashr(const Domain &a, const Domain &b)
 Interval &
 Interval::and_(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -919,8 +916,8 @@ Interval::and_(const Domain &a, const Domain &b)
 Interval &
 Interval::or_(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -934,8 +931,8 @@ Interval::or_(const Domain &a, const Domain &b)
 Interval &
 Interval::xor_(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     // Handle empty values.
     mEmpty = (aa.mEmpty || bb.mEmpty);
@@ -987,8 +984,8 @@ Interval &
 Interval::icmp(const Domain &a, const Domain &b,
                llvm::CmpInst::Predicate predicate)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     if (aa.isTop() || bb.isTop())
     {
@@ -1194,8 +1191,8 @@ Interval &
 Interval::fcmp(const Domain &a, const Domain &b,
                llvm::CmpInst::Predicate predicate)
 {
-    const Float::Interval &aa = llvm::cast<Float::Interval>(a),
-        &bb = llvm::cast<Float::Interval>(b);
+    const Float::Interval &aa = checkedCast<Float::Interval>(a),
+        &bb = checkedCast<Float::Interval>(b);
 
     int result = aa.compare(bb, predicate);
     switch (result)
@@ -1228,7 +1225,7 @@ Interval::fcmp(const Domain &a, const Domain &b,
 Interval &
 Interval::trunc(const Domain &value)
 {
-    const Interval &interval = llvm::cast<Interval>(value);
+    const Interval &interval = checkedCast<Interval>(value);
     mEmpty = interval.mEmpty;
 
     mSignedTop = interval.mSignedTop
@@ -1281,7 +1278,7 @@ Interval::trunc(const Domain &value)
 Interval &
 Interval::zext(const Domain &value)
 {
-    const Interval &interval = llvm::cast<Interval>(value);
+    const Interval &interval = checkedCast<Interval>(value);
     mEmpty = interval.mEmpty;
     mSignedTop = interval.mSignedTop;
     mSignedFrom = APIntUtils::zext(interval.mSignedFrom, getBitWidth());
@@ -1295,7 +1292,7 @@ Interval::zext(const Domain &value)
 Interval &
 Interval::sext(const Domain &value)
 {
-    const Interval &interval = llvm::cast<Interval>(value);
+    const Interval &interval = checkedCast<Interval>(value);
     mEmpty = interval.mEmpty;
     mSignedTop = interval.mSignedTop;
     mSignedFrom = APIntUtils::sext(interval.mSignedFrom, getBitWidth());

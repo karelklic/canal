@@ -92,16 +92,13 @@ typedef bool(Domain::*CmpOperation)(const Domain&)const;
 static bool
 compareMembers(const Structure &a, const Domain &b, CmpOperation operation)
 {
-    const Structure *bb = llvm::dyn_cast<Structure>(&b);
-    if (!bb)
-        return false;
-
-    if (a.mMembers.size() != bb->mMembers.size())
+    const Structure &bb = checkedCast<Structure>(b);
+    if (a.mMembers.size() != bb.mMembers.size())
         return false;
 
     std::vector<Domain*>::const_iterator ita = a.mMembers.begin(),
         itaend = a.mMembers.end(),
-        itb = bb->mMembers.begin();
+        itb = bb.mMembers.begin();
 
     for (; ita != itaend; ++ita, ++itb)
     {
@@ -135,7 +132,7 @@ typedef Domain&(Domain::*JoinOrMeetOperation)(const Domain&);
 static Structure &
 joinOrMeet(Structure &a, const Domain &b, JoinOrMeetOperation op)
 {
-    const Structure &bb = llvm::cast<Structure>(b);
+    const Structure &bb = checkedCast<Structure>(b);
     CANAL_ASSERT(a.mMembers.size() == bb.mMembers.size());
     std::vector<Domain*>::iterator ita = a.mMembers.begin(),
         itaend = a.mMembers.end();
@@ -238,7 +235,7 @@ Structure::insertelement(const Domain &array,
                          const Domain &element,
                          const Domain &index)
 {
-    const Structure &structure = llvm::cast<Structure>(array);
+    const Structure &structure = checkedCast<Structure>(array);
     CANAL_ASSERT(&mType == &structure.mType);
     CANAL_ASSERT(mMembers.size() == structure.mMembers.size());
 
@@ -287,7 +284,7 @@ Structure::insertvalue(const Domain &aggregate,
                        const Domain &element,
                        const std::vector<unsigned> &indices)
 {
-    const Structure &structure = llvm::cast<Structure>(aggregate);
+    const Structure &structure = checkedCast<Structure>(aggregate);
     CANAL_ASSERT(&mType == &structure.mType);
     CANAL_ASSERT(mMembers.size() == structure.mMembers.size());
 
