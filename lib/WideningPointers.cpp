@@ -17,8 +17,8 @@ Pointers::widen(const llvm::BasicBlock &wideningPoint,
     if (!firstPointer)
         return;
 
-    //const Integer::Container &secondContainer =
-    //    llvm::cast<Integer::Container>(second);
+    //const Product::Vector &secondContainer =
+    //    llvm::cast<Product::Vector>(second);
 
     DataInterface *data = first.getWideningData();
     DataIterationCount *iterationCount;

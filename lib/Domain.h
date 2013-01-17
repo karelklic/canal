@@ -34,7 +34,7 @@ public:
         ArraySingleItemKind,
         ArrayStringPrefixKind,
         FloatIntervalKind,
-        IntegerContainerKind,
+        ProductVectorKind,
         IntegerBitfieldKind,
         IntegerIntervalKind,
         IntegerSetKind,

@@ -3,7 +3,7 @@
 #include "Utils.h"
 #include "State.h"
 #include "SlotTracker.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerSet.h"
 #include "IntegerUtils.h"
 #include "Environment.h"

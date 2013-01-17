@@ -1,5 +1,5 @@
 #include "FloatInterval.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerInterval.h"
 #include "IntegerUtils.h"
 #include "FloatUtils.h"

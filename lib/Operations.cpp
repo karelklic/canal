@@ -5,7 +5,7 @@
 #include "Environment.h"
 #include "FloatInterval.h"
 #include "IntegerBitfield.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerUtils.h"
 #include "OperationsCallback.h"
 #include "Pointer.h"
@@ -915,7 +915,7 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
     const Pointer::Pointer &source =
         llvm::cast<Pointer::Pointer>(*base);
 
-    // We get offsets. Either constants or Integer::Container.
+    // We get offsets. Either constants or Product::Vector.
     // Pointer points either to an array (or array offset), or to a
     // struct (or struct member).  Pointer might have multiple
     // targets.
@@ -1138,8 +1138,8 @@ Operations::select(const llvm::SelectInst &instruction,
         falseConstant);
 
     Domain *resultValue;
-    const Integer::Container &conditionInt =
-        llvm::cast<Integer::Container>(*condition);
+    const Product::Vector &conditionInt =
+        llvm::cast<Product::Vector>(*condition);
 
     CANAL_ASSERT(Integer::Utils::getBitfield(conditionInt).getBitWidth() == 1);
     switch (Integer::Utils::getBitfield(conditionInt).getBitValue(0))

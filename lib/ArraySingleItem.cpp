@@ -1,6 +1,6 @@
 #include "ArraySingleItem.h"
 #include "Utils.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerUtils.h"
 #include "Environment.h"
 #include "Constructors.h"

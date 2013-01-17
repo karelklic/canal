@@ -17,7 +17,7 @@ public:
     Domain *mValue;
 
     /// Number of elements in the array.
-    /// It is either a Constant or Integer::Container.
+    /// It is either a Constant or Product::Vector.
     Domain *mSize;
 
     const llvm::SequentialType &mType;

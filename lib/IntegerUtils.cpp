@@ -1,7 +1,7 @@
 #include "IntegerUtils.h"
 
 #include "IntegerBitfield.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerSet.h"
 #include "IntegerInterval.h"
 #include "Utils.h"
@@ -20,42 +20,42 @@ getBitWidth(const Domain &value)
 Bitfield &
 getBitfield(Domain &value)
 {
-    Container &container = llvm::cast<Container>(value);
+    Product::Vector &container = llvm::cast<Product::Vector>(value);
     return llvm::cast<Bitfield>(*container.mValues[0]);
 }
 
 const Bitfield &
 getBitfield(const Domain &value)
 {
-    const Container &container = llvm::cast<Container>(value);
+    const Product::Vector &container = llvm::cast<Product::Vector>(value);
     return llvm::cast<Bitfield>(*container.mValues[0]);
 }
 
 Set &
 getSet(Domain &value)
 {
-    Container &container = llvm::cast<Container>(value);
+    Product::Vector &container = llvm::cast<Product::Vector>(value);
     return llvm::cast<Set>(*container.mValues[1]);
 }
 
 const Set &
 getSet(const Domain &value)
 {
-    const Container &container = llvm::cast<Container>(value);
+    const Product::Vector &container = llvm::cast<Product::Vector>(value);
     return llvm::cast<Set>(*container.mValues[1]);
 }
 
 Interval &
 getInterval(Domain &value)
 {
-    Container &container = llvm::cast<Container>(value);
+    Product::Vector &container = llvm::cast<Product::Vector>(value);
     return llvm::cast<Interval>(*container.mValues[2]);
 }
 
 const Interval &
 getInterval(const Domain &value)
 {
-    const Container &container = llvm::cast<Container>(value);
+    const Product::Vector &container = llvm::cast<Product::Vector>(value);
     return llvm::cast<Interval>(*container.mValues[2]);
 }
 

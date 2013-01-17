@@ -1,5 +1,5 @@
 #include "Constructors.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerBitfield.h"
 #include "IntegerSet.h"
 #include "IntegerInterval.h"
@@ -270,7 +270,7 @@ Constructors::create(const llvm::Constant &value,
 Domain *
 Constructors::createInteger(unsigned bitWidth) const
 {
-    Integer::Container* container = new Integer::Container(mEnvironment);
+    Product::Vector* container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Integer::Bitfield(mEnvironment, bitWidth));
     container->mValues.push_back(new Integer::Set(mEnvironment, bitWidth));
     container->mValues.push_back(new Integer::Interval(mEnvironment, bitWidth));
@@ -279,7 +279,7 @@ Constructors::createInteger(unsigned bitWidth) const
 
 Domain *
 Constructors::createInteger(const llvm::APInt &number) const {
-    Integer::Container* container = new Integer::Container(mEnvironment);
+    Product::Vector* container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Integer::Bitfield(mEnvironment, number));
     container->mValues.push_back(new Integer::Set(mEnvironment, number));
     container->mValues.push_back(new Integer::Interval(mEnvironment, number));
@@ -303,7 +303,7 @@ Constructors::createArray(const llvm::SequentialType &type) const
 {
     return new Array::SingleItem(mEnvironment, type);
 /*
-    Integer::Container *container = new Integer::Container(mEnvironment);
+    Product::Vector *container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
@@ -317,7 +317,7 @@ Constructors::createArray(const llvm::SequentialType &type,
 {
     return new Array::SingleItem(mEnvironment, type, size);
 /*
-    Integer::Container *container = new Integer::Container(mEnvironment);
+    Product::Vector *container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, size));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
@@ -331,7 +331,7 @@ Constructors::createArray(const llvm::SequentialType &type,
 {
     return new Array::SingleItem(mEnvironment, type, values.begin(), values.end());
 /*
-    Integer::Container *container = new Integer::Container(mEnvironment);
+    Product::Vector *container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type, values));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, values.begin(), values.end()));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type, values.begin(), values.end()));
