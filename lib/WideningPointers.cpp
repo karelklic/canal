@@ -15,9 +15,6 @@ Pointers::widen(const llvm::BasicBlock &wideningPoint,
     if (!firstPointer)
         return;
 
-    //const Integer::Container &secondContainer =
-    //    checkedCast<Integer::Container>(second);
-
     DataInterface *data = first.getWideningData();
     DataIterationCount *iterationCount;
     if (data)

@@ -9,7 +9,6 @@ add_library(canal SHARED
     FloatInterval.cpp
     FloatUtils.cpp
     IntegerBitfield.cpp
-    IntegerContainer.cpp
     IntegerSet.cpp
     IntegerInterval.cpp
     IntegerUtils.cpp
@@ -23,6 +22,7 @@ add_library(canal SHARED
     Pointer.cpp
     PointerTarget.cpp
     PointerUtils.cpp
+    ProductVector.cpp
     SlotTracker.cpp
     State.cpp
     StateMap.cpp

@@ -1,5 +1,5 @@
 #include "ArrayStringPrefix.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "Utils.h"
 #include "Environment.h"
 #include "IntegerUtils.h"

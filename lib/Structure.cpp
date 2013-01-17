@@ -1,6 +1,6 @@
 #include "Structure.h"
 #include "Utils.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerSet.h"
 #include "IntegerUtils.h"
 #include "IntegerInterval.h"

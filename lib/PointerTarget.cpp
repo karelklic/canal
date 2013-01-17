@@ -1,5 +1,5 @@
 #include "PointerTarget.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerUtils.h"
 #include "SlotTracker.h"
 #include "State.h"

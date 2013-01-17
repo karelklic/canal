@@ -33,7 +33,7 @@ const llvm::Type &
 getType(const llvm::fltSemantics &semantics, llvm::LLVMContext &context)
 {
 #if (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 1) || LLVM_VERSION_MAJOR > 3
-    if (semantics == llvm::APFloat::IEEEhalf)
+    if (&semantics == &llvm::APFloat::IEEEhalf)
         return *llvm::Type::getHalfTy(context);
     else
 #endif

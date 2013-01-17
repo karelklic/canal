@@ -1,5 +1,5 @@
 #include "ArrayExactSize.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerSet.h"
 #include "IntegerInterval.h"
 #include "Utils.h"
