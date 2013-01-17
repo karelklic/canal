@@ -770,9 +770,8 @@ Operations::extractvalue(const llvm::ExtractValueInst &instruction,
     if (!aggregate)
         return;
 
-    llvm::ArrayRef<unsigned> indicesLlvm = instruction.getIndices();
-    std::vector<unsigned> indices(indicesLlvm.begin(),
-                                  indicesLlvm.end());
+    std::vector<unsigned> indices(instruction.idx_begin(),
+                                  instruction.idx_end());
 
     Domain *result = aggregate->extractvalue(indices);
     state.addFunctionVariable(instruction, result);
@@ -800,9 +799,8 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
     if (!insertedValue)
         return;
 
-    llvm::ArrayRef<unsigned> indicesLlvm = instruction.getIndices();
-    std::vector<unsigned> indices(indicesLlvm.begin(),
-                                  indicesLlvm.end());
+    std::vector<unsigned> indices(instruction.idx_begin(),
+                                  instruction.idx_end());
 
     Domain *result = mConstructors.create(*instruction.getType());
     result->insertvalue(*aggregate, *insertedValue, indices);
