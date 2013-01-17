@@ -278,7 +278,8 @@ Constructors::createInteger(unsigned bitWidth) const
 }
 
 Domain *
-Constructors::createInteger(const llvm::APInt &number) const {
+Constructors::createInteger(const llvm::APInt &number) const
+{
     Integer::Container* container = new Integer::Container(mEnvironment);
     container->mValues.push_back(new Integer::Bitfield(mEnvironment, number));
     container->mValues.push_back(new Integer::Set(mEnvironment, number));
@@ -301,36 +302,42 @@ Constructors::createFloat(const llvm::APFloat &number) const
 Domain *
 Constructors::createArray(const llvm::SequentialType &type) const
 {
-//    return new Array::SingleItem(mEnvironment, type);
+    return new Array::SingleItem(mEnvironment, type);
+/*
     Integer::Container *container = new Integer::Container(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
     return container;
+*/
 }
 
 Domain *
 Constructors::createArray(const llvm::SequentialType &type,
                           Domain *size) const
 {
-//    return new Array::SingleItem(mEnvironment, type, size);
+    return new Array::SingleItem(mEnvironment, type, size);
+/*
     Integer::Container *container = new Integer::Container(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, size));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
     return container;
+*/
 }
 
 Domain *
 Constructors::createArray(const llvm::SequentialType &type,
                           const std::vector<Domain*> &values) const
 {
-//    return new Array::SingleItem(mEnvironment, type, values.begin(), values.end());
+    return new Array::SingleItem(mEnvironment, type, values.begin(), values.end());
+/*
     Integer::Container *container = new Integer::Container(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type, values));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, values.begin(), values.end()));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type, values.begin(), values.end()));
     return container;
+*/
 }
 
 Domain *
