@@ -274,7 +274,10 @@ Bitfield::join(const Domain &value)
 Bitfield &
 Bitfield::meet(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Bitfield &bits = checkedCast<Bitfield>(value);
+    mZeroes &= bits.mZeroes;
+    mOnes &= bits.mOnes;
+    return *this;
 }
 
 bool
