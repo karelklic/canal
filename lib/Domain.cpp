@@ -244,7 +244,16 @@ Domain::extractelement(const Domain &index) const
 Domain &
 Domain::insertelement(const Domain &array,
                       const Domain &element,
-                      const Domain &index)
+                      const Domain &index,
+                      bool overwrite)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+Domain &
+Domain::insertelement(const Domain &element,
+                      const Domain &index,
+                      bool overwrite)
 {
     CANAL_NOT_IMPLEMENTED();
 }
@@ -292,6 +301,14 @@ Domain::load(const llvm::Type &type,
         result->setTop();
         return result;
     }
+}
+
+Domain &
+Domain::store(const Domain &value,
+              const std::vector<Domain*> &offsets,
+              bool overwrite)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void

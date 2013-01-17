@@ -206,7 +206,13 @@ public: // Instructions operating on values.
     /// Inserts an element into an array at a specified index.
     virtual Domain &insertelement(const Domain &array,
                                   const Domain &element,
-                                  const Domain &index);
+                                  const Domain &index,
+                                  bool overwrite);
+
+    /// Inserts an element into an array at a specified index.
+    virtual Domain &insertelement(const Domain &element,
+                                  const Domain &index,
+                                  bool overwrite);
 
     /// Constructs a permutation of elements from two input vectors,
     /// returning a vector with the same element type as the input and
@@ -235,9 +241,9 @@ public: // Instructions operating on values.
     virtual Domain *load(const llvm::Type &type,
                          const std::vector<Domain*> &offsets) const;
 
-    //virtual Domain *store(const Domain &value,
-    //                      const std::vector<Domain*> &offsets,
-    //                      bool overwrite);
+    virtual Domain &store(const Domain &value,
+                          const std::vector<Domain*> &offsets,
+                          bool overwrite);
 
 public: // Widening interface.
     Widening::DataInterface *getWideningData() const
