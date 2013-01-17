@@ -9,9 +9,18 @@ namespace Widening {
 class NumericalInfinity : public Interface
 {
 public:
+    NumericalInfinity() : Interface(Interface::NumericalInfinityKind)
+    {
+    }
+
     virtual void widen(const llvm::BasicBlock &wideningPoint,
                        Domain &first,
                        const Domain &second);
+
+    static bool classof(const Interface *value)
+    {
+        return value->getKind() == NumericalInfinityKind;
+    }
 };
 
 } // namespace Widening

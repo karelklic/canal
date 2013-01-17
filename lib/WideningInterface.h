@@ -12,7 +12,26 @@ namespace Widening {
 class Interface
 {
 public:
-    virtual ~Interface() {}
+    enum InterfaceKind {
+        NumericalInfinityKind,
+        PointersKind
+    };
+
+    const InterfaceKind mKind;
+
+public:
+    Interface(InterfaceKind kind) : mKind(kind)
+    {
+    }
+
+    virtual ~Interface()
+    {
+    }
+
+    InterfaceKind getKind() const
+    {
+        return mKind;
+    }
 
     virtual void widen(const llvm::BasicBlock &wideningPoint,
                        Domain &first,

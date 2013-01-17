@@ -9,7 +9,25 @@ namespace Widening {
 class DataInterface
 {
 public:
-    virtual ~DataInterface() {}
+    enum DataInterfaceKind {
+        DataIterationCountKind
+    };
+
+    const DataInterfaceKind mKind;
+
+public:
+    DataInterface(DataInterfaceKind kind) : mKind(kind)
+    {
+    }
+
+    virtual ~DataInterface()
+    {
+    }
+
+    DataInterfaceKind getKind() const
+    {
+        return mKind;
+    }
 
     virtual DataInterface *clone() const = 0;
 };
