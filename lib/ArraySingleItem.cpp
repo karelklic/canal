@@ -113,22 +113,17 @@ SingleItem::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const SingleItem *singleItem =
-        llvm::dyn_cast<SingleItem>(&value);
-
-    if (!singleItem)
+    const SingleItem &singleItem = checkedCast<SingleItem>(value);
+    if ((mSize && !singleItem.mSize) || (!mSize && singleItem.mSize))
         return false;
 
-    if ((mSize && !singleItem->mSize) || (!mSize && singleItem->mSize))
+    if ((mValue && !singleItem.mValue) || (!mValue && singleItem.mValue))
         return false;
 
-    if ((mValue && !singleItem->mValue) || (!mValue && singleItem->mValue))
+    if (mValue && *mValue != *singleItem.mValue)
         return false;
 
-    if (mValue && *mValue != *singleItem->mValue)
-        return false;
-
-    if (mSize && *mSize != *singleItem->mSize)
+    if (mSize && *mSize != *singleItem.mSize)
         return false;
 
     return true;
@@ -343,6 +338,7 @@ SingleItem::insertelement(const Domain &array,
 
     delete mSize;
     mSize = singleItem.mSize->clone();
+    return *this;
 }
 
 SingleItem &
@@ -426,12 +422,20 @@ SingleItem::load(const llvm::Type &type,
     return result;
 }
 
-std::vector<Domain*>
-SingleItem::getItem(const Domain &offset) const
+SingleItem &
+SingleItem::store(const Domain &value,
+                  const std::vector<Domain*> &offsets,
+                  bool overwrite)
 {
-    std::vector<Domain*> result;
-    result.push_back(mValue);
-    return result;
+    if (offsets.empty())
+        return (SingleItem&)Domain::store(value, offsets, overwrite);
+
+    mValue->store(value,
+                  std::vector<Domain*>(offsets.begin() + 1,
+                                       offsets.end()),
+                  false);
+
+    return *this;
 }
 
 } // namespace Array

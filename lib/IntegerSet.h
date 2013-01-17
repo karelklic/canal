@@ -85,6 +85,11 @@ public:
         return value->getKind() == IntegerSetKind;
     }
 
+    static bool classof(const Domain &value)
+    {
+        return value.getKind() == IntegerSetKind;
+    }
+
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual Set *clone() const;

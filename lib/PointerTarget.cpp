@@ -215,7 +215,7 @@ Target::toString(SlotTracker &slotTracker) const
     case Function:
     {
         const llvm::Function &function =
-            llvmCast<llvm::Function>(*mTarget);
+            checkedCast<llvm::Function>(*mTarget);
 
         ss << " @" << Canal::getName(function, slotTracker);
         break;

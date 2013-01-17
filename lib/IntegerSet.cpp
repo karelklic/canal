@@ -213,7 +213,7 @@ Set::join(const Domain &value)
     if (mTop)
         return *this;
 
-    const Set &set = llvm::cast<Set>(value);
+    const Set &set = checkedCast<Set>(value);
     if (set.isTop())
         setTop();
     else

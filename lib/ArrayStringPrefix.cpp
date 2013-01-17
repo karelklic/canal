@@ -478,5 +478,17 @@ StringPrefix::load(const llvm::Type &type,
     return result;
 }
 
+StringPrefix &
+StringPrefix::store(const Domain &value,
+                    const std::vector<Domain*> &offsets,
+                    bool overwrite)
+{
+    if (offsets.empty())
+        return (StringPrefix&)Domain::store(value, offsets, overwrite);
+
+    setTop();
+    return *this;
+}
+
 } // namespace Array
 } // namespace Canal

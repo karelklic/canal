@@ -294,6 +294,25 @@ Domain::load(const llvm::Type &type,
     }
 }
 
+Domain &
+Domain::store(const Domain &value,
+              const std::vector<Domain*> &offsets,
+              bool overwrite)
+{
+    CANAL_ASSERT(offsets.empty());
+    if (&getValueType() == &value.getValueType())
+    {
+        if (overwrite)
+            setBottom();
+
+        join(value);
+    }
+    else
+        setTop();
+
+    return *this;
+}
+
 void
 Domain::setWideningData(Widening::DataInterface *wideningData)
 {
@@ -301,12 +320,6 @@ Domain::setWideningData(Widening::DataInterface *wideningData)
                      "Widening data set were already set.");
 
     mWideningData = wideningData;
-}
-
-std::vector<Domain*>
-Domain::getItem(const Domain &offset) const
-{
-    CANAL_NOT_IMPLEMENTED();
 }
 
 const llvm::Type &

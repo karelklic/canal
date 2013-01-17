@@ -76,7 +76,7 @@ getName(const llvm::Value &value, SlotTracker &slotTracker)
     else if (llvm::isa<llvm::BasicBlock>(value))
     {
         const llvm::BasicBlock &block =
-            llvmCast<const llvm::BasicBlock>(value);
+            checkedCast<llvm::BasicBlock>(value);
 
         slotTracker.setActiveFunction(*block.getParent());
         ss << "<label>:" << slotTracker.getLocalSlot(value);
@@ -84,7 +84,7 @@ getName(const llvm::Value &value, SlotTracker &slotTracker)
     else
     {
         const llvm::Instruction &inst =
-            llvmCast<const llvm::Instruction>(value);
+            checkedCast<llvm::Instruction>(value);
 
         slotTracker.setActiveFunction(
             *inst.getParent()->getParent());

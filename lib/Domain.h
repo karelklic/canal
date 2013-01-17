@@ -235,9 +235,9 @@ public: // Instructions operating on values.
     virtual Domain *load(const llvm::Type &type,
                          const std::vector<Domain*> &offsets) const;
 
-    //virtual Domain *store(const Domain &value,
-    //                      const std::vector<Domain*> &offsets,
-    //                      bool overwrite);
+    virtual Domain &store(const Domain &value,
+                          const std::vector<Domain*> &offsets,
+                          bool overwrite);
 
 public: // Widening interface.
     Widening::DataInterface *getWideningData() const
@@ -247,12 +247,6 @@ public: // Widening interface.
 
     /// This class takes ownership of the wideningData memory.
     void setWideningData(Widening::DataInterface *wideningData);
-
-public: // Array interface.
-    /// Get the array items pointed by the provided offset.  Returns
-    /// internal array items that are owned by the array.  Caller must
-    /// not delete the items.
-    virtual std::vector<Domain*> getItem(const Domain &offset) const;
 
 public: // Memory layout
     virtual const llvm::Type &getValueType() const;

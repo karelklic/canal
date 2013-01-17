@@ -118,15 +118,32 @@ std::string getName(const llvm::Value &value,
 std::string getCurrentBacktrace();
 
 template <class X, class Y> inline typename llvm::cast_retty<X, Y>::ret_type
-llvmCast(const Y &val)
+checkedCast(const Y &val)
 {
     CANAL_ASSERT_MSG(llvm::isa<X>(val),
-                     "llvmCast<Ty>() argument of incompatible type!");
+                     "checkedCast<Ty>() argument of incompatible type!");
 
     return llvm::cast_convert_val<X, Y,
         typename llvm::simplify_type<Y>::SimpleType>::doit(val);
 }
 
+template <class X, class Y> inline typename llvm::cast_retty<X, Y*>::ret_type
+castOrNull(Y *val)
+{
+    if (val == 0)
+        return 0;
+
+    CANAL_ASSERT_MSG(llvm::isa<X>(val),
+                     "castOrNull<Ty>() argument of incompatible type!");
+
+    return llvm::cast<X>(val);
+}
+
+template <class X, class Y> inline typename llvm::cast_retty<X, Y>::ret_type
+dynCast(const Y &Val)
+{
+    return llvm::isa<X>(Val) ? llvm::cast<X, Y>(Val) : 0;
+}
 
 /// A raw_string_ostream that writes to an embedded std::string.  This
 /// is a simple adaptor class.

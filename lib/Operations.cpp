@@ -174,7 +174,7 @@ Operations::variableOrConstant(const llvm::Value &place,
 
     if (llvm::isa<llvm::Constant>(place))
     {
-        Domain *constValue = mConstructors.create(llvmCast<llvm::Constant>(place),
+        Domain *constValue = mConstructors.create(checkedCast<llvm::Constant>(place),
                                                   place,
                                                   &state);
 
@@ -297,7 +297,7 @@ Operations::getElementPtrOffsets(std::vector<Domain*> &result,
         if (llvm::isa<llvm::ConstantInt>(it))
         {
             const llvm::ConstantInt *constant =
-                llvmCast<llvm::ConstantInt>(it);
+                checkedCast<llvm::ConstantInt>(it);
 
             result.push_back(mConstructors.create(*constant,
                                                   place,
@@ -735,17 +735,17 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
         const llvm::Value *inputMask = instruction.getOperand(2);
         CANAL_ASSERT_MSG(inputMask, "Failed to get shufflevector mask.");
         const llvm::VectorType *inputMaskType =
-            llvmCast<llvm::VectorType>(inputMask->getType());
+            checkedCast<llvm::VectorType>(inputMask->getType());
 
         unsigned count = inputMaskType->getNumElements();
         const llvm::ConstantVector *inputMaskConstant =
-            llvmCast<llvm::ConstantVector>(inputMask);
+            checkedCast<llvm::ConstantVector>(inputMask);
 
         for (unsigned i = 0; i != count; ++i)
         {
             llvm::Constant *constant = inputMaskConstant->getOperand(i);
             uint32_t constantInt = llvm::isa<llvm::UndefValue>(constant) ? -1 :
-                llvmCast<llvm::ConstantInt>(constant)->getZExtValue();
+                checkedCast<llvm::ConstantInt>(constant)->getZExtValue();
 
             shuffleMask.push_back(constantInt);
         }
@@ -1069,7 +1069,7 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
         llvm::cast<Pointer::Pointer>(*source);
 
     const llvm::PointerType &destPointerType =
-        llvmCast<const llvm::PointerType>(*destinationType);
+        checkedCast<llvm::PointerType>(*destinationType);
 
     Domain *resultPointer = sourcePointer.bitcast(destPointerType);
     state.addFunctionVariable(instruction, resultPointer);

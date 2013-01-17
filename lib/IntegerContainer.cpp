@@ -557,6 +557,35 @@ Container::load(const llvm::Type &type,
     return result;
 }
 
+Container &
+Container::store(const Domain &value,
+                 const std::vector<Domain*> &offsets,
+                 bool overwrite)
+{
+    if (offsets.empty())
+    {
+        const Container &container = llvm::cast<Container>(value);
+        CANAL_ASSERT(container.mValues.size() == mValues.size());
+
+        std::vector<Domain*>::iterator it = mValues.begin(),
+            itend = mValues.end();
+
+        std::vector<Domain*>::const_iterator itc = container.mValues.begin();
+        for (; it != itend; ++it, ++itc)
+            (**it).store(**itc, offsets, overwrite);
+    }
+    else
+    {
+        std::vector<Domain*>::iterator it = mValues.begin(),
+            itend = mValues.end();
+
+        for (; it != itend; ++it)
+            (**it).store(value, offsets, overwrite);
+    }
+
+    return *this;
+}
+
 const llvm::Type &
 Container::getValueType() const
 {

@@ -121,6 +121,10 @@ public: // Implementation of Domain.
     virtual Domain *load(const llvm::Type &type,
                          const std::vector<Domain*> &offsets) const;
 
+    virtual Container &store(const Domain &value,
+                             const std::vector<Domain*> &offsets,
+                             bool overwrite);
+
     virtual const llvm::Type &getValueType() const;
 };
 

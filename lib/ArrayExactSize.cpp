@@ -765,10 +765,18 @@ ExactSize::load(const llvm::Type &type,
     return result;
 }
 
-std::vector<Domain*>
-ExactSize::getItem(const Domain &offset) const
+ExactSize &
+ExactSize::store(const Domain &value,
+                 const std::vector<Domain*> &offsets,
+                 bool overwrite)
 {
-    std::vector<Domain*> result;
+    if (!mHasExactSize)
+        return *this;
+
+    if (offsets.empty())
+        return (ExactSize&)Domain::store(value, offsets, overwrite);
+
+    const Domain &offset = *offsets[0];
 
     // First try an enumeration, then interval.
     const Integer::Set &set = Integer::Utils::getSet(offset);
@@ -776,6 +784,9 @@ ExactSize::getItem(const Domain &offset) const
     {
         APIntUtils::USet::const_iterator it = set.mValues.begin(),
             itend = set.mValues.end();
+
+        if (set.mValues.size() > 1)
+            overwrite = false;
 
         for (; it != itend; ++it)
         {
@@ -789,16 +800,13 @@ ExactSize::getItem(const Domain &offset) const
             if (numOffset >= mValues.size())
                 continue;
 
-            result.push_back(mValues[numOffset]);
+            mValues[numOffset]->store(value,
+                                      std::vector<Domain*>(offsets.begin() + 1,
+                                                           offsets.end()),
+                                      overwrite);
         }
 
-        // At least one of the offsets in the set should point
-        // to the array.  Otherwise it might be a bug in the
-        // interpreter that requires investigation.
-        CANAL_ASSERT_MSG(!result.empty() || set.mValues.empty(),
-                         "All offsets out of bound, array size "
-                         << mValues.size());
-        return result;
+        return *this;
     }
 
     const Integer::Interval &interval = Integer::Utils::getInterval(offset);
@@ -809,27 +817,42 @@ ExactSize::getItem(const Domain &offset) const
         uint64_t from = interval.mUnsignedFrom.getZExtValue();
         // Included in the interval!
         uint64_t to = interval.mUnsignedTo.getZExtValue();
-        // At least part of the interval should point to the array.
-        // Otherwise it might be a bug in the interpreter that
-        // requires investigation.
-        CANAL_ASSERT(from < mValues.size());
+
+        CANAL_ASSERT(from <= to);
         if (to >= mValues.size())
             to = mValues.size();
 
-        result.insert(result.end(),
-                      mValues.begin() + from,
-                      mValues.begin() + to);
+        if (to - from != 0)
+            overwrite = false;
 
-        return result;
+        for (uint64_t i = from; i <= to; ++i)
+        {
+            mValues[i]->store(value,
+                              std::vector<Domain*>(offsets.begin() + 1,
+                                                   offsets.end()),
+                              overwrite);
+        }
+
+        return *this;
     }
 
-    // Both set and interval are set to the top value, so return
-    // all members.
-    result.insert(result.end(), mValues.begin(), mValues.end());
+    // Both set and interval are set to the top value, so merge
+    // the value to all items of the array.
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
 
-    // Zero length arrays are not supported.
-    CANAL_ASSERT(!result.empty());
-    return result;
+    if (mValues.size() > 1)
+        overwrite = false;
+
+    for (; it != itend; ++it)
+    {
+        (**it).store(value,
+                     std::vector<Domain*>(offsets.begin() + 1,
+                                          offsets.end()),
+                     overwrite);
+    }
+
+    return *this;
 }
 
 } // namespace Array

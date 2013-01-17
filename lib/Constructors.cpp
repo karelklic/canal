@@ -31,9 +31,7 @@ Constructors::create(const llvm::Type &type) const
 
     if (type.isIntegerTy())
     {
-        llvm::IntegerType &integerType =
-            llvmCast<llvm::IntegerType>(type);
-
+        llvm::IntegerType &integerType = checkedCast<llvm::IntegerType>(type);
         return createInteger(integerType.getBitWidth());
     }
 
@@ -48,7 +46,7 @@ Constructors::create(const llvm::Type &type) const
     if (type.isPointerTy())
     {
         const llvm::PointerType &pointerType =
-            llvmCast<const llvm::PointerType>(type);
+            checkedCast<llvm::PointerType>(type);
 
         return createPointer(pointerType);
     }
@@ -56,7 +54,7 @@ Constructors::create(const llvm::Type &type) const
     if (type.isArrayTy() || type.isVectorTy())
     {
         const llvm::SequentialType &stype =
-            llvmCast<llvm::SequentialType>(type);
+            checkedCast<llvm::SequentialType>(type);
 
         return createArray(stype);
     }
@@ -64,7 +62,7 @@ Constructors::create(const llvm::Type &type) const
     if (type.isStructTy())
     {
         const llvm::StructType &structType =
-            llvmCast<llvm::StructType>(type);
+            checkedCast<llvm::StructType>(type);
 
         std::vector<Domain*> members;
         for (unsigned i = 0; i < structType.getNumElements(); i ++)
@@ -87,7 +85,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::ConstantInt>(value))
     {
         const llvm::ConstantInt &intValue =
-            llvmCast<llvm::ConstantInt>(value);
+            checkedCast<llvm::ConstantInt>(value);
 
         const llvm::APInt &i = intValue.getValue();
         return createInteger(i);
@@ -96,7 +94,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::ConstantPointerNull>(value))
     {
         const llvm::ConstantPointerNull &nullValue =
-            llvmCast<llvm::ConstantPointerNull>(value);
+            checkedCast<llvm::ConstantPointerNull>(value);
 
         const llvm::PointerType &pointerType = *nullValue.getType();
         Domain *constPointer;
@@ -111,14 +109,14 @@ Constructors::create(const llvm::Constant &value,
                          "State is mandatory for constant expressions.");
 
         const llvm::ConstantExpr &exprValue =
-            llvmCast<llvm::ConstantExpr>(value);
+            checkedCast<llvm::ConstantExpr>(value);
 
         const Domain *variable = NULL;
         bool deleteVariable = false;
         const llvm::Value &firstValue = **value.op_begin();
         if (llvm::isa<llvm::ConstantExpr>(firstValue))
         {
-            variable = create(llvmCast<llvm::ConstantExpr>(firstValue),
+            variable = create(checkedCast<llvm::ConstantExpr>(firstValue),
                               place,
                               state);
 
@@ -155,7 +153,7 @@ Constructors::create(const llvm::Constant &value,
 
     if (llvm::isa<llvm::ConstantFP>(value))
     {
-        const llvm::ConstantFP &fp = llvmCast<llvm::ConstantFP>(value);
+        const llvm::ConstantFP &fp = checkedCast<llvm::ConstantFP>(value);
 
         const llvm::APFloat &number = fp.getValueAPF();
         return createFloat(number);
@@ -164,7 +162,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::ConstantStruct>(value))
     {
         const llvm::ConstantStruct &structValue =
-            llvmCast<llvm::ConstantStruct>(value);
+            checkedCast<llvm::ConstantStruct>(value);
 
         uint64_t elementCount = structValue.getType()->getNumElements();
         std::vector<Domain*> members;
@@ -182,7 +180,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::ConstantVector>(value))
     {
         const llvm::ConstantVector &vectorValue =
-            llvmCast<llvm::ConstantVector>(value);
+            checkedCast<llvm::ConstantVector>(value);
 
         // VectorType::getNumElements returns unsigned int.
         unsigned elementCount = vectorValue.getType()->getNumElements();
@@ -201,7 +199,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::ConstantArray>(value))
     {
         const llvm::ConstantArray &arrayValue =
-            llvmCast<llvm::ConstantArray>(value);
+            checkedCast<llvm::ConstantArray>(value);
 
         // ArrayType::getNumElements returns uint64_t.
         uint64_t elementCount = arrayValue.getType()->getNumElements();
@@ -224,7 +222,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::ConstantDataVector>(value) || llvm::isa<llvm::ConstantDataArray>(value))
     {
          const llvm::ConstantDataSequential &sequentialValue =
-            llvmCast<llvm::ConstantDataSequential>(value);
+            checkedCast<llvm::ConstantDataSequential>(value);
 
         unsigned elementCount = sequentialValue.getNumElements();
         std::vector<Domain*> values;
@@ -250,7 +248,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::Function>(value))
     {
         const llvm::Function &functionValue =
-            llvmCast<llvm::Function>(value);
+            checkedCast<llvm::Function>(value);
 
         Domain *constPointer;
         constPointer = createPointer(*llvm::PointerType::getUnqual(
@@ -370,7 +368,7 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     for (; it != value.op_end(); ++it)
     {
         const llvm::ConstantInt &constant =
-            llvmCast<llvm::ConstantInt>(**it);
+            checkedCast<llvm::ConstantInt>(**it);
 
         CANAL_ASSERT_MSG(constant.getBitWidth() <= 64,
                          "Cannot handle GetElementPtr offset"
@@ -385,7 +383,7 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     }
 
     const llvm::PointerType &pointerType =
-        llvmCast<const llvm::PointerType>(*value.getType());
+        checkedCast<const llvm::PointerType>(*value.getType());
 
     // GetElementPtr on a Pointer
     const Pointer::Pointer *pointer =
@@ -420,11 +418,9 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
 {
     // BitCast from Pointer.  It is always a bitcast to some other
     // pointer.
-    const Pointer::Pointer *pointer =
-        llvm::dyn_cast<Pointer::Pointer>(&variable);
-
+    const Pointer::Pointer *pointer = dynCast<Pointer::Pointer>(&variable);
     const llvm::PointerType *pointerType =
-        llvmCast<const llvm::PointerType>(value.getType());
+        checkedCast<llvm::PointerType>(value.getType());
 
     if (pointer)
     {
