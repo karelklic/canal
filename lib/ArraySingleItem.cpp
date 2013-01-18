@@ -343,7 +343,6 @@ SingleItem::insertelement(const Domain &array,
 
     delete mSize;
     mSize = singleItem.mSize->clone();
-    return *this;
 }
 
 SingleItem &

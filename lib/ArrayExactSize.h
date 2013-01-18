@@ -123,12 +123,7 @@ public: // Implementation of Domain.
 
     virtual ExactSize &insertelement(const Domain &array,
                                      const Domain &element,
-                                     const Domain &index,
-                                     bool overwrite);
-
-    virtual ExactSize &insertelement(const Domain &element,
-                                     const Domain &index,
-                                     bool overwrite);
+                                     const Domain &index);
 
     virtual ExactSize &shufflevector(const Domain &a,
                                      const Domain &b,
@@ -145,10 +140,6 @@ public: // Implementation of Domain.
 
     virtual Domain *load(const llvm::Type &type,
                          const std::vector<Domain*> &offsets) const;
-
-    virtual Domain &store(const Domain &value,
-                          const std::vector<Domain*> &offsets,
-                          bool overwrite);
 
     virtual std::vector<Domain*> getItem(const Domain &offset) const;
 

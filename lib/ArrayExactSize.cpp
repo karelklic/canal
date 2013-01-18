@@ -765,37 +765,6 @@ ExactSize::load(const llvm::Type &type,
     return result;
 }
 
-Domain &
-ExactSize::store(const Domain &value,
-                 const std::vector<Domain*> &offsets,
-                 bool overwrite)
-{
-    if (offsets.empty())
-    {
-        if (&mType == &value.getValueType())
-        {
-            if (overwrite && mHasExactSize)
-                setBottom();
-
-            join(value);
-        }
-        else
-            setTop();
-    }
-
-    if (!mHasExactSize)
-        return *this;
-
-    Domain *newElement = extractelement(offsets[0]);
-    newElement->store(value,
-                      std::vector<Domain*>(offsets.begin() + 1,
-                                           offsets.end()),
-                      overwrite);
-
-    insertelement(*newElement, offsets[0], overwrite);
-    return *this;
-}
-
 std::vector<Domain*>
 ExactSize::getItem(const Domain &offset) const
 {
