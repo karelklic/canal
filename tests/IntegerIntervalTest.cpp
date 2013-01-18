@@ -174,6 +174,74 @@ testMeet()
 }
 
 static void
+testInclusion()
+{
+    Integer::Interval
+        zero(*gEnvironment, llvm::APInt(32, 0)),
+        one(*gEnvironment, llvm::APInt(32, 1)),
+        negone(*gEnvironment, llvm::APInt(32, -1, true)),
+        ten(*gEnvironment, llvm::APInt(32, 10)),
+        unsigned_one(*gEnvironment, 32),
+        signed_one(*gEnvironment, 32),
+        bottom(*gEnvironment, 32),
+        top(*gEnvironment, 32),
+        negone_one(negone),
+        zero_one(zero);
+
+    top.setTop();
+    negone_one.join(one);
+    zero_one.join(one);
+
+    llvm::APInt res;
+    unsigned_one.udiv(ten, ten); //Signed top, unsigned one
+    CANAL_ASSERT(unsigned_one.isSignedTop() && unsigned_one.isUnsignedConstant() && unsigned_one.unsignedMin(res) && res == 1);
+    signed_one.sdiv(ten, ten); //Unsigned top, signed one
+    CANAL_ASSERT(signed_one.isUnsignedTop() && signed_one.isSignedConstant() && signed_one.signedMin(res) && res == 1);
+
+    //Top and bottom
+    CANAL_ASSERT(bottom < bottom);
+    CANAL_ASSERT(top < top);
+    CANAL_ASSERT(!(top < bottom));
+    CANAL_ASSERT(!(zero < bottom));
+    CANAL_ASSERT(bottom < zero);
+    CANAL_ASSERT(zero < top);
+    CANAL_ASSERT(!(top < zero));
+
+    CANAL_ASSERT(unsigned_one < top);
+    CANAL_ASSERT(!(unsigned_one < bottom));
+    CANAL_ASSERT(signed_one < top);
+    CANAL_ASSERT(!(signed_one < bottom));
+
+    //Tests with values
+    CANAL_ASSERT(zero < zero);
+    CANAL_ASSERT(one < one);
+    CANAL_ASSERT(negone < negone);
+    CANAL_ASSERT(unsigned_one < unsigned_one);
+    CANAL_ASSERT(signed_one < signed_one);
+    CANAL_ASSERT(negone_one < negone_one);
+    CANAL_ASSERT(zero_one < zero_one);
+
+    CANAL_ASSERT(!(zero < one));
+    CANAL_ASSERT(one < zero_one);
+    CANAL_ASSERT(!(zero_one < one));
+    CANAL_ASSERT(one < negone_one);
+    CANAL_ASSERT(!(negone_one < one));
+
+    CANAL_ASSERT(!(negone_one < zero_one));
+    CANAL_ASSERT(!(zero_one < negone_one)); //Works in signed, not in unsigned
+
+    CANAL_ASSERT(negone < negone_one);
+    CANAL_ASSERT(!(negone_one < negone));
+    CANAL_ASSERT(!(negone < signed_one));
+    CANAL_ASSERT(!(signed_one < negone));
+    CANAL_ASSERT(!(negone < unsigned_one));
+    CANAL_ASSERT(!(unsigned_one < negone));
+
+    CANAL_ASSERT(!(signed_one < unsigned_one));
+    CANAL_ASSERT(!(unsigned_one < signed_one));
+}
+
+static void
 testIcmp()
 {
     llvm::APInt zero(32, 0), one(32, 1);
@@ -656,6 +724,7 @@ main(int argc, char **argv)
     testEquality();
     testJoin();
     testMeet();
+    testInclusion();
     testIcmp();
     testTrunc();
 

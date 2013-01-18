@@ -200,7 +200,24 @@ Set::operator==(const Domain &value) const
 bool
 Set::operator<(const Domain &value) const
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Set &set = checkedCast<Set>(value);
+
+    CANAL_ASSERT(getBitWidth() == set.getBitWidth());
+
+    if (isTop()) return set.isTop();
+    if (set.isTop()) return true;
+
+    APIntUtils::USet::iterator mine = mValues.begin(), other = set.mValues.begin();
+    APIntUtils::USet::key_compare comp = mValues.key_comp();
+
+    for (; mine != mValues.end(); mine ++, other ++) {
+        if (other == set.mValues.end()) return false;
+        for (; *mine != *other && !comp(*mine, *other) ; other ++ ) {
+            if (other == set.mValues.end()) return false;
+        }
+        if (*mine != *other) return false;
+    }
+    return true;
 }
 
 Set &

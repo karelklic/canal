@@ -110,7 +110,7 @@ testMeet()
         CANAL_ASSERT(negone_one1.meet(negone_one) == negone_one);
         CANAL_ASSERT(zero_one1.meet(zero_one) == zero_one);
 
-        CANAL_ASSERT(zero1.meet(one).isBottom());
+        CANAL_ASSERT(zero1.meet(one).toString() == "bitfield 0000000000000000000000000000000_\n");
         CANAL_ASSERT(one1.meet(zero_one) == one);
         CANAL_ASSERT(one1.meet(negone_one) == one);
 
@@ -120,6 +120,51 @@ testMeet()
 
         CANAL_ASSERT(negone1.meet(negone_one) == negone);
     }
+}
+
+static void
+testInclusion()
+{
+    Integer::Bitfield
+        zero(*gEnvironment, llvm::APInt(32, 0)),
+        one(*gEnvironment, llvm::APInt(32, 1)),
+        negone(*gEnvironment, llvm::APInt(32, -1, true)),
+        bottom(*gEnvironment, 32),
+        top(*gEnvironment, 32),
+        negone_one(negone),
+        zero_one(zero);
+
+    top.setTop();
+    negone_one.join(one);
+    zero_one.join(one);
+
+    //Top and bottom
+    CANAL_ASSERT(bottom < bottom);
+    CANAL_ASSERT(top < top);
+    CANAL_ASSERT(!(top < bottom));
+    CANAL_ASSERT(!(zero < bottom));
+    CANAL_ASSERT(bottom < zero);
+    CANAL_ASSERT(zero < top);
+    CANAL_ASSERT(!(top < zero));
+
+    //Tests with values
+    CANAL_ASSERT(zero < zero);
+    CANAL_ASSERT(one < one);
+    CANAL_ASSERT(negone < negone);
+    CANAL_ASSERT(negone_one < negone_one);
+    CANAL_ASSERT(zero_one < zero_one);
+
+    CANAL_ASSERT(!(zero < one));
+    CANAL_ASSERT(one < zero_one);
+    CANAL_ASSERT(!(zero_one < one));
+    CANAL_ASSERT(one < negone_one);
+    CANAL_ASSERT(!(negone_one < one));
+
+    CANAL_ASSERT(!(negone_one < zero_one));
+    CANAL_ASSERT(!(zero_one < negone_one));
+
+    CANAL_ASSERT(negone < negone_one);
+    CANAL_ASSERT(!(negone_one < negone));
 }
 
 static void
@@ -624,6 +669,8 @@ main(int argc, char **argv)
     gEnvironment = new Environment(module);
 
     testJoin();
+    testMeet();
+    testInclusion();
     testIcmp();
     testShl();
     testLshr();

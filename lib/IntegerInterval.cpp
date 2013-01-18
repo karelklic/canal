@@ -325,7 +325,21 @@ Interval::operator==(const Domain& value) const
 bool
 Interval::operator<(const Domain& value) const
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Interval &interval = checkedCast<Interval>(value);
+    CANAL_ASSERT(getBitWidth() == interval.getBitWidth());
+
+    if (!isSignedBottom() && !interval.isSignedTop()) {
+        if (isSignedTop() || interval.isSignedBottom()) return false;
+        if (mSignedFrom.slt(interval.mSignedFrom) ||
+                mSignedTo.sgt(interval.mSignedTo)) return false;
+    }
+
+    if (!isUnsignedBottom() && !interval.isUnsignedTop()) {
+        if (isUnsignedTop() || interval.isUnsignedBottom()) return false;
+        if (mUnsignedFrom.ult(interval.mUnsignedFrom) ||
+                mUnsignedTo.ugt(interval.mUnsignedTo)) return false;
+    }
+    return true;
 }
 
 #define COPY_SIGNED(x) mSignedBottom = x.mSignedBottom; mSignedTop = x.mSignedTop; \
