@@ -95,6 +95,85 @@ testJoin()
 }
 
 static void
+testMeet()
+{
+    Integer::Interval
+        zero(*gEnvironment, llvm::APInt(32, 0)),
+        one(*gEnvironment, llvm::APInt(32, 1)),
+        negone(*gEnvironment, llvm::APInt(32, -1, true)),
+        ten(*gEnvironment, llvm::APInt(32, 10)),
+        unsigned_one(*gEnvironment, 32),
+        signed_one(*gEnvironment, 32),
+        bottom(*gEnvironment, 32),
+        top(*gEnvironment, 32),
+        negone_one(negone),
+        zero_one(zero);
+
+    top.setTop();
+    negone_one.join(one);
+    zero_one.join(one);
+
+    llvm::APInt res;
+    unsigned_one.udiv(ten, ten);
+    CANAL_ASSERT(unsigned_one.isSignedTop() && unsigned_one.isUnsignedConstant() && unsigned_one.unsignedMin(res) && res == 1);
+    signed_one.sdiv(ten, ten);
+    CANAL_ASSERT(signed_one.isUnsignedTop() && signed_one.isSignedConstant() && signed_one.signedMin(res) && res == 1);
+
+    //Top and bottom
+    CANAL_ASSERT(bottom.meet(bottom).isBottom());
+    CANAL_ASSERT(top.meet(top).isTop());
+    {
+        Integer::Interval result(top), result1(bottom), result2(zero),
+               unsigned_one1(unsigned_one), signed_one1(signed_one);
+        CANAL_ASSERT(result.meet(bottom).isBottom());
+        CANAL_ASSERT(result1.meet(top).isBottom());
+        CANAL_ASSERT(result2.meet(top) == zero);
+        CANAL_ASSERT(result2.meet(bottom).isBottom());
+
+        CANAL_ASSERT(unsigned_one1.meet(top) == unsigned_one);
+        CANAL_ASSERT(unsigned_one1.meet(bottom).isBottom());
+        CANAL_ASSERT(signed_one1.meet(top) == signed_one);
+        CANAL_ASSERT(signed_one1.meet(bottom).isBottom());
+    }
+
+    //Tests with values
+    {
+        Integer::Interval zero1(zero), one1(one), negone1(negone), negone2(negone),
+                unsigned_one1(unsigned_one), signed_one1(signed_one), signed_one2(signed_one),
+                negone_one1(negone_one), negone_one2(negone_one), zero_one1(zero_one);
+        CANAL_ASSERT(zero1.meet(zero) == zero);
+        CANAL_ASSERT(one1.meet(one) == one);
+        CANAL_ASSERT(negone1.meet(negone) == negone);
+        CANAL_ASSERT(unsigned_one1.meet(unsigned_one) == unsigned_one);
+        CANAL_ASSERT(signed_one1.meet(signed_one) == signed_one);
+        CANAL_ASSERT(negone_one1.meet(negone_one) == negone_one);
+        CANAL_ASSERT(zero_one1.meet(zero_one) == zero_one);
+
+        CANAL_ASSERT(zero1.meet(one).isBottom());
+        CANAL_ASSERT(one1.meet(zero_one) == one);
+        CANAL_ASSERT(one1.meet(negone_one) == one);
+
+        CANAL_ASSERT(negone_one1.meet(one) == one);
+        CANAL_ASSERT(negone_one2.meet(zero_one).isUnsignedConstant()
+                     && negone_one2.signedMin(res) && res == 0
+                     && negone_one2.signedMax(res) && res == 1); //Unsigned 1, signed 0 - 1
+        CANAL_ASSERT(zero_one1.meet(negone_one) == negone_one2);
+
+        CANAL_ASSERT(negone1.meet(negone_one) == negone);
+        CANAL_ASSERT(negone1.meet(signed_one).isSignedBottom()
+                     && negone1.isUnsignedConstant()
+                     && negone1.unsignedMin(res) && res == llvm::APInt(32, -1, true));
+        CANAL_ASSERT(signed_one1.meet(negone) == negone1);
+        CANAL_ASSERT(negone2.meet(unsigned_one).isUnsignedBottom()
+                     && negone2.isSignedConstant()
+                     && negone2.signedMin(res) && res == llvm::APInt(32, -1, true));
+        CANAL_ASSERT(unsigned_one1.meet(negone) == negone2);
+
+        CANAL_ASSERT(signed_one2.meet(unsigned_one) == one);
+    }
+}
+
+static void
 testIcmp()
 {
     llvm::APInt zero(32, 0), one(32, 1);
@@ -576,6 +655,7 @@ main(int argc, char **argv)
     testConstructors();
     testEquality();
     testJoin();
+    testMeet();
     testIcmp();
     testTrunc();
 

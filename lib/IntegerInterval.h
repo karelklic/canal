@@ -10,18 +10,15 @@ namespace Integer {
 class Interval : public Domain
 {
 public:
-    /// @brief Indicates an empty interval.
-    ///
-    /// When it is set to true, other members' values are not
-    /// considered as valid.
-    bool mEmpty;
 
+    bool mSignedBottom;
     bool mSignedTop;
     /// The number is included in the interval.
     llvm::APInt mSignedFrom;
     /// The number is included in the interval.
     llvm::APInt mSignedTo;
 
+    bool mUnsignedBottom;
     bool mUnsignedTop;
     /// The number is included in the interval.
     llvm::APInt mUnsignedFrom;
@@ -103,6 +100,39 @@ public:
 
     /// Does the interval represent signle bit that is set to 0?
     bool isFalse() const;
+
+    /// Set signed top
+    void setSignedTop();
+
+    /// Set signed bottom
+    void setSignedBottom();
+
+    /// Is signed bottom?
+    bool isSignedBottom() const;
+
+    /// Is signed top?
+    bool isSignedTop() const;
+
+    /// Set signed flags (bottom and top) to false; therefore prepare signed part to set values
+    void resetSignedFlags();
+
+    /// Set unsigned top
+    void setUnsignedTop();
+
+    /// Set unsigned bottom
+    void setUnsignedBottom();
+
+    /// Is unsigned bottom?
+    bool isUnsignedBottom() const;
+
+    /// Is unsigned top?
+    bool isUnsignedTop() const;
+
+    /// Set unsigned flags (bottom and top) to false; therefore prepare unsigned part to set values
+    void resetUnsignedFlags();
+
+    /// Reset signed and unsigned flags
+    void resetFlags();
 
     static bool classof(const Domain *value)
     {
