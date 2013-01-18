@@ -36,3 +36,5 @@ target_link_libraries(canal-tool
 set_target_properties(canal-tool
     PROPERTIES
     OUTPUT_NAME canal)
+
+install(TARGETS canal-tool DESTINATION bin)
