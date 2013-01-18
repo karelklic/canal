@@ -247,8 +247,10 @@ Set::meet(const Domain &value)
 
     const Set &set = checkedCast<Set>(value);
     CANAL_ASSERT(mBitWidth == set.mBitWidth);
-    if (isTop())
+    if (isTop()) {
+        mTop = false;
         mValues = set.mValues;
+    }
     else
     {
         APIntUtils::USet intersection;
