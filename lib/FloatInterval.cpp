@@ -1,5 +1,5 @@
 #include "FloatInterval.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerInterval.h"
 #include "IntegerUtils.h"
 #include "FloatUtils.h"
@@ -283,18 +283,15 @@ Interval::operator==(const Domain& value) const
     if (this == &value)
         return true;
 
-    const Interval *interval = llvm::dyn_cast<Interval>(&value);
-    if (!interval)
-        return false;
+    const Interval &interval = checkedCast<Interval>(value);
+    if (mEmpty || interval.mEmpty)
+        return mEmpty == interval.mEmpty;
 
-    if (mEmpty || interval->mEmpty)
-        return mEmpty == interval->mEmpty;
+    if (isTop() || interval.isTop())
+        return isTop() == interval.isTop();
 
-    if (isTop() || interval->isTop())
-        return isTop() == interval->isTop();
-
-    return mFrom.compare(interval->mFrom) == llvm::APFloat::cmpEqual &&
-        mTo.compare(interval->mTo) == llvm::APFloat::cmpEqual;
+    return mFrom.compare(interval.mFrom) == llvm::APFloat::cmpEqual &&
+        mTo.compare(interval.mTo) == llvm::APFloat::cmpEqual;
 }
 
 bool
@@ -318,7 +315,7 @@ Interval::join(const Domain &value)
         return *this;
     }
 
-    const Interval &interval = llvm::cast<Interval>(value);
+    const Interval &interval = checkedCast<Interval>(value);
     if (isBottom())
     {
         mFrom = interval.mFrom;
@@ -352,7 +349,7 @@ Interval::meet(const Domain &value)
         return *this;
     }
 
-    const Interval &interval = llvm::cast<Interval>(value);
+    const Interval &interval = checkedCast<Interval>(value);
     if (isTop())
     {
         mFrom = interval.mFrom;
@@ -567,8 +564,8 @@ minMax(llvm::APFloat& min,
 Interval &
 Interval::fadd(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
@@ -590,8 +587,8 @@ Interval::fadd(const Domain &a, const Domain &b)
 Interval &
 Interval::fsub(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
@@ -613,8 +610,8 @@ Interval::fsub(const Domain &a, const Domain &b)
 Interval &
 Interval::fmul(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
@@ -641,8 +638,8 @@ Interval::fmul(const Domain &a, const Domain &b)
 Interval &
 Interval::fdiv(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)
@@ -686,8 +683,8 @@ Interval::fdiv(const Domain &a, const Domain &b)
 Interval &
 Interval::frem(const Domain &a, const Domain &b)
 {
-    const Interval &aa = llvm::cast<Interval>(a),
-        &bb = llvm::cast<Interval>(b);
+    const Interval &aa = checkedCast<Interval>(a),
+        &bb = checkedCast<Interval>(b);
 
     mEmpty = (aa.mEmpty || bb.mEmpty);
     if (mEmpty)

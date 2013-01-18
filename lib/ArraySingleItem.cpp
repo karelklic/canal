@@ -1,6 +1,6 @@
 #include "ArraySingleItem.h"
 #include "Utils.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerUtils.h"
 #include "Environment.h"
 #include "Constructors.h"
@@ -18,11 +18,11 @@ SingleItem::SingleItem(const Environment &environment,
 
     uint64_t count = 0;
 
-    const llvm::ArrayType *array = llvm::dyn_cast<llvm::ArrayType>(&type);
+    const llvm::ArrayType *array = dynCast<llvm::ArrayType>(&type);
     if (array)
         count = array->getNumElements();
 
-    const llvm::VectorType *vector = llvm::dyn_cast<llvm::VectorType>(&type);
+    const llvm::VectorType *vector = dynCast<llvm::VectorType>(&type);
     if (vector)
         count = vector->getNumElements();
 
@@ -113,22 +113,17 @@ SingleItem::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const SingleItem *singleItem =
-        llvm::dyn_cast<SingleItem>(&value);
-
-    if (!singleItem)
+    const SingleItem &singleItem = checkedCast<SingleItem>(value);
+    if ((mSize && !singleItem.mSize) || (!mSize && singleItem.mSize))
         return false;
 
-    if ((mSize && !singleItem->mSize) || (!mSize && singleItem->mSize))
+    if ((mValue && !singleItem.mValue) || (!mValue && singleItem.mValue))
         return false;
 
-    if ((mValue && !singleItem->mValue) || (!mValue && singleItem->mValue))
+    if (mValue && *mValue != *singleItem.mValue)
         return false;
 
-    if (mValue && *mValue != *singleItem->mValue)
-        return false;
-
-    if (mSize && *mSize != *singleItem->mSize)
+    if (mSize && *mSize != *singleItem.mSize)
         return false;
 
     return true;
@@ -143,7 +138,7 @@ SingleItem::operator<(const Domain& value) const
 SingleItem &
 SingleItem::join(const Domain &value)
 {
-    const SingleItem &array = llvm::cast<SingleItem>(value);
+    const SingleItem &array = checkedCast<SingleItem>(value);
     mValue->join(*array.mValue);
     mSize->join(*array.mSize);
     return *this;
@@ -152,7 +147,7 @@ SingleItem::join(const Domain &value)
 SingleItem &
 SingleItem::meet(const Domain &value)
 {
-    const SingleItem &array = llvm::cast<SingleItem>(value);
+    const SingleItem &array = checkedCast<SingleItem>(value);
     mValue->meet(*array.mValue);
     mSize->meet(*array.mSize);
     return *this;
@@ -194,8 +189,8 @@ binaryOperation(SingleItem &result,
                 const Domain &b,
                 Domain::BinaryOperation operation)
 {
-    const SingleItem &aa = llvm::cast<SingleItem>(a),
-        &bb = llvm::cast<SingleItem>(b);
+    const SingleItem &aa = checkedCast<SingleItem>(a),
+        &bb = checkedCast<SingleItem>(b);
 
     ((result.mValue)->*(operation))(*aa.mValue, *bb.mValue);
     return result;
@@ -336,13 +331,14 @@ SingleItem::insertelement(const Domain &array,
                           const Domain &element,
                           const Domain &index)
 {
-    const SingleItem &singleItem = llvm::cast<SingleItem>(array);
+    const SingleItem &singleItem = checkedCast<SingleItem>(array);
     CANAL_ASSERT(&mType == &singleItem.mType);
     mValue->join(*singleItem.mValue);
     mValue->join(element);
 
     delete mSize;
     mSize = singleItem.mSize->clone();
+    return *this;
 }
 
 SingleItem &
@@ -350,8 +346,8 @@ SingleItem::shufflevector(const Domain &a,
                           const Domain &b,
                           const std::vector<uint32_t> &mask)
 {
-    const SingleItem &aa = llvm::cast<SingleItem>(a),
-        &bb = llvm::cast<SingleItem>(b);
+    const SingleItem &aa = checkedCast<SingleItem>(a),
+        &bb = checkedCast<SingleItem>(b);
 
     CANAL_ASSERT(&aa.mType == &bb.mType);
     mValue->join(*aa.mValue);
@@ -377,7 +373,7 @@ SingleItem::insertvalue(const Domain &aggregate,
                         const Domain &element,
                         const std::vector<unsigned> &indices)
 {
-    const SingleItem &singleItem = llvm::cast<SingleItem>(aggregate);
+    const SingleItem &singleItem = checkedCast<SingleItem>(aggregate);
     CANAL_ASSERT(&mType == &singleItem.mType);
     mValue->join(*singleItem.mValue);
     delete mSize;
@@ -426,12 +422,20 @@ SingleItem::load(const llvm::Type &type,
     return result;
 }
 
-std::vector<Domain*>
-SingleItem::getItem(const Domain &offset) const
+SingleItem &
+SingleItem::store(const Domain &value,
+                  const std::vector<Domain*> &offsets,
+                  bool overwrite)
 {
-    std::vector<Domain*> result;
-    result.push_back(mValue);
-    return result;
+    if (offsets.empty())
+        return (SingleItem&)Domain::store(value, offsets, overwrite);
+
+    mValue->store(value,
+                  std::vector<Domain*>(offsets.begin() + 1,
+                                       offsets.end()),
+                  false);
+
+    return *this;
 }
 
 } // namespace Array

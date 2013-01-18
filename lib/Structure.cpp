@@ -1,6 +1,6 @@
 #include "Structure.h"
 #include "Utils.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerSet.h"
 #include "IntegerUtils.h"
 #include "IntegerInterval.h"
@@ -92,16 +92,13 @@ typedef bool(Domain::*CmpOperation)(const Domain&)const;
 static bool
 compareMembers(const Structure &a, const Domain &b, CmpOperation operation)
 {
-    const Structure *bb = llvm::dyn_cast<Structure>(&b);
-    if (!bb)
-        return false;
-
-    if (a.mMembers.size() != bb->mMembers.size())
+    const Structure &bb = checkedCast<Structure>(b);
+    if (a.mMembers.size() != bb.mMembers.size())
         return false;
 
     std::vector<Domain*>::const_iterator ita = a.mMembers.begin(),
         itaend = a.mMembers.end(),
-        itb = bb->mMembers.begin();
+        itb = bb.mMembers.begin();
 
     for (; ita != itaend; ++ita, ++itb)
     {
@@ -135,7 +132,7 @@ typedef Domain&(Domain::*JoinOrMeetOperation)(const Domain&);
 static Structure &
 joinOrMeet(Structure &a, const Domain &b, JoinOrMeetOperation op)
 {
-    const Structure &bb = llvm::cast<Structure>(b);
+    const Structure &bb = checkedCast<Structure>(b);
     CANAL_ASSERT(a.mMembers.size() == bb.mMembers.size());
     std::vector<Domain*>::iterator ita = a.mMembers.begin(),
         itaend = a.mMembers.end();
@@ -238,7 +235,7 @@ Structure::insertelement(const Domain &array,
                          const Domain &element,
                          const Domain &index)
 {
-    const Structure &structure = llvm::cast<Structure>(array);
+    const Structure &structure = checkedCast<Structure>(array);
     CANAL_ASSERT(&mType == &structure.mType);
     CANAL_ASSERT(mMembers.size() == structure.mMembers.size());
 
@@ -287,7 +284,7 @@ Structure::insertvalue(const Domain &aggregate,
                        const Domain &element,
                        const std::vector<unsigned> &indices)
 {
-    const Structure &structure = llvm::cast<Structure>(aggregate);
+    const Structure &structure = checkedCast<Structure>(aggregate);
     CANAL_ASSERT(&mType == &structure.mType);
     CANAL_ASSERT(mMembers.size() == structure.mMembers.size());
 
@@ -348,10 +345,15 @@ Structure::load(const llvm::Type &type,
     return result;
 }
 
-std::vector<Domain*>
-Structure::getItem(const Domain &offset) const
+Structure &
+Structure::store(const Domain &value,
+                 const std::vector<Domain*> &offsets,
+                 bool overwrite)
 {
-    std::vector<Domain*> result;
+    if (offsets.empty())
+        return (Structure&)Domain::store(value, offsets, overwrite);
+
+    const Domain &offset = *offsets[0];
 
     // First try an enumeration, then interval.
     const Integer::Set &set = Integer::Utils::getSet(offset);
@@ -359,6 +361,9 @@ Structure::getItem(const Domain &offset) const
     {
         APIntUtils::USet::const_iterator it = set.mValues.begin(),
             itend = set.mValues.end();
+
+        if (set.mValues.size() > 1)
+            overwrite = false;
 
         for (; it != itend; ++it)
         {
@@ -372,14 +377,13 @@ Structure::getItem(const Domain &offset) const
             if (numOffset >= mMembers.size())
                 continue;
 
-            result.push_back(mMembers[numOffset]);
+            mMembers[numOffset]->store(value,
+                                       std::vector<Domain*>(offsets.begin() + 1,
+                                                            offsets.end()),
+                                       overwrite);
         }
 
-        // At least one of the offsets in the set should point
-        // to the array.  Otherwise it might be a bug in the
-        // interpreter that requires investigation.
-        CANAL_ASSERT(!result.empty());
-        return result;
+        return *this;
     }
 
     const Integer::Interval &interval = Integer::Utils::getInterval(offset);
@@ -391,27 +395,41 @@ Structure::getItem(const Domain &offset) const
         // Included in the interval!
         uint64_t to = interval.mUnsignedTo.getZExtValue();
 
-        // At least part of the interval should point to the array.
-        // Otherwise it might be a bug in the interpreter that
-        // requires investigation.
-        CANAL_ASSERT(from < mMembers.size());
+        CANAL_ASSERT(from <= to);
         if (to >= mMembers.size())
             to = mMembers.size();
 
-        result.insert(result.end(),
-                      mMembers.begin() + from,
-                      mMembers.begin() + to);
+        if (to - from != 0)
+            overwrite = false;
 
-        return result;
+        for (uint64_t i = from; i <= to; ++i)
+        {
+            mMembers[i]->store(value,
+                               std::vector<Domain*>(offsets.begin() + 1,
+                                                    offsets.end()),
+                               overwrite);
+        }
+
+        return *this;
     }
 
-    // Both set and interval are set to the top value, so return
-    // all members.
-    result.insert(result.end(), mMembers.begin(), mMembers.end());
+    // Both set and interval are set to the top value, so merge
+    // the value to all items of the array.
+    std::vector<Domain*>::const_iterator it = mMembers.begin(),
+        itend = mMembers.end();
 
-    // Zero length arrays are not supported.
-    CANAL_ASSERT(!result.empty());
-    return result;
+    if (mMembers.size() > 1)
+        overwrite = false;
+
+    for (; it != itend; ++it)
+    {
+        (**it).store(value,
+                     std::vector<Domain*>(offsets.begin() + 1,
+                                          offsets.end()),
+                     overwrite);
+    }
+
+    return *this;
 }
 
 } // namespace Canal

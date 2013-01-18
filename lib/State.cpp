@@ -250,7 +250,7 @@ State::toString(const llvm::Value &place,
         if (llvm::isa<llvm::Instruction>(place))
         {
             const llvm::Instruction &instruction =
-                llvmCast<llvm::Instruction>(place);
+                checkedCast<llvm::Instruction>(place);
 
             slotTracker.setActiveFunction(
                 *instruction.getParent()->getParent());

@@ -1,5 +1,5 @@
 #include "ArrayExactSize.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerSet.h"
 #include "IntegerInterval.h"
 #include "Utils.h"
@@ -18,12 +18,12 @@ ExactSize::ExactSize(const Environment &environment,
 {
     uint64_t count = 0;
 
-    const llvm::ArrayType *array = llvm::dyn_cast<llvm::ArrayType>(&type);
+    const llvm::ArrayType *array = dynCast<llvm::ArrayType>(&type);
     if (array)
         count = array->getNumElements();
     else
     {
-        const llvm::VectorType *vector = llvm::dyn_cast<llvm::VectorType>(&type);
+        const llvm::VectorType *vector = dynCast<llvm::VectorType>(&type);
         if (vector)
             count = vector->getNumElements();
         else
@@ -118,7 +118,7 @@ ExactSize::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const ExactSize &array = llvm::cast<ExactSize>(value);
+    const ExactSize &array = checkedCast<ExactSize>(value);
     CANAL_ASSERT(mHasExactSize == array.mHasExactSize);
     CANAL_ASSERT(&mType == &array.mType);
     CANAL_ASSERT(mValues.size() == array.mValues.size());
@@ -142,7 +142,7 @@ ExactSize::operator<(const Domain& value) const
     if (this == &value)
         return false;
 
-    const ExactSize &array = llvm::cast<ExactSize>(value);
+    const ExactSize &array = checkedCast<ExactSize>(value);
     CANAL_ASSERT(mHasExactSize == array.mHasExactSize);
     CANAL_ASSERT(&mType == &array.mType);
     CANAL_ASSERT(mValues.size() == array.mValues.size());
@@ -166,7 +166,7 @@ ExactSize::operator<(const Domain& value) const
 ExactSize &
 ExactSize::join(const Domain &value)
 {
-    const ExactSize &array = llvm::cast<ExactSize>(value);
+    const ExactSize &array = checkedCast<ExactSize>(value);
     CANAL_ASSERT(mHasExactSize == array.mHasExactSize);
     CANAL_ASSERT(&mType == &array.mType);
     CANAL_ASSERT(mValues.size() == array.mValues.size());
@@ -185,7 +185,7 @@ ExactSize::join(const Domain &value)
 ExactSize &
 ExactSize::meet(const Domain &value)
 {
-    const ExactSize &array = llvm::cast<ExactSize>(value);
+    const ExactSize &array = checkedCast<ExactSize>(value);
     CANAL_ASSERT(mHasExactSize == array.mHasExactSize);
     CANAL_ASSERT(&mType == &array.mType);
     CANAL_ASSERT(mValues.size() == array.mValues.size());
@@ -281,8 +281,8 @@ binaryOperation(ExactSize &result,
                 const Domain &b,
                 Domain::BinaryOperation operation)
 {
-    const ExactSize &aa = llvm::cast<ExactSize>(a),
-        &bb = llvm::cast<ExactSize>(b);
+    const ExactSize &aa = checkedCast<ExactSize>(a),
+        &bb = checkedCast<ExactSize>(b);
 
     CANAL_ASSERT(result.mHasExactSize == aa.mHasExactSize);
     CANAL_ASSERT(&result.mType == &aa.mType);
@@ -418,8 +418,8 @@ cmpOperation(ExactSize &result,
              llvm::CmpInst::Predicate predicate,
              Domain::CmpOperation operation)
 {
-    const ExactSize &aa = llvm::cast<ExactSize>(a),
-        &bb = llvm::cast<ExactSize>(b);
+    const ExactSize &aa = checkedCast<ExactSize>(a),
+        &bb = checkedCast<ExactSize>(b);
 
     CANAL_ASSERT(result.mHasExactSize == aa.mHasExactSize);
     CANAL_ASSERT(&result.mType == &aa.mType);
@@ -490,12 +490,6 @@ ExactSize::extractelement(const Domain &index) const
             result->join(*mValues[numOffset]);
         }
 
-        // At least one of the offsets in the set should point
-        // to the array.  Otherwise it might be a bug in the
-        // interpreter that requires investigation.
-        CANAL_ASSERT_MSG(!result->isBottom() || set.mValues.empty(),
-                         "All offsets out of bound, array size "
-                         << mValues.size());
         return result;
     }
 
@@ -536,7 +530,7 @@ ExactSize::insertelement(const Domain &array,
                          const Domain &element,
                          const Domain &index)
 {
-    const ExactSize &exactSize = llvm::cast<ExactSize>(array);
+    const ExactSize &exactSize = checkedCast<ExactSize>(array);
     CANAL_ASSERT(mHasExactSize == exactSize.mHasExactSize);
     CANAL_ASSERT(&mType == &exactSize.mType);
     CANAL_ASSERT(mValues.size() == exactSize.mValues.size());
@@ -621,8 +615,8 @@ ExactSize::shufflevector(const Domain &a,
     if (!mHasExactSize)
         return *this;
 
-    const ExactSize &aa = llvm::cast<ExactSize>(a),
-        &bb = llvm::cast<ExactSize>(b);
+    const ExactSize &aa = checkedCast<ExactSize>(a),
+        &bb = checkedCast<ExactSize>(b);
 
     CANAL_ASSERT(aa.mHasExactSize == bb.mHasExactSize);
     CANAL_ASSERT(&aa.mType == &bb.mType);
@@ -664,7 +658,7 @@ ExactSize::extractvalue(const std::vector<unsigned> &indices) const
 
         for (; it != itend; ++it)
         {
-            llvm::CompositeType *composite = llvm::cast<llvm::CompositeType>(type);
+            llvm::CompositeType *composite = checkedCast<llvm::CompositeType>(type);
             type = (llvm::Type*)composite->getTypeAtIndex(*it);
         }
 
@@ -690,7 +684,7 @@ ExactSize::insertvalue(const Domain &aggregate,
                        const Domain &element,
                        const std::vector<unsigned> &indices)
 {
-    const ExactSize &exactSize = llvm::cast<ExactSize>(aggregate);
+    const ExactSize &exactSize = checkedCast<ExactSize>(aggregate);
     CANAL_ASSERT(mHasExactSize == exactSize.mHasExactSize);
     CANAL_ASSERT(&mType == &exactSize.mType);
     CANAL_ASSERT(mValues.size() == exactSize.mValues.size());
@@ -765,10 +759,18 @@ ExactSize::load(const llvm::Type &type,
     return result;
 }
 
-std::vector<Domain*>
-ExactSize::getItem(const Domain &offset) const
+ExactSize &
+ExactSize::store(const Domain &value,
+                 const std::vector<Domain*> &offsets,
+                 bool overwrite)
 {
-    std::vector<Domain*> result;
+    if (!mHasExactSize)
+        return *this;
+
+    if (offsets.empty())
+        return (ExactSize&)Domain::store(value, offsets, overwrite);
+
+    const Domain &offset = *offsets[0];
 
     // First try an enumeration, then interval.
     const Integer::Set &set = Integer::Utils::getSet(offset);
@@ -776,6 +778,9 @@ ExactSize::getItem(const Domain &offset) const
     {
         APIntUtils::USet::const_iterator it = set.mValues.begin(),
             itend = set.mValues.end();
+
+        if (set.mValues.size() > 1)
+            overwrite = false;
 
         for (; it != itend; ++it)
         {
@@ -789,16 +794,13 @@ ExactSize::getItem(const Domain &offset) const
             if (numOffset >= mValues.size())
                 continue;
 
-            result.push_back(mValues[numOffset]);
+            mValues[numOffset]->store(value,
+                                      std::vector<Domain*>(offsets.begin() + 1,
+                                                           offsets.end()),
+                                      overwrite);
         }
 
-        // At least one of the offsets in the set should point
-        // to the array.  Otherwise it might be a bug in the
-        // interpreter that requires investigation.
-        CANAL_ASSERT_MSG(!result.empty() || set.mValues.empty(),
-                         "All offsets out of bound, array size "
-                         << mValues.size());
-        return result;
+        return *this;
     }
 
     const Integer::Interval &interval = Integer::Utils::getInterval(offset);
@@ -809,27 +811,42 @@ ExactSize::getItem(const Domain &offset) const
         uint64_t from = interval.mUnsignedFrom.getZExtValue();
         // Included in the interval!
         uint64_t to = interval.mUnsignedTo.getZExtValue();
-        // At least part of the interval should point to the array.
-        // Otherwise it might be a bug in the interpreter that
-        // requires investigation.
-        CANAL_ASSERT(from < mValues.size());
+
+        CANAL_ASSERT(from <= to);
         if (to >= mValues.size())
             to = mValues.size();
 
-        result.insert(result.end(),
-                      mValues.begin() + from,
-                      mValues.begin() + to);
+        if (to - from != 0)
+            overwrite = false;
 
-        return result;
+        for (uint64_t i = from; i <= to; ++i)
+        {
+            mValues[i]->store(value,
+                              std::vector<Domain*>(offsets.begin() + 1,
+                                                   offsets.end()),
+                              overwrite);
+        }
+
+        return *this;
     }
 
-    // Both set and interval are set to the top value, so return
-    // all members.
-    result.insert(result.end(), mValues.begin(), mValues.end());
+    // Both set and interval are set to the top value, so merge
+    // the value to all items of the array.
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+        itend = mValues.end();
 
-    // Zero length arrays are not supported.
-    CANAL_ASSERT(!result.empty());
-    return result;
+    if (mValues.size() > 1)
+        overwrite = false;
+
+    for (; it != itend; ++it)
+    {
+        (**it).store(value,
+                     std::vector<Domain*>(offsets.begin() + 1,
+                                          offsets.end()),
+                     overwrite);
+    }
+
+    return *this;
 }
 
 } // namespace Array

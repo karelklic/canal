@@ -185,12 +185,8 @@ Set::operator==(const Domain &value) const
     if (this == &value)
         return true;
 
-    const Set *set = llvm::dyn_cast<Set>(&value);
-
-    if (!set)
-        return false;
-
-    if (mTop != set->mTop)
+    const Set &set = checkedCast<Set>(value);
+    if (mTop != set.mTop)
         return false;
 
     if (mTop)
@@ -198,7 +194,7 @@ Set::operator==(const Domain &value) const
 
     // Compare values only if the top is not set, otherwise we would
     // get false inequality.
-    return mValues == set->mValues;
+    return mValues == set.mValues;
 }
 
 bool
@@ -213,7 +209,7 @@ Set::join(const Domain &value)
     if (mTop)
         return *this;
 
-    const Set &set = llvm::cast<Set>(value);
+    const Set &set = checkedCast<Set>(value);
     if (set.isTop())
         setTop();
     else
@@ -237,7 +233,36 @@ Set::join(const Domain &value)
 Set &
 Set::meet(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    if (isBottom())
+        return *this;
+
+    if (value.isTop())
+        return *this;
+
+    if (value.isBottom())
+    {
+        setBottom();
+        return *this;
+    }
+
+    const Set &set = checkedCast<Set>(value);
+    CANAL_ASSERT(mBitWidth == set.mBitWidth);
+    if (isTop())
+        mValues = set.mValues;
+    else
+    {
+        APIntUtils::USet intersection;
+        std::set_intersection(mValues.begin(),
+                              mValues.end(),
+                              set.mValues.begin(),
+                              set.mValues.end(),
+                              std::inserter(intersection, intersection.end()),
+                              APIntUtils::UCompare());
+
+        mValues = intersection;
+    }
+
+    return *this;
 }
 
 bool
@@ -384,8 +409,8 @@ Set &
 Set::icmp(const Domain &a, const Domain &b,
                   llvm::CmpInst::Predicate predicate)
 {
-    const Set &aa = llvm::cast<Set>(a),
-        &bb = llvm::cast<Set>(b);
+    const Set &aa = checkedCast<Set>(a),
+        &bb = checkedCast<Set>(b);
 
     if (aa.isTop() || bb.isTop())
     {
@@ -565,8 +590,8 @@ Set::fcmp(const Domain &a,
           const Domain &b,
           llvm::CmpInst::Predicate predicate)
 {
-    const Float::Interval &aa = llvm::cast<Float::Interval>(a),
-        &bb = llvm::cast<Float::Interval>(b);
+    const Float::Interval &aa = checkedCast<Float::Interval>(a),
+        &bb = checkedCast<Float::Interval>(b);
 
     int result = aa.compare(bb, predicate);
     switch (result)
@@ -595,7 +620,7 @@ Set::fcmp(const Domain &a,
 Set &
 Set::trunc(const Domain &value)
 {
-    const Set &set = llvm::cast<Set>(value);
+    const Set &set = checkedCast<Set>(value);
     mTop = set.mTop;
     APIntUtils::USet::const_iterator it = set.mValues.begin();
     for (; it != set.mValues.end(); ++it)
@@ -607,7 +632,7 @@ Set::trunc(const Domain &value)
 Set &
 Set::zext(const Domain &value)
 {
-    const Set &set = llvm::cast<Set>(value);
+    const Set &set = checkedCast<Set>(value);
     mTop = set.mTop;
     APIntUtils::USet::const_iterator it = set.mValues.begin();
     for (; it != set.mValues.end(); ++it)
@@ -619,7 +644,7 @@ Set::zext(const Domain &value)
 Set &
 Set::sext(const Domain &value)
 {
-    const Set &set = llvm::cast<Set>(value);
+    const Set &set = checkedCast<Set>(value);
     mTop = set.mTop;
     APIntUtils::USet::const_iterator it = set.mValues.begin();
     for (; it != set.mValues.end(); ++it)
@@ -654,8 +679,8 @@ Set::applyOperation(const Domain &a,
                     APIntUtils::Operation operation1,
                     APIntUtils::OperationWithOverflow operation2)
 {
-    const Set &aa = llvm::cast<Set>(a),
-        &bb = llvm::cast<Set>(b);
+    const Set &aa = checkedCast<Set>(a),
+        &bb = checkedCast<Set>(b);
 
     CANAL_ASSERT(this != &a && this != &b);
     setBottom();
@@ -701,8 +726,8 @@ Set::applyOperationDivision(const Domain &a,
                             const Domain &b,
                             APIntUtils::Operation operation1)
 {
-    const Set &aa = llvm::cast<Set>(a),
-        &bb = llvm::cast<Set>(b);
+    const Set &aa = checkedCast<Set>(a),
+        &bb = checkedCast<Set>(b);
 
     CANAL_ASSERT(this != &a && this != &b);
     setBottom();

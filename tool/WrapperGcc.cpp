@@ -91,14 +91,14 @@ operator<<(llvm::raw_ostream &target, const clang::driver::JobList &jobList)
         if ((*it)->getKind() == clang::driver::Job::JobListClass)
         {
             const clang::driver::JobList &subList =
-                Canal::llvmCast<clang::driver::JobList>(**it);
+                Canal::checkedCast<clang::driver::JobList>(**it);
 
             target << subList;
         }
         else
         {
             const clang::driver::Command &command =
-                Canal::llvmCast<clang::driver::Command>(**it);
+                Canal::checkedCast<clang::driver::Command>(**it);
 
             target << command;
         }
@@ -170,7 +170,7 @@ getCommandCount(const clang::driver::JobList &jobList)
         if ((*it)->getKind() == clang::driver::Job::JobListClass)
         {
             const clang::driver::JobList &subList =
-                Canal::llvmCast<clang::driver::JobList>(**it);
+                Canal::checkedCast<clang::driver::JobList>(**it);
 
             result += getCommandCount(subList);
         }
@@ -192,14 +192,14 @@ getCommandCount(const clang::driver::JobList &jobList,
         if ((*it)->getKind() == clang::driver::Job::JobListClass)
         {
             const clang::driver::JobList &subList =
-                Canal::llvmCast<clang::driver::JobList>(**it);
+                Canal::checkedCast<clang::driver::JobList>(**it);
 
             result += getCommandCount(subList, actionClass);
         }
         else
         {
             const clang::driver::Command &command =
-                Canal::llvmCast<clang::driver::Command>(**it);
+                Canal::checkedCast<clang::driver::Command>(**it);
 
             if (command.getSource().getKind() == actionClass)
                 ++result;
@@ -288,14 +288,14 @@ assemblyOnly_modifyJobList(clang::driver::JobList &jobList,
         if ((*it)->getKind() == clang::driver::Job::JobListClass)
         {
             clang::driver::JobList &subList =
-                Canal::llvmCast<clang::driver::JobList>(**it);
+                Canal::checkedCast<clang::driver::JobList>(**it);
 
             assemblyOnly_modifyJobList(subList, driver, log);
         }
         else
         {
             const clang::driver::Command *command =
-                Canal::llvmCast<clang::driver::Command>(*it);
+                Canal::checkedCast<clang::driver::Command>(*it);
 
             *it = assemblyOnly_changeCommandOutput(*command, driver, log);
             delete command;

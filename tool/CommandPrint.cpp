@@ -33,12 +33,13 @@ filterStateMap(const Canal::StateMap &map,
         if (addFunctionName)
         {
             const llvm::Instruction *instruction =
-                llvm::dyn_cast<llvm::Instruction>(it->first);
+                Canal::dynCast<llvm::Instruction>(it->first);
 
             if (instruction)
             {
                 const llvm::Function &function =
                     *instruction->getParent()->getParent();
+
                 name << function.getName().str() << ":";
             }
             else

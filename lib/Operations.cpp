@@ -5,7 +5,7 @@
 #include "Environment.h"
 #include "FloatInterval.h"
 #include "IntegerBitfield.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerUtils.h"
 #include "OperationsCallback.h"
 #include "Pointer.h"
@@ -174,7 +174,7 @@ Operations::variableOrConstant(const llvm::Value &place,
 
     if (llvm::isa<llvm::Constant>(place))
     {
-        Domain *constValue = mConstructors.create(llvmCast<llvm::Constant>(place),
+        Domain *constValue = mConstructors.create(checkedCast<llvm::Constant>(place),
                                                   place,
                                                   &state);
 
@@ -297,7 +297,7 @@ Operations::getElementPtrOffsets(std::vector<Domain*> &result,
         if (llvm::isa<llvm::ConstantInt>(it))
         {
             const llvm::ConstantInt *constant =
-                llvmCast<llvm::ConstantInt>(it);
+                checkedCast<llvm::ConstantInt>(it);
 
             result.push_back(mConstructors.create(*constant,
                                                   place,
@@ -455,12 +455,8 @@ void Operations::add(const llvm::BinaryOperator &instruction,
         return;
 
     // Pointer arithmetic.
-    const Pointer::Pointer *aPointer =
-        llvm::dyn_cast<Pointer::Pointer>(a);
-
-    const Pointer::Pointer *bPointer =
-        llvm::dyn_cast<Pointer::Pointer>(b);
-
+    const Pointer::Pointer *aPointer = dynCast<Pointer::Pointer>(a);
+    const Pointer::Pointer *bPointer = dynCast<Pointer::Pointer>(b);
     CANAL_ASSERT_MSG(!aPointer || !bPointer,
                      "Unable to add two pointers.");
 
@@ -513,12 +509,8 @@ Operations::sub(const llvm::BinaryOperator &instruction,
         return;
 
     // Pointer arithmetic.
-    const Pointer::Pointer *aPointer =
-        llvm::dyn_cast<Pointer::Pointer>(a);
-
-    const Pointer::Pointer *bPointer =
-        llvm::dyn_cast<Pointer::Pointer>(b);
-
+    const Pointer::Pointer *aPointer = dynCast<Pointer::Pointer>(a);
+    const Pointer::Pointer *bPointer = dynCast<Pointer::Pointer>(b);
     CANAL_ASSERT_MSG(aPointer || !bPointer,
                      "Subtracting pointer from constant!");
 
@@ -735,17 +727,17 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
         const llvm::Value *inputMask = instruction.getOperand(2);
         CANAL_ASSERT_MSG(inputMask, "Failed to get shufflevector mask.");
         const llvm::VectorType *inputMaskType =
-            llvmCast<llvm::VectorType>(inputMask->getType());
+            checkedCast<llvm::VectorType>(inputMask->getType());
 
         unsigned count = inputMaskType->getNumElements();
         const llvm::ConstantVector *inputMaskConstant =
-            llvmCast<llvm::ConstantVector>(inputMask);
+            checkedCast<llvm::ConstantVector>(inputMask);
 
         for (unsigned i = 0; i != count; ++i)
         {
             llvm::Constant *constant = inputMaskConstant->getOperand(i);
             uint32_t constantInt = llvm::isa<llvm::UndefValue>(constant) ? -1 :
-                llvmCast<llvm::ConstantInt>(constant)->getZExtValue();
+                checkedCast<llvm::ConstantInt>(constant)->getZExtValue();
 
             shuffleMask.push_back(constantInt);
         }
@@ -770,9 +762,8 @@ Operations::extractvalue(const llvm::ExtractValueInst &instruction,
     if (!aggregate)
         return;
 
-    llvm::ArrayRef<unsigned> indicesLlvm = instruction.getIndices();
-    std::vector<unsigned> indices(indicesLlvm.begin(),
-                                  indicesLlvm.end());
+    std::vector<unsigned> indices(instruction.idx_begin(),
+                                  instruction.idx_end());
 
     Domain *result = aggregate->extractvalue(indices);
     state.addFunctionVariable(instruction, result);
@@ -800,9 +791,8 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
     if (!insertedValue)
         return;
 
-    llvm::ArrayRef<unsigned> indicesLlvm = instruction.getIndices();
-    std::vector<unsigned> indices(indicesLlvm.begin(),
-                                  indicesLlvm.end());
+    std::vector<unsigned> indices(instruction.idx_begin(),
+                                  instruction.idx_end());
 
     Domain *result = mConstructors.create(*instruction.getType());
     result->insertvalue(*aggregate, *insertedValue, indices);
@@ -868,7 +858,7 @@ Operations::load(const llvm::LoadInst &instruction,
         return;
 
     const Pointer::Pointer &pointer =
-        llvm::cast<Pointer::Pointer>(*variable);
+        checkedCast<Pointer::Pointer>(*variable);
 
     // Pointer found. Merge all possible values and store the result
     // into the state.
@@ -898,7 +888,7 @@ Operations::store(const llvm::StoreInst &instruction,
         return;
 
     const Pointer::Pointer &inclusionBased =
-        llvm::cast<Pointer::Pointer>(*pointer);
+        checkedCast<Pointer::Pointer>(*pointer);
 
     inclusionBased.store(*value, state);
 }
@@ -915,9 +905,9 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
         return;
 
     const Pointer::Pointer &source =
-        llvm::cast<Pointer::Pointer>(*base);
+        checkedCast<Pointer::Pointer>(*base);
 
-    // We get offsets. Either constants or Integer::Container.
+    // We get offsets. Either constants or Product::Vector.
     // Pointer points either to an array (or array offset), or to a
     // struct (or struct member).  Pointer might have multiple
     // targets.
@@ -1041,10 +1031,10 @@ Operations::inttoptr(const llvm::IntToPtrInst &instruction,
         return;
 
     const Pointer::Pointer &source =
-        llvm::cast<Pointer::Pointer>(*operand);
+        checkedCast<Pointer::Pointer>(*operand);
 
     const llvm::PointerType &pointerType =
-        llvm::cast<llvm::PointerType>(*instruction.getDestTy());
+        checkedCast<llvm::PointerType>(*instruction.getDestTy());
 
     Pointer::Pointer *result =
         source.bitcast(pointerType);
@@ -1068,10 +1058,10 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
         return;
 
     const Pointer::Pointer &sourcePointer =
-        llvm::cast<Pointer::Pointer>(*source);
+        checkedCast<Pointer::Pointer>(*source);
 
     const llvm::PointerType &destPointerType =
-        llvmCast<const llvm::PointerType>(*destinationType);
+        checkedCast<llvm::PointerType>(*destinationType);
 
     Domain *resultPointer = sourcePointer.bitcast(destPointerType);
     state.addFunctionVariable(instruction, resultPointer);
@@ -1140,8 +1130,8 @@ Operations::select(const llvm::SelectInst &instruction,
         falseConstant);
 
     Domain *resultValue;
-    const Integer::Container &conditionInt =
-        llvm::cast<Integer::Container>(*condition);
+    const Product::Vector &conditionInt =
+        checkedCast<Product::Vector>(*condition);
 
     CANAL_ASSERT(Integer::Utils::getBitfield(conditionInt).getBitWidth() == 1);
     switch (Integer::Utils::getBitfield(conditionInt).getBitValue(0))

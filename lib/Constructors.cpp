@@ -1,5 +1,5 @@
 #include "Constructors.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerBitfield.h"
 #include "IntegerSet.h"
 #include "IntegerInterval.h"
@@ -31,9 +31,7 @@ Constructors::create(const llvm::Type &type) const
 
     if (type.isIntegerTy())
     {
-        llvm::IntegerType &integerType =
-            llvmCast<llvm::IntegerType>(type);
-
+        llvm::IntegerType &integerType = checkedCast<llvm::IntegerType>(type);
         return createInteger(integerType.getBitWidth());
     }
 
@@ -48,7 +46,7 @@ Constructors::create(const llvm::Type &type) const
     if (type.isPointerTy())
     {
         const llvm::PointerType &pointerType =
-            llvmCast<const llvm::PointerType>(type);
+            checkedCast<llvm::PointerType>(type);
 
         return createPointer(pointerType);
     }
@@ -56,7 +54,7 @@ Constructors::create(const llvm::Type &type) const
     if (type.isArrayTy() || type.isVectorTy())
     {
         const llvm::SequentialType &stype =
-            llvmCast<llvm::SequentialType>(type);
+            checkedCast<llvm::SequentialType>(type);
 
         return createArray(stype);
     }
@@ -64,7 +62,7 @@ Constructors::create(const llvm::Type &type) const
     if (type.isStructTy())
     {
         const llvm::StructType &structType =
-            llvmCast<llvm::StructType>(type);
+            checkedCast<llvm::StructType>(type);
 
         std::vector<Domain*> members;
         for (unsigned i = 0; i < structType.getNumElements(); i ++)
@@ -87,7 +85,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::ConstantInt>(value))
     {
         const llvm::ConstantInt &intValue =
-            llvmCast<llvm::ConstantInt>(value);
+            checkedCast<llvm::ConstantInt>(value);
 
         const llvm::APInt &i = intValue.getValue();
         return createInteger(i);
@@ -96,7 +94,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::ConstantPointerNull>(value))
     {
         const llvm::ConstantPointerNull &nullValue =
-            llvmCast<llvm::ConstantPointerNull>(value);
+            checkedCast<llvm::ConstantPointerNull>(value);
 
         const llvm::PointerType &pointerType = *nullValue.getType();
         Domain *constPointer;
@@ -111,14 +109,14 @@ Constructors::create(const llvm::Constant &value,
                          "State is mandatory for constant expressions.");
 
         const llvm::ConstantExpr &exprValue =
-            llvmCast<llvm::ConstantExpr>(value);
+            checkedCast<llvm::ConstantExpr>(value);
 
         const Domain *variable = NULL;
         bool deleteVariable = false;
         const llvm::Value &firstValue = **value.op_begin();
         if (llvm::isa<llvm::ConstantExpr>(firstValue))
         {
-            variable = create(llvmCast<llvm::ConstantExpr>(firstValue),
+            variable = create(checkedCast<llvm::ConstantExpr>(firstValue),
                               place,
                               state);
 
@@ -155,7 +153,7 @@ Constructors::create(const llvm::Constant &value,
 
     if (llvm::isa<llvm::ConstantFP>(value))
     {
-        const llvm::ConstantFP &fp = llvmCast<llvm::ConstantFP>(value);
+        const llvm::ConstantFP &fp = checkedCast<llvm::ConstantFP>(value);
 
         const llvm::APFloat &number = fp.getValueAPF();
         return createFloat(number);
@@ -164,7 +162,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::ConstantStruct>(value))
     {
         const llvm::ConstantStruct &structValue =
-            llvmCast<llvm::ConstantStruct>(value);
+            checkedCast<llvm::ConstantStruct>(value);
 
         uint64_t elementCount = structValue.getType()->getNumElements();
         std::vector<Domain*> members;
@@ -182,7 +180,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::ConstantVector>(value))
     {
         const llvm::ConstantVector &vectorValue =
-            llvmCast<llvm::ConstantVector>(value);
+            checkedCast<llvm::ConstantVector>(value);
 
         // VectorType::getNumElements returns unsigned int.
         unsigned elementCount = vectorValue.getType()->getNumElements();
@@ -201,7 +199,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::ConstantArray>(value))
     {
         const llvm::ConstantArray &arrayValue =
-            llvmCast<llvm::ConstantArray>(value);
+            checkedCast<llvm::ConstantArray>(value);
 
         // ArrayType::getNumElements returns uint64_t.
         uint64_t elementCount = arrayValue.getType()->getNumElements();
@@ -224,7 +222,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::ConstantDataVector>(value) || llvm::isa<llvm::ConstantDataArray>(value))
     {
          const llvm::ConstantDataSequential &sequentialValue =
-            llvmCast<llvm::ConstantDataSequential>(value);
+            checkedCast<llvm::ConstantDataSequential>(value);
 
         unsigned elementCount = sequentialValue.getNumElements();
         std::vector<Domain*> values;
@@ -250,7 +248,7 @@ Constructors::create(const llvm::Constant &value,
     if (llvm::isa<llvm::Function>(value))
     {
         const llvm::Function &functionValue =
-            llvmCast<llvm::Function>(value);
+            checkedCast<llvm::Function>(value);
 
         Domain *constPointer;
         constPointer = createPointer(*llvm::PointerType::getUnqual(
@@ -272,7 +270,7 @@ Constructors::create(const llvm::Constant &value,
 Domain *
 Constructors::createInteger(unsigned bitWidth) const
 {
-    Integer::Container* container = new Integer::Container(mEnvironment);
+    Product::Vector* container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Integer::Bitfield(mEnvironment, bitWidth));
     container->mValues.push_back(new Integer::Set(mEnvironment, bitWidth));
     container->mValues.push_back(new Integer::Interval(mEnvironment, bitWidth));
@@ -280,8 +278,9 @@ Constructors::createInteger(unsigned bitWidth) const
 }
 
 Domain *
-Constructors::createInteger(const llvm::APInt &number) const {
-    Integer::Container* container = new Integer::Container(mEnvironment);
+Constructors::createInteger(const llvm::APInt &number) const
+{
+    Product::Vector* container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Integer::Bitfield(mEnvironment, number));
     container->mValues.push_back(new Integer::Set(mEnvironment, number));
     container->mValues.push_back(new Integer::Interval(mEnvironment, number));
@@ -305,7 +304,7 @@ Constructors::createArray(const llvm::SequentialType &type) const
 {
     return new Array::SingleItem(mEnvironment, type);
 /*
-    Integer::Container *container = new Integer::Container(mEnvironment);
+    Product::Vector *container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
@@ -319,7 +318,7 @@ Constructors::createArray(const llvm::SequentialType &type,
 {
     return new Array::SingleItem(mEnvironment, type, size);
 /*
-    Integer::Container *container = new Integer::Container(mEnvironment);
+    Product::Vector *container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, size));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
@@ -333,7 +332,7 @@ Constructors::createArray(const llvm::SequentialType &type,
 {
     return new Array::SingleItem(mEnvironment, type, values.begin(), values.end());
 /*
-    Integer::Container *container = new Integer::Container(mEnvironment);
+    Product::Vector *container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type, values));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, values.begin(), values.end()));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type, values.begin(), values.end()));
@@ -370,7 +369,7 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     for (; it != value.op_end(); ++it)
     {
         const llvm::ConstantInt &constant =
-            llvmCast<llvm::ConstantInt>(**it);
+            checkedCast<llvm::ConstantInt>(**it);
 
         CANAL_ASSERT_MSG(constant.getBitWidth() <= 64,
                          "Cannot handle GetElementPtr offset"
@@ -385,12 +384,10 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     }
 
     const llvm::PointerType &pointerType =
-        llvmCast<const llvm::PointerType>(*value.getType());
+        checkedCast<const llvm::PointerType>(*value.getType());
 
     // GetElementPtr on a Pointer
-    const Pointer::Pointer *pointer =
-        llvm::dyn_cast<Pointer::Pointer>(&variable);
-
+    const Pointer::Pointer *pointer = dynCast<Pointer::Pointer>(&variable);
     if (pointer)
     {
         return pointer->getElementPtr(offsets,
@@ -402,7 +399,6 @@ Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
     // called on arrays and structures.
     Domain *result;
     result = createPointer(pointerType);
-
     Pointer::Utils::addTarget(*result,
                               Pointer::Target::Block,
                               &place,
@@ -420,11 +416,9 @@ Constructors::createBitCast(const llvm::ConstantExpr &value,
 {
     // BitCast from Pointer.  It is always a bitcast to some other
     // pointer.
-    const Pointer::Pointer *pointer =
-        llvm::dyn_cast<Pointer::Pointer>(&variable);
-
+    const Pointer::Pointer *pointer = dynCast<Pointer::Pointer>(&variable);
     const llvm::PointerType *pointerType =
-        llvmCast<const llvm::PointerType>(value.getType());
+        checkedCast<llvm::PointerType>(value.getType());
 
     if (pointer)
     {

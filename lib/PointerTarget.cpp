@@ -1,5 +1,5 @@
 #include "PointerTarget.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "IntegerUtils.h"
 #include "SlotTracker.h"
 #include "State.h"
@@ -194,7 +194,7 @@ Target::toString(SlotTracker &slotTracker) const
     case Block:
     {
         const llvm::Instruction *instruction =
-            llvm::dyn_cast<llvm::Instruction>(mTarget);
+            dynCast<llvm::Instruction>(mTarget);
 
         if (instruction)
         {
@@ -215,7 +215,7 @@ Target::toString(SlotTracker &slotTracker) const
     case Function:
     {
         const llvm::Function &function =
-            llvmCast<llvm::Function>(*mTarget);
+            checkedCast<llvm::Function>(*mTarget);
 
         ss << " @" << Canal::getName(function, slotTracker);
         break;

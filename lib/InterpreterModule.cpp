@@ -18,9 +18,7 @@ processValue(const llvm::Value *value,
              std::vector<const llvm::GlobalVariable*> &sorted,
              const llvm::GlobalVariable *currentVariable)
 {
-    const llvm::GlobalVariable *variable =
-        llvm::dyn_cast<llvm::GlobalVariable>(value);
-
+    const llvm::GlobalVariable *variable = dynCast<llvm::GlobalVariable>(value);
     if (variable)
     {
         if (!variable->isConstant() ||
@@ -45,9 +43,7 @@ processValue(const llvm::Value *value,
     }
     else
     {
-        const llvm::Constant *constant =
-            llvm::dyn_cast<llvm::Constant>(value);
-
+        const llvm::Constant *constant = dynCast<llvm::Constant>(value);
         if (!constant)
             return;
 

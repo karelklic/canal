@@ -252,11 +252,8 @@ Bitfield::operator==(const Domain& value) const
     if (this == &value)
         return true;
 
-    const Bitfield *other = llvm::dyn_cast<Bitfield>(&value);
-    if (!other)
-        return false;
-
-    return mZeroes == other->mZeroes && mOnes == other->mOnes;
+    const Bitfield &other = checkedCast<Bitfield>(value);
+    return mZeroes == other.mZeroes && mOnes == other.mOnes;
 }
 
 bool
@@ -268,7 +265,7 @@ Bitfield::operator<(const Domain& value) const
 Bitfield &
 Bitfield::join(const Domain &value)
 {
-    const Bitfield &bits = llvm::cast<Bitfield>(value);
+    const Bitfield &bits = checkedCast<Bitfield>(value);
     mZeroes |= bits.mZeroes;
     mOnes |= bits.mOnes;
     return *this;
@@ -277,7 +274,10 @@ Bitfield::join(const Domain &value)
 Bitfield &
 Bitfield::meet(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Bitfield &bits = checkedCast<Bitfield>(value);
+    mZeroes &= bits.mZeroes;
+    mOnes &= bits.mOnes;
+    return *this;
 }
 
 bool
@@ -382,8 +382,8 @@ Bitfield::srem(const Domain &a, const Domain &b)
 void
 Bitfield::shift(const Domain &a, const Domain &b, bool right, int shiftValue)
 {
-    const Bitfield &aa = llvm::cast<Bitfield>(a),
-        &bb = llvm::cast<Bitfield>(b);
+    const Bitfield &aa = checkedCast<Bitfield>(a),
+        &bb = checkedCast<Bitfield>(b);
 
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth() &&
             getBitWidth() == aa.getBitWidth());
@@ -456,7 +456,7 @@ Bitfield::lshr(const Domain &a, const Domain &b)
 Bitfield &
 Bitfield::ashr(const Domain &a, const Domain &b)
 {
-    const Bitfield &aa = llvm::cast<Bitfield>(a);
+    const Bitfield &aa = checkedCast<Bitfield>(a);
     shift(a, b, true, aa.getBitValue(aa.getBitWidth() - 1));
     return *this;
 }
@@ -467,8 +467,8 @@ bitOperation(Bitfield &result,
              const Domain &b,
              int(*operation)(int,int))
 {
-    const Bitfield &aa = llvm::cast<Bitfield>(a),
-        &bb = llvm::cast<Bitfield>(b);
+    const Bitfield &aa = checkedCast<Bitfield>(a),
+        &bb = checkedCast<Bitfield>(b);
 
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth() &&
                  result.getBitWidth() == aa.getBitWidth());
@@ -653,8 +653,8 @@ Bitfield::icmp(const Domain &a, const Domain &b,
                llvm::CmpInst::Predicate predicate)
 {
 
-    const Bitfield &aa = llvm::cast<Bitfield>(a),
-            &bb = llvm::cast<Bitfield>(b);
+    const Bitfield &aa = checkedCast<Bitfield>(a),
+            &bb = checkedCast<Bitfield>(b);
 
     //If you do not compare only one bit, TOP value means any result
     if (aa.getBitWidth() > 1 && (aa.isTop() || bb.isTop()))
@@ -795,8 +795,8 @@ Bitfield &
 Bitfield::fcmp(const Domain &a, const Domain &b,
                llvm::CmpInst::Predicate predicate)
 {
-    const Float::Interval &aa = llvm::cast<Float::Interval>(a),
-        &bb = llvm::cast<Float::Interval>(b);
+    const Float::Interval &aa = checkedCast<Float::Interval>(a),
+        &bb = checkedCast<Float::Interval>(b);
 
     int result = aa.compare(bb, predicate);
     switch (result)
@@ -825,7 +825,7 @@ Bitfield::fcmp(const Domain &a, const Domain &b,
 Bitfield &
 Bitfield::trunc(const Domain &value)
 {
-    const Bitfield &bitfield = llvm::cast<Bitfield>(value);
+    const Bitfield &bitfield = checkedCast<Bitfield>(value);
     mZeroes = APIntUtils::trunc(bitfield.mZeroes, getBitWidth());
     mOnes = APIntUtils::trunc(bitfield.mOnes, getBitWidth());
     return *this;
@@ -834,7 +834,7 @@ Bitfield::trunc(const Domain &value)
 Bitfield &
 Bitfield::zext(const Domain &value)
 {
-    const Bitfield &bitfield = llvm::cast<Bitfield>(value);
+    const Bitfield &bitfield = checkedCast<Bitfield>(value);
     mZeroes = APIntUtils::zext(bitfield.mZeroes, getBitWidth());
     mOnes = APIntUtils::zext(bitfield.mOnes, getBitWidth());
 
@@ -847,7 +847,7 @@ Bitfield::zext(const Domain &value)
 Bitfield &
 Bitfield::sext(const Domain &value)
 {
-    const Bitfield &bitfield = llvm::cast<Bitfield>(value);
+    const Bitfield &bitfield = checkedCast<Bitfield>(value);
     mZeroes = APIntUtils::sext(bitfield.mZeroes, getBitWidth());
     mOnes = APIntUtils::sext(bitfield.mOnes, getBitWidth());
     return *this;

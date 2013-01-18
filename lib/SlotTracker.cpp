@@ -135,7 +135,7 @@ SlotTracker::createMetadataSlot(const llvm::MDNode &node)
     // Recursively add any MDNodes referenced by operands.
     for (unsigned i = 0, e = node.getNumOperands(); i != e; ++i)
     {
-        if (const llvm::MDNode *operand = llvm::dyn_cast_or_null<llvm::MDNode>(node.getOperand(i)))
+        if (const llvm::MDNode *operand = dynCastOrNull<llvm::MDNode>(node.getOperand(i)))
             createMetadataSlot(*operand);
     }
 }
@@ -201,7 +201,7 @@ SlotTracker::processFunction()
             // Intrinsics can directly use metadata.  We allow direct calls to any
             // llvm.foo function here, because the target may not be linked into the
             // optimizer.
-            if (const llvm::CallInst *CI = llvm::dyn_cast<llvm::CallInst>(I))
+            if (const llvm::CallInst *CI = dynCast<llvm::CallInst>(I))
             {
                 if (llvm::Function *F = CI->getCalledFunction())
                 {
@@ -209,7 +209,7 @@ SlotTracker::processFunction()
                     {
                         for (unsigned i = 0, e = I->getNumOperands(); i != e; ++i)
                         {
-                            if (llvm::MDNode *N = llvm::dyn_cast_or_null<llvm::MDNode>(I->getOperand(i)))
+                            if (llvm::MDNode *N = dynCastOrNull<llvm::MDNode>(I->getOperand(i)))
                                 createMetadataSlot(*N);
                         }
                     }

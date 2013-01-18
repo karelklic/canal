@@ -1,6 +1,6 @@
 #include "WideningNumericalInfinity.h"
 #include "WideningDataIterationCount.h"
-#include "IntegerContainer.h"
+#include "ProductVector.h"
 #include "FloatInterval.h"
 #include "Utils.h"
 
@@ -12,20 +12,17 @@ NumericalInfinity::widen(const llvm::BasicBlock &wideningPoint,
                          Domain &first,
                          const Domain &second)
 {
-    Integer::Container *firstContainer =
-        llvm::dyn_cast<Integer::Container>(&first);
+    Product::Vector *firstContainer =
+        dynCast<Product::Vector>(&first);
 
-    Float::Interval *f = llvm::dyn_cast<Float::Interval>(&first);
+    Float::Interval *f = dynCast<Float::Interval>(&first);
     if (!firstContainer && !f)
         return;
-
-    //const Integer::Container &secondContainer =
-    //    llvm::cast<Integer::Container>(second);
 
     DataInterface *data = first.getWideningData();
     DataIterationCount *iterationCount;
     if (data)
-        iterationCount = llvm::cast<DataIterationCount>(data);
+        iterationCount = checkedCast<DataIterationCount>(data);
     else
     {
         iterationCount = new DataIterationCount();

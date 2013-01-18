@@ -11,19 +11,14 @@ Pointers::widen(const llvm::BasicBlock &wideningPoint,
                 Domain &first,
                 const Domain &second)
 {
-    Pointer::Pointer *firstPointer =
-        llvm::dyn_cast<Pointer::Pointer>(&first);
-
+    Pointer::Pointer *firstPointer = dynCast<Pointer::Pointer>(&first);
     if (!firstPointer)
         return;
-
-    //const Integer::Container &secondContainer =
-    //    llvm::cast<Integer::Container>(second);
 
     DataInterface *data = first.getWideningData();
     DataIterationCount *iterationCount;
     if (data)
-        iterationCount = llvm::cast<DataIterationCount>(data);
+        iterationCount = checkedCast<DataIterationCount>(data);
     else
     {
         iterationCount = new DataIterationCount();

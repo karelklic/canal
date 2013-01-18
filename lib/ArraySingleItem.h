@@ -17,7 +17,7 @@ public:
     Domain *mValue;
 
     /// Number of elements in the array.
-    /// It is either a Constant or Integer::Container.
+    /// It is either a Constant or Product::Vector.
     Domain *mSize;
 
     const llvm::SequentialType &mType;
@@ -142,7 +142,9 @@ public: // Implementation of Domain.
     virtual Domain *load(const llvm::Type &type,
                          const std::vector<Domain*> &offsets) const;
 
-    virtual std::vector<Domain*> getItem(const Domain &offset) const;
+    virtual SingleItem &store(const Domain &value,
+                              const std::vector<Domain*> &offsets,
+                              bool overwrite);
 
     virtual const llvm::SequentialType &getValueType() const { return mType; }
 };

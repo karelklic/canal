@@ -15,7 +15,6 @@ class Module;
 
 class OperationsCallback : public Canal::OperationsCallback
 {
-protected:
     Module &mModule;
     Constructors &mConstructors;
 
@@ -27,6 +26,12 @@ public:
                                 const State &callState,
                                 State &resultState,
                                 const llvm::Value &resultPlace);
+
+    // char *strcat(char *destination, const char *source);
+    void onFunctionCallStrcat(const llvm::Function &function,
+                              const State &callState,
+                              State &resultState,
+                              const llvm::Value &resultPlace);
 };
 
 } // namespace Interpreter

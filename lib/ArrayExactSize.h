@@ -141,7 +141,9 @@ public: // Implementation of Domain.
     virtual Domain *load(const llvm::Type &type,
                          const std::vector<Domain*> &offsets) const;
 
-    virtual std::vector<Domain*> getItem(const Domain &offset) const;
+    virtual ExactSize &store(const Domain &value,
+                             const std::vector<Domain*> &offsets,
+                             bool overwrite);
 
     virtual const llvm::SequentialType &getValueType() const { return mType; }
 };

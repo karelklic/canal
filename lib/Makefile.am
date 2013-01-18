@@ -20,8 +20,6 @@ libcanal_la_SOURCES = \
 	FloatUtils.h \
 	IntegerBitfield.cpp \
 	IntegerBitfield.h \
-	IntegerContainer.cpp \
-	IntegerContainer.h \
 	IntegerSet.cpp \
 	IntegerSet.h \
 	IntegerInterval.cpp \
@@ -51,6 +49,8 @@ libcanal_la_SOURCES = \
 	PointerUtils.cpp \
 	PointerUtils.h \
 	Prereq.h \
+	ProductVector.cpp \
+	ProductVector.h \
 	SharedDataPointer.h \
 	SlotTracker.cpp \
 	SlotTracker.h \
