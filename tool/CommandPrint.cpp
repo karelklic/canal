@@ -60,7 +60,7 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args,
 {
     std::vector<std::string> result;
     State *state = mCommands.getState();
-    if (!state || !state->isInterpreting())
+    if (!state)
         return result;
 
     std::string arg(args[pointArg].substr(0, pointArgOffset));
@@ -191,7 +191,7 @@ void
 CommandPrint::run(const std::vector<std::string> &args)
 {
     State *state = mCommands.getState();
-    if (!state || !state->isInterpreting())
+    if (!state)
     {
         llvm::outs() << "No module is being interpreted.\n";
         return;
