@@ -7,13 +7,53 @@
 namespace Canal {
 namespace Integer {
 
+// Assumes that neither a nor b are empty or top
+static bool
+intersects(const Interval &a,
+           const Interval &b,
+           bool signed_,
+           bool unsigned_)
+{
+    llvm::APInt i, j;
+    if (signed_)
+    {
+        a.signedMax(i);
+        b.signedMin(j);
+        if (i.sge(j))
+        {
+            b.signedMax(i);
+            a.signedMin(j);
+            if (i.sge(j)) {
+                return true;
+            }
+        }
+    }
+
+    if (unsigned_)
+    {
+        a.unsignedMax(i);
+        b.unsignedMin(j);
+        if (i.uge(j))
+        {
+            b.unsignedMax(i);
+            a.unsignedMin(j);
+            if (i.uge(j))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+
 Interval::Interval(const Environment &environment,
                    unsigned bitWidth)
     : Domain(environment, Domain::IntegerIntervalKind),
-      mEmpty(true),
+      mSignedBottom(true),
       mSignedTop(false),
       mSignedFrom(bitWidth, 0, true),
       mSignedTo(bitWidth, 0, true),
+      mUnsignedBottom(true),
       mUnsignedTop(false),
       mUnsignedFrom(bitWidth, 0),
       mUnsignedTo(bitWidth, 0)
@@ -23,10 +63,11 @@ Interval::Interval(const Environment &environment,
 Interval::Interval(const Environment &environment,
                    const llvm::APInt &constant)
     : Domain(environment, Domain::IntegerIntervalKind),
-      mEmpty(false),
+      mSignedBottom(false),
       mSignedTop(false),
       mSignedFrom(constant),
       mSignedTo(constant),
+      mUnsignedBottom(false),
       mUnsignedTop(false),
       mUnsignedFrom(constant),
       mUnsignedTo(constant)
@@ -37,10 +78,11 @@ Interval::Interval(const Environment &environment,
                    const llvm::APInt &from,
                    const llvm::APInt &to)
     : Domain(environment, Domain::IntegerIntervalKind),
-      mEmpty(false),
+      mSignedBottom(false),
       mSignedTop(false),
       mSignedFrom(from),
       mSignedTo(to),
+      mUnsignedBottom(false),
       mUnsignedTop(false),
       mUnsignedFrom(from),
       mUnsignedTo(to)
@@ -49,10 +91,11 @@ Interval::Interval(const Environment &environment,
 
 Interval::Interval(const Interval &value)
     : Domain(value),
-      mEmpty(value.mEmpty),
+      mSignedBottom(value.mSignedBottom),
       mSignedTop(value.mSignedTop),
       mSignedFrom(value.mSignedFrom),
       mSignedTo(value.mSignedTo),
+      mUnsignedBottom(value.mSignedBottom),
       mUnsignedTop(value.mUnsignedTop),
       mUnsignedFrom(value.mUnsignedFrom),
       mUnsignedTo(value.mUnsignedTo)
@@ -62,10 +105,10 @@ Interval::Interval(const Interval &value)
 bool
 Interval::signedMin(llvm::APInt &result) const
 {
-    if (mEmpty)
+    if (isSignedBottom())
         return false;
 
-    if (mSignedTop)
+    if (isSignedTop())
         result = llvm::APInt::getSignedMinValue(mSignedFrom.getBitWidth());
     else
         result = mSignedFrom;
@@ -76,10 +119,10 @@ Interval::signedMin(llvm::APInt &result) const
 bool
 Interval::signedMax(llvm::APInt &result) const
 {
-    if (mEmpty)
+    if (isSignedBottom())
         return false;
 
-    if (mSignedTop)
+    if (isSignedTop())
         result = llvm::APInt::getSignedMaxValue(mSignedTo.getBitWidth());
     else
         result = mSignedTo;
@@ -90,10 +133,10 @@ Interval::signedMax(llvm::APInt &result) const
 bool
 Interval::unsignedMin(llvm::APInt &result) const
 {
-    if (mEmpty)
+    if (isUnsignedBottom())
         return false;
 
-    if (mUnsignedTop)
+    if (isUnsignedTop())
         result = llvm::APInt::getMinValue(mUnsignedFrom.getBitWidth());
     else
         result = mUnsignedFrom;
@@ -104,10 +147,10 @@ Interval::unsignedMin(llvm::APInt &result) const
 bool
 Interval::unsignedMax(llvm::APInt &result) const
 {
-    if (mEmpty)
+    if (isUnsignedBottom())
         return false;
 
-    if (mUnsignedTop)
+    if (isUnsignedTop())
         result = llvm::APInt::getMaxValue(mUnsignedTo.getBitWidth());
     else
         result = mUnsignedTo;
@@ -124,7 +167,7 @@ Interval::isConstant() const
 bool
 Interval::isSignedConstant() const
 {
-    if (isBottom() || mSignedTop)
+    if (isSignedBottom() || isSignedTop())
         return false;
 
     return mSignedFrom == mSignedTo;
@@ -133,7 +176,7 @@ Interval::isSignedConstant() const
 bool
 Interval::isUnsignedConstant() const
 {
-    if (isBottom() || mUnsignedTop)
+    if (isUnsignedBottom() || isUnsignedTop())
         return false;
 
     return mUnsignedFrom == mUnsignedTo;
@@ -143,9 +186,8 @@ bool
 Interval::isTrue() const
 {
     return
-        !mEmpty &&
-        !mSignedTop &&
-        !mUnsignedTop &&
+        !isBottom() &&
+        !isTop() &&
         getBitWidth() == 1 &&
         mSignedFrom.getBoolValue() &&
         mSignedTo.getBoolValue() &&
@@ -157,9 +199,8 @@ bool
 Interval::isFalse() const
 {
     return
-        !mEmpty &&
-        !mSignedTop &&
-        !mUnsignedTop &&
+        !isBottom() &&
+        !isTop() &&
         getBitWidth() == 1 &&
         !mSignedFrom.getBoolValue() &&
         !mSignedTo.getBoolValue() &&
@@ -184,42 +225,54 @@ Interval::toString() const
 {
     StringStream ss;
     ss << "interval";
-    if (mEmpty)
+    StringStream sign, unsign;
+    if (isBottom()) {
         ss << " empty\n";
+        return ss.str();
+    }
+
+    if (isSignedBottom())
+        sign << " (empty)\n";
     else
     {
-        llvm::APInt sMin, sMax, uMin, uMax;
+        llvm::APInt sMin, sMax;
         bool success = signedMin(sMin);
         CANAL_ASSERT(success);
         success = signedMax(sMax);
         CANAL_ASSERT(success);
-        success = unsignedMin(uMin);
+
+        sign << sMin.toString(10, true) << " to "
+             << sMax.toString(10, true);
+
+        if (isSignedTop())
+            sign << " (top)";
+    }
+
+    if (isUnsignedBottom()) {
+        unsign << " (empty)\n";
+    }
+    else
+    {
+        llvm::APInt uMin, uMax;
+        bool success = unsignedMin(uMin);
         CANAL_ASSERT(success);
         success = unsignedMax(uMax);
         CANAL_ASSERT(success);
 
-        StringStream sign, unsign;
-        sign << sMin.toString(10, true) << " to "
-             << sMax.toString(10, true);
-
-        if (mSignedTop)
-            sign << " (top)";
-
         unsign << uMin.toString(10, false) << " to "
                << uMax.toString(10, false);
 
-        if (mUnsignedTop)
+        if (isUnsignedTop())
             unsign << " (top)";
-
-        if (sign.str() != unsign.str())
-        {
-            ss << "\n"
-               << "    signed " << sign.str() << "\n"
-               << "    unsigned " << unsign.str() << "\n";
-        }
-        else
-            ss << " " << sign.str() << "\n";
     }
+    if (sign.str() != unsign.str())
+    {
+        ss << "\n"
+           << "    signed " << sign.str() << "\n"
+           << "    unsigned " << unsign.str() << "\n";
+    }
+    else
+        ss << " " << sign.str() << "\n";
 
     return ss.str();
 }
@@ -227,8 +280,8 @@ Interval::toString() const
 void
 Interval::setZero(const llvm::Value *place)
 {
-    mEmpty = false;
-    mUnsignedTop = mSignedTop = false;
+    resetSignedFlags();
+    resetUnsignedFlags();
     mUnsignedFrom = mUnsignedTo = mSignedFrom = mSignedTo =
         llvm::APInt::getNullValue(mUnsignedFrom.getBitWidth());
 }
@@ -240,23 +293,27 @@ Interval::operator==(const Domain& value) const
         return true;
 
     const Interval &interval = checkedCast<Interval>(value);
+
     if (getBitWidth() != interval.getBitWidth())
         return false;
 
-    if (mEmpty || interval.mEmpty)
-        return mEmpty == interval.mEmpty;
-
-    if (mSignedTop ^ interval.mSignedTop ||
-        mUnsignedTop ^ interval.mUnsignedTop)
+    if (isSignedBottom() ^ interval.isSignedBottom() ||
+        isUnsignedBottom() ^ interval.isUnsignedBottom())
         return false;
 
-    if (!mSignedTop && (mSignedFrom != interval.mSignedFrom ||
+    if (isSignedTop() ^ interval.isSignedTop() ||
+        isUnsignedTop() ^ interval.isUnsignedTop())
+        return false;
+
+    if (!isSignedTop() && !isSignedBottom()
+                && (mSignedFrom != interval.mSignedFrom ||
                         mSignedTo != interval.mSignedTo))
     {
         return false;
     }
 
-    if (!mUnsignedTop && (mUnsignedFrom != interval.mUnsignedFrom ||
+    if (!isUnsignedTop() && !isUnsignedBottom()
+                && (mUnsignedFrom != interval.mUnsignedFrom ||
                           mUnsignedTo != interval.mUnsignedTo))
     {
         return false;
@@ -268,37 +325,51 @@ Interval::operator==(const Domain& value) const
 bool
 Interval::operator<(const Domain& value) const
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Interval &interval = checkedCast<Interval>(value);
+    CANAL_ASSERT(getBitWidth() == interval.getBitWidth());
+
+    if (!isSignedBottom() && !interval.isSignedTop()) {
+        if (isSignedTop() || interval.isSignedBottom()) return false;
+        if (mSignedFrom.slt(interval.mSignedFrom) ||
+                mSignedTo.sgt(interval.mSignedTo)) return false;
+    }
+
+    if (!isUnsignedBottom() && !interval.isUnsignedTop()) {
+        if (isUnsignedTop() || interval.isUnsignedBottom()) return false;
+        if (mUnsignedFrom.ult(interval.mUnsignedFrom) ||
+                mUnsignedTo.ugt(interval.mUnsignedTo)) return false;
+    }
+    return true;
 }
 
+#define COPY_SIGNED(x) mSignedBottom = x.mSignedBottom; mSignedTop = x.mSignedTop; \
+    mSignedFrom = x.mSignedFrom; mSignedTo = x.mSignedTo;
+#define COPY_UNSIGNED(x) mUnsignedBottom = x.mUnsignedBottom; mUnsignedTop = x.mUnsignedTop; \
+    mUnsignedFrom = x.mUnsignedFrom; mUnsignedTo = x.mUnsignedTo;
 Interval &
 Interval::join(const Domain &value)
 {
     const Interval &interval = checkedCast<Interval>(value);
-    if (interval.mEmpty)
-        return *this;
 
     CANAL_ASSERT_MSG(interval.getBitWidth() == getBitWidth(),
                      "Bit width must be the same in merge! "
                      << getBitWidth() << " != "
                      << interval.getBitWidth());
 
-    if (mEmpty)
-    {
-        mEmpty = false;
-        mSignedTop = interval.mSignedTop;
-        mSignedFrom = interval.mSignedFrom;
-        mSignedTo = interval.mSignedTo;
-        mUnsignedTop = interval.mUnsignedTop;
-        mUnsignedFrom = interval.mUnsignedFrom;
-        mUnsignedTo = interval.mUnsignedTo;
-        return *this;
+    if (isSignedBottom() || interval.isSignedBottom())
+    { //Handle bottom values
+        //If both are bottom, do nothing (the result is bottom and you are already bottom)
+        //If the other is bottom, you don't need to do anything
+        //If I am bottom, copy values from the other
+        // -> therefore only if I am bottom and the other one is not, copy values from the other one
+        if(isSignedBottom() && !interval.isSignedBottom()) {
+            COPY_SIGNED(interval);
+        }
     }
-
-    if (!mSignedTop)
+    else if (!isSignedTop())
     {
-        if (interval.mSignedTop)
-            mSignedTop = true;
+        if (interval.isSignedTop())
+            setSignedTop();
         else
         {
             if (!mSignedFrom.sle(interval.mSignedFrom))
@@ -309,10 +380,20 @@ Interval::join(const Domain &value)
         }
     }
 
-    if (!mUnsignedTop)
+    if (isUnsignedBottom() || interval.isUnsignedBottom())
+    { //Handle bottom values
+        //If both are bottom, do nothing (the result is bottom and you are already bottom)
+        //If the other is bottom, you don't need to do anything
+        //If I am bottom, copy values from the other
+        // -> therefore only if I am bottom and the other one is not, copy values from the other one
+        if(isUnsignedBottom() && !interval.isUnsignedBottom()) {
+            COPY_UNSIGNED(interval);
+        }
+    }
+    else if (!isUnsignedTop())
     {
-        if (interval.mUnsignedTop)
-            mUnsignedTop = true;
+        if (interval.isUnsignedTop())
+            setUnsignedTop();
         else
         {
             if (!mUnsignedFrom.ule(interval.mUnsignedFrom))
@@ -329,43 +410,149 @@ Interval::join(const Domain &value)
 Interval &
 Interval::meet(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Interval &interval = checkedCast<Interval>(value);
+
+    if (*this == interval) return *this; //Shortcut
+
+    if (isSignedBottom() || interval.isSignedBottom()) {
+        setSignedBottom();
+    }
+    else if (isSignedTop() || interval.isSignedTop()) {
+        //If both are top, do nothing (the result is top and you are already top)
+        //If the other is top, you don't need to do anything
+        //If I am top, copy values from the other
+        // -> therefore only if I am top and the other one is not, copy values from the other one
+        if (isSignedTop() && !interval.isSignedTop()) {
+            COPY_SIGNED(interval);
+        }
+    }
+    else {
+        //If there is no intersection, set to bottom; otherwise use the intersection
+        if (intersects(*this, interval, true, false)) {
+            //If there is intersection, intervals are like this:
+            // < < > > - but you do not know, which one is outer and which boundary is which
+            //Therefore intersection is interval from bigger minimum to lower maximum
+            if (mSignedFrom.slt(interval.mSignedFrom)) mSignedFrom = interval.mSignedFrom;
+            if (mSignedTo.sgt(interval.mSignedTo)) mSignedTo = interval.mSignedTo;
+        }
+        else {
+            setSignedBottom();
+        }
+    }
+
+    if (isUnsignedBottom() || interval.isUnsignedBottom()) {
+        setUnsignedBottom();
+    }
+    else if (isUnsignedTop() || interval.isUnsignedTop()) {
+        if (isUnsignedTop() && !interval.isUnsignedTop()) {
+            COPY_UNSIGNED(interval);
+        }
+    }
+    else {
+        if (intersects(*this, interval, false, true)) {
+            if (mUnsignedFrom.ult(interval.mUnsignedFrom)) mUnsignedFrom = interval.mUnsignedFrom;
+            if (mUnsignedTo.ugt(interval.mUnsignedTo)) mUnsignedTo = interval.mUnsignedTo;
+        }
+        else {
+            setUnsignedBottom();
+        }
+    }
+    return *this;
+}
+#undef COPY_UNSIGNED
+#undef COPY_SIGNED
+
+void
+Interval::setSignedBottom() {
+    mSignedBottom = true;
+    mSignedTop = false;
+}
+
+void
+Interval::setSignedTop() {
+    mSignedTop = true;
+    mSignedBottom = false;
+}
+
+bool
+Interval::isSignedBottom() const {
+    return mSignedBottom && !mSignedTop;
+}
+
+bool
+Interval::isSignedTop() const {
+    return !mSignedBottom && mSignedTop;
+}
+
+void
+Interval::resetSignedFlags() {
+    mSignedTop = mSignedBottom = false;
+}
+
+void
+Interval::setUnsignedBottom() {
+    mUnsignedBottom = true;
+    mUnsignedTop = false;
+}
+
+void
+Interval::setUnsignedTop() {
+    mUnsignedTop = true;
+    mUnsignedBottom = false;
+}
+
+bool
+Interval::isUnsignedBottom() const {
+    return mUnsignedBottom && !mUnsignedTop;
+}
+
+bool
+Interval::isUnsignedTop() const {
+    return !mUnsignedBottom && mUnsignedTop;
+}
+
+void
+Interval::resetUnsignedFlags() {
+    mUnsignedTop = mUnsignedBottom = false;
+}
+
+void
+Interval::resetFlags() {
+    resetSignedFlags();
+    resetUnsignedFlags();
 }
 
 bool
 Interval::isBottom() const
 {
-    return mEmpty;
+    return isSignedBottom() && isUnsignedBottom();
 }
 
 void
 Interval::setBottom()
 {
-    mEmpty = true;
-    mUnsignedTop = mSignedTop = false;
+    setSignedBottom();
+    setUnsignedBottom();
 }
 
 bool
 Interval::isTop() const
 {
-    return !mEmpty && mSignedTop && mUnsignedTop;
+    return isSignedTop() && isUnsignedTop();
 }
 
 void
 Interval::setTop()
 {
-    mEmpty = false;
-    mSignedTop = mUnsignedTop = true;
+    setSignedTop();
+    setUnsignedTop();
 }
 
 float
 Interval::accuracy() const
 {
-    if (mEmpty)
-        return 1.0f;
-
     float coverage = 0;
-    if (mUnsignedTop)
+    if (isUnsignedTop() || isUnsignedBottom())
         coverage += 1.0f;
     else
     {
@@ -398,7 +585,7 @@ Interval::accuracy() const
         coverage += dividendFloat.convertToFloat();
     }
 
-    if (mSignedTop)
+    if (isSignedTop() || isSignedBottom())
         coverage += 1.0f;
     else
     {
@@ -445,14 +632,14 @@ Interval::add(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
-
-    mSignedTop = aa.mSignedTop || bb.mSignedTop;
-    if (!mSignedTop)
-    {
+    if (aa.isSignedBottom() || bb.isSignedBottom()) {
+        setSignedBottom();
+    }
+    else if (aa.isSignedTop() || bb.isSignedTop()) {
+        setSignedTop();
+    }
+    else {
+        resetSignedFlags();
         mSignedFrom = APIntUtils::sadd_ov(aa.mSignedFrom,
                                           bb.mSignedFrom,
                                           mSignedTop);
@@ -463,9 +650,14 @@ Interval::add(const Domain &a, const Domain &b)
                                             mSignedTop);
     }
 
-    mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
-    if (!mUnsignedTop)
-    {
+    if (aa.isUnsignedBottom() || bb.isUnsignedBottom()) {
+        setUnsignedBottom();
+    }
+    else if (aa.isUnsignedTop() || bb.isUnsignedTop()) {
+        setUnsignedTop();
+    }
+    else {
+        resetUnsignedFlags();
         mUnsignedFrom = APIntUtils::uadd_ov(aa.mUnsignedFrom,
                                             bb.mUnsignedFrom,
                                             mUnsignedTop);
@@ -485,14 +677,14 @@ Interval::sub(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
-
-    mSignedTop = aa.mSignedTop || bb.mSignedTop;
-    if (!mSignedTop)
-    {
+    if (aa.isSignedBottom() || bb.isSignedBottom()) {
+        setSignedBottom();
+    }
+    else if (aa.isSignedTop() || bb.isSignedTop()) {
+        setSignedTop();
+    }
+    else {
+        resetSignedFlags();
         mSignedFrom = APIntUtils::ssub_ov(aa.mSignedFrom,
                                           bb.mSignedTo,
                                           mSignedTop);
@@ -503,9 +695,14 @@ Interval::sub(const Domain &a, const Domain &b)
                                             mSignedTop);
     }
 
-    mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
-    if (!mUnsignedTop)
-    {
+    if (aa.isUnsignedBottom() || bb.isUnsignedBottom()) {
+        setUnsignedBottom();
+    }
+    else if (aa.isUnsignedTop() || bb.isUnsignedTop()) {
+        setUnsignedTop();
+    }
+    else {
+        resetUnsignedFlags();
         mUnsignedFrom = APIntUtils::usub_ov(aa.mUnsignedFrom,
                                             bb.mUnsignedTo,
                                             mUnsignedTop);
@@ -630,14 +827,14 @@ Interval::mul(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
-
-    mSignedTop = aa.mSignedTop || bb.mSignedTop;
-    if (!mSignedTop)
-    {
+    if (aa.isSignedBottom() || bb.isSignedBottom()) {
+        setSignedBottom();
+    }
+    else if (aa.isSignedTop() || bb.isSignedTop()) {
+        setSignedTop();
+    }
+    else {
+        resetSignedFlags();
         llvm::APInt toTo = APIntUtils::smul_ov(aa.mSignedTo,
                                                bb.mSignedTo,
                                                mSignedTop);
@@ -675,9 +872,14 @@ Interval::mul(const Domain &a, const Domain &b)
         }
     }
 
-    mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
-    if (!mUnsignedTop)
-    {
+    if (aa.isUnsignedBottom() || bb.isUnsignedBottom()) {
+        setUnsignedBottom();
+    }
+    else if (aa.isUnsignedTop() || bb.isUnsignedTop()) {
+        setUnsignedTop();
+    }
+    else {
+        resetUnsignedFlags();
         llvm::APInt toTo = APIntUtils::umul_ov(aa.mUnsignedTo,
                                                bb.mUnsignedTo,
                                                mUnsignedTop);
@@ -724,17 +926,19 @@ Interval::udiv(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
+    setSignedTop();
 
-    mSignedTop = true;
-    mUnsignedTop = aa.mUnsignedTop || bb.mUnsignedTop;
-    if (!mUnsignedTop)
-    {
+    if (aa.isUnsignedBottom() || bb.isUnsignedBottom()) {
+        setUnsignedBottom();
+    }
+    else if (aa.isUnsignedTop() || bb.isUnsignedTop()) {
+        setUnsignedTop();
+    }
+    else {
+        resetUnsignedFlags();
+
         if (bb.mUnsignedFrom == 0 && bb.mUnsignedTo == 0) { //Division by zero
-            mUnsignedTop = true;
+            setUnsignedTop();
             return *this;
         }
         llvm::APInt toTo, toFrom, fromTo, fromFrom;
@@ -768,17 +972,18 @@ Interval::sdiv(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
+    setUnsignedTop();
 
-    mUnsignedTop = true;
-    mSignedTop = aa.mSignedTop || bb.mSignedTop;
-    if (!mSignedTop)
-    {
+    if (aa.isSignedBottom() || bb.isSignedBottom()) {
+        setSignedBottom();
+    }
+    else if (aa.isSignedTop() || bb.isSignedTop()) {
+        setSignedTop();
+    }
+    else {
+        resetSignedFlags();
         if (bb.mSignedFrom == 0 && bb.mSignedTo == 0) { //Division by zero
-            mSignedTop = true;
+            setSignedTop();
             return *this;
         }
         llvm::APInt toTo, toFrom, fromTo, fromFrom;
@@ -827,12 +1032,8 @@ Interval::urem(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
-
     setTop();
+
     //When implemented, handle division by zero - see #145
     return *this;
 }
@@ -843,12 +1044,8 @@ Interval::srem(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
-
     setTop();
+
     //When implemented, handle division by zero - see #145
     return *this;
 }
@@ -859,12 +1056,8 @@ Interval::shl(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
-
     setTop();
+
     return *this;
 }
 
@@ -874,12 +1067,8 @@ Interval::lshr(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
-
     setTop();
+
     return *this;
 }
 
@@ -889,12 +1078,8 @@ Interval::ashr(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
-
     setTop();
+
     return *this;
 }
 
@@ -904,12 +1089,8 @@ Interval::and_(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
-
     setTop();
+
     return *this;
 }
 
@@ -919,12 +1100,8 @@ Interval::or_(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
-
     setTop();
+
     return *this;
 }
 
@@ -934,50 +1111,9 @@ Interval::xor_(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    // Handle empty values.
-    mEmpty = (aa.mEmpty || bb.mEmpty);
-    if (mEmpty)
-        return *this;
-
     setTop();
+
     return *this;
-}
-
-// Assumes that neither a nor b are empty or top
-static bool
-intersects(const Interval &a,
-           const Interval &b,
-           bool signed_,
-           bool unsigned_)
-{
-    llvm::APInt i, j;
-    if (signed_)
-    {
-        a.signedMax(i);
-        b.signedMin(j);
-        if (i.sge(j))
-        {
-            b.signedMax(i);
-            a.signedMin(j);
-            if (i.sge(j))
-                return true;
-        }
-    }
-
-    if (unsigned_)
-    {
-        a.unsignedMax(i);
-        b.unsignedMin(j);
-        if (i.uge(j))
-        {
-            b.unsignedMax(i);
-            a.unsignedMin(j);
-            if (i.uge(j))
-                return true;
-        }
-    }
-
-    return false;
 }
 
 Interval &
@@ -1018,7 +1154,7 @@ Interval::icmp(const Domain &a, const Domain &b,
             mSignedFrom = mSignedTo = 1;
         }
         else if (intersects(aa, bb, true, false))
-            mSignedTop = true;
+            setSignedTop();
 
         // Unsigned equality
         if (aa.isUnsignedConstant() &&
@@ -1028,7 +1164,7 @@ Interval::icmp(const Domain &a, const Domain &b,
             mUnsignedFrom = mUnsignedTo = 1;
         }
         else if (intersects(aa, bb, false, true))
-            mUnsignedTop = true;
+            setUnsignedTop();
 
         break;
     case llvm::CmpInst::ICMP_NE:  // not equal
@@ -1041,7 +1177,7 @@ Interval::icmp(const Domain &a, const Domain &b,
               aa.mSignedFrom == bb.mSignedFrom))
         {
             if (intersects(aa, bb, true, false))
-                mSignedTop = true;
+                setSignedTop();
             else
                 mSignedFrom = mSignedTo = 1;
         }
@@ -1052,7 +1188,7 @@ Interval::icmp(const Domain &a, const Domain &b,
               aa.mUnsignedFrom == bb.mUnsignedFrom))
         {
             if (intersects(aa, bb, false, true))
-                mUnsignedTop = true;
+                setUnsignedTop();
             else
                 mUnsignedFrom = mUnsignedTo = 1;
         }
@@ -1201,13 +1337,13 @@ Interval::fcmp(const Domain &a, const Domain &b,
         setBottom();
         break;
     case 0:
-        mEmpty = mSignedTop = mUnsignedTop = false;
+        resetFlags();
         mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo =
             llvm::APInt(/*bitWidth*/1, /*val*/0);
 
         break;
     case 1:
-        mEmpty = mSignedTop = mUnsignedTop = false;
+        resetFlags();
         mSignedFrom = mSignedTo = mUnsignedFrom = mUnsignedTo =
             llvm::APInt(/*bitWidth*/1, /*val*/1);
 
@@ -1226,52 +1362,56 @@ Interval &
 Interval::trunc(const Domain &value)
 {
     const Interval &interval = checkedCast<Interval>(value);
-    mEmpty = interval.mEmpty;
 
-    mSignedTop = interval.mSignedTop
-        || (!interval.mSignedFrom.isSignedIntN(getBitWidth()) &&
-            !interval.mSignedFrom.isIntN(getBitWidth()))
-        || (!interval.mSignedTo.isSignedIntN(getBitWidth()) &&
-            !interval.mSignedTo.isIntN(getBitWidth()));
+    if (!interval.isSignedBottom()) {
+        resetSignedFlags();
+        mSignedTop = interval.mSignedTop
+            || (!interval.mSignedFrom.isSignedIntN(getBitWidth()) &&
+                !interval.mSignedFrom.isIntN(getBitWidth()))
+            || (!interval.mSignedTo.isSignedIntN(getBitWidth()) &&
+                !interval.mSignedTo.isIntN(getBitWidth()));
 
-    if (!mSignedTop)
-    {
-        mSignedFrom = APIntUtils::trunc(interval.mSignedFrom,
-                                        getBitWidth());
-
-        mSignedTo = APIntUtils::trunc(interval.mSignedTo,
-                                      getBitWidth());
-
-        if (getBitWidth() == 1 && mSignedFrom != mSignedTo)
-            mSignedTop = true;
-        else
+        if (!mSignedTop)
         {
-            if (!mSignedFrom.isNegative() && mSignedTo.isNegative()) {
-                //If during truncate mTo became negative and mFrom stayed positive,
-                //mFrom and mTo have to be swapped
-                std::swap(mSignedFrom, mSignedTo);
+            mSignedFrom = APIntUtils::trunc(interval.mSignedFrom,
+                                            getBitWidth());
+
+            mSignedTo = APIntUtils::trunc(interval.mSignedTo,
+                                          getBitWidth());
+
+            if (getBitWidth() == 1 && mSignedFrom != mSignedTo)
+                setSignedTop();
+            else
+            {
+                if (!mSignedFrom.isNegative() && mSignedTo.isNegative()) {
+                    //If during truncate mTo became negative and mFrom stayed positive,
+                    //mFrom and mTo have to be swapped
+                    std::swap(mSignedFrom, mSignedTo);
+                }
+                CANAL_ASSERT_MSG(mSignedFrom.sle(mSignedTo),
+                                 "mSignedFrom must be lower than mSignedTo");
             }
-            CANAL_ASSERT_MSG(mSignedFrom.sle(mSignedTo),
-                             "mSignedFrom must be lower than mSignedTo");
         }
     }
 
-    mUnsignedTop = interval.mUnsignedTop
-        || !interval.mUnsignedFrom.isIntN(getBitWidth())
-        || !interval.mUnsignedTo.isIntN(getBitWidth());
+    if (!interval.isUnsignedBottom()) {
+        mUnsignedBottom = false;
+        mUnsignedTop = interval.mUnsignedTop
+            || !interval.mUnsignedFrom.isIntN(getBitWidth())
+            || !interval.mUnsignedTo.isIntN(getBitWidth());
 
-    if (!mUnsignedTop)
-    {
-        mUnsignedFrom = APIntUtils::trunc(interval.mUnsignedFrom,
-                                          getBitWidth());
+        if (!mUnsignedTop)
+        {
+            mUnsignedFrom = APIntUtils::trunc(interval.mUnsignedFrom,
+                                              getBitWidth());
 
-        mUnsignedTo = APIntUtils::trunc(interval.mUnsignedTo,
-                                        getBitWidth());
+            mUnsignedTo = APIntUtils::trunc(interval.mUnsignedTo,
+                                            getBitWidth());
 
-        CANAL_ASSERT_MSG(mUnsignedFrom.ule(mUnsignedTo),
-                         "mUnsignedFrom must be lower than mUnsignedTo");
+            CANAL_ASSERT_MSG(mUnsignedFrom.ule(mUnsignedTo),
+                             "mUnsignedFrom must be lower than mUnsignedTo");
+        }
     }
-
     return *this;
 }
 
@@ -1279,13 +1419,19 @@ Interval &
 Interval::zext(const Domain &value)
 {
     const Interval &interval = checkedCast<Interval>(value);
-    mEmpty = interval.mEmpty;
+    mSignedBottom = interval.mSignedBottom;
     mSignedTop = interval.mSignedTop;
-    mSignedFrom = APIntUtils::zext(interval.mSignedFrom, getBitWidth());
-    mSignedTo = APIntUtils::zext(interval.mSignedTo, getBitWidth());
+    if (!mSignedBottom && !mSignedTop) {
+        mSignedFrom = APIntUtils::zext(interval.mSignedFrom, getBitWidth());
+        mSignedTo = APIntUtils::zext(interval.mSignedTo, getBitWidth());
+    }
+
+    mUnsignedBottom = interval.mUnsignedBottom;
     mUnsignedTop = interval.mUnsignedTop;
-    mUnsignedFrom = APIntUtils::zext(interval.mUnsignedFrom, getBitWidth());
-    mUnsignedTo = APIntUtils::zext(interval.mUnsignedTo, getBitWidth());
+    if (!mUnsignedBottom && !mUnsignedTop) {
+        mUnsignedFrom = APIntUtils::zext(interval.mUnsignedFrom, getBitWidth());
+        mUnsignedTo = APIntUtils::zext(interval.mUnsignedTo, getBitWidth());
+    }
     return *this;
 }
 
@@ -1293,13 +1439,19 @@ Interval &
 Interval::sext(const Domain &value)
 {
     const Interval &interval = checkedCast<Interval>(value);
-    mEmpty = interval.mEmpty;
+    mSignedBottom = interval.mSignedBottom;
     mSignedTop = interval.mSignedTop;
-    mSignedFrom = APIntUtils::sext(interval.mSignedFrom, getBitWidth());
-    mSignedTo = APIntUtils::sext(interval.mSignedTo, getBitWidth());
+    if (!mSignedBottom && !mSignedTop) {
+        mSignedFrom = APIntUtils::sext(interval.mSignedFrom, getBitWidth());
+        mSignedTo = APIntUtils::sext(interval.mSignedTo, getBitWidth());
+    }
+
+    mUnsignedBottom = interval.mUnsignedBottom;
     mUnsignedTop = interval.mUnsignedTop;
-    mUnsignedFrom = APIntUtils::sext(interval.mUnsignedFrom, getBitWidth());
-    mUnsignedTo = APIntUtils::sext(interval.mUnsignedTo, getBitWidth());
+    if (!mUnsignedBottom && !mUnsignedTop) {
+        mUnsignedFrom = APIntUtils::sext(interval.mUnsignedFrom, getBitWidth());
+        mUnsignedTo = APIntUtils::sext(interval.mUnsignedTo, getBitWidth());
+    }
     return *this;
 }
 

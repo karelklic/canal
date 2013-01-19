@@ -69,6 +69,103 @@ testJoin()
     CANAL_ASSERT(set11.isTop());
 }
 
+
+static void
+testMeet()
+{
+    Integer::Set
+        zero(*gEnvironment, llvm::APInt(32, 0)),
+        one(*gEnvironment, llvm::APInt(32, 1)),
+        negone(*gEnvironment, llvm::APInt(32, -1, true)),
+        bottom(*gEnvironment, 32),
+        top(*gEnvironment, 32),
+        negone_one(negone),
+        zero_one(zero);
+
+    top.setTop();
+    negone_one.join(one);
+    zero_one.join(one);
+
+    //Top and bottom
+    CANAL_ASSERT(bottom.meet(bottom).isBottom());
+    CANAL_ASSERT(top.meet(top).isTop());
+    {
+        Integer::Set result(top), result1(bottom), result2(zero),
+                top1(top);
+        CANAL_ASSERT(result.meet(bottom).isBottom());
+        CANAL_ASSERT(result1.meet(top).isBottom());
+        CANAL_ASSERT(result2.meet(top) == zero);
+        CANAL_ASSERT(top1.meet(zero) == zero);
+        CANAL_ASSERT(result2.meet(bottom).isBottom());
+    }
+
+    //Tests with values
+    {
+        Integer::Set zero1(zero), one1(one), negone1(negone),
+                negone_one1(negone_one), negone_one2(negone_one), zero_one1(zero_one);
+        CANAL_ASSERT(zero1.meet(zero) == zero);
+        CANAL_ASSERT(one1.meet(one) == one);
+        CANAL_ASSERT(negone1.meet(negone) == negone);
+        CANAL_ASSERT(negone_one1.meet(negone_one) == negone_one);
+        CANAL_ASSERT(zero_one1.meet(zero_one) == zero_one);
+
+        CANAL_ASSERT(zero1.meet(one).isBottom());
+        CANAL_ASSERT(one1.meet(zero_one) == one);
+        CANAL_ASSERT(one1.meet(negone_one) == one);
+
+        CANAL_ASSERT(negone_one1.meet(one) == one);
+        CANAL_ASSERT(negone_one2.meet(zero_one) == one);
+        CANAL_ASSERT(zero_one1.meet(negone_one) == negone_one2);
+
+        CANAL_ASSERT(negone1.meet(negone_one) == negone);
+    }
+}
+
+static void
+testInclusion()
+{
+    Integer::Set
+        zero(*gEnvironment, llvm::APInt(32, 0)),
+        one(*gEnvironment, llvm::APInt(32, 1)),
+        negone(*gEnvironment, llvm::APInt(32, -1, true)),
+        bottom(*gEnvironment, 32),
+        top(*gEnvironment, 32),
+        negone_one(negone),
+        zero_one(zero);
+
+    top.setTop();
+    negone_one.join(one);
+    zero_one.join(one);
+
+    //Top and bottom
+    CANAL_ASSERT(bottom < bottom);
+    CANAL_ASSERT(top < top);
+    CANAL_ASSERT(!(top < bottom));
+    CANAL_ASSERT(!(zero < bottom));
+    CANAL_ASSERT(bottom < zero);
+    CANAL_ASSERT(zero < top);
+    CANAL_ASSERT(!(top < zero));
+
+    //Tests with values
+    CANAL_ASSERT(zero < zero);
+    CANAL_ASSERT(one < one);
+    CANAL_ASSERT(negone < negone);
+    CANAL_ASSERT(negone_one < negone_one);
+    CANAL_ASSERT(zero_one < zero_one);
+
+    CANAL_ASSERT(!(zero < one));
+    CANAL_ASSERT(one < zero_one);
+    CANAL_ASSERT(!(zero_one < one));
+    CANAL_ASSERT(one < negone_one);
+    CANAL_ASSERT(!(negone_one < one));
+
+    CANAL_ASSERT(!(negone_one < zero_one));
+    CANAL_ASSERT(!(zero_one < negone_one));
+
+    CANAL_ASSERT(negone < negone_one);
+    CANAL_ASSERT(!(negone_one < negone));
+}
+
 static void
 testIcmp()
 {
@@ -449,6 +546,8 @@ main(int argc, char **argv)
     gEnvironment = new Environment(module);
 
     testJoin();
+    testMeet();
+    testInclusion();
     testIcmp();
     testDivisionByZero();
 

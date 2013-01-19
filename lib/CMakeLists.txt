@@ -37,3 +37,5 @@ add_library(canal SHARED
 target_link_libraries(canal
     ${LLVM_MODULE_LIBS}
     ${LLVM_LDFLAGS})
+
+install(TARGETS canal DESTINATION lib)

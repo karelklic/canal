@@ -1,13 +1,14 @@
 #!/bin/bash
-# tputcolors
 
-#Colored output functions
+# Colored output functions
 function reset() {
 	echo -n "$(tput sgr0)";
 }
+
 function color() {
 	echo -n "$(tput setaf 4)$(tput bold)";
 }
+
 function print() {
 	echo "" #Newline
 	color;
@@ -18,7 +19,7 @@ function print() {
 	reset;
 }
 
-#Global dir variables
+# Global dir variables
 LLVM_DIR=""
 LIBELF_DIR=""
 LLVM_PATH_DIR=""
@@ -26,13 +27,13 @@ CANAL_DIR=""
 CANAL_BUILD_DIR=""
 BASE_DIR=`pwd`
 
-#Default parameters
+# Default parameters
 THREADS=$((`nproc` + 1))
 BRANCH="master"
 LLVM_VERSIONS="28,29,30,31,32"
 OUTPUT_ON_FAILURE=0
 
-#Download, compile and install libelf if neccessary
+# Download, compile and install libelf if neccessary
 function get_libelf () {
 	LIBELF_DIR="libelf-build/"
 	if [ ! -d $LIBELF_DIR ]; then
@@ -52,7 +53,7 @@ function get_libelf () {
 	fi
 }
 
-#Download CompilerRT (needed for llvm >= 3.1)
+# Download CompilerRT (needed for llvm >= 3.1)
 function download_compiler_rt() {
 	print "Downlad of CompilerRT for LLVM $1"
 	declare -A urls dirs
@@ -73,7 +74,7 @@ function download_compiler_rt() {
 	cd ..
 }
 
-#Download Clang
+# Download Clang
 function download_clang() {
 	print "Download of Clang for LLVM $1"
 	declare -A urls dirs
@@ -133,7 +134,7 @@ function get_llvm() {
 		mkdir build
 		cd build
 		print "Configuration of LLVM $1"
-		../configure --prefix=$BASE_DIR/$LLVM_DIR
+		../configure --enable-shared --prefix=$BASE_DIR/$LLVM_DIR
 		print "Compilation of LLVM $1"
 		REQUIRES_RTTI=1 make -j $THREADS
 		print "Installation of LLVM $1"
@@ -228,12 +229,13 @@ function usage() {
 	exit 1
 }
 
-#Parse input arguments
-#ARGS=`getopt -o "b:,l:,t:,u,h,p:,o" -l "branch:,llvm:,threads:,usage,help,paths:,output-on-failure" -n "download_script" -- "$@"`
+# Parse input arguments
 ARGS=`getopt -o "b:,l:,t:,u,h,o" -l "branch:,llvm:,threads:,usage,help,output-on-failure" -n "download_script" -- "$@"`
+
 if [ $? -ne 0 ]; then
 	usage
 fi
+
 eval set -- "$ARGS"
 while true; do
 	case $1 in
@@ -262,16 +264,16 @@ while true; do
 	esac
 done
 
-#Parse LLVM_VERSIONS
+# Parse LLVM_VERSIONS
 OIFS="$IFS"
 IFS=','
 LLVM_VERSIONS=($LLVM_VERSIONS)
 IFS=$OIFS
 
-#Get canal
+# Get canal
 get_canal $BRANCH
 
-#Build all canal versions
+# Build all canal versions
 for i in `seq 0 $((${#LLVM_VERSIONS[@]} - 1))`; do
 	VERSION=${LLVM_VERSIONS[$i]}
 	if [ $VERSION -lt 28 -o $VERSION -gt 32 ]; then
@@ -280,11 +282,13 @@ for i in `seq 0 $((${#LLVM_VERSIONS[@]} - 1))`; do
 	fi
 	build_canal $VERSION
 done
-#Test all canal versions
+
+# Test all canal versions
 for i in `seq 0 $((${#LLVM_VERSIONS[@]} - 1))`; do
 	VERSION=${LLVM_VERSIONS[$i]}
 	test_canal $VERSION
 done
+
 restore_paths
 
 exit 0

@@ -259,7 +259,15 @@ Bitfield::operator==(const Domain& value) const
 bool
 Bitfield::operator<(const Domain& value) const
 {
-    CANAL_NOT_IMPLEMENTED();
+    const Bitfield &bits = checkedCast<Bitfield>(value);
+    //0 0 -> true
+    //0 1 -> true
+    //1 0 -> false
+    //1 1 -> true
+    // aka implication -> not a or b
+    if (!((~mZeroes) | bits.mZeroes).isAllOnesValue()) return false;
+    if (!((~mOnes) | bits.mOnes).isAllOnesValue()) return false;
+    return true;
 }
 
 Bitfield &
