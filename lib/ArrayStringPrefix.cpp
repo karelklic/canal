@@ -94,7 +94,7 @@ StringPrefix::toString() const
     ss << "\n";
 
     if (!isBottom() && !isTop())
-        ss << "    " << mPrefix << "\n";
+        ss << "    \"" << mPrefix << "\"\n";
 
     return ss.str();
 }
