@@ -117,7 +117,7 @@ Target::operator!=(const Target &target) const
 }
 
 void
-Target::merge(const Target &target)
+Target::join(const Target &target)
 {
     // Merge numeric offsets.
     if (!mNumericOffset && target.mNumericOffset)
@@ -161,6 +161,12 @@ Target::merge(const Target &target)
     default:
         CANAL_DIE();
     }
+}
+
+void
+Target::meet(const Target &target)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 size_t

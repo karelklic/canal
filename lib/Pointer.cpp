@@ -14,13 +14,16 @@ namespace Pointer {
 
 Pointer::Pointer(const Environment &environment,
                  const llvm::PointerType &type)
-    : Domain(environment, Domain::PointerKind), mType(type)
+    : Domain(environment, Domain::PointerKind),
+      mTop(false),
+      mType(type)
 {
 }
 
 Pointer::Pointer(const Pointer &value)
     : Domain(value),
       mTargets(value.mTargets),
+      mTop(value.mTop),
       mType(value.mType)
 {
     PlaceTargetMap::iterator it = mTargets.begin(), itend = mTargets.end();
@@ -32,6 +35,7 @@ Pointer::Pointer(const Pointer &value,
                  const llvm::PointerType &newType)
     : Domain(value),
       mTargets(value.mTargets),
+      mTop(value.mTop),
       mType(newType)
 {
     PlaceTargetMap::iterator it = mTargets.begin(), itend = mTargets.end();
@@ -51,6 +55,9 @@ Pointer::addTarget(Target::Type type,
                    const std::vector<Domain*> &offsets,
                    Domain *numericOffset)
 {
+    if (mTop)
+        return;
+
     CANAL_ASSERT_MSG(place,
                      "Place is mandatory.");
 
@@ -68,7 +75,7 @@ Pointer::addTarget(Target::Type type,
     PlaceTargetMap::iterator it = mTargets.find(place);
     if (it != mTargets.end())
     {
-        it->second->merge(*pointerTarget);
+        it->second->join(*pointerTarget);
         delete pointerTarget;
     }
     else
@@ -78,6 +85,14 @@ Pointer::addTarget(Target::Type type,
 Domain *
 Pointer::dereferenceAndMerge(const State &state) const
 {
+    if (mTop)
+    {
+        const llvm::Type &elementType = *mType.getElementType();
+        Domain *result = mEnvironment.getConstructors().create(elementType);
+        result->setTop();
+        return result;
+    }
+
     Domain *mergedValue = NULL;
     PlaceTargetMap::const_iterator it = mTargets.begin();
     for (; it != mTargets.end(); ++it)
@@ -172,6 +187,8 @@ Pointer::getElementPtr(const std::vector<Domain*> &offsets,
 void
 Pointer::store(const Domain &value, State &state) const
 {
+    CANAL_ASSERT(!mTop);
+
     // Go through all target memory blocks for the pointer and merge
     // them with the value being stored.
     PlaceTargetMap::const_iterator it = mTargets.begin(),
@@ -211,7 +228,7 @@ Pointer::store(const Domain &value, State &state) const
 bool
 Pointer::isConstant() const
 {
-    if (mTargets.size() != 1)
+    if (mTop || mTargets.size() != 1)
         return false;
 
     const Target *target = mTargets.begin()->second;
@@ -254,7 +271,11 @@ std::string
 Pointer::toString() const
 {
     StringStream ss;
-    ss << "pointer\n";
+    if (mTop)
+        ss << "pointer top\n";
+    else
+        ss << "pointer\n";
+
     ss << "    type " << Canal::toString(mType) << "\n";
 
     PlaceTargetMap::const_iterator it = mTargets.begin(),
@@ -288,6 +309,9 @@ Pointer::operator==(const Domain &value) const
     if (&pointer.mType != &mType)
         return false;
 
+    if (pointer.mTop != mTop)
+        return false;
+
     // Check if it has the same number of targets.
     if (pointer.mTargets.size() != mTargets.size())
         return false;
@@ -314,6 +338,18 @@ Pointer::operator<(const Domain &value) const
 Pointer &
 Pointer::join(const Domain &value)
 {
+    if (isTop())
+        return *this;
+
+    if (value.isBottom())
+        return *this;
+
+    if (value.isTop())
+    {
+        setTop();
+        return *this;
+    }
+
     const Pointer &vv = llvm::cast<Pointer>(value);
     CANAL_ASSERT_MSG(&vv.mType == &mType,
                      "Unexpected different types in a pointer merge ("
@@ -328,7 +364,7 @@ Pointer::join(const Domain &value)
             mTargets.insert(PlaceTargetMap::value_type(
                                 valueit->first, new Target(*valueit->second)));
         else
-            it->second->merge(*valueit->second);
+            it->second->join(*valueit->second);
     }
 
     return *this;
@@ -337,18 +373,69 @@ Pointer::join(const Domain &value)
 Pointer &
 Pointer::meet(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    if (isBottom())
+        return *this;
+
+    if (value.isTop())
+        return *this;
+
+    if (value.isBottom())
+    {
+        setBottom();
+        return *this;
+    }
+
+    const Pointer &vv = llvm::cast<Pointer>(value);
+    CANAL_ASSERT_MSG(&vv.mType == &mType,
+                     "Unexpected different types in a pointer merge ("
+                     << Canal::toString(vv.mType) << " != "
+                     << Canal::toString(mType) << ")");
+
+    if (isTop())
+    {
+        mTop = false;
+        CANAL_ASSERT(mTargets.empty());
+    }
+
+    PlaceTargetMap::iterator it = mTargets.begin();
+    for (; it != mTargets.end(); ++it)
+    {
+        PlaceTargetMap::const_iterator valueit = vv.mTargets.find(it->first);
+        if (it == vv.mTargets.end())
+        {
+            delete it->second;
+            mTargets.erase(it);
+        }
+        else
+            it->second->meet(*valueit->second);
+    }
+
+    return *this;
 }
 
 bool
 Pointer::isBottom() const
 {
-    return mTargets.empty();
+    return !mTop && mTargets.empty();
 }
 
 void
 Pointer::setBottom()
 {
+    mTop = false;
+    llvm::DeleteContainerSeconds(mTargets);
+}
+
+bool
+Pointer::isTop() const
+{
+    return mTop;
+}
+
+void
+Pointer::setTop()
+{
+    mTop = true;
     llvm::DeleteContainerSeconds(mTargets);
 }
 

@@ -92,7 +92,9 @@ public:
     bool operator!=(const Target &target) const;
 
     /// Merge another target into this one.
-    void merge(const Target &target);
+    void join(const Target &target);
+
+    void meet(const Target &target);
 
     /// Get memory usage (used byte count) of this value.
     size_t memoryUsage() const;

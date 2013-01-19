@@ -27,6 +27,8 @@ public:
     /// pointer.
     PlaceTargetMap mTargets;
 
+    bool mTop;
+
     /// Type of the object the pointer is pointing to.  It might be
     /// incompatible with the type of the actual abstract value.
     /// Conversion is needed during store and load operations in such a
@@ -135,6 +137,10 @@ public: // Implementation of Domain.
     virtual bool isBottom() const;
 
     virtual void setBottom();
+
+    virtual bool isTop() const;
+
+    virtual void setTop();
 
     /// Covariant return type.
     virtual const llvm::PointerType &getValueType() const { return mType; }

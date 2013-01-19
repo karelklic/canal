@@ -302,42 +302,36 @@ Constructors::createFloat(const llvm::APFloat &number) const
 Domain *
 Constructors::createArray(const llvm::SequentialType &type) const
 {
-    return new Array::SingleItem(mEnvironment, type);
-/*
+//    return new Array::SingleItem(mEnvironment, type);
     Product::Vector *container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
     return container;
-*/
 }
 
 Domain *
 Constructors::createArray(const llvm::SequentialType &type,
                           Domain *size) const
 {
-    return new Array::SingleItem(mEnvironment, type, size);
-/*
+//    return new Array::SingleItem(mEnvironment, type, size);
     Product::Vector *container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, size));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
     return container;
-*/
 }
 
 Domain *
 Constructors::createArray(const llvm::SequentialType &type,
                           const std::vector<Domain*> &values) const
 {
-    return new Array::SingleItem(mEnvironment, type, values.begin(), values.end());
-/*
+//    return new Array::SingleItem(mEnvironment, type, values.begin(), values.end());
     Product::Vector *container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type, values));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, values.begin(), values.end()));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type, values.begin(), values.end()));
     return container;
-*/
 }
 
 Domain *
