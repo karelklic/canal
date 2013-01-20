@@ -36,3 +36,35 @@ AT_CLEANUP
 AT_SETUP([Pointer])
 AT_CHECK([../../PointerTest], 0)
 AT_CLEANUP
+
+AT_SETUP([Integration: 0-numeric.c])
+AT_CHECK([file_test.sh ../../../tool/canal ../../0-numeric.c], 0, [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Integration: 1-pointer.c])
+AT_CHECK([file_test.sh ../../../tool/canal ../../1-pointer.c], 0, [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Integration: 2-string.c])
+AT_CHECK([file_test.sh ../../../tool/canal ../../2-string.c], 0, [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Integration: 3-pointer.c])
+AT_CHECK([file_test.sh ../../../tool/canal ../../3-pointer.c], 0, [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Integration: chroot.c])
+AT_CHECK([file_test.sh ../../../tool/canal ../../chroot.c], 0, [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Integration: sleep.c])
+AT_CHECK([file_test.sh ../../../tool/canal ../../sleep.c], 0, [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Integration: true.c])
+AT_CHECK([file_test.sh ../../../tool/canal ../../true.c], 0, [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Integration: wc.c])
+AT_CHECK([file_test.sh ../../../tool/canal ../../wc.c], 0, [ignore], [ignore])
+AT_CLEANUP
