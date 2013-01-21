@@ -100,6 +100,7 @@ CommandHelp::allCommandsHelp()
                  << "Examining data\n"
                  << commandGetStringAndRemove("print", commands)
                  << commandGetStringAndRemove("dump", commands)
+                 << commandGetStringAndRemove("set", commands)
                  << "\n"
                  << "Specifying files\n"
                  << commandGetStringAndRemove("cd", commands)

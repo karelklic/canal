@@ -6,8 +6,8 @@
 CommandSet::CommandSet(Commands &commands)
     : Command("set",
               "",
-              "Set one of the canal options",
-              "Set one of the canal options",
+              "Assign a value to a variable",
+              "Assign a value to a variable.",
               commands)
 {
     mOptions["widening-iterations"] = CommandSet::WideningIterations;
