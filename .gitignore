@@ -10,6 +10,7 @@ CTestTestfile.cmake
 CMakeCache.txt
 
 /Testing
+/canal.pc
 /canal.config
 /canal.creator
 /canal.files
