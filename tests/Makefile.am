@@ -57,9 +57,15 @@ $(TESTSUITE): $(TESTSUITE_AT) $(srcdir)/package.m4
 ## Test files. ##
 ## ----------- ##
 EXTRA_DIST += \
+	file_test.sh \
 	0-numeric.c \
 	1-pointer.c \
-	2-string.c
+	2-string.c \
+	3-pointer.c \
+	chroot.c \
+	sleep.c \
+	true.c \
+	wc.c
 
 ## --------- ##
 ## Programs. ##

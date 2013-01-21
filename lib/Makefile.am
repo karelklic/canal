@@ -1,79 +1,82 @@
-lib_LTLIBRARIES = libcanal.la
-libcanal_la_SOURCES = \
-	APIntUtils.cpp \
+pkginclude_HEADERS = \
 	APIntUtils.h \
-	ArrayExactSize.cpp \
 	ArrayExactSize.h \
-	ArraySingleItem.cpp \
 	ArraySingleItem.h \
-	ArrayStringPrefix.cpp \
 	ArrayStringPrefix.h \
-	Constructors.cpp \
 	Constructors.h \
-	Domain.cpp \
 	Domain.h \
-	Environment.cpp \
 	Environment.h \
-	FloatInterval.cpp \
 	FloatInterval.h \
-	FloatUtils.cpp \
 	FloatUtils.h \
-	IntegerBitfield.cpp \
 	IntegerBitfield.h \
-	IntegerSet.cpp \
 	IntegerSet.h \
-	IntegerInterval.cpp \
 	IntegerInterval.h \
-	IntegerUtils.cpp \
 	IntegerUtils.h \
-	InterpreterBasicBlock.cpp \
 	InterpreterBasicBlock.h \
-	InterpreterFunction.cpp \
 	InterpreterFunction.h \
-	Interpreter.cpp \
 	Interpreter.h \
-	InterpreterIterator.cpp \
 	InterpreterIterator.h \
 	InterpreterIteratorCallback.h \
-	InterpreterModule.cpp \
 	InterpreterModule.h \
-	InterpreterOperationsCallback.cpp \
 	InterpreterOperationsCallback.h \
-	Operations.cpp \
 	Operations.h \
 	OperationsCallback.h \
-	Pointer.cpp \
 	Pointer.h \
-	PointerTarget.cpp \
 	PointerTarget.h \
-	PointerUtils.cpp \
 	PointerUtils.h \
 	Prereq.h \
-	ProductVector.cpp \
 	ProductVector.h \
 	SharedDataPointer.h \
-	SlotTracker.cpp \
 	SlotTracker.h \
-	State.cpp \
 	State.h \
-	StateMap.cpp \
 	StateMap.h \
-	Structure.cpp \
 	Structure.h \
-	Utils.cpp \
 	Utils.h \
-	VariableArguments.cpp \
 	VariableArguments.h \
 	WideningDataInterface.h \
-	WideningDataIterationCount.cpp \
 	WideningDataIterationCount.h \
 	WideningInterface.h \
-	WideningManager.cpp \
 	WideningManager.h \
-	WideningNumericalInfinity.cpp \
 	WideningNumericalInfinity.h \
-	WideningPointers.cpp \
 	WideningPointers.h
+
+lib_LTLIBRARIES = libcanal.la
+libcanal_la_SOURCES = \
+	$(pkginclude_HEADERS) \
+	APIntUtils.cpp \
+	ArrayExactSize.cpp \
+	ArraySingleItem.cpp \
+	ArrayStringPrefix.cpp \
+	Constructors.cpp \
+	Domain.cpp \
+	Environment.cpp \
+	FloatInterval.cpp \
+	FloatUtils.cpp \
+	IntegerBitfield.cpp \
+	IntegerSet.cpp \
+	IntegerInterval.cpp \
+	IntegerUtils.cpp \
+	InterpreterBasicBlock.cpp \
+	InterpreterFunction.cpp \
+	Interpreter.cpp \
+	InterpreterIterator.cpp \
+	InterpreterModule.cpp \
+	InterpreterOperationsCallback.cpp \
+	Operations.cpp \
+	Pointer.cpp \
+	PointerTarget.cpp \
+	PointerUtils.cpp \
+	ProductVector.cpp \
+	SlotTracker.cpp \
+	State.cpp \
+	StateMap.cpp \
+	Structure.cpp \
+	Utils.cpp \
+	VariableArguments.cpp \
+	WideningDataIterationCount.cpp \
+	WideningManager.cpp \
+	WideningNumericalInfinity.cpp \
+	WideningPointers.cpp
 
 libcanal_la_CXXFLAGS = $(LLVM_CFLAGS)
 libcanal_la_LDFLAGS = $(LLVM_LDFLAGS) $(LLVM_LIBS) -version-info 0:0:0

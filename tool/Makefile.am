@@ -41,6 +41,7 @@ canal_SOURCES = \
 	Commands.cpp \
 	IteratorCallback.h \
 	IteratorCallback.cpp \
+	Prereq.h \
 	State.h \
 	State.cpp \
 	Utils.h \
@@ -53,7 +54,7 @@ canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS) -I$(top_srcdir) -DDATADIR='"$(
 
 install-exec-hook:
 	mkdir -p $(DESTDIR)$(datadir)/canal/wrappers && \
-	cd $(DESTDIR)$(datadir)/canal/wrappers && \
-	$(LN_S)	-f $(DESTDIR)$(bindir)/canal$(EXEEXT) gcc$(EXEEXT) && \
-	$(LN_S)	-f $(DESTDIR)$(bindir)/canal$(EXEEXT) g++$(EXEEXT) && \
-	$(LN_S)	-f $(DESTDIR)$(bindir)/canal$(EXEEXT) ld$(EXEEXT)
+	ln -f $(DESTDIR)$(bindir)/canal$(EXEEXT) $(DESTDIR)$(datadir)/canal/wrappers/gcc$(EXEEXT) && \
+	ln -f $(DESTDIR)$(bindir)/canal$(EXEEXT) $(DESTDIR)$(datadir)/canal/wrappers/g++$(EXEEXT) && \
+	ln -f $(DESTDIR)$(bindir)/canal$(EXEEXT) $(DESTDIR)$(datadir)/canal/wrappers/ld$(EXEEXT)
+

@@ -5,11 +5,18 @@ Summary: LLVM static analysis framework
 Group: Development/Libraries
 License: GPLv3+
 Source0: https://fedorahosted.org/released/canal/canal-%{version}.tar.xz
-BuildRequires: asciidoc xmlto
-BuildRequires: llvm-devel
+BuildRequires: llvm-devel clang-devel
 
 %description
 LLVM static analysis framework.
+
+%package devel
+Summary: Development libraries for %{name}
+Group: Development/Libraries
+Requires: %{name}%{?_isa} = %{version}-%{release}
+
+%description devel
+Development libraries and headers for %{name}.
 
 %prep
 %setup -q
@@ -21,10 +28,25 @@ make %{?_smp_mflags}
 %install
 make install DESTDIR=%{buildroot}
 
+# Remove all libtool archives (*.la) from modules directory.
+find %{buildroot} -regex ".*\.la$" | xargs rm -f --
+
 %check
 make check
 
+%post -p /sbin/ldconfig
+%postun -p /sbin/ldconfig
+
 %files
+%doc README NEWS COPYING ChangeLog
+%{_bindir}/canal
+%{_libdir}/lib*.so.*
+/usr/share/canal/wrappers
+
+%files devel
+%{_includedir}/*
+%{_libdir}/lib*.so
+%{_libdir}/pkgconfig/*
 
 %changelog
 * Thu Mar  8 2012 Karel Klíč <kklic@redhat.com> - @PACKAGE_VERSION@-1

@@ -4,11 +4,14 @@ endif
 
 SUBDIRS = lib tool tests $(MAYBE_DOCUMENTATION)
 
-EXTRA_DIST = canal.spec.in
-
 # Automatic update of libtool.
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status libtool
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = canal.pc
+DISTCLEANFILES = $(pkgconfig_DATA)
+EXTRA_DIST = canal.pc.in
 
 UPLOAD_URI = kklic@fedorahosted.org:canal
 .PHONY: upload
@@ -26,6 +29,7 @@ RPM_DIRS = --define "_sourcedir `pwd`" \
            --define "_builddir `pwd`" \
            --define "_srcrpmdir `pwd`"
 
+EXTRA_DIST += canal.spec.in
 rpm: dist-xz canal.spec
 	rpmbuild $(RPM_DIRS) -ba canal.spec
 srpm: dist-xz canal.spec

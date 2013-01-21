@@ -218,6 +218,7 @@ AC_SUBST([O0CFLAGS], [`echo $CFLAGS | sed 's/-O[[0-9]] *//g'`])
 
 AC_CONFIG_FILES([
     canal.spec
+    canal.pc
     Makefile
     docs/Makefile
     lib/Makefile

@@ -21,6 +21,7 @@ CMakeCache.txt
 /libtool
 /ar-lib
 /INSTALL
+/install_manifest.txt
 /aclocal.m4
 /config.guess
 /config.sub
