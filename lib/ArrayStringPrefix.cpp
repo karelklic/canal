@@ -83,7 +83,7 @@ std::string
 StringPrefix::toString() const
 {
     StringStream ss;
-    ss << "string prefix ";
+    ss << "stringPrefix ";
 
     if (isTop())
         ss << "top";
@@ -92,6 +92,7 @@ StringPrefix::toString() const
         ss << "bottom";
 
     ss << "\n";
+        ss << "    type " << Canal::toString(mType) << "\n";
 
     if (!isBottom() && !isTop())
         ss << "    \"" << mPrefix << "\"\n";

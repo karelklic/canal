@@ -93,6 +93,7 @@ ExactSize::toString() const
     if (mHasExactSize)
     {
         ss << "arrayExactSize\n";
+        ss << "    type " << Canal::toString(mType) << "\n";
         std::vector<Domain*>::const_iterator it = mValues.begin(),
             itend = mValues.end();
 

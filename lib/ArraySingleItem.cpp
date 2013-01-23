@@ -94,6 +94,7 @@ SingleItem::toString() const
 {
     StringStream ss;
     ss << "arraySingleItem\n";
+    ss << "    type " << Canal::toString(mType) << "\n";
     ss << "    size\n";
     ss << indent(mSize->toString(), 8);
     ss << "    value\n";
