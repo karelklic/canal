@@ -74,14 +74,16 @@ State::step(int count)
 void
 State::finish()
 {
-    while (!mIteratorCallback.isFunctionEnter())
+    do
     {
         mInterpreter.getIterator().interpretInstruction();
         if (mIteratorCallback.isFixpointReached())
             return;
+
         if (reachedBreakpoint())
             return;
-    }
+
+    } while (!mIteratorCallback.isFunctionEnter());
 
     llvm::outs() << "Entering function "
                  << mInterpreter.getCurrentFunction().getName() << ".\n"
