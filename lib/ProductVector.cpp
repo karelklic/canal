@@ -50,7 +50,7 @@ std::string
 Vector::toString() const
 {
     StringStream ss;
-    ss << "integerVector\n";
+    ss << "productVector\n";
     std::vector<Domain*>::const_iterator it = mValues.begin(),
         itend = mValues.end();
 
