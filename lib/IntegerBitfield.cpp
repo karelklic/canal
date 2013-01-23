@@ -223,7 +223,7 @@ std::string
 Bitfield::toString() const
 {
     StringStream ss;
-    ss << "bitfield ";
+    ss << "integerBitfield ";
     for (int pos = mZeroes.getBitWidth() - 1; pos >= 0; --pos)
     {
         switch (getBitValue(pos))

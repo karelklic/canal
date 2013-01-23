@@ -45,7 +45,7 @@ Set::signedMin(llvm::APInt &result) const
         if (mValues.empty())
             return false;
 
-        //Find lowest negative number
+        // Find lowest negative number
         APIntUtils::USet::const_iterator bound =
             mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
 
@@ -157,7 +157,7 @@ std::string
 Set::toString() const
 {
     StringStream ss;
-    ss << "set";
+    ss << "integerSet";
     if (mTop)
         ss << " top";
     else if (mValues.empty())

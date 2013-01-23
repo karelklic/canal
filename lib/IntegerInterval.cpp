@@ -224,7 +224,7 @@ std::string
 Interval::toString() const
 {
     StringStream ss;
-    ss << "interval";
+    ss << "integerInterval";
     StringStream sign, unsign;
     if (isBottom()) {
         ss << " empty\n";
