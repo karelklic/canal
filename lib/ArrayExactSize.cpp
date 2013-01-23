@@ -48,7 +48,10 @@ ExactSize::ExactSize(const Environment &environment,
 }
 
 ExactSize::ExactSize(const ExactSize &value)
-    : Domain(value), mValues(value.mValues), mHasExactSize(value.mHasExactSize), mType(value.mType)
+    : Domain(value),
+      mValues(value.mValues),
+      mHasExactSize(value.mHasExactSize),
+      mType(value.mType)
 {
     std::vector<Domain*>::iterator it = mValues.begin(),
         itend = mValues.end();
