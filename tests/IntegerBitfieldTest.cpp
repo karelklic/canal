@@ -110,7 +110,7 @@ testMeet()
         CANAL_ASSERT(negone_one1.meet(negone_one) == negone_one);
         CANAL_ASSERT(zero_one1.meet(zero_one) == zero_one);
 
-        CANAL_ASSERT(zero1.meet(one).toString() == "bitfield 0000000000000000000000000000000_\n");
+        CANAL_ASSERT(zero1.meet(one).toString() == "integerBitfield 0000000000000000000000000000000_\n");
         CANAL_ASSERT(one1.meet(zero_one) == one);
         CANAL_ASSERT(one1.meet(negone_one) == one);
 
