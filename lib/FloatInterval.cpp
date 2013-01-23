@@ -266,6 +266,7 @@ Interval::toString() const
     }
 
     ss << "\n";
+    ss << "    type " << Canal::toString(getValueType()) << "\n";
     return ss.str();
 }
 
@@ -709,8 +710,23 @@ Interval::uitofp(const Domain &value)
         return *this;
     }
 
-    mFrom = llvm::APFloat(min);
-    mTo = llvm::APFloat(max);
+    mTop = false;
+    mEmpty = false;
+
+    // The correct rounding mode (rmNearestTiesToEven) has been found
+    // in the LLVM codebase (ExecutionEnginge.cpp).
+    llvm::APFloat::opStatus status;
+    status = mFrom.convertFromAPInt(min,
+                                    /*isSigned*/false,
+                                    llvm::APFloat::rmNearestTiesToEven);
+
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+    status = mTo.convertFromAPInt(max,
+                                  /*isSigned*/false,
+                                  llvm::APFloat::rmNearestTiesToEven);
+
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
     return *this;
 }
 
@@ -725,8 +741,23 @@ Interval::sitofp(const Domain &value)
         return *this;
     }
 
-    mFrom = llvm::APFloat(min);
-    mTo = llvm::APFloat(max);
+    mTop = false;
+    mEmpty = false;
+
+    // The correct rounding mode (rmNearestTiesToEven) has been found
+    // in the LLVM codebase (ExecutionEnginge.cpp).
+    llvm::APFloat::opStatus status;
+    status = mFrom.convertFromAPInt(min,
+                                    /*isSigned*/true,
+                                    llvm::APFloat::rmNearestTiesToEven);
+
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
+
+    status = mTo.convertFromAPInt(max,
+                                  /*isSigned*/true,
+                                  llvm::APFloat::rmNearestTiesToEven);
+
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
     return *this;
 }
 
