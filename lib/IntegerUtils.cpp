@@ -65,17 +65,19 @@ signedMin(const Domain &value, llvm::APInt &result)
     if (!getSet(value).signedMin(result))
         return false;
 
-    llvm::APInt temp(getBitWidth(value), 0);
+    llvm::APInt temp;
     if (!getInterval(value).signedMin(temp))
         return false;
 
-    if (result.sgt(temp))
+    // If the minimum returned by the interval is higher, it means it
+    // is also more precise.
+    if (result.slt(temp))
         result = temp;
 
     if (!getBitfield(value).signedMin(temp))
         return false;
 
-    if (result.sgt(temp))
+    if (result.slt(temp))
         result = temp;
 
     return true;
@@ -87,17 +89,17 @@ signedMax(const Domain &value, llvm::APInt &result)
     if (!getSet(value).signedMax(result))
         return false;
 
-    llvm::APInt temp(getBitWidth(value), 0);
+    llvm::APInt temp;
     if (!getInterval(value).signedMax(temp))
         return false;
 
-    if (result.slt(temp))
+    if (result.sgt(temp))
         result = temp;
 
     if (!getBitfield(value).signedMax(temp))
         return false;
 
-    if (result.slt(temp))
+    if (result.sgt(temp))
         result = temp;
 
     return true;
@@ -109,17 +111,17 @@ unsignedMin(const Domain &value, llvm::APInt &result)
     if (!getSet(value).unsignedMin(result))
         return false;
 
-    llvm::APInt temp(getBitWidth(value), 0);
+    llvm::APInt temp;
     if (!getInterval(value).unsignedMin(temp))
         return false;
 
-    if (result.ugt(temp))
+    if (result.ult(temp))
         result = temp;
 
     if (!getBitfield(value).unsignedMin(temp))
         return false;
 
-    if (result.ugt(temp))
+    if (result.ult(temp))
         result = temp;
 
     return true;
@@ -131,17 +133,17 @@ unsignedMax(const Domain &value, llvm::APInt &result)
     if (!getSet(value).unsignedMax(result))
         return false;
 
-    llvm::APInt temp(getBitWidth(value), 0);
+    llvm::APInt temp;
     if (!getInterval(value).unsignedMax(temp))
         return false;
 
-    if (result.ult(temp))
+    if (result.ugt(temp))
         result = temp;
 
     if (!getBitfield(value).unsignedMax(temp))
         return false;
 
-    if (result.ult(temp))
+    if (result.ugt(temp))
         result = temp;
 
     return true;
