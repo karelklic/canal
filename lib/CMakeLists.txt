@@ -22,6 +22,7 @@ add_library(canal SHARED
     Pointer.cpp
     PointerTarget.cpp
     PointerUtils.cpp
+    ProductMessage.cpp
     ProductVector.cpp
     SlotTracker.cpp
     State.cpp
