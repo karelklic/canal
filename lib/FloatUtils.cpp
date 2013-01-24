@@ -51,6 +51,24 @@ getType(const llvm::fltSemantics &semantics, llvm::LLVMContext &context)
     CANAL_NOT_IMPLEMENTED();
 }
 
+llvm::APInt
+toInteger(const llvm::APFloat &num, unsigned bitWidth, bool isSigned, bool &isExact)
+{
+    llvm::APInt result(bitWidth, 0, isSigned);
+    llvm::SmallVector<uint64_t, 4> parts(result.getNumWords());
+    llvm::APFloat::opStatus status;
+    status = num.convertToInteger(parts.data(),
+                                  bitWidth,
+                                  isSigned,
+                                  llvm::APFloat::rmTowardZero,
+                                  &isExact);
+
+    CANAL_ASSERT(status == llvm::APFloat::opOK);
+    return llvm::APInt(bitWidth,
+                       (unsigned)parts.size(),
+                       (const uint64_t*)parts.data());
+}
+
 } // namespace Utils
 } // namespace Float
 } // namespace Canal

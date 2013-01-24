@@ -12,6 +12,11 @@ const llvm::fltSemantics &getSemantics(const llvm::Type &type);
 const llvm::Type &getType(const llvm::fltSemantics &semantics,
                           llvm::LLVMContext &context);
 
+llvm::APInt toInteger(const llvm::APFloat &num,
+                      unsigned bitWidth,
+                      bool isSigned,
+                      bool &isExact);
+
 } // namespace Utils
 } // namespace Float
 } // namespace Canal
