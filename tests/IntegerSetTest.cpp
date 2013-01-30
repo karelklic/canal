@@ -536,6 +536,73 @@ testDivisionByZero() {
     CANAL_ASSERT(result.srem(one_two, minusone_zero) == zero);
 }
 
+static void
+testAdd()
+{
+    Integer::Set zero(*gEnvironment, llvm::APInt(32, 0)),
+            one(*gEnvironment, llvm::APInt(32, 1)),
+            minusone(*gEnvironment, llvm::APInt(32, -1, true)),
+            two(*gEnvironment, llvm::APInt(32, 2)),
+            zero_one(zero), zero_one2(one), minusone_zero(minusone), result(zero), two_three(two),
+            three(*gEnvironment, llvm::APInt(32, 3)),
+            one_three(one), top(zero);
+    llvm::APInt res;
+
+    zero_one.join(one); //0-1
+    zero_one2.join(zero); //0-1
+    minusone_zero.join(zero); //-1-0
+    two_three.join(three); //2-3
+    one_three.join(three); //1-3
+    top.setTop();
+
+    result.add(zero, zero); //0 + 0 = 0
+    CANAL_ASSERT(result == zero);
+
+    result.add(zero, top); //0 + TOP = TOP
+    CANAL_ASSERT(result.isTop());
+
+    result.add(zero_one, zero); //0-1 + 0 = 0-1
+    CANAL_ASSERT(result.signedMin(res) && res == 0 && result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.unsignedMin(res) && res == 0 && result.unsignedMax(res) && res == 1);
+
+    result.add(zero_one, zero_one2); //0-1 + 0-1 = 0-2
+    CANAL_ASSERT(result.signedMin(res) && res == 0 && result.signedMax(res) && res == 2);
+    CANAL_ASSERT(result.unsignedMin(res) && res == 0 && result.unsignedMax(res) && res == 2);
+
+    result.add(two_three, one_three); //2-3 + 1-3 = 3-6
+    CANAL_ASSERT(result.signedMin(res) && res == 3 && result.signedMax(res) && res == 6);
+    CANAL_ASSERT(result.unsignedMin(res) && res == 3 && result.unsignedMax(res) && res == 6);
+
+    result.add(zero_one, minusone_zero); //0-1 + -1-0 = -1-1 / TOP for unsigned
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, -1, true) && result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.unsignedMin(res) && res == 0 && result.unsignedMax(res) && res == llvm::APInt(32, -1, true));
+
+    Integer::Set tmp1(result);
+    result.add(tmp1, minusone_zero); //-1-1 + -1-0 = -2-1 / TOP for unsigned
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, -2, true) && result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.unsignedMin(res) && res == 0 && result.unsignedMax(res) && res == llvm::APInt(32, -1, true));
+
+    result.add(top, zero); //TOP + anything = TOP
+    CANAL_ASSERT(result.isTop());
+
+    result.add(top, zero_one2); //TOP + anything = TOP
+    CANAL_ASSERT(result.isTop());
+
+    for (unsigned i = 0; i < 30; i ++) {
+        Integer::Set tmp(i ? result : two_three);
+        result.add(tmp, two_three); //2-3
+    }
+    CANAL_ASSERT(result.signedMin(res) && res == 2*31 && result.signedMax(res) && res == 3*31);
+    CANAL_ASSERT(result.unsignedMin(res) && res == 2*31 && result.unsignedMax(res) && res == 3*31);
+
+    for (unsigned i = 0; i < 30; i ++) {
+        Integer::Set tmp(result);
+        result.add(tmp, minusone_zero);
+    }
+    //CANAL_ASSERT(result.signedMin(res) && res == 0 && result.signedMax(res) && res == 3000);
+    CANAL_ASSERT(result.isTop());
+}
+
 int
 main(int argc, char **argv)
 {
@@ -550,6 +617,8 @@ main(int argc, char **argv)
     testInclusion();
     testIcmp();
     testDivisionByZero();
+
+    testAdd();
 
     delete gEnvironment;
     return 0;

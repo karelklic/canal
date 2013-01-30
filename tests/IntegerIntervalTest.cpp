@@ -663,6 +663,83 @@ testTrunc()
 }
 
 static void
+testAdd()
+{
+    Integer::Interval zero(*gEnvironment, llvm::APInt(32, 0)),
+            one(*gEnvironment, llvm::APInt(32, 1)),
+            minusone(*gEnvironment, llvm::APInt(32, -1, true)),
+            zero_one(zero), zero_one2(one), minusone_zero(minusone), result(zero),
+            two(*gEnvironment, llvm::APInt(32, 2)),
+            three(*gEnvironment, llvm::APInt(32, 3)),
+            two_three(two),
+            zero_two(zero), one_three(zero), top(zero);
+    llvm::APInt res;
+
+    zero_one.join(one); //0-1
+    zero_one2.join(zero); //0-1
+    minusone_zero.join(zero); //-1-0
+    two_three.join(three); //2-3
+    zero_two.join(two); //0-2
+    one_three.join(three); //1-3
+    top.setTop();
+
+    result.add(zero, zero); //0 + 0 = 0
+    CANAL_ASSERT(result == zero);
+
+    result.add(result, result); //0 + 0 = 0
+    CANAL_ASSERT(result == zero);
+
+    result.add(zero, top); //0 + TOP = TOP
+    CANAL_ASSERT(result.isTop());
+
+    result.add(zero_one, zero); //0-1 + 0 = 0-1
+    CANAL_ASSERT(result.signedMin(res) && res == 0 && result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.unsignedMin(res) && res == 0 && result.unsignedMax(res) && res == 1);
+
+    result.add(zero_one, zero_one2); //0-1 + 0-1 = 0-2
+    CANAL_ASSERT(result == zero_two);
+    CANAL_ASSERT(result.signedMin(res) && res == 0 && result.signedMax(res) && res == 2);
+    CANAL_ASSERT(result.unsignedMin(res) && res == 0 && result.unsignedMax(res) && res == 2);
+
+    result.add(three, one_three); //2-3 + 1-3 = 3-6
+    CANAL_ASSERT(result.signedMin(res) && res == 3 && result.signedMax(res) && res == 6);
+    CANAL_ASSERT(result.unsignedMin(res) && res == 3 && result.unsignedMax(res) && res == 6);
+
+    result.add(zero_one, minusone_zero); //0-1 + -1-0 = -1-1 / TOP for unsigned
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, -1, true) && result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt::getMinValue(result.getBitWidth()) && //Unsigned top
+                 result.unsignedMax(res) && res == llvm::APInt::getMaxValue(result.getBitWidth()));
+
+    result.add(result, minusone_zero); //-1-1 + -1-0 = -2-1 / TOP for unsigned
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, -2, true) && result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt::getMinValue(result.getBitWidth()) && //Unsigned top
+                 result.unsignedMax(res) && res == llvm::APInt::getMaxValue(result.getBitWidth()));
+
+    result.add(result, Integer::Interval(*gEnvironment, llvm::APInt::getSignedMinValue(32))); //-1-1 + -signedMin = TOP
+    CANAL_ASSERT(result.isTop());
+
+    result.add(result, zero); //TOP + anything = TOP
+    CANAL_ASSERT(result.isTop());
+
+    result.add(result, zero_one2); //TOP + anything = TOP
+    CANAL_ASSERT(result.isTop());
+
+    result.add(zero, zero); //Reset result
+    for (unsigned i = 0; i < 1000; i ++) {
+        result.add(result, two_three); //2-3
+    }
+    CANAL_ASSERT(result.signedMin(res) && res == 2000 && result.signedMax(res) && res == 3000);
+    CANAL_ASSERT(result.unsignedMin(res) && res == 2000 && result.unsignedMax(res) && res == 3000);
+
+    for (unsigned i = 0; i < 2000; i ++) {
+        result.add(result, minusone_zero);
+    }
+    CANAL_ASSERT(result.signedMin(res) && res == 0 && result.signedMax(res) && res == 3000);
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt::getMinValue(result.getBitWidth()) && //Unsigned top
+                 result.unsignedMax(res) && res == llvm::APInt::getMaxValue(result.getBitWidth()));
+}
+
+static void
 testDivisionByZero() {
     Integer::Interval zero(*gEnvironment, llvm::APInt(32, 0)),
             one(*gEnvironment, llvm::APInt(32, 1)),
@@ -750,6 +827,7 @@ main(int argc, char **argv)
     testIcmp();
     testTrunc();
 
+    testAdd();
     testDivisionByZero();
 
     delete gEnvironment;
