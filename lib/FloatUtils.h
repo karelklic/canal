@@ -15,7 +15,7 @@ const llvm::Type &getType(const llvm::fltSemantics &semantics,
 llvm::APInt toInteger(const llvm::APFloat &num,
                       unsigned bitWidth,
                       bool isSigned,
-                      bool &isExact);
+                      llvm::APFloat::opStatus &status);
 
 } // namespace Utils
 } // namespace Float

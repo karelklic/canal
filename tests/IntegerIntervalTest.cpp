@@ -4,6 +4,7 @@
 #include <llvm/Module.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Support/ManagedStatic.h>
+#include "lib/FloatInterval.h"
 
 using namespace Canal;
 
@@ -810,6 +811,130 @@ testDivisionByZero() {
                  result.unsignedMax(res) && res == llvm::APInt::getMaxValue(result.getBitWidth()));
 }
 
+static void
+testFPConversions ()
+{
+    Integer::Interval result(*gEnvironment, llvm::APInt(32, 0)),
+            small(*gEnvironment, llvm::APInt(8, 0));
+    Float::Interval zerof(*gEnvironment, llvm::APFloat(0.0d)),
+            pointfivef(*gEnvironment, llvm::APFloat(0.5d)),
+            zero_pointfivef(zerof),
+            negativefive(*gEnvironment, llvm::APFloat(-5.0d)),
+            minuspointfivef(*gEnvironment, llvm::APFloat(-0.5d)),
+            five(*gEnvironment, llvm::APFloat(5.0d)),
+            thousandf(*gEnvironment, llvm::APFloat(1000.0d)),
+            five_thousandf(five),
+            topf(zerof),
+            bottomf(zerof),
+            smallf(*gEnvironment, llvm::APFloat(1e-10d)),
+            minusthousand_minusfivef(*gEnvironment, llvm::APFloat(-1000.0d)),
+            minusthousand_thousandf(minusthousand_minusfivef);
+    llvm::APInt res;
+    zerof.join(pointfivef);
+    five_thousandf.join(thousandf);
+    minusthousand_minusfivef.join(negativefive);
+    minusthousand_thousandf.join(thousandf);
+    topf.setTop();
+    bottomf.setBottom();
+
+    //FpToUI
+    result.fptoui(zerof);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptoui(pointfivef);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptoui(zero_pointfivef);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptoui(negativefive);
+    CANAL_ASSERT(result.isTop());
+
+    result.fptoui(smallf);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptoui(five_thousandf);
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, 5) &&
+                 result.signedMax(res) && res == llvm::APInt(32, 1000));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 5) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 1000));
+
+    result.fptoui(bottomf);
+    CANAL_ASSERT(result.isBottom());
+
+    result.fptoui(topf);
+    CANAL_ASSERT(result.isTop());
+
+    small.fptoui(thousandf);
+    CANAL_ASSERT(small.isTop());
+
+    //FpToSI
+    result.fptosi(zerof);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptosi(pointfivef);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptosi(zero_pointfivef);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptosi(minuspointfivef);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptosi(negativefive);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, -5, true) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, -5, true));
+
+    result.fptosi(smallf);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptosi(five_thousandf);
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, 5) &&
+                 result.signedMax(res) && res == llvm::APInt(32, 1000));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 5) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 1000));
+
+    result.fptosi(minusthousand_minusfivef);
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, -1000, true) &&
+                 result.signedMax(res) && res == llvm::APInt(32, -5, true));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, -1000, true) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, -5, true));
+
+    result.fptosi(minusthousand_thousandf);
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, -1000, true) &&
+                 result.signedMax(res) && res == llvm::APInt(32, 1000));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 1000) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, -1000, true));
+
+    result.fptosi(bottomf);
+    CANAL_ASSERT(result.isBottom());
+
+    result.fptosi(topf);
+    CANAL_ASSERT(result.isTop());
+
+    small.fptosi(thousandf);
+    CANAL_ASSERT(small.isTop());
+}
+
 int
 main(int argc, char **argv)
 {
@@ -826,6 +951,7 @@ main(int argc, char **argv)
     testInclusion();
     testIcmp();
     testTrunc();
+    testFPConversions();
 
     testAdd();
     testDivisionByZero();

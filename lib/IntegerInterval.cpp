@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "APIntUtils.h"
 #include "FloatInterval.h"
+#include "FloatUtils.h"
 #include "Environment.h"
 
 namespace Canal {
@@ -1483,14 +1484,81 @@ Interval::sext(const Domain &value)
 Interval &
 Interval::fptoui(const Domain &value)
 {
-    setTop();
+    const Float::Interval &interval = checkedCast<Float::Interval>(value);
+
+    if (interval.isBottom()) {
+        setBottom();
+    }
+    else if (interval.isTop()) {
+        setTop();
+    }
+    else {
+        resetFlags();
+        llvm::APFloat::opStatus status;
+        llvm::APInt from = Float::Utils::toInteger(interval.getMin(), getBitWidth(), false, status);
+        if (status == llvm::APFloat::opInvalidOp ||
+                status == llvm::APFloat::opOverflow ||
+                status == llvm::APFloat::opUnderflow) {
+            setTop();
+        }
+        else {
+            CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
+            llvm::APInt to = Float::Utils::toInteger(interval.getMax(), getBitWidth(), false, status);
+            if (status == llvm::APFloat::opInvalidOp ||
+                    status == llvm::APFloat::opOverflow ||
+                    status == llvm::APFloat::opUnderflow) {
+                setTop();
+            }
+            else {
+                CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
+                mUnsignedFrom = mSignedFrom = from;
+                mUnsignedTo = mSignedTo = to;
+                CANAL_ASSERT(from.ule(to));
+            }
+        }
+    }
     return *this;
 }
 
 Interval &
 Interval::fptosi(const Domain &value)
 {
-    setTop();
+    const Float::Interval &interval = checkedCast<Float::Interval>(value);
+
+    if (interval.isBottom()) {
+        setBottom();
+    }
+    else if (interval.isTop()) {
+        setTop();
+    }
+    else {
+        resetFlags();
+        llvm::APFloat::opStatus status;
+        llvm::APInt from = Float::Utils::toInteger(interval.getMin(), getBitWidth(), true, status);
+        if (status == llvm::APFloat::opInvalidOp ||
+                status == llvm::APFloat::opOverflow ||
+                status == llvm::APFloat::opUnderflow) {
+            setTop();
+        }
+        else {
+            CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
+            llvm::APInt to = Float::Utils::toInteger(interval.getMax(), getBitWidth(), true, status);
+            if (status == llvm::APFloat::opInvalidOp ||
+                    status == llvm::APFloat::opOverflow ||
+                    status == llvm::APFloat::opUnderflow) {
+                setTop();
+            }
+            else {
+                CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
+                mUnsignedFrom = mSignedFrom = from;
+                mUnsignedTo = mSignedTo = to;
+                CANAL_ASSERT(from.sle(to));
+                if (mUnsignedFrom.ugt(mUnsignedTo)) {
+                    std::swap(mUnsignedFrom, mUnsignedTo);
+                }
+            }
+        }
+    }
     return *this;
 }
 
