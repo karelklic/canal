@@ -669,11 +669,15 @@ testDivisionByZero() {
             two(*gEnvironment, llvm::APInt(32, 2)),
             one_two(one),
             zero_one(zero),
+            zero_two(zero),
             minusone_zero(*gEnvironment, llvm::APInt(32, -1, true)),
+            minustwo_two(*gEnvironment, llvm::APInt(32, -2, true)),
             result(*gEnvironment, 32);
     one_two.join(two);
     zero_one.join(one);
+    zero_two.join(two);
     minusone_zero.join(zero);
+    minustwo_two.join(two);
 
     llvm::APInt res;
 
@@ -693,6 +697,12 @@ testDivisionByZero() {
     CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt::getSignedMinValue(result.getBitWidth()) && //Signed top
                  result.signedMax(res) && res == llvm::APInt::getSignedMaxValue(result.getBitWidth()));
 
+    result.udiv(one_two, zero_two);
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 2));
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt::getSignedMinValue(result.getBitWidth()) && //Signed top
+                 result.signedMax(res) && res == llvm::APInt::getSignedMaxValue(result.getBitWidth()));
+
 
     //Sdiv test
     CANAL_ASSERT(result.sdiv(one, zero).isTop());
@@ -707,6 +717,18 @@ testDivisionByZero() {
     result.sdiv(one_two, minusone_zero); //Division by -1 - 0 -> division by -1
     CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, -2, true) && //Signed minus two to minus one
                  result.signedMax(res) && res == llvm::APInt(32, -1, true));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt::getMinValue(result.getBitWidth()) && //Unsigned top
+                 result.unsignedMax(res) && res == llvm::APInt::getMaxValue(result.getBitWidth()));
+
+    result.sdiv(minustwo_two, minustwo_two); //Division by -2 - 2 -> division by -1 to 1
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, -2, true) && //Signed minus two to minus one
+                 result.signedMax(res) && res == llvm::APInt(32, 2));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt::getMinValue(result.getBitWidth()) && //Unsigned top
+                 result.unsignedMax(res) && res == llvm::APInt::getMaxValue(result.getBitWidth()));
+
+    result.sdiv(zero_one, minustwo_two); //Division by -2 - 2 -> division by -1 to 1
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == llvm::APInt(32, 1));
     CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt::getMinValue(result.getBitWidth()) && //Unsigned top
                  result.unsignedMax(res) && res == llvm::APInt::getMaxValue(result.getBitWidth()));
 }

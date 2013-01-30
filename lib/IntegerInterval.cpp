@@ -987,6 +987,31 @@ Interval::sdiv(const Domain &a, const Domain &b)
             return *this;
         }
         llvm::APInt toTo, toFrom, fromTo, fromFrom;
+        if (bb.mSignedFrom.isNegative() && bb.mSignedTo.isStrictlyPositive()) {
+            //If 0 is in this interval, you divide by two intervals:
+            //<signedFrom, -1> and <1, signedTo>
+            //which is the same in intervals as only {-1, 1}
+            // -> it will provide maximum values
+
+            //Divide by -1
+            fromFrom = APIntUtils::sdiv_ov(aa.mSignedFrom, llvm::APInt(bb.getBitWidth(), -1, true), mSignedTop);
+            if (!mSignedTop) {
+                toFrom = APIntUtils::sdiv_ov(aa.mSignedTo, llvm::APInt(bb.getBitWidth(), -1, true), mSignedTop);
+                //Divide by 1 -> same value
+                fromTo = aa.mSignedFrom;
+                toTo = aa.mSignedTo;
+                if (!mSignedTop) {
+                    minMax(true,
+                           mSignedFrom,
+                           mSignedTo,
+                           toTo,
+                           toFrom,
+                           fromTo,
+                           fromFrom);
+                }
+            }
+            return *this;
+        }
         if (bb.mSignedFrom == 0) { //From is zero -> divide by 1 -> same as original
             fromFrom = aa.mSignedFrom;
             toFrom = aa.mSignedTo;
