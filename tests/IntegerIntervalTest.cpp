@@ -816,18 +816,18 @@ testFPConversions ()
 {
     Integer::Interval result(*gEnvironment, llvm::APInt(32, 0)),
             small(*gEnvironment, llvm::APInt(8, 0));
-    Float::Interval zerof(*gEnvironment, llvm::APFloat(0.0d)),
-            pointfivef(*gEnvironment, llvm::APFloat(0.5d)),
+    Float::Interval zerof(*gEnvironment, llvm::APFloat(0.0)),
+            pointfivef(*gEnvironment, llvm::APFloat(0.5)),
             zero_pointfivef(zerof),
-            negativefive(*gEnvironment, llvm::APFloat(-5.0d)),
-            minuspointfivef(*gEnvironment, llvm::APFloat(-0.5d)),
-            five(*gEnvironment, llvm::APFloat(5.0d)),
-            thousandf(*gEnvironment, llvm::APFloat(1000.0d)),
+            negativefive(*gEnvironment, llvm::APFloat(-5.0)),
+            minuspointfivef(*gEnvironment, llvm::APFloat(-0.5)),
+            five(*gEnvironment, llvm::APFloat(5.0)),
+            thousandf(*gEnvironment, llvm::APFloat(1000.0)),
             five_thousandf(five),
             topf(zerof),
             bottomf(zerof),
-            smallf(*gEnvironment, llvm::APFloat(1e-10d)),
-            minusthousand_minusfivef(*gEnvironment, llvm::APFloat(-1000.0d)),
+            smallf(*gEnvironment, llvm::APFloat(1e-10)),
+            minusthousand_minusfivef(*gEnvironment, llvm::APFloat(-1000.0)),
             minusthousand_thousandf(minusthousand_minusfivef);
     llvm::APInt res;
     zerof.join(pointfivef);
