@@ -676,14 +676,16 @@ Set::sext(const Domain &value)
 Set &
 Set::fptoui(const Domain &value)
 {
-    setTop();
+    Integer::Interval tmp = Interval(mEnvironment, getBitWidth());
+    fromInterval(tmp.fptoui(value));
     return *this;
 }
 
 Set &
 Set::fptosi(const Domain &value)
 {
-    setTop();
+    Integer::Interval tmp = Interval(mEnvironment, getBitWidth());
+    fromInterval(tmp.fptosi(value));
     return *this;
 }
 

@@ -865,14 +865,16 @@ Bitfield::sext(const Domain &value)
 Bitfield &
 Bitfield::fptoui(const Domain &value)
 {
-    setTop();
+    Integer::Interval tmp = Interval(mEnvironment, getBitWidth());
+    fromInterval(tmp.fptoui(value));
     return *this;
 }
 
 Bitfield &
 Bitfield::fptosi(const Domain &value)
 {
-    setTop();
+    Integer::Interval tmp = Interval(mEnvironment, getBitWidth());
+    fromInterval(tmp.fptosi(value));
     return *this;
 }
 
