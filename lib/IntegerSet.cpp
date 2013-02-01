@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "FloatInterval.h"
 #include "Environment.h"
+#include "IntegerInterval.h"
 
 namespace Canal {
 namespace Integer {
@@ -781,6 +782,41 @@ Set::applyOperationDivision(const Domain &a,
         }
     }
 
+    return *this;
+}
+
+Set &
+Set::fromInterval(const Interval &interval) {
+    mBitWidth = interval.getBitWidth();
+    if (interval.isSignedBottom() || interval.isUnsignedBottom()) {
+        setBottom();
+    }
+    else if (interval.isSignedTop() || interval.isUnsignedTop()){
+        setTop();
+    }
+    else {
+        mTop = false;
+        mValues.clear();
+        //Signed and unsigned are the same -> we store them ordered by unsigned comparator
+        llvm::APInt from, to, diff;
+        CANAL_ASSERT(interval.signedMin(from) && interval.signedMax(to));
+        diff = to - from;
+        if (diff.ult(SET_THRESHOLD)) { //Store every value
+            for (; from.sle(to); ++from) {
+                mValues.insert(from);
+            }
+        }
+        else {
+            CANAL_ASSERT(interval.unsignedMin(from) && interval.unsignedMax(to));
+            diff = to - from;
+            if (diff.ult(SET_THRESHOLD)) { //Store every value
+                for (; from.ule(to); ++from) {
+                    mValues.insert(from);
+                }
+            }
+            else setTop();
+        }
+    }
     return *this;
 }
 

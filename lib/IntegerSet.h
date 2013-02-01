@@ -7,6 +7,7 @@
 namespace Canal {
 namespace Integer {
 
+class Interval;
 class Set : public Domain
 {
 public:
@@ -89,6 +90,9 @@ public:
     {
         return value.getKind() == IntegerSetKind;
     }
+
+    /// Semantically convert Integer::Interval to Set
+    Set& fromInterval(const Interval& interval);
 
 public: // Implementation of Domain.
     /// Covariant return type.

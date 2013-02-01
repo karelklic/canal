@@ -4,6 +4,7 @@
 #include <llvm/Module.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Support/ManagedStatic.h>
+#include "lib/IntegerInterval.h"
 
 using namespace Canal;
 
@@ -659,6 +660,87 @@ testAshr () {
     }
 }
 
+static void
+testIntervalConversion () {
+    Integer::Interval zero(*gEnvironment, llvm::APInt(32, 0)),
+            one(*gEnvironment, llvm::APInt(32, 1)),
+            two(*gEnvironment, llvm::APInt(32, 2)),
+            one_two(one),
+            zero_one(zero),
+            zero_two(zero),
+            minusone_zero(*gEnvironment, llvm::APInt(32, -1, true)),
+            minustwo_two(*gEnvironment, llvm::APInt(32, -2, true)),
+            thousand(*gEnvironment, llvm::APInt(32, 1000)),
+            fifteen_sixteen(*gEnvironment, llvm::APInt(32, 15)),
+            sixteen(*gEnvironment, llvm::APInt(32, 16)),
+            zero_thousand(zero),
+            bottom(zero),
+            top(zero),
+            signedTop(zero),
+            unsignedTop(zero),
+            signedBottom(zero),
+            unsignedBottom(zero),
+            signedOverflow(*gEnvironment, llvm::APInt(32, 2147483647)),
+            signedOverflow2(*gEnvironment, llvm::APInt::getSignedMinValue(32));
+    Integer::Bitfield result(*gEnvironment, 32);
+    llvm::APInt res;
+    one_two.join(two);
+    zero_one.join(one);
+    zero_two.join(two);
+    minusone_zero.join(zero);
+    minustwo_two.join(two);
+    zero_thousand.join(thousand);
+    fifteen_sixteen.join(sixteen);
+    bottom.setBottom();
+    top.setTop();
+    signedTop.setSignedTop();
+    unsignedTop.setUnsignedTop();
+    signedBottom.setSignedBottom();
+    unsignedBottom.setUnsignedBottom();
+    signedOverflow.join(signedOverflow2); //Two values only when sorted by
+
+    CANAL_ASSERT(result.fromInterval(bottom).isBottom());
+    CANAL_ASSERT(result.fromInterval(top).isTop());
+    CANAL_ASSERT(result.fromInterval(signedTop).isTop());
+    CANAL_ASSERT(result.fromInterval(unsignedTop).isTop());
+    CANAL_ASSERT(result.fromInterval(signedBottom).isBottom());
+    CANAL_ASSERT(result.fromInterval(unsignedBottom).isBottom());
+
+    CANAL_ASSERT(result.fromInterval(zero).isConstant() &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+    CANAL_ASSERT(result.fromInterval(one).isConstant() &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 1));
+    CANAL_ASSERT(result.fromInterval(two).isConstant() &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 2));
+
+    result.fromInterval(one_two); //0000TT
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 3));
+    result.fromInterval(zero_one);
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 1));
+    result.fromInterval(zero_two); //0000TT
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 3));
+    result.fromInterval(fifteen_sixteen); //00TTTT
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 31));
+
+
+    result.fromInterval(minusone_zero); //TOP
+    CANAL_ASSERT(result.isTop());
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, -1, true));
+
+    CANAL_ASSERT(result.fromInterval(minustwo_two).isTop()); //-2, -1, 0, 1, 2 -> TOP
+
+    result.fromInterval(zero_thousand); //000...0TTTTTTTTTT
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 1023));
+
+    CANAL_ASSERT(result.fromInterval(signedOverflow).isTop()); //Difference in first bit -> TOP
+}
+
 int
 main(int argc, char **argv)
 {
@@ -675,6 +757,8 @@ main(int argc, char **argv)
     testShl();
     testLshr();
     testAshr();
+
+    testIntervalConversion();
 
     delete gEnvironment;
     return 0;

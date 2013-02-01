@@ -3,6 +3,7 @@
 #include "APIntUtils.h"
 #include "FloatInterval.h"
 #include "Environment.h"
+#include "IntegerInterval.h"
 #include <queue>
 
 namespace Canal {
@@ -879,6 +880,39 @@ const llvm::IntegerType &
 Bitfield::getValueType() const
 {
     return *llvm::Type::getIntNTy(mEnvironment.getContext(), getBitWidth());
+}
+
+Bitfield &
+Bitfield::fromInterval(const Interval &interval) {
+    mZeroes = mOnes = llvm::APInt(interval.getBitWidth(), 0);
+    if (interval.isSignedBottom() || interval.isUnsignedBottom()) {
+        setBottom();
+    }
+    else if (interval.isSignedTop() || interval.isUnsignedTop()){
+        setTop();
+    }
+    else {
+        llvm::APInt from, to;
+        CANAL_ASSERT(interval.signedMin(from) && interval.signedMax(to));
+        bool same = true;
+        for (int pos = interval.getBitWidth() - 1; pos >= 0; --pos) {
+            if (!same) {
+                setBitValue(pos, 2);
+                continue;
+            }
+            llvm::APInt bit(APIntUtils::getOneBitSet(mZeroes.getBitWidth(), pos));
+            bool first = (from & bit).getBoolValue(),
+                    second = (to & bit).getBoolValue();
+            if (first == second) {
+                setBitValue(pos, first);
+            }
+            else {
+                same = false;
+                setBitValue(pos, 2);
+            }
+        }
+    }
+    return *this;
 }
 
 } // namespace Integer
