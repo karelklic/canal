@@ -6,6 +6,7 @@
 namespace Canal {
 namespace Integer {
 
+class Interval;
 /// Abstracts integers as a bitfield.
 ///
 /// For every bit, we have 4 possible states:
@@ -104,6 +105,8 @@ public:
         return value->getKind() == IntegerBitfieldKind;
     }
 
+    /// Semantically convert Integer::Interval to Bitfield
+    Bitfield& fromInterval(const Interval& interval);
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual Bitfield *clone() const;

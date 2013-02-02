@@ -52,21 +52,22 @@ getType(const llvm::fltSemantics &semantics, llvm::LLVMContext &context)
 }
 
 llvm::APInt
-toInteger(const llvm::APFloat &num, unsigned bitWidth, bool isSigned, bool &isExact)
+toInteger(const llvm::APFloat &num, unsigned bitWidth, bool isSigned, llvm::APFloat::opStatus &status)
 {
     llvm::APInt result(bitWidth, 0, isSigned);
     llvm::SmallVector<uint64_t, 4> parts(result.getNumWords());
-    llvm::APFloat::opStatus status;
+    bool isExact;
     status = num.convertToInteger(parts.data(),
                                   bitWidth,
                                   isSigned,
                                   llvm::APFloat::rmTowardZero,
                                   &isExact);
 
-    CANAL_ASSERT(status == llvm::APFloat::opOK);
-    return llvm::APInt(bitWidth,
+    if (status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact)
+        return llvm::APInt(bitWidth,
                        (unsigned)parts.size(),
                        (const uint64_t*)parts.data());
+    else return llvm::APInt(bitWidth, 0);
 }
 
 } // namespace Utils

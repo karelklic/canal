@@ -4,6 +4,8 @@
 #include <llvm/Module.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Support/ManagedStatic.h>
+#include "lib/IntegerInterval.h"
+#include "lib/FloatInterval.h"
 
 using namespace Canal;
 
@@ -659,6 +661,233 @@ testAshr () {
     }
 }
 
+static void
+testIntervalConversion () {
+    Integer::Interval zero(*gEnvironment, llvm::APInt(32, 0)),
+            one(*gEnvironment, llvm::APInt(32, 1)),
+            two(*gEnvironment, llvm::APInt(32, 2)),
+            one_two(one),
+            zero_one(zero),
+            zero_two(zero),
+            minusone_zero(*gEnvironment, llvm::APInt(32, -1, true)),
+            minustwo_two(*gEnvironment, llvm::APInt(32, -2, true)),
+            thousand(*gEnvironment, llvm::APInt(32, 1000)),
+            fifteen_sixteen(*gEnvironment, llvm::APInt(32, 15)),
+            sixteen(*gEnvironment, llvm::APInt(32, 16)),
+            zero_thousand(zero),
+            bottom(zero),
+            top(zero),
+            signedTop(zero),
+            unsignedTop(zero),
+            signedBottom(zero),
+            unsignedBottom(zero),
+            signedOverflow(*gEnvironment, llvm::APInt(32, 2147483647)),
+            signedOverflow2(*gEnvironment, llvm::APInt::getSignedMinValue(32));
+    Integer::Bitfield result(*gEnvironment, 32);
+    llvm::APInt res;
+    one_two.join(two);
+    zero_one.join(one);
+    zero_two.join(two);
+    minusone_zero.join(zero);
+    minustwo_two.join(two);
+    zero_thousand.join(thousand);
+    fifteen_sixteen.join(sixteen);
+    bottom.setBottom();
+    top.setTop();
+    signedTop.setSignedTop();
+    unsignedTop.setUnsignedTop();
+    signedBottom.setSignedBottom();
+    unsignedBottom.setUnsignedBottom();
+    signedOverflow.join(signedOverflow2); //Two values only when sorted by
+
+    CANAL_ASSERT(result.fromInterval(bottom).isBottom());
+    CANAL_ASSERT(result.fromInterval(top).isTop());
+    CANAL_ASSERT(result.fromInterval(signedTop).isTop());
+    CANAL_ASSERT(result.fromInterval(unsignedTop).isTop());
+    CANAL_ASSERT(result.fromInterval(signedBottom).isBottom());
+    CANAL_ASSERT(result.fromInterval(unsignedBottom).isBottom());
+
+    CANAL_ASSERT(result.fromInterval(zero).isConstant() &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+    CANAL_ASSERT(result.fromInterval(one).isConstant() &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 1));
+    CANAL_ASSERT(result.fromInterval(two).isConstant() &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 2));
+
+    result.fromInterval(one_two); //0000TT
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 3));
+    result.fromInterval(zero_one);
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 1));
+    result.fromInterval(zero_two); //0000TT
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 3));
+    result.fromInterval(fifteen_sixteen); //00TTTT
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 31));
+
+
+    result.fromInterval(minusone_zero); //TOP
+    CANAL_ASSERT(result.isTop());
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, -1, true));
+
+    CANAL_ASSERT(result.fromInterval(minustwo_two).isTop()); //-2, -1, 0, 1, 2 -> TOP
+
+    result.fromInterval(zero_thousand); //000...0TTTTTTTTTT
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 1023));
+
+    CANAL_ASSERT(result.fromInterval(signedOverflow).isTop()); //Difference in first bit -> TOP
+}
+
+static void
+testFPConversions ()
+{
+    Integer::Bitfield result(*gEnvironment, llvm::APInt(32, 0)),
+            small(*gEnvironment, llvm::APInt(8, 0));
+    Float::Interval zerof(*gEnvironment, llvm::APFloat(0.0)),
+            pointfivef(*gEnvironment, llvm::APFloat(0.5)),
+            zero_pointfivef(zerof),
+            minusfivef(*gEnvironment, llvm::APFloat(-5.0)),
+            minuspointfivef(*gEnvironment, llvm::APFloat(-0.5)),
+            fivef(*gEnvironment, llvm::APFloat(5.0)),
+            thirtyf(*gEnvironment, llvm::APFloat(30.0)),
+            five_thirtyf(fivef),
+            thousandf(*gEnvironment, llvm::APFloat(1000.0)),
+            five_thousandf(fivef),
+            topf(zerof),
+            bottomf(zerof),
+            smallf(*gEnvironment, llvm::APFloat(1e-10)),
+            minusthousand_minusfivef(*gEnvironment, llvm::APFloat(-1000.0)),
+            minusthousand_thousandf(minusthousand_minusfivef),
+            minusten_minusfivef(*gEnvironment, llvm::APFloat(-10.0)),
+            minusten_tenf(*gEnvironment, llvm::APFloat(10.0));
+    llvm::APInt res;
+    zerof.join(pointfivef);
+    five_thousandf.join(thousandf);
+    five_thirtyf.join(thirtyf);
+    minusthousand_minusfivef.join(minusfivef);
+    minusthousand_thousandf.join(thousandf);
+    minusten_tenf.join(minusten_minusfivef);
+    minusten_minusfivef.join(minusfivef);
+    topf.setTop();
+    bottomf.setBottom();
+
+    //FpToUI
+    result.fptoui(zerof);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptoui(pointfivef);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptoui(zero_pointfivef);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptoui(minusfivef);
+    CANAL_ASSERT(result.isTop());
+
+    result.fptoui(smallf);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptoui(five_thousandf);
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.signedMax(res) && res == llvm::APInt(32, 1023));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 1023));
+
+    result.fptoui(five_thirtyf);
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.signedMax(res) && res == llvm::APInt(32, 31));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 31));
+
+    result.fptoui(bottomf);
+    CANAL_ASSERT(result.isBottom());
+
+    result.fptoui(topf);
+    CANAL_ASSERT(result.isTop());
+
+    small.fptoui(thousandf);
+    CANAL_ASSERT(small.isTop());
+
+    //FpToSI
+    result.fptosi(zerof);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptosi(pointfivef);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptosi(zero_pointfivef);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptosi(minuspointfivef);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptosi(minusfivef);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, -5, true) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, -5, true));
+
+    result.fptosi(smallf);
+    CANAL_ASSERT(result.isConstant() &&
+                 result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+
+    result.fptosi(five_thousandf); //1111...1111TTTTTTTTTT
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.signedMax(res) && res == llvm::APInt(32, 1023));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 1023));
+
+    result.fptosi(five_thirtyf); //00000....0000TTTTT
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.signedMax(res) && res == llvm::APInt(32, 31));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 0) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, 31));
+
+    result.fptosi(minusthousand_minusfivef); //1111...1111TTTTTTTTTT
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, -1024, true) &&
+                 result.signedMax(res) && res == llvm::APInt(32, -1, true));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, -1024, true) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, -1, true));
+
+    result.fptosi(minusten_minusfivef); //11111....1111111TTTT
+    CANAL_ASSERT(result.signedMin(res) && res == llvm::APInt(32, -16, true) &&
+                 result.signedMax(res) && res == llvm::APInt(32, -1, true));
+    CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, -16, true) &&
+                 result.unsignedMax(res) && res == llvm::APInt(32, -1, true));
+
+    CANAL_ASSERT(result.fptosi(minusthousand_thousandf).isTop());
+    CANAL_ASSERT(result.fptosi(minusten_tenf).isTop());
+
+    result.fptosi(bottomf);
+    CANAL_ASSERT(result.isBottom());
+
+    result.fptosi(topf);
+    CANAL_ASSERT(result.isTop());
+
+    small.fptosi(thousandf);
+    CANAL_ASSERT(small.isTop());
+}
+
 int
 main(int argc, char **argv)
 {
@@ -675,6 +904,10 @@ main(int argc, char **argv)
     testShl();
     testLshr();
     testAshr();
+
+    testIntervalConversion();
+
+    testFPConversions();
 
     delete gEnvironment;
     return 0;
