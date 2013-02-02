@@ -84,5 +84,4 @@ noinst_PROGRAMS = \
 	IntegerBitfieldTest \
 	IntegerSetTest \
 	IntegerIntervalTest \
-	OperationsTest \
 	PointerTest

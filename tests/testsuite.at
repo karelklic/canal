@@ -29,10 +29,6 @@ AT_SETUP([IntegerInterval])
 AT_CHECK([../../IntegerIntervalTest], 0)
 AT_CLEANUP
 
-AT_SETUP([Operations])
-AT_CHECK([../../OperationsTest], 0)
-AT_CLEANUP
-
 AT_SETUP([Pointer])
 AT_CHECK([../../PointerTest], 0)
 AT_CLEANUP
