@@ -61,12 +61,16 @@ public:
                             const std::vector<Domain*> &members) const;
 
 protected:
+    Domain *createConstantExpr(const llvm::ConstantExpr &value,
+                               const llvm::Value &place,
+                               const State *state) const;
+
     Domain *createGetElementPtr(const llvm::ConstantExpr &value,
-                                const Domain &variable,
+                                const std::vector<const Domain*> &operands,
                                 const llvm::Value &place) const;
 
     Domain *createBitCast(const llvm::ConstantExpr &value,
-                          const Domain &variable,
+                          const std::vector<const Domain*> &operands,
                           const llvm::Value &place) const;
 };
 

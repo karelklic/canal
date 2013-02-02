@@ -3,6 +3,7 @@
 #include "IntegerBitfield.h"
 #include "IntegerSet.h"
 #include "IntegerInterval.h"
+#include "IntegerUtils.h"
 #include "Utils.h"
 #include "ArraySingleItem.h"
 #include "ArrayExactSize.h"
@@ -97,64 +98,22 @@ Constructors::create(const llvm::Constant &value,
             checkedCast<llvm::ConstantPointerNull>(value);
 
         const llvm::PointerType &pointerType = *nullValue.getType();
-        Domain *constPointer;
-        constPointer = createPointer(pointerType);
+        Domain *constPointer = createPointer(pointerType);
         constPointer->setZero(&place);
         return constPointer;
     }
 
     if (llvm::isa<llvm::ConstantExpr>(value))
     {
-        CANAL_ASSERT_MSG(state,
-                         "State is mandatory for constant expressions.");
-
         const llvm::ConstantExpr &exprValue =
             checkedCast<llvm::ConstantExpr>(value);
 
-        const Domain *variable = NULL;
-        bool deleteVariable = false;
-        const llvm::Value &firstValue = **value.op_begin();
-        if (llvm::isa<llvm::ConstantExpr>(firstValue))
-        {
-            variable = create(checkedCast<llvm::ConstantExpr>(firstValue),
-                              place,
-                              state);
-
-            deleteVariable = true;
-        }
-        else
-            variable = state->findVariable(firstValue);
-
-        CANAL_ASSERT_MSG(variable, "It is expected that variable used"
-                         " in constant expressions is available.\n"
-                         "Missing: \"" << firstValue << "\"\n"
-                         << "In \"" << value << "\"\n"
-                         << "On line \"" << place << "\"");
-
-        Domain *result = NULL;
-        switch (exprValue.getOpcode())
-        {
-        case llvm::Instruction::GetElementPtr:
-            result = createGetElementPtr(exprValue, *variable, place);
-            break;
-        case llvm::Instruction::BitCast:
-            result = createBitCast(exprValue, *variable, place);
-            break;
-        default:
-            CANAL_FATAL_ERROR("Instruction not implemented: "
-                              << exprValue.getOpcodeName());
-        }
-
-        if (deleteVariable)
-            delete variable;
-
-        return result;
+        return createConstantExpr(exprValue, place, state);
     }
 
     if (llvm::isa<llvm::ConstantFP>(value))
     {
         const llvm::ConstantFP &fp = checkedCast<llvm::ConstantFP>(value);
-
         const llvm::APFloat &number = fp.getValueAPF();
         return createFloat(number);
     }
@@ -170,7 +129,6 @@ Constructors::create(const llvm::Constant &value,
         {
             members.push_back(create(*structValue.getOperand(i),
                                      *structValue.getOperand(i),
-                                     //place,
                                      state));
         }
 
@@ -189,7 +147,6 @@ Constructors::create(const llvm::Constant &value,
         {
             values.push_back(create(*vectorValue.getOperand(i),
                                     *vectorValue.getOperand(i),
-                                    //place,
                                     state));
         }
 
@@ -208,7 +165,6 @@ Constructors::create(const llvm::Constant &value,
         {
             values.push_back(create(*arrayValue.getOperand(i),
                                     *arrayValue.getOperand(i),
-                                    //place,
                                     state));
         }
 
@@ -219,7 +175,8 @@ Constructors::create(const llvm::Constant &value,
     // llvm::isa<llvm::ConstantDataSequential> returns false for an
     // llvm::ConstantDataArray/Vector instance at least on on LLVM
     // 3.1.
-    if (llvm::isa<llvm::ConstantDataVector>(value) || llvm::isa<llvm::ConstantDataArray>(value))
+    if (llvm::isa<llvm::ConstantDataVector>(value) ||
+        llvm::isa<llvm::ConstantDataArray>(value))
     {
          const llvm::ConstantDataSequential &sequentialValue =
             checkedCast<llvm::ConstantDataSequential>(value);
@@ -302,7 +259,6 @@ Constructors::createFloat(const llvm::APFloat &number) const
 Domain *
 Constructors::createArray(const llvm::SequentialType &type) const
 {
-//    return new Array::SingleItem(mEnvironment, type);
     Product::Vector *container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type));
@@ -314,7 +270,6 @@ Domain *
 Constructors::createArray(const llvm::SequentialType &type,
                           Domain *size) const
 {
-//    return new Array::SingleItem(mEnvironment, type, size);
     Product::Vector *container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, size));
@@ -326,7 +281,6 @@ Domain *
 Constructors::createArray(const llvm::SequentialType &type,
                           const std::vector<Domain*> &values) const
 {
-//    return new Array::SingleItem(mEnvironment, type, values.begin(), values.end());
     Product::Vector *container = new Product::Vector(mEnvironment);
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type, values));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, values.begin(), values.end()));
@@ -354,63 +308,132 @@ Constructors::createStructure(const llvm::StructType &type,
 }
 
 Domain *
+Constructors::createConstantExpr(const llvm::ConstantExpr &value,
+                                 const llvm::Value &place,
+                                 const State *state) const
+{
+    CANAL_ASSERT_MSG(state,
+                     "State is mandatory for constant expressions.");
+
+    std::vector<const Domain*> operands;
+    std::vector<bool> operandsDelete;
+    llvm::ConstantExpr::const_op_iterator it = value.op_begin(),
+        itend = value.op_end();
+
+    for (; it != itend; ++it)
+    {
+        const Domain *variable;
+        if (llvm::isa<llvm::GlobalValue>(**it))
+        {
+            variable = state->findVariable(**it);
+            operandsDelete.push_back(false);
+        }
+        else
+        {
+            variable = create(checkedCast<llvm::Constant>(**it),
+                              place,
+                              state);
+
+            operandsDelete.push_back(true);
+        }
+
+        CANAL_ASSERT_MSG(variable, "It is expected that variable used"
+                         " in constant expressions is available.\n"
+                         "Missing: \"" << *it << "\"\n"
+                         << "In \"" << value << "\"\n"
+                         << "On line \"" << place << "\"");
+
+        operands.push_back(variable);
+    }
+
+    Domain *result = NULL;
+    switch (value.getOpcode())
+    {
+    case llvm::Instruction::GetElementPtr:
+        result = createGetElementPtr(value, operands, place);
+        break;
+    case llvm::Instruction::BitCast:
+        result = createBitCast(value, operands, place);
+        break;
+    default:
+        CANAL_FATAL_ERROR("Constant Expressions Instruction not implemented: "
+                          << value.getOpcodeName());
+    }
+
+    std::vector<const Domain*>::const_iterator dit = operands.begin(),
+        ditend = operands.end();
+
+    std::vector<bool>::const_iterator ddit = operandsDelete.begin();
+    for (; dit != ditend; ++dit, ++ddit)
+    {
+        if (*ddit)
+            delete *dit;
+    }
+
+    return result;
+}
+
+Domain *
 Constructors::createGetElementPtr(const llvm::ConstantExpr &value,
-                                  const Domain &variable,
+                                  const std::vector<const Domain*> &operands,
                                   const llvm::Value &place) const
 {
     std::vector<Domain*> offsets;
-    llvm::ConstantExpr::const_op_iterator it = value.op_begin() + 1;
-    for (; it != value.op_end(); ++it)
-    {
-        const llvm::ConstantInt &constant =
-            checkedCast<llvm::ConstantInt>(**it);
+    std::vector<const Domain*>::const_iterator it = operands.begin() + 1,
+        itend = operands.end();
 
-        CANAL_ASSERT_MSG(constant.getBitWidth() <= 64,
+    for (; it != itend; ++it)
+    {
+        unsigned bitWidth = Integer::Utils::getBitWidth(**it);
+        CANAL_ASSERT_MSG(bitWidth <= 64,
                          "Cannot handle GetElementPtr offset"
                          " with more than 64 bits.");
 
-        // Convert to 64-bit if necessary.
-        llvm::APInt extended = constant.getValue();
-        if (extended.getBitWidth() < 64)
-            extended = APIntUtils::sext(extended, 64);
-
-        offsets.push_back(createInteger(extended));
+        if (bitWidth < 64)
+        {
+            Domain *offset = createInteger(64);
+            offset->zext(**it);
+            offsets.push_back(offset);
+        }
+        else
+            offsets.push_back((*it)->clone());
     }
 
     const llvm::PointerType &pointerType =
         checkedCast<const llvm::PointerType>(*value.getType());
 
     // GetElementPtr on a Pointer
-    const Pointer::Pointer *pointer = dynCast<Pointer::Pointer>(&variable);
+    const Pointer::Pointer *pointer = dynCast<Pointer::Pointer>(*operands.begin());
     if (pointer)
     {
         return pointer->getElementPtr(offsets,
                                       pointerType,
                                       *this);
     }
+    else
+    {
+        // GetElementPtr on anything except a pointer.  For example, it is
+        // called on arrays and structures.
+        Domain *result = createPointer(pointerType);
+        Pointer::Utils::addTarget(*result,
+                                  Pointer::Target::Block,
+                                  &place,
+                                  *value.op_begin(),
+                                  offsets,
+                                  NULL);
 
-    // GetElementPtr on anything except a pointer.  For example, it is
-    // called on arrays and structures.
-    Domain *result;
-    result = createPointer(pointerType);
-    Pointer::Utils::addTarget(*result,
-                              Pointer::Target::Block,
-                              &place,
-                              *value.op_begin(),
-                              offsets,
-                              NULL);
-
-    return result;
+        return result;
+    }
 }
 
 Domain *
 Constructors::createBitCast(const llvm::ConstantExpr &value,
-                            const Domain &variable,
+                            const std::vector<const Domain*> &operands,
                             const llvm::Value &place) const
 {
     // BitCast from Pointer.  It is always a bitcast to some other
     // pointer.
-    const Pointer::Pointer *pointer = dynCast<Pointer::Pointer>(&variable);
+    const Pointer::Pointer *pointer = dynCast<Pointer::Pointer>(*operands.begin());
     const llvm::PointerType *pointerType =
         checkedCast<llvm::PointerType>(value.getType());
 
