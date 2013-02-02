@@ -5,18 +5,16 @@
 
 namespace Canal {
 namespace Pointer {
+namespace Utils {
 
-class Utils
-{
-public:
-    static void addTarget(Domain &pointer,
-                          Target::Type type,
-                          const llvm::Value *place,
-                          const llvm::Value *target,
-                          const std::vector<Domain*> &offsets,
-                          Domain *numericOffset);
-};
+void addTarget(Domain &pointer,
+               Target::Type type,
+               const llvm::Value *place,
+               const llvm::Value *target,
+               const std::vector<Domain*> &offsets,
+               Domain *numericOffset);
 
+} // namespace Utils
 } // namespace Pointer
 } // namespace Canal
 

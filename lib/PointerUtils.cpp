@@ -4,14 +4,15 @@
 
 namespace Canal {
 namespace Pointer {
+namespace Utils {
 
 void
-Utils::addTarget(Canal::Domain &pointer,
-                 Target::Type type,
-                 const llvm::Value *place,
-                 const llvm::Value *target,
-                 const std::vector<Domain *> &offsets,
-                 Canal::Domain *numericOffset)
+addTarget(Canal::Domain &pointer,
+          Target::Type type,
+          const llvm::Value *place,
+          const llvm::Value *target,
+          const std::vector<Domain *> &offsets,
+          Canal::Domain *numericOffset)
 {
     checkedCast<Pointer>(pointer).addTarget(type,
                                             place,
@@ -20,5 +21,6 @@ Utils::addTarget(Canal::Domain &pointer,
                                             numericOffset);
 }
 
+} // namespace Utils
 } // namespace Pointer
 } // namespace Canal
