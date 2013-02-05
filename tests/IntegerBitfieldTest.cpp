@@ -25,9 +25,11 @@ testJoin()
         bitfield8(*gEnvironment, llvm::APInt(32, 3)),
         bitfield9(bitfield7),
         bitfield10(bitfield1),
-        bitfield11(bitfield2);
+        bitfield11(bitfield2),
+            bottom(bitfield1);
 
     llvm::APInt res;
+    bottom.setBottom();
 
     bitfield4.join(bitfield2); //0-1 -> ...00T
     CANAL_ASSERT(bitfield4.unsignedMin(res) && res == 0 && bitfield4.unsignedMax(res) && res == 1);
@@ -71,6 +73,13 @@ testJoin()
     //0-1023 -> ...0TTTTTTTTTT (last ten bits is T)
     CANAL_ASSERT(bitfield11.signedMin(res) && res == 0 && bitfield11.signedMax(res) && res == 1023);
     CANAL_ASSERT(bitfield11.unsignedMin(res) && res == 0 && bitfield11.unsignedMax(res) && res == 1023);
+
+    //Bottom values
+    CANAL_ASSERT(bitfield2.join(bottom).isConstant() && bitfield2.signedMin(res) == 1);
+    CANAL_ASSERT(bitfield10.join(bottom).isTop());
+    CANAL_ASSERT(bottom.join(bottom).isBottom());
+    CANAL_ASSERT(bitfield4.join(bottom).signedMin(res) && res == 0 &&
+                 bitfield4.signedMax(res) && res == 1);
 }
 
 static void
@@ -482,6 +491,20 @@ testIcmp()
     CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_SLT).isTop());
     CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_ULE).isTrue());
     CANAL_ASSERT(result.icmp(const_2_1, const_1, llvm::CmpInst::ICMP_ULT).isTop());
+
+
+    //Bottom tests
+    Integer::Bitfield bottom(const0), top(const0);
+    bottom.setBottom();
+    top.setTop();
+    CANAL_ASSERT(result.icmp(bottom, bottom, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(top, bottom, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(const0, bottom, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(bottom, top, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(bottom, const0, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(top, top, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(top, const0, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(const0, top, llvm::CmpInst::ICMP_EQ).isTop());
 }
 
 static void
@@ -492,10 +515,26 @@ testShl () {
             two(*gEnvironment, llvm::APInt(32, 2)),
             zero_one(zero),
             three(*gEnvironment, llvm::APInt(32, 3)),
-            one_three(one);
+            one_three(one),
+            bottom(zero), top(zero);
     zero_one.join(one);
     one_three.join(three);
     llvm::APInt res;
+    top.setTop();
+    bottom.setBottom();
+
+    {
+        Integer::Bitfield result(zero);
+        CANAL_ASSERT(result.shl(bottom, bottom).isBottom());
+        CANAL_ASSERT(result.shl(bottom, top).isBottom());
+        CANAL_ASSERT(result.shl(top, bottom).isBottom());
+        CANAL_ASSERT(result.shl(bottom, zero).isBottom());
+        CANAL_ASSERT(result.shl(zero, bottom).isBottom());
+
+        CANAL_ASSERT(result.shl(top, top).isTop());
+        CANAL_ASSERT(result.shl(zero, top).isTop());
+        CANAL_ASSERT(result.shl(top, zero).isTop());
+    }
 
     { //Shift left for more than bitsize -> 0
         Integer::Bitfield tmp(one);
@@ -550,10 +589,26 @@ testLshr () {
             two(*gEnvironment, llvm::APInt(32, 2)),
             zero_one(zero),
             three(*gEnvironment, llvm::APInt(32, 3)),
-            one_three(one);
+            one_three(one),
+            bottom(zero), top(zero);
     zero_one.join(one);
     one_three.join(three);
     llvm::APInt res;
+    top.setTop();
+    bottom.setBottom();
+
+    {
+        Integer::Bitfield result(zero);
+        CANAL_ASSERT(result.shl(bottom, bottom).isBottom());
+        CANAL_ASSERT(result.shl(bottom, top).isBottom());
+        CANAL_ASSERT(result.shl(top, bottom).isBottom());
+        CANAL_ASSERT(result.shl(bottom, zero).isBottom());
+        CANAL_ASSERT(result.shl(zero, bottom).isBottom());
+
+        CANAL_ASSERT(result.shl(top, top).isTop());
+        CANAL_ASSERT(result.shl(zero, top).isTop());
+        CANAL_ASSERT(result.shl(top, zero).isTop());
+    }
 
     { //Shift rigth for more than bitsize -> 0
         Integer::Bitfield tmp(one);
@@ -608,10 +663,26 @@ testAshr () {
             two(*gEnvironment, llvm::APInt(32, 2)),
             zero_one(zero),
             three(*gEnvironment, llvm::APInt(32, 3)),
-            one_three(one);
+            one_three(one),
+            top(zero), bottom(zero);
     zero_one.join(one);
     one_three.join(three);
     llvm::APInt res;
+    top.setTop();
+    bottom.setBottom();
+
+    {
+        Integer::Bitfield result(zero);
+        CANAL_ASSERT(result.shl(bottom, bottom).isBottom());
+        CANAL_ASSERT(result.shl(bottom, top).isBottom());
+        CANAL_ASSERT(result.shl(top, bottom).isBottom());
+        CANAL_ASSERT(result.shl(bottom, zero).isBottom());
+        CANAL_ASSERT(result.shl(zero, bottom).isBottom());
+
+        CANAL_ASSERT(result.shl(top, top).isTop());
+        CANAL_ASSERT(result.shl(zero, top).isTop());
+        CANAL_ASSERT(result.shl(top, zero).isTop());
+    }
 
     { //Shift rigth for more than bitsize -> 0
         Integer::Bitfield tmp(one);

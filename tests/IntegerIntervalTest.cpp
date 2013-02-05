@@ -52,10 +52,11 @@ testJoin()
         interval8 = Integer::Interval(*gEnvironment, three),
         interval9(interval7),
         interval10(interval1),
-        interval11(interval1);
+        interval11(interval1),
+            bottom(interval1);
 
+    bottom.setBottom();
     llvm::APInt res;
-
     interval4.join(interval2); //0-1
     CANAL_ASSERT(interval4.signedMin(res) && res == 0 && interval4.signedMax(res) && res == 1);
 
@@ -93,6 +94,13 @@ testJoin()
         interval11.join(Integer::Interval(*gEnvironment, llvm::APInt(32, i)));
     }
     CANAL_ASSERT(interval11.signedMin(res) && res == 0 && interval11.signedMax(res) && res == 999);
+
+    CANAL_ASSERT(interval2.join(bottom).isConstant() && interval2.signedMin(res) == 1);
+    CANAL_ASSERT(interval10.join(bottom).isTop());
+    CANAL_ASSERT(bottom.join(bottom).isBottom());
+    CANAL_ASSERT(interval4.join(bottom).signedMin(res) && res == 0 &&
+                 interval4.signedMax(res) && res == 1);
+
 }
 
 static void
@@ -305,6 +313,18 @@ testIcmp()
     CANAL_ASSERT(result.icmp(from0to1, from0to1, llvm::CmpInst::ICMP_SLE).isTop());
     CANAL_ASSERT(result.icmp(from0to1, from0to1, llvm::CmpInst::ICMP_ULT).isTop());
     CANAL_ASSERT(result.icmp(from0to1, from0to1, llvm::CmpInst::ICMP_ULE).isTop());
+
+    Integer::Interval bottom(const0), top(const0);
+    bottom.setBottom();
+    top.setTop();
+    CANAL_ASSERT(result.icmp(bottom, bottom, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(top, bottom, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(const0, bottom, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(bottom, top, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(bottom, const0, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(top, top, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(top, const0, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(const0, top, llvm::CmpInst::ICMP_EQ).isTop());
 
 /*
         from1to1(gEnvironment, 1, 1),
@@ -661,6 +681,12 @@ testTrunc()
     CANAL_ASSERT(interval5.signedMin(res) && res == llvm::APInt(32, -1) && //Signed -1 to 0
                  interval5.signedMax(res) && res == llvm::APInt(32, 0));
     CANAL_ASSERT(interval5.getBitWidth() == 32);
+
+    //Bottom and top test
+    Integer::Interval top(*gEnvironment, 3), bottom(*gEnvironment, 3);
+    bottom.setBottom(); top.setTop();
+    CANAL_ASSERT(interval2.trunc(top).isTop());
+    CANAL_ASSERT(interval2.trunc(bottom).isBottom());
 }
 
 static void
@@ -673,7 +699,8 @@ testAdd()
             two(*gEnvironment, llvm::APInt(32, 2)),
             three(*gEnvironment, llvm::APInt(32, 3)),
             two_three(two),
-            zero_two(zero), one_three(zero), top(zero);
+            zero_two(zero), one_three(zero), top(zero),
+            bottom(zero);
     llvm::APInt res;
 
     zero_one.join(one); //0-1
@@ -683,6 +710,7 @@ testAdd()
     zero_two.join(two); //0-2
     one_three.join(three); //1-3
     top.setTop();
+    bottom.setBottom();
 
     result.add(zero, zero); //0 + 0 = 0
     CANAL_ASSERT(result == zero);
@@ -738,6 +766,13 @@ testAdd()
     CANAL_ASSERT(result.signedMin(res) && res == 0 && result.signedMax(res) && res == 3000);
     CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt::getMinValue(result.getBitWidth()) && //Unsigned top
                  result.unsignedMax(res) && res == llvm::APInt::getMaxValue(result.getBitWidth()));
+
+    //Bottom values
+    CANAL_ASSERT(result.add(bottom, top).isBottom());
+    CANAL_ASSERT(result.add(top, bottom).isBottom());
+    CANAL_ASSERT(result.add(bottom, zero).isBottom());
+    CANAL_ASSERT(result.add(zero, bottom).isBottom());
+    CANAL_ASSERT(result.add(bottom, bottom).isBottom());
 }
 
 static void

@@ -397,15 +397,15 @@ Bitfield::shift(const Domain &a, const Domain &b, bool right, int shiftValue)
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth() &&
             getBitWidth() == aa.getBitWidth());
 
-    if (aa.isTop() || bb.isTop())
-    {
-        setTop();
-        return;
-    }
-
     if (aa.isBottom() || bb.isBottom())
     {
         setBottom();
+        return;
+    }
+
+    if (aa.isTop() || bb.isTop())
+    {
+        setTop();
         return;
     }
 
@@ -665,16 +665,16 @@ Bitfield::icmp(const Domain &a, const Domain &b,
     const Bitfield &aa = checkedCast<Bitfield>(a),
             &bb = checkedCast<Bitfield>(b);
 
+    if (aa.isBottom() || bb.isBottom())
+    {
+        setBottom(); // Undefined
+        return *this;
+    }
+
     //If you do not compare only one bit, TOP value means any result
     if (aa.getBitWidth() > 1 && (aa.isTop() || bb.isTop()))
     {
         setTop(); // Could be both
-        return *this;
-    }
-
-    if (aa.isBottom() || bb.isBottom())
-    {
-        setBottom(); // Undefined
         return *this;
     }
 

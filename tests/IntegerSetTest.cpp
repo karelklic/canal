@@ -26,9 +26,11 @@ testJoin()
         set8(*gEnvironment, llvm::APInt(32, 3)),
         set9(set7),
         set10(set1),
-        set11(set1);
+        set11(set1),
+            bottom(set1);
 
     llvm::APInt res;
+    bottom.setBottom();
 
     set4.join(set2); //0-1
     CANAL_ASSERT(set4.signedMin(res) && res == 0 && set4.signedMax(res) && res == 1);
@@ -69,6 +71,12 @@ testJoin()
         if (set11.isTop()) break;
     }
     CANAL_ASSERT(set11.isTop());
+
+    CANAL_ASSERT(set2.join(bottom).isConstant() && set2.signedMin(res) == 1);
+    CANAL_ASSERT(set10.join(bottom).isTop());
+    CANAL_ASSERT(bottom.join(bottom).isBottom());
+    CANAL_ASSERT(set4.join(bottom).signedMin(res) && res == 0 &&
+                 set4.signedMax(res) && res == 1);
 }
 
 
@@ -496,6 +504,18 @@ testIcmp()
 
     result.icmp(set10, set11, llvm::CmpInst::ICMP_ULT); //0-2 ? 1-3
     CANAL_ASSERT(result.isTop());
+
+    Integer::Set bottom(set1), top(set1);
+    bottom.setBottom();
+    top.setTop();
+    CANAL_ASSERT(result.icmp(bottom, bottom, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(top, bottom, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(set1, bottom, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(bottom, top, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(bottom, set1, llvm::CmpInst::ICMP_EQ).isBottom());
+    CANAL_ASSERT(result.icmp(top, top, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(top, set1, llvm::CmpInst::ICMP_EQ).isTop());
+    CANAL_ASSERT(result.icmp(set1, top, llvm::CmpInst::ICMP_EQ).isTop());
 }
 
 static void
@@ -547,7 +567,7 @@ testAdd()
             two(*gEnvironment, llvm::APInt(32, 2)),
             zero_one(zero), zero_one2(one), minusone_zero(minusone), result(zero), two_three(two),
             three(*gEnvironment, llvm::APInt(32, 3)),
-            one_three(one), top(zero);
+            one_three(one), top(zero), bottom(zero);
     llvm::APInt res;
 
     zero_one.join(one); //0-1
@@ -556,6 +576,7 @@ testAdd()
     two_three.join(three); //2-3
     one_three.join(three); //1-3
     top.setTop();
+    bottom.setBottom();
 
     result.add(zero, zero); //0 + 0 = 0
     CANAL_ASSERT(result == zero);
@@ -603,6 +624,13 @@ testAdd()
     }
     //CANAL_ASSERT(result.signedMin(res) && res == 0 && result.signedMax(res) && res == 3000);
     CANAL_ASSERT(result.isTop());
+
+    //Bottom values
+    CANAL_ASSERT(result.add(bottom, top).isBottom());
+    CANAL_ASSERT(result.add(top, bottom).isBottom());
+    CANAL_ASSERT(result.add(bottom, zero).isBottom());
+    CANAL_ASSERT(result.add(zero, bottom).isBottom());
+    CANAL_ASSERT(result.add(bottom, bottom).isBottom());
 }
 
 static void

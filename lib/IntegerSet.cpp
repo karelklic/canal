@@ -432,15 +432,15 @@ Set::icmp(const Domain &a, const Domain &b,
     const Set &aa = checkedCast<Set>(a),
         &bb = checkedCast<Set>(b);
 
-    if (aa.isTop() || bb.isTop())
-    {
-        setTop(); // Could be both
-        return *this;
-    }
-
     if (aa.isBottom() || bb.isBottom())
     {
         setBottom(); // Undefined
+        return *this;
+    }
+
+    if (aa.isTop() || bb.isTop())
+    {
+        setTop(); // Could be both
         return *this;
     }
 
@@ -706,6 +706,7 @@ Set::applyOperation(const Domain &a,
 
     CANAL_ASSERT(this != &a && this != &b);
     setBottom();
+    if (aa.isBottom() || bb.isBottom()) return *this;
     if (aa.isTop() || bb.isTop())
     {
         setTop();

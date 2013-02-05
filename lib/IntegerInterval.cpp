@@ -1273,17 +1273,17 @@ Interval::icmp(const Domain &a, const Domain &b,
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    if (aa.isTop() || bb.isTop())
-    {
-        // Result could be both true and false.
-        setTop();
-        return *this;
-    }
-
     if (aa.isBottom() || bb.isBottom())
     {
         // Result is undefined.
         setBottom();
+        return *this;
+    }
+
+    if (aa.isTop() || bb.isTop())
+    {
+        // Result could be both true and false.
+        setTop();
         return *this;
     }
 
@@ -1543,9 +1543,10 @@ Interval::trunc(const Domain &value)
             }
         }
     }
+    else setSignedBottom();
 
     if (!interval.isUnsignedBottom()) {
-        mUnsignedBottom = false;
+        resetUnsignedFlags();
         mUnsignedTop = interval.mUnsignedTop
             || !interval.mUnsignedFrom.isIntN(getBitWidth())
             || !interval.mUnsignedTo.isIntN(getBitWidth());
@@ -1562,6 +1563,8 @@ Interval::trunc(const Domain &value)
                              "mUnsignedFrom must be lower than mUnsignedTo");
         }
     }
+    else setUnsignedBottom();
+
     return *this;
 }
 
