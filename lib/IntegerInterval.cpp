@@ -1052,16 +1052,88 @@ Interval::sdiv(const Domain &a, const Domain &b)
     return *this;
 }
 
+void
+Interval::urem_any_result(const Interval& divisor) {
+    mUnsignedFrom = llvm::APInt(divisor.getBitWidth(), 0);
+    mUnsignedTo = divisor.mUnsignedTo - 1;
+}
+
 Interval &
 Interval::urem(const Domain &a, const Domain &b)
 {
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    setTop();
+    CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
+    setSignedTop();
+    if (aa.isUnsignedBottom() || bb.isUnsignedBottom()) {
+        setBottom();
+    }
+    else if (bb.isUnsignedTop()) {
+        // Divide by any value -> can be anything, possibly without maximum value
+        setUnsignedTop();
+    }
+    else {
+        resetUnsignedFlags();
+        if (bb.isUnsignedConstant() && bb.mUnsignedFrom == 0) {
+            setUnsignedTop(); //Division by zero
+        }
+        else if (!aa.isUnsignedTop() &&
+                 (aa.mUnsignedTo - aa.mUnsignedFrom).ult(bb.mUnsignedTo)) {
+            // Size (number of values) of dividend interval is smaller than maximum of divisor
+            // -> otherwise any result is possible
 
-    //When implemented, handle division by zero - see #145
+            if (bb.isUnsignedConstant()) { //Any constant other than zero
+                //-> result is [from.urem(const); to.urem(const)], which works nicely
+                // for [13, 15] % 10, but does not work for [15; 23]; in that case
+                // any value is possible ([0; 9] in this case)
+                llvm::APInt from = aa.mUnsignedFrom.urem(bb.mUnsignedFrom),
+                        to = aa.mUnsignedTo.urem(bb.mUnsignedFrom);
+                if (from.ule(to)) {
+                    mUnsignedFrom = from;
+                    mUnsignedTo = to;
+                }
+                else urem_any_result(bb);
+            }
+            else {
+                //Maximum value of first interval is smaller than smallest value from second interval
+                // -> no division neccessary to calculate result
+                if (aa.mUnsignedTo.ult(bb.mUnsignedFrom)) {
+                    mUnsignedFrom = aa.mUnsignedFrom;
+                    mUnsignedTo = aa.mUnsignedTo;
+                }
+                else {
+                    //This may be further improved, but for now, it can be anything
+                    // -> divisor is not constant, but the result may be better expressed than any result
+                    urem_any_result(bb);
+                }
+            }
+        }
+        else urem_any_result(bb); //Any possible result
+    }
+
     return *this;
+}
+
+void
+Interval::srem_any_result(const Interval &dividend, const llvm::APInt &largerDivisor) {
+    if (dividend.mSignedFrom.isNegative() || dividend.isSignedTop()) { //Signes of dividend: [ -; ? ]
+        if (dividend.mSignedTo.isStrictlyPositive() || dividend.isSignedTop()) { //[ -; + ]
+            //Signes of result: - (from) and + (to)
+            mSignedFrom = -(largerDivisor - 1);
+            mSignedTo = (largerDivisor - 1);
+        }
+        else {
+            //Signes of result: - (from and to)
+            mSignedFrom = -largerDivisor + 1;
+            mSignedTo = llvm::APInt(largerDivisor.getBitWidth(), 0);
+        }
+    }
+    else {
+        //Signes of result: + (from and to)
+        mSignedFrom = llvm::APInt(largerDivisor.getBitWidth(), 0);
+        mSignedTo = largerDivisor - 1;
+    }
 }
 
 Interval &
@@ -1070,9 +1142,61 @@ Interval::srem(const Domain &a, const Domain &b)
     const Interval &aa = checkedCast<Interval>(a),
         &bb = checkedCast<Interval>(b);
 
-    setTop();
+    CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
+    setUnsignedTop();
+    if (aa.isSignedBottom() || bb.isSignedBottom()) {
+        setBottom();
+    }
+    else if (bb.isSignedTop()) {
+        // Divide by any value -> can be anything, possibly without maximum value
+        setSignedTop();
+    }
+    else {
+        resetSignedFlags();
+        const llvm::APInt largerDivisor = (bb.mSignedFrom.abs().ugt(bb.mSignedTo.abs())
+                                            ? bb.mSignedFrom.abs() : bb.mSignedTo.abs());
+        const llvm::APInt smallerDivisor = (bb.mSignedFrom.abs().ugt(bb.mSignedTo.abs())
+                                            ? bb.mSignedTo.abs() : bb.mSignedFrom.abs());
 
-    //When implemented, handle division by zero - see #145
+        if (bb.isSignedConstant() && bb.mSignedFrom == 0) {
+            setSignedTop(); //Division by zero
+        }
+        else if (!aa.isSignedTop() &&
+                 (aa.mSignedFrom.isNegative() && aa.mSignedTo.isStrictlyPositive() ? //If result can have both signes
+                    (aa.mSignedFrom.abs().ult(largerDivisor) && aa.mSignedTo.abs().ult(largerDivisor)) :
+                    (aa.mSignedTo - aa.mSignedFrom).ult(largerDivisor) )) {
+            // Size (number of values) of dividend interval is smaller than maximum of divisor
+            // -> otherwise any result is possible
+
+            if (bb.isSignedConstant()) { //Any constant other than zero
+                //-> result is [from.urem(const); to.urem(const)], which works nicely
+                // for [13, 15] % 10, but does not work for [15; 23]; in that case
+                // any value is possible ([0; 9] in this case)
+                llvm::APInt from = aa.mSignedFrom.srem(bb.mSignedFrom),
+                        to = aa.mSignedTo.srem(bb.mSignedFrom);
+                if (from.sle(to)) {
+                    mSignedFrom = from;
+                    mSignedTo = to;
+                }
+                else srem_any_result(aa, largerDivisor);
+            }
+            else {
+                //Maximum value of first interval is smaller than smallest value from second interval
+                // -> no division neccessary to calculate result
+                if (aa.mSignedTo.abs().ult(smallerDivisor)) {
+                    mSignedFrom = aa.mSignedFrom;
+                    mSignedTo = aa.mSignedTo;
+                }
+                else {
+                    //This may be further improved, but for now, it can be anything
+                    // -> divisor is not constant, but the result may be better expressed than any result
+                    srem_any_result(aa, largerDivisor);
+                }
+            }
+        }
+        else srem_any_result(aa, largerDivisor); //Any possible result
+    }
+
     return *this;
 }
 

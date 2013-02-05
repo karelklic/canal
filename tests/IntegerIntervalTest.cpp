@@ -935,6 +935,187 @@ testFPConversions ()
     CANAL_ASSERT(small.isTop());
 }
 
+static void
+testRemainder() {
+    Integer::Interval zero(*gEnvironment, llvm::APInt(32, 0)),
+            one(*gEnvironment, llvm::APInt(32, 1)),
+            two(*gEnvironment, llvm::APInt(32, 2)),
+            four(*gEnvironment, llvm::APInt(32, 4)),
+            minusfour(*gEnvironment, llvm::APInt(32, -4, true)),
+            ten(*gEnvironment, llvm::APInt(32, 10)),
+            minusten(*gEnvironment, llvm::APInt(32, -10, true)),
+            five(*gEnvironment, llvm::APInt(32, 5)),
+            minusfive(*gEnvironment, llvm::APInt(32, -5, true)),
+            five_ten(five),
+            minusten_minusfive(minusten),
+            one_two(one),
+            zero_one(zero),
+            zero_two(zero),
+            zero_four(zero),
+            minusone(*gEnvironment, llvm::APInt(32, -1, true)),
+            minustwo(*gEnvironment, llvm::APInt(32, -2, true)),
+            minustwo_minusone(minustwo),
+            minusone_zero(minusone),
+            minustwo_zero(minustwo),
+            minustwo_two(minustwo),
+            result(*gEnvironment, 32),
+            top(zero),
+            bottom(zero);
+    llvm::APInt res;
+    top.setTop();
+    bottom.setBottom();
+    five_ten.join(ten);
+    one_two.join(two);
+    zero_one.join(one);
+    zero_two.join(two);
+    zero_four.join(four);
+    minusone_zero.join(zero);
+    minustwo_zero.join(zero);
+    minustwo_two.join(two);
+    minustwo_minusone.join(minusone);
+    minusten_minusfive.join(minusfive);
+
+    //urem
+    CANAL_ASSERT(result.urem(one, bottom).isBottom());
+    CANAL_ASSERT(result.urem(bottom, one).isBottom());
+    CANAL_ASSERT(result.urem(one, top).isTop());
+
+    //Constant division
+    CANAL_ASSERT(result.urem(one, zero).isTop()); //Division by zero
+    CANAL_ASSERT(result.urem(one_two, five).unsignedMin(res) && res == 1 &&
+                 result.unsignedMax(res) && res == 2);
+    CANAL_ASSERT(result.urem(one_two, two).unsignedMin(res) && res == 0 &&
+                 result.unsignedMax(res) && res == 1);
+    CANAL_ASSERT(result.urem(zero_one, two).unsignedMin(res) && res == 0 &&
+                 result.unsignedMax(res) && res == 1);
+    CANAL_ASSERT(result.urem(ten, five).isUnsignedConstant() &&
+                 result.unsignedMin(res) && res == 0);
+    CANAL_ASSERT(result.urem(five_ten, two).unsignedMin(res) && res == 0 &&
+                 result.unsignedMax(res) && res == 1);
+    CANAL_ASSERT(result.urem(top, five).unsignedMin(res) && res == 0 &&
+                 result.unsignedMax(res) && res == 4);
+    CANAL_ASSERT(result.urem(minusone_zero, five).unsignedMin(res) && res == 0 &&
+                 result.unsignedMax(res) && res == 4);
+
+    //Interval division
+    CANAL_ASSERT(result.urem(one_two, five_ten).unsignedMin(res) && res == 1 &&
+                 result.unsignedMax(res) && res == 2);
+    CANAL_ASSERT(result.urem(five_ten, one_two).unsignedMin(res) && res == 0 &&
+                 result.unsignedMax(res) && res == 1);
+    CANAL_ASSERT(result.urem(five_ten, zero_two).unsignedMin(res) && res == 0 &&
+                 result.unsignedMax(res) && res == 1);
+    CANAL_ASSERT(result.urem(five_ten, zero_one).isUnsignedConstant() &&
+                 result.unsignedMin(res) && res == 0);
+    CANAL_ASSERT(result.urem(top, five_ten).unsignedMin(res) && res == 0 &&
+                 result.unsignedMax(res) && res == 9);
+    CANAL_ASSERT(result.urem(minusone_zero, five_ten).unsignedMin(res) && res == 0 &&
+                 result.unsignedMax(res) && res == 9);
+
+    //srem
+    CANAL_ASSERT(result.srem(one, bottom).isBottom());
+    CANAL_ASSERT(result.srem(bottom, one).isBottom());
+    CANAL_ASSERT(result.srem(one, top).isTop());
+
+    //Constant division
+    CANAL_ASSERT(result.srem(one, zero).isTop()); //Division by zero
+    CANAL_ASSERT(result.srem(one_two, five).signedMin(res) && res == 1 &&
+                 result.signedMax(res) && res == 2);
+    CANAL_ASSERT(result.srem(one_two, two).signedMin(res) && res == 0 &&
+                 result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.srem(zero_one, two).signedMin(res) && res == 0 &&
+                 result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.srem(ten, five).isSignedConstant() &&
+                 result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.srem(five_ten, two).signedMin(res) && res == 0 &&
+                 result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.srem(top, minusfive).signedMin(res) && res == llvm::APInt(32, -4, true) &&
+                 result.signedMax(res) && res == 4);
+    CANAL_ASSERT(result.srem(minusone_zero, five).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 0);
+    CANAL_ASSERT(result.srem(minustwo_two, five).signedMin(res) && res == llvm::APInt(32, -2, true) &&
+                 result.signedMax(res) && res == 2);
+    CANAL_ASSERT(result.srem(minustwo_two, four).signedMin(res) && res == llvm::APInt(32, -2, true) &&
+                 result.signedMax(res) && res == 2);
+    CANAL_ASSERT(result.srem(minustwo_two, two).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 1);
+
+    CANAL_ASSERT(result.srem(one_two, minusfive).signedMin(res) && res == 1 &&
+                 result.signedMax(res) && res == 2);
+    CANAL_ASSERT(result.srem(one_two, minustwo).signedMin(res) && res == 0 &&
+                 result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.srem(zero_one, minustwo).signedMin(res) && res == 0 &&
+                 result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.srem(ten, minusfive).isSignedConstant() &&
+                 result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.srem(five_ten, minustwo).signedMin(res) && res == 0 &&
+                 result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.srem(top, minusfive).signedMin(res) && res == llvm::APInt(32, -4, true) &&
+                 result.signedMax(res) && res == 4);
+    CANAL_ASSERT(result.srem(minusone_zero, minusfive).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 0);
+    CANAL_ASSERT(result.srem(minustwo_two, minusfive).signedMin(res) && res == llvm::APInt(32, -2, true) &&
+                 result.signedMax(res) && res == 2);
+    CANAL_ASSERT(result.srem(minustwo_two, minusfour).signedMin(res) && res == llvm::APInt(32, -2, true) &&
+                 result.signedMax(res) && res == 2);
+    CANAL_ASSERT(result.srem(minustwo_two, minustwo).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 1);
+
+    CANAL_ASSERT(result.srem(minustwo_minusone, five).signedMin(res) && res == llvm::APInt(32, -2, true) &&
+                 result.signedMax(res) && res == llvm::APInt(32, -1, true));
+    CANAL_ASSERT(result.srem(minustwo_minusone, two).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 0);
+    CANAL_ASSERT(result.srem(minusone_zero, two).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 0);
+    CANAL_ASSERT(result.srem(minusten, five).isSignedConstant() &&
+                 result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.srem(minusten_minusfive, two).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 0);
+
+    CANAL_ASSERT(result.srem(minustwo_minusone, minusfive).signedMin(res) && res == llvm::APInt(32, -2, true) &&
+                 result.signedMax(res) && res == llvm::APInt(32, -1, true));
+    CANAL_ASSERT(result.srem(minustwo_minusone, minustwo).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 0);
+    CANAL_ASSERT(result.srem(minusone_zero, minustwo).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 0);
+    CANAL_ASSERT(result.srem(minusten, minusfive).isSignedConstant() &&
+                 result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.srem(minusten_minusfive, minustwo).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 0);
+
+
+    //Interval division
+    CANAL_ASSERT(result.srem(one_two, five_ten).signedMin(res) && res == 1 &&
+                 result.signedMax(res) && res == 2);
+    CANAL_ASSERT(result.srem(five_ten, one_two).signedMin(res) && res == 0 &&
+                 result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.srem(five_ten, zero_two).signedMin(res) && res == 0 &&
+                 result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.srem(five_ten, zero_one).isSignedConstant() &&
+                 result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.srem(top, five_ten).signedMin(res) && res == llvm::APInt(32, -9, true) &&
+                 result.signedMax(res) && res == 9);
+    CANAL_ASSERT(result.srem(minusone_zero, five_ten).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 0);
+
+    CANAL_ASSERT(result.srem(one_two, minusten_minusfive).signedMin(res) && res == 1 &&
+                 result.signedMax(res) && res == 2);
+    CANAL_ASSERT(result.srem(five_ten, minustwo_minusone).signedMin(res) && res == 0 &&
+                 result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.srem(five_ten, minustwo_zero).signedMin(res) && res == 0 &&
+                 result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.srem(five_ten, minusone_zero).isSignedConstant() &&
+                 result.signedMin(res) && res == 0);
+    CANAL_ASSERT(result.srem(top, minusten_minusfive).signedMin(res) && res == llvm::APInt(32, -9, true) &&
+                 result.signedMax(res) && res == 9);
+    CANAL_ASSERT(result.srem(minusone_zero, minusten_minusfive).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 0);
+
+    CANAL_ASSERT(result.srem(minustwo_two, minustwo_two).signedMin(res) && res == llvm::APInt(32, -1, true) &&
+                 result.signedMax(res) && res == 1);
+    CANAL_ASSERT(result.srem(minustwo_two, zero_four).signedMin(res) && res == llvm::APInt(32, -3, true) &&
+                 result.signedMax(res) && res == 3);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -955,6 +1136,7 @@ main(int argc, char **argv)
 
     testAdd();
     testDivisionByZero();
+    testRemainder();
 
     delete gEnvironment;
     return 0;

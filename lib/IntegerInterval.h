@@ -139,6 +139,12 @@ public:
         return value->getKind() == IntegerIntervalKind;
     }
 
+    /// Support method for urem
+    void urem_any_result(const Interval& divisor);
+
+    /// Support method for srem
+    void srem_any_result(const Interval& dividend, const llvm::APInt &largerDivisor);
+
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual Interval *clone() const;
