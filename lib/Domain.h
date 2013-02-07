@@ -14,6 +14,10 @@ namespace Widening {
 class DataInterface;
 } // namespace Widening
 
+namespace Product {
+class Message;
+} // namespace Product
+
 /// @brief
 /// Base class for all abstract domains.
 class Domain : public SharedData
@@ -258,6 +262,10 @@ public: // Memory layout
     virtual Domain *getValueCell(uint64_t offset) const;
 
     virtual void mergeValueCell(uint64_t offset, const Domain &value);
+
+public: // Product
+    virtual void extract(Product::Message &message) const {};
+    virtual void refine(const Product::Message &message) {};
 
 private: // Domains are non-copyable.
     /// Assignment operator declaration.  Prevents accidental
