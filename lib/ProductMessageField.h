@@ -7,11 +7,21 @@ namespace Product {
 class MessageField
 {
 public:
+    /// Discriminator for LLVM-style RTTI (dyn_cast<> et al.)
+    enum MessageFieldKind {
+        DummyMessageFieldKind
+    };
+
+    const MessageFieldKind mKind;
+
+public:
+    MessageField(MessageFieldKind kind) : mKind(kind) {}
     virtual ~MessageField() {}
-    
+
     virtual MessageField &meet(const MessageField &other) = 0;
     virtual MessageField* clone() const = 0;
 };
+
 
 } // namespace Product
 } // namespace Canal

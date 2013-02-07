@@ -7,22 +7,19 @@ namespace Product {
 
 Message::~Message()
 {
-    for(size_t i = 0; i != mFields.size(); i++) {
-      if (mFields[i])
-        delete mFields[i];
-    }
+    for(iterator it = mFields.begin(); it != mFields.end(); ++it)
+        delete it->second;
 }
 
 Message& Message::meet(const Message& other)
 {
-    std::vector<MessageField*> otherFields = other.mFields;
-    CANAL_ASSERT(mFields.size() == otherFields.size());
+    Map otherFields = other.mFields;
 
-    for(size_t i = 0; i != mFields.size(); i++) {
-      if (mFields[i] && otherFields[i])
-        mFields[i]->meet(*otherFields[i]);
-      else if (otherFields[i])
-        mFields[i] = otherFields[i]->clone();
+    for(iterator it = otherFields.begin(); it != otherFields.end(); ++it) {
+      if (mFields[it->first])
+        mFields[it->first]->meet(*it->second);
+      else
+        mFields[it->first] = it->second->clone();
     }
     
     return *this;

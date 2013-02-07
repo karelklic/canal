@@ -1,18 +1,19 @@
 #ifndef LIBCANAL_PRODUCT_MESSAGE_H
 #define LIBCANAL_PRODUCT_MESSAGE_H
 
-#include <vector>
+#include "ProductMessageField.h"
+#include <map>
 
 namespace Canal {
 namespace Product {
 
-class MessageField;
-
 class Message
 {
 public:
-    /// Descendat has to fill mFields w/ all its' MessageFields
-    std::vector<MessageField*> mFields;
+    typedef std::map<MessageField::MessageFieldKind, MessageField*> Map;
+    typedef Map::iterator iterator;
+
+    Map mFields;
 
 public:
     virtual ~Message();
