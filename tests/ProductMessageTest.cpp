@@ -9,7 +9,7 @@ public:
     char meetCounter;
     char cloneCounter;
 
-    DummyMessageField() : MessageField(MessageField::DummyMessageFieldKind) {}
+    DummyMessageField() : MessageField(MessageField::DummyMessageFieldKind), meetCounter(0), cloneCounter(0) {}
 
     virtual DummyMessageField &meet(const MessageField &other) {
         meetCounter++;
