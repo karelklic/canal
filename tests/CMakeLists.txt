@@ -37,6 +37,10 @@ add_executable(ProductMessageTest ProductMessageTest.cpp)
 target_link_libraries(ProductMessageTest canal)
 add_test(ProductMessageTest ProductMessageTest)
 
+add_executable(ProductVectorTest ProductVectorTest.cpp)
+target_link_libraries(ProductVectorTest canal)
+add_test(ProductVectorTest ProductVectorTest)
+
 file(GLOB files "*.c")
 foreach(file ${files})
     get_filename_component(name ${file} NAME)
