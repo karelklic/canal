@@ -122,6 +122,11 @@ public: // Implementation of Domain.
                              bool overwrite);
 
     virtual const llvm::Type &getValueType() const;
+
+public: // Reduced Product
+    /// Initiate communication between contained Domains
+    /// to enhance their accuracy
+    void collaborate();
 };
 
 } // namespace Product

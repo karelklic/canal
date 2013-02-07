@@ -1,4 +1,5 @@
 #include "ProductVector.h"
+#include "ProductMessage.h"
 #include "IntegerBitfield.h"
 #include "IntegerSet.h"
 #include "IntegerInterval.h"
@@ -120,6 +121,8 @@ Vector::join(const Domain &value)
     for (; it != mValues.end(); ++it, ++it2)
         (*it)->join(**it2);
 
+    collaborate();
+
     return *this;
 }
 
@@ -132,6 +135,8 @@ Vector::meet(const Domain &value)
     std::vector<Domain*>::const_iterator it2 = container.mValues.begin();
     for (; it != mValues.end(); ++it, ++it2)
         (*it)->meet(**it2);
+
+    collaborate();
 
     return *this;
 }
@@ -219,6 +224,8 @@ binaryOperation(Vector &result,
 
     for (; it != result.mValues.end(); ++it, ++ita, ++itb)
         ((**it).*(operation))(**ita, **itb);
+
+    result.collaborate();
 
     return result;
 }
@@ -355,6 +362,8 @@ Vector::icmp(const Domain &a, const Domain &b,
             setTop();
         }
 
+        collaborate();
+
         return *this;
     }
 
@@ -368,6 +377,8 @@ Vector::icmp(const Domain &a, const Domain &b,
     for (; it != mValues.end(); ++it, ++ita, ++itb)
         (*it)->icmp(**ita, **itb, predicate);
 
+    collaborate();
+
     return *this;
 }
 
@@ -378,6 +389,8 @@ Vector::fcmp(const Domain &a, const Domain &b,
     std::vector<Domain*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         (*it)->fcmp(a, b, predicate);
+
+    collaborate();
 
     return *this;
 }
@@ -392,6 +405,8 @@ castOperation(Vector &result,
     std::vector<Domain*>::const_iterator itc = container.mValues.begin();
     for (; it != result.mValues.end(); ++it, ++itc)
         ((**it).*(operation))(**itc);
+
+    result.collaborate();
 
     return result;
 }
@@ -421,6 +436,8 @@ Vector::fptoui(const Domain &value)
     for (; it != mValues.end(); ++it)
         (**it).fptoui(value);
 
+    collaborate();
+
     return *this;
 }
 
@@ -430,6 +447,8 @@ Vector::fptosi(const Domain &value)
     std::vector<Domain*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         (**it).fptosi(value);
+
+    collaborate();
 
     return *this;
 }
@@ -471,6 +490,8 @@ Vector::insertelement(const Domain &array,
     for (; it != itend; ++it, ++itc)
         (**it).insertelement(**itc, element, index);
 
+    collaborate();
+
     return *this;
 }
 
@@ -491,6 +512,8 @@ Vector::shufflevector(const Domain &a,
 
     for (; it != mValues.end(); ++it, ++ita, ++itb)
         (**it).shufflevector(**ita, **itb, mask);
+
+    collaborate();
 
     return *this;
 }
@@ -532,6 +555,8 @@ Vector::insertvalue(const Domain &aggregate,
     for (; it != itend; ++it, ++itc)
         (**it).insertvalue(**itc, element, indices);
 
+    collaborate();
+
     return *this;
 }
 
@@ -544,6 +569,8 @@ Vector::insertvalue(const Domain &element,
 
     for (; it != itend; ++it)
         (**it).insertvalue(element, indices);
+
+    collaborate();
 }
 
 Domain *
@@ -596,6 +623,8 @@ Vector::store(const Domain &value,
             (**it).store(value, offsets, overwrite);
     }
 
+    collaborate();
+
     return *this;
 }
 
@@ -616,6 +645,24 @@ Vector::getValueType() const
 
     return *result;
 }
+
+void
+Vector::collaborate()
+{
+    Message inputMessage;
+
+    std::vector<Domain*>::iterator it = mValues.begin();
+    for (; it != mValues.end(); ++it)
+    {
+        (**it).refine(inputMessage);
+
+        Message outputMessage;
+        (**it).extract(outputMessage);
+
+        inputMessage.meet(outputMessage);
+    }
+}
+
 
 } // namespace Integer
 } // namespace Canal
