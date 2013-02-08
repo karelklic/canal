@@ -13,15 +13,13 @@ Message::~Message()
 
 Message& Message::meet(const Message& other)
 {
-    Map otherFields = other.mFields;
-
-    for(iterator it = otherFields.begin(); it != otherFields.end(); ++it) {
+    for(const_iterator it = other.mFields.begin(); it != other.mFields.end(); ++it) {
       if (mFields[it->first])
         mFields[it->first]->meet(*it->second);
       else
         mFields[it->first] = it->second->clone();
     }
-    
+
     return *this;
 }
 

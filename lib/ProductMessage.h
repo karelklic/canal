@@ -12,6 +12,7 @@ class Message
 public:
     typedef std::map<MessageField::MessageFieldKind, MessageField*> Map;
     typedef Map::iterator iterator;
+    typedef Map::const_iterator const_iterator;
 
     Map mFields;
 
