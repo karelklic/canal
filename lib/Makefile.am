@@ -25,6 +25,8 @@ pkginclude_HEADERS = \
 	PointerTarget.h \
 	PointerUtils.h \
 	Prereq.h \
+	ProductMessageField.h \
+	ProductMessage.h \
 	ProductVector.h \
 	SharedDataPointer.h \
 	SlotTracker.h \
@@ -66,6 +68,7 @@ libcanal_la_SOURCES = \
 	Pointer.cpp \
 	PointerTarget.cpp \
 	PointerUtils.cpp \
+	ProductMessage.cpp \
 	ProductVector.cpp \
 	SlotTracker.cpp \
 	State.cpp \
