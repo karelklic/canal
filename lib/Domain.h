@@ -2,24 +2,13 @@
 #define LIBCANAL_DOMAIN_H
 
 #include "SharedDataPointer.h"
-
 #include <cstddef>
 #include <string>
 
 namespace Canal {
 
-class Environment;
-
-namespace Widening {
-class DataInterface;
-} // namespace Widening
-
-namespace Product {
-class Message;
-} // namespace Product
-
 /// @brief
-/// Base class for all abstract domains.
+///   Base class for all abstract domains.
 class Domain : public SharedData
 {
 public:
@@ -33,7 +22,8 @@ public:
                                            llvm::CmpInst::Predicate predicate);
 
     /// Discriminator for LLVM-style RTTI (dyn_cast<> et al.)
-    enum DomainKind {
+    enum DomainKind
+    {
         ArrayExactSizeKind,
         ArraySingleItemKind,
         ArrayStringPrefixKind,
@@ -90,7 +80,7 @@ public:
     /// Set value of this domain to represent zeroed memory.  Needed
     /// for constants with zero initializer.  This can only be called
     /// right after creating a domain.
-    virtual void setZero(const llvm::Value *place) = 0;
+    virtual void setZero(const llvm::Value *place);
 
 public: // Lattice
     /// Implementing this is mandatory.  Values are compared while
@@ -236,13 +226,6 @@ public: // Instructions operating on values.
     virtual void insertvalue(const Domain &element,
                              const std::vector<unsigned> &indices);
 
-    virtual Domain *load(const llvm::Type &type,
-                         const std::vector<Domain*> &offsets) const;
-
-    virtual Domain &store(const Domain &value,
-                          const std::vector<Domain*> &offsets,
-                          bool overwrite);
-
 public: // Widening interface.
     Widening::DataInterface *getWideningData() const
     {
@@ -252,20 +235,81 @@ public: // Widening interface.
     /// This class takes ownership of the wideningData memory.
     void setWideningData(Widening::DataInterface *wideningData);
 
-public: // Memory layout
+public: // Memory layout.
+    /// @brief
+    ///   Returns the type of the concrete values represented by this
+    ///   abstract domain.
+    ///
+    /// If the abstract domain does not represent a value, the
+    /// behavior is undefined.
     virtual const llvm::Type &getValueType() const;
 
+    /// @brief
+    ///   Indicates whether all concrete values represented by this
+    ///   abstract domain use an exact number of bytes of memory to be
+    ///   stored.
+    ///
+    /// This is true for abstract domains representing numbers,
+    /// structures, vectors and fixed-size arrays.  It's false for
+    /// variable-sized arrays.
     virtual bool hasValueExactSize() const;
 
     virtual uint64_t getValueExactSize();
+
+    virtual Domain *getValueAbstractSize();
 
     virtual Domain *getValueCell(uint64_t offset) const;
 
     virtual void mergeValueCell(uint64_t offset, const Domain &value);
 
-public: // Product
-    virtual void extract(Product::Message &message) const {};
-    virtual void refine(const Product::Message &message) {};
+    /// Checks whether the abstract value represents an abstract value
+    /// of the provided type on the provided abstract memory offset.
+    /// If the abstract memory offset can be concretized to multiple
+    /// concrete offsets, it is checked whether a value is represented
+    /// by this abstract value for each of the concrete offsets.
+    ///
+    /// @param type
+    ///   Type of the abstract value.
+    /// @param offset
+    ///   Offset in bytes.
+    /// @note
+    ///   The default implementation that is useful for primitive
+    ///   types.
+    virtual bool containsValue(const llvm::Type &type,
+                               const Domain &offset) const;
+
+    /// @param offset
+    ///   Offset in bytes.
+    /// @note
+    ///   The default implementation that is useful for primitive
+    ///   types.
+    virtual Domain *loadValue(const llvm::Type &type,
+                              const Domain &offset) const;
+
+    /// @param offset
+    ///   Offset in bytes.
+    /// @param isSingleTarget
+    ///   Helps to decide whether to set the value or join it to the
+    ///   existing value.
+    /// @note
+    ///   The default implementation that is useful for primitive
+    ///   types.
+    virtual void storeValue(const Domain &value,
+                            const Domain &offset,
+                            bool isSingleTarget);
+
+public: // Product of abstract domains.
+    /// The default implementation extracts no information from the
+    /// abstract value to the message.
+    virtual void extract(Product::Message &message) const
+    {
+    }
+
+    /// The default implementation does not enrich the abstract value
+    /// by the contents of the message.
+    virtual void refine(const Product::Message &message)
+    {
+    }
 
 private: // Domains are non-copyable.
     /// Assignment operator declaration.  Prevents accidental

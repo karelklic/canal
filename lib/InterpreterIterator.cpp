@@ -6,7 +6,7 @@
 #include "Operations.h"
 #include "Environment.h"
 #include "WideningManager.h"
-#include "State.h"
+#include "MemoryState.h"
 #include "Utils.h"
 
 namespace Canal {
@@ -22,7 +22,7 @@ Iterator::Iterator(Module &module,
       mWideningManager(wideningManager),
       mChanged(true),
       mInitialized(false),
-      mState(new State()),
+      mState(new Memory::State()),
       mCallback(&emptyCallback)
 {
     if (!mModule.empty())
@@ -143,7 +143,7 @@ Iterator::nextInstruction()
         }
 
         delete mState;
-        mState = new State((*mBasicBlock)->getInputState());
+        mState = new Memory::State((*mBasicBlock)->getInputState());
         (*mFunction)->initializeInputState(**mBasicBlock, *mState);
         mInstruction = (*mBasicBlock)->begin();
         mCallback->onBasicBlockEnter(**mBasicBlock);

@@ -8,12 +8,12 @@
 #include "ProductVector.h"
 #include "IntegerUtils.h"
 #include "OperationsCallback.h"
-#include "Pointer.h"
-#include "PointerUtils.h"
+#include "MemoryPointer.h"
+#include "MemoryUtils.h"
 #include "Structure.h"
 #include "Utils.h"
 #include "Domain.h"
-#include "State.h"
+#include "MemoryState.h"
 #include <map>
 #include <cassert>
 #include <cstdio>
@@ -31,7 +31,7 @@ Operations::Operations(const Environment &environment,
 
 void
 Operations::interpretInstruction(const llvm::Instruction &instruction,
-                                 State &state)
+                                 Memory::State &state)
 {
     if (llvm::isa<llvm::CallInst>(instruction))
         call((const llvm::CallInst&)instruction, state);
@@ -165,7 +165,7 @@ Operations::interpretInstruction(const llvm::Instruction &instruction,
 
 const Domain *
 Operations::variableOrConstant(const llvm::Value &place,
-                               State &state,
+                               Memory::State &state,
                                llvm::OwningPtr<Domain> &constant) const
 {
     const Domain *variable = state.findVariable(place);
@@ -175,7 +175,6 @@ Operations::variableOrConstant(const llvm::Value &place,
     if (llvm::isa<llvm::Constant>(place))
     {
         Domain *constValue = mConstructors.create(checkedCast<llvm::Constant>(place),
-                                                  place,
                                                   &state);
 
         llvm::OwningPtr<Domain> ptr(constValue);
@@ -188,13 +187,13 @@ Operations::variableOrConstant(const llvm::Value &place,
 
 template<typename T> void
 Operations::interpretCall(const T &instruction,
-                          State &state)
+                          Memory::State &state)
 {
     llvm::Function *function = instruction.getCalledFunction();
     CANAL_ASSERT(function);
 
     // Create the calling state.
-    State callingState;
+    Memory::State callingState;
     callingState.mergeGlobal(state);
 
     // TODO: not all function blocks should be merged to the state.
@@ -245,7 +244,7 @@ Operations::interpretCall(const T &instruction,
 
 void
 Operations::binaryOperation(const llvm::BinaryOperator &instruction,
-                            State &state,
+                            Memory::State &state,
                             Domain::BinaryOperation operation)
 {
     // Find operands in state, and encapsulate constant operands (such
@@ -271,20 +270,23 @@ Operations::binaryOperation(const llvm::BinaryOperator &instruction,
     state.addFunctionVariable(instruction, result);
 }
 
-template<typename T> bool
-Operations::getElementPtrOffsets(std::vector<Domain*> &result,
-                                 T iteratorStart,
-                                 T iteratorEnd,
+bool
+Operations::getElementPtrOffsets(std::vector<const Domain*> &result,
+                                 llvm::GetElementPtrInst::const_op_iterator iteratorStart,
+                                 llvm::GetElementPtrInst::const_op_iterator iteratorEnd,
                                  const llvm::Value &place,
-                                 const State &state)
+                                 const Memory::State &state)
 {
     // Check that all variables exist before building the offset list.
-    for (T it = iteratorStart; it != iteratorEnd; ++it)
+    for (llvm::GetElementPtrInst::const_op_iterator it = iteratorStart;
+         it != iteratorEnd;
+         ++it)
     {
         if (llvm::isa<llvm::ConstantInt>(it))
             continue;
 
         const Domain *offset = state.findVariable(*it->get());
+
         // Not all offsets are necesarily known at each pass before
         // reaching a fixpoint.
         if (!offset)
@@ -292,7 +294,9 @@ Operations::getElementPtrOffsets(std::vector<Domain*> &result,
     }
 
     // Build the offset list.
-    for (T it = iteratorStart; it != iteratorEnd; ++it)
+    for (llvm::GetElementPtrInst::const_op_iterator it = iteratorStart;
+         it != iteratorEnd;
+         ++it)
     {
         if (llvm::isa<llvm::ConstantInt>(it))
         {
@@ -300,7 +304,6 @@ Operations::getElementPtrOffsets(std::vector<Domain*> &result,
                 checkedCast<llvm::ConstantInt>(it);
 
             result.push_back(mConstructors.create(*constant,
-                                                  place,
                                                   &state));
         }
         else
@@ -311,7 +314,7 @@ Operations::getElementPtrOffsets(std::vector<Domain*> &result,
     }
 
     // Extend all values to 64 bits.
-    std::vector<Domain*>::iterator resultIt = result.begin();
+    std::vector<const Domain*>::iterator resultIt = result.begin();
     for (; resultIt != result.end(); ++resultIt)
     {
         unsigned bitWidth = Integer::Utils::getBitWidth(**resultIt);
@@ -335,7 +338,7 @@ Operations::getElementPtrOffsets(std::vector<Domain*> &result,
 
 void
 Operations::castOperation(const llvm::CastInst &instruction,
-                          State &state,
+                          Memory::State &state,
                           Domain::CastOperation operation)
 {
     llvm::OwningPtr<Domain> constant;
@@ -358,7 +361,7 @@ Operations::castOperation(const llvm::CastInst &instruction,
 
 void
 Operations::cmpOperation(const llvm::CmpInst &instruction,
-                         State &state,
+                         Memory::State &state,
                          Domain::CmpOperation operation)
 {
     // Find operands in state, and encapsulate constant operands (such
@@ -386,7 +389,7 @@ Operations::cmpOperation(const llvm::CmpInst &instruction,
 
 void
 Operations::ret(const llvm::ReturnInst &instruction,
-                State &state)
+                Memory::State &state)
 {
     llvm::Value *value = instruction.getReturnValue();
     // Return value is optional, some functions return nothing.
@@ -404,41 +407,41 @@ Operations::ret(const llvm::ReturnInst &instruction,
 
 void
 Operations::br(const llvm::BranchInst &instruction,
-               State &state)
+               Memory::State &state)
 {
     // Ignore.
 }
 
 void
 Operations::switch_(const llvm::SwitchInst &instruction,
-                    State &state)
+                    Memory::State &state)
 {
     // Ignore.
 }
 
 void
 Operations::indirectbr(const llvm::IndirectBrInst &instruction,
-                       State &state)
+                       Memory::State &state)
 {
     // Ignore.
 }
 
 void
 Operations::invoke(const llvm::InvokeInst &instruction,
-                   State &state)
+                   Memory::State &state)
 {
     interpretCall(instruction, state);
 }
 
 void
 Operations::unreachable(const llvm::UnreachableInst &instruction,
-                        State &state)
+                        Memory::State &state)
 {
     // Ignore.
 }
 
 void Operations::add(const llvm::BinaryOperator &instruction,
-                     State &state)
+                     Memory::State &state)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.
@@ -455,8 +458,8 @@ void Operations::add(const llvm::BinaryOperator &instruction,
         return;
 
     // Pointer arithmetic.
-    const Pointer::Pointer *aPointer = dynCast<Pointer::Pointer>(a);
-    const Pointer::Pointer *bPointer = dynCast<Pointer::Pointer>(b);
+    const Memory::Pointer *aPointer = dynCast<Memory::Pointer>(a);
+    const Memory::Pointer *bPointer = dynCast<Memory::Pointer>(b);
     CANAL_ASSERT_MSG(!aPointer || !bPointer,
                      "Unable to add two pointers.");
 
@@ -485,14 +488,14 @@ void Operations::add(const llvm::BinaryOperator &instruction,
 
 void
 Operations::fadd(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::fadd);
 }
 
 void
 Operations::sub(const llvm::BinaryOperator &instruction,
-                State &state)
+                Memory::State &state)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.
@@ -509,8 +512,8 @@ Operations::sub(const llvm::BinaryOperator &instruction,
         return;
 
     // Pointer arithmetic.
-    const Pointer::Pointer *aPointer = dynCast<Pointer::Pointer>(a);
-    const Pointer::Pointer *bPointer = dynCast<Pointer::Pointer>(b);
+    const Memory::Pointer *aPointer = dynCast<Memory::Pointer>(a);
+    const Memory::Pointer *bPointer = dynCast<Memory::Pointer>(b);
     CANAL_ASSERT_MSG(aPointer || !bPointer,
                      "Subtracting pointer from constant!");
 
@@ -542,112 +545,112 @@ Operations::sub(const llvm::BinaryOperator &instruction,
 
 void
 Operations::fsub(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::fsub);
 }
 
 void
 Operations::mul(const llvm::BinaryOperator &instruction,
-                State &state)
+                Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::mul);
 }
 
 void
 Operations::fmul(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::fmul);
 }
 
 void
 Operations::udiv(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::udiv);
 }
 
 void
 Operations::sdiv(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::sdiv);
 }
 
 void
 Operations::fdiv(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::fdiv);
 }
 
 void
 Operations::urem(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::urem);
 }
 
 void
 Operations::srem(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::srem);
 }
 
 void
 Operations::frem(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::frem);
 }
 
 void
 Operations::shl(const llvm::BinaryOperator &instruction,
-                State &state)
+                Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::shl);
 }
 
 void
 Operations::lshr(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::lshr);
 }
 
 void
 Operations::ashr(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::ashr);
 }
 
 void
 Operations::and_(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::and_);
 }
 
 void
 Operations::or_(const llvm::BinaryOperator &instruction,
-                State &state)
+                Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::or_);
 }
 
 void
 Operations::xor_(const llvm::BinaryOperator &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     binaryOperation(instruction, state, &Domain::xor_);
 }
 
 void
 Operations::extractelement(const llvm::ExtractElementInst &instruction,
-                           State &state)
+                           Memory::State &state)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.  Fixpoint
@@ -671,7 +674,7 @@ Operations::extractelement(const llvm::ExtractElementInst &instruction,
 
 void
 Operations::insertelement(const llvm::InsertElementInst &instruction,
-                          State &state)
+                          Memory::State &state)
 {
     // Find operands in state, and encapsulate constant operands (such
     // as numbers).  If some operand is not known, exit.  Fixpoint
@@ -699,7 +702,7 @@ Operations::insertelement(const llvm::InsertElementInst &instruction,
 
 void
 Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
-                          State &state)
+                          Memory::State &state)
 {
     llvm::OwningPtr<Domain> constants[2];
     const Domain *values[2] = {
@@ -751,7 +754,7 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
 
 void
 Operations::extractvalue(const llvm::ExtractValueInst &instruction,
-                         State &state)
+                         Memory::State &state)
 {
     llvm::OwningPtr<Domain> constant;
     const Domain *aggregate = variableOrConstant(
@@ -771,7 +774,7 @@ Operations::extractvalue(const llvm::ExtractValueInst &instruction,
 
 void
 Operations::insertvalue(const llvm::InsertValueInst &instruction,
-                        State &state)
+                        Memory::State &state)
 {
     llvm::OwningPtr<Domain> aggregateConstant;
     const Domain *aggregate = variableOrConstant(
@@ -801,10 +804,9 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
 
 void
 Operations::alloca_(const llvm::AllocaInst &instruction,
-                    State &state)
+                    Memory::State &state)
 {
     Domain *value;
-    std::vector<Domain*> offsets;
 
     if (instruction.isArrayAllocation())
     {
@@ -819,11 +821,6 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
 
         value = mConstructors.createArray(*instruction.getType(),
                                           abstractSize->clone());
-
-        // Set pointer offset.
-        Domain *zero = mConstructors.createInteger(llvm::APInt(64, 0));
-        offsets.push_back(zero);
-        offsets.push_back(zero->clone());
     }
     else
     {
@@ -835,19 +832,16 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
 
     Domain *pointer;
     pointer = mConstructors.createPointer(*instruction.getType());
-    Pointer::Utils::addTarget(*pointer,
-                              Pointer::Target::Block,
-                              &instruction,
-                              &instruction,
-                              offsets,
-                              NULL);
+    Memory::Utils::addTarget(*pointer,
+                             instruction,
+                             NULL);
 
     state.addFunctionVariable(instruction, pointer);
 }
 
 void
 Operations::load(const llvm::LoadInst &instruction,
-                  State &state)
+                 Memory::State &state)
 {
     // Find the pointer in the state.  If the pointer is not
     // available, do nothing.
@@ -857,8 +851,8 @@ Operations::load(const llvm::LoadInst &instruction,
     if (!variable)
         return;
 
-    const Pointer::Pointer &pointer =
-        checkedCast<Pointer::Pointer>(*variable);
+    const Memory::Pointer &pointer =
+        checkedCast<Memory::Pointer>(*variable);
 
     // Pointer found. Merge all possible values and store the result
     // into the state.
@@ -871,7 +865,7 @@ Operations::load(const llvm::LoadInst &instruction,
 
 void
 Operations::store(const llvm::StoreInst &instruction,
-                  State &state)
+                  Memory::State &state)
 {
     llvm::OwningPtr<Domain> constantPointer, constantValue;
     const Domain *pointer = variableOrConstant(
@@ -887,31 +881,31 @@ Operations::store(const llvm::StoreInst &instruction,
     if (!pointer || !value)
         return;
 
-    const Pointer::Pointer &inclusionBased =
-        checkedCast<Pointer::Pointer>(*pointer);
+    const Memory::Pointer &inclusionBased =
+        checkedCast<Memory::Pointer>(*pointer);
 
     inclusionBased.store(*value, state);
 }
 
 void
 Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
-                          State &state)
+                          Memory::State &state)
 {
     CANAL_ASSERT(instruction.getNumOperands() > 1);
 
-    // Find the base pointer.
-    const Domain *base = state.findVariable(*instruction.getPointerOperand());
-    if (!base)
+    // Find the source (base) pointer.
+    const Domain *sourcePointer = state.findVariable(*instruction.getPointerOperand());
+    if (!sourcePointer)
         return;
 
-    const Pointer::Pointer &source =
-        checkedCast<Pointer::Pointer>(*base);
+    const Memory::Pointer &source =
+        checkedCast<Memory::Pointer>(*sourcePointer);
 
     // We get offsets. Either constants or Product::Vector.
     // Pointer points either to an array (or array offset), or to a
     // struct (or struct member).  Pointer might have multiple
     // targets.
-    std::vector<Domain*> offsets;
+    std::vector<const Domain*> offsets;
     bool allOffsetsPresent = getElementPtrOffsets(offsets,
                                                   instruction.idx_begin(),
                                                   instruction.idx_end(),
@@ -921,16 +915,21 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
     if (!allOffsetsPresent)
         return;
 
-    const llvm::PointerType &pointerType = *instruction.getType();
-    Pointer::Pointer *result = source.getElementPtr(
-        offsets, pointerType, mConstructors);
+    Domain *byteOffset = Memory::Utils::getByteOffset(offsets.begin(),
+                                                      offsets.end(),
+                                                      source.getValueType(),
+                                                      mEnvironment);
 
+    llvm::DeleteContainerPointers(offsets);
+    const llvm::PointerType &pointerType = *instruction.getType();
+    Memory::Pointer *result = source.withOffset(*byteOffset, pointerType);
+    delete byteOffset;
     state.addFunctionVariable(instruction, result);
 }
 
 void
 Operations::trunc(const llvm::TruncInst &instruction,
-                  State &state)
+                  Memory::State &state)
 {
     castOperation(instruction,
                   state,
@@ -939,7 +938,7 @@ Operations::trunc(const llvm::TruncInst &instruction,
 
 void
 Operations::zext(const llvm::ZExtInst &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     castOperation(instruction,
                   state,
@@ -948,7 +947,7 @@ Operations::zext(const llvm::ZExtInst &instruction,
 
 void
 Operations::sext(const llvm::SExtInst &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     castOperation(instruction,
                   state,
@@ -957,7 +956,7 @@ Operations::sext(const llvm::SExtInst &instruction,
 
 void
 Operations::fptrunc(const llvm::FPTruncInst &instruction,
-                    State &state)
+                    Memory::State &state)
 {
     castOperation(instruction,
                   state,
@@ -966,7 +965,7 @@ Operations::fptrunc(const llvm::FPTruncInst &instruction,
 
 void
 Operations::fpext(const llvm::FPExtInst &instruction,
-                  State &state)
+                  Memory::State &state)
 {
     castOperation(instruction,
                   state,
@@ -975,7 +974,7 @@ Operations::fpext(const llvm::FPExtInst &instruction,
 
 void
 Operations::fptoui(const llvm::FPToUIInst &instruction,
-                   State &state)
+                   Memory::State &state)
 {
     castOperation(instruction,
                   state,
@@ -984,7 +983,7 @@ Operations::fptoui(const llvm::FPToUIInst &instruction,
 
 void
 Operations::fptosi(const llvm::FPToSIInst &instruction,
-                   State &state)
+                   Memory::State &state)
 {
     castOperation(instruction,
                   state,
@@ -993,7 +992,7 @@ Operations::fptosi(const llvm::FPToSIInst &instruction,
 
 void
 Operations::uitofp(const llvm::UIToFPInst &instruction,
-                   State &state)
+                   Memory::State &state)
 {
     castOperation(instruction,
                   state,
@@ -1002,7 +1001,7 @@ Operations::uitofp(const llvm::UIToFPInst &instruction,
 
 void
 Operations::sitofp(const llvm::SIToFPInst &instruction,
-                    State &state)
+                   Memory::State &state)
 {
     castOperation(instruction,
                   state,
@@ -1011,7 +1010,7 @@ Operations::sitofp(const llvm::SIToFPInst &instruction,
 
 void
 Operations::ptrtoint(const llvm::PtrToIntInst &instruction,
-                     State &state)
+                     Memory::State &state)
 {
     const Domain *operand =
         state.findVariable(*instruction.getOperand(0));
@@ -1024,27 +1023,25 @@ Operations::ptrtoint(const llvm::PtrToIntInst &instruction,
 
 void
 Operations::inttoptr(const llvm::IntToPtrInst &instruction,
-                     State &state)
+                     Memory::State &state)
 {
     const Domain *operand = state.findVariable(*instruction.getOperand(0));
     if (!operand)
         return;
 
-    const Pointer::Pointer &source =
-        checkedCast<Pointer::Pointer>(*operand);
+    const Memory::Pointer &source =
+        checkedCast<Memory::Pointer>(*operand);
 
     const llvm::PointerType &pointerType =
         checkedCast<llvm::PointerType>(*instruction.getDestTy());
 
-    Pointer::Pointer *result =
-        source.bitcast(pointerType);
-
+    Memory::Pointer *result = new Memory::Pointer(source, pointerType);
     state.addFunctionVariable(instruction, result);
 }
 
 void
 Operations::bitcast(const llvm::BitCastInst &instruction,
-                    State &state)
+                    Memory::State &state)
 {
     const llvm::Type *sourceType = instruction.getSrcTy();
     const llvm::Type *destinationType = instruction.getDestTy();
@@ -1057,33 +1054,33 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
     if (!source)
         return;
 
-    const Pointer::Pointer &sourcePointer =
-        checkedCast<Pointer::Pointer>(*source);
+    const Memory::Pointer &sourcePointer =
+        checkedCast<Memory::Pointer>(*source);
 
     const llvm::PointerType &destPointerType =
         checkedCast<llvm::PointerType>(*destinationType);
 
-    Domain *resultPointer = sourcePointer.bitcast(destPointerType);
+    Domain *resultPointer = new Memory::Pointer(sourcePointer, destPointerType);
     state.addFunctionVariable(instruction, resultPointer);
 }
 
 void
 Operations::icmp(const llvm::ICmpInst &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     cmpOperation(instruction, state, &Domain::icmp);
 }
 
 void
 Operations::fcmp(const llvm::FCmpInst &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     cmpOperation(instruction, state, &Domain::fcmp);
 }
 
 void
 Operations::phi(const llvm::PHINode &instruction,
-                State &state)
+                Memory::State &state)
 {
     Domain *mergedValue = NULL;
     for (unsigned i = 0; i < instruction.getNumIncomingValues(); ++i)
@@ -1111,7 +1108,7 @@ Operations::phi(const llvm::PHINode &instruction,
 
 void
 Operations::select(const llvm::SelectInst &instruction,
-                   State &state)
+                   Memory::State &state)
 {
     const Domain *condition = state.findVariable(*instruction.getCondition());
     if (!condition)
@@ -1160,14 +1157,14 @@ Operations::select(const llvm::SelectInst &instruction,
 
 void
 Operations::call(const llvm::CallInst &instruction,
-                 State &state)
+                 Memory::State &state)
 {
     interpretCall(instruction, state);
 }
 
 void
 Operations::va_arg_(const llvm::VAArgInst &instruction,
-                   State &state)
+                   Memory::State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
@@ -1177,35 +1174,35 @@ Operations::va_arg_(const llvm::VAArgInst &instruction,
 
 void
 Operations::resume(const llvm::ResumeInst &instruction,
-                   State &state)
+                   Memory::State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
 Operations::fence(const llvm::FenceInst &instruction,
-                  State &state)
+                  Memory::State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
 Operations::cmpxchg(const llvm::AtomicCmpXchgInst &instruction,
-                    State &state)
+                    Memory::State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
 Operations::atomicrmw(const llvm::AtomicRMWInst &instruction,
-                      State &state)
+                      Memory::State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }
 
 void
 Operations::landingpad(const llvm::LandingPadInst &instruction,
-                       State &state)
+                       Memory::State &state)
 {
     CANAL_NOT_IMPLEMENTED();
 }

@@ -7,7 +7,7 @@
 #include "Constructors.h"
 #include "Utils.h"
 #include "APIntUtils.h"
-#include "Pointer.h"
+#include "MemoryPointer.h"
 
 namespace Canal {
 namespace Product {
@@ -310,11 +310,11 @@ Vector::xor_(const Domain &a, const Domain &b)
 
 Vector &
 Vector::icmp(const Domain &a, const Domain &b,
-                llvm::CmpInst::Predicate predicate)
+             llvm::CmpInst::Predicate predicate)
 {
-    const Pointer::Pointer
-        *aPointer = dynCast<Pointer::Pointer>(&a),
-        *bPointer = dynCast<Pointer::Pointer>(&b);
+    const Memory::Pointer
+        *aPointer = dynCast<Memory::Pointer>(&a),
+        *bPointer = dynCast<Memory::Pointer>(&b);
 
     if (aPointer && bPointer)
     {
@@ -477,8 +477,8 @@ Vector::extractelement(const Domain &index) const
 
 Vector &
 Vector::insertelement(const Domain &array,
-                         const Domain &element,
-                         const Domain &index)
+                      const Domain &element,
+                      const Domain &index)
 {
     const Vector &container = checkedCast<Vector>(array);
     CANAL_ASSERT(container.mValues.size() == mValues.size());
@@ -497,8 +497,8 @@ Vector::insertelement(const Domain &array,
 
 Vector &
 Vector::shufflevector(const Domain &a,
-                         const Domain &b,
-                         const std::vector<uint32_t> &mask)
+                      const Domain &b,
+                      const std::vector<uint32_t> &mask)
 {
     const Vector &aa = checkedCast<Vector>(a),
         &bb = checkedCast<Vector>(b);
@@ -542,8 +542,8 @@ Vector::extractvalue(const std::vector<unsigned> &indices) const
 
 Vector &
 Vector::insertvalue(const Domain &aggregate,
-                       const Domain &element,
-                       const std::vector<unsigned> &indices)
+                    const Domain &element,
+                    const std::vector<unsigned> &indices)
 {
     const Vector &container = checkedCast<Vector>(aggregate);
     CANAL_ASSERT(container.mValues.size() == mValues.size());
@@ -562,7 +562,7 @@ Vector::insertvalue(const Domain &aggregate,
 
 void
 Vector::insertvalue(const Domain &element,
-                       const std::vector<unsigned> &indices)
+                    const std::vector<unsigned> &indices)
 {
     std::vector<Domain*>::iterator it = mValues.begin(),
         itend = mValues.end();
@@ -571,61 +571,6 @@ Vector::insertvalue(const Domain &element,
         (**it).insertvalue(element, indices);
 
     collaborate();
-}
-
-Domain *
-Vector::load(const llvm::Type &type,
-                const std::vector<Domain*> &offsets) const
-{
-    if (offsets.empty())
-    {
-        if (&type == &getValueType())
-            return clone();
-        else
-        {
-            Domain *result = mEnvironment.getConstructors().create(type);
-            result->setTop();
-            return result;
-        }
-    }
-
-    Domain *subitem = extractelement(*offsets[0]);
-    Domain *result = subitem->load(type, std::vector<Domain*>(offsets.begin() + 1,
-                                                              offsets.end()));
-
-    delete subitem;
-    return result;
-}
-
-Vector &
-Vector::store(const Domain &value,
-                 const std::vector<Domain*> &offsets,
-                 bool overwrite)
-{
-    if (offsets.empty())
-    {
-        const Vector &container = checkedCast<Vector>(value);
-        CANAL_ASSERT(container.mValues.size() == mValues.size());
-
-        std::vector<Domain*>::iterator it = mValues.begin(),
-            itend = mValues.end();
-
-        std::vector<Domain*>::const_iterator itc = container.mValues.begin();
-        for (; it != itend; ++it, ++itc)
-            (**it).store(**itc, offsets, overwrite);
-    }
-    else
-    {
-        std::vector<Domain*>::iterator it = mValues.begin(),
-            itend = mValues.end();
-
-        for (; it != itend; ++it)
-            (**it).store(value, offsets, overwrite);
-    }
-
-    collaborate();
-
-    return *this;
 }
 
 const llvm::Type &
@@ -644,6 +589,21 @@ Vector::getValueType() const
     }
 
     return *result;
+}
+
+Domain *
+Vector::loadValue(const llvm::Type &type,
+                  const Domain &offset) const
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
+void
+Vector::storeValue(const Domain &value,
+                   const Domain &offset,
+                   bool isSingleTarget)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 void

@@ -138,14 +138,17 @@ public: // Implementation of Domain.
     virtual void insertvalue(const Domain &element,
                              const std::vector<unsigned> &indices);
 
-    virtual Domain *load(const llvm::Type &type,
-                         const std::vector<Domain*> &offsets) const;
+    virtual const llvm::SequentialType &getValueType() const
+    {
+        return mType;
+    }
 
-    virtual ExactSize &store(const Domain &value,
-                             const std::vector<Domain*> &offsets,
-                             bool overwrite);
+    virtual Domain *loadValue(const llvm::Type &type,
+                              const Domain &offset) const;
 
-    virtual const llvm::SequentialType &getValueType() const { return mType; }
+    virtual void storeValue(const Domain &value,
+                            const Domain &offset,
+                            bool isSingleTarget);
 };
 
 } // namespace Array

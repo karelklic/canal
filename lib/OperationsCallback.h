@@ -6,9 +6,6 @@
 
 namespace Canal {
 
-class Domain;
-class State;
-
 class OperationsCallback
 {
 public:
@@ -23,8 +20,8 @@ public:
     ///   A place in the resultState where the returned value should
     ///   be merged.
     virtual void onFunctionCall(const llvm::Function &function,
-                                const State &callState,
-                                State &resultState,
+                                const Memory::State &callState,
+                                Memory::State &resultState,
                                 const llvm::Value &resultPlace) = 0;
 };
 

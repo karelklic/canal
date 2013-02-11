@@ -74,4 +74,10 @@
 #  endif
 #endif
 
+// Class declarations.
+class Command;
+class CommandFile;
+class Commands;
+class State;
+
 #endif // CANAL_PREREQ_H

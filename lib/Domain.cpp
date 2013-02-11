@@ -3,6 +3,7 @@
 #include "WideningDataInterface.h"
 #include "Environment.h"
 #include "Constructors.h"
+#include "IntegerUtils.h"
 
 namespace Canal {
 
@@ -27,6 +28,12 @@ Domain::Domain(const Domain &value)
 Domain::~Domain()
 {
     delete mWideningData;
+}
+
+void
+Domain::setZero(const llvm::Value *place)
+{
+    CANAL_NOT_IMPLEMENTED();
 }
 
 bool
@@ -278,41 +285,6 @@ Domain::insertvalue(const Domain &element,
     CANAL_NOT_IMPLEMENTED();
 }
 
-Domain *
-Domain::load(const llvm::Type &type,
-             const std::vector<Domain*> &offsets) const
-{
-    // Default implementation.  Useful for non-array objects.
-    CANAL_ASSERT(offsets.empty());
-    if (&type == &getValueType())
-        return clone();
-    else
-    {
-        Domain *result = mEnvironment.getConstructors().create(type);
-        result->setTop();
-        return result;
-    }
-}
-
-Domain &
-Domain::store(const Domain &value,
-              const std::vector<Domain*> &offsets,
-              bool overwrite)
-{
-    CANAL_ASSERT(offsets.empty());
-    if (&getValueType() == &value.getValueType())
-    {
-        if (overwrite)
-            setBottom();
-
-        join(value);
-    }
-    else
-        setTop();
-
-    return *this;
-}
-
 void
 Domain::setWideningData(Widening::DataInterface *wideningData)
 {
@@ -351,6 +323,39 @@ void
 Domain::mergeValueCell(uint64_t offset, const Domain &value)
 {
     CANAL_NOT_IMPLEMENTED();
+}
+
+bool
+Domain::containsValue(const llvm::Type &type,
+                      const Domain &offset) const
+{
+    return &type == &getValueType() &&
+        Integer::Utils::isConstant(offset) &&
+        Integer::Utils::getConstant(offset) == 0L;
+}
+
+Domain *
+Domain::loadValue(const llvm::Type &type,
+                  const Domain &offset) const
+{
+    CANAL_ASSERT(&type == &getValueType());
+    CANAL_ASSERT(Integer::Utils::isConstant(offset));
+    CANAL_ASSERT(Integer::Utils::getConstant(offset) == 0L);
+    return clone();
+}
+
+void
+Domain::storeValue(const Domain &value,
+                   const Domain &offset,
+                   bool isSingleTarget)
+{
+    CANAL_ASSERT(&value.getValueType() == &getValueType());
+    CANAL_ASSERT(Integer::Utils::isConstant(offset));
+    CANAL_ASSERT(Integer::Utils::getConstant(offset) == 0L);
+    if (isSingleTarget)
+        setBottom();
+
+    join(value);
 }
 
 } // namespace Canal

@@ -7,13 +7,8 @@
 
 namespace Canal {
 
-class Domain;
-class Environment;
-class State;
-
 class Constructors
 {
-protected:
     const Environment &mEnvironment;
 
 public:
@@ -26,16 +21,23 @@ public:
 
     Domain *create(const llvm::Type &type) const;
 
+    /// @brief
+    ///   Create an abstract value from a given constant.
+    ///
+    /// Converts a LLVM constant to an abstract value of the
+    /// corresponding type.
+    ///
     /// @param state
     ///   State is used only for constant expressions such as
     ///   getelementptr and bitcast.  For other types of constants it
-    ///   might be NULL.
+    ///   might be NULL.  Constant expressions require state because
+    ///   they might refer to other abstract variables that are stored
+    ///   in the state.
     /// @returns
-    ///   Returns a newly allocated value or NULL.  Caller takes
-    ///   ownership of the returned value.
+    ///   Returns a newly allocated value.  Caller takes ownership of
+    ///   the returned value.  It never returns NULL.
     Domain *create(const llvm::Constant &value,
-                   const llvm::Value &place,
-                   const State *state) const;
+                   const Memory::State *state) const;
 
     Domain *createInteger(unsigned bitWidth) const;
 
@@ -62,16 +64,13 @@ public:
 
 protected:
     Domain *createConstantExpr(const llvm::ConstantExpr &value,
-                               const llvm::Value &place,
-                               const State *state) const;
+                               const Memory::State *state) const;
 
     Domain *createGetElementPtr(const llvm::ConstantExpr &value,
-                                const std::vector<const Domain*> &operands,
-                                const llvm::Value &place) const;
+                                const std::vector<const Domain*> &operands) const;
 
     Domain *createBitCast(const llvm::ConstantExpr &value,
-                          const std::vector<const Domain*> &operands,
-                          const llvm::Value &place) const;
+                          const std::vector<const Domain*> &operands) const;
 };
 
 } // namespace Canal

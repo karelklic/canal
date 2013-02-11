@@ -8,14 +8,8 @@
 #include "InterpreterIterator.h"
 #include "InterpreterOperationsCallback.h"
 #include "WideningManager.h"
-#include <vector>
 
 namespace Canal {
-
-class SlotTracker;
-class Domain;
-class State;
-
 namespace Interpreter {
 
 class Interpreter
@@ -75,7 +69,7 @@ public:
         return mIterator;
     }
 
-    const State &getCurrentState() const
+    const Memory::State &getCurrentState() const
     {
         return mIterator.getCurrentState();
     }

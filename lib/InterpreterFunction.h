@@ -1,17 +1,10 @@
 #ifndef LIBCANAL_INTERPRETER_FUNCTION_H
 #define LIBCANAL_INTERPRETER_FUNCTION_H
 
-#include "State.h"
+#include "MemoryState.h"
 
 namespace Canal {
-
-class Domain;
-class Constructors;
-class Environment;
-
 namespace Interpreter {
-
-class BasicBlock;
 
 class Function
 {
@@ -21,10 +14,10 @@ class Function
     std::vector<BasicBlock*> mBasicBlocks;
 
     // Function arguments, global variables.
-    State mInputState;
+    Memory::State mInputState;
 
     // Returned value, global variables.
-    State mOutputState;
+    Memory::State mOutputState;
 
 public:
     Function(const llvm::Function &function,
@@ -56,17 +49,17 @@ public:
         return mBasicBlocks.empty();
     }
 
-    State &getInputState()
+    Memory::State &getInputState()
     {
         return mInputState;
     }
 
-    const State &getInputState() const
+    const Memory::State &getInputState() const
     {
         return mInputState;
     }
 
-    const State &getOutputState() const
+    const Memory::State &getOutputState() const
     {
         return mOutputState;
     }
@@ -78,7 +71,8 @@ public:
     /// @param basicBlock
     ///    Must be a member of this function.
     ///    Its input state is updated.
-    void initializeInputState(BasicBlock &basicBlock, State &state) const;
+    void initializeInputState(BasicBlock &basicBlock,
+                              Memory::State &state) const;
 
     /// Update function output state from basic block output states.
     void updateOutputState();

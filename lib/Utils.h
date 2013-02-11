@@ -95,8 +95,6 @@
 
 namespace Canal {
 
-class SlotTracker;
-
 /// Get human readable string representation of llvm::APInt.
 std::string toString(const llvm::APInt &num);
 

@@ -7,8 +7,6 @@
 
 namespace Canal {
 
-class Domain;
-
 class VariableArguments
 {
     // llvm::Instruction represents the calling instruction providing

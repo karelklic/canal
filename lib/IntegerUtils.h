@@ -4,14 +4,7 @@
 #include "Prereq.h"
 
 namespace Canal {
-class Domain;
-
 namespace Integer {
-
-class Bitfield;
-class Set;
-class Interval;
-
 namespace Utils {
 
 unsigned getBitWidth(const Domain &value);
@@ -62,8 +55,8 @@ bool signedMax(const Domain &value, llvm::APInt &result);
 /// @return
 ///   True if the result is known and the parameter was set to
 ///   correct value.
-
 bool unsignedMin(const Domain &value, llvm::APInt &result);
+
 /// Highest unsigned number represented by this container.  Uses
 /// the abstract domain (enum, interval, bits) with highest precision.
 /// @param value
@@ -74,13 +67,30 @@ bool unsignedMin(const Domain &value, llvm::APInt &result);
 /// @return
 ///   True if the result is known and the parameter was set to
 ///   correct value.
-
 bool unsignedMax(const Domain &value, llvm::APInt &result);
 
-/// Find out whether all representations contain only single value
+/// @brief
+///   Find out whether the abstract number represents only a single
+///   concrete value.
+///
+/// It check that at least one of the integer abstract value
+/// representations represents a single concrete value.
+///
 /// @param value
 ///   Abstract value that represents number.
+/// @returns
+///   If true is returned, the single concrete value can be obtained
+///   by calling the getConstant function.
 bool isConstant(const Domain &value);
+
+/// @brief
+///   Returns the single concrete value represented by an abstract
+///   number.
+///
+/// If the abstract number does not represent a single concrete value,
+/// the behaviour is undefined.  Call isConstant function to check
+/// whether getConstant can be safely called.
+llvm::APInt getConstant(const Domain &value);
 
 } // namespace Utils
 } // namespace Integer

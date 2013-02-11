@@ -1,18 +1,12 @@
 #ifndef LIBCANAL_INTERPRETER_MODULE_H
 #define LIBCANAL_INTERPRETER_MODULE_H
 
-#include "State.h"
+#include "MemoryState.h"
 #include <vector>
 #include <string>
 
 namespace Canal {
-
-class Constructors;
-class Environment;
-
 namespace Interpreter {
-
-class Function;
 
 class Module
 {
@@ -24,7 +18,7 @@ class Module
     // Workers iterate on functions until the fixpoint is reached.
     std::vector<Function*> mFunctions;
 
-    State mGlobalState;
+    Memory::State mGlobalState;
 
 public:
     Module(const llvm::Module &module,
@@ -59,6 +53,13 @@ public:
     std::string toString() const;
 
     void updateGlobalState();
+
+private:
+    /// @brief
+    ///   Fill the global abstract state with global variables.
+    void initializeGlobalState(const Constructors &constructors);
+
+    void initializeFunctions(const Constructors &constructors);
 };
 
 } // namespace Interpreter

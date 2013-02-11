@@ -7,13 +7,6 @@
 
 namespace Canal {
 
-class State;
-class Machine;
-class Domain;
-class Environment;
-class Constructors;
-class OperationsCallback;
-
 class Operations
 {
 protected:
@@ -26,8 +19,6 @@ public:
                const Constructors &constructors,
                OperationsCallback &callback);
 
-    virtual ~Operations() {}
-
     const Environment &getEnvironment() const
     {
         return mEnvironment;
@@ -35,7 +26,7 @@ public:
 
     /// Interprets current instruction.
     void interpretInstruction(const llvm::Instruction &instruction,
-                              State &state);
+                              Memory::State &state);
 
 protected: // Helper functions.
     /// Given a place in source code, return the corresponding variable
@@ -46,14 +37,14 @@ protected: // Helper functions.
     ///  Returns a pointer to the provided constant if the place contains a
     ///  constant.  Otherwise, it returns NULL.
     const Domain *variableOrConstant(const llvm::Value &place,
-                                     State &state,
+                                     Memory::State &state,
                                      llvm::OwningPtr<Domain> &constant) const;
 
     template<typename T> void interpretCall(const T &instruction,
-                                            State &state);
+                                            Memory::State &state);
 
     void binaryOperation(const llvm::BinaryOperator &instruction,
-                         State &state,
+                         Memory::State &state,
                          Domain::BinaryOperation operation);
 
     // Go through the getelementptr offsets and assembly a list of
@@ -65,19 +56,19 @@ protected: // Helper functions.
     // @param result
     //   Vector where all offsets are going to be stored as abstract
     //   values.  Caller takes ownership of the values.
-    template<typename T> bool getElementPtrOffsets(
-        std::vector<Domain*> &result,
-        T iteratorStart,
-        T iteratorEnd,
+    bool getElementPtrOffsets(
+        std::vector<const Domain*> &result,
+        llvm::GetElementPtrInst::const_op_iterator iteratorStart,
+        llvm::GetElementPtrInst::const_op_iterator iteratorEnd,
         const llvm::Value &place,
-        const State &state);
+        const Memory::State &state);
 
     void castOperation(const llvm::CastInst &instruction,
-                       State &state,
+                       Memory::State &state,
                        Domain::CastOperation operation);
 
     void cmpOperation(const llvm::CmpInst &instruction,
-                      State &state,
+                      Memory::State &state,
                       Domain::CmpOperation operation);
 
 protected:
@@ -88,238 +79,238 @@ protected:
 
     /// Return control flow (and optionally a value) from a function
     /// back to the caller.  It's a terminator instruction.
-    virtual void ret(const llvm::ReturnInst &instruction,
-                     State &state);
+    void ret(const llvm::ReturnInst &instruction,
+             Memory::State &state);
 
     /// Transfer to a different basic block in the current function.
     /// It's a terminator instruction.
-    virtual void br(const llvm::BranchInst &instruction,
-                    State &state);
+    void br(const llvm::BranchInst &instruction,
+            Memory::State &state);
 
     /// Transfer control flow to one of several different places. It is
     /// a generalization of the 'br' instruction, allowing a branch to
     /// occur to one of many possible destinations.  It's a terminator
     /// instruction.
-    virtual void switch_(const llvm::SwitchInst &instruction,
-                         State &state);
+    void switch_(const llvm::SwitchInst &instruction,
+                 Memory::State &state);
 
     /// An indirect branch to a label within the current function,
     /// whose address is specified by "address".  It's a terminator
     /// instruction.
-    virtual void indirectbr(const llvm::IndirectBrInst &instruction,
-                            State &state);
+    void indirectbr(const llvm::IndirectBrInst &instruction,
+                    Memory::State &state);
 
     /// Transfer to a specified function, with the possibility of
     /// control flow transfer to either the 'normal' label or the
     /// 'exception' label.  It's a terminator instruction.
-    virtual void invoke(const llvm::InvokeInst &instruction,
-                        State &state);
+    void invoke(const llvm::InvokeInst &instruction,
+                Memory::State &state);
 
     /// No defined semantics. This instruction is used to inform the
     /// optimizer that a particular portion of the code is not
     /// reachable.  It's a terminator instruction.
-    virtual void unreachable(const llvm::UnreachableInst &instruction,
-                             State &state);
+    void unreachable(const llvm::UnreachableInst &instruction,
+                     Memory::State &state);
 
     /// Sum of two operands.  It's a binary operator.
-    virtual void add(const llvm::BinaryOperator &instruction,
-                     State &state);
+    void add(const llvm::BinaryOperator &instruction,
+             Memory::State &state);
 
     /// Sum of two operands.  It's a binary operator.  The operands are
     /// floating point or vector of floating point values.
-    virtual void fadd(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void fadd(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// Difference of two operands.    It's a binary operator.
-    virtual void sub(const llvm::BinaryOperator &instruction,
-                     State &state);
+    void sub(const llvm::BinaryOperator &instruction,
+             Memory::State &state);
 
     /// Difference of two operands.  It's a binary operator.  The
     /// operands are floating point or vector of floating point values.
-    virtual void fsub(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void fsub(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// Product of two operands.  It's a binary operator.
-    virtual void mul(const llvm::BinaryOperator &instruction,
-                     State &state);
+    void mul(const llvm::BinaryOperator &instruction,
+             Memory::State &state);
 
     /// Product of two operands.  It's a binary operator.
-    virtual void fmul(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void fmul(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// Quotient of two operands.  It's a binary operator.  The
     /// operands are integer or vector of integer values.
-    virtual void udiv(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void udiv(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// Quotient of two operands.  It's a binary operator.  The
     /// operands are integer or vector of integer values.
-    virtual void sdiv(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void sdiv(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// Quotient of two operands.  It's a binary operator.  The
     /// operands are floating point or vector of floating point values.
-    virtual void fdiv(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void fdiv(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// Unsigned division remainder.  It's a binary operator.
-    virtual void urem(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void urem(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// Signed division remainder.  It's a binary operator.
-    virtual void srem(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void srem(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// Floating point remainder.  It's a binary operator.
-    virtual void frem(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void frem(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// It's a bitwise binary operator.
-    virtual void shl(const llvm::BinaryOperator &instruction,
-                     State &state);
+    void shl(const llvm::BinaryOperator &instruction,
+             Memory::State &state);
 
     /// It's a bitwise binary operator.
-    virtual void lshr(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void lshr(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// It's a bitwise binary operator.
-    virtual void ashr(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void ashr(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// It's a bitwise binary operator.
-    virtual void and_(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void and_(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// It's a bitwise binary operator.
-    virtual void or_(const llvm::BinaryOperator &instruction,
-                     State &state);
+    void or_(const llvm::BinaryOperator &instruction,
+             Memory::State &state);
 
     /// It's a bitwise binary operator.
-    virtual void xor_(const llvm::BinaryOperator &instruction,
-                      State &state);
+    void xor_(const llvm::BinaryOperator &instruction,
+              Memory::State &state);
 
     /// It's a vector operation.
-    virtual void extractelement(const llvm::ExtractElementInst &instruction,
-                                State &state);
+    void extractelement(const llvm::ExtractElementInst &instruction,
+                        Memory::State &state);
 
     /// It's a vector operation.
-    virtual void insertelement(const llvm::InsertElementInst &instruction,
-                               State &state);
+    void insertelement(const llvm::InsertElementInst &instruction,
+                       Memory::State &state);
 
     /// It's a vector operation.
-    virtual void shufflevector(const llvm::ShuffleVectorInst &instruction,
-                               State &state);
+    void shufflevector(const llvm::ShuffleVectorInst &instruction,
+                       Memory::State &state);
 
     /// It's an aggregate operation.
-    virtual void extractvalue(const llvm::ExtractValueInst &instruction,
-                              State &state);
+    void extractvalue(const llvm::ExtractValueInst &instruction,
+                      Memory::State &state);
 
     /// It's an aggregate operation.
-    virtual void insertvalue(const llvm::InsertValueInst &instruction,
-                             State &state);
+    void insertvalue(const llvm::InsertValueInst &instruction,
+                     Memory::State &state);
 
     /// It's a memory access operation.
-    virtual void alloca_(const llvm::AllocaInst &instruction,
-                         State &state);
+    void alloca_(const llvm::AllocaInst &instruction,
+                 Memory::State &state);
 
     /// It's a memory access operation.
-    virtual void load(const llvm::LoadInst &instruction,
-                      State &state);
+    void load(const llvm::LoadInst &instruction,
+              Memory::State &state);
 
     /// It's a memory access operation.
-    virtual void store(const llvm::StoreInst &instruction,
-                       State &state);
+    void store(const llvm::StoreInst &instruction,
+               Memory::State &state);
 
     /// It's a memory addressing operation.
-    virtual void getelementptr(const llvm::GetElementPtrInst &instruction,
-                               State &state);
+    void getelementptr(const llvm::GetElementPtrInst &instruction,
+                       Memory::State &state);
 
     /// It's a conversion operation.
-    virtual void trunc(const llvm::TruncInst &instruction,
-                       State &state);
+    void trunc(const llvm::TruncInst &instruction,
+               Memory::State &state);
 
     /// It's a conversion operation.
-    virtual void zext(const llvm::ZExtInst &instruction,
-                      State &state);
+    void zext(const llvm::ZExtInst &instruction,
+              Memory::State &state);
 
     /// It's a conversion operation.
-    virtual void sext(const llvm::SExtInst &instruction,
-                      State &state);
+    void sext(const llvm::SExtInst &instruction,
+              Memory::State &state);
 
     /// It's a conversion operation.
-    virtual void fptrunc(const llvm::FPTruncInst &instruction,
-                         State &state);
+    void fptrunc(const llvm::FPTruncInst &instruction,
+                 Memory::State &state);
 
     /// It's a conversion operation.
-    virtual void fpext(const llvm::FPExtInst &instruction,
-                       State &state);
+    void fpext(const llvm::FPExtInst &instruction,
+               Memory::State &state);
 
     /// It's a conversion operation.
-    virtual void fptoui(const llvm::FPToUIInst &instruction,
-                        State &state);
+    void fptoui(const llvm::FPToUIInst &instruction,
+                Memory::State &state);
 
     /// It's a conversion operation.
-    virtual void fptosi(const llvm::FPToSIInst &instruction,
-                        State &state);
+    void fptosi(const llvm::FPToSIInst &instruction,
+                Memory::State &state);
 
     /// It's a conversion operation.
-    virtual void uitofp(const llvm::UIToFPInst &instruction,
-                        State &state);
+    void uitofp(const llvm::UIToFPInst &instruction,
+                Memory::State &state);
 
     /// It's a conversion operation.
-    virtual void sitofp(const llvm::SIToFPInst &instruction,
-                        State &state);
+    void sitofp(const llvm::SIToFPInst &instruction,
+                Memory::State &state);
 
     /// It's a conversion operation.
-    virtual void ptrtoint(const llvm::PtrToIntInst &instruction,
-                          State &state);
+    void ptrtoint(const llvm::PtrToIntInst &instruction,
+                  Memory::State &state);
 
     /// It's a conversion operation.
-    virtual void inttoptr(const llvm::IntToPtrInst &instruction,
-                          State &state);
+    void inttoptr(const llvm::IntToPtrInst &instruction,
+                  Memory::State &state);
 
     /// It's a conversion operation.
-    virtual void bitcast(const llvm::BitCastInst &instruction,
-                         State &state);
+    void bitcast(const llvm::BitCastInst &instruction,
+                 Memory::State &state);
 
-    virtual void icmp(const llvm::ICmpInst &instruction,
-                      State &state);
+    void icmp(const llvm::ICmpInst &instruction,
+              Memory::State &state);
 
-    virtual void fcmp(const llvm::FCmpInst &instruction,
-                      State &state);
+    void fcmp(const llvm::FCmpInst &instruction,
+              Memory::State &state);
 
-    virtual void phi(const llvm::PHINode &instruction,
-                     State &state);
+    void phi(const llvm::PHINode &instruction,
+             Memory::State &state);
 
-    virtual void select(const llvm::SelectInst &instruction,
-                        State &state);
+    void select(const llvm::SelectInst &instruction,
+                Memory::State &state);
 
-    virtual void call(const llvm::CallInst &instruction,
-                      State &state);
+    void call(const llvm::CallInst &instruction,
+              Memory::State &state);
 
-    virtual void va_arg_(const llvm::VAArgInst &instruction,
-                        State &state);
+    void va_arg_(const llvm::VAArgInst &instruction,
+                 Memory::State &state);
 
 #if LLVM_VERSION_MAJOR >= 3
     // Instructions available since LLVM 3.0
-    virtual void landingpad(const llvm::LandingPadInst &instruction,
-                            State &state);
+    void landingpad(const llvm::LandingPadInst &instruction,
+                    Memory::State &state);
 
     /// Resume instruction is available since LLVM 3.0
     /// A terminator instruction that has no successors. Resumes
     /// propagation of an existing (in-flight) exception whose
     /// unwinding was interrupted with a landingpad instruction.
-    virtual void resume(const llvm::ResumeInst &instruction,
-                        State &state);
+    void resume(const llvm::ResumeInst &instruction,
+                Memory::State &state);
 
-    virtual void fence(const llvm::FenceInst &instruction,
-                       State &state);
+    void fence(const llvm::FenceInst &instruction,
+               Memory::State &state);
 
-    virtual void cmpxchg(const llvm::AtomicCmpXchgInst &instruction,
-                         State &state);
+    void cmpxchg(const llvm::AtomicCmpXchgInst &instruction,
+                 Memory::State &state);
 
-    virtual void atomicrmw(const llvm::AtomicRMWInst &instruction,
-                           State &state);
+    void atomicrmw(const llvm::AtomicRMWInst &instruction,
+                   Memory::State &state);
 #endif
 };
 

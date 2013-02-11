@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-class Commands;
-
 class Command
 {
 protected:

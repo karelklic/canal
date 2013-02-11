@@ -6,7 +6,6 @@
 namespace Canal {
 namespace Integer {
 
-class Interval;
 /// Abstracts integers as a bitfield.
 ///
 /// For every bit, we have 4 possible states:

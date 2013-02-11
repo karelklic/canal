@@ -10,7 +10,6 @@ namespace Integer {
 class Interval : public Domain
 {
 public:
-
     bool mSignedBottom;
     bool mSignedTop;
     /// The number is included in the interval.

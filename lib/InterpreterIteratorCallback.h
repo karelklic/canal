@@ -6,9 +6,6 @@
 namespace Canal {
 namespace Interpreter {
 
-class BasicBlock;
-class Function;
-
 class IteratorCallback
 {
 public:

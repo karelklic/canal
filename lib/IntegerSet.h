@@ -7,7 +7,6 @@
 namespace Canal {
 namespace Integer {
 
-class Interval;
 class Set : public Domain
 {
 public:
@@ -22,11 +21,11 @@ public:
 public:
     /// Initializes to the lowest value.
     Set(const Environment &environment,
-                unsigned bitWidth);
+        unsigned bitWidth);
 
     /// Initializes to the given value.
     Set(const Environment &environment,
-                const llvm::APInt &constant);
+        const llvm::APInt &constant);
 
     /// Copy constructor.
     Set(const Set &value);

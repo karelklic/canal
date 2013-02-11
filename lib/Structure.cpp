@@ -322,114 +322,18 @@ Structure::insertvalue(const Domain &element,
 }
 
 Domain *
-Structure::load(const llvm::Type &type,
-                const std::vector<Domain*> &offsets) const
+Structure::loadValue(const llvm::Type &type,
+                     const Domain &offset) const
 {
-    if (offsets.empty())
-    {
-        if (&mType == &type)
-            return clone();
-        else
-        {
-            Domain *result = mEnvironment.getConstructors().create(type);
-            result->setTop();
-            return result;
-        }
-    }
-
-    Domain *subitem = extractelement(*offsets[0]);
-    Domain *result = subitem->load(type, std::vector<Domain*>(offsets.begin() + 1,
-                                                              offsets.end()));
-
-    delete subitem;
-    return result;
+    CANAL_NOT_IMPLEMENTED();
 }
 
-Structure &
-Structure::store(const Domain &value,
-                 const std::vector<Domain*> &offsets,
-                 bool overwrite)
+void
+Structure::storeValue(const Domain &value,
+                      const Domain &offset,
+                      bool isSingleTarget)
 {
-    if (offsets.empty())
-        return (Structure&)Domain::store(value, offsets, overwrite);
-
-    const Domain &offset = *offsets[0];
-
-    // First try an enumeration, then interval.
-    const Integer::Set &set = Integer::Utils::getSet(offset);
-    if (!set.isTop())
-    {
-        APIntUtils::USet::const_iterator it = set.mValues.begin(),
-            itend = set.mValues.end();
-
-        if (set.mValues.size() > 1)
-            overwrite = false;
-
-        for (; it != itend; ++it)
-        {
-            CANAL_ASSERT(it->getBitWidth() <= 64);
-            uint64_t numOffset = it->getZExtValue();
-
-            // If some offset from the set points out of the
-            // array bounds, we ignore it FOR NOW.  It might be caused
-            // either by a bug in the code, or by imprecision of the
-            // interpreter.
-            if (numOffset >= mMembers.size())
-                continue;
-
-            mMembers[numOffset]->store(value,
-                                       std::vector<Domain*>(offsets.begin() + 1,
-                                                            offsets.end()),
-                                       overwrite);
-        }
-
-        return *this;
-    }
-
-    const Integer::Interval &interval = Integer::Utils::getInterval(offset);
-    // Let's care about the unsigned interval only.
-    if (!interval.mUnsignedTop)
-    {
-        CANAL_ASSERT(interval.mUnsignedFrom.getBitWidth() <= 64);
-        uint64_t from = interval.mUnsignedFrom.getZExtValue();
-        // Included in the interval!
-        uint64_t to = interval.mUnsignedTo.getZExtValue();
-
-        CANAL_ASSERT(from <= to);
-        if (to >= mMembers.size())
-            to = mMembers.size();
-
-        if (to - from != 0)
-            overwrite = false;
-
-        for (uint64_t i = from; i <= to; ++i)
-        {
-            mMembers[i]->store(value,
-                               std::vector<Domain*>(offsets.begin() + 1,
-                                                    offsets.end()),
-                               overwrite);
-        }
-
-        return *this;
-    }
-
-    // Both set and interval are set to the top value, so merge
-    // the value to all items of the array.
-    std::vector<Domain*>::const_iterator it = mMembers.begin(),
-        itend = mMembers.end();
-
-    if (mMembers.size() > 1)
-        overwrite = false;
-
-    for (; it != itend; ++it)
-    {
-        (**it).store(value,
-                     std::vector<Domain*>(offsets.begin() + 1,
-                                          offsets.end()),
-                     overwrite);
-    }
-
-    return *this;
+    CANAL_NOT_IMPLEMENTED();
 }
 
 } // namespace Canal

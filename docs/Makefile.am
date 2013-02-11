@@ -1,4 +1,4 @@
-doc_DATA = canal.tex canal.pdf
+doc_DATA = canal.tex
 CLEANFILES = *.aux canal.log canal.out canal.toc canal.pdf
 
 clean-local:
@@ -29,14 +29,13 @@ doxygen-lib/doxygen-lib.tex: doxygen-lib.conf ../lib/*.h
 	sed -i'~' 's/\\chapter{Class Index}$$/\\chapter{Library Class Index}/' doxygen-lib/refman.tex
 	sed -i'~' 's/\\chapter{Class Documentation}$$/\\chapter{Library Class Documentation}/' doxygen-lib/refman.tex
 
-
 	sed -i'~' 's/\\input{hierarchy}$$/\\input{doxygen-lib-hierarchy}/' doxygen-lib/refman.tex
 	sed -i'~' 's/\\input{annotated}$$/\\input{doxygen-lib-annotated}/' doxygen-lib/refman.tex
 	mv doxygen-lib/{,doxygen-lib-}hierarchy.tex
 	mv doxygen-lib/{,doxygen-lib-}annotated.tex
 	mv doxygen-lib/{refman,doxygen-lib}.tex
 
-doxygen-tool/doxygen-tool.tex: doxygen-tool.conf ../lib/*.h
+doxygen-tool/doxygen-tool.tex: doxygen-tool.conf ../tool/*.h
 	$(DOXYGEN) doxygen-tool.conf
 	sed -i'~' '4d' doxygen-tool/refman.tex
 	sed -i'~' '/\\printindex$$/d' doxygen-tool/refman.tex

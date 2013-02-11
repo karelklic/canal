@@ -4,9 +4,6 @@
 #include "Prereq.h"
 
 namespace Canal {
-
-class Domain;
-
 namespace Widening {
 
 class Interface

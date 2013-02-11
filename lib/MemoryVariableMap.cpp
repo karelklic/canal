@@ -12,10 +12,6 @@ StateMap::StateMap(const StateMap &map) : mMap(map.mMap)
         it->second = it->second->clone();
 }
 
-StateMap::~StateMap()
-{
-}
-
 bool
 StateMap::operator==(const StateMap &map) const
 {
@@ -28,11 +24,13 @@ StateMap::operator==(const StateMap &map) const
     for (const_iterator it = begin(); it != end(); ++it)
     {
         StateMap::const_iterator mapit = map.find(it->first);
-        if (mapit == map.end() || *it->second != *mapit->second) {
-#if 0 //Print differences in state map for fixpoint calculation
+        if (mapit == map.end() || *it->second != *mapit->second)
+        {
+#if 0 // Print differences in state map for fixpoint calculation
             if (mapit == map.end()) std::cout << "Map ended" << std::endl;
             else std::cout << (*it->second).toString() << (*mapit->second).toString() << std::endl;
 #endif
+
             return false;
         }
     }
@@ -41,7 +39,7 @@ StateMap::operator==(const StateMap &map) const
 }
 
 void
-StateMap::merge(const StateMap &map)
+StateMap::join(const StateMap &map)
 {
     const_iterator it2 = map.begin(), it2end = map.end();
     for (; it2 != it2end; ++it2)
@@ -63,6 +61,8 @@ StateMap::insert(const llvm::Value &place, Domain *value)
     iterator it = find(&place);
     if (it != end())
     {
+        // TODO: figure out here whether to join or replace!
+        // Replace is probably the proper operation!
         it->second.mutable_()->join(*value);
         delete value;
     }

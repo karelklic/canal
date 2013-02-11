@@ -5,8 +5,6 @@
 
 namespace Canal {
 
-class Constructors;
-
 class Environment
 {
     llvm::Module *mModule;

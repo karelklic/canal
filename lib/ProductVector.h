@@ -80,10 +80,10 @@ public: // Implementation of Domain.
     virtual Vector &xor_(const Domain &a, const Domain &b);
 
     virtual Vector &icmp(const Domain &a, const Domain &b,
-                            llvm::CmpInst::Predicate predicate);
+                         llvm::CmpInst::Predicate predicate);
 
     virtual Vector &fcmp(const Domain &a, const Domain &b,
-                            llvm::CmpInst::Predicate predicate);
+                         llvm::CmpInst::Predicate predicate);
 
     virtual Vector &trunc(const Domain &value);
 
@@ -98,34 +98,34 @@ public: // Implementation of Domain.
     virtual Domain *extractelement(const Domain &index) const;
 
     virtual Vector &insertelement(const Domain &array,
-                                     const Domain &element,
-                                     const Domain &index);
+                                  const Domain &element,
+                                  const Domain &index);
 
     virtual Vector &shufflevector(const Domain &a,
-                                     const Domain &b,
-                                     const std::vector<uint32_t> &mask);
+                                  const Domain &b,
+                                  const std::vector<uint32_t> &mask);
 
     virtual Domain *extractvalue(const std::vector<unsigned> &indices) const;
 
     virtual Vector &insertvalue(const Domain &aggregate,
-                                   const Domain &element,
-                                   const std::vector<unsigned> &indices);
+                                const Domain &element,
+                                const std::vector<unsigned> &indices);
 
     virtual void insertvalue(const Domain &element,
                              const std::vector<unsigned> &indices);
 
-    virtual Domain *load(const llvm::Type &type,
-                         const std::vector<Domain*> &offsets) const;
-
-    virtual Vector &store(const Domain &value,
-                             const std::vector<Domain*> &offsets,
-                             bool overwrite);
-
     virtual const llvm::Type &getValueType() const;
+
+    virtual Domain *loadValue(const llvm::Type &type,
+                              const Domain &offset) const;
+
+    virtual void storeValue(const Domain &value,
+                            const Domain &offset,
+                            bool isSingleTarget);
 
 public: // Reduced Product
     /// Initiate communication between contained Domains
-    /// to enhance their accuracy
+    /// to enhance their accuracy.
     void collaborate();
 };
 

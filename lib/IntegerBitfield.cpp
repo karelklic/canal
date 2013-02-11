@@ -78,7 +78,6 @@ resizeAndClearResult(llvm::APInt &result, const unsigned bitWidth)
 bool
 Bitfield::signedMin(llvm::APInt &result) const
 {
-
     resizeAndClearResult(result, getBitWidth());
 
     for (unsigned i = 0; i < getBitWidth(); ++i)
@@ -100,7 +99,7 @@ Bitfield::signedMin(llvm::APInt &result) const
                 APIntUtils::setBit(result, i);
             break;
         default:
-            CANAL_DIE();
+            CANAL_NOT_IMPLEMENTED();
         }
     }
 
@@ -131,7 +130,7 @@ Bitfield::signedMax(llvm::APInt &result) const
                 APIntUtils::setBit(result, i);
             break;
         default:
-            CANAL_DIE();
+            CANAL_NOT_IMPLEMENTED();
         }
     }
 
@@ -157,7 +156,7 @@ Bitfield::unsignedMin(llvm::APInt &result) const
             APIntUtils::setBit(result, i);
             break;
         default:
-            CANAL_DIE();
+            CANAL_NOT_IMPLEMENTED();
         }
     }
 
@@ -183,7 +182,7 @@ Bitfield::unsignedMax(llvm::APInt &result) const
             APIntUtils::setBit(result, i);
             break;
         default:
-            CANAL_DIE();
+            CANAL_NOT_IMPLEMENTED();
         }
     }
 

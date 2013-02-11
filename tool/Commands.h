@@ -6,10 +6,6 @@
 #include <vector>
 #include <map>
 
-class Command;
-class CommandFile;
-class State;
-
 class Commands
 {
     std::string mLastCommand;

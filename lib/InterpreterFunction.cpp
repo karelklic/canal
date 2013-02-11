@@ -70,7 +70,8 @@ Function::getName() const
 }
 
 void
-Function::initializeInputState(BasicBlock &basicBlock, State &state) const
+Function::initializeInputState(BasicBlock &basicBlock,
+                               Memory::State &state) const
 {
     const llvm::BasicBlock &llvmBasicBlock = basicBlock.getLlvmBasicBlock();
     state.merge(basicBlock.getInputState());
@@ -112,7 +113,7 @@ Function::updateOutputState()
 size_t
 Function::memoryUsage() const
 {
-    size_t result = sizeof(Function) - 2 * sizeof(State);
+    size_t result = sizeof(Function) - 2 * sizeof(Memory::State);
     result += mInputState.memoryUsage();
     result += mOutputState.memoryUsage();
     std::vector<BasicBlock*>::const_iterator it = mBasicBlocks.begin();

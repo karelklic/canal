@@ -9,8 +9,8 @@ pkginclude_HEADERS = \
 	FloatInterval.h \
 	FloatUtils.h \
 	IntegerBitfield.h \
-	IntegerSet.h \
 	IntegerInterval.h \
+	IntegerSet.h \
 	IntegerUtils.h \
 	InterpreterBasicBlock.h \
 	InterpreterFunction.h \
@@ -19,17 +19,20 @@ pkginclude_HEADERS = \
 	InterpreterIteratorCallback.h \
 	InterpreterModule.h \
 	InterpreterOperationsCallback.h \
+	MemoryBlock.h \
+	MemoryBlockMap.h \
+	MemoryMap.h \
+	MemoryPointer.h \
+	MemoryState.h \
+	MemoryUtils.h \
+	MemoryVariableArguments.h \
+	MemoryVariableMap.h \
 	Operations.h \
 	OperationsCallback.h \
-	Pointer.h \
-	PointerTarget.h \
-	PointerUtils.h \
 	Prereq.h \
 	ProductVector.h \
 	SharedDataPointer.h \
 	SlotTracker.h \
-	State.h \
-	StateMap.h \
 	Structure.h \
 	Utils.h \
 	VariableArguments.h \
@@ -64,7 +67,6 @@ libcanal_la_SOURCES = \
 	InterpreterOperationsCallback.cpp \
 	Operations.cpp \
 	Pointer.cpp \
-	PointerTarget.cpp \
 	PointerUtils.cpp \
 	ProductVector.cpp \
 	SlotTracker.cpp \

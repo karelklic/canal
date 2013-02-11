@@ -1,5 +1,4 @@
 #include "IntegerUtils.h"
-
 #include "IntegerBitfield.h"
 #include "ProductVector.h"
 #include "IntegerSet.h"
@@ -153,8 +152,16 @@ bool
 isConstant(const Domain &value)
 {
     return getBitfield(value).isConstant()
-        && getSet(value).isConstant()
-        && getInterval(value).isConstant();
+        || getSet(value).isConstant()
+        || getInterval(value).isConstant();
+}
+
+llvm::APInt getConstant(const Domain &value)
+{
+    llvm::APInt result;
+    bool success = unsignedMin(value, result);
+    CANAL_ASSERT(success);
+    return result;
 }
 
 } // namespace Utils

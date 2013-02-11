@@ -1,14 +1,13 @@
-#ifndef LIBCANAL_STATE_H
-#define LIBCANAL_STATE_H
+#ifndef LIBCANAL_MEMORY_STATE_H
+#define LIBCANAL_MEMORY_STATE_H
 
-#include "VariableArguments.h"
-#include "StateMap.h"
+#include "MemoryVariableArguments.h"
+#include "MemoryBlockMap.h"
+#include "MemoryVariableMap.h"
 #include <string>
 
 namespace Canal {
-
-class Domain;
-class SlotTracker;
+namespace Memory {
 
 /// @brief Abstract memory state.
 ///
@@ -17,37 +16,13 @@ class SlotTracker;
 /// variables are in abstract domain.
 class State
 {
-    /// The key (llvm::Value*) is not owned by this class.  It is not
-    /// deleted.  The value (Domain*) memory is owned by this
-    /// class, so it is deleted in state destructor.
-    StateMap mGlobalVariables;
+    /// Nameless memory/values allocated on the heap or stack.  It's
+    /// referenced either by a pointer somewhere on a stack, by a
+    /// global variable, or by a pointer from another block.
+    BlockMap mBlocks;
 
-    /// Nameless memory/values allocated on the heap.  It's referenced
-    /// either by a pointer somewhere on a stack, by a global variable,
-    /// or by another Block or stack Block.
-    ///
-    /// The keys are not owned by this class.  They represent the place
-    /// where the block has been allocated.  The values are owned by
-    /// this class, so they are deleted in the state destructor.
-    StateMap mGlobalBlocks;
-
-    /// The value pointer does _not_ point to mFunctionBlocks! To connect
-    /// with a mFunctionBlocks item, create a Pointer object that
-    /// contains a pointer to a StackBlocks item.
-    ///
-    /// The key (llvm::Value*) is not owned by this class.  It is not
-    /// deleted.  The value (Domain*) memory is owned by this
-    /// class, so it is deleted in state destructor.
-    StateMap mFunctionVariables;
-
-    /// Nameless memory/values allocated on the stack.  The values are
-    /// referenced either by a pointer in mFunctionVariables or
-    /// mGlobalVariables, or by another item in mFunctionBlocks or
-    /// mGlobalBlocks.
-    ///
-    /// The members of the list are owned by this class, so they are
-    /// deleted in the state destructor.
-    StateMap mFunctionBlocks;
+    /// Both global and function-local registers.
+    VariableMap mVariables;
 
     /// Value returned from function.
     Domain *mReturnedValue;
@@ -60,9 +35,10 @@ public:
 
     State(const State &state);
 
-    virtual ~State();
+    ~State();
 
     bool operator==(const State &state) const;
+
     bool operator!=(const State &state) const;
 
     /// Merge everything.
@@ -101,10 +77,7 @@ public:
     ///   addFunctionBlock.
     void addFunctionVariable(const llvm::Value &place, Domain *value);
 
-    void addGlobalBlock(const llvm::Value &place, Domain *value);
-
-    /// Adds a value created by alloca to the stack.
-    void addFunctionBlock(const llvm::Value &place, Domain *value);
+    void addBlock(const llvm::Value &place, Block *value);
 
     void setReturnedValue(Domain *value);
 
@@ -116,46 +89,6 @@ public:
     }
 
     void addVariableArgument(const llvm::Instruction &place, Domain *argument);
-
-    const StateMap &getGlobalVariables() const
-    {
-        return mGlobalVariables;
-    }
-
-    StateMap &getGlobalVariables()
-    {
-        return mGlobalVariables;
-    }
-
-    const StateMap &getGlobalBlocks() const
-    {
-        return mGlobalBlocks;
-    }
-
-    StateMap &getGlobalBlocks()
-    {
-        return mGlobalBlocks;
-    }
-
-    const StateMap &getFunctionVariables() const
-    {
-        return mFunctionVariables;
-    }
-
-    StateMap &getFunctionVariables()
-    {
-        return mFunctionVariables;
-    }
-
-    const StateMap &getFunctionBlocks() const
-    {
-        return mFunctionBlocks;
-    }
-
-    StateMap &getFunctionBlocks()
-    {
-        return mFunctionBlocks;
-    }
 
     /// Search both global and function variables for a place.  If the
     /// place is found, the variable is returned.  Otherwise NULL is
@@ -181,6 +114,7 @@ private:
     State &operator=(const State &state);
 };
 
+} // namespace Memory
 } // namespace Canal
 
-#endif // LIBCANAL_STATE_H
+#endif // LIBCANAL_MEMORY_STATE_H

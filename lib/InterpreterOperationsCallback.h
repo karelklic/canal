@@ -4,9 +4,6 @@
 #include "OperationsCallback.h"
 
 namespace Canal {
-
-class Constructors;
-
 namespace Interpreter {
 
 extern bool printMissing;
@@ -23,14 +20,14 @@ public:
                        Constructors &mConstructors);
 
     virtual void onFunctionCall(const llvm::Function &function,
-                                const State &callState,
-                                State &resultState,
+                                const Memory::State &callState,
+                                Memory::State &resultState,
                                 const llvm::Value &resultPlace);
 
     // char *strcat(char *destination, const char *source);
     void onFunctionCallStrcat(const llvm::Function &function,
-                              const State &callState,
-                              State &resultState,
+                              const Memory::State &callState,
+                              Memory::State &resultState,
                               const llvm::Value &resultPlace);
 };
 

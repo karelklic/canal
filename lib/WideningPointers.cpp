@@ -1,6 +1,6 @@
 #include "WideningPointers.h"
 #include "WideningDataIterationCount.h"
-#include "Pointer.h"
+#include "MemoryPointer.h"
 #include "Utils.h"
 
 namespace Canal {
@@ -11,7 +11,7 @@ Pointers::widen(const llvm::BasicBlock &wideningPoint,
                 Domain &first,
                 const Domain &second)
 {
-    Pointer::Pointer *firstPointer = dynCast<Pointer::Pointer>(&first);
+    Memory::Pointer *firstPointer = dynCast<Memory::Pointer>(&first);
     if (!firstPointer)
         return;
 
@@ -26,31 +26,13 @@ Pointers::widen(const llvm::BasicBlock &wideningPoint,
     }
 
     iterationCount->increase(wideningPoint);
-
     if (iterationCount->count(wideningPoint) < DataIterationCount::ITERATION_COUNT)
         return;
 
-    Pointer::PlaceTargetMap::const_iterator
-        it = firstPointer->mTargets.begin(),
-        itend = firstPointer->mTargets.end();
+    const Memory::Pointer &secondPointer =
+        checkedCast<Memory::Pointer>(second);
 
-    for (; it != itend; ++it)
-    {
-        if (it->second->mNumericOffset)
-            it->second->mNumericOffset->setTop();
-
-        if (!it->second->mOffsets.empty())
-        {
-            // Keep the first offset untouched, it must be set to zero.
-            std::vector<Domain*>::const_iterator
-                itOffset = it->second->mOffsets.begin() + 1,
-                itendOffset = it->second->mOffsets.end();
-
-            for (; itOffset != itendOffset; ++itOffset)
-                (*itOffset)->setTop();
-        }
-    }
-
+    firstPointer->widen(secondPointer);
 }
 
 } // namespace Widening

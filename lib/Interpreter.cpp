@@ -1,6 +1,5 @@
 #include "Interpreter.h"
 #include "Utils.h"
-#include "Pointer.h"
 
 namespace Canal {
 namespace Interpreter {

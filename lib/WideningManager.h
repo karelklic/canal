@@ -5,24 +5,19 @@
 #include <vector>
 
 namespace Canal {
-
-class Domain;
-class State;
-class StateMap;
-
 namespace Widening {
-
-class Interface;
 
 class Manager
 {
+    std::vector<Interface*> mWidenings;
+
 public:
     Manager();
     virtual ~Manager();
 
     void widen(const llvm::BasicBlock &wideningPoint,
-               State &first,
-               const State &second) const;
+               Memory::State &first,
+               const Memory::State &second) const;
 
 protected:
     void widen(const llvm::BasicBlock &wideningPoint,
@@ -32,8 +27,6 @@ protected:
     void widen(const llvm::BasicBlock &wideningPoint,
                Domain &first,
                const Domain &second) const;
-
-    std::vector<Interface*> mWidenings;
 };
 
 } // namespace Widening

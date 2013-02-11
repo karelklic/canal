@@ -20,7 +20,6 @@ add_library(canal SHARED
     InterpreterOperationsCallback.cpp
     Operations.cpp
     Pointer.cpp
-    PointerTarget.cpp
     PointerUtils.cpp
     ProductMessage.cpp
     ProductVector.cpp

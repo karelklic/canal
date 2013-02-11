@@ -1,10 +1,10 @@
 #include "WideningManager.h"
 #include "WideningNumericalInfinity.h"
 #include "WideningPointers.h"
-#include "State.h"
+#include "MemoryState.h"
 #include "StateMap.h"
 #include "Domain.h"
-#if 0 //Debug info for fixpoint calculation
+#if 0 // Debug info for fixpoint calculation
 #include "Utils.h"
 #include "Environment.h"
 #include <iostream>
@@ -59,7 +59,7 @@ Manager::widen(const llvm::BasicBlock &wideningPoint,
 	StateMap::iterator it1 = first.find(it2->first);
 	if (it1 != first.end() && *it1->second != *it2->second)
         {
-#if 0 //Debug info for fixpoint calculation
+#if 0 // Debug info for fixpoint calculation
             std::cout << ((it1->second)->toString()) << "\n";
             std::cout << Canal::getName(*it1->first,
                                         it1->second->getEnvironment().getSlotTracker())

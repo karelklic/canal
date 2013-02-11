@@ -39,8 +39,8 @@ createTopReturnValue(const llvm::Function &function,
 
 void
 OperationsCallback::onFunctionCall(const llvm::Function &function,
-                                   const State &callState,
-                                   State &resultState,
+                                   const Memory::State &callState,
+                                   Memory::State &resultState,
                                    const llvm::Value &resultPlace)
 {
     if (function.getName() == "strcat")
@@ -102,19 +102,19 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
 
 void
 OperationsCallback::onFunctionCallStrcat(const llvm::Function &function,
-                                         const State &callState,
-                                         State &resultState,
+                                         const Memory::State &callState,
+                                         Memory::State &resultState,
                                          const llvm::Value &resultPlace)
 {
     CANAL_ASSERT(function.getArgumentList().size() == 2);
-    const llvm::Argument &destArgument = *function.getArgumentList().begin();
-    const llvm::Argument &srcArgument = *(++function.getArgumentList().begin());
-    const Domain *destinationPointer = callState.findVariable(destArgument);
-    const Domain *sourcePointer = callState.findVariable(srcArgument);
+    //const llvm::Argument &destArgument = *function.getArgumentList().begin();
+    //const llvm::Argument &srcArgument = *(++function.getArgumentList().begin());
+    //const Domain *destinationPointer = callState.findVariable(destArgument);
+    //const Domain *sourcePointer = callState.findVariable(srcArgument);
 
     CANAL_NOT_IMPLEMENTED();
 
-    resultState.addFunctionVariable(resultPlace, destinationPointer->clone());
+    //resultState.addFunctionVariable(resultPlace, destinationPointer->clone());
 }
 
 } // namespace Interpreter

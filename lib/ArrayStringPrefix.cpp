@@ -456,39 +456,18 @@ StringPrefix::insertvalue(const Domain &element,
 }
 
 Domain *
-StringPrefix::load(const llvm::Type &type,
-                   const std::vector<Domain*> &offsets) const
+StringPrefix::loadValue(const llvm::Type &type,
+                        const Domain &offset) const
 {
-    if (offsets.empty())
-    {
-        if (&mType == &type)
-            return clone();
-        else
-        {
-            Domain *result = mEnvironment.getConstructors().create(type);
-            result->setTop();
-            return result;
-        }
-    }
-
-    Domain *subitem = extractelement(*offsets[0]);
-    Domain *result = subitem->load(type, std::vector<Domain*>(offsets.begin() + 1,
-                                                              offsets.end()));
-
-    delete subitem;
-    return result;
+    CANAL_NOT_IMPLEMENTED();
 }
 
-StringPrefix &
-StringPrefix::store(const Domain &value,
-                    const std::vector<Domain*> &offsets,
-                    bool overwrite)
+void
+StringPrefix::storeValue(const Domain &value,
+                         const Domain &offset,
+                         bool isSingleTarget)
 {
-    if (offsets.empty())
-        return (StringPrefix&)Domain::store(value, offsets, overwrite);
-
-    setTop();
-    return *this;
+    CANAL_NOT_IMPLEMENTED();
 }
 
 } // namespace Array

@@ -400,43 +400,18 @@ SingleItem::insertvalue(const Domain &element,
 }
 
 Domain *
-SingleItem::load(const llvm::Type &type,
-                 const std::vector<Domain*> &offsets) const
+SingleItem::loadValue(const llvm::Type &type,
+                      const Domain &offset) const
 {
-    if (offsets.empty())
-    {
-        if (&mType == &type)
-            return clone();
-        else
-        {
-            Domain *result = mEnvironment.getConstructors().create(type);
-            result->setTop();
-            return result;
-        }
-    }
-
-    Domain *subitem = extractelement(*offsets[0]);
-    Domain *result = subitem->load(type, std::vector<Domain*>(offsets.begin() + 1,
-                                                              offsets.end()));
-
-    delete subitem;
-    return result;
+    CANAL_NOT_IMPLEMENTED();
 }
 
-SingleItem &
-SingleItem::store(const Domain &value,
-                  const std::vector<Domain*> &offsets,
-                  bool overwrite)
+void
+SingleItem::storeValue(const Domain &value,
+                       const Domain &offset,
+                       bool isSingleTarget)
 {
-    if (offsets.empty())
-        return (SingleItem&)Domain::store(value, offsets, overwrite);
-
-    mValue->store(value,
-                  std::vector<Domain*>(offsets.begin() + 1,
-                                       offsets.end()),
-                  false);
-
-    return *this;
+    CANAL_NOT_IMPLEMENTED();
 }
 
 } // namespace Array

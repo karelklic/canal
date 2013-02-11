@@ -1,24 +1,11 @@
 #ifndef LIBCANAL_INTERPRETER_ITERATOR_H
 #define LIBCANAL_INTERPRETER_ITERATOR_H
 
-#include "State.h"
+#include "MemoryState.h"
 #include <vector>
 
 namespace Canal {
-
-class Operations;
-class State;
-
-namespace Widening {
-class Manager;
-} // namespace Widening
-
 namespace Interpreter {
-
-class Module;
-class BasicBlock;
-class Function;
-class IteratorCallback;
 
 /// Basic iterator that iterates over the whole program until a
 /// fixpoint is reached.
@@ -48,7 +35,7 @@ class Iterator
     llvm::BasicBlock::const_iterator mInstruction;
 
     /// Current state.
-    State *mState;
+    Memory::State *mState;
 
     /// Callback functions.
     IteratorCallback *mCallback;
@@ -74,7 +61,7 @@ public:
         return mInitialized;
     }
 
-    const State &getCurrentState() const
+    const Memory::State &getCurrentState() const
     {
         return *mState;
     }

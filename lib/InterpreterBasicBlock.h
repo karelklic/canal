@@ -1,13 +1,9 @@
 #ifndef LIBCANAL_INTERPRETER_BASIC_BLOCK_H
 #define LIBCANAL_INTERPRETER_BASIC_BLOCK_H
 
-#include "State.h"
+#include "MemoryState.h"
 
 namespace Canal {
-
-class Constructors;
-class Environment;
-
 namespace Interpreter {
 
 class BasicBlock
@@ -15,8 +11,8 @@ class BasicBlock
     const llvm::BasicBlock &mBasicBlock;
     const Environment &mEnvironment;
 
-    State mInputState;
-    State mOutputState;
+    Memory::State mInputState;
+    Memory::State mOutputState;
 
 public:
     BasicBlock(const llvm::BasicBlock &basicBlock,
@@ -37,12 +33,12 @@ public:
         return mBasicBlock.end();
     }
 
-    State &getInputState()
+    Memory::State &getInputState()
     {
         return mInputState;
     }
 
-    State &getOutputState()
+    Memory::State &getOutputState()
     {
         return mOutputState;
     }
