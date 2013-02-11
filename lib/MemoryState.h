@@ -77,7 +77,27 @@ public:
     ///   addFunctionBlock.
     void addFunctionVariable(const llvm::Value &place, Domain *value);
 
+    VariableMap &getVariables()
+    {
+        return mVariables;
+    }
+
+    const VariableMap &getVariables() const
+    {
+        return mVariables;
+    }
+
     void addBlock(const llvm::Value &place, Block *value);
+
+    BlockMap &getBlocks()
+    {
+        return mBlocks;
+    }
+
+    const BlockMap &getBlocks() const
+    {
+        return mBlocks;
+    }
 
     void setReturnedValue(Domain *value);
 

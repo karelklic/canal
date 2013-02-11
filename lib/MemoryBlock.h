@@ -1,23 +1,25 @@
 #ifndef LIBCANAL_MEMORY_BLOCK_H
 #define LIBCANAL_MEMORY_BLOCK_H
 
-#include "Domain.h"
+#include "SharedDataPointer.h"
 
 namespace Canal {
 namespace Memory {
 
 /// Abstracts a continuous memory block.
-class Block
+class Block : public SharedData
 {
-    Domain *mMainValue;
+    mutable Domain *mMainValue;
 
 public:
     enum MemoryType {
         StackMemoryType,
-        HeapMemorTypey
+        HeapMemoryType
     } mMemoryType;
 
 public:
+    /// @param mainValue
+    ///   The block takes ownership of the provided abstract value.
     Block(MemoryType memoryType, Domain *mainValue);
 
     Block(const Block &block);
@@ -26,13 +28,30 @@ public:
 
     bool operator==(const Block &value) const;
 
+    bool operator!=(const Block &value) const
+    {
+        return !operator==(value);
+    }
+
     bool operator<(const Block &value) const;
+
+    /// For SharedDataPtr.
+    Block *clone() const
+    {
+        return new Block(*this);
+    }
 
     size_t memoryUsage() const;
 
     std::string toString() const;
 
     void join(const Block &block);
+
+    /// Merges all cells to the main value and returns it.
+    Domain &getMainValue() const
+    {
+        return *mMainValue;
+    }
 
     /// @param offset
     ///   Offset in bytes.

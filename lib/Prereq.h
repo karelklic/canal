@@ -75,6 +75,7 @@ namespace Canal {
     } // namespace Interpreter
 
     namespace Memory {
+        class Block;
         class State;
     } // namespace Memory
 

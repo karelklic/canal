@@ -204,21 +204,24 @@ Module::initializeGlobalState(const Constructors &constructors)
         //
         // First, we initialize a new memory block and add it to the
         // state.
-        Domain *block = NULL;
+        Domain *blockValue = NULL;
         if ((*it)->hasInitializer())
         {
-            block = constructors.create(*(*it)->getInitializer(),
-                                        &mGlobalState);
+            blockValue = constructors.create(*(*it)->getInitializer(),
+                                             &mGlobalState);
         }
         else
         {
             const llvm::Type &elementType =
                 *(*it)->getType()->getElementType();
 
-            block = constructors.create(elementType);
+            blockValue = constructors.create(elementType);
         }
 
-        mGlobalState.addGlobalBlock(**it, block);
+        Memory::Block *block = new Memory::Block(Memory::Block::HeapMemoryType,
+                                                 blockValue);
+
+        mGlobalState.addBlock(**it, block);
 
         // Second, we initialize a pointer to the block and add it to
         // the state.

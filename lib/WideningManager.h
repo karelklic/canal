@@ -2,6 +2,7 @@
 #define LIBCANAL_WIDENING_MANAGER_H
 
 #include "Prereq.h"
+#include "MemoryMap.h"
 #include <vector>
 
 namespace Canal {
@@ -20,13 +21,18 @@ public:
                const Memory::State &second) const;
 
 protected:
+    template <typename T>
     void widen(const llvm::BasicBlock &wideningPoint,
-               StateMap &first,
-               const StateMap &second) const;
+               Memory::Map<T> &first,
+               const Memory::Map<T> &second) const;
 
     void widen(const llvm::BasicBlock &wideningPoint,
                Domain &first,
                const Domain &second) const;
+
+    void widen(const llvm::BasicBlock &wideningPoint,
+               Memory::Block &first,
+               const Memory::Block &second) const;
 };
 
 } // namespace Widening

@@ -13,7 +13,7 @@ namespace Memory {
 ///
 /// The values are owned by this class, so they are deleted in the
 /// state destructor.
-class BlockMap : Map<Block>
+class BlockMap : public Map<Block>
 {
 public:
     // TODO

@@ -828,7 +828,10 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
         value = mConstructors.create(allocatedType);
     }
 
-    state.addFunctionBlock(instruction, value);
+    Memory::Block *block = new Memory::Block(Memory::Block::StackMemoryType,
+                                             value);
+
+    state.addBlock(instruction, block);
 
     Domain *pointer;
     pointer = mConstructors.createPointer(*instruction.getType());

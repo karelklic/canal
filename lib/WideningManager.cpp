@@ -2,7 +2,8 @@
 #include "WideningNumericalInfinity.h"
 #include "WideningPointers.h"
 #include "MemoryState.h"
-#include "StateMap.h"
+#include "MemoryBlockMap.h"
+#include "MemoryVariableMap.h"
 #include "Domain.h"
 #if 0 // Debug info for fixpoint calculation
 #include "Utils.h"
@@ -26,37 +27,30 @@ Manager::~Manager()
 
 void
 Manager::widen(const llvm::BasicBlock &wideningPoint,
-               State &first,
-               const State &second) const
+               Memory::State &first,
+               const Memory::State &second) const
 {
     widen(wideningPoint,
-          first.getFunctionVariables(),
-          second.getFunctionVariables());
+          first.getVariables(),
+          second.getVariables());
 
     widen(wideningPoint,
-          first.getFunctionBlocks(),
-          second.getFunctionBlocks());
-
-    widen(wideningPoint,
-          first.getGlobalVariables(),
-          second.getGlobalVariables());
-
-    widen(wideningPoint,
-          first.getGlobalBlocks(),
-          second.getGlobalBlocks());
+          first.getBlocks(),
+          second.getBlocks());
 }
 
+template <typename T>
 void
 Manager::widen(const llvm::BasicBlock &wideningPoint,
-               StateMap &first,
-               const StateMap &second) const
+               Memory::Map<T> &first,
+               const Memory::Map<T> &second) const
 {
-    StateMap::const_iterator it2 = second.begin(),
+    typename Memory::Map<T>::const_iterator it2 = second.begin(),
         it2end = second.end();
 
     for (; it2 != it2end; ++it2)
     {
-	StateMap::iterator it1 = first.find(it2->first);
+        typename Memory::Map<T>::iterator it1 = first.find(it2->first);
 	if (it1 != first.end() && *it1->second != *it2->second)
         {
 #if 0 // Debug info for fixpoint calculation
@@ -78,9 +72,27 @@ Manager::widen(const llvm::BasicBlock &wideningPoint,
                Domain &first,
                const Domain &second) const
 {
-    std::vector<Interface*>::const_iterator it = mWidenings.begin();
-    for (; it != mWidenings.end(); ++it)
+    std::vector<Interface*>::const_iterator
+        it = mWidenings.begin(), itend = mWidenings.end();
+
+    for (; it != itend; ++it)
         (*it)->widen(wideningPoint, first, second);
+}
+
+void
+Manager::widen(const llvm::BasicBlock &wideningPoint,
+               Memory::Block &first,
+               const Memory::Block &second) const
+{
+    std::vector<Interface*>::const_iterator
+        it = mWidenings.begin(), itend = mWidenings.end();
+
+    for (; it != itend; ++it)
+    {
+        (*it)->widen(wideningPoint,
+                     first.getMainValue(),
+                     second.getMainValue());
+    }
 }
 
 } // namespace Widening
