@@ -1,4 +1,6 @@
+#include "lib/ArrayStringTrie.h"
 #include "lib/Environment.h"
+#include "lib/Utils.h"
 #include <llvm/Module.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Support/ManagedStatic.h>
@@ -9,7 +11,11 @@ static Environment *gEnvironment;
 
 static void testConstructors()
 {
+    const llvm::ArrayType &type = *llvm::ArrayType::get(llvm::Type::getInt8Ty(
+        gEnvironment->getContext()), 10);
 
+    Array::StringTrie stringTrie(*gEnvironment, type);
+    CANAL_ASSERT(stringTrie.isBottom());
 }
 
 int
