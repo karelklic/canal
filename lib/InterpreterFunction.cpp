@@ -74,7 +74,7 @@ Function::initializeInputState(BasicBlock &basicBlock,
                                Memory::State &state) const
 {
     const llvm::BasicBlock &llvmBasicBlock = basicBlock.getLlvmBasicBlock();
-    state.merge(basicBlock.getInputState());
+    state.join(basicBlock.getInputState());
 
     // Merge out states of predecessors to input state of
     // current block.
@@ -84,11 +84,11 @@ Function::initializeInputState(BasicBlock &basicBlock,
     for (; it != itend; ++it)
     {
         BasicBlock &predBlock = getBasicBlock(**it);
-        state.merge(predBlock.getOutputState());
+        state.join(predBlock.getOutputState());
     }
 
     if (&llvmBasicBlock == &getLlvmEntryBlock())
-        state.merge(mInputState);
+        state.join(mInputState);
 }
 
 void

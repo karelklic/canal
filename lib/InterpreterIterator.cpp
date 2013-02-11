@@ -111,14 +111,14 @@ Iterator::nextInstruction()
 
     if (mInstruction == (*mBasicBlock)->end())
     {
-        mState->merge((*mBasicBlock)->getOutputState());
+        mState->join((*mBasicBlock)->getOutputState());
         if (*mState != (*mBasicBlock)->getOutputState())
         {
             mWideningManager.widen((*mBasicBlock)->getLlvmBasicBlock(),
                                    (*mBasicBlock)->getOutputState(),
                                    *mState);
 
-            (*mBasicBlock)->getOutputState().merge(*mState);
+            (*mBasicBlock)->getOutputState().join(*mState);
             mChanged = true;
         }
 

@@ -1,8 +1,9 @@
-#include "VariableArguments.h"
+#include "MemoryVariableArguments.h"
 #include "Domain.h"
 #include "Utils.h"
 
 namespace Canal {
+namespace Memory {
 
 static void
 cloneDomains(std::vector<Domain*> &domains)
@@ -119,4 +120,5 @@ VariableArguments::addArgument(const llvm::Instruction &place,
         it->second.push_back(argument);
 }
 
+} // namespace Memory
 } // namespace Canal

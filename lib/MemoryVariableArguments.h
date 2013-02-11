@@ -1,11 +1,12 @@
-#ifndef LIBCANAL_VARIABLE_ARGUMENTS_H
-#define LIBCANAL_VARIABLE_ARGUMENTS_H
+#ifndef LIBCANAL_MEMORY_VARIABLE_ARGUMENTS_H
+#define LIBCANAL_MEMORY_VARIABLE_ARGUMENTS_H
 
 #include "Prereq.h"
 #include <map>
 #include <vector>
 
 namespace Canal {
+namespace Memory {
 
 class VariableArguments
 {
@@ -40,6 +41,7 @@ private:
     VariableArguments &operator=(const VariableArguments &arguments);
 };
 
+} // namespace Memory
 } // namespace Canal
 
-#endif // LIBCANAL_VARIABLE_ARGUMENTS_H
+#endif // LIBCANAL_MEMORY_VARIABLE_ARGUMENTS_H

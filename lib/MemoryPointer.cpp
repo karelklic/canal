@@ -1,7 +1,7 @@
 #include "MemoryPointer.h"
 #include "ArraySingleItem.h"
 #include "Utils.h"
-#include "State.h"
+#include "MemoryState.h"
 #include "SlotTracker.h"
 #include "ProductVector.h"
 #include "IntegerSet.h"

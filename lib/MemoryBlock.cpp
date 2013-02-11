@@ -1,4 +1,8 @@
 #include "MemoryBlock.h"
+#include "Utils.h"
+#include "Domain.h"
+#include "Environment.h"
+#include "Constructors.h"
 
 namespace Canal {
 namespace Memory {
@@ -50,7 +54,7 @@ void
 Block::join(const Block &block)
 {
     CANAL_ASSERT(mMemoryType == block.mMemoryType);
-    mMainValue->join(block.mMainValue);
+    mMainValue->join(*block.mMainValue);
 }
 
 Domain *

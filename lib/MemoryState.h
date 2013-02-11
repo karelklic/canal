@@ -42,7 +42,7 @@ public:
     bool operator!=(const State &state) const;
 
     /// Merge everything.
-    void merge(const State &state);
+    void join(const State &state);
 
     /// Merge global variables and blocks.
     void mergeGlobal(const State &state);

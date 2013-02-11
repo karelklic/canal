@@ -1,20 +1,19 @@
-#include "State.h"
+#include "MemoryState.h"
 #include "Domain.h"
 #include "Utils.h"
 #include "Environment.h"
 #include "SlotTracker.h"
 
 namespace Canal {
+namespace Memory {
 
 State::State() : mReturnedValue(NULL)
 {
 }
 
 State::State(const State &state)
-    : mGlobalVariables(state.mGlobalVariables),
-      mGlobalBlocks(state.mGlobalBlocks),
-      mFunctionVariables(state.mFunctionVariables),
-      mFunctionBlocks(state.mFunctionBlocks),
+    : mBlocks(state.mBlocks),
+      mVariables(state.mVariables),
       mReturnedValue(state.mReturnedValue),
       mVariableArguments(state.mVariableArguments)
 {
@@ -34,14 +33,10 @@ State::operator==(const State &state) const
         return true;
 
     // Quickly compare sizes.
-    return mGlobalVariables.size() == state.mGlobalVariables.size() &&
-        mGlobalBlocks.size() == state.mGlobalBlocks.size() &&
-        mFunctionVariables.size() == state.mFunctionVariables.size() &&
-        mFunctionBlocks.size() == state.mFunctionBlocks.size() &&
-        mGlobalVariables == state.mGlobalVariables &&
-        mGlobalBlocks == state.mGlobalBlocks &&
-        mFunctionVariables == state.mFunctionVariables &&
-        mFunctionBlocks == state.mFunctionBlocks &&
+    return mVariables.size() == state.mVariables.size() &&
+        mBlocks.size() == state.mBlocks.size() &&
+        mVariables == state.mVariables &&
+        mBlocks == state.mBlocks &&
         ((mReturnedValue && state.mReturnedValue &&
           *mReturnedValue == *state.mReturnedValue) ||
          (!mReturnedValue && !state.mReturnedValue)) &&
@@ -55,13 +50,12 @@ State::operator!=(const State &state) const
 }
 
 void
-State::merge(const State &state)
+State::join(const State &state)
 {
-    mFunctionVariables.merge(state.mFunctionVariables);
-    mFunctionBlocks.merge(state.mFunctionBlocks);
-    mergeGlobal(state);
+    mVariables.join(state.mVariables);
+    mBlocks.join(state.mBlocks);
     mergeReturnedValue(state);
-    mVariableArguments.merge(state.mVariableArguments);
+    mVariableArguments.join(state.mVariableArguments);
 }
 
 void
@@ -305,4 +299,5 @@ State::toString(const llvm::Value &place,
     return ss.str();
 }
 
+} // namespace Memory
 } // namespace Canal

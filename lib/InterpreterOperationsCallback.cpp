@@ -87,7 +87,7 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
     CANAL_ASSERT_MSG(func, "Function not found in module!");
 
     // Extend the input so the function can be re-interpreted.
-    func->getInputState().merge(callState);
+    func->getInputState().join(callState);
 
     // Take the current function interpretation results and use them
     // as a result of the function call.

@@ -247,7 +247,7 @@ Module::initializeFunctions(const Constructors &constructors)
             continue;
 
         Function *function = new Function(*it, constructors);
-        function->getInputState().merge(mGlobalState);
+        function->getInputState().join(mGlobalState);
         mFunctions.push_back(function);
     }
 }
