@@ -30,6 +30,8 @@ pkginclude_HEADERS = \
 	Operations.h \
 	OperationsCallback.h \
 	Prereq.h \
+	ProductMessageField.h \
+	ProductMessage.h \
 	ProductVector.h \
 	SharedDataPointer.h \
 	SlotTracker.h \
@@ -68,6 +70,7 @@ libcanal_la_SOURCES = \
 	Operations.cpp \
 	Pointer.cpp \
 	PointerUtils.cpp \
+	ProductMessage.cpp \
 	ProductVector.cpp \
 	SlotTracker.cpp \
 	State.cpp \
