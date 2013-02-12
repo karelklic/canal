@@ -62,7 +62,7 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
 
         Domain *returnValue = createTopReturnValue(function, mConstructors);
         if (returnValue)
-            resultState.addFunctionVariable(resultPlace, returnValue);
+            resultState.addVariable(resultPlace, returnValue);
 
         return;
     }
@@ -78,7 +78,7 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
 
         Domain *returnValue = createTopReturnValue(function, mConstructors);
         if (returnValue)
-            resultState.addFunctionVariable(resultPlace, returnValue);
+            resultState.addVariable(resultPlace, returnValue);
 
         return;
     }
@@ -96,7 +96,7 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
     if (func->getOutputState().getReturnedValue())
     {
         Domain *result = func->getOutputState().getReturnedValue()->clone();
-        resultState.addFunctionVariable(resultPlace, result);
+        resultState.addVariable(resultPlace, result);
     }
 }
 

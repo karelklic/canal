@@ -149,6 +149,17 @@ getByteOffset(std::vector<const Domain*>::const_iterator elementsBegin,
     }
 }
 
+bool
+isGlobal(const llvm::Value &place)
+{
+    bool isGlobal = llvm::isa<llvm::GlobalVariable>(place);
+    CANAL_ASSERT(isGlobal ||
+                 llvm::isa<llvm::Instruction>(place) ||
+                 llvm::isa<llvm::Argument>(place));
+
+    return isGlobal;
+}
+
 
 } // namespace Utils
 } // namespace Memory

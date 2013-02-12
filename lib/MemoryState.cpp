@@ -1,4 +1,5 @@
 #include "MemoryState.h"
+#include "MemoryUtils.h"
 #include "Domain.h"
 #include "Utils.h"
 #include "Environment.h"
@@ -91,15 +92,9 @@ State::joinForeignStackBlocks(const State &state,
                              currentFunction);
 }
 
-void State::addGlobalVariable(const llvm::Value &place, Domain *value)
+void State::addVariable(const llvm::Value &place, Domain *value)
 {
-    mGlobalVariables.insert(place, value);
-}
-
-void
-State::addFunctionVariable(const llvm::Value &place, Domain *value)
-{
-    mFunctionVariables.insert(place, value);
+    mVariables.insert(place, value);
 }
 
 void
@@ -189,46 +184,26 @@ State::toString(const llvm::Value &place,
             name << slotTracker.getGlobalSlot(place);
     }
 
-    StateMap::const_iterator it = mFunctionVariables.find(&place);
-    if (it != mFunctionVariables.end())
+    ss << (Memory::Utils::isGlobal(place) ? "@" : "%");
+
+    VariableMap::const_iterator vit = mVariables.find(&place);
+    if (vit != mVariables.end())
     {
-        ss << "%" << name.str() << " = "
-           << Canal::indentExceptFirstLine(it->second->toString(),
-                                           name.str().length() + 4);
+        ss << name.str() << " = "
+           << Canal::indentExceptFirstLine(vit->second->toString(),
+                                           name.str().length() + strlen("@ = "));
     }
 
-    it = mFunctionBlocks.find(&place);
-    if (it != mFunctionBlocks.end())
+    BlockMap::const_iterator bit = mBlocks.find(&place);
+    if (bit != mBlocks.end())
     {
-        ss << "%^" << name.str() << " = "
-           << Canal::indentExceptFirstLine(it->second->toString(),
-                                           name.str().length() + 5);
+        ss << "^" << name.str() << " = "
+           << Canal::indentExceptFirstLine(bit->second->toString(),
+                                           name.str().length() + strlen("@^ = "));
     }
 
-    if (ss.str().empty() &&
-        llvm::isa<llvm::Instruction>(place))
-    {
-        ss << "%" << name.str() << " = undefined\n";
-    }
-
-    it = mGlobalVariables.find(&place);
-    if (it != mGlobalVariables.end())
-    {
-        ss << "@" << name.str() << " = "
-           << Canal::indentExceptFirstLine(it->second->toString(),
-                                           name.str().length() + 4);
-    }
-
-    it = mGlobalBlocks.find(&place);
-    if (it != mGlobalBlocks.end())
-    {
-        ss << "@^" << name.str() << " = "
-           << Canal::indentExceptFirstLine(it->second->toString(),
-                                           name.str().length() + 5);
-    }
-
-    if (ss.str().empty())
-        ss << "@" << name.str() << " = undefined\n";
+    if (ss.str().length() == 1)
+        ss << name.str() << " = undefined\n";
 
     return ss.str();
 }

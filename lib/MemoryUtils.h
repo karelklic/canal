@@ -45,6 +45,9 @@ Domain *getByteOffset(std::vector<const Domain*>::const_iterator elementsBegin,
                       const llvm::Type &type,
                       const Environment &environment);
 
+// Does a value represent a local (stack based) or global place.
+bool isGlobal(const llvm::Value &place);
+
 } // namespace Utils
 } // namespace Memory
 } // namespace Canal

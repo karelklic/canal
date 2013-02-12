@@ -2,6 +2,7 @@
 #define LIBCANAL_MEMORY_MAP_H
 
 #include "SharedDataPointer.h"
+#include "Utils.h"
 #include <map>
 #include <cstddef>
 #if 0 // DEBUG
@@ -36,7 +37,7 @@ public:
         const_iterator it1 = begin(), it1end = end();
         for (; it1 != it1end; ++it1)
         {
-            const_iterator it2 = map.find(it2->first);
+            const_iterator it2 = map.find(it1->first);
             if (it2 == map.end() || *it1->second != *it2->second)
             {
 #if 0 // DEBUG

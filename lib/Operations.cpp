@@ -218,7 +218,7 @@ Operations::interpretCall(const T &instruction,
         if (!value)
             return;
 
-        callingState.addFunctionVariable(*it, value->clone());
+        callingState.addVariable(*it, value->clone());
     }
 
     for (; arg < instruction.getNumArgOperands(); ++arg)
@@ -267,7 +267,7 @@ Operations::binaryOperation(const llvm::BinaryOperator &instruction,
     ((result)->*(operation))(*values[0], *values[1]);
 
     // Store the result value to the state.
-    state.addFunctionVariable(instruction, result);
+    state.addVariable(instruction, result);
 }
 
 bool
@@ -356,7 +356,7 @@ Operations::castOperation(const llvm::CastInst &instruction,
     ((result)->*(operation))(*source);
 
     // Store the result value to the state.
-    state.addFunctionVariable(instruction, result);
+    state.addVariable(instruction, result);
 }
 
 void
@@ -384,7 +384,7 @@ Operations::cmpOperation(const llvm::CmpInst &instruction,
                                   *values[1],
                                   instruction.getPredicate());
 
-    state.addFunctionVariable(instruction, resultValue);
+    state.addVariable(instruction, resultValue);
 }
 
 void
@@ -483,7 +483,7 @@ void Operations::add(const llvm::BinaryOperator &instruction,
     }
 
     // Store the result value to the state.
-    state.addFunctionVariable(instruction, result);
+    state.addVariable(instruction, result);
 }
 
 void
@@ -540,7 +540,7 @@ Operations::sub(const llvm::BinaryOperator &instruction,
     }
 
     // Store the result value to the state.
-    state.addFunctionVariable(instruction, result);
+    state.addVariable(instruction, result);
 }
 
 void
@@ -669,7 +669,7 @@ Operations::extractelement(const llvm::ExtractElementInst &instruction,
         return;
 
     Domain *result = values[0]->extractelement(*values[1]);
-    state.addFunctionVariable(instruction, result);
+    state.addVariable(instruction, result);
 }
 
 void
@@ -697,7 +697,7 @@ Operations::insertelement(const llvm::InsertElementInst &instruction,
 
     Domain *result = mConstructors.create(*instruction.getType());
     result->insertelement(*values[0], *values[1], *values[2]);
-    state.addFunctionVariable(instruction, result);
+    state.addVariable(instruction, result);
 }
 
 void
@@ -749,7 +749,7 @@ Operations::shufflevector(const llvm::ShuffleVectorInst &instruction,
 
     Domain *result = mConstructors.create(*instruction.getType());
     result->shufflevector(*values[0], *values[1], shuffleMask);
-    state.addFunctionVariable(instruction, result);
+    state.addVariable(instruction, result);
 }
 
 void
@@ -769,7 +769,7 @@ Operations::extractvalue(const llvm::ExtractValueInst &instruction,
                                   instruction.idx_end());
 
     Domain *result = aggregate->extractvalue(indices);
-    state.addFunctionVariable(instruction, result);
+    state.addVariable(instruction, result);
 }
 
 void
@@ -799,7 +799,7 @@ Operations::insertvalue(const llvm::InsertValueInst &instruction,
 
     Domain *result = mConstructors.create(*instruction.getType());
     result->insertvalue(*aggregate, *insertedValue, indices);
-    state.addFunctionVariable(instruction, result);
+    state.addVariable(instruction, result);
 }
 
 void
@@ -839,7 +839,7 @@ Operations::alloca_(const llvm::AllocaInst &instruction,
                              instruction,
                              NULL);
 
-    state.addFunctionVariable(instruction, pointer);
+    state.addVariable(instruction, pointer);
 }
 
 void
@@ -863,7 +863,7 @@ Operations::load(const llvm::LoadInst &instruction,
     if (!mergedValue)
         return;
 
-    state.addFunctionVariable(instruction, mergedValue);
+    state.addVariable(instruction, mergedValue);
 }
 
 void
@@ -927,7 +927,7 @@ Operations::getelementptr(const llvm::GetElementPtrInst &instruction,
     const llvm::PointerType &pointerType = *instruction.getType();
     Memory::Pointer *result = source.withOffset(*byteOffset, pointerType);
     delete byteOffset;
-    state.addFunctionVariable(instruction, result);
+    state.addVariable(instruction, result);
 }
 
 void
@@ -1021,7 +1021,7 @@ Operations::ptrtoint(const llvm::PtrToIntInst &instruction,
     if (!operand)
         return;
 
-    return state.addFunctionVariable(instruction, operand->clone());
+    return state.addVariable(instruction, operand->clone());
 }
 
 void
@@ -1039,7 +1039,7 @@ Operations::inttoptr(const llvm::IntToPtrInst &instruction,
         checkedCast<llvm::PointerType>(*instruction.getDestTy());
 
     Memory::Pointer *result = new Memory::Pointer(source, pointerType);
-    state.addFunctionVariable(instruction, result);
+    state.addVariable(instruction, result);
 }
 
 void
@@ -1064,7 +1064,7 @@ Operations::bitcast(const llvm::BitCastInst &instruction,
         checkedCast<llvm::PointerType>(*destinationType);
 
     Domain *resultPointer = new Memory::Pointer(sourcePointer, destPointerType);
-    state.addFunctionVariable(instruction, resultPointer);
+    state.addVariable(instruction, resultPointer);
 }
 
 void
@@ -1106,7 +1106,7 @@ Operations::phi(const llvm::PHINode &instruction,
     if (!mergedValue)
         return;
 
-    state.addFunctionVariable(instruction, mergedValue);
+    state.addVariable(instruction, mergedValue);
 }
 
 void
@@ -1155,7 +1155,7 @@ Operations::select(const llvm::SelectInst &instruction,
         CANAL_DIE();
     }
 
-    state.addFunctionVariable(instruction, resultValue);
+    state.addVariable(instruction, resultValue);
 }
 
 void

@@ -188,7 +188,7 @@ Module::initializeGlobalState(const Constructors &constructors)
             else
                 value = constructors.create(*(*it)->getType());
 
-            mGlobalState.addGlobalVariable(**it, value);
+            mGlobalState.addVariable(**it, value);
             continue;
         }
 
@@ -230,7 +230,7 @@ Module::initializeGlobalState(const Constructors &constructors)
                                  **it,
                                  NULL);
 
-        mGlobalState.addGlobalVariable(**it, value);
+        mGlobalState.addVariable(**it, value);
     }
 }
 

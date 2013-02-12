@@ -61,21 +61,13 @@ public:
                                 const llvm::Function &currentFunction);
 
     /// @param place
-    ///   Represents a place in the program where the global variable
-    ///   is defined and assigned.
-    void addGlobalVariable(const llvm::Value &place, Domain *value);
-
-    /// Adds a register-type value to the stack.
-    /// @param place
-    ///   Represents a place in the program where the function variable
+    ///   Represents a place in the program where the variable
     ///   is assigned.  Usually it is an instance of llvm::Instruction
     ///   for a result of the instruction.  It might also be an
     ///   instance of llvm::Argument, which represents a function call
-    ///   parameter.
-    /// @see
-    ///   To add a value created by alloca to the stack, use the method
-    ///   addFunctionBlock.
-    void addFunctionVariable(const llvm::Value &place, Domain *value);
+    ///   parameter.  It might be an instance of llvm::GlobalValue, which
+    ///   represents a global variable.
+    void addVariable(const llvm::Value &place, Domain *value);
 
     VariableMap &getVariables()
     {

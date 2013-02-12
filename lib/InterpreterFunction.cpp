@@ -20,7 +20,7 @@ Function::Function(const llvm::Function &function,
         for (; it != itend; ++it)
         {
             Domain *argument = constructors.create(*it->getType());
-            mInputState.addFunctionVariable(*it, argument);
+            mInputState.addVariable(*it, argument);
         }
     }
 
