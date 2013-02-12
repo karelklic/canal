@@ -103,10 +103,10 @@ Function::updateOutputState()
         // Merge global blocks, global variables.  Merge function
         // blocks that do not belong to this function.  Merge returned
         // value.
-        mOutputState.mergeGlobal((*it)->getOutputState());
-        mOutputState.mergeReturnedValue((*it)->getOutputState());
-        mOutputState.mergeForeignFunctionBlocks((*it)->getOutputState(),
-                                                mFunction);
+        mOutputState.joinGlobal((*it)->getOutputState());
+        mOutputState.joinReturnedValue((*it)->getOutputState());
+        mOutputState.joinForeignStackBlocks((*it)->getOutputState(),
+                                            mFunction);
     }
 }
 

@@ -91,7 +91,7 @@ Module::updateGlobalState()
         // Merge global blocks, global variables.  Merge function
         // blocks that do not belong to this function.  Merge returned
         // value.
-        mGlobalState.mergeGlobal((*it)->getOutputState());
+        mGlobalState.joinGlobal((*it)->getOutputState());
     }
 }
 

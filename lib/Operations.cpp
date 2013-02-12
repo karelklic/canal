@@ -194,12 +194,12 @@ Operations::interpretCall(const T &instruction,
 
     // Create the calling state.
     Memory::State callingState;
-    callingState.mergeGlobal(state);
+    callingState.joinGlobal(state);
 
     // TODO: not all function blocks should be merged to the state.
     // Only the function blocks accessible from the arguments and
     // global variables should be merged.
-    callingState.mergeFunctionBlocks(state);
+    callingState.joinStackBlocks(state);
 
     // Add function arguments to the calling state.
     llvm::Function::ArgumentListType::const_iterator it =

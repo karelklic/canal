@@ -10,8 +10,9 @@ namespace Memory {
 class VariableMap : public Map<Domain>
 {
 public:
-    // TODO
+    void joinGlobals(const VariableMap &map);
 };
+
 
 } // namespace Memory
 } // namespace Canal

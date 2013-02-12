@@ -29,7 +29,7 @@ public:
     bool operator==(const VariableArguments &arguments) const;
 
     /// Merges the arguments per every instruction.
-    void merge(const VariableArguments &arguments);
+    void join(const VariableArguments &arguments);
 
     /// Adds an argument at the end of the argument list for an
     /// instruction.

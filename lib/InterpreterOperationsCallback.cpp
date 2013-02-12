@@ -91,8 +91,8 @@ OperationsCallback::onFunctionCall(const llvm::Function &function,
 
     // Take the current function interpretation results and use them
     // as a result of the function call.
-    resultState.mergeGlobal(func->getOutputState());
-    resultState.mergeFunctionBlocks(func->getOutputState());
+    resultState.joinGlobal(func->getOutputState());
+    resultState.joinStackBlocks(func->getOutputState());
     if (func->getOutputState().getReturnedValue())
     {
         Domain *result = func->getOutputState().getReturnedValue()->clone();

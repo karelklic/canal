@@ -108,6 +108,11 @@ public:
         return !mPointer;
     }
 
+    operator bool() const
+    {
+        return mPointer;
+    }
+
     T *mutable_()
     {
         considerClone();

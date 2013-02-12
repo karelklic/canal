@@ -54,19 +54,19 @@ State::join(const State &state)
 {
     mVariables.join(state.mVariables);
     mBlocks.join(state.mBlocks);
-    mergeReturnedValue(state);
+    joinReturnedValue(state);
     mVariableArguments.join(state.mVariableArguments);
 }
 
 void
-State::mergeGlobal(const State &state)
+State::joinGlobal(const State &state)
 {
-    mGlobalVariables.merge(state.mGlobalVariables);
-    mGlobalBlocks.merge(state.mGlobalBlocks);
+    mVariables.joinGlobals(state.mVariables);
+    mBlocks.joinHeap(state.mBlocks);
 }
 
 void
-State::mergeReturnedValue(const State &state)
+State::joinReturnedValue(const State &state)
 {
     if (!state.mReturnedValue)
         return;
@@ -78,9 +78,9 @@ State::mergeReturnedValue(const State &state)
 }
 
 void
-State::mergeFunctionBlocks(const State &state)
+State::joinStackBlocks(const State &state)
 {
-    mFunctionBlocks.merge(state.mFunctionBlocks);
+    mBlocks.joinStack(state.mBlocks);
 }
 
 static bool
@@ -116,8 +116,8 @@ containsPlace(const llvm::Function &function,
 }
 
 void
-State::mergeForeignFunctionBlocks(const State &state,
-                                  const llvm::Function &currentFunction)
+State::joinForeignStackBlocks(const State &state,
+                              const llvm::Function &currentFunction)
 {
     // Merge function blocks that do not belong to current function.
     StateMap::const_iterator it2 = state.mFunctionBlocks.begin(),
@@ -200,32 +200,29 @@ State::findVariable(const llvm::Value &place) const
 const Domain *
 State::findBlock(const llvm::Value &place) const
 {
-    StateMap::const_iterator it = mGlobalBlocks.find(&place);
-    if (it != mGlobalBlocks.end())
-        return it->second.data();
-
-    it = mFunctionBlocks.find(&place);
-    if (it != mFunctionBlocks.end())
+    StateMap::const_iterator it = mBlocks.find(&place);
+    if (it != mBlocks.end())
         return it->second.data();
 
     return NULL;
 }
 
-bool
-State::hasGlobalBlock(const llvm::Value &place) const
+SharedDataPointer<Block>
+State::findBlock(const llvm::Value &place)
 {
-    return (mGlobalBlocks.find(&place) != mGlobalBlocks.end());
+    BlockMap::iterator it = mBlocks.find(&place);
+    if (it != mBlocks.end())
+        return it->second;
+
+    return NULL;
 }
 
 size_t
 State::memoryUsage() const
 {
     size_t result = sizeof(State);
-    result += mGlobalVariables.memoryUsage();
-    result += mGlobalBlocks.memoryUsage();
-    result += mFunctionVariables.memoryUsage();
-    result += mFunctionBlocks.memoryUsage();
-
+    result += mVariables.memoryUsage();
+    result += mBlocks.memoryUsage();
     if (mReturnedValue)
         result += mReturnedValue->memoryUsage();
 

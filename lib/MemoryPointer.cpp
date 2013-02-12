@@ -138,7 +138,7 @@ Pointer::dereferenceAndMerge(const State &state) const
 
     for (; it != itend; ++it)
     {
-        const Domain *source = state.findBlock(*it->first);
+        const Block *source = state.findBlock(*it->first);
         CANAL_ASSERT_MSG(source,
                          "Unable to find referenced memory block: "
                          << *it->first);
@@ -207,18 +207,12 @@ Pointer::store(const Domain &value, State &state) const
 
     for (; it != itend; ++it)
     {
-        const Domain *source = state.findBlock(*it->first);
+        SharedDataPointer<Block> source = state.findBlock(*it->first);
         CANAL_ASSERT_MSG(source,
                          "Unable to find referenced memory block: "
                          << *it->first);
 
-        Domain *result = source->clone();
-        result->store(value, *it->second, mBlockTargets.size() == 1);
-
-        if (state.hasGlobalBlock(*it->first))
-            state.addGlobalBlock(*it->first, result);
-        else
-            state.addFunctionBlock(*it->first, result);
+        source.mutable_()->store(value, *it->second, mBlockTargets.size() == 1);
     }
 }
 

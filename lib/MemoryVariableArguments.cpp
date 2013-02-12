@@ -83,7 +83,7 @@ mergeDomains(std::vector<Domain*> &first, const std::vector<Domain*> &second)
 }
 
 void
-VariableArguments::merge(const VariableArguments &arguments)
+VariableArguments::join(const VariableArguments &arguments)
 {
     // Merge all values.
     CallMap::const_iterator it2 = arguments.mCalls.begin(),

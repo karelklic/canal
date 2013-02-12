@@ -37,7 +37,6 @@ pkginclude_HEADERS = \
 	SlotTracker.h \
 	Structure.h \
 	Utils.h \
-	VariableArguments.h \
 	WideningDataInterface.h \
 	WideningDataIterationCount.h \
 	WideningInterface.h \

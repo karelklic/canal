@@ -16,7 +16,8 @@ namespace Memory {
 class BlockMap : public Map<Block>
 {
 public:
-    // TODO
+    void joinHeap(const BlockMap &map);
+    void joinStack(const BlockMap &map);
 };
 
 } // namespace Memory

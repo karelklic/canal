@@ -45,20 +45,20 @@ public:
     void join(const State &state);
 
     /// Merge global variables and blocks.
-    void mergeGlobal(const State &state);
+    void joinGlobal(const State &state);
 
     /// Merge the returned value.
-    void mergeReturnedValue(const State &state);
+    void joinReturnedValue(const State &state);
 
     /// Merge function blocks only.
-    void mergeFunctionBlocks(const State &state);
+    void joinStackBlocks(const State &state);
 
     /// Merge function memory blocks external to a function.
     /// This is used after a function call, where the modifications of
     /// the global state need to be merged to the state of the caller,
     /// but its local state is not relevant.
-    void mergeForeignFunctionBlocks(const State &state,
-                                    const llvm::Function &currentFunction);
+    void joinForeignStackBlocks(const State &state,
+                                const llvm::Function &currentFunction);
 
     /// @param place
     ///   Represents a place in the program where the global variable
@@ -118,9 +118,12 @@ public:
     /// Search both global and function blocks for a place.  If the
     /// place is found, the block is returned.  Otherwise NULL is
     /// returned.
-    const Domain *findBlock(const llvm::Value &place) const;
+    const Block *findBlock(const llvm::Value &place) const;
 
-    bool hasGlobalBlock(const llvm::Value &place) const;
+    /// Search both global and function blocks for a place.  If the
+    /// place is found, the block is returned.  Otherwise NULL is
+    /// returned.
+    SharedDataPointer<Block> findBlock(const llvm::Value &place);
 
     /// Get memory usage (used byte count) of this abstract state.
     size_t memoryUsage() const;
