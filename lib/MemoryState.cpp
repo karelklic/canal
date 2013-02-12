@@ -83,59 +83,12 @@ State::joinStackBlocks(const State &state)
     mBlocks.joinStack(state.mBlocks);
 }
 
-static bool
-containsPlace(const llvm::BasicBlock &basicBlock,
-              const llvm::Value *place)
-{
-    llvm::BasicBlock::const_iterator it = basicBlock.begin(),
-        itend = basicBlock.end();
-
-    for (; it != itend; ++it)
-    {
-        if (it == place)
-            return true;
-    }
-
-    return false;
-}
-
-static bool
-containsPlace(const llvm::Function &function,
-              const llvm::Value *place)
-{
-    llvm::Function::const_iterator it = function.begin(),
-        itend = function.end();
-
-    for (; it != itend; ++it)
-    {
-        if (containsPlace(*it, place))
-            return true;
-    }
-
-    return false;
-}
-
 void
 State::joinForeignStackBlocks(const State &state,
                               const llvm::Function &currentFunction)
 {
-    // Merge function blocks that do not belong to current function.
-    StateMap::const_iterator it2 = state.mFunctionBlocks.begin(),
-        it2end = state.mFunctionBlocks.end();
-
-    for (; it2 != it2end; ++it2)
-    {
-	StateMap::iterator it1 = mFunctionBlocks.find(it2->first);
-	if (it1 == mFunctionBlocks.end())
-        {
-            if (containsPlace(currentFunction, it2->first))
-                continue;
-
-            mFunctionBlocks.insert(*it2);
-        }
-	else if (*it1->second != *it2->second)
-            it1->second.mutable_()->join(*it2->second);
-    }
+    mBlocks.joinForeignStack(state.mBlocks,
+                             currentFunction);
 }
 
 void State::addGlobalVariable(const llvm::Value &place, Domain *value)
@@ -147,18 +100,6 @@ void
 State::addFunctionVariable(const llvm::Value &place, Domain *value)
 {
     mFunctionVariables.insert(place, value);
-}
-
-void
-State::addGlobalBlock(const llvm::Value &place, Domain *value)
-{
-    mGlobalBlocks.insert(place, value);
-}
-
-void
-State::addFunctionBlock(const llvm::Value &place, Domain *value)
-{
-    mFunctionBlocks.insert(place, value);
 }
 
 void
@@ -186,21 +127,17 @@ State::addVariableArgument(const llvm::Instruction &place, Domain *argument)
 const Domain *
 State::findVariable(const llvm::Value &place) const
 {
-    StateMap::const_iterator it = mGlobalVariables.find(&place);
-    if (it != mGlobalVariables.end())
-        return it->second.data();
-
-    it = mFunctionVariables.find(&place);
-    if (it != mFunctionVariables.end())
+    VariableMap::const_iterator it = mVariables.find(&place);
+    if (it != mVariables.end())
         return it->second.data();
 
     return NULL;
 }
 
-const Domain *
+const Block *
 State::findBlock(const llvm::Value &place) const
 {
-    StateMap::const_iterator it = mBlocks.find(&place);
+    BlockMap::const_iterator it = mBlocks.find(&place);
     if (it != mBlocks.end())
         return it->second.data();
 
@@ -214,7 +151,7 @@ State::findBlock(const llvm::Value &place)
     if (it != mBlocks.end())
         return it->second;
 
-    return NULL;
+    return SharedDataPointer<Block>();
 }
 
 size_t

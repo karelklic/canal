@@ -30,7 +30,9 @@ class SharedDataPointer
     T *mPointer;
 
 public:
-    SharedDataPointer() : mPointer(0) {}
+    SharedDataPointer() : mPointer(0)
+    {
+    }
 
     explicit SharedDataPointer(T *ptr) : mPointer(ptr)
     {

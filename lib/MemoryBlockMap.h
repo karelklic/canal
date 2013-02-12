@@ -18,6 +18,8 @@ class BlockMap : public Map<Block>
 public:
     void joinHeap(const BlockMap &map);
     void joinStack(const BlockMap &map);
+    void joinForeignStack(const BlockMap &map,
+                          const llvm::Function &currentFunction);
 };
 
 } // namespace Memory
