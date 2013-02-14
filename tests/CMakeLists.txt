@@ -29,9 +29,9 @@ add_executable(IntegerIntervalTest IntegerIntervalTest.cpp)
 target_link_libraries(IntegerIntervalTest canal)
 add_test(IntegerIntervalTest IntegerIntervalTest)
 
-add_executable(PointerTest PointerTest.cpp)
-target_link_libraries(PointerTest canal)
-add_test(PointerTest PointerTest)
+#add_executable(PointerTest PointerTest.cpp)
+#target_link_libraries(PointerTest canal)
+#add_test(PointerTest PointerTest)
 
 add_executable(ProductMessageTest ProductMessageTest.cpp)
 target_link_libraries(ProductMessageTest canal)

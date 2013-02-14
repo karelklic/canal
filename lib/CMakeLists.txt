@@ -18,17 +18,19 @@ add_library(canal SHARED
     InterpreterIterator.cpp
     InterpreterModule.cpp
     InterpreterOperationsCallback.cpp
+    MemoryBlock.cpp
+    MemoryBlockMap.cpp
+    MemoryPointer.cpp
+    MemoryState.cpp
+    MemoryUtils.cpp
+    MemoryVariableArguments.cpp
+    MemoryVariableMap.cpp
     Operations.cpp
-    Pointer.cpp
-    PointerUtils.cpp
     ProductMessage.cpp
     ProductVector.cpp
     SlotTracker.cpp
-    State.cpp
-    StateMap.cpp
     Structure.cpp
     Utils.cpp
-    VariableArguments.cpp
     WideningDataIterationCount.cpp
     WideningManager.cpp
     WideningNumericalInfinity.cpp
