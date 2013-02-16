@@ -4,6 +4,7 @@
 #include <llvm/Module.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Support/ManagedStatic.h>
+#include <iostream>
 
 using namespace Canal;
 
@@ -20,6 +21,15 @@ static void testConstructors()
     const llvm::ArrayType *type = getTestType();
     Array::StringTrie stringTrie(*gEnvironment, *type);
     CANAL_ASSERT(stringTrie.isBottom());
+    CANAL_ASSERT(stringTrie.mRoot->mValue == "");
+    CANAL_ASSERT(stringTrie.mRoot->mChildren.size() == 0);
+
+    Array::StringTrie stringTrie2(*gEnvironment, "test");
+    CANAL_ASSERT(!stringTrie2.isBottom());
+    CANAL_ASSERT(stringTrie2.mRoot->mValue == "");
+    CANAL_ASSERT(stringTrie2.mRoot->mChildren.size() == 1);
+    //std::cout << stringTrie2.mRoot->mChildren[0]->mValue << "\n";
+    CANAL_ASSERT(stringTrie2.mRoot->mChildren[0]->mValue == "test");
 }
 
 static void testSetTop()

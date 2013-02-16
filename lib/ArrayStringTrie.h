@@ -11,6 +11,9 @@ class TrieNode
 public:
     std::string mValue;
     std::vector<TrieNode*> mChildren;
+
+public:
+    TrieNode(const std::string &value);
 };
 
 class StringTrie : public Domain
@@ -24,7 +27,7 @@ public:
     /// Standard constructor
     StringTrie(const Environment &environment,
                const llvm::SequentialType &type);
-/*
+
     StringTrie(const Environment &environment,
                const llvm::SequentialType &type,
                std::vector<Domain*>::const_iterator begin,
@@ -32,7 +35,7 @@ public:
 
     StringTrie(const Environment &environment,
                const std::string &value);
-*/
+
     static bool classof(const Domain *value)
     {
         return value->getKind() == ArrayStringTrieKind;
