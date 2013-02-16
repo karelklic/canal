@@ -137,13 +137,21 @@ AC_CHECK_HEADERS([clang/Basic/Version.h], [clang_header_found=yes], [clang_heade
 if test "$clang_lib_found" = "yes" -a "$clang_header_found" = "yes"
 then
     AC_DEFINE(HAVE_CLANG, [], [Have Clang])
-    CLANG_LIBS="-lclangFrontendTool -lclangFrontend -lclangDriver -lclangSerialization -lclangCodeGen -lclangParse -lclangSema  -lclangAnalysis -lclangIndex -lclangRewrite -lclangAST -lclangLex -lclangBasic"
-else
-    CLANG_LIBS=""
+    AC_CHECK_LIB([clangBasic], [main])
+    AC_CHECK_LIB([clangLex], [main])
+    AC_CHECK_LIB([clangAST], [main])
+    AC_CHECK_LIB([clangRewrite], [main])
+    AC_CHECK_LIB([clangEdit], [main])
+    AC_CHECK_LIB([clangIndex], [main])
+    AC_CHECK_LIB([clangAnalysis], [main])
+    AC_CHECK_LIB([clangSema], [main])
+    AC_CHECK_LIB([clangParse], [main])
+    AC_CHECK_LIB([clangCodeGen], [main])
+    AC_CHECK_LIB([clangSerialization], [main])
+    AC_CHECK_LIB([clangDriver], [main])
+    AC_CHECK_LIB([clangFrontend], [main])
+    AC_CHECK_LIB([clangFrontendTool], [main])
 fi
-
-AC_SUBST([CLANG_LIBS])
-
 
 # Capture compile-time LLVM NDEBUG status.
 #

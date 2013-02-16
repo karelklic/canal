@@ -49,7 +49,7 @@ canal_SOURCES = \
 	WrapperGcc.h \
 	WrapperGcc.cpp
 
-canal_LDADD = $(top_builddir)/lib/libcanal.la -lreadline -lhistory $(LLVM_LDFLAGS) $(LLVM_LIBS) $(CLANG_LIBS)
+canal_LDADD = $(top_builddir)/lib/libcanal.la -lreadline -lhistory $(LLVM_LDFLAGS) $(LLVM_LIBS)
 canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS) -I$(top_srcdir) -DDATADIR='"$(datadir)"'
 
 install-exec-hook:
