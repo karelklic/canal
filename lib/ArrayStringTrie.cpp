@@ -11,6 +11,17 @@ TrieNode::TrieNode(const std::string &value)
 { 
 }
 
+TrieNode::~TrieNode()
+{
+    std::vector<TrieNode*>::const_iterator it = mChildren.begin(),
+        itend = mChildren.end();
+
+    for (; it != itend; ++it)
+    {
+        delete *it;
+    }
+}
+
 StringTrie::StringTrie(const Environment &environment,
                        const llvm::SequentialType &type)
     : Domain(environment, Domain::ArrayStringTrieKind),
@@ -79,6 +90,13 @@ StringTrie::StringTrie(const Environment &environment,
     mRoot->mChildren.push_back(newNode);
 }
 
+
+StringTrie::~StringTrie()
+{
+    delete mRoot;
+}
+
+
 StringTrie *
 StringTrie::clone() const
 {
@@ -135,6 +153,7 @@ StringTrie::isBottom() const
 void StringTrie::setBottom()
 {
     mIsBottom = true;
+    delete mRoot;
     mRoot = NULL;
 }
 
@@ -147,6 +166,7 @@ StringTrie::isTop() const
 void StringTrie::setTop()
 {
     mIsBottom = false;
+    delete mRoot;
     mRoot = NULL;
 }
 

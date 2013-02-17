@@ -14,6 +14,7 @@ public:
 
 public:
     TrieNode(const std::string &value);
+    ~TrieNode();
 };
 
 class StringTrie : public Domain
@@ -35,6 +36,8 @@ public:
 
     StringTrie(const Environment &environment,
                const std::string &value);
+
+    ~StringTrie();
 
     static bool classof(const Domain *value)
     {
