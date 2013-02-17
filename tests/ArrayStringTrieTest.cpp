@@ -22,7 +22,7 @@ static void testConstructors()
     Array::StringTrie stringTrie(*gEnvironment, *type);
     CANAL_ASSERT(stringTrie.isBottom());
     CANAL_ASSERT(stringTrie.mRoot->mValue == "");
-    CANAL_ASSERT(stringTrie.mRoot->mChildren.size() == 0);
+    CANAL_ASSERT(stringTrie.mRoot->mChildren.empty());
 
     Array::StringTrie stringTrie2(*gEnvironment, "test");
     CANAL_ASSERT(!stringTrie2.isBottom());
