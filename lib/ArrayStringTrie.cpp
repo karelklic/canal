@@ -45,7 +45,7 @@ TrieNode::operator==(const TrieNode &node) const
     // their count is the same
     for (; first != firstEnd && second != secondEnd; ++first, ++second)
     {
-        if ((*first == *second) == false)
+        if ((**first == **second) == false)
             return false;
     }
 

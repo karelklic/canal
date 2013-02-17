@@ -43,8 +43,7 @@ static void testTrieEqualityOperator()
     Array::TrieNode trie8 = Array::TrieNode("asdf");
     Array::TrieNode *node3 = new Array::TrieNode("qwe");
     trie8.mChildren.push_back(node3);
-    // TODO fix this
-    //CANAL_ASSERT(trie5 == trie8);
+    CANAL_ASSERT(trie5 == trie8);
 }
 
 static void testConstructors()
