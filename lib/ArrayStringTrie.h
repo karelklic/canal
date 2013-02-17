@@ -15,6 +15,7 @@ public:
 public:
     TrieNode(const std::string &value);
     ~TrieNode();
+    bool operator==(const TrieNode &node) const;
 };
 
 class StringTrie : public Domain

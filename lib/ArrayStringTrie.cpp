@@ -2,6 +2,7 @@
 #include "Environment.h"
 #include "Utils.h"
 #include "IntegerUtils.h"
+#include <iostream>
 
 namespace Canal {
 namespace Array {
@@ -20,6 +21,35 @@ TrieNode::~TrieNode()
     {
         delete *it;
     }
+}
+
+bool
+TrieNode::operator==(const TrieNode &node) const
+{
+    if (this == &node)
+        return true;
+
+    if (mValue != node.mValue)
+        return false;
+
+    if (mChildren.size() != node.mChildren.size())
+        return false;
+
+    std::vector<TrieNode*>::const_iterator first = mChildren.begin(),
+        firstEnd = mChildren.end(),
+        second = node.mChildren.begin(),
+        secondEnd = node.mChildren.end();
+
+    // TODO this is incorrect, because we don't care about the
+    // order of children as long as they have the same content and
+    // their count is the same
+    for (; first != firstEnd && second != secondEnd; ++first, ++second)
+    {
+        if ((*first == *second) == false)
+            return false;
+    }
+
+    return true;
 }
 
 StringTrie::StringTrie(const Environment &environment,
@@ -118,13 +148,23 @@ StringTrie::toString() const
 void
 StringTrie::setZero(const llvm::Value *place)
 {
-    CANAL_NOT_IMPLEMENTED();
+    setTop();
 }
 
 bool
 StringTrie::operator==(const Domain &value) const
 {
-    CANAL_NOT_IMPLEMENTED();
+    if (this == &value)
+        return true;
+
+    const StringTrie &array = checkedCast<StringTrie>(value);
+    if (isBottom() != array.isBottom())
+        return false;
+
+    if (!mIsBottom && (mRoot != array.mRoot))
+        return false;
+
+    return true;
 }
 
 bool StringTrie::operator<(const Domain &value) const

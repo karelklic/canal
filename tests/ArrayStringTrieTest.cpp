@@ -16,6 +16,37 @@ static llvm::ArrayType *getTestType()
         gEnvironment->getContext()), 10);
 }
 
+static void testTrieEqualityOperator()
+{
+    Array::TrieNode trie1 = Array::TrieNode("");
+    CANAL_ASSERT(trie1 == trie1);
+
+    Array::TrieNode trie2 = Array::TrieNode("abc");
+    Array::TrieNode trie3 = Array::TrieNode("defgh");
+    Array::TrieNode trie4 = Array::TrieNode("abc");
+    CANAL_ASSERT((trie2 == trie3) == false);
+    CANAL_ASSERT(trie2 == trie4);
+
+    Array::TrieNode trie5 = Array::TrieNode("asdf");
+    Array::TrieNode *node1 = new Array::TrieNode("qwe");
+    trie5.mChildren.push_back(node1);
+    CANAL_ASSERT(trie5.mChildren.size() == 1);
+    Array::TrieNode trie6 = Array::TrieNode("asdf");
+    CANAL_ASSERT(trie6.mChildren.size() == 0);
+    CANAL_ASSERT((trie5 == trie6) == false);
+
+    Array::TrieNode trie7 = Array::TrieNode("asdf");
+    Array::TrieNode *node2 = new Array::TrieNode("poi");
+    trie7.mChildren.push_back(node2);
+    CANAL_ASSERT((trie5 == trie7) == false);
+
+    Array::TrieNode trie8 = Array::TrieNode("asdf");
+    Array::TrieNode *node3 = new Array::TrieNode("qwe");
+    trie8.mChildren.push_back(node3);
+    // TODO fix this
+    //CANAL_ASSERT(trie5 == trie8);
+}
+
 static void testConstructors()
 {
     const llvm::ArrayType *type = getTestType();
@@ -57,6 +88,7 @@ main(int argc, char **argv)
     llvm::Module *module = new llvm::Module("testModule", context);
     gEnvironment = new Environment(module);
 
+    testTrieEqualityOperator();
     testConstructors();
     testSetTop();
     testSetBottom();
