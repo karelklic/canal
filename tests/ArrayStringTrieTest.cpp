@@ -29,7 +29,7 @@ static void testTrieEqualityOperator()
 
     Array::TrieNode trie5 = Array::TrieNode("asdf");
     Array::TrieNode *node1 = new Array::TrieNode("qwe");
-    trie5.mChildren.push_back(node1);
+    trie5.mChildren.insert(node1);
     CANAL_ASSERT(trie5.mChildren.size() == 1);
     Array::TrieNode trie6 = Array::TrieNode("asdf");
     CANAL_ASSERT(trie6.mChildren.size() == 0);
@@ -37,12 +37,12 @@ static void testTrieEqualityOperator()
 
     Array::TrieNode trie7 = Array::TrieNode("asdf");
     Array::TrieNode *node2 = new Array::TrieNode("poi");
-    trie7.mChildren.push_back(node2);
+    trie7.mChildren.insert(node2);
     CANAL_ASSERT((trie5 == trie7) == false);
 
     Array::TrieNode trie8 = Array::TrieNode("asdf");
     Array::TrieNode *node3 = new Array::TrieNode("qwe");
-    trie8.mChildren.push_back(node3);
+    trie8.mChildren.insert(node3);
     CANAL_ASSERT(trie5 == trie8);
 }
 
@@ -58,8 +58,8 @@ static void testConstructors()
     CANAL_ASSERT(!stringTrie2.isBottom());
     CANAL_ASSERT(stringTrie2.mRoot->mValue == "");
     CANAL_ASSERT(stringTrie2.mRoot->mChildren.size() == 1);
-    //std::cout << stringTrie2.mRoot->mChildren[0]->mValue << "\n";
-    CANAL_ASSERT(stringTrie2.mRoot->mChildren[0]->mValue == "test");
+    Array::TrieNode *node = *stringTrie2.mRoot->mChildren.begin();
+    CANAL_ASSERT(node->mValue == "test");
 }
 
 static void testSetTop()

@@ -1,6 +1,7 @@
 #ifndef LIBCANAL_ARRAY_STRING_TRIE_H
 #define LIBCANAL_ARRAY_STRING_TRIE_H
 
+#include <set>
 #include "Domain.h"
 
 namespace Canal {
@@ -8,14 +9,21 @@ namespace Array {
 
 class TrieNode
 {
+    struct TrieNodeCompare
+    {
+        bool operator()(const TrieNode *first, const TrieNode *second) const;
+    };
+
 public:
     std::string mValue;
-    std::vector<TrieNode*> mChildren;
+    std::set<TrieNode *, TrieNodeCompare> mChildren;
 
 public:
     TrieNode(const std::string &value);
     ~TrieNode();
     bool operator==(const TrieNode &node) const;
+    //bool operator!=(const TrieNode &node) const;
+    //TrieNode *find(const std::string &value);
 };
 
 class StringTrie : public Domain

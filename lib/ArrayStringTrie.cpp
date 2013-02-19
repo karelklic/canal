@@ -7,6 +7,12 @@
 namespace Canal {
 namespace Array {
 
+bool
+TrieNode::TrieNodeCompare::operator()(const TrieNode *first, const TrieNode *second) const
+{
+    return first->mValue < second->mValue;
+}
+
 TrieNode::TrieNode(const std::string &value)
     : mValue(value)
 { 
@@ -14,7 +20,7 @@ TrieNode::TrieNode(const std::string &value)
 
 TrieNode::~TrieNode()
 {
-    std::vector<TrieNode*>::const_iterator it = mChildren.begin(),
+    std::set<TrieNode*>::const_iterator it = mChildren.begin(),
         itend = mChildren.end();
 
     for (; it != itend; ++it)
@@ -35,14 +41,11 @@ TrieNode::operator==(const TrieNode &node) const
     if (mChildren.size() != node.mChildren.size())
         return false;
 
-    std::vector<TrieNode*>::const_iterator first = mChildren.begin(),
+    std::set<TrieNode*>::const_iterator first = mChildren.begin(),
         firstEnd = mChildren.end(),
         second = node.mChildren.begin(),
         secondEnd = node.mChildren.end();
 
-    // TODO this is incorrect, because we don't care about the
-    // order of children as long as they have the same content and
-    // their count is the same
     for (; first != firstEnd && second != secondEnd; ++first, ++second)
     {
         if ((**first == **second) == false)
@@ -103,7 +106,11 @@ StringTrie::StringTrie(const Environment &environment,
 
         if (!mIsBottom)
         {
-            mRoot->mChildren.push_back(newNode);
+            mRoot->mChildren.insert(newNode);
+        }
+        else
+        {
+            delete newNode;
         }
     }
 }
@@ -117,7 +124,7 @@ StringTrie::StringTrie(const Environment &environment,
                                   value.size()))
 {
     TrieNode *newNode = new TrieNode(value);
-    mRoot->mChildren.push_back(newNode);
+    mRoot->mChildren.insert(newNode);
 }
 
 
@@ -161,8 +168,9 @@ StringTrie::operator==(const Domain &value) const
     if (isBottom() != array.isBottom())
         return false;
 
-    if (!mIsBottom && (mRoot != array.mRoot))
-        return false;
+    // TODO inequality operator for TrieNode type is missing
+    //if (!mIsBottom && (*mRoot != *array.mRoot))
+        //return false;
 
     return true;
 }
