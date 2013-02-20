@@ -32,7 +32,7 @@ static void testTrieEqualityOperator()
     trie5.mChildren.insert(node1);
     CANAL_ASSERT(trie5.mChildren.size() == 1);
     Array::TrieNode trie6 = Array::TrieNode("asdf");
-    CANAL_ASSERT(trie6.mChildren.size() == 0);
+    CANAL_ASSERT(trie6.mChildren.empty());
     CANAL_ASSERT((trie5 == trie6) == false);
 
     Array::TrieNode trie7 = Array::TrieNode("asdf");
@@ -46,6 +46,36 @@ static void testTrieEqualityOperator()
     CANAL_ASSERT(trie5 == trie8);
 }
 
+static void testTrieInequalityOperator()
+{
+    Array::TrieNode trie1 = Array::TrieNode("");
+    CANAL_ASSERT((trie1 != trie1) == false);
+
+    Array::TrieNode trie2 = Array::TrieNode("xyz");
+    Array::TrieNode trie3 = Array::TrieNode("ijklm");
+    Array::TrieNode trie4 = Array::TrieNode("xyz");
+    CANAL_ASSERT(trie2 != trie3);
+    CANAL_ASSERT((trie2 != trie4) == false);
+
+    Array::TrieNode trie5 = Array::TrieNode("qwer");
+    Array::TrieNode *node1 = new Array::TrieNode("zxc");
+    trie5.mChildren.insert(node1);
+    CANAL_ASSERT(trie5.mChildren.size() == 1);
+    Array::TrieNode trie6 = Array::TrieNode("qwer");
+    CANAL_ASSERT(trie6.mChildren.empty());
+    CANAL_ASSERT(trie5 != trie6);
+
+    Array::TrieNode trie7 = Array::TrieNode("qwer");
+    Array::TrieNode *node2 = new Array::TrieNode("abc");
+    trie7.mChildren.insert(node2);
+    CANAL_ASSERT(trie5 != trie7);
+
+    Array::TrieNode trie8 = Array::TrieNode("qwer");
+    Array::TrieNode *node3 = new Array::TrieNode("zxc");
+    trie8.mChildren.insert(node3);
+    CANAL_ASSERT((trie5 != trie8) == false);
+}
+
 static void testConstructors()
 {
     const llvm::ArrayType *type = getTestType();
@@ -54,12 +84,19 @@ static void testConstructors()
     CANAL_ASSERT(stringTrie.mRoot->mValue == "");
     CANAL_ASSERT(stringTrie.mRoot->mChildren.empty());
 
+    // TODO test second constructor
+
     Array::StringTrie stringTrie2(*gEnvironment, "test");
     CANAL_ASSERT(!stringTrie2.isBottom());
     CANAL_ASSERT(stringTrie2.mRoot->mValue == "");
     CANAL_ASSERT(stringTrie2.mRoot->mChildren.size() == 1);
     Array::TrieNode *node = *stringTrie2.mRoot->mChildren.begin();
     CANAL_ASSERT(node->mValue == "test");
+}
+
+static void testEqualityOperator()
+{
+    // TODO
 }
 
 static void testSetTop()
@@ -88,7 +125,9 @@ main(int argc, char **argv)
     gEnvironment = new Environment(module);
 
     testTrieEqualityOperator();
+    testTrieInequalityOperator();
     testConstructors();
+    testEqualityOperator();
     testSetTop();
     testSetBottom();
 

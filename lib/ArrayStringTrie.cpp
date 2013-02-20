@@ -20,7 +20,7 @@ TrieNode::TrieNode(const std::string &value)
 
 TrieNode::~TrieNode()
 {
-    std::set<TrieNode*>::const_iterator it = mChildren.begin(),
+    std::set<TrieNode*, TrieNodeCompare>::const_iterator it = mChildren.begin(),
         itend = mChildren.end();
 
     for (; it != itend; ++it)
@@ -41,7 +41,7 @@ TrieNode::operator==(const TrieNode &node) const
     if (mChildren.size() != node.mChildren.size())
         return false;
 
-    std::set<TrieNode*>::const_iterator first = mChildren.begin(),
+    std::set<TrieNode*, TrieNodeCompare>::const_iterator first = mChildren.begin(),
         firstEnd = mChildren.end(),
         second = node.mChildren.begin(),
         secondEnd = node.mChildren.end();
@@ -53,6 +53,29 @@ TrieNode::operator==(const TrieNode &node) const
     }
 
     return true;
+}
+
+bool
+TrieNode::operator!=(const TrieNode &node) const
+{
+    if (mValue != node.mValue)
+        return true;
+
+    if (mChildren.size() != node.mChildren.size())
+        return true;
+
+    std::set<TrieNode *, TrieNodeCompare>::const_iterator first = mChildren.begin(),
+        firstEnd = mChildren.end(),
+        second = node.mChildren.begin(),
+        secondEnd = node.mChildren.end();
+
+    for (; first != firstEnd && second != secondEnd; ++first, ++second)
+    {
+        if ((**first != **second))
+            return true;
+    }
+
+    return false;
 }
 
 StringTrie::StringTrie(const Environment &environment,
@@ -168,9 +191,8 @@ StringTrie::operator==(const Domain &value) const
     if (isBottom() != array.isBottom())
         return false;
 
-    // TODO inequality operator for TrieNode type is missing
-    //if (!mIsBottom && (*mRoot != *array.mRoot))
-        //return false;
+    if (!mIsBottom && (*mRoot != *array.mRoot))
+        return false;
 
     return true;
 }
