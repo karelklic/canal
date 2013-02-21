@@ -11,6 +11,11 @@ class VariableMap : public Map<Domain>
 {
 public:
     void joinGlobals(const VariableMap &map);
+
+    void findNames(const std::string &prefix,
+                   bool isGlobal,
+                   SlotTracker &slotTracker,
+                   std::vector<std::string> &result) const;
 };
 
 

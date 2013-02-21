@@ -63,7 +63,7 @@ void
 State::joinGlobal(const State &state)
 {
     mVariables.joinGlobals(state.mVariables);
-    mBlocks.joinHeap(state.mBlocks);
+    mBlocks.join(state.mBlocks, Block::HeapMemoryType);
 }
 
 void
@@ -81,7 +81,7 @@ State::joinReturnedValue(const State &state)
 void
 State::joinStackBlocks(const State &state)
 {
-    mBlocks.joinStack(state.mBlocks);
+    mBlocks.join(state.mBlocks, Block::StackMemoryType);
 }
 
 void

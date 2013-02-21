@@ -16,10 +16,22 @@ namespace Memory {
 class BlockMap : public Map<Block>
 {
 public:
-    void joinHeap(const BlockMap &map);
-    void joinStack(const BlockMap &map);
+    void join(const BlockMap &map)
+    {
+        Map<Block>::join(map);
+    }
+
+    void join(const BlockMap &map,
+              Block::MemoryType memoryType);
+
+    // Merge function blocks that do not belong to current function.
     void joinForeignStack(const BlockMap &map,
                           const llvm::Function &currentFunction);
+
+    void findNames(const std::string &prefix,
+                   Block::MemoryType memoryType,
+                   SlotTracker &slotTracker,
+                   std::vector<std::string> &result) const;
 };
 
 } // namespace Memory

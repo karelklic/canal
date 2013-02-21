@@ -9,13 +9,16 @@ namespace Memory {
 /// Abstracts a continuous memory block.
 class Block : public SharedData
 {
-    mutable Domain *mMainValue;
-
 public:
     enum MemoryType {
         StackMemoryType,
         HeapMemoryType
-    } mMemoryType;
+    };
+
+private:
+    mutable Domain *mMainValue;
+
+    MemoryType mMemoryType;
 
 public:
     /// @param mainValue
@@ -34,6 +37,11 @@ public:
     }
 
     bool operator<(const Block &value) const;
+
+    MemoryType getMemoryType() const
+    {
+        return mMemoryType;
+    }
 
     /// For SharedDataPtr.
     Block *clone() const
