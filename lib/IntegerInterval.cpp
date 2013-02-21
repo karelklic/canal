@@ -571,7 +571,7 @@ Interval::accuracy() const
         CANAL_ASSERT(status == llvm::APFloat::opOK);
 
         llvm::APFloat divisorFloat(llvm::APFloat::IEEEdouble);
-        status = dividendFloat.convertFromAPInt(
+        status = divisorFloat.convertFromAPInt(
             llvm::APInt::getMaxValue(mUnsignedTo.getBitWidth() + 1),
             /*isSigned=*/false,
             llvm::APFloat::rmNearestTiesToEven);
@@ -607,7 +607,7 @@ Interval::accuracy() const
         CANAL_ASSERT(status == llvm::APFloat::opOK);
 
         llvm::APFloat divisorFloat(llvm::APFloat::IEEEdouble);
-        status = dividendFloat.convertFromAPInt(
+        status = divisorFloat.convertFromAPInt(
             llvm::APInt::getMaxValue(mSignedTo.getBitWidth() + 1),
             /*isSigned=*/false,
             llvm::APFloat::rmNearestTiesToEven);
