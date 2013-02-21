@@ -17,6 +17,7 @@ class State
 
 public:
     State(llvm::Module *module);
+
     ~State();
 
     Canal::Interpreter::Interpreter &getInterpreter()

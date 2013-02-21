@@ -6,7 +6,8 @@
 #include "lib/Domain.h"
 #include "lib/Utils.h"
 #include "lib/InterpreterFunction.h"
-#include "lib/StateMap.h"
+#include "lib/MemoryBlockMap.h"
+#include "lib/MemoryVariableMap.h"
 
 CommandPrint::CommandPrint(Commands &commands)
     : Command("print",
@@ -15,42 +16,6 @@ CommandPrint::CommandPrint(Commands &commands)
               "Print value of a variable.",
               commands)
 {
-}
-
-static void
-filterStateMap(const Canal::StateMap &map,
-               Canal::SlotTracker &slotTracker,
-               const char *prefix,
-               const std::string &arg,
-               bool addFunctionName,
-               std::vector<std::string> &result)
-{
-    Canal::StateMap::const_iterator it = map.begin();
-    for (; it != map.end(); ++it)
-    {
-        Canal::StringStream name;
-        name << prefix;
-        if (addFunctionName)
-        {
-            const llvm::Instruction *instruction =
-                Canal::dynCast<llvm::Instruction>(it->first);
-
-            if (instruction)
-            {
-                const llvm::Function &function =
-                    *instruction->getParent()->getParent();
-
-                name << function.getName().str() << ":";
-            }
-            else
-                CANAL_ASSERT_MSG(llvm::isa<llvm::GlobalVariable>(it->first),
-                                 "Unexpected entity in a place-variable map.");
-        }
-
-        name << Canal::getName(*it->first, slotTracker);
-        if (0 == strncmp(name.str().c_str(), arg.c_str(), arg.size()))
-            result.push_back(name.str());
-    }
 }
 
 std::vector<std::string>
@@ -64,7 +29,8 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args,
         return result;
 
     std::string arg(args[pointArg].substr(0, pointArgOffset));
-    const Canal::State &curState = state->getInterpreter().getCurrentState();
+    const Canal::Memory::State &curState =
+        state->getInterpreter().getCurrentState();
 
     if (arg.empty() || arg == "%")
     {
@@ -78,18 +44,26 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args,
         result.push_back("@^");
     }
 
-    filterStateMap(curState.getGlobalVariables(),
-                   state->getSlotTracker(),
-                   "@", arg, false, result);
-    filterStateMap(curState.getGlobalBlocks(),
-                   state->getSlotTracker(),
-                   "@^", arg, true, result);
-    filterStateMap(curState.getFunctionVariables(),
-                   state->getSlotTracker(),
-                   "%", arg, false, result);
-    filterStateMap(curState.getFunctionBlocks(),
-                   state->getSlotTracker(),
-                   "%^", arg, false, result);
+    if (!arg.empty() && arg[0] == '@')
+    {
+        if (arg.length() > 1 && arg[1] == '^')
+        {
+            TODO
+        }
+    }
+
+    filterMemoryMap(curState.getGlobalVariables(),
+                    state->getSlotTracker(),
+                    "@", arg, false, result);
+    filterMemoryMap(curState.getGlobalBlocks(),
+                    state->getSlotTracker(),
+                    "@^", arg, true, result);
+    filterMemoryMap(curState.getFunctionVariables(),
+                    state->getSlotTracker(),
+                    "%", arg, false, result);
+    filterMemoryMap(curState.getFunctionBlocks(),
+                    state->getSlotTracker(),
+                    "%^", arg, false, result);
 
     return result;
 }

@@ -1,9 +1,8 @@
 #include "State.h"
 #include "Utils.h"
 #include "lib/Utils.h"
-#include "lib/State.h"
+#include "lib/MemoryState.h"
 #include "lib/ProductVector.h"
-#include "lib/Pointer.h"
 #include "lib/InterpreterFunction.h"
 
 State::State(llvm::Module *module) : mInterpreter(module)
