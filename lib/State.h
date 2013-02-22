@@ -175,6 +175,8 @@ public:
     std::string toString(const llvm::Value &place,
                          SlotTracker &slotTracker) const;
 
+    void dumpToMetadata(llvm::Value &place) const;
+
 private:
     /// Assignment operator declaration.  Prevents accidental
     /// assignments of states.  Do not implement!

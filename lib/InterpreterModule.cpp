@@ -191,6 +191,19 @@ Module::toString() const
 }
 
 void
+Module::dumpToMetadata() const
+{
+    //TODO - print globals
+
+    //Print functions
+    std::vector<Function*>::const_iterator fit = mFunctions.begin(),
+            fitend = mFunctions.end();
+
+    for (; fit != fitend; ++fit)
+        (*fit)->dumpToMetadata();
+}
+
+void
 Module::updateGlobalState()
 {
     std::vector<Function*>::const_iterator it = mFunctions.begin(),

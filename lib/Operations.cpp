@@ -373,6 +373,13 @@ Operations::cmpOperation(const llvm::CmpInst &instruction,
                            constants[1])
     };
 
+    printf("cmpOperation\n");
+    if (instruction.hasMetadata()) {
+        printf("\tHas metadata\n");
+        llvm::MDNode * metadata = instruction.getMetadata("canal");
+        metadata->dump();
+    }
+
     if (!values[0] || !values[1])
         return;
 

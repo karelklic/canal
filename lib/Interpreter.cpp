@@ -29,5 +29,11 @@ Interpreter::toString() const
     return ss.str();
 }
 
+void
+Interpreter::dumpToMetadata () const
+{
+    return mModule.dumpToMetadata();
+}
+
 } // namespace Interpreter
 } // namespace Canal

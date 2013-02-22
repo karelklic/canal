@@ -96,6 +96,8 @@ public:
     }
 
     std::string toString() const;
+
+    void dumpToMetadata() const;
 };
 
 } // namespace Interpreter

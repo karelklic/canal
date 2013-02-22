@@ -87,6 +87,8 @@ public:
     size_t memoryUsage() const;
 
     std::string toString() const;
+
+    void dumpToMetadata() const;
 };
 
 } // namespace Interpreter

@@ -169,6 +169,18 @@ Function::toString() const
     return ss.str();
 }
 
+void
+Function::dumpToMetadata() const
+{
+    //TODO - print arguments and result
+
+    std::vector<BasicBlock*>::const_iterator bit = mBasicBlocks.begin(),
+        bitend = mBasicBlocks.end();
+
+    for (; bit != bitend; ++bit)
+        (*bit)->dumpToMetadata();
+}
+
 } // namespace Interpreter
 } // namespace Canal
 

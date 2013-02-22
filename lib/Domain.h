@@ -267,6 +267,18 @@ public: // Product
     virtual void extract(Product::Message &message) const {};
     virtual void refine(const Product::Message &message) {};
 
+public: // Serialization
+
+    /// Is it possible to deserialize from this metadata?
+    virtual bool canDeserialize(llvm::MDNode* what, unsigned offset) const;
+
+    /// Deserialize from metadata
+    virtual void deserialize(llvm::MDNode* what, unsigned offset);
+
+    /// Serialize into metadata
+    virtual llvm::MDNode* serialize() const;
+
+
 private: // Domains are non-copyable.
     /// Assignment operator declaration.  Prevents accidental
     /// assignments of domains.  Do not implement!

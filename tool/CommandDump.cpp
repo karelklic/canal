@@ -63,16 +63,24 @@ CommandDump::run(const std::vector<std::string> &args)
         }
     }
 
-    fp = fopen(args[1].c_str(), "w");
-    if (!fp)
+    std::string error;
+    llvm::raw_fd_ostream out(args[1].c_str(), error);
+    if (out.has_error())
     {
-        llvm::outs() << "Failed to open the file.\n";
+        llvm::outs() << "Failed to open the file:\n";
+        llvm::outs() << error << "\n";
         return;
     }
 
-    fprintf(fp, "%s",
-            mCommands.getState()->getInterpreter().toString().c_str());
+    //Dump as .s file -> save as metadata
+    if (args[1].length() > 2 && args[1].substr(args[1].length() - 2) == ".s") {
+        mCommands.getState()->getInterpreter().dumpToMetadata();
+        mCommands.getState()->getModule().print(out, NULL);
+    }
+    else {
+        out << mCommands.getState()->getInterpreter().toString();
+    }
+    out.flush();
 
-    fclose(fp);
     llvm::outs() << "Interpretation state saved.\n";
 }

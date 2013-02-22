@@ -48,5 +48,22 @@ BasicBlock::toString() const
     return ss.str();
 }
 
+void
+BasicBlock::dumpToMetadata() const
+{
+    SlotTracker &slotTracker = mEnvironment.getSlotTracker();
+    slotTracker.setActiveFunction(*mBasicBlock.getParent());
+    llvm::BasicBlock &modifiable = const_cast<llvm::BasicBlock&>(mBasicBlock); //TODO - nothing to see here...
+    llvm::BasicBlock::iterator it = modifiable.begin(),
+            end = modifiable.end();
+    for (; it != end; ++it)
+    {
+        if (it->getType()->isVoidTy())
+            continue;
+
+        mOutputState.dumpToMetadata(*it);
+    }
+}
+
 } // namespace Interpreter
 } // namespace Canal

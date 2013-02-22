@@ -305,4 +305,21 @@ State::toString(const llvm::Value &place,
     return ss.str();
 }
 
+void
+State::dumpToMetadata(llvm::Value &place) const
+{
+    assert(llvm::isa<llvm::Instruction>(place));
+
+    llvm::Instruction &instruction =
+        checkedCast<llvm::Instruction>(place);
+
+    StateMap::const_iterator it = mFunctionVariables.find(&place);
+    if (it != mFunctionVariables.end())
+    {
+        llvm::MDNode* data = it->second->serialize();
+        if (data != NULL) instruction.setMetadata("canal", data);
+    }
+    //TODO - function blocks for memory
+}
+
 } // namespace Canal

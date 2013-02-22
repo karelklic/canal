@@ -58,6 +58,8 @@ public:
 
     std::string toString() const;
 
+    void dumpToMetadata() const;
+
     void updateGlobalState();
 };
 

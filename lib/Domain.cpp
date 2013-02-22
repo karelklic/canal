@@ -353,4 +353,20 @@ Domain::mergeValueCell(uint64_t offset, const Domain &value)
     CANAL_NOT_IMPLEMENTED();
 }
 
+bool
+Domain::canDeserialize(llvm::MDNode *what, unsigned offset) const
+{
+    return false;
+}
+
+void
+Domain::deserialize(llvm::MDNode *what, unsigned offset) {
+    CANAL_NOT_IMPLEMENTED();
+}
+
+llvm::MDNode*
+Domain::serialize() const {
+    return NULL;
+}
+
 } // namespace Canal
