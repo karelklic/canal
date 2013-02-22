@@ -823,5 +823,24 @@ Set::fromInterval(const Interval &interval) {
     return *this;
 }
 
+llvm::MDNode*
+Set::serialize() const {
+    std::vector<llvm::Value*> data;
+    data.reserve(mTop ? 2 : 2 + mValues.size());
+
+    StringStream ss;
+    ss << "Set:" << (mTop ? 2 : 2 + mValues.size()) << ":1";
+    data.push_back(llvm::MDString::get(mEnvironment.getContext(), ss.str()));
+
+    data.push_back(llvm::ConstantInt::get(mEnvironment.getContext(), llvm::APInt(1, mTop)));
+
+    APIntUtils::USet::const_iterator it = mValues.begin(),
+            end = mValues.end();
+    for (; it != end; ++ it)
+        data.push_back(llvm::ConstantInt::get(mEnvironment.getContext(), *it));
+
+    return llvm::MDNode::get(mEnvironment.getContext(), data);
+}
+
 } // namespace Integer
 } // namespace Canal

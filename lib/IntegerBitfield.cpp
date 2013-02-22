@@ -917,5 +917,15 @@ Bitfield::fromInterval(const Interval &interval) {
     return *this;
 }
 
+llvm::MDNode*
+Bitfield::serialize() const
+{
+    llvm::SmallVector<llvm::Value*, 3> data;
+    data.push_back(llvm::MDString::get(mEnvironment.getContext(), "Bitfield:2:1"));
+    data.push_back(llvm::ConstantInt::get(mEnvironment.getContext(), mZeroes));
+    data.push_back(llvm::ConstantInt::get(mEnvironment.getContext(), mOnes));
+    return llvm::MDNode::get(mEnvironment.getContext(), data);
+}
+
 } // namespace Integer
 } // namespace Canal

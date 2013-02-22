@@ -123,6 +123,8 @@ public: // Implementation of Domain.
 
     virtual const llvm::Type &getValueType() const;
 
+    virtual llvm::MDNode* serialize() const;
+
 public: // Reduced Product
     /// Initiate communication between contained Domains
     /// to enhance their accuracy

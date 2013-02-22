@@ -663,6 +663,27 @@ Vector::collaborate()
     }
 }
 
+llvm::MDNode*
+Vector::serialize() const
+{
+    unsigned counter = 0;
+    std::vector<llvm::Value*> data;
+    data.push_back(NULL); //Will be replaced by header
+    std::vector<Domain*>::const_iterator it = mValues.begin(),
+            end = mValues.end();
+    for (; it != end; ++it) {
+        llvm::MDNode* item = (*it)->serialize();
+        if (item != NULL) {
+            data.push_back(item);
+            counter ++;
+        }
+    }
+    StringStream ss;
+    ss << "Vector:" << counter << ":1";
+    llvm::MDString* header = llvm::MDString::get(mEnvironment.getContext(), ss.str());
+    data[0] = header;
+    return llvm::MDNode::get(mEnvironment.getContext(), data);
+}
 
 } // namespace Integer
 } // namespace Canal

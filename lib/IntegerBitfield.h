@@ -180,6 +180,8 @@ public: // Implementation of Domain.
     /// Covariant return type.
     virtual const llvm::IntegerType &getValueType() const;
 
+    virtual llvm::MDNode* serialize() const;
+
 private:
     void shift(const Domain &a, const Domain &b, bool right, int shiftValue);
 };

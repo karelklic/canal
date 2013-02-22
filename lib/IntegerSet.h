@@ -167,6 +167,8 @@ public: // Implementation of Domain.
     /// Covariant return type.
     virtual const llvm::IntegerType &getValueType() const;
 
+    virtual llvm::MDNode* serialize() const;
+
 protected:
     Set &applyOperation(const Domain &a,
                                 const Domain &b,

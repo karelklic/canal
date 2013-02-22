@@ -1695,5 +1695,37 @@ Interval::getValueType() const
     return *llvm::Type::getIntNTy(mEnvironment.getContext(), getBitWidth());
 }
 
+llvm::MDNode*
+Interval::serialize() const
+{
+    llvm::SmallVector<llvm::Value*, 6> data;
+    bool signedTopBottom = isSignedBottom() || isSignedTop();
+    bool unsignedTopBottom = isUnsignedBottom() || isUnsignedTop();
+    StringStream ss;
+    ss << "Interval:";
+    ss << 5 - (signedTopBottom ? 2 : 0) -
+          (unsignedTopBottom ? 2 : 0);
+    ss << ":1";
+    data.push_back(llvm::MDString::get(mEnvironment.getContext(), ss.str()));
+
+    llvm::APInt flags(4, 0); //Bottom top flags
+    if (mUnsignedBottom) flags.setBit(3);
+    if (mUnsignedTop) flags.setBit(1);
+    if (mSignedBottom) flags.setBit(2);
+    if (mSignedTop) flags.setBit(0);
+    data.push_back(llvm::ConstantInt::get(mEnvironment.getContext(), flags));
+
+    //Save data if necessary
+    if (!unsignedTopBottom) {
+        data.push_back(llvm::ConstantInt::get(mEnvironment.getContext(), mUnsignedFrom));
+        data.push_back(llvm::ConstantInt::get(mEnvironment.getContext(), mUnsignedTo));
+    }
+    if (!signedTopBottom) {
+        data.push_back(llvm::ConstantInt::get(mEnvironment.getContext(), mSignedFrom));
+        data.push_back(llvm::ConstantInt::get(mEnvironment.getContext(), mSignedTo));
+    }
+    return llvm::MDNode::get(mEnvironment.getContext(), data);
+}
+
 } // namespace Integer
 } // namespace Canal

@@ -217,6 +217,8 @@ public: // Implementation of Domain.
 
     /// Covariant return type.
     virtual const llvm::IntegerType &getValueType() const;
+
+    virtual llvm::MDNode* serialize() const;
 };
 
 } // namespace Integer
