@@ -29,6 +29,21 @@ TrieNode::~TrieNode()
     }
 }
 
+size_t
+TrieNode::size()
+{
+    size_t size = mValue.size();
+    std::set<TrieNode *, TrieNodeCompare>::const_iterator it = mChildren.begin(),
+        itend = mChildren.end();
+
+    for (; it != itend; ++it)
+    {
+        size += (*it)->size();
+    }
+
+    return size;
+}
+
 bool
 TrieNode::operator==(const TrieNode &node) const
 {
@@ -166,7 +181,9 @@ StringTrie::clone() const
 size_t
 StringTrie::memoryUsage() const
 {
-    CANAL_NOT_IMPLEMENTED();
+    size_t size = sizeof(StringTrie);
+    size += mRoot->mValue.size();
+    return size;
 }
 
 std::string

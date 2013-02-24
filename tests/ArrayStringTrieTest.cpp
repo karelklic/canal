@@ -76,6 +76,26 @@ static void testTrieInequalityOperator()
     CANAL_ASSERT((trie5 != trie8) == false);
 }
 
+static void testTrieSize()
+{
+    Array::TrieNode trie1 = Array::TrieNode("");
+    CANAL_ASSERT(trie1.size() == 0);
+
+    Array::TrieNode trie2 = Array::TrieNode("test");
+    CANAL_ASSERT(trie2.size() == 4);
+
+    Array::TrieNode trie3 = Array::TrieNode("");
+    Array::TrieNode *node1 = new Array::TrieNode("abc");
+    Array::TrieNode *node2 = new Array::TrieNode("defgh");
+    trie3.mChildren.insert(node1);
+    trie3.mChildren.insert(node2);
+    Array::TrieNode *node3 = new Array::TrieNode("ij");
+    Array::TrieNode *first = *trie3.mChildren.begin();
+    CANAL_ASSERT(first->mValue == "abc");
+    first->mChildren.insert(node3);
+    CANAL_ASSERT(trie3.size() == 10);
+}
+
 static void testConstructors()
 {
     const llvm::ArrayType *type = getTestType();
@@ -126,6 +146,7 @@ main(int argc, char **argv)
 
     testTrieEqualityOperator();
     testTrieInequalityOperator();
+    testTrieSize();
     testConstructors();
     testEqualityOperator();
     testSetTop();
