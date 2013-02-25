@@ -93,6 +93,31 @@ TrieNode::operator!=(const TrieNode &node) const
     return false;
 }
 
+std::string
+TrieNode::toString() const
+{
+    StringStream ss;
+    ss << mValue;
+
+    std::set<TrieNode *, TrieNodeCompare>::const_iterator it = mChildren.begin(),
+        end = mChildren.end();
+
+    if (mChildren.size() > 0)
+        ss << "[";
+
+    if (it != end)
+        ss << (*it++)->toString();
+
+    for (; it != end; ++it)
+    {
+        ss << "|" << (*it)->toString();
+    }
+
+    if (mChildren.size() > 0)
+        ss << "]";
+    return ss.str();
+}
+
 StringTrie::StringTrie(const Environment &environment,
                        const llvm::SequentialType &type)
     : Domain(environment, Domain::ArrayStringTrieKind),
@@ -189,7 +214,22 @@ StringTrie::memoryUsage() const
 std::string
 StringTrie::toString() const
 {
-    CANAL_NOT_IMPLEMENTED();
+    StringStream ss;
+    ss << "stringTrie ";
+
+    if (isTop())
+        ss << "top";
+
+    if (isBottom())
+        ss << "bottom";
+
+    ss << "\n";
+        ss << "    type " << Canal::toString(mType) << "\n";
+
+    if (!isBottom() && !isBottom())
+        ss << "    " << mRoot->toString() << "\n";
+
+    return ss.str();
 }
 
 void

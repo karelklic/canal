@@ -24,6 +24,7 @@ public:
     size_t size();
     bool operator==(const TrieNode &node) const;
     bool operator!=(const TrieNode &node) const;
+    std::string toString() const;
     //TrieNode *find(const std::string &value);
 };
 
