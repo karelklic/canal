@@ -46,9 +46,20 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args,
 
     if (!arg.empty() && arg[0] == '@')
     {
-        if (arg.length() > 1 && arg[1] == '^')
+        if (arg.length() == 1 || (arg.length() > 1 && arg[1] != '^'))
         {
-            TODO
+            curState.getVariables().findNames(arg,
+                                              true,
+                                              state->getSlotTracker(),
+                                              result);
+        }
+
+        if (arg.length() == 1 || (arg.length() > 1 && arg[1] == '^'))
+        {
+            curState.getBlocks().findNames(arg,
+                                           Canal::Memory::Block::HeapMemoryType,
+                                           state->getSlotTracker(),
+                                           result);
         }
     }
 
