@@ -754,6 +754,7 @@ Set::applyOperationDivision(const Domain &a,
 
     CANAL_ASSERT(this != &a && this != &b);
     setBottom();
+    if (aa.isBottom() || bb.isBottom()) return *this;
     if (aa.isTop() || bb.isTop())
     {
         setTop();
