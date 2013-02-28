@@ -652,7 +652,8 @@ testIntervalConversion () {
             signedBottom(zero),
             unsignedBottom(zero),
             signedOverflow(*gEnvironment, llvm::APInt(32, 2147483647)),
-            signedOverflow2(*gEnvironment, llvm::APInt::getSignedMinValue(32));
+            signedOverflow2(*gEnvironment, llvm::APInt::getSignedMinValue(32)),
+            overflow(*gEnvironment, llvm::APInt(8, 127));
     Integer::Set result(*gEnvironment, 32);
     llvm::APInt res;
     one_two.join(two);
@@ -708,6 +709,9 @@ testIntervalConversion () {
     result.fromInterval(signedOverflow); //Signed overflow, but not unsigned
     CANAL_ASSERT(result.unsignedMin(res) && res == llvm::APInt(32, 2147483647) &&
                  result.unsignedMax(res) && res == llvm::APInt::getSignedMinValue(32));
+
+    CANAL_ASSERT(result.fromInterval(overflow).isConstant() &&
+                 result.unsignedMin(res) && res == llvm::APInt(8, 127));
 }
 
 static void
