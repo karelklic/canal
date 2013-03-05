@@ -6,6 +6,7 @@ add_library(canal SHARED
     Constructors.cpp
     Domain.cpp
     Environment.cpp
+    FieldMinMax.cpp
     FloatInterval.cpp
     FloatUtils.cpp
     IntegerBitfield.cpp

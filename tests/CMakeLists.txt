@@ -13,6 +13,10 @@ add_executable(ArrayStringPrefixTest ArrayStringPrefixTest.cpp)
 target_link_libraries(ArrayStringPrefixTest canal)
 add_test(ArrayStringPrefixTest ArrayStringPrefixTest)
 
+add_executable(FieldMinMaxTest FieldMinMaxTest.cpp)
+target_link_libraries(FieldMinMaxTest canal)
+add_test(FieldMinMaxTest FieldMinMaxTest)
+
 add_executable(FloatIntervalTest FloatIntervalTest.cpp)
 target_link_libraries(FloatIntervalTest canal)
 add_test(FloatIntervalTest FloatIntervalTest)

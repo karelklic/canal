@@ -9,10 +9,16 @@ class MessageField
 public:
     /// Discriminator for LLVM-style RTTI (dyn_cast<> et al.)
     enum MessageFieldKind {
-        DummyMessageFieldKind
+        DummyMessageFieldKind,
+        FieldMinMaxKind
     };
 
     const MessageFieldKind mKind;
+
+    MessageFieldKind getKind() const
+    {
+        return mKind;
+    }
 
 public:
     MessageField(MessageFieldKind kind) : mKind(kind) {}
