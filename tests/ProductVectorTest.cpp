@@ -55,6 +55,9 @@ public:
     virtual bool operator==(const Domain& value) const { return false; }
     virtual void setZero(const llvm::Value* place) {}
     virtual std::string toString() const { return "fakeDomain"; }
+    virtual float accuracy() const { return 0.0f; };
+    virtual bool isTop() const { return false; };
+    virtual bool isBottom() const { return false; };
 };
 
 static void
@@ -75,12 +78,12 @@ testCollaborate()
     vector.mValues.push_back(c);
     vector.collaborate();
 
-    // Domains are iterated in order
+    // Domains are iterated twice in order
     // every refine() increases message.num
     // every extract() sets this.num to message.num
-    CANAL_ASSERT(a->num == 0);
-    CANAL_ASSERT(b->num == 1);
-    CANAL_ASSERT(c->num == 2);
+    CANAL_ASSERT(a->num == 3);
+    CANAL_ASSERT(b->num == 4);
+    CANAL_ASSERT(c->num == 5);
 }
 
 int

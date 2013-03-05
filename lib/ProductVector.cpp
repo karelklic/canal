@@ -652,17 +652,32 @@ Vector::collaborate()
     Message inputMessage;
     bool allBottom = isBottom();
 
-    std::vector<Domain*>::iterator it = mValues.begin();
-    for (; it != mValues.end(); ++it)
+    for (int i = 0; i < 2; i++)
     {
-        CANAL_ASSERT(allBottom || !(**it).isBottom());
 
-        (**it).refine(inputMessage);
+        std::vector<Domain*>::iterator it = mValues.begin();
+        for (; it != mValues.end(); ++it)
+        {
+//            float a = (**it).accuracy();
+//            std::string s = (**it).toString();
+            CANAL_ASSERT(allBottom || !(**it).isBottom());
 
-        Message outputMessage;
-        (**it).extract(outputMessage);
+            (**it).refine(inputMessage);
+            if ((*it)->isBottom()) {
+                setBottom();
+                return;
+            }
 
-        inputMessage.meet(outputMessage);
+            if (!(**it).isTop())
+            {
+                Message outputMessage;
+                (**it).extract(outputMessage);
+                inputMessage.meet(outputMessage);
+            }
+
+//            if(a != (**it).accuracy())
+//                llvm::outs() << "\n" << s << (**it).toString() << "\n" << a << "\n" << (**it).accuracy() << "\n";
+        }
     }
 }
 
