@@ -181,7 +181,7 @@ SingleItem::setTop()
 float
 SingleItem::accuracy() const
 {
-    CANAL_NOT_IMPLEMENTED();
+    return 0.0f;
 }
 
 static SingleItem &
