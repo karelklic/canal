@@ -4,6 +4,8 @@
 #include "FloatInterval.h"
 #include "FloatUtils.h"
 #include "Environment.h"
+#include "ProductMessage.h"
+#include "FieldMinMax.h"
 
 namespace Canal {
 namespace Integer {
@@ -482,6 +484,11 @@ Interval::isSignedBottom() const {
 
 bool
 Interval::isSignedTop() const {
+    if(mSignedFrom.isMinSignedValue() && mSignedTo.isMaxSignedValue())
+    {
+        return true;
+    }
+
     return !mSignedBottom && mSignedTop;
 }
 
@@ -509,6 +516,11 @@ Interval::isUnsignedBottom() const {
 
 bool
 Interval::isUnsignedTop() const {
+    if(mUnsignedFrom.isMinValue() && mUnsignedTo.isMaxValue())
+    {
+        return true;
+    }
+
     return !mUnsignedBottom && mUnsignedTop;
 }
 
@@ -1729,6 +1741,24 @@ Interval::fptosi(const Domain &value)
         }
     }
     return *this;
+}
+
+void
+Interval::extract(Product::Message& message) const
+{
+    Field::MinMax* minMax = new Field::MinMax(*this);
+    message.mFields[Product::MessageField::FieldMinMaxKind] = minMax;
+}
+
+void
+Interval::refine(const Product::Message& message)
+{
+    Product::Message::const_iterator it = message.mFields.find(Product::MessageField::FieldMinMaxKind);
+    if(it != message.mFields.end())
+    {
+        Field::MinMax* minMax = checkedCast<Field::MinMax>(it->second);
+        meet(*minMax->mInterval);
+    }
 }
 
 const llvm::IntegerType &
