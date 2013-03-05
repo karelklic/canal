@@ -7,64 +7,32 @@
 #include <cstring>
 #include <cctype>
 #include <cstdlib>
+#include <cstdio>
 
 extern "C" {
 #include <readline/readline.h>
 #include <readline/history.h>
-#include <unistd.h>
-#include <argp.h>
-#include <sysexits.h>
 }
 
 // List of all commands.
 Commands gCommands;
 
-static struct argp_option gOptions[] = {
-    {"eval", 'e', "COMMAND", 0, "Execute a single Canal command. May be used multiple times."},
-    { 0 }
-};
+static llvm::cl::list<std::string>
+gEval("eval",
+      llvm::cl::desc("Execute a single Machine command. May be used multiple times."),
+      llvm::cl::value_desc("COMMAND"),
+      llvm::cl::ValueRequired);
 
-class Arguments
-{
-public:
-    std::vector<std::string> mEvalCommands;
-    std::string mFileName;
-};
+static llvm::cl::alias
+gEvalAlias("e",
+           llvm::cl::aliasopt(gEval),
+           llvm::cl::ValueRequired,
+           llvm::cl::ZeroOrMore);
 
-static error_t
-parseArgument(int key, char *arg, struct argp_state *state)
-{
-    /* Get the input argument from argp_parse, which we
-       know is a pointer to our arguments structure. */
-    class Arguments *arguments = (class Arguments*)state->input;
+static llvm::cl::opt<std::string>
+gFileName(llvm::cl::Positional, llvm::cl::desc("<program file>"));
 
-    switch (key)
-    {
-    case 'e':
-        arguments->mEvalCommands.push_back(arg);
-        break;
-    case ARGP_KEY_ARG:
-        if (!arguments->mFileName.empty())
-        {
-            argp_usage(state);
-            exit(EX_USAGE);
-        }
-        arguments->mFileName = arg;
-        break;
-    default:
-        return ARGP_ERR_UNKNOWN;
-    }
-    return 0;
-}
-
-// Our argp parser.
-static struct argp gArgumentParser = {
-    gOptions,
-    parseArgument,
-    "[FILE]",
-    "Canal -- Abstract Interpreter"
-};
-
+// Completion function for readline.
 static char *
 completeEntry(const char *text, int state)
 {
@@ -72,18 +40,25 @@ completeEntry(const char *text, int state)
     if (state == 0)
     {
         std::string buf(rl_line_buffer);
-        if (rl_point >= buf.size())
+        if ((unsigned)rl_point >= buf.size())
             buf += std::string(text);
 
         matches = gCommands.getCompletionMatches(buf, rl_point);
     }
 
-    if (state < matches.size())
+    if (state < (int)matches.size())
         return strdup(matches[state].c_str());
     else
         return NULL;
 }
 
+// Version printer
+void printVersion()
+{
+    printf("Canal %s\n", VERSION);
+}
+
+// Program entry function.
 int
 main(int argc, char **argv)
 {
@@ -109,21 +84,24 @@ main(int argc, char **argv)
     stifle_history(256);
 
     // Parse command arguments.
-    Arguments arguments;
-    argp_parse(&gArgumentParser, argc, argv, 0, 0, &arguments);
+    llvm::cl::SetVersionPrinter(printVersion);
+    llvm::cl::ParseCommandLineOptions(argc, argv);
 
-    if (!arguments.mFileName.empty())
+    // Convert file names from command line into commands loading
+    // those files and run the commands.
+    if (!gFileName.empty())
     {
         Canal::StringStream ss;
-        ss << "file " << arguments.mFileName;
+        ss << "file " << gFileName;
         gCommands.executeLine(ss.str());
     }
 
-    std::vector<std::string>::const_iterator it = arguments.mEvalCommands.begin();
-    for (; it != arguments.mEvalCommands.end(); ++it)
-        gCommands.executeLine(*it);
+    // Execute all commands from command line options.
+    for (unsigned i = 0; i != gEval.size(); ++i)
+        gCommands.executeLine(gEval[i]);
 
-    // Loop reading and executing lines until the user quits.
+    // Loop reading and executing user input lines until the user
+    // quits.
     while (true)
     {
         char *line = readline("(canal) ");

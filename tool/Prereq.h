@@ -23,6 +23,7 @@
 #include <llvm/Support/IRReader.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/ValueSymbolTable.h>
+#include <llvm/Support/CommandLine.h>
 
 #if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR == 8
 #  include <llvm/System/Host.h>
