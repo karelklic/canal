@@ -562,26 +562,26 @@ Interval::accuracy() const
         dividendInt -= mUnsignedFrom;
         dividendInt = dividendInt + 1;
 
-        llvm::APFloat dividendFloat(llvm::APFloat::IEEEdouble);
+        llvm::APFloat dividendFloat(llvm::APFloat::IEEEsingle);
         llvm::APFloat::opStatus status = dividendFloat.convertFromAPInt(
             dividendInt,
             /*isSigned=*/false,
             llvm::APFloat::rmNearestTiesToEven);
 
-        CANAL_ASSERT(status == llvm::APFloat::opOK);
+        CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
 
-        llvm::APFloat divisorFloat(llvm::APFloat::IEEEdouble);
-        status = dividendFloat.convertFromAPInt(
+        llvm::APFloat divisorFloat(llvm::APFloat::IEEEsingle);
+        status = divisorFloat.convertFromAPInt(
             llvm::APInt::getMaxValue(mUnsignedTo.getBitWidth() + 1),
             /*isSigned=*/false,
             llvm::APFloat::rmNearestTiesToEven);
 
-        CANAL_ASSERT(status == llvm::APFloat::opOK);
+        CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
 
         status = dividendFloat.divide(divisorFloat,
                                       llvm::APFloat::rmNearestTiesToEven);
 
-        CANAL_ASSERT(status == llvm::APFloat::opOK);
+        CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
 
         coverage += dividendFloat.convertToFloat();
     }
@@ -607,17 +607,17 @@ Interval::accuracy() const
         CANAL_ASSERT(status == llvm::APFloat::opOK);
 
         llvm::APFloat divisorFloat(llvm::APFloat::IEEEdouble);
-        status = dividendFloat.convertFromAPInt(
+        status = divisorFloat.convertFromAPInt(
             llvm::APInt::getMaxValue(mSignedTo.getBitWidth() + 1),
             /*isSigned=*/false,
             llvm::APFloat::rmNearestTiesToEven);
 
-        CANAL_ASSERT(status == llvm::APFloat::opOK);
+        CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
 
         status = dividendFloat.divide(divisorFloat,
                                       llvm::APFloat::rmNearestTiesToEven);
 
-        CANAL_ASSERT(status == llvm::APFloat::opOK);
+        CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
 
         coverage += dividendFloat.convertToFloat();
     }

@@ -1,3 +1,6 @@
+Canal
+=====
+
 Canal is a static analysis tool designed to analyze behaviour of
 application programs written in C. It is based on the theoretical
 framework of abstract interpretation, with focus on the scalability to
@@ -27,5 +30,5 @@ responsibility:
 
 LLVM framework is used as the technological foundation of the
 analysis, and CLang is used to compile C programs to the LLVM
-intermediate representation.  Canal works with LLVM 2.8 to 3.1 and any
+intermediate representation.  Canal works with LLVM 2.8 to 3.2 and any
 recent Linux distributions (Fedora 16+, RHEL 6+, Ubuntu, Gentoo).
