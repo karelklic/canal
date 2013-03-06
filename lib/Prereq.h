@@ -51,4 +51,44 @@
 #  endif
 #endif
 
+// Class declarations.
+namespace Canal {
+
+    class Constructors;
+    class Domain;
+    class Environment;
+    class Operations;
+    class OperationsCallback;
+    class SlotTracker;
+
+    namespace Integer {
+        class Bitfield;
+        class Interval;
+        class Set;
+    } // namespace Integer
+
+    namespace Interpreter {
+        class BasicBlock;
+        class Function;
+        class IteratorCallback;
+        class Module;
+    } // namespace Interpreter
+
+    namespace Memory {
+        class Block;
+        class State;
+    } // namespace Memory
+
+    namespace Product {
+        class Message;
+    } // namespace Product
+
+    namespace Widening {
+        class DataInterface;
+        class Interface;
+        class Manager;
+    } // namespace Widening
+
+} // namespace Canal
+
 #endif // LIBCANAL_PREREQ_H

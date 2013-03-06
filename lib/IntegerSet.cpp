@@ -47,7 +47,7 @@ Set::signedMin(llvm::APInt &result) const
             return false;
 
         // Find lowest negative number
-        APIntUtils::USet::const_iterator bound =
+        Utils::USet::const_iterator bound =
             mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
 
         if (bound == mValues.end())
@@ -74,9 +74,9 @@ Set::signedMax(llvm::APInt &result) const
             return false;
 
         //Find lowest negative number
-        APIntUtils::USet::const_iterator bound = mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
+        Utils::USet::const_iterator bound = mValues.lower_bound(llvm::APInt::getSignedMinValue(mBitWidth));
         if (bound == mValues.end() || //If there is no negative number in this set
-                bound == mValues.begin())
+            bound == mValues.begin())
         { //or first element in this set is negative
             result = *mValues.rbegin(); //then the last element in this set is highest
         }
@@ -165,7 +165,7 @@ Set::toString() const
         ss << " empty";
     ss << "\n";
 
-    APIntUtils::USet::const_iterator it = mValues.begin();
+    Utils::USet::const_iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
         ss << "    " << Canal::toString(*it) << "\n";
 
@@ -208,8 +208,8 @@ Set::operator<(const Domain &value) const
     if (isTop()) return set.isTop();
     if (set.isTop()) return true;
 
-    APIntUtils::USet::iterator mine = mValues.begin(), other = set.mValues.begin();
-    APIntUtils::USet::key_compare comp = mValues.key_comp();
+    Utils::USet::iterator mine = mValues.begin(), other = set.mValues.begin();
+    Utils::USet::key_compare comp = mValues.key_comp();
 
     for (; mine != mValues.end(); mine ++, other ++) {
         if (other == set.mValues.end()) return false;
@@ -271,13 +271,13 @@ Set::meet(const Domain &value)
     }
     else
     {
-        APIntUtils::USet intersection;
+        Utils::USet intersection;
         std::set_intersection(mValues.begin(),
                               mValues.end(),
                               set.mValues.begin(),
                               set.mValues.end(),
                               std::inserter(intersection, intersection.end()),
-                              APIntUtils::UCompare());
+                              Utils::UCompare());
 
         mValues = intersection;
     }
@@ -408,7 +408,7 @@ intersects(const Set &a,
            const Set &b)
 {
     // Signed and unsigned does not matter, it contains specific values
-    APIntUtils::USet::const_iterator ita = a.mValues.begin(),
+    Utils::USet::const_iterator ita = a.mValues.begin(),
         itb = b.mValues.begin();
 
     // Algorithm inspired by std::set_intersection
@@ -642,9 +642,9 @@ Set::trunc(const Domain &value)
 {
     const Set &set = checkedCast<Set>(value);
     mTop = set.mTop;
-    APIntUtils::USet::const_iterator it = set.mValues.begin();
+    Utils::USet::const_iterator it = set.mValues.begin();
     for (; it != set.mValues.end(); ++it)
-        mValues.insert(APIntUtils::trunc(*it, getBitWidth()));
+        mValues.insert(Utils::trunc(*it, getBitWidth()));
 
     return *this;
 }
@@ -654,9 +654,9 @@ Set::zext(const Domain &value)
 {
     const Set &set = checkedCast<Set>(value);
     mTop = set.mTop;
-    APIntUtils::USet::const_iterator it = set.mValues.begin();
+    Utils::USet::const_iterator it = set.mValues.begin();
     for (; it != set.mValues.end(); ++it)
-        mValues.insert(APIntUtils::zext(*it, getBitWidth()));
+        mValues.insert(Utils::zext(*it, getBitWidth()));
 
     return *this;
 }
@@ -666,9 +666,9 @@ Set::sext(const Domain &value)
 {
     const Set &set = checkedCast<Set>(value);
     mTop = set.mTop;
-    APIntUtils::USet::const_iterator it = set.mValues.begin();
+    Utils::USet::const_iterator it = set.mValues.begin();
     for (; it != set.mValues.end(); ++it)
-        mValues.insert(APIntUtils::sext(*it, getBitWidth()));
+        mValues.insert(Utils::sext(*it, getBitWidth()));
 
     return *this;
 }
@@ -698,8 +698,8 @@ Set::getValueType() const
 Set &
 Set::applyOperation(const Domain &a,
                     const Domain &b,
-                    APIntUtils::Operation operation1,
-                    APIntUtils::OperationWithOverflow operation2)
+                    Utils::Operation operation1,
+                    Utils::OperationWithOverflow operation2)
 {
     const Set &aa = checkedCast<Set>(a),
         &bb = checkedCast<Set>(b);
@@ -714,10 +714,10 @@ Set::applyOperation(const Domain &a,
     }
 
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
-    APIntUtils::USet::const_iterator aaIt = aa.mValues.begin();
+    Utils::USet::const_iterator aaIt = aa.mValues.begin();
     for (; aaIt != aa.mValues.end(); ++aaIt)
     {
-        APIntUtils::USet::const_iterator bbIt = bb.mValues.begin();
+        Utils::USet::const_iterator bbIt = bb.mValues.begin();
         for (; bbIt != bb.mValues.end(); ++bbIt)
         {
             if (operation1)
@@ -747,7 +747,7 @@ Set::applyOperation(const Domain &a,
 Set &
 Set::applyOperationDivision(const Domain &a,
                             const Domain &b,
-                            APIntUtils::Operation operation1)
+                            Utils::Operation operation1)
 {
     const Set &aa = checkedCast<Set>(a),
         &bb = checkedCast<Set>(b);
@@ -761,7 +761,7 @@ Set::applyOperationDivision(const Domain &a,
     }
 
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth());
-    APIntUtils::USet::const_iterator aaIt = aa.mValues.begin();
+    Utils::USet::const_iterator aaIt = aa.mValues.begin();
 
     if (bb.mValues.size() == 1 && *bb.mValues.begin() == 0)
     { //Only division by zero
@@ -771,7 +771,7 @@ Set::applyOperationDivision(const Domain &a,
 
     for (; aaIt != aa.mValues.end(); ++aaIt)
     {
-        APIntUtils::USet::const_iterator bbIt = bb.mValues.begin();
+        Utils::USet::const_iterator bbIt = bb.mValues.begin();
         for (; bbIt != bb.mValues.end(); ++bbIt)
         {
             if (*bbIt == 0) continue; //Avoid division by zero

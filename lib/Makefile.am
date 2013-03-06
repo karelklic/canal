@@ -1,5 +1,4 @@
 pkginclude_HEADERS = \
-	APIntUtils.h \
 	ArrayExactSize.h \
 	ArraySingleItem.h \
 	ArrayStringPrefix.h \
@@ -45,7 +44,6 @@ pkginclude_HEADERS = \
 lib_LTLIBRARIES = libcanal.la
 libcanal_la_SOURCES = \
 	$(pkginclude_HEADERS) \
-	APIntUtils.cpp \
 	ArrayExactSize.cpp \
 	ArraySingleItem.cpp \
 	ArrayStringPrefix.cpp \

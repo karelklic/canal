@@ -6,7 +6,6 @@
 #include "Environment.h"
 #include "Constructors.h"
 #include "Utils.h"
-#include "APIntUtils.h"
 #include "Pointer.h"
 
 namespace Canal {

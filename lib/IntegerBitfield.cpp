@@ -1,6 +1,6 @@
 #include "IntegerBitfield.h"
 #include "Utils.h"
-#include "APIntUtils.h"
+#include "IntegerUtils.h"
 #include "FloatInterval.h"
 #include "Environment.h"
 #include "IntegerInterval.h"
@@ -35,7 +35,7 @@ Bitfield::Bitfield(const Bitfield &value)
 int
 Bitfield::getBitValue(unsigned pos) const
 {
-    llvm::APInt bit(APIntUtils::getOneBitSet(mZeroes.getBitWidth(), pos));
+    llvm::APInt bit(Utils::getOneBitSet(mZeroes.getBitWidth(), pos));
     if ((mOnes & bit).getBoolValue())
         return (mZeroes & bit).getBoolValue() ? 2 : 1;
     else
@@ -45,7 +45,7 @@ Bitfield::getBitValue(unsigned pos) const
 void
 Bitfield::setBitValue(unsigned pos, int value)
 {
-    llvm::APInt bit(APIntUtils::getOneBitSet(mZeroes.getBitWidth(), pos));
+    llvm::APInt bit(Utils::getOneBitSet(mZeroes.getBitWidth(), pos));
     switch (value)
     {
     case -1:
@@ -91,13 +91,14 @@ Bitfield::signedMin(llvm::APInt &result) const
         case 0:
             break;
         case 1:
-            APIntUtils::setBit(result, i);
+            Utils::setBit(result, i);
             break;
         case 2:
             // If sign bit, set to 1, otherwise to 0
             // TTTTTTTTTT -> 100000000
             if (i == getBitWidth() - 1)
-                APIntUtils::setBit(result, i);
+                Utils::setBit(result, i);
+
             break;
         default:
             CANAL_DIE();
@@ -122,13 +123,14 @@ Bitfield::signedMax(llvm::APInt &result) const
         case 0:
             break;
         case 1:
-            APIntUtils::setBit(result, i);
+            Utils::setBit(result, i);
             break;
         case 2:
             // If sign bit, set to 0, otherwise to 1
             // TTTTTTTTTTT -> 01111111111
             if (i != getBitWidth() - 1)
-                APIntUtils::setBit(result, i);
+                Utils::setBit(result, i);
+
             break;
         default:
             CANAL_DIE();
@@ -154,7 +156,7 @@ Bitfield::unsignedMin(llvm::APInt &result) const
         case 2: // We choose 0 when both 0 and 1 are available...
             break;
         case 1:
-            APIntUtils::setBit(result, i);
+            Utils::setBit(result, i);
             break;
         default:
             CANAL_DIE();
@@ -180,7 +182,7 @@ Bitfield::unsignedMax(llvm::APInt &result) const
             break;
         case 1:
         case 2: // We choose 1 when both 0 and 1 are available...
-            APIntUtils::setBit(result, i);
+            Utils::setBit(result, i);
             break;
         default:
             CANAL_DIE();
@@ -424,7 +426,8 @@ Bitfield::shift(const Domain &a, const Domain &b, bool right, int shiftValue)
     counts[shiftValue + 1] = maxShift + minShift; //Put maxShift zeros from shift
     std::queue<unsigned> q; //Queue of bits to handle -> you need to handle them after minShift
 
-    for (int i = (right ? getBitWidth() - 1 : 0); (right ? i >= 0 : i < getBitWidth()); (right ? i -- : i ++)) {
+    for (int i = (right ? getBitWidth() - 1 : 0); (right ? i >= 0 : i < getBitWidth()); (right ? i -- : i ++))
+    {
         q.push(aa.getBitValue(i) + 1); //Push this bit into queue
 
         if (q.size() > minShift) { //If minShift is reached, put this in for merge
@@ -835,8 +838,8 @@ Bitfield &
 Bitfield::trunc(const Domain &value)
 {
     const Bitfield &bitfield = checkedCast<Bitfield>(value);
-    mZeroes = APIntUtils::trunc(bitfield.mZeroes, getBitWidth());
-    mOnes = APIntUtils::trunc(bitfield.mOnes, getBitWidth());
+    mZeroes = Utils::trunc(bitfield.mZeroes, getBitWidth());
+    mOnes = Utils::trunc(bitfield.mOnes, getBitWidth());
     return *this;
 }
 
@@ -844,11 +847,11 @@ Bitfield &
 Bitfield::zext(const Domain &value)
 {
     const Bitfield &bitfield = checkedCast<Bitfield>(value);
-    mZeroes = APIntUtils::zext(bitfield.mZeroes, getBitWidth());
-    mOnes = APIntUtils::zext(bitfield.mOnes, getBitWidth());
+    mZeroes = Utils::zext(bitfield.mZeroes, getBitWidth());
+    mOnes = Utils::zext(bitfield.mOnes, getBitWidth());
 
     for (unsigned i = bitfield.mZeroes.getBitWidth(); i < getBitWidth(); ++i)
-        APIntUtils::setBit(mZeroes, i);
+        Utils::setBit(mZeroes, i);
 
     return *this;
 }
@@ -857,8 +860,8 @@ Bitfield &
 Bitfield::sext(const Domain &value)
 {
     const Bitfield &bitfield = checkedCast<Bitfield>(value);
-    mZeroes = APIntUtils::sext(bitfield.mZeroes, getBitWidth());
-    mOnes = APIntUtils::sext(bitfield.mOnes, getBitWidth());
+    mZeroes = Utils::sext(bitfield.mZeroes, getBitWidth());
+    mOnes = Utils::sext(bitfield.mOnes, getBitWidth());
     return *this;
 }
 
@@ -902,7 +905,7 @@ Bitfield::fromInterval(const Interval &interval) {
                 setBitValue(pos, 2);
                 continue;
             }
-            llvm::APInt bit(APIntUtils::getOneBitSet(mZeroes.getBitWidth(), pos));
+            llvm::APInt bit(Utils::getOneBitSet(mZeroes.getBitWidth(), pos));
             bool first = (from & bit).getBoolValue(),
                     second = (to & bit).getBoolValue();
             if (first == second) {

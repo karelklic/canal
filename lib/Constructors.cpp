@@ -15,7 +15,6 @@
 #include "Structure.h"
 #include "Environment.h"
 #include "State.h"
-#include "APIntUtils.h"
 
 namespace Canal {
 

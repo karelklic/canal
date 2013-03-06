@@ -476,7 +476,7 @@ ExactSize::extractelement(const Domain &index) const
     const Integer::Set &set = Integer::Utils::getSet(index);
     if (!set.isTop())
     {
-        APIntUtils::USet::const_iterator it = set.mValues.begin(),
+        Integer::Utils::USet::const_iterator it = set.mValues.begin(),
             itend = set.mValues.end();
 
         for (; it != itend; ++it)
@@ -554,7 +554,7 @@ ExactSize::insertelement(const Domain &array,
     const Integer::Set &set = Integer::Utils::getSet(index);
     if (!set.isTop())
     {
-        APIntUtils::USet::const_iterator it = set.mValues.begin(),
+        Integer::Utils::USet::const_iterator it = set.mValues.begin(),
             itend = set.mValues.end();
 
         for (; it != itend; ++it)
@@ -780,7 +780,7 @@ ExactSize::store(const Domain &value,
     const Integer::Set &set = Integer::Utils::getSet(offset);
     if (!set.isTop())
     {
-        APIntUtils::USet::const_iterator it = set.mValues.begin(),
+        Integer::Utils::USet::const_iterator it = set.mValues.begin(),
             itend = set.mValues.end();
 
         if (set.mValues.size() > 1)

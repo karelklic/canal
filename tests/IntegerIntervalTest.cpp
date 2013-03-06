@@ -317,13 +317,22 @@ testIcmp()
     Integer::Interval bottom(const0), top(const0);
     bottom.setBottom();
     top.setTop();
+
+    result.setBottom();
     CANAL_ASSERT(result.icmp(bottom, bottom, llvm::CmpInst::ICMP_EQ).isBottom());
+    result.setBottom();
     CANAL_ASSERT(result.icmp(top, bottom, llvm::CmpInst::ICMP_EQ).isBottom());
+    result.setBottom();
     CANAL_ASSERT(result.icmp(const0, bottom, llvm::CmpInst::ICMP_EQ).isBottom());
+    result.setBottom();
     CANAL_ASSERT(result.icmp(bottom, top, llvm::CmpInst::ICMP_EQ).isBottom());
+    result.setBottom();
     CANAL_ASSERT(result.icmp(bottom, const0, llvm::CmpInst::ICMP_EQ).isBottom());
+    result.setBottom();
     CANAL_ASSERT(result.icmp(top, top, llvm::CmpInst::ICMP_EQ).isTop());
+    result.setBottom();
     CANAL_ASSERT(result.icmp(top, const0, llvm::CmpInst::ICMP_EQ).isTop());
+    result.setBottom();
     CANAL_ASSERT(result.icmp(const0, top, llvm::CmpInst::ICMP_EQ).isTop());
 
 /*
@@ -701,6 +710,7 @@ testAdd()
             two_three(two),
             zero_two(zero), one_three(zero), top(zero),
             bottom(zero);
+
     llvm::APInt res;
 
     zero_one.join(one); //0-1

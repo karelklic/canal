@@ -2,16 +2,15 @@
 #define LIBCANAL_INTEGER_SET_H
 
 #include "Domain.h"
-#include "APIntUtils.h"
+#include "IntegerUtils.h"
 
 namespace Canal {
 namespace Integer {
 
-class Interval;
 class Set : public Domain
 {
 public:
-    APIntUtils::USet mValues;
+    Utils::USet mValues;
 
     bool mTop;
 
@@ -170,12 +169,12 @@ public: // Implementation of Domain.
 protected:
     Set &applyOperation(const Domain &a,
                                 const Domain &b,
-                                APIntUtils::Operation operation1,
-                                APIntUtils::OperationWithOverflow operation2);
+                                Utils::Operation operation1,
+                                Utils::OperationWithOverflow operation2);
 
     Set &applyOperationDivision(const Domain &a,
                                 const Domain &b,
-                                APIntUtils::Operation operation1);
+                                Utils::Operation operation1);
 };
 
 } // namespace Integer
