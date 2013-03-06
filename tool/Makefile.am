@@ -52,9 +52,3 @@ canal_SOURCES = \
 canal_LDADD = $(top_builddir)/lib/libcanal.la -lreadline -lhistory $(LLVM_LDFLAGS) $(LLVM_LIBS)
 canal_CPPFLAGS = $(LLVM_CFLAGS) $(LIBEDIT_CFLAGS) -I$(top_srcdir) -DDATADIR='"$(datadir)"'
 
-install-exec-hook:
-	mkdir -p $(DESTDIR)$(datadir)/canal/wrappers && \
-	ln -f $(DESTDIR)$(bindir)/canal$(EXEEXT) $(DESTDIR)$(datadir)/canal/wrappers/gcc$(EXEEXT) && \
-	ln -f $(DESTDIR)$(bindir)/canal$(EXEEXT) $(DESTDIR)$(datadir)/canal/wrappers/g++$(EXEEXT) && \
-	ln -f $(DESTDIR)$(bindir)/canal$(EXEEXT) $(DESTDIR)$(datadir)/canal/wrappers/ld$(EXEEXT)
-

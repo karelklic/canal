@@ -63,19 +63,6 @@ CommandPrint::getCompletionMatches(const std::vector<std::string> &args,
         }
     }
 
-    filterMemoryMap(curState.getGlobalVariables(),
-                    state->getSlotTracker(),
-                    "@", arg, false, result);
-    filterMemoryMap(curState.getGlobalBlocks(),
-                    state->getSlotTracker(),
-                    "@^", arg, true, result);
-    filterMemoryMap(curState.getFunctionVariables(),
-                    state->getSlotTracker(),
-                    "%", arg, false, result);
-    filterMemoryMap(curState.getFunctionBlocks(),
-                    state->getSlotTracker(),
-                    "%^", arg, false, result);
-
     return result;
 }
 
@@ -115,7 +102,7 @@ printVariable(const std::string &fullName, State &state)
     const Canal::Interpreter::Interpreter &interpreter =
         state.getInterpreter();
 
-    const Canal::State &currentState = interpreter.getCurrentState();
+    const Canal::Memory::State &currentState = interpreter.getCurrentState();
     Canal::SlotTracker &slotTracker = interpreter.getSlotTracker();
 
     const Canal::Interpreter::Function *function =
@@ -157,7 +144,10 @@ printVariable(const std::string &fullName, State &state)
 
     const Canal::Domain *value = NULL;
     if (isBlock)
-        value = currentState.findBlock(*position);
+    {
+        const Canal::Memory::Block *block = currentState.findBlock(*position);
+        value = &block->getMainValue();
+    }
     else
         value = currentState.findVariable(*position);
 
@@ -191,7 +181,7 @@ CommandPrint::run(const std::vector<std::string> &args)
     if (args[1] == "%" || args[1] == "@" || args[1] == "@^" || args[1] == "%^")
     {
         std::vector<std::string> variables;
-        const Canal::State &curState =
+        const Canal::Memory::State &curState =
             state->getInterpreter().getCurrentState();
 
         bool addFunctionName = (args[1] == "@^");

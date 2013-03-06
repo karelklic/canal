@@ -78,7 +78,7 @@ BlockMap::findNames(const std::string &prefix,
                     SlotTracker &slotTracker,
                     std::vector<std::string> &result) const
 {
-    std::string prefix = (memoryType == Block::HeapMemoryType) ? "@^" : "%^";
+    std::string typePrefix = (memoryType == Block::HeapMemoryType) ? "@^" : "%^";
 
     const_iterator it = begin(), itend = end();
     for (; it != itend; ++it)
@@ -87,7 +87,7 @@ BlockMap::findNames(const std::string &prefix,
             continue;
 
         std::string name = Canal::getName(*it->first, slotTracker);
-        std::string prefixedName = prefix + name;
+        std::string prefixedName = typePrefix + name;
         if (0 == strncmp(prefixedName.c_str(), prefix.c_str(), prefix.length()))
         {
             result.push_back(prefixedName);
@@ -103,7 +103,7 @@ BlockMap::findNames(const std::string &prefix,
             const llvm::Function &function =
                 *instruction->getParent()->getParent();
 
-            std::string prefixedName = prefix + function.getName().str() + ":" + name;
+            std::string prefixedName = typePrefix + function.getName().str() + ":" + name;
 
             if (0 == strncmp(prefixedName.c_str(), prefix.c_str(), prefix.length()))
             {
