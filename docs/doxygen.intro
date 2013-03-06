@@ -1,0 +1,13 @@
+// -*- c++ -*-
+
+/// @mainpage Canal
+///
+/// @section main_intro Introduction
+/// Welcome to Canal.
+///
+/// This documentation describes the Canal source code. There are no
+/// instructions here on how to use Canal, only the APIs that make up
+/// the software.
+///
+/// This documentation is generated directly from the source code by
+/// Doxygen.

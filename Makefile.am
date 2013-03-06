@@ -1,8 +1,4 @@
-if BUILD_DOCUMENTATION
-  MAYBE_DOCUMENTATION = docs
-endif
-
-SUBDIRS = lib tool tests $(MAYBE_DOCUMENTATION)
+SUBDIRS = lib tool tests docs
 
 # Automatic update of libtool.
 libtool: $(LIBTOOL_DEPS)

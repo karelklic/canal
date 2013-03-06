@@ -25,75 +25,6 @@ AC_PATH_PROG($1, $2, [no])
 AC_SUBST($1)
 ])
 
-# Program testing macro
-AC_DEFUN([AC_PATH_PROG_OPTIONAL],[
-AC_PATH_PROG($1, $2, [no])
-AM_CONDITIONAL([HAVE_$1], test "$$1" != "no")
-[if test "$$1" = "no"; then]
-    [echo "The $2 program was not found in the search path."]
-    $3
-    [echo "Then run configure again before attempting to build Canal."]
-[fi]
-AC_SUBST($1)
-])
-
-# LaTeX testing macro
-AC_DEFUN([_AC_LATEX_TEST],[
-rm -rf .tmps_latex 
-mkdir .tmps_latex 
-cd .tmps_latex 
-$2="no"; export $2;
-cat > testconf.tex << \EOF
-$1
-EOF
-if test "$PDFLATEX" != "no"; then
-  cat testconf.tex | $PDFLATEX 2>&1 1>/dev/null && $2=yes; export $2;
-fi
-cd .. 
-rm -rf .tmps_latex 
-])
-
-# LaTeX package testing macro
-AC_DEFUN([AC_LATEX_PACKAGE],[
-AC_CACHE_CHECK([for $2 latex package in class book],[ac_cv_latex_]$2,[
-_AC_LATEX_TEST([
-\documentclass{book}
-\usepackage{$2}
-\begin{document}
-\end{document}
-],[ac_cv_latex_]$2)
-])
-export $1=$[ac_cv_latex_]$2
-AC_SUBST($1)
-])
-
-# LaTeX package testing macro
-AC_DEFUN([AC_LATEX_PACKAGE_CRITICAL],[
-AC_LATEX_PACKAGE($1, $2)
-[if test "$$1" = "no"; then]
-    [echo "The $2 LaTeX library was not found. Please ensure that it is "]
-    [echo "installed and its directory is included in the LaTeX search path."]
-    [echo "Then run configure again before attempting to build Canal."]
-    [exit 1]
-[fi]
-AC_SUBST($1)
-])
-
-# LaTeX package testing macro
-AC_DEFUN([AC_LATEX_PACKAGE_OPTIONAL],[
-AC_LATEX_PACKAGE($1, $2)
-AM_CONDITIONAL([HAVE_$1], test "$$1" != "no")
-[if test "$$1" = "no"; then]
-    [echo "The $2 LaTeX library was not found."]
-    [echo "Documentation will not be build.  If you want to"]
-    [echo "build the documentation, ensure that $2 is installed"]
-    [echo "and included in the LaTeX search path."]
-    [echo "Then run configure again before attempting to build Canal."]
-[fi]
-AC_SUBST($1)
-])
-
-
 # Initialize libtool.
 AC_DISABLE_STATIC
 LT_INIT
@@ -171,52 +102,6 @@ AC_CHECK_HEADERS([readline/readline.h], [],
 # elfutils
 AC_CHECK_HEADERS([gelf.h libelf.h])
 AC_CHECK_LIB([elf], [main])
-
-# pdfLaTeX
-AC_PATH_PROG_OPTIONAL([PDFLATEX], [pdflatex],
-		      [echo "Documentation will not be build.  If you want to build"]
-		      [echo "the documentation, ensure that pdflatex is installed"]
-		      [echo "and included in the search path."])
-
-# LaTeX packages
-AC_LATEX_PACKAGE_OPTIONAL([LATEX_GALOIS], [galois])
-AC_LATEX_PACKAGE_OPTIONAL([LATEX_FLOAT], [float])
-AC_LATEX_PACKAGE_OPTIONAL([LATEX_TXFONTS], [txfonts])
-AC_LATEX_PACKAGE_OPTIONAL([LATEX_AMSSYMB], [amssymb])
-AC_LATEX_PACKAGE_OPTIONAL([LATEX_AMSMATH], [amsmath])
-AC_LATEX_PACKAGE_OPTIONAL([LATEX_IMPORT], [import])
-AC_LATEX_PACKAGE_OPTIONAL([LATEX_GRAPHICX], [graphicx])
-AC_LATEX_PACKAGE_OPTIONAL([LATEX_HYPERREF], [hyperref])
-AC_LATEX_PACKAGE_OPTIONAL([LATEX_MAKEIDX], [makeidx])
-AC_LATEX_PACKAGE_OPTIONAL([LATEX_A4WIDE], [a4wide])
-AC_LATEX_PACKAGE_OPTIONAL([LATEX_INPUTENC], [inputenc])
-
-# Doxygen
-AC_PATH_PROG_OPTIONAL([DOXYGEN], [doxygen],
-		      [echo "Documentation will not be build.  If you want to"]
-		      [echo "build the documentation, ensure that doxygen is installed"]
-		      [echo "and included in the search path."])
-
-# Dot (part of graphviz)
-AC_PATH_PROG_OPTIONAL([DOT], [dot],
-		      [echo "Documentation will not be build.  If you want to"]
-		      [echo "build the documentation, ensure that dot is installed"]
-		      [echo "and included in the search path."])
-
-AM_CONDITIONAL([BUILD_DOCUMENTATION], test \( "$DOXYGEN" != "no" \) \
-				      	-a \( "$DOT" != "no" \) \
-					-a \( "$PDFLATEX" != "no" \) \
-					-a \( "$LATEX_GALOIS" != "no" \) \
-					-a \( "$LATEX_FLOAT" != "no" \) \
-					-a \( "$LATEX_TXFONTS" != "no" \) \
-					-a \( "$LATEX_AMSSYMB" != "no" \) \
-					-a \( "$LATEX_AMSMATH" != "no" \) \
-					-a \( "$LATEX_IMPORT" != "no" \) \
-					-a \( "$LATEX_GRAPHICX" != "no" \) \
-					-a \( "$LATEX_HYPERREF" != "no" \) \
-					-a \( "$LATEX_MAKEIDX" != "no" \) \
-					-a \( "$LATEX_A4WIDE" != "no" \) \
-					-a \( "$LATEX_INPUTENC" != "no" \))
 
 # Initialize the test suite.
 AC_CONFIG_TESTDIR(tests)
