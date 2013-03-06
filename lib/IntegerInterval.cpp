@@ -24,9 +24,8 @@ intersects(const Interval &a,
         {
             b.signedMax(i);
             a.signedMin(j);
-            if (i.sge(j)) {
+            if (i.sge(j))
                 return true;
-            }
         }
     }
 
@@ -343,10 +342,12 @@ Interval::operator<(const Domain& value) const
     return true;
 }
 
-#define COPY_SIGNED(x) mSignedBottom = x.mSignedBottom; mSignedTop = x.mSignedTop; \
-    mSignedFrom = x.mSignedFrom; mSignedTo = x.mSignedTo;
-#define COPY_UNSIGNED(x) mUnsignedBottom = x.mUnsignedBottom; mUnsignedTop = x.mUnsignedTop; \
-    mUnsignedFrom = x.mUnsignedFrom; mUnsignedTo = x.mUnsignedTo;
+#define COPY_SIGNED(x) { mSignedBottom = x.mSignedBottom; mSignedTop = x.mSignedTop; \
+        mSignedFrom = x.mSignedFrom; mSignedTo = x.mSignedTo; }
+
+#define COPY_UNSIGNED(x) { mUnsignedBottom = x.mUnsignedBottom; mUnsignedTop = x.mUnsignedTop; \
+        mUnsignedFrom = x.mUnsignedFrom; mUnsignedTo = x.mUnsignedTo; }
+
 Interval &
 Interval::join(const Domain &value)
 {
@@ -413,51 +414,55 @@ Interval::meet(const Domain &value)
 {
     const Interval &interval = checkedCast<Interval>(value);
 
-    if (*this == interval) return *this; //Shortcut
+    if (*this == interval)
+        return *this; // Shortcut
 
-    if (isSignedBottom() || interval.isSignedBottom()) {
+    if (isSignedBottom() || interval.isSignedBottom())
         setSignedBottom();
-    }
-    else if (isSignedTop() || interval.isSignedTop()) {
+    else if (isSignedTop() || interval.isSignedTop())
+    {
         //If both are top, do nothing (the result is top and you are already top)
         //If the other is top, you don't need to do anything
         //If I am top, copy values from the other
         // -> therefore only if I am top and the other one is not, copy values from the other one
-        if (isSignedTop() && !interval.isSignedTop()) {
+        if (isSignedTop() && !interval.isSignedTop())
             COPY_SIGNED(interval);
-        }
     }
     else {
         //If there is no intersection, set to bottom; otherwise use the intersection
-        if (intersects(*this, interval, true, false)) {
+        if (intersects(*this, interval, true, false))
+        {
             //If there is intersection, intervals are like this:
             // < < > > - but you do not know, which one is outer and which boundary is which
             //Therefore intersection is interval from bigger minimum to lower maximum
             if (mSignedFrom.slt(interval.mSignedFrom)) mSignedFrom = interval.mSignedFrom;
             if (mSignedTo.sgt(interval.mSignedTo)) mSignedTo = interval.mSignedTo;
         }
-        else {
+        else
             setSignedBottom();
-        }
     }
 
-    if (isUnsignedBottom() || interval.isUnsignedBottom()) {
+    if (isUnsignedBottom() || interval.isUnsignedBottom())
         setUnsignedBottom();
-    }
-    else if (isUnsignedTop() || interval.isUnsignedTop()) {
-        if (isUnsignedTop() && !interval.isUnsignedTop()) {
+    else if (isUnsignedTop() || interval.isUnsignedTop())
+    {
+        if (isUnsignedTop() && !interval.isUnsignedTop())
             COPY_UNSIGNED(interval);
-        }
     }
-    else {
-        if (intersects(*this, interval, false, true)) {
-            if (mUnsignedFrom.ult(interval.mUnsignedFrom)) mUnsignedFrom = interval.mUnsignedFrom;
-            if (mUnsignedTo.ugt(interval.mUnsignedTo)) mUnsignedTo = interval.mUnsignedTo;
+    else
+    {
+        if (intersects(*this, interval, false, true))
+        {
+            if (mUnsignedFrom.ult(interval.mUnsignedFrom))
+                mUnsignedFrom = interval.mUnsignedFrom;
+
+            if (mUnsignedTo.ugt(interval.mUnsignedTo))
+                mUnsignedTo = interval.mUnsignedTo;
         }
-        else {
+        else
             setUnsignedBottom();
-        }
     }
+
     return *this;
 }
 #undef COPY_UNSIGNED
@@ -1655,30 +1660,37 @@ Interval::fptoui(const Domain &value)
 {
     const Float::Interval &interval = checkedCast<Float::Interval>(value);
 
-    if (interval.isBottom()) {
+    if (interval.isBottom())
         setBottom();
-    }
-    else if (interval.isTop()) {
+    else if (interval.isTop())
         setTop();
-    }
-    else {
+    else
+    {
         resetFlags();
+        llvm::APFloat min(interval.getSemantics()), max(interval.getSemantics());
+        bool success = interval.getMinMax(min, max);
+        CANAL_ASSERT_MSG(success, "This should never fail.");
+
         llvm::APFloat::opStatus status;
-        llvm::APInt from = Float::Utils::toInteger(interval.getMin(), getBitWidth(), false, status);
+        llvm::APInt from = Float::Utils::toInteger(min, getBitWidth(), false, status);
         if (status == llvm::APFloat::opInvalidOp ||
-                status == llvm::APFloat::opOverflow ||
-                status == llvm::APFloat::opUnderflow) {
+            status == llvm::APFloat::opOverflow ||
+            status == llvm::APFloat::opUnderflow)
+        {
             setTop();
         }
-        else {
+        else
+        {
             CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
-            llvm::APInt to = Float::Utils::toInteger(interval.getMax(), getBitWidth(), false, status);
+            llvm::APInt to = Float::Utils::toInteger(max, getBitWidth(), false, status);
             if (status == llvm::APFloat::opInvalidOp ||
-                    status == llvm::APFloat::opOverflow ||
-                    status == llvm::APFloat::opUnderflow) {
+                status == llvm::APFloat::opOverflow ||
+                status == llvm::APFloat::opUnderflow)
+            {
                 setTop();
             }
-            else {
+            else
+            {
                 CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
                 mUnsignedFrom = mSignedFrom = from;
                 mUnsignedTo = mSignedTo = to;
@@ -1686,6 +1698,7 @@ Interval::fptoui(const Domain &value)
             }
         }
     }
+
     return *this;
 }
 
@@ -1694,37 +1707,43 @@ Interval::fptosi(const Domain &value)
 {
     const Float::Interval &interval = checkedCast<Float::Interval>(value);
 
-    if (interval.isBottom()) {
+    if (interval.isBottom())
         setBottom();
-    }
-    else if (interval.isTop()) {
+    else if (interval.isTop())
         setTop();
-    }
-    else {
+    else
+    {
         resetFlags();
+        llvm::APFloat min(interval.getSemantics()), max(interval.getSemantics());
+        bool success = interval.getMinMax(min, max);
+        CANAL_ASSERT_MSG(success, "This should never fail.");
+
         llvm::APFloat::opStatus status;
-        llvm::APInt from = Float::Utils::toInteger(interval.getMin(), getBitWidth(), true, status);
+        llvm::APInt from = Float::Utils::toInteger(min, getBitWidth(), true, status);
         if (status == llvm::APFloat::opInvalidOp ||
-                status == llvm::APFloat::opOverflow ||
-                status == llvm::APFloat::opUnderflow) {
+            status == llvm::APFloat::opOverflow ||
+            status == llvm::APFloat::opUnderflow)
+        {
             setTop();
         }
-        else {
+        else
+        {
             CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
-            llvm::APInt to = Float::Utils::toInteger(interval.getMax(), getBitWidth(), true, status);
+            llvm::APInt to = Float::Utils::toInteger(max, getBitWidth(), true, status);
             if (status == llvm::APFloat::opInvalidOp ||
-                    status == llvm::APFloat::opOverflow ||
-                    status == llvm::APFloat::opUnderflow) {
+                status == llvm::APFloat::opOverflow ||
+                status == llvm::APFloat::opUnderflow)
+            {
                 setTop();
             }
-            else {
+            else
+            {
                 CANAL_ASSERT(status == llvm::APFloat::opOK || status == llvm::APFloat::opInexact);
                 mUnsignedFrom = mSignedFrom = from;
                 mUnsignedTo = mSignedTo = to;
                 CANAL_ASSERT(from.sle(to));
-                if (mUnsignedFrom.ugt(mUnsignedTo)) {
+                if (mUnsignedFrom.ugt(mUnsignedTo))
                     std::swap(mUnsignedFrom, mUnsignedTo);
-                }
             }
         }
     }

@@ -44,9 +44,9 @@ public:
 
     bool intersects(const Interval &value) const;
 
-    llvm::APFloat getMax() const;
+    bool getMinMax(llvm::APFloat &min, llvm::APFloat &max) const;
 
-    llvm::APFloat getMin() const;
+    bool getMin(llvm::APFloat &result) const;
 
     static bool classof(const Domain *value)
     {
