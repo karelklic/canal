@@ -14,12 +14,25 @@ namespace Array {
 class SingleItem : public Domain
 {
 public:
+    /// @brief
+    ///   Abstract value of the array members.
+    ///
+    /// Abstract value representing all concrete values of the array.
+    /// It is never NULL.
     Domain *mValue;
 
-    /// Number of elements in the array.
-    /// It is either a Constant or Product::Vector.
+    /// @brief
+    ///   Abstract number of the elements in the array.
+    ///
+    /// Abstract value representing the number of elements in the
+    /// array.  It is never NULL.
     Domain *mSize;
 
+    /// @brief
+    ///   Type of the array.
+    ///
+    /// Type of the concrete array represented by this abstract
+    /// domain.
     const llvm::SequentialType &mType;
 
 public:

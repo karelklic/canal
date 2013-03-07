@@ -54,18 +54,20 @@ SingleItem::SingleItem(const Environment &environment,
       mSize(size),
       mType(type)
 {
+    CANAL_ASSERT(size);
     const llvm::Type &elementType = *type.getElementType();
     mValue = environment.getConstructors().create(elementType);
 }
 
 SingleItem::SingleItem(const SingleItem &value)
-    : Domain(value), mValue(value.mValue), mSize(value.mSize), mType(value.mType)
+    : Domain(value),
+      mValue(value.mValue),
+      mSize(value.mSize),
+      mType(value.mType)
 {
-    if (mValue)
-        mValue = mValue->clone();
-
-    if (mSize)
-        mSize = mSize->clone();
+    CANAL_ASSERT(mValue && mSize);
+    mValue = mValue->clone();
+    mSize = mSize->clone();
 }
 
 SingleItem::~SingleItem()
@@ -181,6 +183,7 @@ SingleItem::setTop()
 float
 SingleItem::accuracy() const
 {
+    return mValue->accuracy() * mSize->accuracy();
     CANAL_NOT_IMPLEMENTED();
 }
 
@@ -190,6 +193,13 @@ binaryOperation(SingleItem &result,
                 const Domain &b,
                 Domain::BinaryOperation operation)
 {
+    // No need to check if a or be is bottom, as this is done in the
+    // operation on mValues.  If a or b is bottom, the operation
+    // result (result.mValue) must also be bottom.
+
+    // No need to check if result is bottom, as this is done for
+    // result.mValue in the operation.
+
     const SingleItem &aa = checkedCast<SingleItem>(a),
         &bb = checkedCast<SingleItem>(b);
 
