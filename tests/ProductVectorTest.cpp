@@ -55,6 +55,9 @@ public:
     virtual bool operator==(const Domain& value) const { return false; }
     virtual void setZero(const llvm::Value* place) {}
     virtual std::string toString() const { return "fakeDomain"; }
+    virtual float accuracy() const { return 0.0f; }
+    virtual bool isTop() const { return false; }
+    virtual bool isBottom() const { return false; }
 };
 
 static void
