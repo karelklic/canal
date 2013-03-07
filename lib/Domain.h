@@ -8,18 +8,8 @@
 
 namespace Canal {
 
-class Environment;
-
-namespace Widening {
-class DataInterface;
-} // namespace Widening
-
-namespace Product {
-class Message;
-} // namespace Product
-
 /// @brief
-/// Base class for all abstract domains.
+///   Base class for all abstract domains.
 class Domain : public SharedData
 {
 public:
@@ -52,17 +42,14 @@ public:
 
     Widening::DataInterface *mWideningData;
 
-    /// Can be NULL for domains which are not representing a value.
-    const llvm::Type *mType;
-
 public:
     /// Standard constructor.
     Domain(const Environment &environment,
            DomainKind kind);
 
     /// Copy constructor.  Careful!  Copy constructor of base class is
-    /// not called by automatically generated copy constructor of
-    /// an inherited class.
+    /// not called by automatically generated copy constructor of an
+    /// inherited class.
     Domain(const Domain &value);
 
     /// Virtual destructor.
@@ -115,13 +102,13 @@ public: // Lattice
 
     virtual Domain &meet(const Domain &value) = 0;
 
-    /// Is it the lowest value.
+    /// Is it the lowest possible value of the lattice.
     virtual bool isBottom() const;
 
-    /// Set to the lowest value.
+    /// Set to the lowest value of the lattice.
     virtual void setBottom();
 
-    /// Is it the highest value.
+    /// Is it the highest value of the lattice.
     virtual bool isTop() const;
 
     /// Set it to the top value of lattice.
@@ -133,74 +120,294 @@ public: // Lattice
     ///
     /// Accuracy 0 means that the value represents all possible values
     /// (top).  Accuracy 1 means that the value represents the most
-    /// precise and exact value (bottom).
+    /// precise and exact value (bottom or a constant).
     virtual float accuracy() const;
 
 public: // Instructions operating on values.
+
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &add(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &fadd(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &sub(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &fsub(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &mul(const Domain &a, const Domain &b);
 
+    /// Stores the result of a multiplication a * b to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &fmul(const Domain &a, const Domain &b);
 
-    /// Unsigned division.
+    /// @brief
+    ///   Unsigned division.
+    ///
     /// Stores the result of unsigned division a / b to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &udiv(const Domain &a, const Domain &b);
 
-    /// Signed division.
+    /// @brief
+    ///   Signed division.
+    ///
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &sdiv(const Domain &a, const Domain &b);
 
-    /// Floating point division.
+    /// @brief
+    ///   Floating point division.
+    ///
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &fdiv(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &urem(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &srem(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &frem(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &shl(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &lshr(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &ashr(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &and_(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &or_(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &xor_(const Domain &a, const Domain &b);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &icmp(const Domain &a,
                          const Domain &b,
                          llvm::CmpInst::Predicate predicate);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param a
+    ///   If it is bottom, the result is also bottom.
+    /// @param b
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &fcmp(const Domain &a,
                          const Domain &b,
                          llvm::CmpInst::Predicate predicate);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param value
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &trunc(const Domain &value);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param value
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &zext(const Domain &value);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param value
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &sext(const Domain &value);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param value
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &fptrunc(const Domain &value);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param value
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &fpext(const Domain &value);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param value
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &fptoui(const Domain &value);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param value
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &fptosi(const Domain &value);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param value
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &uitofp(const Domain &value);
 
+    /// The result of the operation is stored to this object.
+    ///
+    /// This method can only be called on a bottom value domain.
+    ///
+    /// @param value
+    ///   If it is bottom, the result is also bottom.
     virtual Domain &sitofp(const Domain &value);
 
     /// Extracts a single element from an array at a specified index.

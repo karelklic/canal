@@ -145,7 +145,10 @@ public: // Implementation of Domain.
                              const std::vector<Domain*> &offsets,
                              bool overwrite);
 
-    virtual const llvm::SequentialType &getValueType() const { return mType; }
+    virtual const llvm::SequentialType &getValueType() const
+    {
+        return mType;
+    }
 };
 
 } // namespace Array
