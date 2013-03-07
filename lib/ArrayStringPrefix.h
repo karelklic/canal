@@ -38,6 +38,9 @@ public:
         return value->getKind() == ArrayStringPrefixKind;
     }
 
+    /// Appends the source string to this string.
+    void strcat(const StringPrefix &source);
+
 public: // Implementation of Domain.
     /// Covariant return type.
     virtual StringPrefix *clone() const;

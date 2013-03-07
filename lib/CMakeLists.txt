@@ -2,6 +2,7 @@ add_library(canal SHARED
     ArrayExactSize.cpp
     ArraySingleItem.cpp
     ArrayStringPrefix.cpp
+    ArrayUtils.cpp
     Constructors.cpp
     Domain.cpp
     Environment.cpp

@@ -143,7 +143,10 @@ public: // Implementation of Domain.
     virtual void setTop();
 
     /// Covariant return type.
-    virtual const llvm::PointerType &getValueType() const { return mType; }
+    virtual const llvm::PointerType &getValueType() const
+    {
+        return mType;
+    }
 };
 
 } // namespace Pointer

@@ -4,6 +4,8 @@
 #include "Constructors.h"
 #include "Utils.h"
 #include "Domain.h"
+#include "Pointer.h"
+#include "ArrayUtils.h"
 
 namespace Canal {
 namespace Interpreter {
@@ -109,12 +111,26 @@ OperationsCallback::onFunctionCallStrcat(const llvm::Function &function,
     CANAL_ASSERT(function.getArgumentList().size() == 2);
     const llvm::Argument &destArgument = *function.getArgumentList().begin();
     const llvm::Argument &srcArgument = *(++function.getArgumentList().begin());
-    const Domain *destinationPointer = callState.findVariable(destArgument);
-    const Domain *sourcePointer = callState.findVariable(srcArgument);
+    const Domain *destDomain = callState.findVariable(destArgument);
+    const Domain *srcDomain = callState.findVariable(srcArgument);
+    const Pointer::Pointer *destPointer = checkedCast<Pointer::Pointer>(destDomain);
+    const Pointer::Pointer *srcPointer = checkedCast<Pointer::Pointer>(srcDomain);
+    CANAL_ASSERT_MSG(destPointer->isConstant(), "Not implemented for variable pointers");
+    CANAL_ASSERT_MSG(srcPointer->isConstant(), "Not implemented for variable pointers");
+    CANAL_ASSERT(destPointer->mTargets.begin()->second->mType == Pointer::Target::Block);
+    CANAL_ASSERT(srcPointer->mTargets.begin()->second->mType == Pointer::Target::Block);
+    const llvm::Value &destTarget = *destPointer->mTargets.begin()->second->mTarget;
+    const llvm::Value &srcTarget = *srcPointer->mTargets.begin()->second->mTarget;
+    const Domain *destArray = callState.findBlock(destTarget);
+    const Domain *srcArray = callState.findBlock(srcTarget);
+    CANAL_ASSERT(destArray && srcArray);
+    Domain *newArray = destArray->clone();
 
-    CANAL_NOT_IMPLEMENTED();
+    Array::Utils::strcat(*newArray, *srcArray);
 
-    resultState.addFunctionVariable(resultPlace, destinationPointer->clone());
+    // Works just on function blocks for now.
+    resultState.addFunctionBlock(destTarget, newArray);
+    resultState.addFunctionVariable(resultPlace, destPointer->clone());
 }
 
 } // namespace Interpreter

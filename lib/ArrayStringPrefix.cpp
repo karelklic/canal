@@ -65,6 +65,12 @@ StringPrefix::StringPrefix(const Environment &environment,
 {
 }
 
+void
+StringPrefix::strcat(const StringPrefix &source)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 StringPrefix *
 StringPrefix::clone() const
 {
