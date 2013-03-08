@@ -2,11 +2,8 @@ add_library(canal SHARED
     ArrayExactSize.cpp
     ArraySingleItem.cpp
     ArrayStringPrefix.cpp
-<<<<<<< HEAD
-    ArrayUtils.cpp
-=======
     ArrayStringTrie.cpp
->>>>>>> e4e9cfc27d255e8d5a2126579041e4f9a69add82
+    ArrayUtils.cpp
     Constructors.cpp
     Domain.cpp
     Environment.cpp
