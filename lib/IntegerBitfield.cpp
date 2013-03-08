@@ -872,14 +872,11 @@ Bitfield &
 Bitfield::trunc(const Domain &value)
 {
     const Bitfield &bitfield = checkedCast<Bitfield>(value);
-<<<<<<< HEAD
+    if (bitfield.isBottom())
+        return *this;
+
     mZeroes = Utils::trunc(bitfield.mZeroes, getBitWidth());
     mOnes = Utils::trunc(bitfield.mOnes, getBitWidth());
-=======
-    if (bitfield.isBottom()) return *this;
-    mZeroes = APIntUtils::trunc(bitfield.mZeroes, getBitWidth());
-    mOnes = APIntUtils::trunc(bitfield.mOnes, getBitWidth());
->>>>>>> e4e9cfc27d255e8d5a2126579041e4f9a69add82
     return *this;
 }
 

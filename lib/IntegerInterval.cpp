@@ -1219,13 +1219,6 @@ Interval::shl(const Domain &a, const Domain &b)
     if (a.isBottom() || b.isBottom())
         return *this;
 
-    if (aa.isBottom() || bb.isBottom())
-    {
-        // Result is undefined.
-        setBottom();
-        return *this;
-    }
-
     setTop();
     return *this;
 }
@@ -1235,13 +1228,6 @@ Interval::lshr(const Domain &a, const Domain &b)
 {
     if (a.isBottom() || b.isBottom())
         return *this;
-
-    if (aa.isBottom() || bb.isBottom())
-    {
-        // Result is undefined.
-        setBottom();
-        return *this;
-    }
 
     setTop();
     return *this;
@@ -1253,13 +1239,6 @@ Interval::ashr(const Domain &a, const Domain &b)
     if (a.isBottom() || b.isBottom())
         return *this;
 
-    if (aa.isBottom() || bb.isBottom())
-    {
-        // Result is undefined.
-        setBottom();
-        return *this;
-    }
-
     setTop();
     return *this;
 }
@@ -1269,13 +1248,6 @@ Interval::and_(const Domain &a, const Domain &b)
 {
     if (a.isBottom() || b.isBottom())
         return *this;
-
-    if (aa.isBottom() || bb.isBottom())
-    {
-        // Result is undefined.
-        setBottom();
-        return *this;
-    }
 
     setTop();
     return *this;
@@ -1287,13 +1259,6 @@ Interval::or_(const Domain &a, const Domain &b)
     if (a.isBottom() || b.isBottom())
         return *this;
 
-    if (aa.isBottom() || bb.isBottom())
-    {
-        // Result is undefined.
-        setBottom();
-        return *this;
-    }
-
     setTop();
     return *this;
 }
@@ -1303,13 +1268,6 @@ Interval::xor_(const Domain &a, const Domain &b)
 {
     if (a.isBottom() || b.isBottom())
         return *this;
-
-    if (aa.isBottom() || bb.isBottom())
-    {
-        // Result is undefined.
-        setBottom();
-        return *this;
-    }
 
     setTop();
     return *this;
