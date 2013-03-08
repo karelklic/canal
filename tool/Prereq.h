@@ -15,36 +15,10 @@
 #  endif
 #endif
 
-#include <llvm/ADT/StringRef.h>
 #include <llvm/Analysis/CallGraph.h>
 #include <llvm/Analysis/LoopInfo.h>
-#include <llvm/LLVMContext.h>
 #include <llvm/PassManager.h>
-#include <llvm/Support/IRReader.h>
-#include <llvm/Support/MemoryBuffer.h>
 #include <llvm/ValueSymbolTable.h>
-#include <llvm/Support/CommandLine.h>
-
-#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR == 8
-#  include <llvm/System/Host.h>
-#  include <llvm/System/TimeValue.h>
-#  include <llvm/Target/TargetSelect.h>
-#elif LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR == 9
-#  include <llvm/InitializePasses.h>
-#  include <llvm/Support/Host.h>
-#  include <llvm/Support/TimeValue.h>
-#  include <llvm/Target/TargetSelect.h>
-#elif LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR < 2
-#  include <llvm/InitializePasses.h>
-#  include <llvm/Support/Host.h>
-#  include <llvm/Support/TimeValue.h>
-#  include <llvm/Support/TargetSelect.h>
-#else
-#  include <llvm/InitializePasses.h>
-#  include <llvm/Support/Host.h>
-#  include <llvm/Support/TimeValue.h>
-#  include <llvm/Support/TargetSelect.h>
-#endif
 
 #ifdef HAVE_CLANG
 #include <clang/Basic/Version.h>

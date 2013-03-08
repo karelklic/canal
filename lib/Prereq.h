@@ -21,8 +21,9 @@
 #include <llvm/ADT/APFloat.h>
 #include <llvm/ADT/APInt.h>
 #include <llvm/ADT/OwningPtr.h>
-#include <llvm/ADT/SmallVector.h>
 #include <llvm/ADT/STLExtras.h>
+#include <llvm/ADT/SmallVector.h>
+#include <llvm/ADT/StringRef.h>
 #include <llvm/BasicBlock.h>
 #include <llvm/Constant.h>
 #include <llvm/Constants.h>
@@ -30,16 +31,41 @@
 #include <llvm/GlobalVariable.h>
 #include <llvm/Instruction.h>
 #include <llvm/Instructions.h>
+#include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 #include <llvm/Support/CFG.h>
 #include <llvm/Support/Casting.h>
+#include <llvm/Support/CommandLine.h>
+#include <llvm/Support/IRReader.h>
+#include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Type.h>
 #include <llvm/Value.h>
-#if LLVM_VERSION_MAJOR > 2 && LLVM_VERSION_MINOR > 1
-#  include <llvm/DataLayout.h>
-#else
+
+// Includes with differences across LLVM version.
+#if LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR == 8
+#  include <llvm/System/Host.h>
+#  include <llvm/System/TimeValue.h>
+#  include <llvm/Target/TargetSelect.h>
 #  include <llvm/Target/TargetData.h>
+#elif LLVM_VERSION_MAJOR == 2 && LLVM_VERSION_MINOR == 9
+#  include <llvm/InitializePasses.h>
+#  include <llvm/Support/Host.h>
+#  include <llvm/Support/TimeValue.h>
+#  include <llvm/Target/TargetData.h>
+#  include <llvm/Target/TargetSelect.h>
+#elif LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR < 2
+#  include <llvm/InitializePasses.h>
+#  include <llvm/Support/Host.h>
+#  include <llvm/Support/TimeValue.h>
+#  include <llvm/Support/TargetSelect.h>
+#  include <llvm/Target/TargetData.h>
+#else // LLVM 3.2 and newer
+#  include <llvm/DataLayout.h>
+#  include <llvm/InitializePasses.h>
+#  include <llvm/Support/Host.h>
+#  include <llvm/Support/TimeValue.h>
+#  include <llvm/Support/TargetSelect.h>
 #endif
 
 #ifdef CANAL_NDEBUG_SWITCHED

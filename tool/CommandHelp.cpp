@@ -121,7 +121,6 @@ CommandHelp::allCommandsHelp()
                  << "Support facilities\n"
                  << commandGetStringAndRemove("help", commands)
                  << commandGetStringAndRemove("quit", commands)
-                 << commandGetStringAndRemove("shell", commands)
                  << "\n"
                  << "Type \"help\" followed by command name for full documentation.\n"
                  << "Command name abbreviations are allowed if unambiguous.\n";

@@ -7,7 +7,6 @@
 #include <cstring>
 #include <cctype>
 #include <cstdlib>
-#include <cstdio>
 
 extern "C" {
 #include <readline/readline.h>
@@ -55,7 +54,7 @@ completeEntry(const char *text, int state)
 // Version printer
 void printVersion()
 {
-    printf("Canal %s\n", VERSION);
+    llvm::outs() << "Canal " << VERSION << "\n";
 }
 
 // Program entry function.
@@ -111,7 +110,7 @@ main(int argc, char **argv)
         char *expansion;
         int result = history_expand(line, &expansion);
         if (result < 0 || result == 2)
-            fprintf(stderr, "%s\n", expansion);
+            llvm::errs() << expansion << "\n";
         else
         {
             if (strlen(expansion) > 0)

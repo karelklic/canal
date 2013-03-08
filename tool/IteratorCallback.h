@@ -6,7 +6,6 @@
 
 class IteratorCallback : public Canal::Interpreter::IteratorCallback
 {
-protected:
     bool mFixpointReached;
 
     bool mFunctionEnter;
