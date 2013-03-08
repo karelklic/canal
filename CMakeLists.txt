@@ -21,6 +21,7 @@ add_definitions(-DDATADIR="${CMAKE_CURRENT_BINARY_DIR}")
 
 add_subdirectory("lib/")
 add_subdirectory("tool/")
+add_subdirectory("tools/")
 add_subdirectory("tests/")
 
 SET(HAVE_GELF_H ${LIBELF_FOUND})

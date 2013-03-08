@@ -50,7 +50,8 @@ testJoin()
 }
 
 static void
-testComparison() {
+testComparison()
+{
     Float::Interval zero(*gEnvironment, llvm::APFloat(0.0f)),
             bot(*gEnvironment, llvm::APFloat::IEEEsingle),
             top(*gEnvironment, llvm::APFloat::IEEEsingle);
@@ -71,7 +72,8 @@ testComparison() {
 }
 
 static void
-testDivisionByZero() {
+testDivisionByZero()
+{
     Float::Interval zero(*gEnvironment, llvm::APFloat(0.0f)),
             one(*gEnvironment, llvm::APFloat(1.0f)),
             two(*gEnvironment, llvm::APFloat(2.0f)),
@@ -79,23 +81,25 @@ testDivisionByZero() {
             zero_one(zero),
             minusone_zero(*gEnvironment, llvm::APFloat(-1.0f)),
             result(zero);
+
     one_two.join(two);
     zero_one.join(one);
     minusone_zero.join(zero);
-
-    llvm::APFloat res(0.0f);
 
     //Fdiv test
     CANAL_ASSERT(result.fdiv(one, zero).isTop());
     CANAL_ASSERT(result.fdiv(zero, zero).isTop());
 
     result.fdiv(one_two, zero_one);
-    res = result.getMin(); CANAL_ASSERT(res.compare(llvm::APFloat(1.0f)) == llvm::APFloat::cmpEqual); //One to infinity
-    res = result.getMax(); CANAL_ASSERT(res.isInfinity() && !res.isNegative());
+    llvm::APFloat min(0.0f), max(0.0f);
+    CANAL_ASSERT(result.getMinMax(min, max));
+    CANAL_ASSERT(min.compare(llvm::APFloat(1.0f)) == llvm::APFloat::cmpEqual); //One to infinity
+    CANAL_ASSERT(max.isInfinity() && !max.isNegative());
 
     result.fdiv(one_two, minusone_zero); //Division by -1 to 0
-    res = result.getMin(); CANAL_ASSERT(res.isInfinity() && res.isNegative()); //Negative infinity minus one
-    res = result.getMax(); CANAL_ASSERT(res.compare(llvm::APFloat(-1.0f)) == llvm::APFloat::cmpEqual); //Unsigned zero to two
+    CANAL_ASSERT(result.getMinMax(min, max));
+    CANAL_ASSERT(min.isInfinity() && min.isNegative()); //Negative infinity minus one
+    CANAL_ASSERT(max.compare(llvm::APFloat(-1.0f)) == llvm::APFloat::cmpEqual); //Unsigned zero to two
 }
 
 int

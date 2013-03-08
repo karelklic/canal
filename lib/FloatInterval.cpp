@@ -204,32 +204,43 @@ Interval::intersects(const Interval &value) const
     if (isBottom() || value.isBottom())
         return false;
 
+    llvm::APFloat minA(getSemantics()), maxA(getSemantics());
+    llvm::APFloat minB(value.getSemantics()), maxB(value.getSemantics());
+
+    if (!getMinMax(minA, maxA) || !value.getMinMax(minB, maxB))
+        return false;
+
     llvm::APFloat::cmpResult res;
-    res = getMax().compare(value.getMin());
-    if (res == llvm::APFloat::cmpEqual ||
-        res == llvm::APFloat::cmpGreaterThan)
+    res = maxA.compare(minB);
+
+    if (res == llvm::APFloat::cmpEqual || res == llvm::APFloat::cmpGreaterThan)
     {
-        res = getMin().compare(value.getMax());
-        if (res == llvm::APFloat::cmpEqual ||
-            res == llvm::APFloat::cmpLessThan)
-        {
+        res = minA.compare(maxB);
+        if (res == llvm::APFloat::cmpEqual || res == llvm::APFloat::cmpLessThan)
             return true;
-        }
     }
 
     return false;
 }
 
-llvm::APFloat
-Interval::getMax() const
+bool
+Interval::getMinMax(llvm::APFloat &min, llvm::APFloat &max) const
 {
-    return (mTop ? llvm::APFloat::getLargest(getSemantics(), false) : mTo);
-}
+    if (mEmpty)
+        return false;
 
-llvm::APFloat
-Interval::getMin() const
-{
-    return (mTop ? llvm::APFloat::getLargest(getSemantics(), true) : mFrom);
+    if (mTop)
+    {
+        min = llvm::APFloat::getLargest(getSemantics(), /*Negative=*/true);
+        max = llvm::APFloat::getLargest(getSemantics(), /*Negative=*/false);
+    }
+    else
+    {
+        min = mFrom;
+        max = mTo;
+    }
+
+    return true;
 }
 
 bool

@@ -649,10 +649,13 @@ void
 Vector::collaborate()
 {
     Message inputMessage;
+    bool allBottom = isBottom();
 
     std::vector<Domain*>::iterator it = mValues.begin();
     for (; it != mValues.end(); ++it)
     {
+        CANAL_ASSERT(allBottom || !(**it).isBottom());
+
         (**it).refine(inputMessage);
 
         Message outputMessage;

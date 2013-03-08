@@ -285,6 +285,12 @@ binaryOperation(ExactSize &result,
                 const Domain &b,
                 Domain::BinaryOperation operation)
 {
+    if (a.isBottom() || b.isBottom())
+    {
+        result.setBottom();
+        return result;
+    }
+
     const ExactSize &aa = checkedCast<ExactSize>(a),
         &bb = checkedCast<ExactSize>(b);
 
@@ -422,6 +428,12 @@ cmpOperation(ExactSize &result,
              llvm::CmpInst::Predicate predicate,
              Domain::CmpOperation operation)
 {
+    if (a.isBottom() || b.isBottom())
+    {
+        result.setBottom();
+        return result;
+    }
+
     const ExactSize &aa = checkedCast<ExactSize>(a),
         &bb = checkedCast<ExactSize>(b);
 
@@ -465,6 +477,9 @@ ExactSize::extractelement(const Domain &index) const
 {
     const llvm::Type &elementType = *mType.getElementType();
     Domain *result = mEnvironment.getConstructors().create(elementType);
+
+    if (index.isBottom())
+        return result;
 
     if (!mHasExactSize)
     {

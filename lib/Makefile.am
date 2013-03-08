@@ -2,6 +2,7 @@ pkginclude_HEADERS = \
 	ArrayExactSize.h \
 	ArraySingleItem.h \
 	ArrayStringPrefix.h \
+	ArrayStringTrie.h \
 	ArrayUtils.h \
 	Constructors.h \
 	Domain.h \
@@ -48,6 +49,7 @@ libcanal_la_SOURCES = \
 	ArrayExactSize.cpp \
 	ArraySingleItem.cpp \
 	ArrayStringPrefix.cpp \
+	ArrayStringTrie.cpp \
 	ArrayUtils.cpp \
 	Constructors.cpp \
 	Domain.cpp \

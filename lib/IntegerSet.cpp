@@ -754,6 +754,7 @@ Set::applyOperationDivision(const Domain &a,
 
     CANAL_ASSERT(this != &a && this != &b);
     setBottom();
+    if (aa.isBottom() || bb.isBottom()) return *this;
     if (aa.isTop() || bb.isTop())
     {
         setTop();
@@ -805,17 +806,19 @@ Set::fromInterval(const Interval &interval) {
         CANAL_ASSERT(interval.signedMin(from) && interval.signedMax(to));
         diff = to - from;
         if (diff.ult(SET_THRESHOLD)) { //Store every value
-            for (; from.sle(to); ++from) {
+            for (; from.slt(to); ++from) {
                 mValues.insert(from);
             }
+            mValues.insert(from); //We need upper bound as well, but upper bound + 1 may not fit into bitwidth
         }
         else {
             CANAL_ASSERT(interval.unsignedMin(from) && interval.unsignedMax(to));
             diff = to - from;
             if (diff.ult(SET_THRESHOLD)) { //Store every value
-                for (; from.ule(to); ++from) {
+                for (; from.ult(to); ++from) {
                     mValues.insert(from);
                 }
+                mValues.insert(from);
             }
             else setTop();
         }

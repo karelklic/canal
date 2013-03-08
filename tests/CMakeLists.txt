@@ -13,6 +13,10 @@ add_executable(ArrayStringPrefixTest ArrayStringPrefixTest.cpp)
 target_link_libraries(ArrayStringPrefixTest canal)
 add_test(ArrayStringPrefixTest ArrayStringPrefixTest)
 
+add_executable(ArrayStringTrieTest ArrayStringTrieTest.cpp)
+target_link_libraries(ArrayStringTrieTest canal)
+add_test(ArrayStringTrieTest ArrayStringTrieTest)
+
 add_executable(FloatIntervalTest FloatIntervalTest.cpp)
 target_link_libraries(FloatIntervalTest canal)
 add_test(FloatIntervalTest FloatIntervalTest)

@@ -340,6 +340,10 @@ Bitfield::accuracy() const
 Bitfield &
 Bitfield::add(const Domain &a, const Domain &b)
 {
+    if (a.isBottom() || b.isBottom()) {
+        setBottom();
+        return *this;
+    }
     setTop();
     return *this;
 }
@@ -347,6 +351,10 @@ Bitfield::add(const Domain &a, const Domain &b)
 Bitfield &
 Bitfield::sub(const Domain &a, const Domain &b)
 {
+    if (a.isBottom() || b.isBottom()) {
+        setBottom();
+        return *this;
+    }
     setTop();
     return *this;
 }
@@ -354,6 +362,10 @@ Bitfield::sub(const Domain &a, const Domain &b)
 Bitfield &
 Bitfield::mul(const Domain &a, const Domain &b)
 {
+    if (a.isBottom() || b.isBottom()) {
+        setBottom();
+        return *this;
+    }
     setTop();
     return *this;
 }
@@ -361,6 +373,10 @@ Bitfield::mul(const Domain &a, const Domain &b)
 Bitfield &
 Bitfield::udiv(const Domain &a, const Domain &b)
 {
+    if (a.isBottom() || b.isBottom()) {
+        setBottom();
+        return *this;
+    }
     setTop();
     //When implemented, handle division by zero - see #145
     return *this;
@@ -369,6 +385,10 @@ Bitfield::udiv(const Domain &a, const Domain &b)
 Bitfield &
 Bitfield::sdiv(const Domain &a, const Domain &b)
 {
+    if (a.isBottom() || b.isBottom()) {
+        setBottom();
+        return *this;
+    }
     setTop();
     //When implemented, handle division by zero - see #145
     return *this;
@@ -377,6 +397,10 @@ Bitfield::sdiv(const Domain &a, const Domain &b)
 Bitfield &
 Bitfield::urem(const Domain &a, const Domain &b)
 {
+    if (a.isBottom() || b.isBottom()) {
+        setBottom();
+        return *this;
+    }
     setTop();
     //When implemented, handle division by zero - see #145
     return *this;
@@ -385,6 +409,13 @@ Bitfield::urem(const Domain &a, const Domain &b)
 Bitfield &
 Bitfield::srem(const Domain &a, const Domain &b)
 {
+    const Bitfield &aa = checkedCast<Bitfield>(a),
+        &bb = checkedCast<Bitfield>(b);
+
+    if (a.isBottom() || b.isBottom()) {
+        setBottom();
+        return *this;
+    }
     setTop();
     //When implemented, handle division by zero - see #145
     return *this;
@@ -481,6 +512,8 @@ bitOperation(Bitfield &result,
 {
     const Bitfield &aa = checkedCast<Bitfield>(a),
         &bb = checkedCast<Bitfield>(b);
+
+    if (aa.isBottom() || bb.isBottom()) return result;
 
     CANAL_ASSERT(aa.getBitWidth() == bb.getBitWidth() &&
                  result.getBitWidth() == aa.getBitWidth());
@@ -810,6 +843,7 @@ Bitfield::fcmp(const Domain &a, const Domain &b,
     const Float::Interval &aa = checkedCast<Float::Interval>(a),
         &bb = checkedCast<Float::Interval>(b);
 
+    if (aa.isBottom() || bb.isBottom()) return *this;
     int result = aa.compare(bb, predicate);
     switch (result)
     {
@@ -838,8 +872,14 @@ Bitfield &
 Bitfield::trunc(const Domain &value)
 {
     const Bitfield &bitfield = checkedCast<Bitfield>(value);
+<<<<<<< HEAD
     mZeroes = Utils::trunc(bitfield.mZeroes, getBitWidth());
     mOnes = Utils::trunc(bitfield.mOnes, getBitWidth());
+=======
+    if (bitfield.isBottom()) return *this;
+    mZeroes = APIntUtils::trunc(bitfield.mZeroes, getBitWidth());
+    mOnes = APIntUtils::trunc(bitfield.mOnes, getBitWidth());
+>>>>>>> e4e9cfc27d255e8d5a2126579041e4f9a69add82
     return *this;
 }
 
@@ -847,6 +887,9 @@ Bitfield &
 Bitfield::zext(const Domain &value)
 {
     const Bitfield &bitfield = checkedCast<Bitfield>(value);
+    if (bitfield.isBottom())
+        return *this;
+
     mZeroes = Utils::zext(bitfield.mZeroes, getBitWidth());
     mOnes = Utils::zext(bitfield.mOnes, getBitWidth());
 
@@ -860,6 +903,9 @@ Bitfield &
 Bitfield::sext(const Domain &value)
 {
     const Bitfield &bitfield = checkedCast<Bitfield>(value);
+    if (bitfield.isBottom())
+        return *this;
+
     mZeroes = Utils::sext(bitfield.mZeroes, getBitWidth());
     mOnes = Utils::sext(bitfield.mOnes, getBitWidth());
     return *this;
