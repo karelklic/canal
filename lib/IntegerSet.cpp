@@ -797,7 +797,7 @@ Set::fromInterval(const Interval &interval) {
     if (interval.isSignedBottom() || interval.isUnsignedBottom()) {
         setBottom();
     }
-    else if (interval.isSignedTop() || interval.isUnsignedTop()){
+    else if (interval.isTop()){
         setTop();
     }
     else {

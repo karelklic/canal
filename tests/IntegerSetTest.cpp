@@ -672,8 +672,12 @@ testIntervalConversion () {
 
     CANAL_ASSERT(result.fromInterval(bottom).isBottom());
     CANAL_ASSERT(result.fromInterval(top).isTop());
-    CANAL_ASSERT(result.fromInterval(signedTop).isTop());
-    CANAL_ASSERT(result.fromInterval(unsignedTop).isTop());
+    //CANAL_ASSERT(result.fromInterval(signedTop).isTop()); //If one representation is top and the other is zero, the result should be zero
+    //CANAL_ASSERT(result.fromInterval(unsignedTop).isTop());
+    CANAL_ASSERT(result.fromInterval(signedTop).isConstant() &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
+    CANAL_ASSERT(result.fromInterval(unsignedTop).isConstant() &&
+                 result.unsignedMin(res) && res == llvm::APInt(32, 0));
     CANAL_ASSERT(result.fromInterval(signedBottom).isBottom());
     CANAL_ASSERT(result.fromInterval(unsignedBottom).isBottom());
 

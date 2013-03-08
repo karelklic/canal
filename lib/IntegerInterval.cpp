@@ -475,6 +475,8 @@ void
 Interval::setSignedTop() {
     mSignedTop = true;
     mSignedBottom = false;
+    mSignedFrom = llvm::APInt::getSignedMinValue(getBitWidth());
+    mSignedTo = llvm::APInt::getSignedMaxValue(getBitWidth());
 }
 
 bool
@@ -484,12 +486,8 @@ Interval::isSignedBottom() const {
 
 bool
 Interval::isSignedTop() const {
-    if(mSignedFrom.isMinSignedValue() && mSignedTo.isMaxSignedValue())
-    {
-        return true;
-    }
-
-    return !mSignedBottom && mSignedTop;
+    return !mSignedBottom && (mSignedTop ||
+                              (mSignedFrom.isMinSignedValue() && mSignedTo.isMaxSignedValue()) );
 }
 
 void
@@ -507,6 +505,8 @@ void
 Interval::setUnsignedTop() {
     mUnsignedTop = true;
     mUnsignedBottom = false;
+    mUnsignedFrom = llvm::APInt::getMinValue(getBitWidth());
+    mUnsignedTo = llvm::APInt::getMaxValue(getBitWidth());
 }
 
 bool
@@ -516,12 +516,8 @@ Interval::isUnsignedBottom() const {
 
 bool
 Interval::isUnsignedTop() const {
-    if(mUnsignedFrom.isMinValue() && mUnsignedTo.isMaxValue())
-    {
-        return true;
-    }
-
-    return !mUnsignedBottom && mUnsignedTop;
+    return !mUnsignedBottom && (mUnsignedTop ||
+                                (mUnsignedFrom.isMinValue() && mUnsignedTo.isMaxValue()) );
 }
 
 void
@@ -944,9 +940,9 @@ Interval::udiv(const Domain &a, const Domain &b)
     if (aa.isUnsignedBottom() || bb.isUnsignedBottom()) {
         setUnsignedBottom();
     }
-    else if (aa.isUnsignedTop() || bb.isUnsignedTop()) {
-        setUnsignedTop();
-    }
+    //else if (aa.isUnsignedTop() || bb.isUnsignedTop()) {
+    //    setUnsignedTop();
+    //}
     else {
         resetUnsignedFlags();
 
@@ -990,9 +986,9 @@ Interval::sdiv(const Domain &a, const Domain &b)
     if (aa.isSignedBottom() || bb.isSignedBottom()) {
         setSignedBottom();
     }
-    else if (aa.isSignedTop() || bb.isSignedTop()) {
-        setSignedTop();
-    }
+    //else if (aa.isSignedTop() || bb.isSignedTop()) {
+    //    setSignedTop();
+    //}
     else {
         resetSignedFlags();
         if (bb.mSignedFrom == 0 && bb.mSignedTo == 0) { //Division by zero
