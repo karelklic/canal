@@ -103,10 +103,7 @@ TrieNode::toString() const
         end = mChildren.end();
 
     if (mChildren.size() > 0)
-        ss << "[";
-
-    if (it != end)
-        ss << (*it++)->toString();
+        ss << "(" << (*it++)->toString();
 
     for (; it != end; ++it)
     {
@@ -114,7 +111,8 @@ TrieNode::toString() const
     }
 
     if (mChildren.size() > 0)
-        ss << "]";
+        ss << ")?";
+
     return ss.str();
 }
 
@@ -226,7 +224,7 @@ StringTrie::toString() const
     ss << "\n";
         ss << "    type " << Canal::toString(mType) << "\n";
 
-    if (!isBottom() && !isBottom())
+    if (!isBottom() && !isTop())
         ss << "    " << mRoot->toString() << "\n";
 
     return ss.str();
