@@ -73,24 +73,7 @@ TrieNode::operator==(const TrieNode &node) const
 bool
 TrieNode::operator!=(const TrieNode &node) const
 {
-    if (mValue != node.mValue)
-        return true;
-
-    if (mChildren.size() != node.mChildren.size())
-        return true;
-
-    std::set<TrieNode *, TrieNodeCompare>::const_iterator first = mChildren.begin(),
-        firstEnd = mChildren.end(),
-        second = node.mChildren.begin(),
-        secondEnd = node.mChildren.end();
-
-    for (; first != firstEnd && second != secondEnd; ++first, ++second)
-    {
-        if ((**first != **second))
-            return true;
-    }
-
-    return false;
+    return !operator==(node); 
 }
 
 std::string
