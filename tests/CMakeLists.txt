@@ -20,6 +20,8 @@ foreach(test ${CANAL_UNIT_TESTS})
     add_test(${test} ${test})
 endforeach()
 
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS ${CANAL_UNIT_TESTS})
+
 file(GLOB files "*.c")
 foreach(file ${files})
     get_filename_component(name ${file} NAME)
