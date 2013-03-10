@@ -8,7 +8,7 @@ namespace Canal {
 namespace Array {
 
 bool
-TrieNode::TrieNodeCompare::operator()(const TrieNode *first, const TrieNode *second) const
+TrieNode::Compare::operator()(const TrieNode *first, const TrieNode *second) const
 {
     return first->mValue < second->mValue;
 }
@@ -20,7 +20,7 @@ TrieNode::TrieNode(const std::string &value)
 
 TrieNode::~TrieNode()
 {
-    std::set<TrieNode*, TrieNodeCompare>::const_iterator it = mChildren.begin(),
+    std::set<TrieNode*, Compare>::const_iterator it = mChildren.begin(),
         itend = mChildren.end();
 
     for (; it != itend; ++it)
@@ -33,7 +33,7 @@ size_t
 TrieNode::size()
 {
     size_t size = mValue.size();
-    std::set<TrieNode *, TrieNodeCompare>::const_iterator it = mChildren.begin(),
+    std::set<TrieNode *, Compare>::const_iterator it = mChildren.begin(),
         itend = mChildren.end();
 
     for (; it != itend; ++it)
@@ -56,7 +56,7 @@ TrieNode::operator==(const TrieNode &node) const
     if (mChildren.size() != node.mChildren.size())
         return false;
 
-    std::set<TrieNode*, TrieNodeCompare>::const_iterator first = mChildren.begin(),
+    std::set<TrieNode*, Compare>::const_iterator first = mChildren.begin(),
         firstEnd = mChildren.end(),
         second = node.mChildren.begin(),
         secondEnd = node.mChildren.end();
@@ -82,7 +82,7 @@ TrieNode::toString() const
     StringStream ss;
     ss << mValue;
 
-    std::set<TrieNode *, TrieNodeCompare>::const_iterator it = mChildren.begin(),
+    std::set<TrieNode *, Compare>::const_iterator it = mChildren.begin(),
         end = mChildren.end();
 
     if (mChildren.size() > 0)

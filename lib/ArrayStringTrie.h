@@ -9,14 +9,14 @@ namespace Array {
 
 class TrieNode
 {
-    struct TrieNodeCompare
+    struct Compare
     {
         bool operator()(const TrieNode *first, const TrieNode *second) const;
     };
 
 public:
     std::string mValue;
-    std::set<TrieNode *, TrieNodeCompare> mChildren;
+    std::set<TrieNode *, Compare> mChildren;
 
 public:
     TrieNode(const std::string &value);
