@@ -1,49 +1,24 @@
 include_directories(${CANAL_SOURCE_DIR})
 link_directories(${CANAL_SOURCE_DIR}/lib)
 
-add_executable(ArrayExactSizeTest ArrayExactSizeTest.cpp)
-target_link_libraries(ArrayExactSizeTest canal)
-add_test(ArrayExactSizeTest ArrayExactSizeTest)
+set(CANAL_UNIT_TESTS
+    ArrayExactSizeTest
+    ArraySingleItemTest
+    ArrayStringPrefixTest
+    ArrayStringTrieTest
+    FloatIntervalTest
+    IntegerBitfieldTest
+    IntegerSetTest
+    IntegerIntervalTest
+    PointerTest
+    ProductMessageTest
+    ProductVectorTest)
 
-add_executable(ArraySingleItemTest ArraySingleItemTest.cpp)
-target_link_libraries(ArraySingleItemTest canal)
-add_test(ArraySingleItemTest ArraySingleItemTest)
-
-add_executable(ArrayStringPrefixTest ArrayStringPrefixTest.cpp)
-target_link_libraries(ArrayStringPrefixTest canal)
-add_test(ArrayStringPrefixTest ArrayStringPrefixTest)
-
-add_executable(ArrayStringTrieTest ArrayStringTrieTest.cpp)
-target_link_libraries(ArrayStringTrieTest canal)
-add_test(ArrayStringTrieTest ArrayStringTrieTest)
-
-add_executable(FloatIntervalTest FloatIntervalTest.cpp)
-target_link_libraries(FloatIntervalTest canal)
-add_test(FloatIntervalTest FloatIntervalTest)
-
-add_executable(IntegerBitfieldTest IntegerBitfieldTest.cpp)
-target_link_libraries(IntegerBitfieldTest canal)
-add_test(IntegerBitfieldTest IntegerBitfieldTest)
-
-add_executable(IntegerSetTest IntegerSetTest.cpp)
-target_link_libraries(IntegerSetTest canal)
-add_test(IntegerSetTest IntegerSetTest)
-
-add_executable(IntegerIntervalTest IntegerIntervalTest.cpp)
-target_link_libraries(IntegerIntervalTest canal)
-add_test(IntegerIntervalTest IntegerIntervalTest)
-
-add_executable(PointerTest PointerTest.cpp)
-target_link_libraries(PointerTest canal)
-add_test(PointerTest PointerTest)
-
-add_executable(ProductMessageTest ProductMessageTest.cpp)
-target_link_libraries(ProductMessageTest canal)
-add_test(ProductMessageTest ProductMessageTest)
-
-add_executable(ProductVectorTest ProductVectorTest.cpp)
-target_link_libraries(ProductVectorTest canal)
-add_test(ProductVectorTest ProductVectorTest)
+foreach(test ${CANAL_UNIT_TESTS})
+    add_executable(${test} "${test}.cpp")
+    target_link_libraries(${test} canal)
+    add_test(${test} ${test})
+endforeach()
 
 file(GLOB files "*.c")
 foreach(file ${files})
