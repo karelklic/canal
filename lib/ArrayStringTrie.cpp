@@ -18,6 +18,20 @@ TrieNode::TrieNode(const std::string &value)
 { 
 }
 
+TrieNode::TrieNode(const TrieNode &node)
+{
+    mValue = node.mValue;
+
+    std::set<TrieNode *, Compare>::const_iterator it = node.mChildren.begin(),
+        itend = node.mChildren.end();
+
+    for (; it != itend; ++it)
+    {
+        TrieNode *newNode = new TrieNode(**it);
+        mChildren.insert(newNode);
+    }
+}
+
 TrieNode::~TrieNode()
 {
     std::set<TrieNode*, Compare>::const_iterator it = mChildren.begin(),
@@ -25,7 +39,7 @@ TrieNode::~TrieNode()
 
     for (; it != itend; ++it)
     {
-        delete *it;
+        delete (*it);
     }
 }
 
@@ -243,7 +257,33 @@ bool StringTrie::operator<(const Domain &value) const
 StringTrie &
 StringTrie::join(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    if (isTop())
+        return *this;
+
+    if (value.isBottom())
+        return *this;
+
+    if (value.isTop())
+    {
+        setTop();
+        return *this;
+    }
+
+    const StringTrie &array = checkedCast<StringTrie>(value);
+
+    if (isBottom())
+    {
+        delete mRoot;
+        mRoot = new TrieNode(*array.mRoot);
+    }
+    else
+    {
+        // intelligently join string trie here
+        CANAL_NOT_IMPLEMENTED();
+    }
+   
+    mIsBottom = false;
+    return *this;
 }
 
 StringTrie &

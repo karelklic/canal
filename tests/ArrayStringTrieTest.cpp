@@ -11,13 +11,32 @@ using namespace Canal;
 
 static Environment *gEnvironment;
 
-static llvm::ArrayType *getTestType()
+static llvm::ArrayType *
+getTestType()
 {
     return llvm::ArrayType::get(llvm::Type::getInt8Ty(
         gEnvironment->getContext()), 10);
 }
 
-static void testTrieEqualityOperator()
+static void
+testTrieCopyConstructor()
+{
+    Array::TrieNode trie1 = Array::TrieNode("fdsa");
+    Array::TrieNode trie2 = Array::TrieNode(trie1);
+    CANAL_ASSERT(trie2.mValue == "fdsa");
+
+    Array::TrieNode trie3 = Array::TrieNode("aaa");
+    Array::TrieNode *node1 = new Array::TrieNode("bbb");
+    trie3.mChildren.insert(node1);
+    Array::TrieNode trie4 = Array::TrieNode(trie3);
+    CANAL_ASSERT(trie4.mValue == "aaa");
+    CANAL_ASSERT(trie4.mChildren.size() == 1);
+    Array::TrieNode *node2 = *trie4.mChildren.begin();
+    CANAL_ASSERT(node2->mValue == "bbb");
+}
+
+static void
+testTrieEqualityOperator()
 {
     Array::TrieNode trie1 = Array::TrieNode("");
     CANAL_ASSERT(trie1 == trie1);
@@ -69,7 +88,8 @@ static void testTrieEqualityOperator()
     CANAL_ASSERT((trie9 == trie11) == false);
 }
 
-static void testTrieInequalityOperator()
+static void
+testTrieInequalityOperator()
 {
     Array::TrieNode trie1 = Array::TrieNode("");
     CANAL_ASSERT((trie1 != trie1) == false);
@@ -99,7 +119,8 @@ static void testTrieInequalityOperator()
     CANAL_ASSERT((trie5 != trie8) == false);
 }
 
-static void testTrieToString()
+static void
+testTrieToString()
 {
     Array::TrieNode trie1 = Array::TrieNode("");
     CANAL_ASSERT(trie1.toString() == "");
@@ -117,7 +138,8 @@ static void testTrieToString()
     CANAL_ASSERT(trie3.toString() == "gr(eat|ow(th)?)?")
 }
 
-static void testTrieSize()
+static void
+testTrieSize()
 {
     Array::TrieNode trie1 = Array::TrieNode("");
     CANAL_ASSERT(trie1.size() == 0);
@@ -137,7 +159,8 @@ static void testTrieSize()
     CANAL_ASSERT(trie3.size() == 10);
 }
 
-static void testConstructors()
+static void
+testConstructors()
 {
     const llvm::ArrayType *type = getTestType();
     Array::StringTrie stringTrie(*gEnvironment, *type);
@@ -155,7 +178,8 @@ static void testConstructors()
     CANAL_ASSERT(node->mValue == "test");
 }
 
-static void testEqualityOperator()
+static void
+testEqualityOperator()
 {
     const llvm::ArrayType *type = getTestType();
     
@@ -192,7 +216,8 @@ static void testEqualityOperator()
     CANAL_ASSERT((trie5 == trie7) == false);
 }
 
-static void testToString()
+static void
+testToString()
 {
     const llvm::ArrayType *type = getTestType();
     Array::StringTrie trie1(*gEnvironment, *type);
@@ -207,7 +232,29 @@ static void testToString()
     "stringTrie \n    type [4 x i8]\n    (asdf)?\n");
 }
 
-static void testSetTop()
+static void
+testJoin()
+{
+    const llvm::ArrayType *type = getTestType();
+
+    // bottom vs bottom
+    Array::StringTrie bottom1(*gEnvironment, *type);
+    Array::StringTrie bottom2(*gEnvironment, *type);
+    Array::StringTrie result1 = bottom1.join(bottom2);
+    CANAL_ASSERT(result1.isBottom());
+
+    // bottom vs non-bottom
+    Array::StringTrie bottom3(*gEnvironment, *type);
+    Array::StringTrie trie1(*gEnvironment, "test");
+    bottom3.join(trie1);
+    CANAL_ASSERT(!bottom3.isBottom());
+    Array::TrieNode *node = *bottom3.mRoot->mChildren.begin();
+    CANAL_ASSERT(node->mValue == "test");
+    CANAL_ASSERT(!bottom3.isTop());
+}
+
+static void
+testSetTop()
 {
     const llvm::ArrayType *type = getTestType();
     Array::StringTrie trie(*gEnvironment, *type);
@@ -215,7 +262,8 @@ static void testSetTop()
     CANAL_ASSERT(trie.isTop());
 }
 
-static void testSetBottom()
+static void
+testSetBottom()
 {
     const llvm::ArrayType *type = getTestType();
     Array::StringTrie trie(*gEnvironment, *type);
@@ -232,6 +280,7 @@ main(int argc, char **argv)
     llvm::Module *module = new llvm::Module("testModule", context);
     gEnvironment = new Environment(module);
 
+    testTrieCopyConstructor();
     testTrieEqualityOperator();
     testTrieInequalityOperator();
     testTrieToString();
@@ -239,6 +288,7 @@ main(int argc, char **argv)
     testConstructors();
     testEqualityOperator();
     testToString();
+    testJoin();
     testSetTop();
     testSetBottom();
 

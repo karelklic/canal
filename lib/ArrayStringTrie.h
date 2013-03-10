@@ -20,6 +20,7 @@ public:
 
 public:
     TrieNode(const std::string &value);
+    TrieNode(const TrieNode &root);
     ~TrieNode();
     size_t size();
     bool operator==(const TrieNode &node) const;
