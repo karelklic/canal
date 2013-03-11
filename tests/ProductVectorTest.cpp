@@ -78,12 +78,12 @@ testCollaborate()
     vector.mValues.push_back(c);
     vector.collaborate();
 
-    // Domains are iterated in order
+    // Domains are iterated twice in order
     // every refine() increases message.num
     // every extract() sets this.num to message.num
-    CANAL_ASSERT(a->num == 0);
-    CANAL_ASSERT(b->num == 1);
-    CANAL_ASSERT(c->num == 2);
+    CANAL_ASSERT(a->num == 3);
+    CANAL_ASSERT(b->num == 4);
+    CANAL_ASSERT(c->num == 5);
 }
 
 int

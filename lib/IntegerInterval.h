@@ -215,6 +215,10 @@ public: // Implementation of Domain.
 
     virtual Interval &fptosi(const Domain &value);
 
+public: // Product
+    virtual void extract(Product::Message& message) const;
+    virtual void refine(const Product::Message& message);
+
     /// Covariant return type.
     virtual const llvm::IntegerType &getValueType() const;
 };

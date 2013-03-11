@@ -3,6 +3,8 @@
 #include "FloatInterval.h"
 #include "Environment.h"
 #include "IntegerInterval.h"
+#include "ProductMessage.h"
+#include "FieldMinMax.h"
 
 namespace Canal {
 namespace Integer {
@@ -795,7 +797,7 @@ Set::fromInterval(const Interval &interval) {
     if (interval.isSignedBottom() || interval.isUnsignedBottom()) {
         setBottom();
     }
-    else if (interval.isSignedTop() || interval.isUnsignedTop()){
+    else if (interval.isTop()){
         setTop();
     }
     else {
@@ -825,6 +827,37 @@ Set::fromInterval(const Interval &interval) {
     }
     return *this;
 }
+
+void
+Set::extract(Product::Message& message) const
+{
+    Integer::Interval interval(mEnvironment, getBitWidth());
+    interval.resetSignedFlags();
+    signedMin(interval.mSignedFrom);
+    signedMax(interval.mSignedTo);
+
+    interval.resetUnsignedFlags();
+    unsignedMin(interval.mUnsignedFrom);
+    unsignedMax(interval.mUnsignedTo);
+
+    Field::MinMax* minMax = new Field::MinMax(interval);
+    message.mFields[Product::MessageField::FieldMinMaxKind] = minMax;
+}
+
+
+void
+Set::refine(const Product::Message& message)
+{
+    Product::Message::const_iterator it = message.mFields.find(Product::MessageField::FieldMinMaxKind);
+    if(it != message.mFields.end())
+    {
+        Field::MinMax* minMax = checkedCast<Field::MinMax>(it->second);
+        Set set(mEnvironment, mBitWidth);
+        set.fromInterval(*minMax->mInterval);
+        meet(set);
+    }
+}
+
 
 } // namespace Integer
 } // namespace Canal

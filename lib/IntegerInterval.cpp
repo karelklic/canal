@@ -4,6 +4,8 @@
 #include "FloatInterval.h"
 #include "FloatUtils.h"
 #include "Environment.h"
+#include "ProductMessage.h"
+#include "FieldMinMax.h"
 
 namespace Canal {
 namespace Integer {
@@ -478,6 +480,8 @@ void
 Interval::setSignedTop() {
     mSignedTop = true;
     mSignedBottom = false;
+    mSignedFrom = llvm::APInt::getSignedMinValue(getBitWidth());
+    mSignedTo = llvm::APInt::getSignedMaxValue(getBitWidth());
 }
 
 bool
@@ -487,7 +491,8 @@ Interval::isSignedBottom() const {
 
 bool
 Interval::isSignedTop() const {
-    return !mSignedBottom && mSignedTop;
+    return !mSignedBottom && (mSignedTop ||
+                              (mSignedFrom.isMinSignedValue() && mSignedTo.isMaxSignedValue()) );
 }
 
 void
@@ -505,6 +510,8 @@ void
 Interval::setUnsignedTop() {
     mUnsignedTop = true;
     mUnsignedBottom = false;
+    mUnsignedFrom = llvm::APInt::getMinValue(getBitWidth());
+    mUnsignedTo = llvm::APInt::getMaxValue(getBitWidth());
 }
 
 bool
@@ -514,7 +521,8 @@ Interval::isUnsignedBottom() const {
 
 bool
 Interval::isUnsignedTop() const {
-    return !mUnsignedBottom && mUnsignedTop;
+    return !mUnsignedBottom && (mUnsignedTop ||
+                                (mUnsignedFrom.isMinValue() && mUnsignedTo.isMaxValue()) );
 }
 
 void
@@ -943,9 +951,9 @@ Interval::udiv(const Domain &a, const Domain &b)
     if (aa.isUnsignedBottom() || bb.isUnsignedBottom()) {
         setUnsignedBottom();
     }
-    else if (aa.isUnsignedTop() || bb.isUnsignedTop()) {
-        setUnsignedTop();
-    }
+    //else if (aa.isUnsignedTop() || bb.isUnsignedTop()) {
+    //    setUnsignedTop();
+    //}
     else {
         resetUnsignedFlags();
 
@@ -991,9 +999,9 @@ Interval::sdiv(const Domain &a, const Domain &b)
     if (aa.isSignedBottom() || bb.isSignedBottom()) {
         setSignedBottom();
     }
-    else if (aa.isSignedTop() || bb.isSignedTop()) {
-        setSignedTop();
-    }
+    //else if (aa.isSignedTop() || bb.isSignedTop()) {
+    //    setSignedTop();
+    //}
     else {
         resetSignedFlags();
         if (bb.mSignedFrom == 0 && bb.mSignedTo == 0) { //Division by zero
@@ -1706,6 +1714,24 @@ Interval::fptosi(const Domain &value)
         }
     }
     return *this;
+}
+
+void
+Interval::extract(Product::Message& message) const
+{
+    Field::MinMax* minMax = new Field::MinMax(*this);
+    message.mFields[Product::MessageField::FieldMinMaxKind] = minMax;
+}
+
+void
+Interval::refine(const Product::Message& message)
+{
+    Product::Message::const_iterator it = message.mFields.find(Product::MessageField::FieldMinMaxKind);
+    if(it != message.mFields.end())
+    {
+        Field::MinMax* minMax = checkedCast<Field::MinMax>(it->second);
+        meet(*minMax->mInterval);
+    }
 }
 
 const llvm::IntegerType &
