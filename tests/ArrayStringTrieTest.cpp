@@ -238,19 +238,69 @@ testJoin()
     const llvm::ArrayType *type = getTestType();
 
     // bottom vs bottom
-    Array::StringTrie bottom1(*gEnvironment, *type);
-    Array::StringTrie bottom2(*gEnvironment, *type);
-    Array::StringTrie result1 = bottom1.join(bottom2);
-    CANAL_ASSERT(result1.isBottom());
+    Array::StringTrie test1(*gEnvironment, *type);
+    Array::StringTrie bottom(*gEnvironment, *type);
+    CANAL_ASSERT(test1.isBottom());
+    CANAL_ASSERT(bottom.isBottom());
+    test1.join(bottom);
+    CANAL_ASSERT(test1.isBottom());
 
     // bottom vs non-bottom
-    Array::StringTrie bottom3(*gEnvironment, *type);
-    Array::StringTrie trie1(*gEnvironment, "test");
-    bottom3.join(trie1);
-    CANAL_ASSERT(!bottom3.isBottom());
-    Array::TrieNode *node = *bottom3.mRoot->mChildren.begin();
+    Array::StringTrie test2(*gEnvironment, *type);
+    Array::StringTrie trie(*gEnvironment, "test");
+    CANAL_ASSERT(test2.isBottom());
+    CANAL_ASSERT(!trie.isBottom() && !trie.isTop());
+    test2.join(trie);
+    CANAL_ASSERT(!test2.isBottom());
+    Array::TrieNode *node = *test2.mRoot->mChildren.begin();
     CANAL_ASSERT(node->mValue == "test");
-    CANAL_ASSERT(!bottom3.isTop());
+    CANAL_ASSERT(!test2.isTop());
+
+    // bottom vs top
+    Array::StringTrie test3(*gEnvironment, *type);
+    Array::StringTrie top(*gEnvironment, *type);
+    top.setTop();
+    CANAL_ASSERT(test3.isBottom());
+    CANAL_ASSERT(top.isTop());
+    test3.join(top);
+    CANAL_ASSERT(test3.isTop());
+
+    // non-bottom vs bottom
+    Array::StringTrie test4(*gEnvironment, "abcdefgh");
+    CANAL_ASSERT(!test4.isBottom() && !test4.isTop());
+    test4.join(bottom);
+    CANAL_ASSERT(!test4.isBottom() && !test4.isTop());
+    Array::TrieNode *node2 = *test4.mRoot->mChildren.begin();
+    CANAL_ASSERT(node2->mValue == "abcdefgh");
+
+    // TODO non-bottom vs non-bottom
+
+    // non-bottom vs top
+    Array::StringTrie test6(*gEnvironment, "qwerty");
+    CANAL_ASSERT(!test6.isBottom() && !test6.isTop());
+    test6.join(top);
+    CANAL_ASSERT(test6.isTop());
+
+    // top vs bottom
+    Array::StringTrie test7(*gEnvironment, *type);
+    test7.setTop();
+    CANAL_ASSERT(test7.isTop());
+    test7.join(bottom);
+    CANAL_ASSERT(test7.isTop());
+
+    // top vs non-bottom
+    Array::StringTrie test8(*gEnvironment, *type);
+    test8.setTop();
+    CANAL_ASSERT(test8.isTop());
+    test8.join(trie);
+    CANAL_ASSERT(test8.isTop());
+
+    // top vs top
+    Array::StringTrie test9(*gEnvironment, *type);
+    test9.setTop();
+    CANAL_ASSERT(test9.isTop());
+    test9.join(top);
+    CANAL_ASSERT(test9.isTop());
 }
 
 static void
