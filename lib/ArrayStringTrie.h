@@ -26,7 +26,10 @@ public:
     bool operator==(const TrieNode &node) const;
     bool operator!=(const TrieNode &node) const;
     std::string toString() const;
-    //TrieNode *find(const std::string &value);
+    size_t getNumberOfMatchingSymbols(const std::string &value) const;
+    TrieNode *getMatchingChild(const std::string &value);
+    void split(const size_t index);
+    void insert(std::string &value);
 };
 
 class StringTrie : public Domain

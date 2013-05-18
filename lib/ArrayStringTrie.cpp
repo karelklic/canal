@@ -113,6 +113,64 @@ TrieNode::toString() const
     return ss.str();
 }
 
+size_t
+TrieNode::getNumberOfMatchingSymbols(const std::string &value) const
+{
+    size_t result = 0;
+    while (result < value.length() && result < mValue.length())
+    {
+        if (value[result] != mValue[result])
+            break;
+        result++;
+    }
+    return result;
+}
+
+TrieNode *
+TrieNode::getMatchingChild(const std::string &value)
+{
+    std::set<TrieNode *, Compare>::const_iterator it = mChildren.begin(),
+        end = mChildren.end();
+
+    for (; it != end; ++it)
+    {
+        if ((*it)->getNumberOfMatchingSymbols(value) != 0)
+            return *it;
+    }
+
+    return NULL;
+}
+
+void
+TrieNode::split(const size_t index)
+{
+    std::string oldValue = mValue.substr(index, mValue.length() - index);
+    std::string newValue = mValue.substr(0, index);
+    TrieNode *newNode = new TrieNode(oldValue);
+    mChildren.insert(newNode);
+    mValue = newValue;
+}
+
+void
+TrieNode::insert(std::string &value)
+{
+/*
+    if (mChildren.size() == 0 || getMatchingChild(value) == NULL)
+    {
+        TrieNode *trieNode = new TrieNode(value);
+    }
+    else
+    {
+        TrieNode *matchingChild = getMatchingChild(value);
+        size_t numberOfMatchingSymbols =
+            matchingChild->getNumberOfMatchingSymbols(value);
+
+        if (matchingChild->mValue.length() != numberOfMatchingSymbols)
+            matchingChild->split(numberOfMatchingSymbols);
+    }
+*/
+}
+
 StringTrie::StringTrie(const Environment &environment,
                        const llvm::SequentialType &type)
     : Domain(environment, Domain::ArrayStringTrieKind),

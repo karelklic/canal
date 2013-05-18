@@ -160,6 +160,53 @@ testTrieSize()
 }
 
 static void
+testTrieGetNumberOfMatchingSymbols()
+{
+    Array::TrieNode trie1 = Array::TrieNode("testing");
+    size_t result1 = trie1.getNumberOfMatchingSymbols("television");
+    CANAL_ASSERT(result1 == 2);
+
+    Array::TrieNode trie2 = Array::TrieNode("category");
+    size_t result2 = trie2.getNumberOfMatchingSymbols("cat");
+    CANAL_ASSERT(result2 == 3);
+
+    Array::TrieNode trie3 = Array::TrieNode("dog");
+    size_t result3 = trie3.getNumberOfMatchingSymbols("monkey");
+    CANAL_ASSERT(result3 == 0);
+}
+
+static void
+testTrieGetMatchingChild()
+{
+    Array::TrieNode trie1 = Array::TrieNode("");
+    Array::TrieNode *node1 = new Array::TrieNode("house");
+    Array::TrieNode *node2 = new Array::TrieNode("game");
+    trie1.mChildren.insert(node1);
+    trie1.mChildren.insert(node2);
+    Array::TrieNode *result1 = trie1.getMatchingChild("home");
+    CANAL_ASSERT(result1 != NULL);
+    CANAL_ASSERT(result1->mValue == "house");
+
+    Array::TrieNode trie2 = Array::TrieNode("");
+    Array::TrieNode *node3 = new Array::TrieNode("pocket");
+    Array::TrieNode *node4 = new Array::TrieNode("hole");
+    trie2.mChildren.insert(node3);
+    trie2.mChildren.insert(node4);
+    Array::TrieNode *result2 = trie2.getMatchingChild("stone");
+    CANAL_ASSERT(result2 == NULL);
+}
+
+static void
+testTrieSplit()
+{
+    Array::TrieNode trie1 = Array::TrieNode("hello");
+    trie1.split(2);
+    CANAL_ASSERT(trie1.mValue == "he");
+    Array::TrieNode *node1 = *trie1.mChildren.begin();
+    CANAL_ASSERT(node1->mValue == "llo");
+}
+
+static void
 testConstructors()
 {
     const llvm::ArrayType *type = getTestType();
@@ -335,6 +382,9 @@ main(int argc, char **argv)
     testTrieInequalityOperator();
     testTrieToString();
     testTrieSize();
+    testTrieGetNumberOfMatchingSymbols();
+    testTrieGetMatchingChild();
+    testTrieSplit();
     testConstructors();
     testEqualityOperator();
     testToString();
