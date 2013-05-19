@@ -359,7 +359,7 @@ testJoin()
     test1.join(bottom);
     CANAL_ASSERT(test1.isBottom());
 
-    // bottom vs non-bottom
+    // bottom vs value
     Array::StringTrie test2(*gEnvironment, *type);
     Array::StringTrie trie(*gEnvironment, "test");
     CANAL_ASSERT(test2.isBottom());
@@ -426,7 +426,20 @@ testJoin()
         test5_1.mRoot->mChildren.begin();
     Array::TrieNode *node5_7 = *it5_5;
     CANAL_ASSERT(node5_7->mValue == "s");
-    //CANAL_ASSERT(node5_7->mChildren.size() == 2);
+    CANAL_ASSERT(node5_7->mChildren.size() == 2);
+    std::set<Array::TrieNode *, Array::TrieNode::Compare>::const_iterator it5_6 =
+        node5_7->mChildren.begin();
+    Array::TrieNode *node5_8 = *it5_6;
+    Array::TrieNode *node5_9 = *(++it5_6);
+    CANAL_ASSERT(node5_8->mValue == "t");
+    CANAL_ASSERT(node5_9->mValue == "uper");
+    CANAL_ASSERT(node5_8->mChildren.size() == 2);
+    std::set<Array::TrieNode *, Array::TrieNode::Compare>::const_iterator it5_7 =
+        node5_8->mChildren.begin();
+    Array::TrieNode *node5_10 = *it5_7;
+    Array::TrieNode *node5_11 = *(++it5_7);
+    CANAL_ASSERT(node5_10->mValue == "ep");
+    CANAL_ASSERT(node5_11->mValue == "op");
 
     // value vs top
     Array::StringTrie test6(*gEnvironment, "qwerty");
@@ -454,6 +467,17 @@ testJoin()
     CANAL_ASSERT(test9.isTop());
     test9.join(top);
     CANAL_ASSERT(test9.isTop());
+}
+
+static void
+testMeet()
+{
+    const llvm::ArrayType *type = getTestType();
+
+    // bottom vs bottom
+    Array::StringTrie bottom(*gEnvironment, *type);
+    bottom.meet(bottom);
+    CANAL_ASSERT(bottom.isBottom());
 }
 
 static void
@@ -497,6 +521,7 @@ main(int argc, char **argv)
     testEqualityOperator();
     testToString();
     testJoin();
+    testMeet();
     testSetTop();
     testSetBottom();
 

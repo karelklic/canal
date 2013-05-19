@@ -146,10 +146,12 @@ TrieNode::split(const size_t index)
 {
     std::string newValue = mValue.substr(index, mValue.length() - index);
     std::string oldValue = mValue.substr(0, index);
+
     TrieNode *newNode = new TrieNode(newValue);
     newNode->mIsActualString = true;
-    //newNode->mChildren(mChildren);
-    //mChildren.clear();
+    newNode->mChildren = std::set<TrieNode *, Compare>(mChildren);
+    
+    mChildren.clear();
     mChildren.insert(newNode);
     mIsActualString = false;
     mValue = oldValue;
@@ -384,7 +386,57 @@ StringTrie::join(const Domain &value)
 StringTrie &
 StringTrie::meet(const Domain &value)
 {
-    CANAL_NOT_IMPLEMENTED();
+    if (isBottom())
+        return *this;
+
+    if (value.isTop())
+        return *this;
+
+    if (value.isBottom())
+    {
+        setBottom();
+        return *this;
+    }
+
+    const StringTrie &array = checkedCast<StringTrie>(value);
+
+    if (isTop())
+    {
+        delete mRoot;
+        mRoot = new TrieNode(*array.mRoot);
+    }
+    else
+    {
+        std::vector<std::string> first;
+        array.mRoot->getRepresentedStrings(first, array.mRoot->mValue);
+
+        std::vector<std::string> second;
+        mRoot->getRepresentedStrings(second, mRoot->mValue);
+
+        std::vector<std::string> common;
+        std::set_intersection(first.begin(), first.end(), second.begin(),
+                              second.end(), std::back_inserter(common));
+
+        if (common.empty())
+        {
+            setBottom();
+        }
+        else
+        {
+            delete mRoot;
+            mRoot = new TrieNode("");
+
+            std::vector<std::string>::const_iterator it = common.begin(),
+                end = common.end();
+
+            for (; it != end; ++it)
+            {
+                mRoot->insert(*it);
+            }
+        }
+    }
+
+    return *this;
 }
 
 bool
