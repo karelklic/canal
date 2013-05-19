@@ -148,14 +148,9 @@ testTrieSize()
     CANAL_ASSERT(trie2.size() == 4);
 
     Array::TrieNode trie3 = Array::TrieNode("");
-    Array::TrieNode *node1 = new Array::TrieNode("abc");
-    Array::TrieNode *node2 = new Array::TrieNode("defgh");
-    trie3.mChildren.insert(node1);
-    trie3.mChildren.insert(node2);
-    Array::TrieNode *node3 = new Array::TrieNode("ij");
-    Array::TrieNode *first = *trie3.mChildren.begin();
-    CANAL_ASSERT(first->mValue == "abc");
-    first->mChildren.insert(node3);
+    trie3.insert("abc");
+    trie3.insert("defgh");
+    trie3.insert("ij");
     CANAL_ASSERT(trie3.size() == 10);
 }
 
@@ -204,6 +199,78 @@ testTrieSplit()
     CANAL_ASSERT(trie1.mValue == "he");
     Array::TrieNode *node1 = *trie1.mChildren.begin();
     CANAL_ASSERT(node1->mValue == "llo");
+}
+
+static void
+testTrieInsert()
+{
+    Array::TrieNode trie1 = Array::TrieNode("");
+    trie1.insert("test");
+    CANAL_ASSERT(trie1.mChildren.size() == 1);
+    Array::TrieNode *result1 = *trie1.mChildren.begin();
+    CANAL_ASSERT(result1->mValue == "test");
+
+    Array::TrieNode trie2 = Array::TrieNode("");
+    trie2.insert("car");
+    trie2.insert("house");
+    CANAL_ASSERT(trie2.mChildren.size() == 2);
+    Array::TrieNode *result2 = *trie2.mChildren.begin();
+    CANAL_ASSERT(result2->mValue == "car");
+    Array::TrieNode *result3 = *(++trie2.mChildren.begin());
+    CANAL_ASSERT(result3->mValue == "house");
+
+    Array::TrieNode trie3 = Array::TrieNode("");
+    trie3.insert("home");
+    trie3.insert("house");
+    CANAL_ASSERT(trie3.mChildren.size() == 1);
+    Array::TrieNode *result4 = *trie3.mChildren.begin();
+    CANAL_ASSERT(result4->mValue == "ho");
+    CANAL_ASSERT(result4->mChildren.size() == 2);
+    Array::TrieNode *subresult1 = *result4->mChildren.begin();
+    CANAL_ASSERT(subresult1->mValue == "me");
+    Array::TrieNode *subresult2 = *(++result4->mChildren.begin());
+    CANAL_ASSERT(subresult2->mValue == "use");
+
+    Array::TrieNode trie4 = Array::TrieNode("");
+    trie4.insert("good");
+    trie4.insert("go");
+    CANAL_ASSERT(trie4.mChildren.size() == 1);
+    Array::TrieNode *result5 = *trie4.mChildren.begin();
+    CANAL_ASSERT(result5->mValue == "go");
+    CANAL_ASSERT(result5->mChildren.size() == 1);
+    Array::TrieNode *subresult3 = *result5->mChildren.begin();
+    CANAL_ASSERT(subresult3->mValue == "od");
+}
+
+static void
+testTrieGetRepresentedStrings()
+{
+    Array::TrieNode trie1 = Array::TrieNode("");
+    trie1.insert("test");
+    std::vector<std::string> results1;
+    trie1.getRepresentedStrings(results1, trie1.mValue);
+    CANAL_ASSERT(results1.size() == 1);
+    CANAL_ASSERT(results1[0] == "test");
+
+    Array::TrieNode trie2 = Array::TrieNode("");
+    trie2.insert("car");
+    trie2.insert("house");
+    std::vector<std::string> results2;
+    trie2.getRepresentedStrings(results2, trie2.mValue);
+    CANAL_ASSERT(results2.size() == 2);
+    CANAL_ASSERT(results2[0] == "car");
+    CANAL_ASSERT(results2[1] == "house");
+
+    Array::TrieNode trie3 = Array::TrieNode("");
+    trie3.insert("stop");
+    trie3.insert("super");
+    trie3.insert("step");
+    std::vector<std::string> results3;
+    trie3.getRepresentedStrings(results3, trie3.mValue);
+    CANAL_ASSERT(results3.size() == 3);
+    CANAL_ASSERT(results3[0] == "step");
+    CANAL_ASSERT(results3[1] == "stop");
+    CANAL_ASSERT(results3[2] == "super");
 }
 
 static void
@@ -312,7 +379,7 @@ testJoin()
     test3.join(top);
     CANAL_ASSERT(test3.isTop());
 
-    // non-bottom vs bottom
+    // value vs bottom
     Array::StringTrie test4(*gEnvironment, "abcdefgh");
     CANAL_ASSERT(!test4.isBottom() && !test4.isTop());
     test4.join(bottom);
@@ -320,9 +387,48 @@ testJoin()
     Array::TrieNode *node2 = *test4.mRoot->mChildren.begin();
     CANAL_ASSERT(node2->mValue == "abcdefgh");
 
-    // TODO non-bottom vs non-bottom
+    // value vs value
+    Array::StringTrie test5_1(*gEnvironment, "stop");
+    Array::StringTrie test5_2(*gEnvironment, "step");
+    test5_1.join(test5_2);
+    CANAL_ASSERT(test5_1.mRoot->mChildren.size() == 1);
+    std::set<Array::TrieNode *, Array::TrieNode::Compare>::const_iterator it5_1 =
+        test5_1.mRoot->mChildren.begin();
+    Array::TrieNode *node5_1 = *it5_1;
+    CANAL_ASSERT(node5_1->mValue == "st");
+    CANAL_ASSERT(node5_1->mChildren.size() == 2);
+    std::set<Array::TrieNode *, Array::TrieNode::Compare>::const_iterator it5_2 =
+        node5_1->mChildren.begin();
+    Array::TrieNode *node5_2 = *it5_2;
+    Array::TrieNode *node5_3 = *(++it5_2);
+    CANAL_ASSERT(node5_2->mValue == "ep");
+    CANAL_ASSERT(node5_3->mValue == "op");
 
-    // non-bottom vs top
+    Array::StringTrie test5_3(*gEnvironment, "step");
+    Array::StringTrie test5_4(*gEnvironment, "super");
+    test5_3.join(test5_4);
+    CANAL_ASSERT(test5_3.mRoot->mChildren.size() == 1);
+    std::set<Array::TrieNode *, Array::TrieNode::Compare>::const_iterator it5_3 =
+        test5_3.mRoot->mChildren.begin();
+    Array::TrieNode *node5_4 = *it5_3;
+    CANAL_ASSERT(node5_4->mValue == "s");
+    CANAL_ASSERT(node5_4->mChildren.size() == 2);
+    std::set<Array::TrieNode *, Array::TrieNode::Compare>::const_iterator it5_4 =
+        node5_4->mChildren.begin();
+    Array::TrieNode *node5_5 = *it5_4;
+    Array::TrieNode *node5_6 = *(++it5_4);
+    CANAL_ASSERT(node5_5->mValue == "tep");
+    CANAL_ASSERT(node5_6->mValue == "uper");
+
+    test5_1.join(test5_3);
+    CANAL_ASSERT(test5_1.mRoot->mChildren.size() == 1);
+    std::set<Array::TrieNode *, Array::TrieNode::Compare>::const_iterator it5_5 =
+        test5_1.mRoot->mChildren.begin();
+    Array::TrieNode *node5_7 = *it5_5;
+    CANAL_ASSERT(node5_7->mValue == "s");
+    //CANAL_ASSERT(node5_7->mChildren.size() == 2);
+
+    // value vs top
     Array::StringTrie test6(*gEnvironment, "qwerty");
     CANAL_ASSERT(!test6.isBottom() && !test6.isTop());
     test6.join(top);
@@ -385,6 +491,8 @@ main(int argc, char **argv)
     testTrieGetNumberOfMatchingSymbols();
     testTrieGetMatchingChild();
     testTrieSplit();
+    testTrieInsert();
+    testTrieGetRepresentedStrings();
     testConstructors();
     testEqualityOperator();
     testToString();

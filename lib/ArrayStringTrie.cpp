@@ -144,31 +144,58 @@ TrieNode::getMatchingChild(const std::string &value)
 void
 TrieNode::split(const size_t index)
 {
-    std::string oldValue = mValue.substr(index, mValue.length() - index);
-    std::string newValue = mValue.substr(0, index);
-    TrieNode *newNode = new TrieNode(oldValue);
+    std::string newValue = mValue.substr(index, mValue.length() - index);
+    std::string oldValue = mValue.substr(0, index);
+    TrieNode *newNode = new TrieNode(newValue);
+    newNode->mIsActualString = true;
+    //newNode->mChildren(mChildren);
+    //mChildren.clear();
     mChildren.insert(newNode);
-    mValue = newValue;
+    mIsActualString = false;
+    mValue = oldValue;
 }
 
 void
-TrieNode::insert(std::string &value)
+TrieNode::insert(const std::string &value)
 {
-/*
     if (mChildren.size() == 0 || getMatchingChild(value) == NULL)
     {
-        TrieNode *trieNode = new TrieNode(value);
+        TrieNode *newNode = new TrieNode(value);
+        newNode->mIsActualString = true;
+        mChildren.insert(newNode);
     }
     else
     {
         TrieNode *matchingChild = getMatchingChild(value);
-        size_t numberOfMatchingSymbols =
+        size_t matchIndex =
             matchingChild->getNumberOfMatchingSymbols(value);
 
-        if (matchingChild->mValue.length() != numberOfMatchingSymbols)
-            matchingChild->split(numberOfMatchingSymbols);
+        if (matchingChild->mValue.length() != matchIndex)
+            matchingChild->split(matchIndex);
+
+        std::string newValue =
+            value.substr(matchIndex, value.length() - matchIndex);
+        
+        if (newValue != "")
+            matchingChild->insert(newValue);
     }
-*/
+}
+
+void
+TrieNode::getRepresentedStrings(std::vector<std::string> &results,
+                                const std::string &prefix)
+{
+    std::set<TrieNode *, Compare>::const_iterator it = mChildren.begin(),
+        end = mChildren.end();
+
+    for (; it != end; ++it)
+    {
+        std::string str = prefix + (*it)->mValue;
+        (*it)->getRepresentedStrings(results, str);
+
+        if ((*it)->mIsActualString)
+            results.push_back(str);
+    }
 }
 
 StringTrie::StringTrie(const Environment &environment,
@@ -222,6 +249,7 @@ StringTrie::StringTrie(const Environment &environment,
 
         if (!mIsBottom)
         {
+            newNode->mIsActualString = true;
             mRoot->mChildren.insert(newNode);
         }
         else
@@ -240,6 +268,7 @@ StringTrie::StringTrie(const Environment &environment,
                                   value.size()))
 {
     TrieNode *newNode = new TrieNode(value);
+    newNode->mIsActualString = true;
     mRoot->mChildren.insert(newNode);
 }
 
@@ -336,8 +365,16 @@ StringTrie::join(const Domain &value)
     }
     else
     {
-        // intelligently join string trie here
-        CANAL_NOT_IMPLEMENTED();
+        std::vector<std::string> strings;
+        array.mRoot->getRepresentedStrings(strings, array.mRoot->mValue);
+        
+        std::vector<std::string>::const_iterator it = strings.begin(),
+            end = strings.end();
+
+        for (; it != end; ++it)
+        {
+            mRoot->insert(*it);
+        }
     }
    
     mIsBottom = false;
