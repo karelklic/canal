@@ -340,7 +340,17 @@ StringTrie::operator==(const Domain &value) const
 
 bool StringTrie::operator<(const Domain &value) const
 {
-    CANAL_NOT_IMPLEMENTED();
+    if (this == &value)
+        return false;
+
+    const StringTrie &array = checkedCast<StringTrie>(value);
+
+    if (array.isBottom())
+        return false;
+
+
+
+    return true;
 }
 
 StringTrie &

@@ -16,21 +16,35 @@ class TrieNode
 
 public:
     std::string mValue;
+    
     std::set<TrieNode *, Compare> mChildren;
+    
     bool mIsActualString;
 
 public:
+
     TrieNode(const std::string &value);
+
     TrieNode(const TrieNode &root);
+
     ~TrieNode();
+
     size_t size();
+
     bool operator==(const TrieNode &node) const;
+
     bool operator!=(const TrieNode &node) const;
+
     std::string toString() const;
+
     size_t getNumberOfMatchingSymbols(const std::string &value) const;
+
     TrieNode *getMatchingChild(const std::string &value);
+
     void split(const size_t index);
+
     void insert(const std::string &value);
+
     void getRepresentedStrings(std::vector<std::string> &results,
                                const std::string &value);
 };
@@ -39,7 +53,9 @@ class StringTrie : public Domain
 {
 public:
     TrieNode *mRoot;
+    
     bool mIsBottom;
+    
     const llvm::SequentialType &mType;
 
 public:

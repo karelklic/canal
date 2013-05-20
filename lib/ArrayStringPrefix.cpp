@@ -8,6 +8,22 @@
 namespace Canal {
 namespace Array {
 
+static std::string
+commonPrefix(std::string first, std::string second)
+{
+    if (first.length() > second.length())
+        first.swap(second);
+
+    size_t i;
+    for (i = 0; i < first.length(); i++)
+    {
+        if (first[i] != second[i])
+            break;
+    }
+
+    return first.substr(0, i);
+}
+
 StringPrefix::StringPrefix(const Environment &environment,
                            const llvm::SequentialType &type)
     : Domain(environment, Domain::ArrayStringPrefixKind),
@@ -134,30 +150,22 @@ StringPrefix::operator<(const Domain &value) const
     if (this == &value)
         return false;
 
+    if (isTop())
+        return false;
+
     const StringPrefix &array = checkedCast<StringPrefix>(value);
     if (array.isBottom())
         return false;
 
-    //if (!isBottom() && commonPrefix..._
-    CANAL_NOT_IMPLEMENTED();
-
-    return true;
-}
-
-static std::string
-commonPrefix(std::string first, std::string second)
-{
-    if (first.length() > second.length())
-        first.swap(second);
-
-    size_t i;
-    for (i = 0; i < first.length(); i++)
+    if (!isBottom() && !array.isTop())
     {
-        if (first[i] != second[i])
-            break;
+        std::string prefix = commonPrefix(mPrefix, array.mPrefix);
+
+        if (prefix == "" || mPrefix.length() < array.mPrefix.length())
+            return false;
     }
 
-    return first.substr(0, i);
+    return true;
 }
 
 StringPrefix &

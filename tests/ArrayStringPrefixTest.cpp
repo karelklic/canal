@@ -228,6 +228,49 @@ testMeet()
     CANAL_ASSERT(result12.isBottom());
 }
 
+static void
+testLessThan()
+{
+    const llvm::ArrayType &type = *llvm::ArrayType::get(llvm::Type::getInt8Ty(
+        gEnvironment->getContext()), 10);
+
+    // top vs top
+    Array::StringPrefix top(*gEnvironment, type);
+    top.setTop();
+    CANAL_ASSERT((top < top) == false);
+
+    // top vs prefix
+    Array::StringPrefix prefix(*gEnvironment, "ab");
+    CANAL_ASSERT((top < prefix) == false);
+
+    // top vs bottom
+    Array::StringPrefix bottom(*gEnvironment, type);
+    CANAL_ASSERT((top < bottom) == false);
+
+    // bottom vs top
+    CANAL_ASSERT(bottom < top);
+
+    // bottom vs prefix
+    CANAL_ASSERT(bottom < prefix);
+
+    // bottom vs bottom
+    CANAL_ASSERT((bottom < bottom) == false);
+
+    // prefix vs top
+    CANAL_ASSERT(prefix < top);
+
+    // prefix vs bottom
+    CANAL_ASSERT((prefix < bottom) == false);
+
+    // prefix vs prefix
+    Array::StringPrefix prefix1(*gEnvironment, "cd");
+    Array::StringPrefix prefix2(*gEnvironment, "cde");
+
+    CANAL_ASSERT((prefix < prefix1) == false);
+    CANAL_ASSERT((prefix1 < prefix2) == false);
+    CANAL_ASSERT(prefix2 < prefix1);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -240,6 +283,7 @@ main(int argc, char **argv)
     testConstructors();
     testSetZero();
     testEquality();
+    testLessThan();
     testJoin();
     testMeet();
 
