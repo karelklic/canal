@@ -78,6 +78,8 @@ public:
         return value->getKind() == ArrayStringTrieKind;
     }
 
+    void strcat(const StringTrie &source);
+
 public: // Implementation of Domain
 
     virtual StringTrie *clone() const;

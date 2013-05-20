@@ -280,6 +280,11 @@ StringTrie::~StringTrie()
     delete mRoot;
 }
 
+void
+StringTrie::strcat(const StringTrie &source)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
 
 StringTrie *
 StringTrie::clone() const

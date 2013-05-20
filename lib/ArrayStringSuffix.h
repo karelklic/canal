@@ -32,6 +32,8 @@ public:
         return value->getKind() == ArrayStringSuffixKind;
     }
 
+    void strcat(const StringSuffix &source);
+
 public:
     virtual StringSuffix *clone() const;
 

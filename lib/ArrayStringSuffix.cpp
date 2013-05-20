@@ -84,6 +84,12 @@ StringSuffix::StringSuffix(const Environment &environment,
 {
 }
 
+void
+StringSuffix::strcat(const StringSuffix &source)
+{
+    CANAL_NOT_IMPLEMENTED();
+}
+
 StringSuffix *
 StringSuffix::clone() const
 {

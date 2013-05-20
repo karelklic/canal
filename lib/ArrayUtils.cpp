@@ -1,5 +1,7 @@
 #include "ArrayUtils.h"
 #include "ArrayStringPrefix.h"
+#include "ArrayStringSuffix.h"
+#include "ArrayStringTrie.h"
 #include "ProductVector.h"
 #include "Utils.h"
 
@@ -29,6 +31,26 @@ strcat(Domain &destination, const Domain &source)
 
         const StringPrefix &srcPrefix = checkedCast<Array::StringPrefix>(**srcIt);
         destPrefix->strcat(srcPrefix);
+
+        StringSuffix *destSuffix = castOrNull<Array::StringSuffix>(*destIt);
+        if (!destSuffix)
+        {
+            (*destIt)->setTop();
+            continue;
+        }
+
+        const StringSuffix &srcSuffix = checkedCast<Array::StringSuffix>(**srcIt);
+        destSuffix->strcat(srcSuffix);
+
+        StringTrie *destTrie = castOrNull<Array::StringTrie>(*destIt);
+        if (!destTrie)
+        {
+            (*destIt)->setTop();
+            continue;
+        }
+
+        const StringTrie &srcTrie = checkedCast<Array::StringTrie>(**srcIt);
+        destTrie->strcat(srcTrie);
     }
 }
 
