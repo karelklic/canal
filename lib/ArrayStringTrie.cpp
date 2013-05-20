@@ -2,7 +2,7 @@
 #include "Environment.h"
 #include "Utils.h"
 #include "IntegerUtils.h"
-#include <iostream>
+#include "Constructors.h"
 
 namespace Canal {
 namespace Array {
@@ -455,7 +455,8 @@ StringTrie::isBottom() const
     return mIsBottom;
 }
 
-void StringTrie::setBottom()
+void
+StringTrie::setBottom()
 {
     mIsBottom = true;
     delete mRoot;
@@ -468,11 +469,267 @@ StringTrie::isTop() const
     return !mIsBottom && (mRoot == NULL);
 }
 
-void StringTrie::setTop()
+void
+StringTrie::setTop()
 {
     mIsBottom = false;
     delete mRoot;
     mRoot = NULL;
+}
+
+float
+StringTrie::accuracy() const
+{
+    return 0.0f;
+}
+
+StringTrie &
+StringTrie::add(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::fadd(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::sub(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::fsub(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::mul(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::fmul(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::udiv(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::sdiv(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::fdiv(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::urem(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::srem(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::frem(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::shl(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::lshr(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::ashr(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::and_(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::or_(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::xor_(const Domain &a, const Domain &b)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::icmp(const Domain &a, const Domain &b,
+                 llvm::CmpInst::Predicate predicate)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::fcmp(const Domain &a, const Domain &b,
+                 llvm::CmpInst::Predicate predicate)
+{
+    setTop();
+    return *this;
+}
+
+Domain *
+StringTrie::extractelement(const Domain &index) const
+{
+    const llvm::Type &elementType = *mType.getElementType();
+    Domain *result = mEnvironment.getConstructors().create(elementType);
+    result->setTop();
+    return result;
+}
+
+StringTrie &
+StringTrie::insertelement(const Domain &array,
+                          const Domain &element,
+                          const Domain &index)
+{
+    setTop();
+    return *this;
+}
+
+StringTrie &
+StringTrie::shufflevector(const Domain &a,
+                          const Domain &b,
+                          const std::vector<uint32_t> &mask)
+{
+    setTop();
+    return *this;
+}
+
+Domain *
+StringTrie::extractvalue(const std::vector<unsigned> &indices) const
+{
+    if (isTop())
+    {
+        // Cannot use const-correctness here because of differences
+        // between LLVM versions.
+        llvm::Type *type = (llvm::Type*)&mType;
+        std::vector<unsigned>::const_iterator it = indices.begin(),
+            itend = indices.end();
+
+        for (; it != itend; ++it)
+        {
+            llvm::CompositeType *composite = checkedCast<llvm::CompositeType>(type);
+            type = (llvm::Type*)composite->getTypeAtIndex(*it);
+        }
+
+        Domain *result = mEnvironment.getConstructors().create(*type);
+        result->setTop();
+        return result;
+    }
+
+    CANAL_ASSERT(indices.size() == 1);
+    Domain *result = mEnvironment.getConstructors().create(*mType.getElementType());
+    result->setTop();
+    return result;
+}
+
+StringTrie &
+StringTrie::insertvalue(const Domain &aggregate,
+                        const Domain &element,
+                        const std::vector<unsigned> &indices)
+{
+    setTop();
+    return *this;
+}
+
+void
+StringTrie::insertvalue(const Domain &element,
+                        const std::vector<unsigned> &indices)
+{
+    setTop();
+}
+
+Domain *
+StringTrie::load(const llvm::Type &type,
+                 const std::vector<Domain*> &offsets) const
+{
+    if (offsets.empty())
+    {
+        if (&mType == &type)
+            return clone();
+        else
+        {
+            Domain *result = mEnvironment.getConstructors().create(type);
+            result->setTop();
+            return result;
+        }
+    }
+
+    Domain *subitem = extractelement(*offsets[0]);
+    Domain *result = subitem->load(type, std::vector<Domain*>(offsets.begin() + 1,
+                                                              offsets.end()));
+
+    delete subitem;
+    return result;
+}
+
+StringTrie &
+StringTrie::store(const Domain &value,
+                  const std::vector<Domain*> &offsets,
+                  bool overwrite)
+{
+    if (offsets.empty())
+        return (StringTrie&)Domain::store(value, offsets, overwrite);
+
+    setTop();
+    return *this;
 }
 
 } // namespace Array

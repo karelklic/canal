@@ -103,6 +103,81 @@ public: // Implementation of Domain
     virtual bool isTop() const;
 
     virtual void setTop();
+
+    virtual float accuracy() const;
+
+    virtual StringTrie &add(const Domain &a, const Domain &b);
+
+    virtual StringTrie &fadd(const Domain &a, const Domain &b);
+
+    virtual StringTrie &sub(const Domain &a, const Domain &b);
+
+    virtual StringTrie &fsub(const Domain &a, const Domain &b);
+
+    virtual StringTrie &mul(const Domain &a, const Domain &b);
+
+    virtual StringTrie &fmul(const Domain &a, const Domain &b);
+
+    virtual StringTrie &udiv(const Domain &a, const Domain &b);
+
+    virtual StringTrie &sdiv(const Domain &a, const Domain &b);
+
+    virtual StringTrie &fdiv(const Domain &a, const Domain &b);
+
+    virtual StringTrie &urem(const Domain &a, const Domain &b);
+
+    virtual StringTrie &srem(const Domain &a, const Domain &b);
+
+    virtual StringTrie &frem(const Domain &a, const Domain &b);
+
+    virtual StringTrie &shl(const Domain &a, const Domain &b);
+
+    virtual StringTrie &lshr(const Domain &a, const Domain &b);
+
+    virtual StringTrie &ashr(const Domain &a, const Domain &b);
+
+    virtual StringTrie &and_(const Domain &a, const Domain &b);
+
+    virtual StringTrie &or_(const Domain &a, const Domain &b);
+
+    virtual StringTrie &xor_(const Domain &a, const Domain &b);
+
+    virtual StringTrie &icmp(const Domain &a,
+                             const Domain &b,
+                             llvm::CmpInst::Predicate predicate);
+
+    virtual StringTrie &fcmp(const Domain &a,
+                             const Domain &b,
+                             llvm::CmpInst::Predicate predicate);
+
+    virtual Domain *extractelement(const Domain &index) const;
+
+    virtual StringTrie &insertelement(const Domain &array,
+                                      const Domain &element,
+                                      const Domain &index);
+
+    virtual StringTrie &shufflevector(const Domain &a,
+                                      const Domain &b,
+                                      const std::vector<uint32_t> &mask);
+
+    virtual Domain *extractvalue(const std::vector<unsigned> &indices) const;
+
+    virtual StringTrie &insertvalue(const Domain &aggregate,
+                                    const Domain &element,
+                                    const std::vector<unsigned> &indices);
+
+    virtual void insertvalue(const Domain &element,
+                             const std::vector<unsigned> &indices);
+
+    virtual Domain *load(const llvm::Type &type,
+                         const std::vector<Domain*> &offsets) const;
+
+    virtual StringTrie &store(const Domain &value,
+                              const std::vector<Domain*> &offsets,
+                              bool overwrite);
+
+    virtual const llvm::SequentialType &getValueType() const { return mType; }
+
 };
 
 } // namespace Array
