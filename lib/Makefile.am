@@ -2,11 +2,13 @@ pkginclude_HEADERS = \
 	ArrayExactSize.h \
 	ArraySingleItem.h \
 	ArrayStringPrefix.h \
+	ArrayStringSuffix.h \
 	ArrayStringTrie.h \
 	ArrayUtils.h \
 	Constructors.h \
 	Domain.h \
 	Environment.h \
+	FieldMinMax.h \
 	FloatInterval.h \
 	FloatUtils.h \
 	IntegerBitfield.h \
@@ -49,11 +51,13 @@ libcanal_la_SOURCES = \
 	ArrayExactSize.cpp \
 	ArraySingleItem.cpp \
 	ArrayStringPrefix.cpp \
+	ArrayStringSuffix.cpp \
 	ArrayStringTrie.cpp \
 	ArrayUtils.cpp \
 	Constructors.cpp \
 	Domain.cpp \
 	Environment.cpp \
+	FieldMinMax.cpp \
 	FloatInterval.cpp \
 	FloatUtils.cpp \
 	IntegerBitfield.cpp \

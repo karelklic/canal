@@ -5,6 +5,7 @@ set(CANAL_UNIT_TESTS
     ArrayExactSizeTest
     ArraySingleItemTest
     ArrayStringPrefixTest
+    ArrayStringSuffixTest
     ArrayStringTrieTest
     FloatIntervalTest
     IntegerBitfieldTest

@@ -80,6 +80,7 @@ noinst_PROGRAMS = \
 	ArrayExactSizeTest \
 	ArraySingleItemTest \
 	ArrayStringPrefixTest \
+	ArrayStringSuffixTest \
 	ArrayStringTrieTest \
 	FloatIntervalTest \
 	IntegerBitfieldTest \

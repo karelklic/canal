@@ -27,6 +27,7 @@ public:
         ArrayExactSizeKind,
         ArraySingleItemKind,
         ArrayStringPrefixKind,
+        ArrayStringSuffixKind,
         ArrayStringTrieKind,
         FloatIntervalKind,
         ProductVectorKind,
