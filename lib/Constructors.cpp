@@ -264,7 +264,7 @@ Constructors::createArray(const llvm::SequentialType &type) const
     container->mValues.push_back(new Array::ExactSize(mEnvironment, type));
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
-    container->mValues.push_back(new Array::StringSuffix(mEnvironment, type));
+    //container->mValues.push_back(new Array::StringSuffix(mEnvironment, type));
     //container->mValues.push_back(new Array::StringTrie(mEnvironment, type));
     return container;
 }
