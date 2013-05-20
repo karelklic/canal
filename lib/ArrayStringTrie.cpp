@@ -343,12 +343,29 @@ bool StringTrie::operator<(const Domain &value) const
     if (this == &value)
         return false;
 
+    if (isTop())
+        return false;
+
     const StringTrie &array = checkedCast<StringTrie>(value);
 
     if (array.isBottom())
         return false;
 
+    if (!isBottom() && !array.isTop())
+    {
+        std::vector<std::string> first;
+        mRoot->getRepresentedStrings(first, mRoot->mValue);
 
+        std::vector<std::string> second;
+        array.mRoot->getRepresentedStrings(second, array.mRoot->mValue);
+
+        std::vector<std::string> common;
+        std::set_intersection(first.begin(), first.end(), second.begin(),
+                              second.end(), std::back_inserter(common));
+
+        if (common.empty() || common.size() != first.size())
+            return false;
+    }
 
     return true;
 }

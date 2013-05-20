@@ -331,6 +331,53 @@ testEqualityOperator()
 }
 
 static void
+testLessThanOperator()
+{
+    const llvm::ArrayType *type = getTestType();
+
+    // top vs top
+    Array::StringTrie top(*gEnvironment, *type);
+    top.setTop();
+    CANAL_ASSERT((top < top) == false);
+
+    // top vs value
+    Array::StringTrie trie(*gEnvironment, "test");
+    CANAL_ASSERT((top < trie) == false);
+
+    // top vs bottom
+    Array::StringTrie bottom(*gEnvironment, *type);
+    CANAL_ASSERT((top < bottom) == false);
+
+    // bottom vs top
+    CANAL_ASSERT(bottom < top);
+
+    // bottom vs value
+    CANAL_ASSERT(bottom < trie);
+
+    // bottom vs bottom
+    CANAL_ASSERT((bottom < bottom) == false);
+
+    // value vs top
+    CANAL_ASSERT(trie < top);
+
+    // value vs bottom
+    CANAL_ASSERT((trie < bottom) == false);
+
+    // value vs value
+    Array::StringTrie trie1(*gEnvironment, "car");
+    Array::StringTrie trie2(*gEnvironment, "house");
+    CANAL_ASSERT((trie1 < trie2) == false);
+
+    Array::StringTrie trie3(*gEnvironment, "stop");
+    trie3.mRoot->insert("super");
+    trie3.mRoot->insert("step");
+    Array::StringTrie trie4(*gEnvironment, "super");
+    trie4.mRoot->insert("step");
+    CANAL_ASSERT((trie3 < trie4) == false);
+    CANAL_ASSERT(trie4 < trie3);
+}
+
+static void
 testToString()
 {
     const llvm::ArrayType *type = getTestType();
@@ -613,6 +660,7 @@ main(int argc, char **argv)
     testTrieGetRepresentedStrings();
     testConstructors();
     testEqualityOperator();
+    testLessThanOperator();
     testToString();
     testJoin();
     testMeet();
