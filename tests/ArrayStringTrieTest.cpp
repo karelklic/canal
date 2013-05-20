@@ -475,9 +475,103 @@ testMeet()
     const llvm::ArrayType *type = getTestType();
 
     // bottom vs bottom
-    Array::StringTrie bottom(*gEnvironment, *type);
-    bottom.meet(bottom);
-    CANAL_ASSERT(bottom.isBottom());
+    Array::StringTrie bottom1(*gEnvironment, *type);
+    bottom1.meet(bottom1);
+    CANAL_ASSERT(bottom1.isBottom());
+
+    // value vs bottom
+    Array::StringTrie trie1(*gEnvironment, "test");
+    trie1.meet(bottom1);
+    CANAL_ASSERT(trie1.isBottom());
+
+    // bottom vs prefix
+    Array::StringTrie bottom2(*gEnvironment, *type);
+    Array::StringTrie trie2(*gEnvironment, "game");
+    bottom2.meet(trie2);
+    CANAL_ASSERT(bottom2.isBottom());
+
+    // bottom vs top
+    Array::StringTrie bottom3(*gEnvironment, *type);
+    Array::StringTrie top1(*gEnvironment, *type);
+    top1.setTop();
+    bottom3.meet(top1);
+    CANAL_ASSERT(bottom3.isBottom());
+
+    // top vs bottom
+    Array::StringTrie top2(*gEnvironment, *type);
+    top2.setTop();
+    Array::StringTrie bottom4(*gEnvironment, *type);
+    top2.meet(bottom4);
+    CANAL_ASSERT(top2.isBottom());
+
+    // top vs value
+    Array::StringTrie top3(*gEnvironment, *type);
+    top3.setTop();
+    Array::StringTrie trie3(*gEnvironment, "cat");
+    top3.meet(trie3);
+    CANAL_ASSERT(!top3.isBottom());
+    CANAL_ASSERT(!top3.isTop());
+    CANAL_ASSERT(top3.mRoot->mChildren.size() == 1);
+    CANAL_ASSERT((*top3.mRoot->mChildren.begin())->mValue == "cat");
+
+    // value vs top
+    Array::StringTrie trie4(*gEnvironment, "dog");
+    Array::StringTrie top4(*gEnvironment, *type);
+    top4.setTop();
+    trie4.meet(top4);
+    CANAL_ASSERT(!trie4.isTop());
+    CANAL_ASSERT(!trie4.isBottom());
+    CANAL_ASSERT(trie4.mRoot->mChildren.size() == 1);
+    CANAL_ASSERT((*trie4.mRoot->mChildren.begin())->mValue == "dog");
+
+    // top vs top
+    Array::StringTrie top5(*gEnvironment, *type);
+    top5.setTop();
+    Array::StringTrie top6(*gEnvironment, *type);
+    top6.setTop();
+    top5.meet(top6);
+    CANAL_ASSERT(top5.isTop());
+
+    // value vs value
+    Array::StringTrie trie5_1(*gEnvironment, "step");
+    trie5_1.mRoot->insert("super");
+    Array::StringTrie trie5_2(*gEnvironment, "stop");
+    trie5_2.mRoot->insert("super");
+    trie5_1.meet(trie5_2);
+    CANAL_ASSERT(trie5_1.mRoot->mChildren.size() == 1);
+    std::set<Array::TrieNode *, Array::TrieNode::Compare>::const_iterator it5_1 =
+        trie5_1.mRoot->mChildren.begin();
+    Array::TrieNode *node5_1 = *it5_1;
+    CANAL_ASSERT(node5_1->mValue == "super");
+    CANAL_ASSERT(node5_1->mChildren.empty());
+
+    Array::StringTrie trie5_3(*gEnvironment, "step");
+    trie5_3.mRoot->insert("samba");
+    trie5_3.mRoot->insert("super");
+    Array::StringTrie trie5_4(*gEnvironment, "super");
+    trie5_4.mRoot->insert("stack");
+    trie5_4.mRoot->insert("step");
+    trie5_3.meet(trie5_4);
+    CANAL_ASSERT(trie5_3.mRoot->mChildren.size() == 1);
+    std::set<Array::TrieNode *, Array::TrieNode::Compare>::const_iterator it5_2 =
+        trie5_3.mRoot->mChildren.begin();
+    Array::TrieNode *node5_2 = *it5_2;
+    CANAL_ASSERT(node5_2->mValue == "s");
+    CANAL_ASSERT(node5_2->mChildren.size() == 2);
+    std::set<Array::TrieNode *, Array::TrieNode::Compare>::const_iterator it5_3 =
+        node5_2->mChildren.begin();
+    Array::TrieNode *node5_3 = *it5_3;
+    Array::TrieNode *node5_4 = *(++it5_3);
+    CANAL_ASSERT(node5_3->mValue == "tep");
+    CANAL_ASSERT(node5_4->mValue == "uper");
+    CANAL_ASSERT(node5_3->mChildren.empty());
+    CANAL_ASSERT(node5_4->mChildren.empty());
+
+    Array::StringTrie trie5_6(*gEnvironment, "car");
+    Array::StringTrie trie5_7(*gEnvironment, "house");
+    trie5_6.meet(trie5_7);
+    CANAL_ASSERT(trie5_6.isBottom());
+    CANAL_ASSERT(trie5_6.mRoot == NULL);
 }
 
 static void
