@@ -65,7 +65,7 @@ StringSuffix::StringSuffix(const Environment &environment,
             CANAL_ASSERT(success);
 
             uint64_t c = constant.getZExtValue();
-            if (c == 0 || c > 255);
+            if (c == 0 || c > 255)
                 break;
 
             mIsBottom = false;
