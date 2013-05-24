@@ -292,7 +292,7 @@ StringTrie::~StringTrie()
 void
 StringTrie::strcat(const StringTrie &source)
 {
-    CANAL_NOT_IMPLEMENTED();
+    return;
 }
 
 StringTrie *

@@ -87,7 +87,8 @@ StringSuffix::StringSuffix(const Environment &environment,
 void
 StringSuffix::strcat(const StringSuffix &source)
 {
-    CANAL_NOT_IMPLEMENTED();
+    mIsBottom = source.mIsBottom;
+    mSuffix = source.mSuffix;
 }
 
 StringSuffix *
