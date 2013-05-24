@@ -9,17 +9,17 @@ main(int argc, char **argv)
     char suffix[3] = "ab";
     char prefix[7] = "/root/";
 
-    int max = 4;
+    char *tmp1 = NULL, *tmp2 = NULL;
+    int max = 2;
     for (int i = 0; i < max; i++)
     {
-        char *tmp = NULL;
-        if (i < 2)
-            tmp = strcat(path, suffix);
+        if (i < 1)
+            tmp1 = strcat(path, suffix);
         else
-            tmp = strcat(prefix, path);
-
-        printf("path: %s\n", tmp);
+            tmp1 = strcat(prefix, path);
     }
+
+    char *result = tmp1;
 
     return EXIT_SUCCESS;
 }
