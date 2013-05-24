@@ -15,7 +15,7 @@ TrieNode::Compare::operator()(const TrieNode *first, const TrieNode *second) con
 
 TrieNode::TrieNode(const std::string &value)
     : mValue(value)
-{ 
+{
 }
 
 TrieNode::TrieNode(const TrieNode &node)
@@ -274,6 +274,15 @@ StringTrie::StringTrie(const Environment &environment,
     mRoot->mChildren.insert(newNode);
 }
 
+StringTrie::StringTrie(const StringTrie &value)
+    :  Domain(value),
+       mRoot(value.mRoot),
+       mIsBottom(value.mIsBottom),
+       mType(value.mType)
+{
+    if (mRoot)
+        mRoot = new TrieNode(*mRoot);
+}
 
 StringTrie::~StringTrie()
 {

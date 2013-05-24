@@ -265,7 +265,7 @@ Constructors::createArray(const llvm::SequentialType &type) const
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
     container->mValues.push_back(new Array::StringSuffix(mEnvironment, type));
-    //container->mValues.push_back(new Array::StringTrie(mEnvironment, type));
+    container->mValues.push_back(new Array::StringTrie(mEnvironment, type));
     return container;
 }
 
@@ -278,7 +278,7 @@ Constructors::createArray(const llvm::SequentialType &type,
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, size));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type));
     container->mValues.push_back(new Array::StringSuffix(mEnvironment, type));
-    //container->mValues.push_back(new Array::StringTrie(mEnvironment, type));
+    container->mValues.push_back(new Array::StringTrie(mEnvironment, type));
     return container;
 }
 
@@ -291,7 +291,7 @@ Constructors::createArray(const llvm::SequentialType &type,
     container->mValues.push_back(new Array::SingleItem(mEnvironment, type, values.begin(), values.end()));
     container->mValues.push_back(new Array::StringPrefix(mEnvironment, type, values.begin(), values.end()));
     container->mValues.push_back(new Array::StringSuffix(mEnvironment, type, values.begin(), values.end()));
-    //container->mValues.push_back(new Array::StringTrie(mEnvironment, type, values.begin(), values.end()));
+    container->mValues.push_back(new Array::StringTrie(mEnvironment, type, values.begin(), values.end()));
     return container;
 }
 

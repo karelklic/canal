@@ -71,6 +71,8 @@ public:
     StringTrie(const Environment &environment,
                const std::string &value);
 
+    StringTrie(const StringTrie &value);
+
     ~StringTrie();
 
     static bool classof(const Domain *value)
