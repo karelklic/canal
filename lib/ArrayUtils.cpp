@@ -2,6 +2,7 @@
 #include "ArrayStringPrefix.h"
 #include "ArrayStringSuffix.h"
 #include "ArrayStringTrie.h"
+#include "Prereq.h"
 #include "ProductVector.h"
 #include "Utils.h"
 
@@ -22,35 +23,47 @@ strcat(Domain &destination, const Domain &source)
 
     for (; destIt != destItEnd; ++destIt, ++srcIt)
     {
-        StringPrefix *destPrefix = castOrNull<Array::StringPrefix>(*destIt);
-        if (!destPrefix)
+        bool isPrefix = llvm::isa<Array::StringPrefix>(**destIt);
+        if (isPrefix)
         {
-            (*destIt)->setTop();
-            continue;
+            StringPrefix *destPrefix = castOrNull<Array::StringPrefix>(*destIt);
+            if (!destPrefix)
+            {
+                (*destIt)->setTop();
+                continue;
+            }
+
+            const StringPrefix &srcPrefix = checkedCast<Array::StringPrefix>(**srcIt);
+            destPrefix->strcat(srcPrefix);
         }
 
-        const StringPrefix &srcPrefix = checkedCast<Array::StringPrefix>(**srcIt);
-        destPrefix->strcat(srcPrefix);
-
-        StringSuffix *destSuffix = castOrNull<Array::StringSuffix>(*destIt);
-        if (!destSuffix)
+        bool isSuffix = llvm::isa<Array::StringSuffix>(**destIt);
+        if (isSuffix)
         {
-            (*destIt)->setTop();
-            continue;
+            StringSuffix *destSuffix = castOrNull<Array::StringSuffix>(*destIt);
+            if (!destSuffix)
+            {
+                (*destIt)->setTop();
+                continue;
+            }
+
+            const StringSuffix &srcSuffix = checkedCast<Array::StringSuffix>(**srcIt);
+            destSuffix->strcat(srcSuffix);
         }
 
-        const StringSuffix &srcSuffix = checkedCast<Array::StringSuffix>(**srcIt);
-        destSuffix->strcat(srcSuffix);
-
-        StringTrie *destTrie = castOrNull<Array::StringTrie>(*destIt);
-        if (!destTrie)
+        bool isTrie = llvm::isa<Array::StringTrie>(**destIt);
+        if (isTrie)
         {
-            (*destIt)->setTop();
-            continue;
-        }
+            StringTrie *destTrie = castOrNull<Array::StringTrie>(*destIt);
+            if (!destTrie)
+            {
+                (*destIt)->setTop();
+                continue;
+            }
 
-        const StringTrie &srcTrie = checkedCast<Array::StringTrie>(**srcIt);
-        destTrie->strcat(srcTrie);
+            const StringTrie &srcTrie = checkedCast<Array::StringTrie>(**srcIt);
+            destTrie->strcat(srcTrie);
+        }
     }
 }
 
