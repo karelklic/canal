@@ -122,7 +122,13 @@ OperationsCallback::onFunctionCallStrcat(const llvm::Function &function,
     const llvm::Value &destTarget = *destPointer->mTargets.begin()->second->mTarget;
     const llvm::Value &srcTarget = *srcPointer->mTargets.begin()->second->mTarget;
     const Domain *destArray = callState.findBlock(destTarget);
+    if (!destArray)
+        destArray = callState.findVariable(destTarget);
+
     const Domain *srcArray = callState.findBlock(srcTarget);
+    if (!srcArray)
+        srcArray = callState.findVariable(srcTarget);
+
     CANAL_ASSERT(destArray && srcArray);
     Domain *newArray = destArray->clone();
 
